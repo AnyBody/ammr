@@ -1,0 +1,123 @@
+//This folders creates realistic support forces for a foot standing on a surface which has the y axis 
+//pointing away from the surface
+//This file will typicaly be included directly from the Application joint and drivers file
+//It needs the following input to work
+//
+//SideFolder : Reference to the rigth or left leg
+//StartNode : This is the node on the body from where the force will act
+//Strength  : Strenght of muscles acting in the y direction 
+//FrictionStrength  : FrictionStrenght of muscles acting in the x and z direction
+//DrawRef : Reference to drawsettings
+
+AnyFolder FootSupportOneSurface={
+  
+  //Create a surface which controls the foot
+  //the segment will be carried by global ref and support the foot using artifcial muscles.
+  
+  AnySeg Surface ={
+    Mass=0;
+    Jii={0,0,0};
+    r0= ..SideFolder.Leg.Seg.Foot.r0;
+    AnyRefNode HeelNode={sRel={0,0,0};};
+    
+    //Create a surface under the foot
+    AnyRefNode SurfaceNode ={
+      sRel={Size[0]*0.5-0.05,-Size[1],0};
+      AnyVec3  Color= Main.DrawSettings.Colors.AnyBodyBlue; //box color
+      AnyVar   Transparency=1; //box transparency
+      AnyVec3 Size={0.3,0.01,0.1};
+      //AnyDrawRefFrame drw ={};
+      #include "../../../Body/AAUHuman/ToolBox/DrawObjects/Box.any" //include file which will draw a box
+    };
+  };
+  
+  AnyReacForce SurfaceSupport ={
+    AnyKinLinear Lin = {
+      AnyRefNode &ref1 = ...StartNode;
+      AnySeg &ref2 = ..Surface;
+    };
+    AnyKinRotational Rot = {
+      AnyRefNode &ref1 = ...StartNode;
+      AnySeg &ref2 = ..Surface;
+      Type=RotVector;
+    };  
+    
+    
+  };
+  
+  
+  AnyKinEqSimpleDriver SurfaceDrivers = {
+    //This is the joint which connects the Pelvis segment to the bike.
+    AnyKinLinear Lin ={
+      Ref=0; 
+      AnyRefNode &Ball = ...SideFolder.Leg.Seg.Foot.HeelJoint;
+      AnySeg &Ref2  = ..Surface;     
+    };
+    AnyKinRotational Rot ={
+      Ref=0; 
+      AnyRefNode &Ball = ...SideFolder.Leg.Seg.Foot.HeelJoint;
+      AnySeg &Ref2  = ..Surface;     
+      Type=RotVector;
+    };
+    DriverPos = {-0.02,0,0,0,0,-0.5*pi};
+    DriverVel = {0,0,0,0,0,0};
+    Reaction.Type = {0,0,0,0,0,0}; 
+  };
+  
+  
+  
+  
+  AnyFolder ToeMedialSupport = {
+        AnySeg &StartNode = .Surface;
+        AnyRefNode &EndNode = ..SideFolder.Leg.Seg.Foot.ToeMedialContactNode;
+    //The terms push and pull are determined wrt. the coordinate system of the StartNode!
+    //StrenghtOfReactionsLin         = {XPush,XPull,YPush,YPull,ZPush,ZPull}
+    AnyVector StrengthOfReactionsLin =  {..FrictionStrength,..FrictionStrength,..Strength,..FrictionStrength,..FrictionStrength,..FrictionStrength}; //List of strengths for the linear muscles
+    AnyFolder &DrawRef=Main.DrawSettings;
+    AnyVar ScaleFactor =0.5;
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/XPush.any"
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/XPull.any"
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/YPush.any"
+    //  #include "../../../Body/AAUHuman/ToolBox/Reactions/YPull.any"
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/ZPush.any" 
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/ZPull.any" 
+  };
+  
+  
+  AnyFolder ToeLateralSupport= {
+    AnySeg &StartNode = .Surface;
+    AnyRefNode &EndNode = ..SideFolder.Leg.Seg.Foot.ToeLateralContactNode;
+    //The terms push and pull are determined wrt. the coordinate system of the StartNode!
+    //StrenghtOfReactionsLin         = {XPush,XPull,YPush,YPull,ZPush,ZPull}
+    AnyVector StrengthOfReactionsLin =  {..FrictionStrength,..FrictionStrength,..Strength,..FrictionStrength,..FrictionStrength,..FrictionStrength}; //List of strengths for the linear muscles    AnyFolder &DrawRef=Main.DrawSettings;
+    AnyFolder &DrawRef=Main.DrawSettings;
+    AnyVar ScaleFactor =0.5;
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/XPush.any"
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/XPull.any"
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/YPush.any"
+    //  #include "../../../Body/AAUHuman/ToolBox/Reactions/YPull.any"
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/ZPush.any" 
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/ZPull.any" 
+    
+  };
+  
+  
+  AnyFolder HeelSupport = {
+    AnySeg &StartNode = .Surface;
+    AnyRefNode &EndNode = ..SideFolder.Leg.Seg.Foot.HeelContactNode;
+    
+    //The terms push and pull are determined wrt. the coordinate system of the StartNode!
+    //StrenghtOfReactionsLin         = {XPush,XPull,YPush,YPull,ZPush,ZPull}
+    AnyVector StrengthOfReactionsLin =  {..FrictionStrength,..FrictionStrength,..Strength,..FrictionStrength,..FrictionStrength,..FrictionStrength}; //List of strengths for the linear muscles    AnyFolder &DrawRef=Main.DrawSettings;
+    AnyVar ScaleFactor =0.5;
+    AnyFolder &DrawRef=Main.DrawSettings;
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/XPush.any"
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/XPull.any"
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/YPush.any"
+    //#include "../../../Body/AAUHuman/ToolBox/Reactions/YPull.any"
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/ZPush.any" 
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/ZPull.any" 
+  };
+  
+  
+};

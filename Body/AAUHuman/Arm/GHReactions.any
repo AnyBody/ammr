@@ -1,0 +1,396 @@
+/**
+This file creates realistic reaction between humerus and scapula, 
+the ordinary reactions in the spherical GH joint has been switched off.
+
+The ideas is to use a setup of strong pushing muscles 
+which ensure that the GH reactions force is alway inside the glenoid cavity.
+The reactions are made by a number of strong muscles pushing 
+from the GH joint center towards the edge of the glenoid cavity, 
+here created as a circular path. So if any of these muscles are 
+activated the reaction force will either point ot the edge or inside 
+the cavity, it can not go outside. These muscles are recruited like 
+any other muscle in the model, they are just very strong and not 
+close to the activity envelope, so they do not distrub the 
+recruitment of the other muscles. In other words the model "feels" 
+that the reaction force should fall within the cavity and it will 
+change the recruitment of the normal muscles to ensure this, but it 
+do not feel any cost of having a high normal force there, even 
+though it is created by muscles, because these muscles are very strong, 
+and should not be lying on the muscle activity envelope.
+
+This way of calculating the reaction force can be switched off by 
+excluding the file "GHReactions.any "from the Arm3D/jnt.any
+and instead using the normal reactions of the GH joint.
+*/
+AnyFolder GHReactions={
+  
+  //Add extra nodes on the gh cavitas edge 
+  AnySeg &Scapula=..Seg.Scapula;
+  
+  Scapula={
+    
+    AnyRefNode    GHReactionCenterNode = {
+      sRel=.Scale({  -0.001,-0.048,-0.030})*.Mirror;
+      //AnyDrawRefFrame drw={ScaleXYZ={0.05,0.05,0.05};};
+    };
+    
+    AnyRefNode    EdgeNode1 = {
+      sRel=.Scale({  0.001,-0.050863,-0.013})*.Mirror;
+      //AnyDrawRefFrame drw={ScaleXYZ={0.05,0.05,0.05};};
+    };
+    
+    AnyRefNode    EdgeNode2 = {
+      sRel=.Scale({  0.001,-0.035,-0.03})*.Mirror;
+      //AnyDrawRefFrame drw={ScaleXYZ={0.05,0.05,0.05};};
+    };
+    
+    // this node is located at the center of glenohumeral cavitas and orientated in accrodance to the 
+    //overall cavitas plane using the three points defined abover
+    AnyRefNode    GHReactionCenterNodeRotated = {
+      sRel=.GHReactionCenterNode.sRel;
+      
+      //Calculate rot matrix for cylinder using three points
+      AnyMat33  Mat = RotMat(sRel,.EdgeNode1.sRel,.EdgeNode2.sRel);
+      
+      ARel=Mat;
+      
+      //create some nodes around the edge of the cavitas
+      AnyVar no=8;
+      AnyVar angspace=....Sign*(360/no)*pi/180;
+      AnyVar startangle =0; 
+      AnyVec3 DrwRGB={0,0,1};
+      AnyVec3 DrwRadius={0.0015,0.0015,0.0015};
+      
+      //radius found as distance between center node and EdgeNode1 
+      AnyVar radius=sqrt(
+      (.EdgeNode1.sRel[0]-.GHReactionCenterNode.sRel[0])^2+
+      (.EdgeNode1.sRel[1]-.GHReactionCenterNode.sRel[1])^2+
+      (.EdgeNode1.sRel[2]-.GHReactionCenterNode.sRel[2])^2 );
+      
+      
+      AnyRefNode CavityEdgeNode1={
+        sRel=({-.radius*cos(.startangle+.angspace*1),.radius*sin(.startangle+.angspace*1),0})*..Mirror;
+        AnyDrawNode node  = {RGB=..DrwRGB; ScaleXYZ=..DrwRadius;};
+      };
+      AnyRefNode CavityEdgeNode2={
+        sRel=({-.radius*cos(.startangle+.angspace*2),.radius*sin(.startangle+.angspace*2),0})*..Mirror;
+        AnyDrawNode node  ={RGB=..DrwRGB;  ScaleXYZ=..DrwRadius;};
+      };     
+      AnyRefNode CavityEdgeNode3={
+        sRel=({-.radius*cos(.startangle+.angspace*3),.radius*sin(.startangle+.angspace*3),0})*..Mirror;
+        AnyDrawNode node  ={RGB=..DrwRGB; ScaleXYZ=..DrwRadius;};
+      };
+      AnyRefNode CavityEdgeNode4={
+        sRel=({-.radius*cos(.startangle+.angspace*4),.radius*sin(.startangle+.angspace*4),0})*..Mirror;
+        AnyDrawNode node  ={RGB=..DrwRGB; ScaleXYZ=..DrwRadius;};
+      };
+      AnyRefNode CavityEdgeNode5={
+        sRel=({-.radius*cos(.startangle+.angspace*5),.radius*sin(.startangle+.angspace*5),0})*..Mirror;
+        AnyDrawNode node  ={RGB=..DrwRGB; ScaleXYZ=..DrwRadius;};
+      };
+      AnyRefNode CavityEdgeNode6={
+        sRel=({-.radius*cos(.startangle+.angspace*6),.radius*sin(.startangle+.angspace*6),0})*..Mirror;
+        AnyDrawNode node  ={RGB=..DrwRGB; ScaleXYZ=..DrwRadius;};
+      };
+      AnyRefNode CavityEdgeNode7={
+        sRel=({-.radius*cos(.startangle+.angspace*7),.radius*sin(.startangle+.angspace*7),0})*..Mirror;
+        AnyDrawNode node  ={RGB=..DrwRGB; ScaleXYZ=..DrwRadius;};
+      };
+      AnyRefNode CavityEdgeNode8={
+        sRel=({-.radius*cos(.startangle+.angspace*8),.radius*sin(.startangle+.angspace*8),0})*..Mirror;
+        AnyDrawNode node  ={RGB=..DrwRGB; ScaleXYZ=..DrwRadius;};
+      };
+    };
+  };
+  
+  AnyVec3 LineRGB={0,1,0}; 
+  AnyVar LineThickness=0.0005;
+  
+  //create plines from cavitas egde to humerus gh node
+  AnyKinPLine EdgeLine1 ={
+    AnyRefNode &ref1=...Seg.Humerus.gh;
+    AnyRefNode &ref2=...Seg.Scapula.GHReactionCenterNodeRotated.CavityEdgeNode1;
+    AnyDrawPLine line ={RGB=..LineRGB; Thickness=..LineThickness;};
+  };
+  
+  //create plines from cavitas egde to humerus gh node
+  AnyKinPLine EdgeLine2 ={
+    AnyRefNode &ref1=...Seg.Humerus.gh;
+    AnyRefNode &ref2=...Seg.Scapula.GHReactionCenterNodeRotated.CavityEdgeNode2;
+    AnyDrawPLine line ={RGB=..LineRGB; Thickness=..LineThickness;};
+  };
+  
+  //create plines from cavitas egde to humerus gh node
+  AnyKinPLine EdgeLine3 ={
+    AnyRefNode &ref1=...Seg.Humerus.gh;
+    AnyRefNode &ref2=...Seg.Scapula.GHReactionCenterNodeRotated.CavityEdgeNode3;
+    AnyDrawPLine line ={RGB=..LineRGB; Thickness=..LineThickness;};
+  };
+  
+  //create plines from cavitas egde to humerus gh node
+  AnyKinPLine EdgeLine4 ={
+    AnyRefNode &ref1=...Seg.Humerus.gh;
+    AnyRefNode &ref2=...Seg.Scapula.GHReactionCenterNodeRotated.CavityEdgeNode4;
+    AnyDrawPLine line ={RGB=..LineRGB; Thickness=..LineThickness;};
+  };
+  
+  //create plines from cavitas egde to humerus gh node
+  AnyKinPLine EdgeLine5 ={
+    AnyRefNode &ref1=...Seg.Humerus.gh;
+    AnyRefNode &ref2=...Seg.Scapula.GHReactionCenterNodeRotated.CavityEdgeNode5;
+    AnyDrawPLine line ={RGB=..LineRGB; Thickness=..LineThickness;};
+  };
+  
+  //create plines from cavitas egde to humerus gh node
+  AnyKinPLine EdgeLine6 ={
+    AnyRefNode &ref1=...Seg.Humerus.gh;
+    AnyRefNode &ref2=...Seg.Scapula.GHReactionCenterNodeRotated.CavityEdgeNode6;
+    AnyDrawPLine line ={RGB=..LineRGB; Thickness=..LineThickness;};
+  };
+  
+  //create plines from cavitas egde to humerus gh node
+  AnyKinPLine EdgeLine7={
+    AnyRefNode &ref1=...Seg.Humerus.gh;
+    AnyRefNode &ref2=...Seg.Scapula.GHReactionCenterNodeRotated.CavityEdgeNode7;
+    AnyDrawPLine line ={RGB=..LineRGB; Thickness=..LineThickness;};
+  };
+  
+  //create plines from cavitas egde to humerus gh node
+  AnyKinPLine EdgeLine8 ={
+    AnyRefNode &ref1=...Seg.Humerus.gh;
+    AnyRefNode &ref2=...Seg.Scapula.GHReactionCenterNodeRotated.CavityEdgeNode8;
+    AnyDrawPLine line ={RGB=..LineRGB; Thickness=..LineThickness;};
+  };
+  
+  AnyVar Strength =5000;
+  
+  AnyMuscleModel MuscleMdl={F0=.Strength;};
+  
+  AnyGeneralMuscle EdgeMuscle1 ={
+    AnyMuscleModel &ref1=.MuscleMdl;
+    AnyKinPLine &ref2=.EdgeLine1;
+    ForceDirection=1; //push
+  };
+  AnyGeneralMuscle EdgeMuscle2 ={
+    AnyMuscleModel &ref1=.MuscleMdl;
+    AnyKinPLine &ref2=.EdgeLine2;
+    ForceDirection=1; //push
+  };
+  AnyGeneralMuscle EdgeMuscle3 ={
+    AnyMuscleModel &ref1=.MuscleMdl;
+    AnyKinPLine &ref2=.EdgeLine3;
+    ForceDirection=1; //push
+  };
+  AnyGeneralMuscle EdgeMuscle4 ={
+    AnyMuscleModel &ref1=.MuscleMdl;
+    AnyKinPLine &ref2=.EdgeLine4;
+    ForceDirection=1; //push
+  };
+  AnyGeneralMuscle EdgeMuscle5 ={
+    AnyMuscleModel &ref1=.MuscleMdl;
+    AnyKinPLine &ref2=.EdgeLine5;
+    ForceDirection=1; //push
+  };
+  AnyGeneralMuscle EdgeMuscle6 ={
+    AnyMuscleModel &ref1=.MuscleMdl;
+    AnyKinPLine &ref2=.EdgeLine6;
+    ForceDirection=1; //push
+  };
+  AnyGeneralMuscle EdgeMuscle7 ={
+    AnyMuscleModel &ref1=.MuscleMdl;
+    AnyKinPLine &ref2=.EdgeLine7;
+    ForceDirection=1; //push
+  };
+  AnyGeneralMuscle EdgeMuscle8 ={
+    AnyMuscleModel &ref1=.MuscleMdl;
+    AnyKinPLine &ref2=.EdgeLine8;
+    ForceDirection=1; //push
+  };
+  
+  //make a force summation
+  AnyFolder ResultanForce ={
+    
+    AnyRefNode &CenterNode=...Seg.Scapula.GHReactionCenterNodeRotated;
+    
+    AnyVar L1=((CenterNode.CavityEdgeNode1.r[0]-...Seg.Humerus.gh.r[0])^2+(CenterNode.CavityEdgeNode1.r[1]-...Seg.Humerus.gh.r[1])^2+(CenterNode.CavityEdgeNode1.r[2]-...Seg.Humerus.gh.r[2])^2)^0.5;
+    AnyVec3  F1={
+      CenterNode.CavityEdgeNode1.r[0]-...Seg.Humerus.gh.r[0],
+      CenterNode.CavityEdgeNode1.r[1]-...Seg.Humerus.gh.r[1],
+      CenterNode.CavityEdgeNode1.r[2]-...Seg.Humerus.gh.r[2]
+    }*.EdgeMuscle1.Ft/L1;
+    
+    AnyVar L2=((CenterNode.CavityEdgeNode2.r[0]-...Seg.Humerus.gh.r[0])^2+(CenterNode.CavityEdgeNode2.r[1]-...Seg.Humerus.gh.r[1])^2+(CenterNode.CavityEdgeNode2.r[2]-...Seg.Humerus.gh.r[2])^2)^0.5;
+    AnyVec3  F2={
+      CenterNode.CavityEdgeNode2.r[0]-...Seg.Humerus.gh.r[0],
+      CenterNode.CavityEdgeNode2.r[1]-...Seg.Humerus.gh.r[1],
+      CenterNode.CavityEdgeNode2.r[2]-...Seg.Humerus.gh.r[2]
+    }*.EdgeMuscle2.Ft/L2;
+    
+    AnyVar L3=((CenterNode.CavityEdgeNode3.r[0]-...Seg.Humerus.gh.r[0])^2+(CenterNode.CavityEdgeNode3.r[1]-...Seg.Humerus.gh.r[1])^2+(CenterNode.CavityEdgeNode3.r[2]-...Seg.Humerus.gh.r[2])^2)^0.5;
+    AnyVec3  F3={
+      CenterNode.CavityEdgeNode3.r[0]-...Seg.Humerus.gh.r[0],
+      CenterNode.CavityEdgeNode3.r[1]-...Seg.Humerus.gh.r[1],
+      CenterNode.CavityEdgeNode3.r[2]-...Seg.Humerus.gh.r[2]
+    }*.EdgeMuscle3.Ft/L3;
+    
+    AnyVar L4=((CenterNode.CavityEdgeNode4.r[0]-...Seg.Humerus.gh.r[0])^2+(CenterNode.CavityEdgeNode4.r[1]-...Seg.Humerus.gh.r[1])^2+(CenterNode.CavityEdgeNode4.r[2]-...Seg.Humerus.gh.r[2])^2)^0.5;
+    AnyVec3  F4={
+      CenterNode.CavityEdgeNode4.r[0]-...Seg.Humerus.gh.r[0],
+      CenterNode.CavityEdgeNode4.r[1]-...Seg.Humerus.gh.r[1],
+      CenterNode.CavityEdgeNode4.r[2]-...Seg.Humerus.gh.r[2]
+    }*.EdgeMuscle4.Ft/L4;
+    
+    AnyVar L5=((CenterNode.CavityEdgeNode5.r[0]-...Seg.Humerus.gh.r[0])^2+(CenterNode.CavityEdgeNode5.r[1]-...Seg.Humerus.gh.r[1])^2+(CenterNode.CavityEdgeNode5.r[2]-...Seg.Humerus.gh.r[2])^2)^0.5;
+    AnyVec3  F5={
+      CenterNode.CavityEdgeNode5.r[0]-...Seg.Humerus.gh.r[0],
+      CenterNode.CavityEdgeNode5.r[1]-...Seg.Humerus.gh.r[1],
+      CenterNode.CavityEdgeNode5.r[2]-...Seg.Humerus.gh.r[2]
+    }*.EdgeMuscle5.Ft/L5;
+    
+    AnyVar L6=((CenterNode.CavityEdgeNode6.r[0]-...Seg.Humerus.gh.r[0])^2+(CenterNode.CavityEdgeNode6.r[1]-...Seg.Humerus.gh.r[1])^2+(CenterNode.CavityEdgeNode6.r[2]-...Seg.Humerus.gh.r[2])^2)^0.5;
+    AnyVec3  F6={
+      CenterNode.CavityEdgeNode6.r[0]-...Seg.Humerus.gh.r[0],
+      CenterNode.CavityEdgeNode6.r[1]-...Seg.Humerus.gh.r[1],
+      CenterNode.CavityEdgeNode6.r[2]-...Seg.Humerus.gh.r[2]
+    }*.EdgeMuscle6.Ft/L6;
+    
+    AnyVar L7=((CenterNode.CavityEdgeNode7.r[0]-...Seg.Humerus.gh.r[0])^2+(CenterNode.CavityEdgeNode7.r[1]-...Seg.Humerus.gh.r[1])^2+(CenterNode.CavityEdgeNode7.r[2]-...Seg.Humerus.gh.r[2])^2)^0.5;
+    AnyVec3  F7={
+      CenterNode.CavityEdgeNode7.r[0]-...Seg.Humerus.gh.r[0],
+      CenterNode.CavityEdgeNode7.r[1]-...Seg.Humerus.gh.r[1],
+      CenterNode.CavityEdgeNode7.r[2]-...Seg.Humerus.gh.r[2]
+    }*.EdgeMuscle7.Ft/L7;
+    
+    AnyVar L8=((CenterNode.CavityEdgeNode8.r[0]-...Seg.Humerus.gh.r[0])^2+(CenterNode.CavityEdgeNode8.r[1]-...Seg.Humerus.gh.r[1])^2+(CenterNode.CavityEdgeNode8.r[2]-...Seg.Humerus.gh.r[2])^2)^0.5;
+    AnyVec3  F8={
+      CenterNode.CavityEdgeNode8.r[0]-...Seg.Humerus.gh.r[0],
+      CenterNode.CavityEdgeNode8.r[1]-...Seg.Humerus.gh.r[1],
+      CenterNode.CavityEdgeNode8.r[2]-...Seg.Humerus.gh.r[2]
+    }*.EdgeMuscle8.Ft/L8;
+    
+    AnyVec3 FTotalGlobal=F1+F2+F3+F4+F5+F6+F7+F8;
+    
+    AnyVec3 FTotalLocal = FTotalGlobal*...Seg.Scapula.gh.Axes;
+
+    
+    
+    //    
+    //    
+    //    AnyDrawVector DrawFTotal =     {
+    //      
+    //      AnyRefFrame &ref=....Seg.Humerus.gh;
+    //      
+    //      Vec =Main.DrawSettings.DrawSettingsSupport.Lin.ScaleFactor*.FTotal;
+    //      
+    //      PointAway = Off;
+    //      DrawCoord = Off;
+    //      
+    //      Line.RGB = Main.DrawSettings.DrawSettingsSupport.Lin.RGB;
+    //      Line.Thickness = Main.DrawSettings.DrawSettingsSupport.Lin.Thickness;
+    //      Line.End.Thickness = 2*Main.DrawSettings.DrawSettingsSupport.Lin.Thickness;  
+    //      Line.End.Length = 4*Main.DrawSettings.DrawSettingsSupport.Lin.Thickness;
+    //    };
+    //    
+    //    
+    //    
+    //     
+    //    AnyDrawVector DrawF1 =     {
+    //      AnyRefFrame &ref=....Seg.Scapula.GHReactionCenterNodeRotated.CavityEdgeNode1;
+    //      Vec =Main.DrawSettings.DrawSettingsSupport.Lin.ScaleFactor*.F1;
+    //      PointAway = Off;
+    //      DrawCoord = Off;
+    //      
+    //      Line.RGB = Main.DrawSettings.DrawSettingsSupport.Lin.RGB;
+    //      Line.Thickness = 0.5*Main.DrawSettings.DrawSettingsSupport.Lin.Thickness;
+    //      Line.End.Thickness = 0.5*2*Main.DrawSettings.DrawSettingsSupport.Lin.Thickness;  
+    //      Line.End.Length = 0.5*4*Main.DrawSettings.DrawSettingsSupport.Lin.Thickness;
+    //    };
+    //    
+    //    AnyDrawVector DrawF2 =     {
+    //      AnyRefFrame &ref=....Seg.Scapula.GHReactionCenterNodeRotated.CavityEdgeNode2;
+    //      Vec =Main.DrawSettings.DrawSettingsSupport.Lin.ScaleFactor*.F2;
+    //      PointAway = Off;
+    //      DrawCoord = Off;
+    //      
+    //      Line.RGB = Main.DrawSettings.DrawSettingsSupport.Lin.RGB;
+    //      Line.Thickness = 0.5*Main.DrawSettings.DrawSettingsSupport.Lin.Thickness;
+    //      Line.End.Thickness = 0.5*2*Main.DrawSettings.DrawSettingsSupport.Lin.Thickness;  
+    //      Line.End.Length = 0.5*4*Main.DrawSettings.DrawSettingsSupport.Lin.Thickness;
+    //    };
+    //    AnyDrawVector DrawF3 =     {
+    //      AnyRefFrame &ref=....Seg.Scapula.GHReactionCenterNodeRotated.CavityEdgeNode3;
+    //      Vec =Main.DrawSettings.DrawSettingsSupport.Lin.ScaleFactor*.F3;
+    //      PointAway = Off;
+    //      DrawCoord = Off;
+    //      
+    //      Line.RGB = Main.DrawSettings.DrawSettingsSupport.Lin.RGB;
+    //      Line.Thickness = 0.5*Main.DrawSettings.DrawSettingsSupport.Lin.Thickness;
+    //      Line.End.Thickness = 0.5*2*Main.DrawSettings.DrawSettingsSupport.Lin.Thickness;  
+    //      Line.End.Length = 0.5*4*Main.DrawSettings.DrawSettingsSupport.Lin.Thickness;
+    //    };
+    //    
+    //    AnyDrawVector DrawF4 =     {
+    //      AnyRefFrame &ref=....Seg.Scapula.GHReactionCenterNodeRotated.CavityEdgeNode4;
+    //      Vec =Main.DrawSettings.DrawSettingsSupport.Lin.ScaleFactor*.F4;
+    //      PointAway = Off;
+    //      DrawCoord = Off;
+    //      
+    //      Line.RGB = Main.DrawSettings.DrawSettingsSupport.Lin.RGB;
+    //      Line.Thickness = 0.5*Main.DrawSettings.DrawSettingsSupport.Lin.Thickness;
+    //      Line.End.Thickness = 0.5*2*Main.DrawSettings.DrawSettingsSupport.Lin.Thickness;  
+    //      Line.End.Length = 0.5*4*Main.DrawSettings.DrawSettingsSupport.Lin.Thickness;
+    //    };
+    //    AnyDrawVector DrawF5 =     {
+    //      AnyRefFrame &ref=....Seg.Scapula.GHReactionCenterNodeRotated.CavityEdgeNode5;
+    //      Vec =Main.DrawSettings.DrawSettingsSupport.Lin.ScaleFactor*.F5;
+    //      PointAway = Off;
+    //      DrawCoord = Off;
+    //      
+    //      Line.RGB = Main.DrawSettings.DrawSettingsSupport.Lin.RGB;
+    //      Line.Thickness = 0.5*Main.DrawSettings.DrawSettingsSupport.Lin.Thickness;
+    //      Line.End.Thickness = 0.5*2*Main.DrawSettings.DrawSettingsSupport.Lin.Thickness;  
+    //      Line.End.Length = 0.5*4*Main.DrawSettings.DrawSettingsSupport.Lin.Thickness;
+    //    };
+    //  
+    //  AnyDrawVector DrawF6 =     {
+    //      AnyRefFrame &ref=....Seg.Scapula.GHReactionCenterNodeRotated.CavityEdgeNode6;
+    //      Vec =Main.DrawSettings.DrawSettingsSupport.Lin.ScaleFactor*.F6;
+    //      PointAway = Off;
+    //      DrawCoord = Off;
+    //      
+    //      Line.RGB = Main.DrawSettings.DrawSettingsSupport.Lin.RGB;
+    //      Line.Thickness = 0.5*Main.DrawSettings.DrawSettingsSupport.Lin.Thickness;
+    //      Line.End.Thickness = 0.5*2*Main.DrawSettings.DrawSettingsSupport.Lin.Thickness;  
+    //      Line.End.Length = 0.5*4*Main.DrawSettings.DrawSettingsSupport.Lin.Thickness;
+    //    };
+    //  
+    // AnyDrawVector DrawF7 =     {
+    //      AnyRefFrame &ref=....Seg.Scapula.GHReactionCenterNodeRotated.CavityEdgeNode7;
+    //      Vec =Main.DrawSettings.DrawSettingsSupport.Lin.ScaleFactor*.F7;
+    //      PointAway = Off;
+    //      DrawCoord = Off;
+    //      
+    //      Line.RGB = Main.DrawSettings.DrawSettingsSupport.Lin.RGB;
+    //      Line.Thickness = 0.5*Main.DrawSettings.DrawSettingsSupport.Lin.Thickness;
+    //      Line.End.Thickness = 0.5*2*Main.DrawSettings.DrawSettingsSupport.Lin.Thickness;  
+    //      Line.End.Length = 0.5*4*Main.DrawSettings.DrawSettingsSupport.Lin.Thickness;
+    //    };
+    //  
+    //
+    //    AnyDrawVector DrawF8 =     {
+    //      AnyRefFrame &ref=....Seg.Scapula.GHReactionCenterNodeRotated.CavityEdgeNode8;
+    //      Vec =Main.DrawSettings.DrawSettingsSupport.Lin.ScaleFactor*.F8;
+    //      PointAway = Off;
+    //      DrawCoord = Off;
+    //      
+    //      Line.RGB = Main.DrawSettings.DrawSettingsSupport.Lin.RGB;
+    //      Line.Thickness = 0.5*Main.DrawSettings.DrawSettingsSupport.Lin.Thickness;
+    //      Line.End.Thickness = 0.5*2*Main.DrawSettings.DrawSettingsSupport.Lin.Thickness;  
+    //      Line.End.Length = 0.5*4*Main.DrawSettings.DrawSettingsSupport.Lin.Thickness;
+    //    };
+    //
+      };
+    
+  };
+  
+  

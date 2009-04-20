@@ -1,0 +1,82 @@
+//This model is used for simulating the gripforce of the hand and are to be used if no 
+//real handmodel can be used
+
+Seg={
+  AnySeg Glove = { 
+    r0=.Radius.wj.sRel*.Radius.Axes0'+.Radius.r0+.Hand.PalmJoint.sRel*.Hand.Axes0'; 
+    Axes0=.Hand.Axes0;
+    Mass=0.0;
+    Jii={0,0,0};
+
+    AnyFunTransform3D &Scale=..Scaling.GeometricalScaling.Hand.ScaleFunction;
+    AnyMat33 Mirror={{1,0,0},{0,1,0},{0,0,..Sign}};
+  
+    //if this node is set to 0,0,0 it will cause numeric problems in cases
+    // where the glove is being used and when is it not loaded by any moment
+     AnyRefNode ConnectionNode ={
+      sRel=.Scale({0.002,0.002,0.002})*.Mirror;
+    };    
+    
+    AnyRefNode ContactNode ={
+       ARel={{-1,0,0},{0,0,...Sign*1},{0,...Sign*1,0}};  
+       sRel={0,0,0};
+    };
+  
+    AnyRefNode WristContactNode={
+      sRel=.Scale({0.08,0.02,0.0})*.Mirror;
+      ARel={{-1,0,0},{0,0,...Sign*1},{0,...Sign*1,0}};  
+    };
+    
+    AnyRefNode PalmLateralContactNode={
+      sRel=.Scale({-0.0,-0.02,0.0})*.Mirror;
+      ARel={{-1,0,0},{0,0,...Sign*1},{0,...Sign*1,0}};  
+    };
+    
+    AnyRefNode PalmMedialContactNode={
+      sRel=.Scale({-0.0,0.04,0.0})*.Mirror;
+      ARel={{-1,0,0},{0,0,...Sign*1},{0,...Sign*1,0}};  
+    };
+   
+  };
+};
+
+Jnt={
+
+  AnyKinLinear HandGloveLin={
+    AnyRefNode &ref1=..Seg.Glove.ConnectionNode;
+    AnyRefNode &ref2=..GloveInsertationNode;
+  };
+  
+  AnyKinEqSimpleDriver HandGloveLinDrv={
+    AnyKinLinear &ref=.HandGloveLin;
+    DriverPos={0,0,0};
+    DriverVel={0,0,0};
+    Reaction.Type={On,On,On};
+  };
+  
+  AnyKinRotational HandGloveRot={
+    AnyRefNode &ref1=..Seg.Glove.ConnectionNode;
+    AnyRefNode &ref2=..GloveInsertationNode;
+    Type=RotAxesAngles;
+  };
+  
+  AnyKinEqSimpleDriver HandGloveRotDrv={
+    AnyKinRotational &ref=.HandGloveRot;
+    DriverPos={0,0,0};
+    DriverVel={0,0,0};
+    Reaction.Type={Off,Off,Off};
+  };
+  
+  AnyKinMeasureOrg HandGloveRotZ={
+    AnyKinRotational &ref=.HandGloveRot;
+    MeasureOrganizer={0};
+  }; 
+  AnyKinMeasureOrg HandGloveRotY={
+    AnyKinRotational &ref=.HandGloveRot;
+    MeasureOrganizer={1};
+  }; 
+  AnyKinMeasureOrg HandGloveRotX={
+    AnyKinRotational &ref=.HandGloveRot;
+    MeasureOrganizer={2};
+  }; 
+};

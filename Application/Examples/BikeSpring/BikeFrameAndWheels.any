@@ -1,0 +1,134 @@
+AnyFolder BikeModel = {
+  
+  /* -------------------------------------------------------
+  This folder contains the definition of the bike
+  - BikeFrame
+  - Crank motion and loading
+  - Rear wheel definition   
+  
+  ---------------------------------------------------------- */
+  
+  //Bike Segment
+  AnySeg BikeFrame = {
+    Jii = {0.00,0.00,0.00};
+    Mass =0.0; 
+    AnyRefNode SaddelPos = {
+      AnyDrawNode SaddelNode={};
+      sRel = {Main.BikeParameters.SaddlePos,Main.BikeParameters.SaddleHeight,0}; 
+    };
+    
+    // Node for attachment of spring
+    AnyRefNode Spring = {
+      sRel = {Main.BikeParameters.SpringX,Main.BikeParameters.SpringY,0};
+    };
+    
+    AnyRefNode Crank = { sRel = {0,0,0}; };
+    AnyRefNode Wheel = { sRel = {-0.45,0.01,0}; };
+    
+    AnyDrawSurf BikeFrameSurf ={
+      FileName = "bikeframe";
+      ScaleXYZ={0.9,0.9,0.9};
+      RGB=....Colors.AnyBodyBlue;      
+    };
+  };  // BikeFrame
+  
+  AnySeg Crank = {
+    Mass=0.5;
+    Jii = {0.001,0.001,0.001};
+    r0={1,0,0};
+    
+    AnyRefNode CrankJoint = { sRel = {0,0,0}; };
+    AnyRefNode RPedal = { sRel = {0,Main.BikeParameters.PedalArmLength,Main.BikeParameters.PedalArmWidth}; };
+    AnyRefNode LPedal = { sRel = {0,-Main.BikeParameters.PedalArmLength,-Main.BikeParameters.PedalArmWidth}; };
+    AnyDrawSurf CrankSurf ={
+      FileName = "crank";
+      ScaleXYZ={0.9,0.9,0.9};
+      RGB=....Colors.AnyBodyGreen; 
+    };
+    
+    // Point to attach spring
+    AnyVar SpringRad = Main.BikeParameters.SpringRad;
+    AnyVar SpringAngle = Main.BikeParameters.SpringAngle;  // Spring point angle in degrees
+    AnyRefNode Rspring = {
+      sRel = .SpringRad*{cos(.SpringAngle*pi/180),sin(.SpringAngle*pi/180),0};
+    };
+    AnyRefNode Lspring = {
+      sRel = .SpringRad*{cos((.SpringAngle+180)*pi/180),sin((.SpringAngle+180)*pi/180),0};
+    };
+  };//Crank
+  
+  // Spring between pedal crank and frame modeled as a ligament
+
+  AnyLigamentModelPol LigModel = {
+    L0 = Main.BikeParameters.L0;
+    eps1 = 0.50;
+    F1 = Main.BikeParameters.F1;
+  };
+  
+  AnyViaPointLigament RSpring = {
+    AnyRefNode &Frame = .BikeFrame.Spring;
+    AnyRefNode &Crank = .Crank.Rspring;
+    AnyDrawPLine drw = {
+      Thickness = 0.02;
+      RGB = {0,1,0};
+    };
+    AnyLigamentModelPol &Model = .LigModel;
+  };  
+  
+  AnyViaPointLigament LSpring = {
+    AnyRefNode &Frame = .BikeFrame.Spring;
+    AnyRefNode &Crank = .Crank.Lspring;
+    AnyDrawPLine drw = {
+      Thickness = 0.02;
+      RGB = {0,1,0};
+    };
+    AnyLigamentModelPol &Model = .LigModel;
+  };  
+  
+  AnyRevoluteJoint CrankJoint ={
+    Axis = z;
+    AnyRefNode &Ground = .BikeFrame.Crank;
+    AnyRefNode &Crank = .Crank.CrankJoint;         
+  };
+  
+  AnyKinEqSimpleDriver CrankRotation = {
+    AnyRevoluteJoint &Jnt = .CrankJoint;
+    DriverPos = {0};
+    DriverVel = {-(...BikeParameters.Cadence/60)*pi*2};
+    Reaction.Type = {Off}; //This has to be zero otherwise the driver will carry the applied moment
+  };
+  
+  //This is the definiton of the crank moment
+  AnyForce CrankMoment ={
+    AnyJoint &Jnt=.CrankJoint;
+      F = {Main.BikeParameters.Torque};
+  };
+  
+  //This is the definition of the rear wheel its pure graphics!
+  AnySeg RearWheel = {
+    Mass=0.0;
+    Jii = {0.00,0.00,0.00};
+    AnyRefNode Wheel = { sRel = {0,0,0}; };
+    r0 ={0.550000, 0.010000, 0.000000};
+    
+    AnyDrawSurf CrankSTL ={
+      FileName = "wheel";
+      ScaleXYZ={0.9,0.9,0.9};
+      RGB=....Colors.AnyBodyGreen;
+    };  
+  };
+  
+  AnyRevoluteJoint WheelJoint ={
+    Axis = z;
+    AnyRefNode& Ground = .BikeFrame.Wheel;
+    AnyRefNode &Wheel = .RearWheel.Wheel;     
+  };
+  
+  AnyKinEqSimpleDriver WheelRotation = {
+    AnyRevoluteJoint &Jnt = .WheelJoint;
+    DriverPos = {0};
+    DriverVel = -{0.9*(...BikeParameters.Cadence/60)*pi*2};
+    Reaction.Type = {On}; //Setting Reaction.Type=1 means the joint should provide the needed moment to turn the wheel
+  };
+  
+}; //Bikemodel

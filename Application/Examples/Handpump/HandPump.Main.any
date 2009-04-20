@@ -1,0 +1,75 @@
+/** ----------------------------------------------------------------------------
+This is a a model of a person operating an old-fashioned hand pump. 
+The model is based on the standing model and described in the building
+block tutorial.
+---------------------------------------------------------------------------- */
+Main = {
+   /**Execute this operation to run the model in the intended operation sequence.  
+  It is also possible to run operations seperately, by manual selections in the operation tree*/
+  AnyOperationSequence RunApplication = {
+
+    /**This operation calibrates the muscles in the model if these are of the type AnyMuscleModel3E.
+    This will just be an empty operation if the model is using a muscle type that does not require calibration.*/
+    AnyOperation &CalibrationAnal = Main.HumanModel.Calibration.CalibrationSequence;  
+
+    ///This operation is the inverse dynamic analysis
+    AnyOperation &InvAnal=Main.Study.InverseDynamics;
+    
+  };
+
+
+  // Settings governing the graphical display of the model's elements.
+  #include "DrawSettings.any"
+    
+  AnyFolder HumanModel = {
+    
+    AnyFolder &Mannequin=.Model.Mannequin;
+    
+    // The no_muscle version of the model is useful for sorting out the
+    // kinematics of the model in the development phase. It loads and
+    // runs much faster than versions with muscles.
+//    #include  "..\..\..\Body\AAUHuman\BodyModels\FullBodyModel\BodyModel_NoMuscles.any"    
+    
+    // This version uses the simple one-parameter muscle model. 
+    #include  "..\..\..\Body\AAUHuman\BodyModels\FullBodyModel\BodyModel.any"
+    
+    AnyFolder StrengthParameters={
+      AnyVar SpecificMuscleTensionSpine= 90; //N/cm^2
+      AnyVar StrengthIndexLeg= 1; 
+      AnyVar SpecificMuscleTensionShoulderArm= 90; //N/cm^2
+    };
+    
+    // Pick one of the scaling laws
+    // Do not scale
+    #include "..\..\..\Body\AAUHuman\Scaling\ScalingStandard.any"
+    // Scaling taking length, mass and fat of the segments into account 
+    /*#include "..\..\..\Body\AAUHuman\Scaling\ScalingLengthMassFat.any" 
+      Scaling = {
+      #include "..\..\..\Body\AAUHuman\Scaling\AnyFamily\AnyAnne.any"
+    };*/
+  };
+  
+  /// This folder collects all the parts of the model. This is the
+  /// target that the study is pointing to,
+  AnyFolder Model ={
+    AnyFolder &HumanModel=.HumanModel.BodyModel;
+    #include "Environment.any"   
+    #include "Mannequin.any"   
+    AnyFolder ModelEnvironmentConnection = {
+      #include "JointsAndDrivers.any"
+    };
+  };
+  
+  AnyBodyStudy Study = {
+    AnyFolder &Model = .Model;
+   
+    tEnd = 2.0;
+    Gravity = {0.00, -9.81, 0.00};
+    nStep = 20;
+  }; // End of study
+
+  
+
+}; //Main
+
+

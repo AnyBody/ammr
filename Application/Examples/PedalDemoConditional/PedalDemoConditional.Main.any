@@ -1,0 +1,86 @@
+/** This model is for design of a pedal that is comfortable to use 
+for a seated operator depending on the stiffness of the embedded
+spring and the distance of the seat from the pedal. The model is
+a copy of the PedalDemo example with the exception that this model
+has conditional contact between the foot and the pedal, such that
+the contact becomes active when the two elements are in proximity
+with each other. */
+Main = {
+  
+  /**Execute this operation to run the model in the intended operation sequence.  
+  It is also possible to run operations seperately, by manual selections in the operation tree*/
+  AnyOperationSequence RunApplication = {
+
+    /**This operation calibrates the muscles in the model if these are of the type AnyMuscleModel3E.
+    This will just be an empty operation if the model is using a muscle type that does not require calibration.*/
+    AnyOperation &CalibrationAnal = Main.HumanModel.Calibration.CalibrationSequence;  
+
+    ///This operation is the inverse dynamic analysis
+    AnyOperation &InvAnal=Main.Study.InverseDynamics;
+   
+  };
+
+  #include "DrawSettings.any"
+  
+  /// The actual body model is defined in this folder
+  AnyFolder HumanModel = {
+    AnyFolder &Mannequin=.Model.Mannequin; 
+    
+    // This model uses the simple one-parameter muscles 
+    #include  "..\..\..\Body\AAUHuman\BodyModels\TrunkNoMusclesTwoLegs\BodyModel.any"
+    
+    // Add a pedal contact node to the ball of the foot.
+    BodyModel.Right.Leg.Seg.Foot = {
+      AnyRefNode FootBall = {
+        sRel = {-0.015, -0.05, 0.0};
+      };
+    };
+    
+    // Use the standard size human.
+    #include "..\..\..\Body\AAUHuman\Scaling\ScalingStandard.any"
+    
+    // Overall strength scaling
+    AnyFolder StrengthParameters={
+      AnyVar SpecificMuscleTensionSpine= 90; //N/cm^2
+      AnyVar StrengthIndexLeg= 1; 
+      AnyVar SpecificMuscleTensionShoulderArm= 90; //N/cm^2
+    };    
+  };
+  
+  /// This folder collects the entire model
+  AnyFolder Model = {
+    
+    AnyFolder &HumanModel=.HumanModel.BodyModel;
+    #include "Mannequin.any"   
+    
+    /// This folder contains the description of the environment. The spring
+    /// stiffness of the pedal and the Hpoint, i.e. the position of the
+    /// seat, can be adjusted by the parameters in this folder.
+    AnyFolder MyPedal = {
+      AnyVar SpringStiff = 40;         // Spring stiffness in Nm/rad
+      AnyVec3 Hpoint = {-0.8, 0.5, 0};
+      #include "Environment.any"
+    }; // MyPedal
+    
+    // Folder containing the objects that bind the human model and
+    // the pedal together.
+    AnyFolder ModelEnvironmentConnection = {
+      #include "JointsAndDrivers.any"
+    };
+  };
+  
+  /// The study: Operations to be performed on the model
+  AnyBodyStudy Study = {
+    nStep = 100;
+    AnyFolder &Model = .Model;
+    AnyFolder &Body = .HumanModel;
+    
+    Gravity = {0.0, -9.81, 0.0};
+  };
+
+ 
+  
+ 
+};  // Main
+
+

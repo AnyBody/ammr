@@ -1,0 +1,206 @@
+/// The environment in this model is primarily the force plates 
+AnyFolder Environment ={
+  
+  /// The global reference frame, i.e. the ground.
+  AnyFixedRefFrame GlobalRef = {
+    Origin={0,0,0}; 
+    AnyRefNode floornode={
+      sRel={-0.0,-1.0,0};
+      ARel={{0,0,1},{1,0,0},{0,1,0}};
+      AnyDrawSurf floor_w={
+        ScaleXYZ={0.5,1,2};
+        FileName ="floor";
+        Transparency=.2;
+      };
+    };
+  };
+  
+  AnySeg CenterOfPressure1 = { 
+    Mass=0;
+    Jii={0.0,0.0,0.0};
+    AnyRefNode node={
+      sRel={0,0,0};
+      AnyDrawNode drw={ScaleXYZ={0.015,.015,.005}; RGB={1,0,0};};
+    };
+  };
+  
+  AnyKinLinear Lin1={
+    AnyRefFrame &ref1=.GlobalRef;
+    AnyRefFrame &ref2=.CenterOfPressure1;
+  };
+  
+  AnyKinRotational Rot1={
+    AnyRefFrame &ref1=.GlobalRef;
+    AnyRefFrame &ref2=.CenterOfPressure1;
+    Type=RotVector;
+  };
+  
+  #include "cop.txt"
+  #include "Time.any"
+  #include "CenterOfPressurePlateOffset1.any"
+  
+  //The center of pressure has been moved sligthly sideways 
+  //compared to the measured position to obtain realistic
+  //abduction/adduction moment of the ankle.
+  AnyKinEqInterPolDriver LinDrv1 = {
+    AnyKinLinear &ref1= .Lin1;
+    Type=PiecewiseLinear;
+    T = .time;
+    Data = (.cop+.copoffset)';
+    Reaction.Type={Off,Off,Off};
+  };
+  
+  AnyKinEqSimpleDriver RotDrv1={
+    AnyKinRotational &ref1= .Rot1;
+    DriverPos={0,0,0};
+    DriverVel={0,0,0};
+    Reaction.Type={Off,Off,Off};
+  };
+
+  /// Force connection between the force plate and the foot. This transfers
+  /// all forces applied to the force plate directly to the foot.
+  AnyReacForce ForcePlate1FootRContactForce = {
+    AnyKinLinear Lin = {
+      //very very important this ensure that the reaction is between 
+      //the artifical segment and the foot and not between foot 
+      //and globalref such as it would be with Ref = -1 which is 
+      // the default
+      Ref=0; 
+      AnySeg &ref1=..CenterOfPressure1;
+      AnySeg &ref2=Main.Model.HumanModel.Right.Leg.Seg.Foot;
+    };
+    AnyKinRotational Rot= {
+      AnySeg &ref1=..CenterOfPressure1;
+      AnySeg &ref2=Main.Model.HumanModel.Right.Leg.Seg.Foot;
+      Type=RotVector;
+    };
+  };
+  
+  /// Application of the measured force to the force plate.
+  AnyForce3D ForceOnForcePlate1 = {
+    AnyFunInterpol force = {
+      Type=Bspline;
+      BsplineOrder = 8;
+      FileName ="GRF.txt";
+    }; 
+    AnySeg &ref1=.CenterOfPressure1;
+    F=force(t);
+  };
+    
+  AnyDrawVector DrawSupport1 = {
+    AnyRefFrame &ref = .CenterOfPressure1;
+    Vec = 0.0005*.ForceOnForcePlate1.F;
+    
+    PointAway = Off;
+    DrawCoord = Off;
+    
+    Line.RGB = {0,0,1};
+    Line.Thickness =0.0075;
+    Line.End.Thickness = 2*0.0075;
+    Line.End.Length = 4*0.0075;
+  };
+
+  /// The left foot is not on a force plate, so its contact to the floor
+  /// is modeled as a boundary condition allowing for compression and
+  /// friction only. A rigid connection between the foot and the floor
+  /// might lead to unrealistic exploitation of the reaction force.
+  AnyFolder ConditionalContact = {
+    
+    AnySeg LeftFootSupport = {
+      Mass=0;
+      Jii={0,0,0};
+    };
+    
+    AnyReacForce LeftFootSupportReaction ={
+      AnyKinLinear lin1={
+        AnySeg &ref=..LeftFootSupport;
+      };
+    };
+    
+    AnyKinEq RotDrv={
+      AnyKinRotational rot={
+        AnyRefFrame &ref1=...GlobalRef ;
+        AnySeg &ref2=..LeftFootSupport;
+        Type=RotVector;  
+      };
+    };
+    
+    AnyKinMeasureLinComb FootSupportLeftCombMeasure = {
+      AnyKinLinear lin1 = {
+        AnySeg &ref=..LeftFootSupport;
+      };
+      AnyKinLinear lin2 = {
+        AnyRefNode &ref=Main.Model.HumanModel.Left.Leg.Seg.Foot.ToeJoint;
+      };
+      Coef = {{1,0,0,-1,0,0},{0,1,0,0,-1,0},{0,0,1,0,0,-1}};
+      //Const = ;
+      //AnyKinMeasure &<Insert name0> = <Insert object reference (or full object definition)>; You can make any number of these objects!
+    };
+    
+    AnyKinEqSimpleDriver FootSupportLeftCombMeasureDrv= {
+      
+      AnyKinMeasureLinComb &ref=.FootSupportLeftCombMeasure ;
+      DriverPos={0,0,0};
+      DriverVel={0,0,0};
+      Reaction.Type={Off,Off,Off};
+    }; 
+    
+    AnyFolder FootBallMidSupport = {
+      AnyRefFrame &BaseObject=.LeftFootSupport; //Object which delivers the forces  
+      AnyRefFrame &TargetObject= Main.Model.HumanModel.Left.Leg.Seg.Foot.ToeJoint;//Location where the force is applied
+      AnyRefFrame &StrengthObject=TargetObject; //Node used for strength measurement, occasionally this is different from the target object
+      
+      AnyFolder &DrawRef=Main.DrawSettings; //reference to the folder which contains drawsettings
+      //low limit for the strength measure function, if the distance measured along Direction[0] is below this val. the strength will be zero (negative)
+      AnyVar UserDefinedLimitLow=-0.005; 
+      //high limit for the strength measure function, if the distance measured along Direction[0] is above this val. the strength will be zero
+      AnyVar UserDefinedLimitHigh=0.005; 
+      
+      //high limit for the strength measure function, if the radius measured along the plane with Direction[0] as normal is above this val. the strength will be zero
+      AnyVar UserDefinedRadiusLimit=0.07; 
+      
+      AnyVar Strength =3000;  //strength of muscles
+      AnyVar StaticFrictionCoefficient=0.4; //Friction coefficient
+      AnyVar ScaleFactor =1; //scale factor for draw vectors it can be set differently than by the drawsettings
+      
+      AnyInt Direction={2,0,1}; //first element gives normal direction
+      #include  "..\..\..\Body\AAUHuman\ToolBox\FrictionContactMuscles\ContactSurfaceLinPush.any"
+    };
+    
+    AnyFolder FootBallMidSupportp = {
+      AnyRefFrame &BaseObject=.LeftFootSupport; //Object which delivers the forces  
+      AnyRefFrame &TargetObject= Main.Model.HumanModel.Left.Leg.Seg.Foot.ToeJointP;//Location where the force is applied
+      AnyRefFrame &StrengthObject=TargetObject; //Node used for strength measurement, occasionally this is different from the target object
+      
+      AnyFolder &DrawRef=Main.DrawSettings; //reference to the folder which contains drawsettings
+      //low limit for the strength measure function, if the distance measured along Direction[0] is below this val. the strength will be zero (negative)
+      AnyVar UserDefinedLimitLow=-0.005; 
+      //high limit for the strength measure function, if the distance measured along Direction[0] is above this val. the strength will be zero
+      AnyVar UserDefinedLimitHigh=0.005; 
+      
+      //high limit for the strength measure function, if the radius measured along the plane with Direction[0] as normal is above this val. the strength will be zero
+      AnyVar UserDefinedRadiusLimit=0.07; 
+      
+      AnyVar Strength =3000;  //strength of muscles
+      AnyVar StaticFrictionCoefficient=0.4; //Friction coefficient
+      AnyVar ScaleFactor =1; //scale factor for draw vectors it can be set differently than by the drawsettings
+      
+      AnyInt Direction={2,0,1}; //first element gives normal direction
+      #include  "..\..\..\Body\AAUHuman\ToolBox\FrictionContactMuscles\ContactSurfaceLinPush.any"
+    };
+  };
+  
+  /// This braces the ankle for inversion/eversion, chich is not 
+  /// adequately carried by muscles in the absence of a detailed foot
+  /// model.
+  AnyReacForce LeftAnkleBrace = {
+    AnyKinMeasureOrg &ref = Main.Model.HumanModel.Interface.Left.AnkleEversion;
+  };
+  
+  /// This braces the ankle for inversion/eversion, chich is not 
+  /// adequately carried by muscles in the absence of a detailed foot
+  /// model.
+  AnyReacForce RightAnkleBrace = {
+    AnyKinMeasureOrg &ref = Main.Model.HumanModel.Interface.Right.AnkleEversion;
+  };
+};

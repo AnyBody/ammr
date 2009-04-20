@@ -1,0 +1,118 @@
+//This folders creates realistic support forces for a hand grappin an cylinder
+
+//This file will typicaly be included directly from the Application joint and drivers file
+
+//It needs the following input to work
+//
+//SideFolder : Reference to the rigth or left arm
+//StartNode : This is the node on the body from where the force will act
+//Strength  : Strenght of muscles acting in the y direction 
+//FrictionStrength  : FrictionStrenght of muscles acting in the x and z direction
+//DrawRef : Reference to drawsettings
+
+AnyFolder HandCylinderSupport={
+  
+  //Create a surface that follow the hand
+  //the segment will be carried by global ref and support the foot using artifcial muscles.
+   
+  AnySeg Cylinder={
+    Mass=0;
+    Jii={0,0,0};
+    r0= ..SideFolderModel.ShoulderArm.Seg.Glove.r0;
+    AnyRefNode Node={sRel={0,0,0};};
+    
+    //Create a surface under the hand
+    AnyRefNode SurfaceNode ={
+
+      AnyVec3  Color= Main.DrawSettings.Colors.AnyBodyBlue; //box color
+      AnyVar   Transparency=1; //box transparency
+      
+      AnySurfCylinder Cylinder ={
+        Radius=0.02;
+        Length=0.1;
+        AnyDrawParamSurf drw={
+          
+          RGB=Main.DrawSettings.Colors.AnyBodyBlue; //box color
+          Transparency=1; //box transparency
+        };
+        
+        
+      };
+    };
+  };
+  
+  AnyReacForce SurfaceSupport ={
+    AnyKinLinear Lin = {
+     
+      AnyRefNode &ref1 = ...StartNode;
+      AnySeg &ref2 = ..Cylinder;
+    };
+    AnyKinRotational Rot = {
+      AnyRefNode &ref1 = ...StartNode;
+      AnySeg &ref2 = ..Cylinder;
+      Type=RotVector;
+    };  
+    
+    
+  };
+  
+  
+  AnyKinEqSimpleDriver SurfaceDrivers = {
+    //This is the joint which connects the Pelvis segment to the bike.
+    AnyKinLinear Lin ={
+      Ref=0; 
+      AnyRefNode &ref1 = ...SideFolderInterface.WristContactNode;   
+      AnySeg &ref2  = ..Cylinder;     
+    };
+    AnyKinRotational Rot ={
+      Ref=0; 
+      AnyRefNode &Ball = ...SideFolderInterface.WristContactNode;
+      AnySeg &Ref2  = ..Cylinder;     
+      Type=RotVector;
+    };
+    DriverPos = {0.06,-0.03,-0.05,0,0,0};
+    DriverVel = {0,0,0,0,0,0};
+    Reaction.Type = {0,0,0,0,0,0}; 
+  };
+  
+  
+  
+  
+  
+  AnyFolder PalmMedialSupport= {
+    AnySeg &StartNode = .Cylinder;
+    AnyRefNode &EndNode = ..SideFolderInterface.PalmMedialContactNode;
+    //The terms push and pull are determined wrt. the coordinate system of the StartNode!
+    //StrenghtOfReactionsLin         = {XPush,XPull,YPush,YPull,ZPush,ZPull}
+    AnyVector StrengthOfReactionsLin =  {..Strength,..Strength,..Strength,..Strength,..FrictionStrength,..FrictionStrength}; //List of strengths for the linear muscles    AnyFolder &DrawRef=Main.DrawSettings;
+    AnyFolder &DrawRef=Main.DrawSettings;
+    AnyVar ScaleFactor =0.5;
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/XPush.any"
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/XPull.any"
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/YPush.any"
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/YPull.any"
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/ZPush.any" 
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/ZPull.any" 
+    
+  };
+  
+  
+  AnyFolder PalmLateralSupport = {
+    AnySeg &StartNode = .Cylinder;
+    AnyRefNode &EndNode = ..SideFolderInterface.PalmLateralContactNode;
+    
+    //The terms push and pull are determined wrt. the coordinate system of the StartNode!
+    //StrenghtOfReactionsLin         = {XPush,XPull,YPush,YPull,ZPush,ZPull}
+    AnyVector StrengthOfReactionsLin =  {..Strength,..Strength,..Strength,..Strength,..FrictionStrength,..FrictionStrength}; //List of strengths for the linear muscles    AnyFolder &DrawRef=Main.DrawSettings;
+    AnyFolder &DrawRef=Main.DrawSettings;
+    AnyVar ScaleFactor =0.5;
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/XPush.any"
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/XPull.any"
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/YPush.any"
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/YPull.any"
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/ZPush.any" 
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/ZPull.any" 
+  };
+  
+  
+};

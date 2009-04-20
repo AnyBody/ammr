@@ -1,0 +1,103 @@
+/* ----------------------------------------------------------------------------
+
+This is a model of a person sitting in a wheelchair. The model only comprises
+the upper body including the pelvis.
+
+
+
+---------------------------------------------------------------------------- */
+Main = {
+  
+/**Execute this operation to run the model in the intended operation sequence.  
+  It is also possible to run operations seperately, by manual selections in the operation tree*/
+  AnyOperationSequence RunApplication = {
+
+    /**This operation calibrates the muscles in the model if these are of the type AnyMuscleModel3E.
+    This will just be an empty operation if the model is using a muscle type that does not require calibration.*/
+    AnyOperation &CalibrationAnal = Main.HumanModel.Calibration.CalibrationSequence;  
+
+    ///This operation is the inverse dynamic analysis
+    AnyOperation &InvAnal=Main.Study.InverseDynamics;
+   
+  };
+
+
+
+  
+  AnyFolder ChairParameters = {
+    AnyVar AxleX = 0.165;         // Forward/backward dist from pelvis to axle
+    AnyVar SeatY = 0.17;        // Seat height
+    AnyVar AxleZ =  0.2325;       // Half width between wheels
+    AnyVar WheelRad = 0.305;      // Radius of the wheel
+    AnyVar PushRimRad = 0.2675;   // Radius of the pushrim
+    AnyVar PushRimDist = 0.05;  // Distance from wheel to pushrim
+    // Movement of the wheels
+    AnyVar StartPos = -10;        // Start angle in degrees.
+    AnyVar Vel = 1.0;           // Forward velocity of the wheelchair in m/s
+    
+    AnyVar WheelMoment = 10;    // Moment on each of the wheels
+  };
+  
+  #include "DrawSettings.any"
+ 
+
+    AnyFolder HumanModel = {
+    AnyFolder &Mannequin=.Model.Mannequin;
+    
+      #include "..\..\..\Body\AAUHuman\BodyModels\TrunkTwoArms\BodyModel.Any"
+      
+     // #include "..\..\..\Body\AAUHuman\BodyModels\TrunkTwoArms\BodyModel_NoMuscles.Any"
+      
+      
+      AnyFolder StrengthParameters={
+        AnyVar SpecificMuscleTensionSpine= 90; //N/cm^2
+        AnyVar StrengthIndexLeg= 1; 
+        AnyVar SpecificMuscleTensionShoulderArm= 90; //N/cm^2
+      };
+      
+      /*
+      Choice of Scaling
+      */
+      
+      #include "..\..\..\Body\AAUHuman\Scaling\ScalingStandard.any"
+   
+    };
+
+      AnyFolder Model = {    
+    
+    AnyFolder &HumanModel=.HumanModel.BodyModel;
+    #include "Environment.any"   
+   
+     //The Mannequin values is used both for setting the initial positions of the model
+    //and driving the model at analysis time. So you can change the values in the Mannequin
+    //file and it will change both initial positions and how it is positioned at analysis time. 
+    //If you want to run the model into some posture and then dump the momentary joint angles as the
+    //initial ones then simply do the following:
+    // 1  Double click the folder Main.MannequinValuesFromModel.AnyFolder_Posture and it will dump the joint angles to the message window 
+    // 2. Copy the dumped text into the Mannequin.any replacing the "Posture" folder 
+    // 3. Press ctrl+h and search and replace "_" with " "
+    // 4. Once the model is reloaded it will start in the position corresponding to the one which was dumped.
+    #include "Mannequin.any"   
+   
+    
+    AnyFolder ModelEnvironmentConnection = {
+      #include "JointsAndDrivers.any"
+      AnyFolder Support ={
+        #include "BackRestSupport.any"
+      };
+    };
+  };
+
+  AnyBodyStudy Study = {
+    AnyFolder &Model = .Model;
+   
+    Kinematics.Relax = 0.001;
+    Gravity = {0.0, -9.81, 0.0};
+    tEnd=0.25;
+    nStep=20;
+  };//End of study  
+  
+  
+  
+}; //Main
+

@@ -1,0 +1,217 @@
+//This file is used for making a interface to the dof of the arm
+//the added rotnodes are needed to be able to have the same rotation definitions for 
+//the right and left side
+
+AnyKinMeasureOrg SternoClavicularProtraction ={
+  
+  AnyRefNode &thorax  = ..ShoulderRef.scj;
+  thorax={
+    AnyRefNode RotNode={ARel={{1,0,0},{0,....Sign*1,0},{0,0,....Sign*1}};};
+  };
+  AnyFolder &clavicula=..Seg.Clavicula.scj ;
+  clavicula={
+    AnyRefNode RotNode={ ARel={{....Sign*1,0,0},{0,1,0},{0,0,....Sign*1}};};
+  };
+  
+  AnyKinRotational SCRot = {
+    AnyRefNode &thorax_sc = ...ShoulderRef.scj.RotNode;
+    AnyRefNode &clavicula_sc = ...Seg.Clavicula.scj.RotNode;    
+    Type = RotAxesAngles;
+    Axis1 = y;
+    Axis2 = z;
+    Axis3 = x;
+  };
+  MeasureOrganizer ={0};
+};
+
+AnyKinMeasureOrg SternoClavicularElevation ={
+  AnyKinRotational &ref=.SternoClavicularProtraction.SCRot;
+  MeasureOrganizer ={1};
+};
+
+AnyKinMeasureOrg SternoClavicularAxialRotation ={
+  AnyKinRotational &ref=.SternoClavicularProtraction.SCRot;
+  MeasureOrganizer ={2};
+};
+
+
+
+
+
+AnyKinMeasureOrg GlenohumeralFlexion ={
+  AnyRefNode &ShoulderNodeRef  = ..ShoulderRef;
+  ShoulderNodeRef={
+    AnyRefNode RotNode={ARel={{0,0,1},{0,....Sign*-1,0},{....Sign*1,0,0}};
+    };
+  };
+  AnyFolder &gh=..Seg.Humerus.gh ;
+  gh ={
+    AnyRefNode RotNode={
+      ARel=.ARel*{{0,0,1},{0,....Sign*-1,0},{....Sign*1,0,0}};
+    };
+  };
+  AnyKinRotational GHMeasure ={
+    AnyRefNode &ref1  = ...ShoulderRef.RotNode;
+    AnyRefNode &ref2  = ...Seg.Humerus.gh.RotNode;
+ 
+    Type=RotAxesAngles;
+    Axis1=x;
+    Axis2=z;
+    Axis3=y;
+    
+  };
+  MeasureOrganizer ={1};
+
+ 
+};
+
+AnyKinMeasureOrg GlenohumeralExternalRotation ={
+  AnyKinRotational &ref=.GlenohumeralFlexion.GHMeasure;
+  MeasureOrganizer ={2};
+};
+AnyKinMeasureOrg GlenohumeralAbduction ={
+  AnyKinRotational &ref=.GlenohumeralFlexion.GHMeasure;
+  MeasureOrganizer ={0};
+};
+
+
+
+
+AnyKinMeasureOrg GlenohumeralFlexionJntMus ={
+  AnyRefNode &Scapula  = ..Seg.Scapula.gh ;
+  Scapula={
+    AnyRefNode RotNode={
+      ARel={{0,0,....Sign*1},{0,-1,0},{....Sign*1,0,0}};
+    };
+  };
+  AnyKinRotational GHMeasure ={
+    AnyRefNode &ref1  = ...Seg.Scapula.gh.RotNode;
+    AnyRefNode &ref2  = ...Seg.Humerus.gh.RotNode;
+ 
+    AngVelOnOff = On;
+    Type=RotAxesAngles;
+//    Axis1=x;
+//    Axis2=z;
+//    Axis3=y;
+// The measure is now a xyz vector
+    
+  };
+  MeasureOrganizer ={2};
+};
+
+AnyKinMeasureOrg GlenohumeralExternalRotationJntMus ={
+  AnyKinRotational &ref=.GlenohumeralFlexionJntMus.GHMeasure;
+  MeasureOrganizer ={1};
+};
+AnyKinMeasureOrg GlenohumeralAbductionJntMus ={
+  AnyKinRotational &ref=.GlenohumeralFlexionJntMus.GHMeasure;
+  MeasureOrganizer ={0};
+};
+
+
+
+
+
+
+
+AnyKinMeasureOrg ElbowFlexion= {
+  AnyFolder &humerus=..Seg.Humerus.fe ;
+  humerus ={
+    AnyRefNode RotNode={ 
+      ARel=.ARel*{{1,0,0},{0,....Sign*-1,0},{0,0,....Sign*-1}};
+    };
+  };
+  AnyFolder &ulna=..Seg.Ulna.fe ;
+  ulna ={
+    AnyRefNode RotNode={ 
+      ARel=.ARel*{{....Sign*-1,0,0},{0,1,0},{0,0,....Sign*-1}};
+    };
+  };
+  AnyKinRotational  Rot= {
+    AnyRefNode &HumerusFE = ...Seg.Humerus.fe.RotNode;
+    AnyRefNode &UlnaFE = ...Seg.Ulna.fe.RotNode;
+    Type=RotAxesAngles;
+  };
+  MeasureOrganizer={2}; //this cooresponds to x  (remember z y x is default)
+  
+};//End FE
+
+
+AnyKinMeasureOrg ElbowPronation={
+  
+  AnyFolder &ulna=..Seg.Ulna.ps2 ;
+  ulna ={
+    AnyRefNode RotNode={ 
+      ARel={{0,1,0},{-....Sign*1,0,0},{0,0,....Sign*1}};
+    };
+  };
+  AnyFolder &radius=..Seg.Radius.PointPS2;
+  radius ={
+    AnyRefNode RotNode={ 
+      ARel=RotMat(-....Sign*30*pi/180,x)*{{....Sign*1,0,0},{0,....Sign*1,0},{0,0,1}};
+    };
+  };
+  
+  AnyKinRotational PSRotProximal = {
+    Type = RotAxesAngles;
+    AnyRefNode &UlnaPs = ...Seg.Ulna.ps2.RotNode;
+    AnyRefNode &RadiusPs = ...Seg.Radius.PointPS2.RotNode;
+    
+  };//End pronation supination joint proximal
+  MeasureOrganizer = {2}; //this cooresponds to x  (remember z y x is default)
+  
+  
+  
+};
+//AnyKinMeasureOrg &UlnaRadiusJointProtraction= FolderSide.ShoulderArm.Jnt.PS;
+
+
+//Definition of wrist joint
+AnyKinMeasureOrg WristFlexion ={
+  AnyFolder &radius=..Seg.Radius.wj;
+  radius ={
+    AnyRefNode RotNode={ 
+      ARel={{....Sign*1,0,0},{0,1,0},{0,0,....Sign*1}};
+    };
+  };
+  AnyFolder &hand=..Seg.Hand.wj;
+  hand ={
+    AnyRefNode RotNode={ 
+      ARel={{....Sign*1,0,0},{0,1,0},{0,0,....Sign*1}};
+    };
+  };
+  AnyKinRotational WristJoint = {
+    Type=RotAxesAngles;
+    AnyRefNode &radius_wj = ...Seg.Radius.wj.RotNode;
+    AnyRefNode &hand_wj =...Seg.Hand.wj.RotNode;
+  };//End WristJoint
+  MeasureOrganizer ={1};
+};
+
+
+AnyKinMeasureOrg WristAbduction ={
+  MeasureOrganizer ={0};
+  
+  
+  AnyFolder &WristJointSeg=..Seg.WristJointSeg.RadialUlnarDeviation;
+  WristJointSeg ={
+    AnyRefNode RotNode={ 
+      ARel={{....Sign*1,0,0},{0,1,0},{0,0,....Sign*1}};
+    };
+  };
+  AnyKinRotational WristJoint = {
+    Type=RotAxesAngles;
+    AnyRefNode &radius_wj = ...Seg.WristJointSeg.RadialUlnarDeviation.RotNode;
+    AnyRefNode &hand_wj =...Seg.Hand.wj.RotNode;
+  };//End WristJoint
+
+};
+
+
+
+
+AnyRefNode &GloveContactNode =.Seg.Glove.ContactNode;
+AnyRefNode  &WristContactNode=.Seg.Glove.WristContactNode;
+AnyRefNode  &PalmLateralContactNode=.Seg.Glove.PalmLateralContactNode;
+AnyRefNode  &PalmMedialContactNode=.Seg.Glove.PalmMedialContactNode;
+

@@ -1,0 +1,127 @@
+/**This is the calibration file it will calibrate the latissimus dorsi muscle
+in the article  "Esitmation of musculotendon properties in the human upperlimb"
+Grian A. Garner, Marcus G. Pandy
+Annals biomedical engineering Vol. 31, pp.207-220, 2003
+it has been found that the latissimus dorsi muscle have limited strength 
+at short operation length whereas the strength is high for large operation lengths
+120 deg abduction 
+*/
+AnyFolder ArmCal5 ={
+  
+  
+  AnyFolder &ThoraxSegs =  ...HumanFolderRef.Trunk.SegmentsThorax;
+  AnyFolder &LumbarSegs =  ...HumanFolderRef.Trunk.SegmentsLumbar;
+  AnyFolder &SpineJoints =  ...HumanFolderRef.Trunk.JointsLumbar;
+  
+  AnyFolder &SegSideCal = .SideHumanFolderRef.ShoulderArm.Seg;
+  AnyFolder &JointsSideCal = .SideHumanFolderRef.ShoulderArm.Jnt;
+  
+  AnyShortestPathMuscle &lat4 =  .SideHumanFolderRef.ShoulderArm.Mus.latissimus_dorsi_4;
+  AnyShortestPathMuscle &lat5 =  .SideHumanFolderRef.ShoulderArm.Mus.latissimus_dorsi_5;
+  
+  
+  
+  AnyFolder &MusParCalSide =  .SideHumanFolderRef.ShoulderArm.MusPar;
+  
+  AnyFixedRefFrame ground = {
+    AnyRefNode node = { 
+      ARel=.....HumanFolderRef.Trunk.SegmentsThorax.ThoraxSeg.Axes0; 
+      sRel=.....HumanFolderRef.Trunk.SegmentsThorax.ThoraxSeg.r0;
+    };
+  };
+  
+  AnySphericalJoint ThoraxGround={
+    AnyRefFrame &Ground = .ground.node;
+    AnyRefFrame &Sacrum= ....HumanFolderRef.Trunk.SegmentsThorax.ThoraxSeg;
+  };
+  
+  AnyKinEqSimpleDriver  ThoraxGroundDriver = {
+    AnySphericalJoint &Jnt = .ThoraxGround;
+    DriverPos = {0,0,0};
+    DriverVel = {0,0,0};
+    Reaction.Type = {Off,Off,Off}; 
+  };
+  
+  
+  AnyKinEqSimpleDriver NeckJntDriver = {
+   AnyRevoluteJoint &T12L1Joint = ....HumanFolderRef.Interface.Trunk.NeckJoint;
+       DriverPos = {0};
+    DriverVel = {0};
+    Reaction.Type = {On};
+  };
+  
+  AnyKinMeasureOrg Posture = {
+    AnyKinMeasureOrg &Ref2 = ....HumanFolderRef.Interface.Trunk.PelvisThoraxLateralBending;        
+    AnyKinMeasureOrg &Ref3 = ....HumanFolderRef.Interface.Trunk.PelvisThoraxRotation;   
+    AnyKinMeasureOrg &Ref1 = ....HumanFolderRef.Interface.Trunk.PelvisThoraxExtension;
+    MeasureOrganizer={0,1,2};
+  };
+  
+  AnyKinEqSimpleDriver PostureDriver ={
+    AnyKinMeasureOrg &AllDofs = .Posture;
+    DriverPos = pi/180*{0,0,0};
+    DriverVel = pi/180*{  0.0,0.0,0.0};
+    Reaction.Type = {On,On,On};  
+  };
+  
+  AnyKinEqSimpleDriver SCDriver ={
+    AnyKinRotational &SC =  ..SideHumanFolderRef.ShoulderArm.Jnt.SCRot;  
+    DriverPos = {..Sign*-0.66, -0.5*(..Sign-1)*pi+..Sign*0.258228, ..Sign*-0.25}; 
+
+
+    DriverVel = {-0.0,-0.0,-0.0};
+    Reaction.Type={Off,Off,Off};
+  };
+  
+  //This joint is not used in the  mannequin as the is set to a default pos.
+  AnyKinEqSimpleDriver WristDriver ={
+     AnyKinMeasureOrg &Wrist1 =..SideHumanFolderRef.ShoulderArm.Jnt.WristJointFlexion;
+    AnyKinMeasureOrg &Wrist2 =..SideHumanFolderRef.ShoulderArm.Jnt.WristJointDeviation;
+    DriverPos = {0,0};
+    DriverVel = {0,0};
+    Reaction.Type={On,On};
+  };
+  
+  AnyKinEqSimpleDriver FEDriver ={
+    AnyKinMeasureOrg &ref = ..SideHumanFolderRef.ShoulderArm.Jnt.FE;
+    AnyVar pos = iffun(ltfun(..Sign,0), 90*pi/180, pi-90*pi/180);
+    DriverPos = {pos};  
+    DriverVel = {0};
+    Reaction.Type = {Off};  
+  };
+  
+  AnyKinEqSimpleDriver PSDriver ={
+    AnyKinMeasureOrg &ref = ..SideHumanFolderRef.ShoulderArm.Jnt.PS;
+    DriverPos = {0.50*pi};  
+    DriverVel = pi/180*{ 0.0 };
+    Reaction.Type = {Off};  
+  };
+  
+  AnyKinEqSimpleDriver GHDriver ={
+    AnyKinRotational GHRotR = { 
+      AnyRefNode &scapula_gh = .....HumanFolderRef.Trunk.SegmentsThorax.ThoraxSeg.ij;
+      AnyRefNode &humerus_gh = ...SideHumanFolderRef.ShoulderArm.Seg.Humerus.gh;
+      Type = RotAxesAngles;
+      Axis1 = z;
+      Axis2 = x;
+      Axis3 = y;
+    };
+    MeasureOrganizer={0,1,2};
+    DriverPos = pi/180*{..Sign*120.0,0,0.0 };  
+    DriverVel = {0,0,0};
+    Reaction.Type = {Off,Off,Off};  
+  };
+};
+
+// The study: Operations to be performed on the model
+AnyBodyCalibrationStudy ArmCalibrationStudy5 = {
+  AnyFolder &ref=.ArmCal5; 
+  nStep = 1;
+  Kinematics.KinematicTol = 1e-07;
+};
+
+
+
+
+
+

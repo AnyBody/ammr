@@ -1,0 +1,93 @@
+/**2-D bicyle model.
+Although this model can be rotated in 3-D space it really is just a saggital
+plane pedaling model with only a few muscles in each leg. The beauty of 
+pedaling is that it is one of the few cases of biomechanics that can be modeled
+reasonably on two dimensions only. 
+
+The 2-D legs are supplemented with models of the bike frame, crank, and
+wheels.
+
+You can do lots of interesting stuff with this model:
+- Investigate the influence of the bicycle design
+- Change riding parameters sich as cadence and output power
+- Separate internal work for acceleraton of body segments
+from external work on the crank.*/
+Main = {
+  
+  
+  /**Execute this operation to run the model in the intended operation sequence.  
+  It is also possible to run operations seperately, by manual selections in the operation tree*/
+  AnyOperationSequence RunApplication = {
+    
+    ///This operation is the inverse dynamic analysis
+    AnyOperation &InvAnal=Main.Study.InverseDynamics;
+   
+  };
+  
+  
+  /// Various parameters for setting up the bicycle and the riding characteristics.
+  AnyFolder BikeParameters = {
+    
+    // Geometry parameters
+    AnyVar PedalArmLength =0.17;  //Length of pedal arm
+    AnyVar PedalArmWidth = 0.106; //Horizontal distance between left and right connecting point between foot and pedal
+    AnyVar SaddleHeight = 0.7 ;  //Height of hip joint measured vertically from the crank
+    AnyVar SaddlePos = -0.15;     //Horizontal pos of hipjoint measured from the crank
+    
+    // Loading parameters
+    AnyVar Cadence = 80.0;   //Cadence in RPM 
+    AnyVar MechOutput = 165; //Average Mechanical output over a cycle in Watt
+    
+    // The function for the crank moment is defined as Moment=Offset-Amp*cos(4*pi*t/T+Phase)
+    AnyVar T = 60/Cadence; //Cycle time
+    
+    AnyVar CrankMomentTopDeadCenter = 3.0; // This is the moment which can be applied by the rider in the top dead center point
+    AnyVar CrankMomentOffset = (MechOutput*T)/(2*pi); 
+    AnyVar CrankMomentAmp = CrankMomentOffset-CrankMomentTopDeadCenter;
+    AnyVar CrankMomentPhase = -15*pi/180;
+  };
+  
+  /// These are the attachment positions of the bike frames to the global 
+  /// reference frame
+  AnyFixedRefFrame GlobalRef = {
+    AnyRefNode Bike2DGround = { sRel = {0.0, 0.0, 0.0}; };
+    AnyRefNode Bike3DGround = { sRel = {0.0, 0.0, 0.0}; };
+  };  // Global reference frame  
+  
+  /// Body parameters that the leg model will need a reference to.
+  AnyFolder BodyParameters = {
+    AnyVar BodyMass = 75;
+    AnyVar Density = 1000;
+  }; //Bodyparameters
+  
+  #include "DrawSettings.any"
+  #include "Scaling.any"
+  
+  
+  
+  /// This folder is a place to assemble all the elements to include in the
+  /// study.
+  AnyFolder Model = {
+    
+    // Notice the '&'. It means that HumanFolder is just a pointer
+    AnyFolder &HumanFolder = Leg2D;  
+    #include "Leg2D.any"
+    #include "BikeFrameAndWheels.any"
+    #include "BikeLegConnection.any"        
+    AnyRefNode& GroundNode = Main.GlobalRef.Bike2DGround;
+    #include "BikeFrameGroundConnection.any"
+  };
+  
+  /// The study: Operations to be performed on the model
+  AnyBodyStudy Study = {
+    AnyFolder &Model = .Model;      
+    
+   
+    Gravity = {0.0, -9.81, 0.0};
+    tEnd = Main.BikeParameters.T;
+  };
+
+  
+  
+}; // Main
+

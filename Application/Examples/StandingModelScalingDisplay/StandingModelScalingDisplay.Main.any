@@ -1,0 +1,140 @@
+/**
+This application shows all the scaling laws available.
+The model can be scaled either regarding to measures between joint center, 
+or exteranal measures of bony tips, or by representation of a certain percentile of the population.
+For further details see the tutorial about scaling at anybodytech.com
+*/
+Main = {
+  
+  /**Execute this operation to run the model in the intended operation sequence.  
+  It is also possible to run operations seperately, by manual selections in the operation tree*/
+  AnyOperationSequence RunApplication = {
+
+    /**This operation calibrates the muscles in the model if these are of the type AnyMuscleModel3E.
+    This will just be an empty operation if the model is using a muscle type that does not require calibration.*/
+    AnyOperation &CalibrationAnal = Main.HumanModel.Calibration.CalibrationSequence;  
+
+    ///This operation is the inverse dynamic analysis
+    AnyOperation &InvAnal=Main.Study.InverseDynamics;
+   
+  };
+
+
+
+  #include "DrawSettings.any"
+  
+  AnyFolder HumanModel = {
+    
+    AnyFolder &Mannequin=.Model.Mannequin;
+    
+    // Use only ONE of the three include files below at any time
+    // --------------------------------------------------------
+    
+    // Selecting the include file below results in a body model without muscles.
+    // Instead, the model is equipped with joint moment providers. This version
+    // loads and run much faster than versions with anatomical muscles.
+     #include  "..\..\..\Body\AAUHuman\BodyModels\FullBodyModel\BodyModel_NoMuscles.any"    
+    
+    // Selecting the include file below results in a body model with simple
+    // constant stength muscles. They are adequate for many purposes and have the
+    // advantage of not requiring calibration
+    //#include  "..\..\..\Body\AAUHuman\BodyModels\FullBodyModel\BodyModel.any"
+    
+    // The include file below selects the three-element Hill-type muscles.
+    // They require calibration before they can be used, and this can be done
+    // by the HumanModel.Calibration.CalibrationSequence operation. This must 
+    // be executed every time the model is reloaded.
+    //#include  "..\..\..\Body\AAUHuman\BodyModels\FullBodyModel\BodyModel_Mus3E.any" 
+
+    // The StrengthParameters folder allows for simple scaling of strength
+    // between the spine, the legs and the ShoulderArm body parts. The methods
+    // are slightly different to adhere to the anatomical literature on which the
+    // models are based.
+    AnyFolder StrengthParameters = {
+      AnyVar SpecificMuscleTensionSpine = 90; //N/cm^2
+      AnyVar StrengthIndexLeg = 1; 
+      AnyVar SpecificMuscleTensionShoulderArm = 90; //N/cm^2
+    };    
+    
+    
+    // This section below offers the choice between several scaling strategies
+    
+    #include "..\..\..\Body\AAUHuman\Scaling\ScalingStandard.any"
+    
+    // Scaling laws using joint to joint measures
+    //#include "..\..\..\Body\AAUHuman\Scaling\ScalingUniform.any"
+    //#include "..\..\..\Body\AAUHuman\Scaling\ScalingLengthMass.any"
+    //#include "..\..\..\Body\AAUHuman\Scaling\ScalingLengthMassFat.any"
+    
+    // Scaling laws using external measures
+    //#include "..\..\..\Body\AAUHuman\Scaling\ScalingUniformExt.any"
+    //#include "..\..\..\Body\AAUHuman\Scaling\ScalingLengthMassExt.any"
+    //#include "..\..\..\Body\AAUHuman\Scaling\ScalingLengthMassFatExt.any"
+    
+    #include "DrawExternalMeasures.any"
+    
+    Scaling = {
+      //#include "..\..\..\Body\AAUHuman\Scaling\AnyFamily\AnyMan.any"
+      
+      //#include "..\..\..\Body\AAUHuman\Scaling\AnyFamily\AnyManUniform.any"
+      
+      //#include "..\..\..\Body\AAUHuman\Scaling\AnyFamily\AnyManExternal.any"
+      
+      //#include "..\..\..\Body\AAUHuman\Scaling\AnyFamily\AnyManExtPercentile.any"
+      
+      //#include "..\..\..\Body\AAUHuman\Scaling\AnyFamily\AnyWomanExtPercentile.any"
+    };
+  };
+  
+  // This folder collects the elements of the model. It is referred by the
+  // study section below as the target of the analyses.  
+  AnyFolder Model = {
+    
+    AnyFolder &HumanModel=.HumanModel.BodyModel;
+    #include "Environment.any"   
+    
+    // The Mannequin file specifies load-time positions for all the segments
+    // in the HumanModel. This is important for the model's ablity to resolve
+    // all the kinematic constraints when the model is analyzed.
+    // The mannequin file also drives those degrees of freedom of the human 
+    // model that are not governed by problem-specific drivers at run time.    
+    #include "Mannequin.any" 
+    
+    // The include file below, MannequinValuesFromModel, is not strictly
+    // necessary but can be helpful when developing new applications
+    // based on this application, particularly when the new application
+    // involves an environment that somehow governs the kinematics of
+    // the human body.
+    
+    // When included, MannequinValuesFromModel creates a folder named
+    // Main.HumanModel.BodyModel.MannequinValuesFromModel that contains 
+    // variables with the human model's joint angles as they are defined
+    // in the mennequin model. When the model has been loaded and the
+    // SetInitialConditions operation has been executed successfully once,
+    // you can look up 
+    // Main.HumanModel.BodyModel.MannequinValuesFromModel in the model
+    // tree and dump its values. The output is very similar to the content
+    // of the mannequin file, so the output can be saved and edited slightly
+    // and then replace the existing mannequin.any file. The new file will
+    // cause the model to have the exactly correct load-time positions.
+    // #include "MannequinValuesFromModel.any"
+    
+    AnyFolder ModelEnvironmentConnection = {
+      #include "JointsAndDrivers.any"
+    };
+  };
+  
+  AnyBodyStudy Study = {
+    AnyFolder &Model = .Model;
+    
+   
+    tEnd = 1.0;
+    Gravity = {0.0, -9.81, 0.0};
+    nStep = 1;
+    
+  }; // End of study
+
+ 
+  
+}; //Main
+

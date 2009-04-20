@@ -1,0 +1,178 @@
+/**
+The essence of a gait model is that it is a complex movement that is driven by means of kinematic data collected by
+a motion capture system. To have something fairly standardized and accessible, we grabbed the motion data and ground 
+reaction force measurements from the book by Vaughan et al: Dynamics of Human Gait. These data sets have been placed 
+in the public domain and are available from the ISB homepage. We used the "Man" dataset.
+
+The gait model is driven directly by the marker coordinates from the motion capture experiment. These coordinates have 
+been saved on text files and are driving corresponding points on the computer model. To avoid kinematical over-determinacy,
+we have selected only as many driver coordnates as we have degrees of freedom in the model. We use the ISB-recommended 
+coordinate system with x forward, y vertical, and z lateral and drive the following coordinates:
+
+The model is driven by setting of drivers between the free floating markers (grey) and the markers on the bones (blue), 
+for selected dof.
+
+Sacrum in (y) 
+Right and left ASIS in (x) 
+Right and left knee in (x) 
+Right and left malleolus in (y) 
+Right and left metatarsal in (x, z) 
+Right and left heel in (x, y, z)
+
+Right and left ASIS  and Sacrum in (z), combined as RAsisZ+LAsisZ=SacrumZ
+
+These drivers are sufficient to determine the kinematics of the 3-D model. AnyBody reproduces the movement 
+and computes individual muscle and joint forces. 
+
+To run the model please do the following 
+
+1: Run the Main.HumanModel.Calibration.CalibrationSequence  in the operation window lower leftcorner of the screen
+This will calibrate the muscles
+2: Run the Study.InverseDynamicAnalysis in the operation window 
+*/
+Main = {
+  
+  /**Execute this operation to run the model in the intended operation sequence.  
+  It is also possible to run operations seperately, by manual selections in the operation tree*/
+  AnyOperationSequence RunApplication = {
+    
+    /**This operation calibrates the muscles in the model if these are of the type AnyMuscleModel3E.
+    This will just be an empty operation if the model is using a muscle type that does not require calibration.*/
+    AnyOperation &CalibrationAnal = Main.HumanModel.Calibration.CalibrationSequence;  
+    
+    ///This operation is the inverse dynamic analysis
+    AnyOperation &InvAnal=Main.Study.InverseDynamics;
+    
+    
+    ///This operation is running a post analysis of the model it will normalize muscle activity and measured EMG to unity
+    AnyOperation &PostAnal=Main.PostStudy.Kinematics;
+    
+  };
+  
+  //Includes some settings for the visual representation of the model
+  #include "DrawSettings.any"
+  
+  
+  AnyFolder HumanModel={
+    
+    AnyFolder &Mannequin=.Model.Mannequin;
+    
+    //This model should be used when playing around with the model in the 
+    //initial modelling phase since leaving the normal muscles out, makes the 
+    //model run much faster. The model uses artificial muscles on each dof. in 
+    //the joints which makes it possible also to run the inverse analysis.  
+    //IMPORTANT: 
+    //As this model has no muscles, the include files EMGComparison.any
+    //and PostProcessing.any have to be removed from the AnyBodyStudy below.
+    //Those files are measuring muscle activity and will give an error if not removed
+    //when using this model.
+    //#include  "..\..\..\Body\AAUHuman\BodyModels\TrunkNoMusclesTwoLegs\BodyModel_NoMuscles.any"
+    
+    
+    //This model uses the 3 element hill type model 
+    //VERY IMPORTANT: Remember to calibrate the legs before running the inverse analysis
+    //This is done by running the CalibrationSequence seen in the opera
+    #include  "..\..\..\Body\AAUHuman\BodyModels\TrunkNoMusclesTwoLegs\BodyModel_Mus3e.any"
+    
+    
+    //This model uses the simple constant force muscLes 
+    //#include  "..\..\..\Body\AAUHuman\BodyModels\TrunkNoMusclesTwoLegs\BodyModel.any"
+    
+    AnyFolder StrengthParameters={
+      AnyVar SpecificMuscleTensionSpine= 150; //N/cm^2
+      AnyVar StrengthIndexLeg= 1.5; 
+      AnyVar SpecificMuscleTensionShoulderArm= 150; //N/cm^2
+    };
+    
+    //Choose between scaling laws
+    //#include "..\..\..\Body\AAUHuman\Scaling\ScalingStandard.any"
+    #include "..\..\..\Body\AAUHuman\Scaling\ScalingUniform.any"
+    //#include "..\..\..\Body\AAUHuman\Scaling\ScalingLengthMass.any" 
+    //#include "..\..\..\Body\AAUHuman\Scaling\ScalingLengthMassFat.any" 
+    
+    Scaling = {
+      //This is the file which set the segments lenghts
+      #include "AnyMan.any" 
+    };
+    
+    //include the marker set
+    #include "KitVaughanMarkers.any"
+    
+  };
+  
+  
+  
+  
+  AnyFolder Model={
+    
+    AnyFolder &HumanModel = .HumanModel.BodyModel;
+    
+    //Create segments for each of the markers and drive them according to data
+    //which can be found in the files p1.any - p15.any
+    #include "MotionTrackerInclude.any"
+    
+    
+    //The Mannequin values is used both for setting the initial positions of the model
+    //and driving the model at analysis time. So you can change the values in the Mannequin
+    //file and it will change both initial positions and how it is positioned at analysis time. 
+    //If you want to run the model into some posture and then dump the momentary joint angles as the
+    //initial ones then simply do the following:
+    // 1  Double click the folder Main.MannequinValuesFromModel.AnyFolder_Posture and it will dump the joint angles to the message window 
+    // 2. Copy the dumped text into the Mannequin.any replacing the "Posture" folder 
+    // 3. Press ctrl+h and search and replace "_" with " "
+    // 4. Rename the folder name Main.Model.MannequinValuesFromModel.AnyFolder_Posture to Posture
+    // 5. Once the model is reloaded it will start in the position corresponding to the one which was dumped.
+    //This file contains joint angles which are used at load time for setting the initial positions
+    #include "Mannequin.any" 
+    
+    
+    
+    //Environment around the human
+    AnyFolder Environment ={
+      //Model of the floor and force plates 
+      #include "Environment.any"
+      
+    };
+    //Connection between environment and the human    
+    AnyFolder ModelEnvironmentConnection = {
+      //Drivers for the model
+      #include "JointsAndDriversOldMethod.any"
+    };
+  };
+  
+  
+  // The study: Operations to be performed on the model
+  AnyBodyStudy Study = {
+    AnyFolder &Model = .Model;
+    nStep=100;
+    Gravity = {0.0, 0.0,-9.81};
+    tEnd=1.26-0.1;
+    tStart=0.01;
+    
+    
+    //Folder which contains a a comparison of measured EMG with calculated muscle activity
+    #include "EMGComparison.any"
+    
+    //enable this line if you would like to see marker trajectories
+    //#include "Trajectories.any"
+  };
+  
+  
+ 
+
+
+//Run this study for comparison between model and measured EMG data, it will automatically normalize all curves to unitiy
+//the curves are found in the PostProcessing folder
+AnyBodyStudy PostStudy ={
+  nStep=100;
+  Gravity = {0.0, 0.0,-9.81};
+  tEnd=1.26-0.1;
+  tStart=0.01;
+  
+  #include "PostProcessing.any"    
+};
+
+
+
+};  // Main
+

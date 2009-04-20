@@ -1,0 +1,77 @@
+
+AnyFolder EnvironmentModel = {
+    
+  AnyFixedRefFrame GlobalRef = {
+    Origin ={0.0,0.1,0.0}; 
+    #include "drawcoorsystem.any"
+  };//GlobalRef
+  
+  // Bag segment
+  AnySeg Bag = {
+    Mass = 20;
+    Jii = {0.2,0.2,1}/10;
+    r0 = Main.Model.HumanModel.Trunk.SegmentsLumbar.PelvisSeg.r0+{0,0,0.15};
+    AnyRefNode StrapFront = {
+      sRel = {0.1, 0.1, 0};
+    };
+    AnyRefNode StrapBack = {
+      sRel = {-0.1, 0.1, 0};
+    };
+    AnyDrawSurf surf = {
+      FileName = "bag";
+      RGB = {128,0,0}/256;
+      ScaleXYZ = {1,1,1}/100;
+    };
+  };
+  
+  // Create via points for the bag strap
+  Main.Model.HumanModel.Right.ShoulderArm.Seg.Scapula = {
+    AnyRefNode Strap1 = {
+      sRel = {-0.05, 0.01, 0.02};
+    };
+  };
+  Main.Model.HumanModel.Right.ShoulderArm.Seg.Clavicula = {
+    AnyRefNode Strap1 = {
+      sRel = {0.1, 0.02, -0.01};
+    };
+  };
+  Main.Model.HumanModel.Trunk.SegmentsThorax.ThoraxSeg = {
+    AnyRefNode Strap1 = {
+      sRel = {0.1, 0.25, 0.15};
+    };
+  };
+  
+  // Contact point on the pelvis
+  Main.Model.HumanModel.Trunk.SegmentsLumbar.PelvisSeg = {
+    AnyRefNode Bag = {
+      sRel = {0.0, 0.0, 0.15};
+    };
+  };
+  
+  // Constrain the bag to only slide up and down on the pelvis
+  AnyPrismaticJoint PelvisBag = {
+    AnyRefFrame &Pel = Main.Model.HumanModel.Trunk.SegmentsLumbar.PelvisSeg.Bag;
+    AnyRefFrame &Bag = .Bag;
+    Axis = y;
+  };
+
+  // Model the strap
+  AnyKinPLine Strap = {
+    AnyRefFrame &p1 = .Bag.StrapFront;
+    AnyRefFrame &p2 = Main.Model.HumanModel.Trunk.SegmentsThorax.ThoraxSeg.Strap1;
+    AnyRefFrame &p3 = Main.Model.HumanModel.Right.ShoulderArm.Seg.Clavicula.Strap1;
+    AnyRefFrame &p4 = Main.Model.HumanModel.Right.ShoulderArm.Seg.Scapula.Strap1;
+    AnyRefFrame &p5 = .Bag.StrapBack;
+    AnyDrawPLine drw = {
+      RGB = {128,0,0}/256;
+      Thickness = 0.01;
+    };
+  };
+  
+  // Strap length driver
+  AnyKinEqSimpleDriver StrapLength = {
+    AnyKinPLine &Strap = .Strap;
+    DriverPos = {0.8};
+    DriverVel = {0};
+  };
+};

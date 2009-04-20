@@ -1,0 +1,110 @@
+/**
+ --------------------------------------------------------
+ This model comprises an isolated cervical spine model.
+ The model is equipped with the socalled simple muscle model.
+ 
+ The goal of this application is to find the force generating
+ capacity of the neck in all directions.
+ An external force of 50 N is defined which rotates around a
+ certain point on the skull.
+
+ Mark de Zee
+ --------------------------------------------------------
+*/
+Main = {
+    
+   /**Execute this operation to run the model in the intended operation sequence.  
+  It is also possible to run operations seperately, by manual selections in the operation tree*/
+  AnyOperationSequence RunApplication = {
+
+    /**This operation calibrates the muscles in the model if these are of the type AnyMuscleModel3E.
+    This will just be an empty operation if the model is using a muscle type that does not require calibration.*/
+    AnyOperation &CalibrationAnal = Main.HumanModel.Calibration.CalibrationSequence;  
+
+    ///This operation is the inverse dynamic analysis
+    AnyOperation &InvAnal=Main.Study.InverseDynamics;
+   
+  };
+
+
+  // ----------------------------------------------------------
+  // Draw settings
+  // ----------------------------------------------------------
+  #include "DrawSettings.any"
+  
+  
+  // ------------------------------------------------------------
+  // Model
+  // ------------------------------------------------------------
+    
+  AnyFolder HumanModel={
+    
+    AnyFolder &Mannequin=.Model.Mannequin;
+    
+    #include  "..\..\..\Body\AAUHuman\BodyModels\NeckNoMusclesInArmsAndLumbarSpine\BodyModel.any"
+    
+    AnyFolder StrengthParameters={
+      AnyVar SpecificMuscleTensionSpine= 35; //N/cm^2
+      //AnyVar SpecificMuscleTensionSpine= 90; //N/cm^2
+      AnyVar StrengthIndexLeg= 1; 
+      AnyVar SpecificMuscleTensionShoulderArm= 90; //N/cm^2
+    };
+    
+    /*
+    Choice of Scaling
+    */
+    #include "..\..\..\Body\AAUHuman\Scaling\ScalingStandard.any"
+    
+  };
+  
+  AnyFolder Model ={
+    
+    AnyFolder &HumanModel =.HumanModel;
+    
+    #include "Mannequin.any"   
+    
+    AnyFolder EnvironmentModel = {
+      #include "Environment.any"
+    };
+    
+    AnyFolder ModelEnvironmentConnection = {
+      //#include "JointsAndDriversSimple.any"
+      #include "JointsAndDriversWithNeckRhythm.any"
+      
+      #include "ForceOnHead.any"
+    }; // ModelEnvironmentConnection
+    
+    
+    
+  }; // Model
+  
+    
+  AnyBodyStudy Study = {
+    AnyFolder &Model = .Model;
+    
+    
+    tEnd = 360;
+    Gravity = {0.0, -9.81, 0.0};
+    nStep = 101;
+        
+  }; // Study
+
+  
+  
+};// Main
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

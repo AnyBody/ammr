@@ -1,0 +1,121 @@
+AnyFolder &BikeParameters = Main.BikeParameters;
+
+//This is the joint which connects the Pelvis segment to the bike.
+AnyKinLinear SaddelJointLin ={
+  AnyRefNode & Sacrum= ..ModelFolder.Pelvis.LigArcuatumPubis;
+  AnyRefNode & Saddel = ...BikeModel.BikeFrame.SaddelPos;
+  
+};
+AnyKinEq SaddelJointLinConstraints={
+  AnyKinLinear &ref= .SaddelJointLin;
+};
+AnyKinRotational SaddelJointRot ={
+  AnyRefNode & Sacrum= ..ModelFolder.Pelvis.LigArcuatumPubis;
+  AnyRefNode & Saddel = ...BikeModel.BikeFrame.SaddelPos;
+  Type=RotAxesAngles;
+};
+
+AnyKinEqSimpleDriver SaddelRotation = {
+  AnyKinRotational &Jnt = .SaddelJointRot;
+  DriverPos = {0.15*pi,0,0};
+  DriverVel = {0.0,0,0};
+  //Setting Reaction.Type=1 means that the joint will generate the moment it will 
+  //need to balance this DOF, setting it to 0 which is default will mean that muscles 
+  //forces will be used for balancing the joint
+  Reaction.Type = {On,On,On}; 
+};
+
+
+AnyFolder Right={
+  // This is the joint connecting the foot to the pedal. It simply
+  // specifies that the linear distances between the two must be zero
+  AnyKinLinear PedalJointLin = {
+    AnyRefNode &Foot = ...ModelFolder.Right.Seg.Foot.GroundJoint;
+    AnyRefNode &PedalR= ....BikeModel.Crank.RPedal;
+  };
+   AnyKinMeasureOrg PedalJointLinXY = {
+    AnyKinLinear &ref=.PedalJointLin;
+    MeasureOrganizer={0,1};
+  };
+  
+  AnyKinEq PedalJointLinConstraints = {
+    AnyKinMeasureOrg  &ref= .PedalJointLinXY;
+  };
+  
+  // This measure is for controlling the rotation.
+  AnyKinRotational PedalJointRot = {
+    AnyRefFrame &Ground = ....BikeModel.BikeFrame;
+    AnyRefNode &Foot = ...ModelFolder.Right.Seg.Foot.GroundJoint;
+    Type=RotAxesAngles;
+  };
+  AnyKinMeasureOrg FootRMovement = {
+    AnyKinRotational &GroundFoot = .PedalJointRot;
+    MeasureOrganizer = {0,1};  // Standard rotational order = z,y,x = 0,1,2
+  }; 
+  
+ 
+  AnyKinEqFourierDriver PedalRRotationFourier  ={
+    AnyKinMeasureOrg &Jnt = .FootRMovement;
+    Type = CosSin;
+    AnyVar a0 = -0.3797-0.5*pi;
+    AnyVar a1 = -0.0205;
+    AnyVar b1 = 0.3393;
+    AnyVar a2 = 0.004906;
+    AnyVar b2 = 0.03654;
+    AnyVar w = 7.681;
+    Freq = ..BikeParameters.Cadence/60; 
+    A = { {a0+0.5*pi,a1,a2}  };
+    B = {{0,b1,b2} }; 
+    Reaction.Type = {Off};
+    MeasureOrganizer={0};
+  };
+  
+};
+AnyFolder Left={
+  
+  
+  // This is the joint connecting the foot to the pedal. It simply
+  // specifies that the linear distances between the two mush be zero
+  AnyKinLinear PedalJointLin = {
+    AnyRefNode &Foot = ...ModelFolder.Left.Seg.Foot.GroundJoint;
+    AnyRefNode &PedalR= ....BikeModel.Crank.LPedal;
+  };
+ AnyKinMeasureOrg PedalJointLinXY = {
+    AnyKinLinear &ref=.PedalJointLin;
+    MeasureOrganizer={0,1};
+  };
+  
+  AnyKinEq PedalJointLinConstraints = {
+    AnyKinMeasureOrg &ref= .PedalJointLinXY;
+  };  // This measure is for controlling the rotation.
+  AnyKinRotational PedalJointRot = {
+    AnyRefFrame &Ground = ....BikeModel.BikeFrame;
+    AnyRefNode &Foot = ...ModelFolder.Left.Seg.Foot.GroundJoint;
+    Type=RotAxesAngles;
+  };
+  AnyKinMeasureOrg FootLMovement = {
+    AnyKinRotational &GroundFoot = .PedalJointRot;
+    MeasureOrganizer = {0,1};  // Standard rotational order = z,y,x = 0,1,2
+  }; 
+  
+  
+  
+  AnyKinEqFourierDriver PedalLRotationFourier ={
+    
+    AnyKinMeasureOrg &Jnt = .FootLMovement;
+    Type = CosSin;
+    AnyVar a0 = -0.3792-0.5*pi;
+    AnyVar a1 = 0.0205;
+    AnyVar b1 = -0.3373;
+    AnyVar a2 = 0.004906;
+    AnyVar b2 = 0.03654;
+    AnyVar w = 7.681;
+    Freq = ..BikeParameters.Cadence/60; 
+    A = { {a0+0.5*pi,a1,a2}};
+    B = {{0,b1,b2}}; 
+    Reaction.Type = {Off};
+    MeasureOrganizer={0};
+  };
+};
+
+ 

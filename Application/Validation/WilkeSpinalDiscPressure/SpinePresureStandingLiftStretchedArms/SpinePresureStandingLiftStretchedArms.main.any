@@ -1,0 +1,101 @@
+/**
+This application can be a good starting point for new applications involving 
+the entire body, doing lifts from a standing posture. The model uses artificial 
+muscles between the feet and the floor for creating non-sticking boundary conditions.
+Similarly there are non-sticking boundary conditions between the hands and the box.
+The drivers for the model are listed in the file "JointsAndDrivers.any".
+*/
+Main = {
+  
+  /**Execute this operation to run the model in the intended operation sequence.  
+  It is also possible to run operations seperately, by manual selections in the operation tree*/
+  AnyOperationSequence RunApplication = {
+
+    /**This operation calibrates the muscles in the model if these are of the type AnyMuscleModel3E.
+    This will just be an empty operation if the model is using a muscle type that does not require calibration.*/
+    AnyOperation &CalibrationAnal = Main.HumanModel.Calibration.CalibrationSequence;  
+
+    ///This operation is the inverse dynamic analysis
+    AnyOperation &InvAnal=Main.Study.InverseDynamicAnalysis;
+  };
+
+
+
+  
+  #include "DrawSettings.any"
+  
+  AnyFolder HumanModel={
+    
+    AnyFolder &Mannequin=.Model.Mannequin;
+    // Use only ONE of the two include files below at any time
+    // --------------------------------------------------------
+    
+    // Selecting the include file below results in a body model without muscles.
+    // Instead, the model is equipped with joint moment providers. This version
+    // loads and run much faster than versions with anatomical muscles.
+    // #include  "..\..\..\Body\AAUHuman\BodyModels\FullBodyModel\BodyModel_NoMuscles.any"    
+    
+    // Selecting the include file below results in a body model with simple
+    // constant stength muscles. They are adequate for many purposes and have the
+    // advantage of not requiring calibration
+    #include  "..\..\..\..\Body\AAUHuman\BodyModels\FullBodyModel\BodyModel.any"
+    
+    
+    AnyFolder StrengthParameters={
+      AnyVar SpecificMuscleTensionSpine= 90; //N/cm^2
+      AnyVar StrengthIndexLeg= 1; 
+      AnyVar SpecificMuscleTensionShoulderArm= 90; //N/cm^2
+    };
+    
+    // This section below offers the choice between two scaling strategies for the
+    // human model. 
+    
+    // ScalingStandard means that all the body parts will have the standard size 
+    // at which they were originally developed, i.e. with anthropometric
+    // data from the anatomical literature. This roughly corresponds to a 50th
+    // percentile European male.    
+    // #include "..\..\..\Body\AAUHuman\Scaling\ScalingStandard.any"
+    
+    // ScalingLengthMassFat will scale each segment of the body to anthropometric data
+    // specified in the selected AnyFamily include file, attempting to take the
+    // fat percentage into account in the assessment of the muscle strength.
+     #include "..\..\..\..\Body\AAUHuman\Scaling\ScalingLengthMassFat.any" 
+     Scaling = {
+       #include "AnyManUniform.any"
+     };
+    
+  };
+  
+  // This folder collects the elements of the model. It is referred by the
+  // study section below as the target of the analyses.  
+  AnyFolder Model={
+    
+    AnyFolder &HumanModel=.HumanModel.BodyModel;
+    
+    #include "Environment.any"   
+    
+    // The Mannequin file specifies load-time positions for all the segments
+    // in the HumanModel. This is important for the model's ablity to resolve
+    // all the kinematic constraints when the model is analyzed.
+    // The mannequin file also drives those degrees of freedom of the human 
+    // model that are not governed by problem-specific drivers at run time.    
+    #include "Mannequin.any"   
+    
+    AnyFolder ModelEnvironmentConnection = {
+      #include "JointsAndDrivers.any"
+    };
+    
+  };
+  AnyBodyStudy Study = {
+    AnyFolder &Model = .Model;
+    RecruitmentSolver = MinMaxSimplex;
+    tEnd = 1.0;
+    Gravity = {0.0001, -9.81, 0.0001};
+    nStep = 1;
+    MuscleEliminationTol = 1e-8;
+    RecruitmentLpPenalty = 1e-5;
+    
+  }; // End of study
+  
+}; //Main
+

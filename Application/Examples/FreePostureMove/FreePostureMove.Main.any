@@ -1,0 +1,115 @@
+/** ----------------------------------------------------------------------------
+This model uses the full body model, i.e. most of the body parts available
+in the AAUHuman part of the Body directory. The model is grounded at the
+pelvis and the posture if the model is controlled through a mannequin.any 
+file by means of joint angles.
+
+This application is a really good starting point for new applications 
+involving the entire body. It is quite exactly like the FreePosture model
+with the exception that static or constant velocity joint angles are 
+replaced by interpolated drivers where the user can modify the interpolation
+points very easily.
+---------------------------------------------------------------------------- */
+Main = {
+  
+  /**Execute this operation to run the model in the intended operation sequence.  
+  It is also possible to run operations seperately, by manual selections in the operation tree*/
+  AnyOperationSequence RunApplication = {
+
+    /**This operation calibrates the muscles in the model if these are of the type AnyMuscleModel3E.
+    This will just be an empty operation if the model is using a muscle type that does not require calibration.*/
+    AnyOperation &CalibrationAnal = Main.HumanModel.Calibration.CalibrationSequence;  
+
+    ///This operation is the kinematic analysis
+    AnyOperation &InvAnal=Main.Study.Kinematics;
+  };
+
+  
+  #include "DrawSettings.any"
+  
+  
+  
+  AnyFolder HumanModel={
+    AnyFolder &Mannequin=.Model.InitialPositionValues;
+    
+    // Use only ONE of the three include fles below at any time
+    // --------------------------------------------------------
+    
+    // Selecting the include file below results in a body model without muscles.
+    // Instead, the model is equipped with joint moment providers. This version
+    // loads and run much faster than versions with anatomical muscles.
+     #include  "..\..\..\Body\AAUHuman\BodyModels\FullBodyModel\BodyModel_NoMuscles.any"    
+    
+    // Selecting the include file below results in a body model with simple
+    // constant stength muscles. They are adequate for many purposes and have the
+    // advantage of not requiring calibration
+    //#include  "..\..\..\Body\AAUHuman\BodyModels\FullBodyModel\BodyModel.any"
+    
+    // The include file below selects the three-element Hill-type muscles.
+    // They require calibration before they can be used, and this can be done
+    // by the HumanModel.Calibration.CalibrationSequence operation. This must 
+    // be executed every time the model is reloaded.
+    //#include  "..\..\..\Body\AAUHuman\BodyModels\FullBodyModel\BodyModel_Mus3E.any" 
+    
+    AnyFolder StrengthParameters={
+      AnyVar SpecificMuscleTensionSpine= 90; //N/cm^2
+      AnyVar StrengthIndexLeg= 1; 
+      AnyVar SpecificMuscleTensionShoulderArm= 90; //N/cm^2
+    };
+    
+    // This section below offers the choice between two scaling strategies for the
+    // human model. 
+    
+    // ScalingStandard means that all the body parts will have the standard size 
+    // at which they were originally developed, i.e. with anthropometric
+    // data from the anatomical literature. This roughly corresponds to a 50th
+    // percentile European male.    
+    #include "..\..\..\Body\AAUHuman\Scaling\ScalingStandard.any"
+    
+    // ScalingLengthMassFat will scale each segment of the body to anthropometric data
+    // specified in the selected AnyFamily include file, attempting to take the
+    // fat percentage into account in the assessment of the muscle strength.
+    // #include "..\..\..\Body\AAUHuman\Scaling\ScalingLengthMassFat.any" 
+    // Scaling = {
+    //   #include "..\..\..\Body\AAUHuman\Scaling\AnyFamily\AnyMan.any"
+    // };
+  };//humanmodel
+  
+  AnyFolder Model={
+    
+    AnyFolder &HumanModel=.HumanModel.BodyModel;
+    #include "Environment.any"   
+
+    // The Mannequin file specifies load-time positions for all the segments
+    // in the HumanModel. This is important for the model's ablity to resolve
+    // all the kinematic constraints when the model is analyzed.
+    // The mannequin file also drives those degrees of freedom of the human 
+    // model that are not governed by problem-specific drivers at run time.
+    // The mannequin file of this model is different by allowing the user
+    // to insert interpolation values for the joint angle drivers thus
+    // enabling complex movements.
+    #include "Mannequin.any"   
+    
+    #include "InterpolationFunctions.any"
+    #include "InitialPositionValues.any"
+    
+    AnyFolder ModelEnvironmentConnection = {
+      #include "JointsAndDrivers.any"
+    };
+  };
+  
+  AnyBodyStudy Study = {
+    AnyFolder &Model = .Model;
+    
+    tEnd = 1.0;
+    Gravity = {0.0, -9.81, 0.0};
+    nStep = 150;
+    
+  }; // End of study
+
+ 
+
+}; //Main
+
+
+

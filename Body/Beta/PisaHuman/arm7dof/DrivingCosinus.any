@@ -1,0 +1,67 @@
+
+Main = {
+
+  // The actual body model goes in this folder
+  AnyFolder MyModel = {
+
+    // Global Reference Frame
+    AnyFixedRefFrame GlobalRef = {
+      AnyRefNode ElbowNode = {sRel = {0,0,0};};
+      AnyDrawRefFrame DrwGlobalRef = {
+        ScaleXYZ = {0.2,0.2,0.2};
+        RGB = {1, 0, 0};
+      };
+    };  // Global reference frame
+
+    // Definition of a simple segment
+    AnySeg Arm = {
+      Mass = 2;
+      Jii = {0.1,0.01,0.1};
+      AnyRefNode ElbowNode = {sRel = {0,0.5,0};};
+      AnyDrawSeg DrwSeg = {};
+    };
+    
+    AnyUniversalJoint Elbow = {
+      Axis1 = x;
+      Axis2 = z;
+      AnyRefNode &GroundNode = .GlobalRef.ElbowNode;
+      AnyRefNode &ArmNode = .Arm.ElbowNode;
+    };   
+
+    /*
+    In the following driver I will drive the z-axis of the elbow joint with the following function:
+    theta(t) = (a/w2)*(1-cos(w*t));
+             = a/w2 - (a/w2)*cos(w*t);
+    The x-axis will be kept contstant. You can change this constant position for example like this:
+          A = {{0.3*pi,0},{a/(w^2),-a/(w^2)}};
+    Within in the driver I defined two variables a and w, which I gave an arbitrary value.
+    
+    w = 2*pi*Freq, therefore Freq is defined as w/(2*pi).In this example that will result in 
+    a frequency of 1 Hz.
+    
+    Be aware that in this example I set the reaction type on 1, because I didn't define
+    any muscles. In your case it must be set to 0 (the muscles will deliver the necessary force).
+    */
+    AnyKinEqFourierDriver ElbowMovement = {
+      AnyUniversalJoint &Jnt = .Elbow;
+      Type = Cos;
+      AnyVar a = pi;
+      AnyVar w = 2*pi;
+      Freq = w/(2*pi);
+      A = {{0,0},{a/(w^2),-a/(w^2)}};
+      B = {{0,0},{0,0}};
+      Reaction.Type = {1.0,1.0};
+    };
+
+};
+
+  // The study: Operations to be performed on the model
+  AnyBodyStudy MyStudy = {
+    AnyFolder &Model = .MyModel;
+    RecruitmentSolver = MinMaxSimplex;
+    Gravity = {0.0, -9.81, 0.0};
+    tEnd = 10;
+    nStep = 500;
+  };
+
+};  // Main

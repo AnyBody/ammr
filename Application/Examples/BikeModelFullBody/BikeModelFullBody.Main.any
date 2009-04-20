@@ -1,0 +1,145 @@
+/** This is a full-body model of a bicyclist.
+
+Pedaling is usualy modeled reasonably with a model comprising the lower extremities
+only and may even be represented well by a 2-D model.
+
+However, for some purposes it is interesting to assess also the forces in the upper
+body during bicycling:
+- How much muscle activation does it take to stabilize the body by holding on
+  to the handle bar?
+- What is the cost in terms of comfort and fatigue of maintaining a horizontal
+  position of the trunk to avoid drag. 
+
+The cost of having the shoulders and arms in the model is much longer 
+computation time.*/
+Main = {
+  
+  
+   /**Execute this operation to run the model in the intended operation sequence.  
+  It is also possible to run operations seperately, by manual selections in the operation tree*/
+  AnyOperationSequence RunApplication = {
+
+    /**This operation calibrates the muscles in the model if these are of the type AnyMuscleModel3E.
+    This will just be an empty operation if the model is using a muscle type that does not require calibration.*/
+    AnyOperation &CalibrationAnal = Main.HumanModel.Calibration.CalibrationSequence;  
+
+    ///This operation is the inverse dynamic analysis
+    AnyOperation &InvAnal=Main.Study.InverseDynamics;
+  };
+
+  
+  #include "DrawSettings.any"
+  
+  /// Various parameters for setting up the bicycle and the riding characteristics.
+  AnyFolder BikeParameters ={
+    
+    // Geometry parameters
+    AnyVar PedalArmLength =0.17;  //Length of pedal arm
+    AnyVar PedalArmWidth = 0.106; //Horizontal distance between left and right connecting point between foot and pedal
+    AnyVar SaddleHeight = 0.73 ;  //Height of hip joint measured vertically from the crank
+    AnyVar SaddlePos = -0.17;     //Horizontal pos of hipjoint measured from the crank
+    
+    // Loading parameters
+    AnyVar Cadence = 80.0;   //Cadence in RPM 
+    AnyVar MechOutput = 170; //Average Mechanical output over a cycle in Watt
+    
+    // The function for the crank moment is defined as Moment=Offset-Amp*cos(4*pi*t/T+Phase)
+    AnyVar T = 60/Cadence; //Cycle time
+    
+    AnyVar CrankMomentTopDeadCenter = 3.0; // This is the moment which can be applied by the rider in the top dead center point
+    AnyVar CrankMomentOffset = (MechOutput*T)/(2*pi); 
+    AnyVar CrankMomentAmp = CrankMomentOffset-CrankMomentTopDeadCenter;
+    AnyVar CrankMomentPhase = -15*pi/180;
+    
+//    AnyVar DistBetweenBikes =1;  // Physical placement of the two models
+  };
+  
+  //This is the definition of the global ref frame where the bikes are attached too
+  AnyFixedRefFrame GlobalRef = {
+    AnyRefNode Bike2DGround = { sRel = {0,0.0,0}; };
+    AnyRefNode Bike3DGround = { sRel = {0,0.0,0}; };
+  };  // Global reference frame
+  
+  
+  AnyFolder HumanModel={
+    AnyFolder &Mannequin=.Model.Mannequin;
+    
+    
+    // Use only ONE of the three include fles below at any time
+    // --------------------------------------------------------
+    
+    // Selecting the include file below results in a body model without muscles.
+    // Instead, the model is equipped with joint moment providers. This version
+    // loads and run much faster than versions with anatomical muscles.
+    // #include  "..\..\..\Body\AAUHuman\BodyModels\FullBodyModel\BodyModel_NoMuscles.any"    
+    
+    // Selecting the include file below results in a body model with simple
+    // constant stength muscles. They are adequate for many purposes and have the
+    // advantage of not requiring calibration
+     //#include  "..\..\..\Body\AAUHuman\BodyModels\FullBodyModel\BodyModel.any"
+    
+    // The include file below selects the three-element Hill-type muscles.
+    // They require calibration before they can be used, and this can be done
+    // by the HumanModel.Calibration.CalibrationSequence operation. This must 
+    // be executed every time the model is reloaded.
+    #include  "..\..\..\Body\AAUHuman\BodyModels\FullBodyModel\BodyModel_Mus3E.any"
+
+    AnyFolder StrengthParameters={
+      AnyVar SpecificMuscleTensionSpine= 90; //N/cm^2
+      AnyVar StrengthIndexLeg= 1; 
+      AnyVar SpecificMuscleTensionShoulderArm= 90; //N/cm^2
+    };
+    
+    // This section below offers the choice between two scaling strategies for the
+    // human model. 
+
+    // ScalingStandard means that all the body parts will have the standard size 
+    // at which they were originally developed, i.e. with anthropometric
+    // data from the anatomical literature. This roughly corresponds to a 50th
+    // percentile European male.    
+    #include "..\..\..\Body\AAUHuman\Scaling\ScalingStandard.any"
+    
+    // ScalingLengthMassFat will scale each segment of the body to anthropometric data
+    // specified in the selected AnyFamily include file, attempting to take the
+    // fat percentage into account in the assessment of the muscle strength.
+    // #include "..\..\..\Body\AAUHuman\Scaling\ScalingLengthMassFat.any" 
+    // Scaling = {
+    //   #include "..\..\..\Body\AAUHuman\Scaling\AnyFamily\AnyMan.any"
+    // };
+  };
+  
+  /// This folder collects the elements of the model. It is referred by the
+  /// study section below as the target of the analyses.  
+  AnyFolder Model={
+    AnyFolder &HumanModel  =.HumanModel.BodyModel  ;
+    
+    #include  "BikeFrameAndWheels.any"
+    #include  "BikeLegConnection.any"  
+    #include "SeatSupport.any"
+    AnyRefNode& GroundNode= Main.GlobalRef.Bike3DGround;
+    #include    "BikeFrameGroundConnection.any"
+    
+    // The Mannequin file specifies load-time positions for all the segments
+    // in the HumanModel. This is important for the model's ablity to resolve
+    // all the kinematic constraints when the model is analyzed.
+    // The mannequin file also drives those degrees of freedom of the human 
+    // model that are not governed by problem-specific drivers at run time.
+    #include "Mannequin.any"     
+    #include "InitialPositionsBike.any"
+  };
+  
+  /// The study: Operations to be performed on the model
+  AnyBodyStudy Study = {
+    //This file set the position and orientation of the segments in the model
+    AnyFolder &Model = .Model;      
+    
+    Gravity = {0.0,-9.81, 0.0};
+    tStart = 0;
+    tEnd=.BikeParameters.T;
+    nStep =101;
+  };
+
+  
+  
+}; // Main
+

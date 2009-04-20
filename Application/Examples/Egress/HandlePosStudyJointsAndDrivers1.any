@@ -1,0 +1,47 @@
+
+// Make convenient short names for the Environment and the human
+AnyFolder &RefP=Main.Model.EnvironmentModel;
+AnyFolder &RefH=Main.Model.HumanModel;
+
+//------------------------------------------------------
+// This joint locks the hand to the window frame 
+// (actually the ground).
+//-------------------------------------------------------        
+AnyPrismaticJoint HandleMotion = {
+  AnySeg &Seg = .RefP.Handle;
+  AnyRefFrame &frame = .RefP.HandlePosR.cc;
+  Axis = x;
+};
+
+AnyKinEqSimpleDriver HandleMotionX = {
+  AnyPrismaticJoint &HandleMotion=.HandleMotion;
+  DriverPos = {Main.EnvironmentParameters.HandlePos};
+  DriverVel = {0.0};
+  Reaction.Type = {On};
+};
+
+AnyKinLinear HandPosLin = {
+  AnySeg &GroundNode = .RefP.Handle;
+  AnySeg &HandNode =   .RefH.Right.ShoulderArm.Seg.Glove;
+};
+
+AnyKinRotational HandPosRot = {
+  AnySeg &GroundNode = .RefP.Handle;
+  AnySeg &HandNode =   .RefH.Right.ShoulderArm.Seg.Glove;
+  Type=RotVector;
+  AngVelOnOff = On;      
+};
+
+// This object provides reaction moments between the glove and the
+// handle. It means that the handle is rigid rather than a strap.
+AnyReacForce HandPosRotReaction = {
+  AnyKinRotational &HandPosRot = .HandPosRot;
+};
+
+AnyKinEqSimpleDriver HandleMotionZ = {
+  AnyKinLinear &HandPosLin=.HandPosLin;
+  DriverPos = {0,0,0};
+  DriverVel = {0,0,0};
+  Reaction.Type = {On,On,On};
+};
+  

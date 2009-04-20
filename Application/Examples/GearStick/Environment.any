@@ -1,0 +1,39 @@
+/// Definition of the environment, i.e. everything sorrounding
+/// the human model
+AnyFolder EnvironmentModel = {
+  
+  /// The global reference frame. 
+  AnyFixedRefFrame GlobalRef = {
+    #include "drawcoorsystem.any"
+    AnyDrawRefFrame drw = {
+      ScaleXYZ = {1,1,1}/10;
+    };
+  }; //GlobalRef
+  
+  /// Force on the hand.
+  AnyForce3D HandForce = {
+    AnyRefNode &Hand = Main.Model.HumanModel.Right.ShoulderArm.Seg.Hand.PalmJoint;
+    F = {Main.Parameters.F,0,0};
+  };
+
+  /// The gear stick to which the hand is connected.
+  AnySeg GearStick = {
+    Mass=0;
+    Jii={0,0,0};
+  };
+
+  /// Positioning of the gear stick in space
+  AnyKinEqSimpleDriver GearStickDriver = {
+    AnyKinLinear lin = {
+      AnyFixedRefFrame  &ref2=..GlobalRef;
+      AnySeg &ref1=..GearStick;
+    };
+    AnyKinRotational rot = {
+      AnyFixedRefFrame &ref2=..GlobalRef;
+      AnySeg &ref1=..GearStick;
+      Type=RotVector;
+    };
+    DriverPos={Main.Parameters.SlideStart,Main.Parameters.KnobHeight,Main.Parameters.KnobLat,0,0,0};
+    DriverVel={Main.Parameters.SlideLength,0,0.0,0,0,0}*1/Main.Study.tEnd;
+  };
+};

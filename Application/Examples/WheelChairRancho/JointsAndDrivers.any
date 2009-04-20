@@ -1,0 +1,196 @@
+/* ----------------------------------------------------------------
+Drivers for the model:
+
+-The model is driven by connecting recorded markers with equivalnet markers on the body
+
+Soeren, March 15, 2006.
+----------------------------------------------------------------  */
+
+AnyFolder Drivers = {
+  
+  // Aliases for convenient referencing
+  AnyFolder &JntPos=..Mannequin.Posture;  
+  AnyFolder &JntVel=..Mannequin.PostureVel;  
+  
+  AnyFolder &Thorax = ..HumanModel.Trunk.SegmentsThorax.ThoraxSeg;
+  AnyFolder &ref=Main.Model.HumanModel.Trunk;
+  
+  
+  // ************************************
+  // Drivers for attaching the pelvis to the global reference system
+  // ************************************  
+  
+  AnyKinEqSimpleDriver PelvisGroundDriver ={
+    AnyKinRotational rot ={
+      AnyFixedRefFrame &ref1 =....EnvironmentModel.GlobalRef;
+      AnySeg &ref2 =....HumanModel.Trunk.SegmentsLumbar.PelvisSeg;
+      Type=RotAxesAngles;
+    };
+    DriverPos={
+      
+      pi/180*.JntPos.PelvisRotZ,
+      pi/180*.JntPos.PelvisRotY,
+      pi/180*.JntPos.PelvisRotX
+    };
+    DriverVel={
+      
+      pi/180*.JntVel.PelvisRotX,
+      pi/180*.JntVel.PelvisRotY,
+      pi/180*.JntVel.PelvisRotZ
+    };
+    
+    Reaction.Type={On,On,On};
+    
+  };
+  
+  AnyReacForce PelvisGroundLinReac={
+    AnyKinLinear lin ={
+      AnyFixedRefFrame &ref1 =....EnvironmentModel.GlobalRef;
+      AnySeg &ref2 =....HumanModel.Trunk.SegmentsLumbar.PelvisSeg;
+    };
+  };
+  
+  
+  
+  AnyKinEqSimpleDriver IncisuraJungularisDrv = {  
+    AnyKinLinear lin = {  
+      Ref=1;
+      AnySeg     &ref1 = Main.Model.Markers.MAN.Seg;
+      AnyRefNode &ref2 = Main.Model.HumanModel.Trunk.SegmentsThorax.ThoraxSeg.IncisuraJungularisMarker;
+    }; 
+    MeasureOrganizer={0,1,2};
+    DriverPos={0,0.0,0};
+    DriverVel={0,0,0};
+    Reaction.Type={Off,Off,Off};
+  };
+  
+  
+  
+  AnyKinEqSimpleDriver ProcessusXiphoideus = {  
+    AnyKinLinear lin = {  
+      Ref=0;
+      AnyRefNode &ref2 = Main.Model.HumanModel.Trunk.SegmentsThorax.ThoraxSeg.ProcessusXiphoideusMarker;
+      AnySeg     &ref1 = Main.Model.Markers.XIP.Seg;
+      //ref2={AnyDrawRefFrame drwq={};};
+      
+    }; 
+    MeasureOrganizer={0,2};
+    DriverPos={0.0,0};
+    DriverVel={0,0};
+    Reaction.Type={Off,Off};
+  };
+  
+  
+  AnyKinEqSimpleDriver T10Drv = {  
+    AnyKinLinear lin = {  
+      Ref=1;
+      AnySeg     &ref1 = Main.Model.Markers.T10.Seg;
+      AnyRefNode &ref2 = Main.Model.HumanModel.Trunk.SegmentsThorax.ThoraxSeg.T10Marker;
+    }; 
+    MeasureOrganizer={2};
+    DriverPos={0};
+    DriverVel={0};
+    Reaction.Type={Off};
+  };
+  
+  
+  
+  // ************************************
+  // Drivers for the spine
+  // ************************************
+  
+  //Neck driver 
+  AnyKinEqSimpleDriver NeckJntDriver = {
+    AnyRevoluteJoint &T12L1Joint = ...HumanModel.Interface.Trunk.NeckJoint;
+    DriverPos = pi/180*{.JntPos.NeckExtension};
+    DriverVel = pi/180*{.JntVel.NeckExtension};
+    Reaction.Type = {Off};
+  };
+  
+  
+  
+  // ************************************
+  // Drivers for the right arm
+  // ************************************
+  
+  
+  //Sterno clavicular joint driver
+  AnyKinEqSimpleDriver SCDriverRight ={
+    AnyKinMeasureOrg &ref1 =...HumanModel.Interface.Right.SternoClavicularProtraction;
+    AnyKinMeasureOrg &ref2 =...HumanModel.Interface.Right.SternoClavicularElevation;
+    AnyKinMeasureOrg &ref3 =...HumanModel.Interface.Right.SternoClavicularAxialRotation;
+    DriverPos = pi/180*{
+      .JntPos.Right.SternoClavicularProtraction,
+      .JntPos.Right.SternoClavicularElevation,
+      .JntPos.Right.SternoClavicularAxialRotation
+    };
+    DriverVel = {
+      .JntVel.Right.SternoClavicularProtraction,
+      .JntVel.Right.SternoClavicularElevation,
+      .JntVel.Right.SternoClavicularAxialRotation
+    };
+    Reaction.Type={Off,Off,Off};
+  };
+  
+  
+  AnyKinEqSimpleDriver RightLateralEpicondyleDrv ={
+    AnyKinLinear Lin={ 
+      Ref=0;
+      AnyRefFrame  &ref1 = Main.Model.HumanModel.Right.ShoulderArm.Seg.Humerus.LateralEpicondyleMarker;  
+      AnyRefFrame &ref2=Main.Model.Markers.RLEP.Seg;
+    };
+    MeasureOrganizer={0,2}; 
+    DriverPos={0,0};
+    DriverVel={0,0};
+    Reaction.Type={Off,Off};
+  };  
+  
+  
+  
+  AnyKinEqSimpleDriver RadialStyloidMarkerDrv ={
+    AnyKinLinear Lin={ 
+      Ref=0;
+      //ref1={AnyDrawRefFrame drw2={};};
+      AnyRefFrame  &ref1 = Main.Model.HumanModel.Right.ShoulderArm.Seg.Radius.RadialStyloidMarker;  
+      AnyRefFrame &ref2=Main.Model.Markers.RRSP.Seg;
+      
+    };
+    MeasureOrganizer={2}; 
+    DriverPos={0};
+    DriverVel={0};
+    Reaction.Type={Off};
+    
+    
+    
+  };  
+  
+  
+  
+  AnyKinEqSimpleDriver UlnaStyloidMarkerDrv ={
+    AnyKinLinear Lin={ 
+      Ref=0;
+      AnyRefFrame  &ref1 = Main.Model.HumanModel.Right.ShoulderArm.Seg.Ulna.UlnaStyloidMarker;  
+      AnyRefFrame &ref2=Main.Model.Markers.RUSP.Seg;
+    }; 
+    MeasureOrganizer={0,2}; 
+    DriverPos={0,0};
+    DriverVel={0,0};
+    Reaction.Type={Off,Off};
+    
+  }; 
+  
+  AnyKinEqSimpleDriver RightMetacarpophalangelJoint3Drv ={
+    AnyKinLinear Lin={ 
+      Ref=0;
+      AnyRefFrame  &ref1 = Main.Model.HumanModel.Right.ShoulderArm.Seg.Hand.MetacarpophalangealJoint3Marker;  
+      AnyRefFrame &ref2=Main.Model.Markers.RM3.Seg;
+    };
+    MeasureOrganizer={1,2}; 
+    DriverPos={0,0};
+    DriverVel={0,0};
+    Reaction.Type={Off,Off};
+  };  
+  
+  
+};//Drivers
+

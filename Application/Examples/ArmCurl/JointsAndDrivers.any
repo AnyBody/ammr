@@ -1,0 +1,567 @@
+//
+
+
+AnyFolder Drivers = {
+  
+  // Aliases for convenient referencing
+  AnyFolder &JntPos=..Mannequin.Posture;  
+  AnyFolder &JntVel=..Mannequin.PostureVel;  
+  AnyFolder &Thorax = ..HumanModel.Trunk.SegmentsThorax.ThoraxSeg;
+  
+  AnyFolder &RefHM = Main.Model.HumanModel;
+  AnyFolder &RefEM = Main.Model.EnvironmentModel ; 
+  
+  AnyKinEqSimpleDriver PelvisDrv={
+    AnyKinRotational PelvisGroundRotMeasure = {
+      AnyRefFrame &Ref1 = ..RefEM.GlobalRef.PelvisNode;
+      AnyRefFrame &Ref2 = ..RefHM.Trunk.SegmentsLumbar.PelvisSeg;
+      Type = RotVector;
+      AngVelOnOff = On;
+    };
+    AnyKinLinear PelvisGroundLinMeasure = {
+      AnyRefFrame &Ref1 = ..RefEM.GlobalRef.PelvisNode;
+      AnyRefFrame &Ref2 = ..RefHM.Trunk.SegmentsLumbar.PelvisSeg;
+    };
+    MeasureOrganizer={0,1,3,4,5};
+    DriverPos={0,0,0,0,0};
+    DriverVel={0,0,0,0,0};
+  };
+  
+  //Make a linear measure between ThoraxRest and thorax
+  AnyKinEqSimpleDriver ThoraxDrv={
+    AnyKinLinear  lin={
+      Ref=0;
+      AnySeg &ref1=..RefEM.ThoraxRest;
+      AnyRefNode &ref2=..RefHM.Trunk.SegmentsThorax.ThoraxSeg.ij;     
+    };
+    MeasureOrganizer={1};
+    DriverPos={-0.05};
+    DriverVel={0.0};
+  };
+  
+  
+  AnyFolder &ref=Main.Model.HumanModel.Trunk;
+  
+  
+  // ************************************
+  // Drivers for the spine
+  // ************************************
+  
+  //Neck driver 
+  AnyKinEqSimpleDriver NeckJntDriver = {
+    AnyRevoluteJoint &T12L1Joint = ...HumanModel.Interface.Trunk.NeckJoint;
+    DriverPos = pi/180*{.JntPos.NeckExtension};
+    DriverVel = pi/180*{.JntVel.NeckExtension};
+    Reaction.Type = {Off};
+  };
+  
+  
+  
+  //Thorax pelvis rotation driver
+  AnyKinEqSimpleDriver PostureDriver ={
+    AnyKinMeasureOrg &Ref2 = ...HumanModel.Interface.Trunk.PelvisThoraxLateralBending;        
+    AnyKinMeasureOrg &Ref3 = ...HumanModel.Interface.Trunk.PelvisThoraxRotation;   
+    AnyKinMeasureOrg &Ref1 = ...HumanModel.Interface.Trunk.PelvisThoraxExtension;
+    
+    DriverPos = pi/180*{
+      .JntPos.PelvisThoraxLateralBending,
+      .JntPos.PelvisThoraxRotation,
+      .JntPos.PelvisThoraxExtension
+    };
+    DriverVel = pi/180*{
+      .JntVel.PelvisThoraxLateralBending,
+      .JntVel.PelvisThoraxRotation,
+      .JntVel.PelvisThoraxExtension
+    };
+    Reaction.Type = {Off,Off,Off};  
+  };  
+  
+  
+  
+  AnyFolder Right ={
+    
+    
+    //Make a linear measure between the hand and the handle
+    AnyKinEqSimpleDriver HandDrv={
+      AnyKinLinear  lin={
+        AnyRefNode &ref1=...RefEM.Right.Handle.Node2;
+        AnySeg &ref2=...RefHM.Right.ShoulderArm.Seg.Glove;
+      };
+      DriverPos={0,0,0};
+      DriverVel={0,0,0};
+    };
+    
+    //Make a rotational reaction in the hand
+    AnyReacForce HandRotCon={
+      AnyKinRotational  rot={
+        AnyRefNode &ref1=...RefEM.Right.Handle.Node2;
+        AnySeg &ref2=...RefHM.Right.ShoulderArm.Seg.Glove;
+        Type=RotVector;
+      };
+    };
+    
+    
+    
+    
+    //Make a linear measure between ArmRest and elbow
+    AnyKinEqSimpleDriver ElbowDrv={
+      AnyKinLinear  lin={
+        Ref=0;
+        AnySeg &ref1=...RefEM.ArmRest;
+         AnyRefNode &ref2=...RefHM.Right.ShoulderArm.Seg.Humerus.fe;     
+      };
+      MeasureOrganizer={1};
+      DriverPos={-0.05};
+      DriverVel={0.0};
+    };
+    
+    //Make a reaction force measure between ArmRest and elbow
+    AnyReacForce ElbowReactions={
+      AnyKinMeasureOrg MeasureOrg={
+        AnyKinLinear  lin={
+          Ref=0;
+          AnySeg &ref1=....RefEM.ArmRest;
+          AnyRefNode &ref2=....RefHM.Right.ShoulderArm.Seg.Humerus.fe;     
+        };
+        MeasureOrganizer={0,2};
+        
+      };
+    };
+    
+    //Sterno clavicular joint driver
+    AnyKinEqSimpleDriver SCDriverRight ={
+      AnyKinMeasureOrg &ref1 =....HumanModel.Interface.Right.SternoClavicularProtraction;
+      AnyKinMeasureOrg &ref2 =....HumanModel.Interface.Right.SternoClavicularElevation;
+      AnyKinMeasureOrg &ref3 =....HumanModel.Interface.Right.SternoClavicularAxialRotation;
+      DriverPos = pi/180*{
+        ..JntPos.Right.SternoClavicularProtraction,
+        ..JntPos.Right.SternoClavicularElevation,
+        ..JntPos.Right.SternoClavicularAxialRotation
+      };
+      DriverVel = {
+        ..JntVel.Right.SternoClavicularProtraction,
+        ..JntVel.Right.SternoClavicularElevation,
+        ..JntVel.Right.SternoClavicularAxialRotation
+      };
+      Reaction.Type={Off,Off,Off};
+    };
+    
+    
+    //Wrist driver 
+    AnyKinEqSimpleDriver WristDriverRight ={
+      AnyKinMeasureOrg &ref1 =....HumanModel.Interface.Right.WristFlexion;
+      AnyKinMeasureOrg &ref2 =....HumanModel.Interface.Right.WristAbduction;
+      DriverPos = pi/180*{
+        ..JntPos.Right.WristFlexion,
+        ..JntPos.Right.WristAbduction
+      };
+      
+      DriverVel = pi/180*{
+        ..JntVel.Right.WristFlexion,
+        ..JntVel.Right.WristAbduction};
+      Reaction.Type={Off,Off};
+    };
+    
+   
+    //Glenohumeral joint 
+    AnyKinEqSimpleDriver GHDriverRight={
+      AnyKinMeasureOrg &ref1 =....HumanModel.Interface.Right.GlenohumeralAbduction;
+      DriverPos=pi/180*{
+        ..JntPos.Right.GlenohumeralAbduction  //GH joint
+      };
+      DriverVel = pi/180*{
+        ..JntVel.Right.GlenohumeralAbduction  //GH joint
+      };    
+      Reaction.Type={Off};
+    };
+    //Elbow pronation driver
+    AnyKinEqSimpleDriver ElbowPSDriverRight={
+      AnyKinMeasureOrg &Elbow =....HumanModel.Interface.Right.ElbowPronation;
+      DriverPos=pi/180*{..JntPos.Right.ElbowPronation };  
+      DriverVel = pi/180*{..JntVel.Right.ElbowPronation };  
+      Reaction.Type={Off};
+    };
+    
+    
+    //Hip driver 
+    AnyKinEqSimpleDriver HipDriverRight={
+      AnyKinMeasureOrg &ref2 =....HumanModel.Interface.Right.HipExternalRotation;
+      DriverPos= pi/180*{
+        ..JntPos.Right.HipExternalRotation
+      };    
+      DriverVel = pi/180*{
+        ..JntVel.Right.HipExternalRotation
+      }; 
+      Reaction.Type={Off};
+      
+    };
+    
+    
+  };//right
+  
+  
+  AnyFolder Left ={
+    
+    
+    //Make a linear measure between the hand and the handle
+    AnyKinEqSimpleDriver HandDrv={
+      AnyKinLinear  lin={
+        AnyRefNode &ref1=...RefEM.Left.Handle.Node2;
+        AnySeg &ref2=...RefHM.Left.ShoulderArm.Seg.Glove;
+      };
+      DriverPos={0,0,0};
+      DriverVel={0,0,0};
+    };
+    
+    //Make a rotational reaction in the hand
+    AnyReacForce HandRotCon={
+      AnyKinRotational  rot={
+        AnyRefNode &ref1=...RefEM.Left.Handle.Node2;
+        AnySeg &ref2=...RefHM.Left.ShoulderArm.Seg.Glove;
+        Type=RotVector;
+      };
+    };
+    
+    //Make a linear measure between ArmRest and elbow
+    AnyKinEqSimpleDriver ElbowDrv={
+      AnyKinLinear  lin={
+        Ref=0;
+        AnySeg &ref1=...RefEM.ArmRest;
+        AnyRefNode &ref2=...RefHM.Left.ShoulderArm.Seg.Humerus.fe;     
+      };
+      MeasureOrganizer={1};
+      DriverPos={-0.05};
+      DriverVel={0.0};
+    };
+    
+    //Make a reaction force measure between ArmRest and elbow
+    AnyReacForce ElbowReactions={
+      AnyKinMeasureOrg MeasureOrg={
+        AnyKinLinear  lin={
+          Ref=0;
+          AnySeg &ref1=....RefEM.ArmRest;
+          AnyRefNode &ref2=....RefHM.Left.ShoulderArm.Seg.Humerus.fe;     
+        };
+        MeasureOrganizer={0,2};
+        
+      };
+    };
+    //Sterno clavicular joint driver
+    AnyKinEqSimpleDriver SCDriverLeft ={
+      AnyKinMeasureOrg &ref1 =....HumanModel.Interface.Left.SternoClavicularProtraction;
+      AnyKinMeasureOrg &ref2 =....HumanModel.Interface.Left.SternoClavicularElevation;
+      AnyKinMeasureOrg &ref3 =....HumanModel.Interface.Left.SternoClavicularAxialRotation;
+      
+      DriverPos = pi/180*{
+        ..JntPos.Left.SternoClavicularProtraction,
+        ..JntPos.Left.SternoClavicularElevation,
+        ..JntPos.Left.SternoClavicularAxialRotation
+      };
+      
+      DriverVel = pi/180*{
+        ..JntVel.Left.SternoClavicularProtraction,
+        ..JntVel.Left.SternoClavicularElevation,
+        ..JntVel.Left.SternoClavicularAxialRotation
+      };
+      
+      Reaction.Type={Off,Off,Off};
+    };
+    
+    
+   
+ //Wrist driver
+  AnyKinEqSimpleDriver WristDriverLeft ={
+    AnyKinMeasureOrg &ref1 =....HumanModel.Interface.Left.WristFlexion;
+    AnyKinMeasureOrg &ref2 =....HumanModel.Interface.Left.WristAbduction;
+    DriverPos = pi/180*{
+      ..JntPos.Left.WristFlexion,
+      ..JntPos.Left.WristAbduction};
+    
+    DriverVel = pi/180*{
+      ..JntVel.Left.WristFlexion,
+      ..JntVel.Left.WristAbduction};
+    Reaction.Type={Off,Off};
+  };
+  
+    //Glenohumeral joint driver
+    AnyKinEqSimpleDriver GHDriverLeft={
+      AnyKinMeasureOrg &ref1 =....HumanModel.Interface.Left.GlenohumeralAbduction;
+      DriverPos=pi/180*{
+        ..JntPos.Left.GlenohumeralAbduction  //GH joint
+        
+      };    
+      DriverVel = pi/180*{
+        ..JntVel.Left.GlenohumeralAbduction  //GH joint
+        
+      };    
+      Reaction.Type={Off};
+    };
+    
+    //Elbow pronation driver 
+    AnyKinEqSimpleDriver ElbowPSDriverLeft={
+      AnyKinMeasureOrg &Elbow =....HumanModel.Interface.Left.ElbowPronation;
+      DriverPos= pi/180*{..JntPos.Left.ElbowPronation };  
+      DriverVel = pi/180*{..JntVel.Left.ElbowPronation };  
+      Reaction.Type={Off};
+    };
+    
+    //Left hip driver
+    AnyKinEqSimpleDriver HipDriverLeft={
+      
+      AnyKinMeasureOrg &ref2 =....HumanModel.Interface.Left.HipExternalRotation;
+      
+      DriverPos=pi/180*{
+        
+        ..JntPos.Left.HipExternalRotation
+        
+      };    
+      DriverVel = pi/180*{
+        
+        ..JntVel.Left.HipExternalRotation
+        
+      };    
+      Reaction.Type={Off};
+    };
+    
+    //    
+    //    AnyKinRotational GHRotL = {
+    //    AnyRefNode &scapula_gh = ....HumanModel.Trunk.SegmentsThorax.ThoraxSeg.ij;
+    //    AnyRefNode &humerus_gh = ....HumanModel.Left.ShoulderArm.Seg.Humerus.gh;
+    //    Type = RotAxesAngles;
+    //    Axis1 = z;
+    //    Axis2 = x;
+    //    Axis3 = y;
+    //    }; 
+    //    
+    //    
+    //    // This kinematic measure compiles all the degrees of freedom controlled by the
+    //    //  manikin.
+    //    AnyKinMeasureOrg Left = {
+    //    
+    //    // Arm movements
+    //    AnyKinRotational &GH = .GHRotL; 
+    //    
+    //    AnyRevoluteJoint  &Elbow =....HumanModel.Left.ShoulderArm.Jnt.FE;
+    //    
+    //    // Forearm pronation/supination
+    //    AnyKinMeasureOrg &ForearmPronat = ....HumanModel.Left.ShoulderArm.Jnt.PS;
+    //    
+    //    
+    //    // Leg movements
+    //    AnySphericalJoint &Hip = ....HumanModel.Left.Leg.Jnt.Hip;
+    //    AnyRevoluteJoint  &Knee = ....HumanModel.Left.Leg.Jnt.Knee;
+    //    AnyUniversalJoint  &Ankle = ....HumanModel.Left.Leg.Jnt.Ankle;
+    //    
+    //    
+    //    MeasureOrganizer={0,4,7};
+    //    
+    //    };
+    //    
+    //    
+    //    AnyKinEqSimpleDriver DriverLeft ={
+    //    AnyKinMeasureOrg &AllDofs = .Left;
+    //    DriverPos = pi/180*{
+    //    0,  //GH abduction joint
+    //    -160,//.JntPos.Right.ElbowPronationSupination//not in use
+    //    
+    //    220//..JntPos.Left.HipExternalExternalRotation
+    //    
+    //    };  
+    //    
+    //    // This is static posture, so all velocities are zero.
+    //    DriverVel = pi/180*{
+    //    0,
+    //    0,
+    //    0 
+    //    
+    //    };
+    //    
+    //    Reaction.Type = {
+    //    Off,Off,Off
+    //    };  
+    //    };
+  }; //Left
+  
+  
+  
+  // Place the right toe and heel on the ground
+  AnyKinEq RToeGroundConstraint ={
+    AnyKinLinear ToePos = {
+      AnyRefFrame &Ground = Main.Model.EnvironmentModel.GlobalRef.FloorNode.Right;
+      AnyRefNode &Ball = Main.Model.HumanModel.Right.Leg.Seg.Foot.ToeJoint;
+    };
+    MeasureOrganizer = {0,1,2};  // Only the y coordinate
+    Reaction.Type={On,On,On};
+  };
+  
+  AnyKinEq RToePGroundConstraint ={
+    AnyKinLinear ToePos = {
+      AnyRefFrame &Ground = Main.Model.EnvironmentModel.GlobalRef.FloorNode;
+      AnyRefNode &Ball = Main.Model.HumanModel.Right.Leg.Seg.Foot.ToeJointP;
+    };
+    MeasureOrganizer = {1};  // Only the y coordinate
+    Reaction.Type={Off};
+  };
+  
+  AnyKinEqSimpleDriver RHeelGroundConstraint ={
+    AnyKinLinear HeelPos = {
+      AnyRefNode &Ground = Main.Model.EnvironmentModel.GlobalRef.FloorNode;
+      AnyRefNode &Ball = Main.Model.HumanModel.Right.Leg.Seg.Foot.HeelJoint;
+    };
+    MeasureOrganizer = {1};  // Only the y coordinate
+    DriverPos = {0.0};
+    DriverVel = {0};
+    Reaction.Type = {Off};   // Provide ground reaction forces
+  };
+  
+  // Place the left toe and heel on the ground
+  AnyKinEq LToeGroundConstraint ={
+    AnyKinLinear ToePos = {
+      AnyRefNode &Ground = Main.Model.EnvironmentModel.GlobalRef.FloorNode.Left;
+      AnyRefNode &Ball = Main.Model.HumanModel.Left.Leg.Seg.Foot.ToeJoint;
+    };
+    MeasureOrganizer = {0,1,2};  // Only the y coordinate
+    Reaction.Type={On,On,On};
+  };
+  
+  
+  AnyKinEq LToePGroundConstraint ={
+    AnyKinLinear ToePos = {
+      AnyRefNode &Ground = Main.Model.EnvironmentModel.GlobalRef.FloorNode;
+      AnyRefNode &Ball = Main.Model.HumanModel.Left.Leg.Seg.Foot.ToeJointP;
+    };
+    MeasureOrganizer = {1};  // Only the y coordinate
+    Reaction.Type={Off};
+  };
+  
+  AnyKinEqSimpleDriver LHeelGroundConstraint ={
+    AnyKinLinear HeelPos = {
+      AnyRefNode &Ground = Main.Model.EnvironmentModel.GlobalRef.FloorNode;
+      AnyRefNode &Ball = Main.Model.HumanModel.Left.Leg.Seg.Foot.HeelJoint;
+    };
+    MeasureOrganizer = {1};  // Only the y coordinate
+    DriverPos = {0.0};
+    DriverVel = {0};
+    Reaction.Type = {Off};  // Do not Provide ground reaction
+  };  
+  
+  
+  
+  
+  
+  
+  AnyVar Strength=2500;
+  AnyVar FrictionStrength=400;
+  
+  AnyFolder HeelSupportLeft = {
+    AnyFixedRefFrame &StartNode = Main.Model.EnvironmentModel.GlobalRef;
+    AnyRefNode &EndNode = Main.Model.HumanModel.Left.Leg.Seg.Foot.HeelJoint;
+    //The terms push and pull are determined wrt. the coordinate system of the StartNode!
+    //StrenghtOfReactionsLin         = {XPush,XPull,YPush,YPull,ZPush,ZPull}
+    AnyVector StrengthOfReactionsLin = {.FrictionStrength,.FrictionStrength,.Strength,.FrictionStrength,.FrictionStrength,.FrictionStrength}; //List of strengths for the linear muscles
+    AnyFolder &DrawRef=Main.DrawSettings;
+    AnyVar ScaleFactor=1;
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/XPush.any"
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/XPull.any"
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/YPush.any"
+    //  #include "../../../Body/AAUHuman/ToolBox/Reactions/YPull.any"
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/ZPush.any" 
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/ZPull.any" 
+    
+  };
+  
+  
+  AnyFolder ToeSupportLeft = {
+    AnyFixedRefFrame &StartNode = Main.Model.EnvironmentModel.GlobalRef;
+    AnyRefNode &EndNode = Main.Model.HumanModel.Left.Leg.Seg.Foot.ToeJoint;
+    
+    //The terms push and pull are determined wrt. the coordinate system of the StartNode!
+    //StrenghtOfReactionsLin         = {XPush,XPull,YPush,YPull,ZPush,ZPull}
+    AnyVector StrengthOfReactionsLin = {.FrictionStrength,.FrictionStrength,.Strength,.FrictionStrength,.FrictionStrength,.FrictionStrength}; //List of strengths for the linear muscles
+    AnyFolder &DrawRef=Main.DrawSettings;
+    AnyVar ScaleFactor=1;
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/XPush.any"
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/XPull.any"
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/YPush.any"
+    //#include "../../../Body/AAUHuman/ToolBox/Reactions/YPull.any"
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/ZPush.any" 
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/ZPull.any" 
+  };
+  
+  
+  AnyFolder ToeSupportPosteriorLeft = {
+    AnyFixedRefFrame &StartNode = Main.Model.EnvironmentModel.GlobalRef;
+    AnyRefNode &EndNode = Main.Model.HumanModel.Left.Leg.Seg.Foot.ToeJointP;
+    
+    //The terms push and pull are determined wrt. the coordinate system of the StartNode!
+    //StrenghtOfReactionsLin         = {XPush,XPull,YPush,YPull,ZPush,ZPull}
+    AnyVector StrengthOfReactionsLin = {.FrictionStrength,.FrictionStrength,.Strength,.FrictionStrength,.FrictionStrength,.FrictionStrength}; //List of strengths for the linear muscles
+    AnyFolder &DrawRef=Main.DrawSettings;
+    AnyVar ScaleFactor=1;
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/XPush.any"
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/XPull.any"
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/YPush.any"
+    //#include "../../../Body/AAUHuman/ToolBox/Reactions/YPull.any"
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/ZPush.any" 
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/ZPull.any" 
+  };
+  
+  
+  
+  
+  AnyFolder HeelSupportRight = {
+    AnyFixedRefFrame &StartNode = Main.Model.EnvironmentModel.GlobalRef;
+    AnyRefNode &EndNode = Main.Model.HumanModel.Right.Leg.Seg.Foot.HeelJoint;
+    //The terms push and pull are determined wrt. the coordinate system of the StartNode!
+    //StrenghtOfReactionsLin         = {XPush,XPull,YPush,YPull,ZPush,ZPull}
+    AnyVector StrengthOfReactionsLin = {.FrictionStrength,.FrictionStrength,.Strength,.FrictionStrength,.FrictionStrength,.FrictionStrength}; //List of strengths for the linear muscles
+    AnyFolder &DrawRef=Main.DrawSettings;
+    AnyVar ScaleFactor=1;
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/XPush.any"
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/XPull.any"
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/YPush.any"
+    //#include "../../../Body/AAUHuman/ToolBox/Reactions/YPull.any"
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/ZPush.any" 
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/ZPull.any" 
+  };
+  
+  
+  AnyFolder ToeSupportRight = {
+    AnyFixedRefFrame &StartNode = Main.Model.EnvironmentModel.GlobalRef;
+    AnyRefNode &EndNode = Main.Model.HumanModel.Right.Leg.Seg.Foot.ToeJoint;
+    
+    //The terms push and pull are determined wrt. the coordinate system of the StartNode!
+    //StrenghtOfReactionsLin         = {XPush,XPull,YPush,YPull,ZPush,ZPull}
+    AnyVector StrengthOfReactionsLin = {.FrictionStrength,.FrictionStrength,.Strength,.FrictionStrength,.FrictionStrength,.FrictionStrength}; //List of strengths for the linear muscles
+    AnyFolder &DrawRef=Main.DrawSettings;
+    AnyVar ScaleFactor=1;
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/XPush.any"
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/XPull.any"
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/YPush.any"
+    //#include "../../../Body/AAUHuman/ToolBox/Reactions/YPull.any"
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/ZPush.any" 
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/ZPull.any" 
+  };
+  
+  
+  
+  AnyFolder ToeSupportPRight = {
+    AnyFixedRefFrame &StartNode = Main.Model.EnvironmentModel.GlobalRef;
+    AnyRefNode &EndNode = Main.Model.HumanModel.Right.Leg.Seg.Foot.ToeJointP;
+    
+    //The terms push and pull are determined wrt. the coordinate system of the StartNode!
+    //StrenghtOfReactionsLin         = {XPush,XPull,YPush,YPull,ZPush,ZPull}
+    AnyVector StrengthOfReactionsLin = {.FrictionStrength,.FrictionStrength,.Strength,.FrictionStrength,.FrictionStrength,.FrictionStrength}; //List of strengths for the linear muscles
+    AnyFolder &DrawRef=Main.DrawSettings;
+    AnyVar ScaleFactor=1;
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/XPush.any"
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/XPull.any"
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/YPush.any"
+    //#include "../../../Body/AAUHuman/ToolBox/Reactions/YPull.any"
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/ZPush.any" 
+    #include "../../../Body/AAUHuman/ToolBox/Reactions/ZPull.any" 
+  };
+  
+  
+};
+

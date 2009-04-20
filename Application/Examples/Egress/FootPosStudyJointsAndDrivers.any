@@ -1,0 +1,71 @@
+// Make convenient short names for the Environment and the human
+AnyFolder &RefP=Main.Model.EnvironmentModel;
+AnyFolder &RefH=Main.Model.HumanModel;
+
+//------------------------------------------------------
+// This joint locks the hand to the window frame 
+// (actually the ground).
+//-------------------------------------------------------        
+AnyPrismaticJoint HandleMotion={
+  AnySeg &Seg = .RefP.Handle;
+  AnyRefFrame &frame = .RefP.HandlePosR.cc;
+  Axis = x;
+};
+
+AnyKinEqSimpleDriver HandleMotionX = {
+  AnyKinLinear &HandleMotion=.HandleMotion;
+  DriverPos = {0.0};
+  DriverVel = {0.0};
+  Reaction.Type = {1};
+};
+
+AnyKinLinear HandPosLin = {
+  AnyRefNode &GroundNode = .RefP.Handle;
+  AnyRefNode &HandNode =   .RefH.Right.ShoulderArm.Seg.Hand.PalmJoint;
+};
+
+AnyKinRotational HandPosRot = {
+  AnyRefNode &GroundNode = .RefP.Handle;
+  AnyRefNode &HandNode =   .RefH.Right.ShoulderArm.Seg.Hand.PalmJoint;
+  Type=RotVector;
+  AngVelOnOff = On;      
+};
+
+// This object provides reaction moments between the hand and the
+// handle. It means that the handle is rigid rather than a strap.
+AnyReacForce HandPosRotReaction = {
+  AnyKinRotational &HandPosRot = .HandPosRot;
+};
+
+AnyKinEqSimpleDriver HandleMotionZ = {
+  AnyKinLinear &HandPosLin=.HandPosLin;
+  DriverPos = {0,0,0};
+  DriverVel = {0,0,0};
+  Reaction.Type = {1,1,1};
+};
+
+//This is the control of the left hand position and reactions  
+AnyKinLinear HandPosLinL  = {
+  AnyRefNode &GroundNode = .RefP.HandPosL;
+  AnyRefNode &HandNode   = .RefH.Left.ShoulderArm.Seg.Hand.PalmJoint;
+};
+
+AnyKinEqSimpleDriver HandPosDriver = {
+  AnyKinLinear &Jnt = .HandPosLinL;
+  DriverPos = {0,0,0};
+  DriverVel = {0.0,0,0};
+  Reaction.Type = {0,0,0};
+};
+
+//This is the control of the position, reactions and motions of the left foot  
+AnyKinLinear HeelToGroundLin = {
+  AnyRefNode &GroundNode = .RefP.Left.HeelPos;
+  AnyRefNode &HeelNode = .RefH.Left.Leg.Seg.Foot.GroundJoint;
+};
+
+AnyKinEqSimpleDriver HeelToGroundLinDriver = {
+  AnyKinLinear  &HeelToGroundLin= .HeelToGroundLin;      
+  DriverPos = {0,0.0,0};
+  DriverVel = {-0.3,0,0};
+  Reaction.Type = {1,1,1};
+};

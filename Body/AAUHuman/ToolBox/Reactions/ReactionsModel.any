@@ -1,0 +1,65 @@
+// Todo: Write a small description of your model here
+
+Main = {
+  
+  // The actual body model goes in this folder
+  AnyFolder MyModel = {
+    
+    // Global Reference Frame
+    AnyFixedRefFrame GlobalRef = {
+      
+      // Todo: Add points for grounding of the model here
+      
+    };  // Global reference frame
+    
+  
+    AnySeg seg={
+      Mass=70;
+      Jii={0.2,0.2,0.2};
+      sCoM={0.1,0.1,0.1};
+      AnyDrawSeg drw={};
+    };
+    
+    AnyStdJoint  jnt={
+      AnyRefFrame &ref1=.GlobalRef;
+      AnySeg &ref2=.seg;
+      Constraints.Reaction.Type={0,0,0,0,0,0};
+    };
+
+    //I have found two ways to make the model run and give ok results.
+    //1: set a Reaction.Type=1 for any of the reactions above
+    //2: adding an extra segment with some reactions on (see outcomment lines below)
+    //Conclusion it seems that the system does not handle a model with zero reactions... 
+    //and the error is treated in different ways depending on the solver likely due to some settings?
+
+    
+    AnySeg seg2={
+      Mass=70;
+      Jii={0.2,0.2,0.2};
+      sCoM={0.1,0.1,0.1};
+    };
+    
+    AnyStdJoint  jnt2={
+      AnyRefFrame &ref1=.GlobalRef;
+      AnySeg &ref2=.seg2;
+    };
+  
+    
+    
+    #include "Support.any"
+  }; // MyModel
+  
+  // The study: Operations to be performed on the model
+  AnyBodyStudy MyStudy = {
+    AnyFolder &Model = .MyModel;
+    //Using MinMaxNRSimplex will give zero forces everywhere...
+    //RecruitmentSolver = MinMaxNRSimplex;
+
+    //Using MinMaxSimplex will produce the following error 
+    //ERROR  :   Unexpected error in system kernel : OOSsimplexLP::init() : Maximal number of iteration was exceeded.
+    RecruitmentSolver = MinMaxSimplex;
+    
+    Gravity ={0,0,-5};
+  };
+  
+};  // Main

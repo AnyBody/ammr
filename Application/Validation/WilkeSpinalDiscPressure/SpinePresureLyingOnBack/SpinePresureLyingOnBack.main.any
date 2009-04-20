@@ -1,0 +1,145 @@
+/** The Seated Human is a family of models resulting from a
+research project involving the furniture industry. This
+model is a human sitting in a generic chair where the seat,
+backrest, arm rests, foot rest and head rest can be adjusted
+and their influence on the forces in the human body can be
+investigated.
+Notice that the contact conditions are conditional with
+respect to the distance between the body and the surface
+in question so that they are only active when the contact
+pair is close to each other.
+The contact between the human body and the chair is by means
+of contact elements that can only provide compression and
+friction but no tension. The available friction is proportional
+to the normal force and the user can supply a friction 
+coefficient for each surface such that the effect of different 
+surface fabrics can be investigated.*/
+Main = {
+  
+  /**Execute this operation to run the model in the intended operation sequence.  
+  It is also possible to run operations seperately, by manual selections in the operation tree*/
+  AnyOperationSequence RunApplication = {
+
+    /**This operation calibrates the muscles in the model if these are of the type AnyMuscleModel3E.
+    This will just be an empty operation if the model is using a muscle type that does not require calibration.*/
+    AnyOperation &CalibrationAnal = Main.HumanModel.Calibration.CalibrationSequence;  
+
+    ///This operation is the inverse dynamic analysis
+    AnyOperation &InvAnal=Main.Study.InverseDynamicAnalysis;
+  };
+
+
+
+  
+  /// Driver Positions - in degrees
+  AnyFolder DrvPos = {
+    AnyVar PelvisSeatLinXPos = 0.05;      ///< Position of the pelvis on the seat
+    AnyVar SeatGlobalLinYPos = 0;         ///< Seat Height
+    AnyVar SeatGlobalZRot = 0;            ///< Forward seat inclination
+    AnyVar BackRestHeadResRotZPos = 0;    ///< Rotation of the head rest wrt the back rest
+    AnyVar GlobalLegRestRotZPos = 90;     ///< Inclination of the leg rest
+    AnyVar GlobalBackRestRotZPos = 90;    ///< Back rest inclination
+    AnyVar LegRestFootRestLinYPos = 0.13; //< Position of the footrest along the leg rest
+  }; // DrvPos
+  
+  /// Driver Velocities - angles are in degrees per second
+  AnyFolder DrvVel = {
+    AnyVar PelvisSeatLinXVel = 0;         ///< Movement of the pelvis on the seat
+    AnyVar SeatGlobalLinYVel = 0;         ///< Movement of the seat Height
+    AnyVar SeatGlobalZRotVel = 0;         ///< Movement of seat inclination
+    AnyVar GlobalBackRestRotZVel = 0;     ///< Back rest inclination velocity
+    AnyVar GlobalLegRestRotZVel = 0;      ///< Leg rest inclination velocity
+    AnyVar LegRestFootRestLinYVel = 0;    //< Movement of the footrest along the leg rest
+  }; // DrvVel
+  
+  // --------------------------------------------------------
+  // Support settings 
+  // --------------------------------------------------------
+  /// Settings for the support elements, friction coefficients and
+  /// strength of the support contact elements. If the strength 
+  /// gets too low it means that the body will start using muscle
+  /// force to avoid laying too much 
+  AnyFolder SupportSettings = {
+    
+    //Friction coefficients between the human and the chair
+    AnyVar StaticFrictionSeat = 0.5;
+    AnyVar StaticFrictionBackrest = 0.5;
+    AnyVar StaticFrictionFootrest = 0.5; 
+    AnyVar StaticFrictionArmrest = 0.2; 
+    
+    //Strenght of the support muscles between the human and the chair
+    AnyVar SeatSupportStrength=10000;
+    AnyVar BackrestSupportStrength=10000;
+    AnyVar FootrestSupportStrength=10000;
+    AnyVar ArmrestSupportStrength=10000;
+  };
+  
+  // ----------------------------------------------------------
+  // Draw settings
+  // ----------------------------------------------------------
+  #include "DrawSettings.any"
+  
+  AnyFolder HumanModel = {
+    
+    AnyFolder &Mannequin=.Model.Mannequin;
+    
+    // The NoMuscles version is useful for playing around with the kinematics
+//    #include  "..\..\..\Body\AAUHuman\BodyModels\FullBodyModel\BodyModel_NoMuscles.any"    
+    
+    // This model uses the simple one-parameter muscles 
+    #include  "..\..\..\..\Body\AAUHuman\BodyModels\FullBodyModel\BodyModel.any"    
+    
+    AnyFolder StrengthParameters={
+      AnyVar SpecificMuscleTensionSpine= 90; //N/cm^2
+      AnyVar StrengthIndexLeg= 1; 
+      AnyVar SpecificMuscleTensionShoulderArm= 90; //N/cm^2
+    };
+    
+    // Use the standard size human model.
+    #include "..\..\..\..\Body\AAUHuman\Scaling\ScalingLengthMassFat.any"
+    Scaling = {
+       #include "AnyManUniform.any"
+     };
+  };
+  
+  // ------------------------------------------------------------
+  // Model
+  // ------------------------------------------------------------
+  
+  /// This folder collects all the objects in the model.
+  AnyFolder Model = {
+    AnyFolder &HumanModel=.HumanModel.BodyModel;
+    #include "Mannequin.any"
+    #include "Environment.any"
+    
+    /// Objects connecting the human to the chair
+    AnyFolder ModelEnvironmentConnection = {
+      
+      #include "ConnectionSegments.any"
+      #include "JointsAndDrivers.any"
+      
+      AnyFolder &RefPM=Main.Model.EnvironmentModel;
+      #include "InitialPositionsEnvironment.any" 
+      #include "Support.any" 
+    }; // ModelEnvironmentConnection
+  }; // Model
+  
+  // --------------------------------------------------------------
+  // Study
+  // --------------------------------------------------------------
+  AnyBodyStudy Study = {
+    AnyFolder &Model = .Model;
+    RecruitmentSolver = MinMaxNRSimplex;
+    
+    tEnd = 1;
+    Gravity = {0.0001, -9.81, 0.00001};
+    nStep = 1;
+    RecruitmentLpPenalty = 0.0005;
+    NRSimplex.Zero = 1.0e-5;
+    
+    //Size of total force in the L5 Sacrum joint
+    AnyVar L5SacrumReac = (Main.Model.HumanModel.Trunk.JointsLumbar.L5SacrumJnt.Constraints.Reaction.Fout[0]^2+
+    Main.Model.HumanModel.Trunk.JointsLumbar.L5SacrumJnt.Constraints.Reaction.Fout[1]^2+
+    Main.Model.HumanModel.Trunk.JointsLumbar.L5SacrumJnt.Constraints.Reaction.Fout[2]^2)^0.5;
+  }; // Study  
+};// Main

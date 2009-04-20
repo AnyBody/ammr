@@ -1,0 +1,82 @@
+/* ----------------------------------------------------------------------------
+This model is used for investigation of the fidelity of the shoulder model
+by comparing computed GH joint reactions against in-vivo measured reactions
+by Bergmann et al published in the Journal of Biomechanics.
+
+The model is as precise as possible a remake of Bergmann's experiment, and
+the shoulder model has been equipped with a force mesurement object that
+reads out the forces in the humeral coordinate system similarly to the
+instrumented shoulder prosthesis.
+---------------------------------------------------------------------------- */
+Main = {
+  
+  /**Execute this operation to run the model in the intended operation sequence.  
+  It is also possible to run operations seperately, by manual selections in the operation tree*/
+  AnyOperationSequence RunApplication = {
+
+    /**This operation calibrates the muscles in the model if these are of the type AnyMuscleModel3E.
+    This will just be an empty operation if the model is using a muscle type that does not require calibration.*/
+    AnyOperation &CalibrationAnal = Main.HumanModel.Calibration.CalibrationSequence;  
+
+    ///This operation is the inverse dynamic analysis
+    AnyOperation &InvAnal=Main.Study.InverseDynamicAnalysis;
+  };
+
+  #include "DrawSettings.any"
+  
+  AnyFolder HumanModel = {
+    
+    AnyFolder &Mannequin=.Model.Mannequin;    
+    
+    #include  "..\..\..\Body\AAUHuman\BodyModels\TrunkNoMusclesRightArm\BodyModel.any"
+    
+    AnyFolder StrengthParameters = {
+      AnyVar SpecificMuscleTensionSpine= 90; //N/cm^2
+      AnyVar StrengthIndexLeg= 1;
+      AnyVar SpecificMuscleTensionShoulderArm= 90; //N/cm^2
+    };
+    
+    // We do not have much information about the anthropometrics of the
+    // test person, so we just use the standard size model
+    #include "..\..\..\Body\AAUHuman\Scaling\ScalingStandard.any"
+    
+    // Create a node for Bergmann's force reference
+    BodyModel.Right.ShoulderArm.Seg.Humerus.gh = {
+      AnyRefNode Bergmann = {
+        ARel = RotMat(90*pi/180,y);
+        AnyDrawRefFrame drwref = {
+          RGB = {1,0,0};
+          ScaleXYZ = {1,1,1}/5;
+        };
+      };
+    };
+  };
+    
+  AnyFolder Model = {
+    
+    AnyFolder &HumanModel=.HumanModel.BodyModel;
+    #include "Mannequin.any"
+    #include "Environment.any"
+    
+    AnyFolder ModelEnvironmentConnection = {
+      #include "JointsAndDrivers.any"
+    };
+  };
+  
+  AnyBodyStudy Study = {
+    AnyFolder &Model = .Model;
+    
+    // Output variables collecting the GH forces in the pertinent coordinate frame
+    AnyVec3 GHReactionInHumerus = -(Model.HumanModel.Right.ShoulderArm.Seg.Humerus.gh.Bergmann.Axes'
+       *Model.HumanModel.Right.ShoulderArm.Jnt.GHReactions.ResultanForce.FTotal')';
+    
+    //RecruitmentSolver = MinMaxSimplex;
+    RecruitmentSolver = MinMaxOOSolQP;
+    RecruitmentQpPenalty = 100;
+    tEnd = 8.0; // 5;
+    Gravity = {0.01, -9.81, 0.01};
+    nStep = 30; //19;
+//    MuscleEliminationTol = 1e-6;
+  }; // End of study
+  
+}; //Main

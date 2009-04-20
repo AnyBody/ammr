@@ -1,0 +1,79 @@
+
+AnyFolder EnvironmentModel = {
+  
+  /*
+  This folder contains the definition of the Environment
+  - GlobalRefFrame
+*/  
+  
+  AnyFixedRefFrame GlobalRef = {
+
+    #include "drawcoorsystem.any"
+    
+    // The hub of the wheel
+    AnyRefNode Hub = {
+      sRel = Main.WheelParameters.Hub;
+    AnyDrawRefFrame  Drw={ScaleXYZ={0.05,0.05,0.05};};
+    };
+    
+    // The left hand rest
+    AnyRefNode HandRest = {
+      sRel = Main.ChairParameters.HandRest;
+    };
+        
+//    AnyDrawRefFrame drw = {};
+  };//GlobalRef
+  
+  AnySeg Wheel = {
+    Mass = 2.5;
+    Jii = {0.1,2,0.1}*0.1;
+   AnyRefNode HubTop={sRel={0.0,0.03,0};};
+      AnyRefNode Hub={};
+    AnyRefNode HubBottom={sRel={0.0,-0.03,0};};
+
+    AnyRefNode Handle = {
+      sRel = {Main.WheelParameters.Rad, 0.05, 0};
+    };
+   AnyRefNode HandleTip={
+     sRel=.Handle.sRel+{0,0.05,0};
+   };
+   AnyRefNode HandleBottom={
+     sRel=.Handle.sRel+{0,-0.05,0};
+   };
+  
+   //Make the handle visual
+   AnyKinPLine Line ={
+     AnyRefNode &ref1=.HubTop;
+          AnyRefNode &ref2=.HubBottom;
+               AnyRefNode &ref3=.Hub;
+     AnyRefNode &ref4=.HandleBottom;
+     AnyRefNode &ref5=.HandleTip;
+     AnyDrawPLine drw={
+       Thickness=.015;
+       RGB=Main.DrawSettings.Colors.AnyBodyRed;
+     };
+   };
+   r0 =Main.WheelParameters.Hub;
+ };
+ 
+  // Join the wheels to the chair (ground, actually)
+  AnyRevoluteJoint Hub = {
+    AnyRefNode &Ground = .GlobalRef.Hub;
+    AnySeg &Wheel = .Wheel;
+    Axis = y;
+  };
+
+  // Drive the wheels. This in turn determines the hand movement
+  AnyKinEqSimpleDriver WheelDr = {
+    AnyRevoluteJoint &Joint = .Hub;
+    DriverPos = {0};
+    DriverVel = {Main.WheelParameters.Omega*pi/180};
+    Reaction.Type = {Off}; // Let applied moment through
+  };
+
+  // Moment affecting the wheels and caried by the muscles
+  AnyForce Moment = {
+    AnyRevoluteJoint &Joint = .Hub;
+    F = {Main.WheelParameters.M};
+  };
+};

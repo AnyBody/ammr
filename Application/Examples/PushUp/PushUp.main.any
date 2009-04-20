@@ -1,0 +1,95 @@
+/**
+This model shows a model of a push up 
+
+The model displays several topics
+-Block building techniques
+-Include files
+-Structuring of models using directories
+
+The positions of the hands can be controlled by chaning variables in the file
+Environment.any
+
+Known issues:
+1: The model seems to be too weak for the load applied when doing pushups, this is a sign that the shoulder needs more 
+adjustments before it becomes reliable
+*/
+Main = {
+ /**Execute this operation to run the model in the intended operation sequence.  
+  It is also possible to run operations seperately, by manual selections in the operation tree*/
+  AnyOperationSequence RunApplication = {
+
+    /**This operation calibrates the muscles in the model if these are of the type AnyMuscleModel3E.
+    This will just be an empty operation if the model is using a muscle type that does not require calibration.*/
+    AnyOperation &CalibrationAnal = Main.HumanModel.Calibration.CalibrationSequence;  
+
+    ///This operation is the inverse dynamic analysis
+    AnyOperation &InvAnal=Main.Study.InverseDynamics;
+   
+  };
+
+
+
+  #include "DrawSettings.any"
+  
+  AnyFolder HumanModel={
+    
+    AnyFolder &Mannequin=.Model.Mannequin;
+    
+    //This model should be used when playing around with the model in the 
+    //initial modelling phase since leaving the normal muscles out, makes the 
+    //model run much faster. The model uses artificial muscles on each dof. in 
+    //the joints which makes it possible also to run the inverse analysis.  
+//    #include  "..\..\..\Body\AAUHuman\BodyModels\FullBodyModel\BodyModel_NoMuscles.any"    
+    
+    //This model uses the simple constant force muscles 
+    #include  "..\..\..\Body\AAUHuman\BodyModels\FullBodyModel\BodyModel.any"
+    
+    //This model uses the simple constant force muscles for shoulder-arm and spine
+    //but the 3 element hill type model for the legs
+    //Remember to calibrtate the legs before running the inversae anlysis
+    //This is done by pressing CalibrationSequence in the 
+    //operationtree(lower left corner of screen)
+    //#include  "..\..\..\Body\AAUHuman\BodyModels\FullBodyModel\BodyModel_Mus3E.any" 
+    AnyFolder StrengthParameters={
+      AnyVar SpecificMuscleTensionSpine= 110; //N/cm^2
+      AnyVar StrengthIndexLeg= 1; 
+      AnyVar SpecificMuscleTensionShoulderArm= 110; //N/cm^2
+    };
+    
+    #include "..\..\..\Body\AAUHuman\Scaling\ScalingStandard.any"
+    
+  };
+  
+  AnyFolder Model={
+    AnyFolder &HumanModel=.HumanModel.BodyModel;    
+    
+    #include  "JointsAndDrivers.any"
+    #include  "Environment.any"
+    
+    //The Mannequin values is used both for setting the initial positions of the model
+    //and driving the model at analysis time. So you can change the values in the Mannequin
+    //file and it will change both initial positions and how it is positioned at analysis time. 
+    #include "Mannequin.any"   
+  };
+  
+  
+  //The study: Operations to be performed on the model
+  AnyBodyStudy Study = {
+    
+    //This file set the position and orientation of the segments in the model
+    AnyFolder &Model = .Model;      
+    
+    Gravity = {0.0,-9.81,0.0};
+    tStart = 0;
+    tEnd=1;
+    nStep =21;
+    //This tolerances determine how agressively the muscles will be removed from the system
+    //if there is symmetry problems this value should be lowered
+  };
+  
+  
+ 
+  
+};// Main
+
+

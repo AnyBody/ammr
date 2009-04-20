@@ -1,0 +1,153 @@
+/* ----------------------------------------------------------------------------
+This is a posture prediction problem based on the standing model. It 
+simulates a person carrying a bag on the shoulder and tries to predict 
+the postural changes due to this.
+---------------------------------------------------------------------------- */
+Main = {
+  
+  /**Execute this operation to run the model in the intended operation sequence.  
+  It is also possible to run operations seperately, by manual selections in the operation tree*/
+  AnyOperationSequence RunApplication = {
+
+    /**This operation calibrates the muscles in the model if these are of the type AnyMuscleModel3E.
+    This will just be an empty operation if the model is using a muscle type that does not require calibration.*/
+    AnyOperation &CalibrationAnal = Main.HumanModel.Calibration.CalibrationSequence;  
+
+    ///This operation is the inverse dynamic analysis
+    AnyOperation &InvAnal=Main.Study.InverseDynamics;
+  
+  };
+
+  #include "DrawSettings.any"
+  
+  AnyFolder HumanModel = {
+    
+    AnyFolder &Mannequin=.Model.Mannequin;
+    
+    // Use only ONE of the three include fles below at any time
+    // --------------------------------------------------------
+    
+    // Selecting the include file below results in a body model without muscles.
+    // Instead, the model is equipped with joint moment providers. This version
+    // loads and run much faster than versions with anatomical muscles.
+    // #include  "..\..\..\Body\AAUHuman\BodyModels\FullBodyModel\BodyModel_NoMuscles.any"    
+    
+    // Selecting the include file below results in a body model with simple
+    // constant stength muscles. They are adequate for many purposes and have the
+    // advantage of not requiring calibration
+    #include  "..\..\..\Body\AAUHuman\BodyModels\FullBodyModel\BodyModel.any"
+    
+    // The include file below selects the three-element Hill-type muscles.
+    // They require calibration before they can be used, and this can be done
+    // by the HumanModel.Calibration.CalibrationSequence operation. This must 
+    // be executed every time the model is reloaded.
+    //#include  "..\..\..\Body\AAUHuman\BodyModels\FullBodyModel\BodyModel_Mus3E.any" 
+
+    // The StrengthParameters folder allows for simple scaling of strength
+    // between the spine, the legs and the ShoulderArm body parts. The methods
+    // are slightly different to adhere to the anatomical literature on which the
+    // models are based.
+    AnyFolder StrengthParameters = {
+      AnyVar SpecificMuscleTensionSpine = 90; //N/cm^2
+      AnyVar StrengthIndexLeg = 1; 
+      AnyVar SpecificMuscleTensionShoulderArm = 90; //N/cm^2
+    };    
+    
+    // This section below offers the choice between two scaling strategies for the
+    // human model. 
+    
+    // ScalingStandard means that all the body parts will have the standard size 
+    // at which they were originally developed, i.e. with anthropometric
+    // data from the anatomical literature. This roughly corresponds to a 50th
+    // percentile European male.    
+    #include "..\..\..\Body\AAUHuman\Scaling\ScalingStandard.any"
+    
+    // ScalingLengthMassFat will scale each segment of the body to anthropometric data
+    // specified in the selected AnyFamily include file, attempting to take the
+    // fat percentage into account in the assessment of the muscle strength.
+    // #include "..\..\..\Body\AAUHuman\Scaling\ScalingLengthMassFat.any" 
+    // Scaling = {
+    //   #include "..\..\..\Body\AAUHuman\Scaling\AnyFamily\AnyMan.any"
+    // };    
+  };
+  
+  AnyFolder Model = {
+    
+    AnyFolder &HumanModel=.HumanModel.BodyModel;
+    #include "Environment.any"   
+    
+    // The Mannequin file specifies load-time positions for all the segments
+    // in the HumanModel. This is important for the model's ablity to resolve
+    // all the kinematic constraints when the model is analyzed.
+    // The mannequin file also drives those degrees of freedom of the human 
+    // model that are not governed by problem-specific drivers at run time.    
+    #include "Mannequin.any" 
+    
+    AnyFolder ModelEnvironmentConnection = {
+      // This file converts values in the "Mannequin.any" file to Axes matrices
+      #include "JointsAndDrivers.any"
+    };
+    
+  };
+  
+
+ AnyBodyStudy Study = {
+    AnyFolder &Model = .Model;
+    
+    
+    tEnd = 1.0;
+    Gravity = {0.0, -9.81, 0.0};
+    nStep = 1;
+    
+    AnyOutputFun MaxAct = {
+      Val = .MaxMuscleActivity;
+    };
+  }; // End of study
+
+  
+  
+  // This optimization study demonstrates the use of posture prediction.
+  // The underlying assumption is that a person will attain the posture that
+  // minimizes the muscular effort. Thus, the study defines a number of postural
+  // variables and tries to find the combination that reduces the maximum
+  // muscle activity as much as possible.
+  AnyOptStudy PostureOptimization = {
+    LogFile = "Optimization.log";
+    AnyDesVar HipFlex = {
+      Val = Main.Model.Mannequin.Posture.Right.HipFlexion;
+      Min = Val - 10;
+      Max = Val + 10;
+    };
+        
+    AnyDesVar PelvisThoraxExt = {
+      Val = Main.Model.Mannequin.Posture.PelvisThoraxExtension;
+      Min = Val - 10;
+      Max = Val + 10;
+    };
+    
+    AnyDesVar PelvisThoraxLat = {
+      Val = Main.Model.Mannequin.Posture.PelvisThoraxLateralBending;
+      Min = Val - 10;
+      Max = Val + 10;
+    };
+    
+    AnyDesVar CoMx = {
+      Val = Main.Model.ModelEnvironmentConnection.Drivers.CoMDriver.DriverPos[0];
+      Min = Val - 0.05;
+      Max = Val + 0.05;
+    };
+    
+    // Objective function: MaxMuscleActivity = Muscular effort.
+    AnyDesMeasure MaxMuscleAct = {
+      Val = max(..Study.MaxAct());  /// Max of muscle activity
+      Type = ObjectiveFun;
+    };
+    
+    // Definition of the Analysis
+    Analysis = {
+      AnyOperation &Analysis = ..Study.InverseDynamics;
+    };
+  };
+  
+}; //Main
+

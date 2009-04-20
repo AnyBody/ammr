@@ -1,0 +1,86 @@
+/* ----------------------------------------------------------------------------------
+  This is an example of a 2-D bicycle with a spring helping the model over
+  the dead centers
+---------------------------------------------------------------------------------- */
+
+Main = {
+  
+  
+  /**Execute this operation to run the model in the intended operation sequence.  
+  It is also possible to run operations seperately, by manual selections in the operation tree*/
+  AnyOperationSequence RunApplication = {
+
+    ///This operation is the inverse dynamic analysis
+    AnyOperation &InvAnal=Main.Study.InverseDynamics;
+    
+  };
+
+  AnyFolder BikeParameters = {
+    
+    // Bicycle parameters
+    AnyVar PedalArmLength =0.17;  //Length of pedal arm
+    AnyVar PedalArmWidth = 0.106; //Horizontal distance between left and right connecting point between foot and pedal
+    AnyVar SaddleHeight = 0.60 ;  //Height of hip joint measured vertically from the crank
+    AnyVar SaddlePos = -0.15;     //Horizontal pos of hipjoint measured from the crank
+    
+    #include "anyinc.any"
+    
+    // Loading parameters
+    AnyVar Cadence = 80.0;   //Cadence in RPM 
+    AnyVar Torque = 30.0;    //Constant crank torque in Nm
+    
+    // The function for the crank moment is defined as Moment=Offset-Amp*cos(4*pi*t/T+Phase)
+    AnyVar T = 60/Cadence; //Cycle time
+  };
+  
+   // Body parameters that the leg model will need a reference to.
+  AnyFolder BodyParameters = {
+    AnyVar BodyMass = 75;
+    AnyVar Density = 1000;
+  }; //Bodyparameters
+  
+  
+  // These are the attachment positions of the bike frames to the global reference frame
+  AnyFixedRefFrame GlobalRef = {
+  };  // Global reference frame  
+  
+  
+  #include "DrawSettings.any"
+  #include "Scaling.any"
+  
+  
+    
+    // This folder is a place to assemble all the elements to include in the
+    // study. The study in this folder is for the 2-D legs, so the Model folder
+    // herender does not include the bicycle with the 3-D legs.
+    AnyFolder Model = {
+      
+      // Notice the '&'. It means that HumanFolder is just a pointer
+      AnyFolder &HumanFolder = Leg2D;  
+      #include "Leg2D.any"
+      #include "BikeFrameAndWheels.any"
+      
+      AnyVar  Dist = 0.0;
+      #include "BikeLegConnection.any"        
+      #include "BikeFrameGroundConnection.any"
+    };
+    
+    // The study: Operations to be performed on the model
+    AnyBodyStudy Study = {
+      
+      AnyFolder &Model = .Model;      
+      
+     
+      Gravity = {0.0, -9.81, 0.0};
+      
+      tEnd = Main.BikeParameters.T;
+
+      AnyOutputFile OutFile1 = {
+        FileName = "MaxActivity.csv";
+        AnyVar MaxAct = .MaxMuscleActivity;
+      };
+    };
+
+   
+  
+}; // Main

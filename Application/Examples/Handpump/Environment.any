@@ -1,0 +1,51 @@
+/// Objects in the environment, i.e. the ground and the hand 
+/// wheel are in this folder
+AnyFolder EnvironmentModel = {
+  
+  AnyFixedRefFrame GlobalRef = {
+    #include "drawcoorsystem.any"
+    
+    AnyRefNode Hub = {
+      sRel = {0.35, 1.4, 0.0};
+      
+      AnyDrawNode drw = {};
+    };
+  }; //GlobalRef
+
+  /// Wheel segment. Inertia properties are set to
+  /// resemble a real wheel but it does not matter much
+  /// unless the wheel rotates at a non-constant velocity.
+  AnySeg Wheel = {
+    r0 = .GlobalRef.Hub.sRel;
+    Mass = 5;
+    Jii = {0.003, 0.003, 0.3};
+    AnyRefNode rHandle = {
+      sRel = {0.2, 0, 0.1};
+    };
+    AnyRefNode lHandle = {
+      sRel = {-0.2, 0, -0.1};
+    };
+    AnyDrawSeg drw = {};
+  };
+
+  /// Joint between the wheel and the global reference frame
+  AnyRevoluteJoint WheelHub = {
+    AnyRefFrame &Hub = .GlobalRef.Hub;
+    AnyRefFrame &Wheel = .Wheel;
+    Axis = z;
+  };
+
+  /// Rotational driver for the wheel.
+  AnyKinEqSimpleDriver WheelTurn = {
+    AnyRevoluteJoint &Hub = .WheelHub;
+    DriverVel = {-pi};
+    Reaction.Type = {Off};   ///< No motor in the driver
+  };
+  
+  /// Force applied to the wheel. This must be balanced by the
+  /// muscle actions.
+  AnyForce WheelTorque = {
+    AnyRevoluteJoint &Hub = .WheelHub;
+    F = {20};
+  };
+};

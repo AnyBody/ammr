@@ -1,0 +1,59 @@
+/** Model of a bench press exercise developed from the free posture model.
+The bench is simulated by reaction forces between the head, thorax, pelvis,
+feet and the ground. */
+Main = {
+  
+  
+  /**Execute this operation to run the model in the intended operation sequence.  
+  It is also possible to run operations seperately, by manual selections in the operation tree*/
+  AnyOperationSequence RunApplication = {
+
+    /**This operation calibrates the muscles in the model if these are of the type AnyMuscleModel3E.
+    This will just be an empty operation if the model is using a muscle type that does not require calibration.*/
+    AnyOperation &CalibrationAnal = Main.HumanModel.Calibration.CalibrationSequence;  
+
+    ///This operation is the inverse dynamic analysis
+    AnyOperation &InvAnal=Main.Study.InverseDynamics;
+   
+  };
+
+  #include "DrawSettings.any"
+  
+  AnyFolder HumanModel={
+    
+    AnyFolder &Mannequin=.Model.Mannequin;
+    
+    // Use the simple muscle model
+    #include  "..\..\..\Body\AAUHuman\BodyModels\FullBodyModel\BodyModel.any"
+    
+    AnyFolder StrengthParameters={
+      AnyVar SpecificMuscleTensionSpine= 90; //N/cm^2
+      AnyVar StrengthIndexLeg= 1; 
+      AnyVar SpecificMuscleTensionShoulderArm= 90; //N/cm^2
+    };
+    
+    // Standard size person
+    #include "..\..\..\Body\AAUHuman\Scaling\ScalingStandard.any"
+  };
+  
+  AnyFolder Model = {
+    
+    AnyFolder &HumanModel=.HumanModel.BodyModel;    
+    #include "Mannequin.any"   
+    #include "Environment.any"   
+    
+    AnyFolder ModelEnvironmentConnection = {
+      #include "JointsAndDrivers.any"
+    };
+  };
+
+  AnyBodyStudy Study = {
+    AnyFolder &Model = .Model;
+    tEnd = 10.0;
+    Gravity = {0.0, -9.81, 0.0};
+    nStep = 75;
+    
+  }; // End of study
+  
+  
+}; //Main

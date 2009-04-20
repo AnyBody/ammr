@@ -1,0 +1,86 @@
+//File used for creating markers in an easy way
+
+
+AnySeg Seg={
+  Mass=0;
+  Jii={0.0,0.0,0.0};
+  AnyRefNode node={
+    sRel={0,0,0};
+    AnyDrawNode drw={ScaleXYZ={0.005,0.005,0.005};};
+  };
+  
+};
+
+AnyKinLinear Lin={
+  Ref=0;
+  AnyRefFrame &ref1=..GlobalRef;
+  AnyRefFrame &ref2=.Seg;
+};
+
+AnyKinRotational Rot={
+  AnyRefFrame &ref1=..GlobalRef;
+  AnyRefFrame &ref2=.Seg;
+  Type=RotVector;
+};
+
+////This driver will use unfiltered data
+//AnyKinEqInterPolDriver LinDrv={
+//  AnyKinLinear &ref1= .Lin;
+//  T=.HeaderFolder.Frames/.HeaderFolder.VideoFrameRate;
+//  Data=..ScaleFactor*.DataFolder.Pos';
+//  Type=Bspline;
+//  BsplineOrder = 8;
+//};
+
+
+
+AnyKinEqSimpleDriver RotDrv={
+  AnyKinRotational &ref1= .Rot;
+  DriverPos={0,0,0};
+  DriverVel={0,0,0};
+};
+
+/// A lowpass butterworth filter
+AnyFunButterworthFilter LowPassFilter = 
+{
+  FilterForwardBackwardOnOff = On;
+  AutomaticInitialConditionOnOff = On;
+  N = 2;
+  AnyVar CutOffFrequency=10;
+  AnyVar SampleFreq=Main.C3DFileData.Header.VideoFrameRate    ;
+  W = {1/(SampleFreq*0.5)*CutOffFrequency};
+  Type = LowPass;
+};
+
+// filter the data
+AnyVector FilteredX = LowPassFilter(.ScaleFactor*DataFolder.Pos'[0]);
+AnyVector FilteredY = LowPassFilter(.ScaleFactor*DataFolder.Pos'[1]);
+AnyVector FilteredZ = LowPassFilter(.ScaleFactor*DataFolder.Pos'[2]);
+
+
+
+//
+//AnyVector FilteredX = (.ScaleFactor*DataFolder.Pos'[0]);
+//AnyVector FilteredY = (.ScaleFactor*DataFolder.Pos'[1]);
+//AnyVector FilteredZ = (.ScaleFactor*DataFolder.Pos'[2]);
+//
+
+AnyKinEqInterPolDriver LinDrv={
+  AnyKinLinear &ref1= .Lin;
+  T=.HeaderFolder.Frames/.HeaderFolder.VideoFrameRate;
+  Data={.FilteredX,.FilteredY,.FilteredZ};
+  Type=Bspline;
+  BsplineOrder = 4;
+};
+
+
+////Only use this output file when you want to create markers trajectory files
+//// otherwise leave it outcommented or it may overwrite existing trajectories
+//AnyOutputFile MarkerPositionFile =  {
+// FileName = .Label + ".txt";
+// AnyVar px= .Seg.r[0];
+// AnyVar py= .Seg.r[1];
+// AnyVar pz= .Seg.r[2];
+// SepSign = "  ";
+// NumberFormat =   {  Digits = 15;  };
+// };

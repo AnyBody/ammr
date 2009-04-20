@@ -1,0 +1,937 @@
+// This file contains segment inertia properties and geometry used for muscle wrapping.
+// The file includes a number of segment files which contains muscles attachment points and 
+// bonylandmarks.
+
+///Clavicula segment definition 
+AnySeg Clavicula ={
+  
+  AnyMat33 Mirror={{1,0,0},{0,..Sign*1,0},{0,0,1}};
+  
+  AnyFunTransform3D &Scale=..Scaling.GeometricalScaling.Clavicula.ScaleFunction;
+  
+  
+  AnyKinLinear Lin ={
+    Ref=0;
+    AnyRefNode &ref1=.scj;
+    AnySeg &ref2=.....Trunk.SegmentsThorax.ThoraxSeg;
+  };
+  
+  //  used before
+  AnyRefNode NeutralPositionOnPelvis = {
+    AnyVec3 StandardsRel ={-0.06475022, -0.4240306, -0.05013008};
+    // AnyVec3 StandardsRel ={-0.000708, -0.431345, -0.021187};
+    sRel=(.Scale(StandardsRel))*.Mirror;
+    
+    
+    AnyMat33 Clavicula_Axes = {
+      {-0.4035009, ...Sign*0.2703461, -0.8741282},
+      {0.1493913, ...Sign*0.9619986, 0.2285626},
+      {...Sign*0.9027011, -0.0383619,...Sign* -0.4285547}};
+    
+    AnyMat33 Pelvis_Axes = {{1.000000, 0.000000, 0.000000}, {0.000000, 1.000000, 0.000000}, {0.000000, 0.000000, 1.000000}};
+    ARel=Clavicula_Axes'*Pelvis_Axes;
+  };
+  
+  AnyMat33  As= ....Trunk.SegmentsThorax.ThoraxSeg.Axes0*NeutralPositionOnPelvis.ARel';
+  AnyVec3   RThorax = ....Trunk.SegmentsThorax.ThoraxSeg.r0;
+  
+  AnyVec3 Rvec=(RThorax-NeutralPositionOnPelvis.sRel*As');
+  r0={Rvec[0],Rvec[1],Rvec[2]};
+  
+  Axes0={
+    {As[0][0],As[0][1],As[0][2]},
+    {As[1][0],As[1][1],As[1][2]},
+    {As[2][0],As[2][1],As[2][2]}};
+  
+  
+  
+  /*
+  AnyRefNode NeutralPositionOnPelvis = {
+  AnyVec3 StandardsRel ={-0.000708, -0.431345, -0.021187};
+  sRel=.Scale(StandardsRel);
+  AnyMat33 Clavicula_Axes = {
+  {-0.280836, 0.188095, -0.941144}, 
+  {-0.004752, 0.980323, 0.197343}, 
+  { 0.959744, 0.059893, -0.274416}};
+  
+  AnyMat33 Pelvis_Axes = {{1.000000, 0.000000, 0.000000}, {0.000000, 1.000000, 0.000000}, {0.000000, 0.000000, 1.000000}};
+  ARel=Clavicula_Axes'*Pelvis_Axes;
+  };
+  
+  AnyMat33  As= ....Trunk.SegmentsThorax.ThoraxSeg.Axes0*NeutralPositionOnPelvis.ARel';
+  AnyVec3   RThorax = ....Trunk.SegmentsThorax.ThoraxSeg.r0;
+  
+  AnyVec3 Rvec=(RThorax-NeutralPositionOnPelvis.sRel*As');
+  r0={Rvec[0],Rvec[1],..Sign*Rvec[2]};
+  
+  Axes0={
+  {As[0][0],..Sign*As[0][1],As[0][2]},
+  {As[1][0],..Sign*As[1][1],As[1][2]},
+  {..Sign*As[2][0],As[2][1],..Sign*As[2][2]}};
+  */
+ 
+  #include "../DrawSettings/Nodes.any"
+  
+  AnyVar MassS = .....Scaling.MassScaling.Clavicula.MassScale;
+  AnyVar MassStandard = ..StandardParameters.Clavicula.Mass; 
+  Mass = MassS*MassStandard;
+  
+  //AnyVar LengthStandard = 0.168874;
+  //Note stc issue for scaling
+  AnyVar Length = ( (ac.sRel[0]-scj.sRel[0])^2 + (ac.sRel[1]-scj.sRel[1])^2 + (ac.sRel[2]-scj.sRel[2])^2 )^0.5; // Find the length using bonylandmark x coordinates!
+  AnyVar Radius = (Mass/(3.1416*Length*..StandardParameters.Clavicula.Density))^0.5;
+  AnyVar Iyy = 0.25*Mass*Radius*Radius + 1/12*Mass*Length*Length;
+  AnyVar Ixx = 0.5*Mass*Radius*Radius;
+  AnyVar Izz = Iyy; 
+  Jii = {Ixx,Iyy,Izz};
+  sCoM={Length/2,0,0}; // Guesstimate
+  JaboutCoMOnOff = On;
+  
+  AnyRefNode ac = {
+    sRel = .Scale({0.168874, -0.000000, -0.000000})*.Mirror;
+  };
+  
+  AnyRefNode acj = {
+    sRel = .Scale({0.155254, 0.002989,-0.006589})*.Mirror;
+    #include "../DrawSettings/JointAxesDistal.any"
+    
+  };
+  
+  AnyRefNode scj = {
+    sRel = .Scale({0.000000, 0.000000, 0.000000})*.Mirror;
+    #include "../DrawSettings/JointAxesProximal.any"
+    
+  };
+  AnyVec3 ConoidStd={0.127105, 0.006526 , 0.002547};
+  
+  AnyRefNode conoid = {
+    sRel = .Scale(.ConoidStd)*.Mirror;
+  };
+  
+  AnyRefNode trapezoid = {
+    sRel = .Scale({0.139417, 0.004248, -0.006785})*.Mirror;
+  };
+  
+  
+  AnyDrawSurf DrwSurf2 = {
+    FileName = "Clavicula_bone";
+    RGB=...ColorRef.Segments;
+    ScaleXYZ =  ({1,1*...Sign,1});
+    AnyFunTransform3D &Scale = .Scale;
+    Transparency = ...BonesTransparency.Clavicula;
+  };
+};
+
+///Scapula segment definition 
+AnySeg Scapula ={
+  
+  AnyMat33 Mirror={{1,0,0},{0,1*..Sign,0},{0,0,1}};
+  
+  //AnyDrawRefFrame DRW={ScaleXYZ={1,1,1};};
+  AnyFunTransform3D &Scale=..Scaling.GeometricalScaling.Scapula.ScaleFunction;
+  
+  /*
+  AnyFolder NeutralPositionOnPelvis = {
+  AnyVec3 StandardsRel = {-0.230118, -0.394883, -0.075449};
+  AnyVec3 sRel = .Scale( StandardsRel);
+  AnyMat33 Scapula_Axes = {
+  {0.588988, -0.159489, -0.792248}, 
+  {0.186879, 0.980641, -0.058482}, 
+  {0.786238, -0.113609, 0.607391}};
+  
+  AnyMat33 Pelvis_Axes  = {{1.000000, 0.000000, 0.000000}, {0.000000, 1.000000, 0.000000}, {0.000000, 0.000000, 1.000000}};
+  AnyMat33 ARel=Scapula_Axes'*Pelvis_Axes;
+  
+  };
+  
+  AnyMat33  As= ....Trunk.SegmentsThorax.ThoraxSeg.Axes0*NeutralPositionOnPelvis.ARel';
+  AnyVec3   RThorax = ....Trunk.SegmentsThorax.ThoraxSeg.r0;
+  
+  AnyVec3 Rvec=(RThorax-NeutralPositionOnPelvis.sRel*As');
+  
+  r0={Rvec[0],Rvec[1],..Sign*Rvec[2]};
+  
+  Axes0= 
+  {{As[0][0],..Sign*As[0][1],As[0][2]},
+  {As[1][0],..Sign*As[1][1],As[1][2]},
+  {..Sign*As[2][0],As[2][1],..Sign*As[2][2]}};
+  
+  */
+  
+  AnyKinLinear Lin ={
+    Ref=0;
+    AnyRefNode &ref1=.ac;
+    AnySeg &ref2=.....Trunk.SegmentsThorax.ThoraxSeg;
+  };
+  
+  
+  AnyRefNode NeutralPositionOnPelvis = {
+    
+    
+    AnyVec3 StandardsRel=  {-0.2914858, -0.3801103, -0.07873066};
+    //AnyVec3 StandardsRel =  {-0.218944, -0.399176, -0.087378};
+    sRel = .Scale( StandardsRel)*.Mirror;
+    
+    AnyMat33 Scapula_Axes = {
+      {0.270262, ...Sign*-0.1210351, -0.9551487}, 
+      {0.3376548, ...Sign*0.9409716, -0.0236982},
+      {...Sign*0.9016361, -0.3161058, ...Sign*0.2951769}};
+    
+    AnyMat33 Pelvis_Axes  = {
+      {1.000000, 0.000000, 0.000000}, 
+      {0.000000, 1.000000, 0.000000},
+      {0.000000, 0.000000, 1.000000}};
+    
+    ARel=Scapula_Axes'*Pelvis_Axes;
+    
+  
+  };
+  
+  AnyMat33  As= ....Trunk.SegmentsThorax.ThoraxSeg.Axes0*NeutralPositionOnPelvis.ARel';
+  AnyVec3   RThorax = ....Trunk.SegmentsThorax.ThoraxSeg.r0;
+  
+  AnyVec3 Rvec=(RThorax-NeutralPositionOnPelvis.sRel*As');
+  
+  r0={Rvec[0],Rvec[1],Rvec[2]};
+  
+  Axes0= 
+  {{As[0][0],As[0][1],As[0][2]},
+    {As[1][0],As[1][1],As[1][2]},
+    {As[2][0],As[2][1],As[2][2]}};
+  
+  
+  #include "../DrawSettings/Nodes.any"
+  #include "../DrawSettings/SegmentAxes.any"
+  
+  AnyVar MassS = .....Scaling.MassScaling.Scapula.MassScale;
+  AnyVar MassStandard = ..StandardParameters.Scapula.Mass; 
+  Mass = MassS*MassStandard;
+  
+  AnyVar Length = 0.01; // Guesstimate the thickness.
+  
+  //Note stc issue for scaling
+  AnyVar Radius = (Mass/(3.1416*Length*..StandardParameters.Scapula.Density))^0.5;
+  AnyVar Iyy = 0.25*Mass*Radius*Radius + 1/12*Mass*Length*Length;
+  AnyVar Izz = 0.5*Mass*Radius*Radius;
+  AnyVar Ixx = Iyy; 
+  Jii = {Ixx,Iyy,Izz};
+  sCoM={-0.06,-0.04,0.02}*Mirror;
+  JaboutCoMOnOff = On;
+  AnyDrawSurf DrwSurf = {
+    FileName = "Scapula_new";
+    RGB=...ColorRef.Segments;
+    ScaleXYZ = {1.0,1.0,1.0}*.Mirror;
+    AnyFunTransform3D &Scale = .Scale;
+    Transparency = ...BonesTransparency.Scapula;
+  };
+  
+  AnyRefNode MuscleConnectorPlaneNode ={
+    sRel = .Scale({0.032144, -0.008524, -0.025-0.003283})*.Mirror;
+  };
+  
+  AnyRefNode ac = {   
+    sRel = .Scale({0.000000, 0.000000, 0.000000})*.Mirror;
+    #include "../DrawSettings/BML.any"
+    #include "../DrawSettings/JointAxesProximal.any"
+    
+  };
+  
+  AnyRefNode acj = {  
+    sRel = .Scale({-0.000929+0.007, 0.001401-0.005, -0.015331-0.015})*.Mirror;
+    
+  };
+  
+  
+  AnyRefNode ts = {
+    sRel = .Scale({-0.117455, -0.017693, 0.006280})*.Mirror;
+    #include "../DrawSettings/BML.any"
+  };
+  
+  AnyRefNode ai= {
+    sRel = .Scale({-0.130736, -0.130236, 0.006280})*.Mirror;
+    #include "../DrawSettings/BML.any"
+  };
+  AnyRefNode aa = {
+    sRel = .Scale({0.022522, -0.017693, 0.006280})*.Mirror;
+    #include "../DrawSettings/BML.any"
+  };
+  
+  AnyRefNode gh = {
+    //Corrected!
+    AnyVec3 d= {0.0075,0,-0.01};
+    sRel = .Scale({0.015898, -0.050863, -0.024381}+d)*.Mirror;
+    
+    //AnyDrawRefFrame drw={};
+    #include "../DrawSettings/BML.any"
+    #include "../DrawSettings/JointAxesDistal.any"
+  };
+  
+  AnyVec3 ConoidStd={-0.030040, -0.008900, -0.035754};
+  
+  AnyRefNode conoid = {
+    sRel = .Scale(.ConoidStd)*.Mirror;
+  };
+  
+  AnyRefNode trapezoid = {
+    sRel = .Scale({-0.020194, -0.009190 , -0.037291})*.Mirror;
+  };
+  
+  
+  
+}; //Scapula
+
+///Humerus segment definition
+AnySeg Humerus ={
+  
+  
+  AnyVec3 OffSet =-{-0.001379, 0.008999 , -0.009119};
+  
+  AnyMat33 Mirror={{..Sign,0,0},{0,1,0},{0,0,1}};
+  
+  r0=.Scapula.gh.sRel*.Scapula.Axes0'+.Scapula.r0;
+  
+  AnyFunTransform3D &Scale=..Scaling.GeometricalScaling.Humerus.ScaleFunction;
+  
+  #include "../DrawSettings/Nodes.any"
+  
+  AnyVar MassS = .....Scaling.MassScaling.Humerus.MassScale;
+  AnyVar MassStandard = ..StandardParameters.Humerus.Mass; 
+  
+  Mass = MassS*MassStandard;
+  
+  //Note stc issue for scaling
+  AnyVar Length = ((gh.sRel[1]-fe.sRel[1])^2)^0.5; // Find the length using bonylandmark x coordinates!
+  
+  AnyVar Radius = (Mass/(3.1416*Length*..StandardParameters.Humerus.Density))^0.5;
+  
+  AnyVar Ixx = 0.25*Mass*Radius*Radius + 1/12*Mass*Length*Length;
+  AnyVar Iyy = 0.5*Mass*Radius*Radius;
+  AnyVar Izz = Ixx; 
+  Jii = {Ixx,Iyy,Izz};
+  sCoM={0,-0.18*Length,0};
+  JaboutCoMOnOff = On;
+
+  AnyRefNode HumerusBoneGeometryNode={ 
+    sRel=.OffSet*.Mirror;
+    AnyDrawSurf DrwSurf = {
+      FileName = "Humerus_bone";
+      ScaleXYZ = ({1.0,1.0,1.0})*..Mirror;
+      RGB =....ColorRef.Segments;
+      AnyFunTransform3D &Scale = ..Scale;
+      Transparency = ....BonesTransparency.Humerus;
+    };
+  };
+  
+  AnyRefNode DeltoidConnectorCenter = {
+    sRel=.art_tub_minus_tub_majus.sRel;
+    //sRel=.art_gh_hum.sRel;
+    
+  };
+  
+  
+  AnyRefNode gh = {
+    
+    sRel = .Scale({0.00000, 0.000000 , -0.000000})*.Mirror;
+    #include "../DrawSettings/BML.any"
+    #include "../DrawSettings/JointAxesProximal.any"
+    //AnyDrawRefFrame drw={RGB={0,1,0};};
+    //AnySurfSphere sphere={Radius=0.03;AnyDrawParamSurf drw={};};
+    
+  };
+  AnyRefNode em = {sRel = .Scale({-0.030510, -0.311210 , 0.000000}+.OffSet)*.Mirror;
+    #include "../DrawSettings/BML.any"
+    // AnyDrawRefFrame drw={};
+    
+  };
+  AnyRefNode el = {sRel = .Scale({0.030510, -0.306605 , 0.000000}+.OffSet)*.Mirror;
+    #include "../DrawSettings/BML.any"
+    //AnyDrawRefFrame drw={};
+  };
+  
+  
+  //Axis for flexion extension joint data 
+  AnyRefNode fe = {
+    sRel = .Scale({(0.013072-.01), -0.331048 , -0.007917}+.OffSet)*.Mirror;
+    
+    //Note:STC the axis might be subject for scaling
+    /*ARel = {
+    {...Sign*-0.998167,...Sign*-0.060507,-0.001446},
+    {-0.060524,0.997882,...Sign*0.023852},
+    {-0.000000,0.023896,...Sign*-0.999714}};*/
+    
+    ARel = {
+      {...Sign*-1,...Sign*-0,0.0},
+      {0,1,...Sign*0.0},
+      {-0.000000,0.0,...Sign*-1}};
+    
+    
+    
+    
+    #include "../DrawSettings/JointAxesDistal.any"
+    
+  };
+  
+  
+  
+}; // Humerus
+
+
+
+
+AnySeg Ulna ={
+  
+  AnyMat33 Mirror={{1,0,0},{0,..Sign,0},{0,0,1}};
+  
+  AnyFunTransform3D &Scale=..Scaling.GeometricalScaling.Ulna.ScaleFunction;
+  
+  r0=.Humerus.fe.sRel*.Humerus.Axes0'+.Humerus.r0;
+  
+  #include "../DrawSettings/Nodes.any"
+  
+  AnyVar MassS = .....Scaling.MassScaling.Ulna.MassScale;
+  
+  AnyVar MassStandard =..StandardParameters.Ulna.Mass; // Veeger1997 subject no.4. 
+  
+  Mass = MassS*MassStandard;
+  
+  //AnyVar LengthStandard = 0.275575;
+  
+  
+  //Note stc issue for scaling
+  AnyVar Length = ((us.sRel[1]-ol.sRel[1])^2)^0.5; // Find the length using bonylandmark x coordinates!
+  AnyVar Radius = (Mass/(3.1416*Length*..StandardParameters.Ulna.Density))^0.5;
+  
+  AnyVar Ixx = 0.25*Mass*Radius*Radius + 1/12*Mass*Length*Length;
+  AnyVar Iyy = 0.5*Mass*Radius*Radius;
+  AnyVar Izz = Ixx; 
+  Jii = {Ixx,Iyy,Izz};
+  sCoM={0,0.43*Length,0}*Mirror;
+    JaboutCoMOnOff = On;
+  AnyRefNode fe = { sRel=.Scale({0.0,0.008,0.0})*.Mirror; 
+    #include "../DrawSettings/JointAxesProximal.any"
+  };
+  
+  //Node used for defining proximal ps joint
+  AnyRefNode ps2 = { 
+    sRel=.Scale({-0.015,0.0,0.005})*.Mirror;
+    ARel=RotMat(sRel,.us.sRel,.ol.sRel)*RotMat(pi,y)*RotMat(pi/2,z);
+    
+    AnyRefNode usRot = {
+      sRel = {0.00000, vnorm(..us.sRel-.sRel), 0.000000}*..Mirror;
+    };
+  };
+  
+  
+  AnyDrawSurf DrwSurf = {
+    FileName = "Ulna_bone";
+    ScaleXYZ = ({1.0,1.0,1.0})*.Mirror;
+    RGB =...ColorRef.Segments;
+    AnyFunTransform3D &Scale = .Scale;
+    Transparency = ...BonesTransparency.Ulna;
+  };
+  
+  
+  AnyRefNode us = {
+    sRel = .Scale({0.024878, 0.270451, 0.000000})*.Mirror;
+    #include "../DrawSettings/BML.any"
+  };
+  
+  AnyRefNode ol = {sRel = .Scale({0.019665, -0.005124, 0.033000})*.Mirror;
+    #include "../DrawSettings/BML.any"
+  };
+  
+  //This is the nodes which are used for the definiton of the pronation supination axis.
+  AnyRefNode ps = {
+    sRel = .Scale({-0.010063, 0.045066, -0.002620})*.Mirror;
+  };
+  
+}; // Ulna
+
+
+
+AnySeg Radius ={
+  
+  AnyMat33 Mirror={{1,0,0},{0,..Sign,0},{0,0,1}};
+  
+  AnyFunTransform3D &Scale=..Scaling.GeometricalScaling.Radius.ScaleFunction;
+  
+  r0=.Ulna.ps.sRel*.Ulna.Axes0'+.Ulna.r0; 
+  
+  //This node is used for scaling of radius together with ulna
+  //using the scaling matrix of ulna
+  //For a neutral position this node will be located in the origo of 
+  //Ulna
+  //Arel is used to map the scaling of ulna into the rotated coordinate system
+  //of radius
+  AnyRefNode NeutralPositionOnUlna = {
+    AnyVec3 Radius_R = {0.110509, 0.020415, 0.280149};
+    AnyVec3 Ulna_R = {0.098238, 0.059976, 0.261779};
+    AnyMat33 Radius_Axes = {{-0.279448, -0.020684, -0.959938}, {0.956474, -0.093525, -0.276425}, {-0.084061, -0.995402, 0.045919}};
+    AnyMat33 Ulna_Axes = {{0.020302, 0.279477, -0.959938}, {-0.232048, -0.932600, -0.276425}, {-0.972492, 0.228363, 0.045919}};
+    sRel = {0.042812, 0.014839, 0.000000}*.Mirror;
+    ARel = {{-0.145873, -0.989303, -0.000001}, {0.989303, -0.145873, 0.000001}, {-0.000001, -0.000000, 1.000000}};
+  };
+  
+  
+  #include "../DrawSettings/Nodes.any"
+  
+  AnyVar MassS = .....Scaling.MassScaling.Radius.MassScale;
+  
+  AnyVar MassStandard =..StandardParameters.Radius.Mass; // Veeger1997 subject no.4. 
+  
+  Mass = MassS*MassStandard;
+  
+  //AnyVar LengthStandard = 0.275575;
+  //NOte stc issue for scaling 
+  AnyVar Length = .Ulna.Length;
+  AnyVar Radius = (Mass/(3.1416*Length*..StandardParameters.Radius.Density))^0.5;
+  
+  AnyVar Iyy = 0.25*Mass*Radius*Radius + 1/12*Mass*Length*Length;
+  AnyVar Ixx = 0.5*Mass*Radius*Radius;
+  AnyVar Izz = Iyy; 
+  Jii = {Ixx,Iyy,Izz};
+  
+  sCoM={-0.43*Length,0,0};
+    JaboutCoMOnOff = On;
+    
+  AnyRefNode PointPS2 = {
+    #include "../DrawSettings/JointAxesProximal.any"
+    sRel = .Scale({0.045, -0.0, 0.0})*.Mirror;
+  };
+  
+  
+  AnyDrawSurf DrwSurf = {
+    FileName = "radius_bone";
+    ScaleXYZ = ({1.0,1.0,1.0})*.Mirror;
+    RGB = ...ColorRef.Segments;
+    AnyFunTransform3D &Scale = .Scale;
+    Transparency = ...BonesTransparency.Radius;
+  };
+  
+  
+  // Radius stylno bml
+  //Not used!
+  AnyRefNode rs = {
+    sRel = .Scale({-0.236653, -0.041349, 0.000000})*.Mirror;
+    #include "../DrawSettings/BML.any"
+  };
+  
+  AnyRefNode wj = {
+    ARel=RotMat(...Sign*-15*pi/180,z);
+    sRel = .Scale({-0.235, -0.015, 0.01})*.Mirror;
+    //    AnyDrawRefFrame drw={RGB={0,1,0};};
+    #include "../DrawSettings/BML.any"
+  };
+  
+  // This is the RefNode which is used for the pronation supination axis
+  AnyRefNode PS = {
+    #include "../DrawSettings/JointAxesProximal.any"
+    sRel = .Scale({-0.232338, 0.005, 0.015})*.Mirror;
+    
+    #include "../DrawSettings/BML.any"
+  };
+}; // Radius
+
+
+AnySeg Hand ={
+  
+  AnyMat33 Mirror={{1,0,0},{0,1,0},{0,0,..Sign}};
+  
+  AnyFunTransform3D &Scale=..Scaling.GeometricalScaling.Hand.ScaleFunction;
+  r0=.WristJointSeg.RadialUlnarDeviation.sRel*.WristJointSeg.Axes0'+.WristJointSeg.r0;//.Radius.wj.sRel*.Radius.Axes0'+.Radius.r0+; 
+  
+  #include "../DrawSettings/Nodes.any"
+  
+  AnyVar MassS = .....Scaling.MassScaling.Hand.MassScale;
+  
+  AnyVar MassStandard = ..StandardParameters.Hand.Mass; // Veeger1997 subject no.4. 
+  
+  Mass = MassS*MassStandard;
+  
+  AnyVar LengthStandard = 0.1;// Guesstimate..
+  
+  AnyVar Length = 0.1; // Guesstimate..
+  AnyVar Radius = (Mass/(3.1416*Length*..StandardParameters.Hand.Density))^0.5;
+  
+  AnyVar Ixx = 0.25*Mass*Radius*Radius + 1/12*Mass*Length*Length;
+  AnyVar Iyy = 0.5*Mass*Radius*Radius;
+  AnyVar Izz = Ixx; 
+  Jii = {Ixx,Iyy,Izz};
+  
+  sCoM={-0.06,0,0}; // Guesstimate
+    JaboutCoMOnOff = On;
+  
+  AnyRefNode wj={ 
+    sRel=.Scale({-0.014,0.0,0.0})*.Mirror;
+    //Note:STC Issue for scaling 
+    ARel = {{1,0,0},
+      {0,...Sign*1,0},
+      {0,0,...Sign*1}
+    }; 
+  };
+  
+  
+  AnyRefNode Hand={ sRel=.Scale({-0.1,0,.0})*.Mirror;};
+  
+  
+  AnyRefNode PalmJoint={ sRel=.Scale({-0.08,-0.02,0.0})*.Mirror;};
+  /*
+  AnyRefNode WristContactNode={
+  sRel=.Scale({-0.0,-0.0,0.0})*.Mirror;
+  ARel={{-1,0,0},{0,0,...Sign*1},{0,...Sign*1,0}};  
+  
+  };
+  
+  AnyRefNode PalmLateralContactNode={
+  sRel=.Scale({-0.08,-0.04,0.0})*.Mirror;
+  ARel={{-1,0,0},{0,0,...Sign*1},{0,...Sign*1,0}};  
+  
+  };
+  
+  AnyRefNode PalmMedialContactNode={
+  sRel=.Scale({-0.08,0.02,0.0})*.Mirror;
+  ARel={{-1,0,0},{0,0,...Sign*1},{0,...Sign*1,0}};  
+  };
+  
+  */
+  
+  AnyRefNode Via1_Extensor_Indicis = {
+    //    AnyDrawRefFrame drw={RGB={0,1,0};};
+    
+    sRel = .Scale({-0.03, -0.015, 0.015})*.Mirror; //guesstimate
+  };
+  
+  
+  AnyRefNode I_Extensor_Indicis = {
+    //    AnyDrawRefFrame drw={};
+    
+    sRel = .Scale({-0.135, -0.05, -0.005})*.Mirror; //guesstimate
+  };
+  
+  
+  
+  AnyRefNode I_Extensor_Pollicis_Longus = {
+    //    AnyDrawRefFrame drw={};
+    sRel = .Scale({-0.055, -0.065, -0.003})*.Mirror; //guesstimate
+  };
+  
+  AnyRefNode Via1_Extensor_Pollicis_Longus= {
+    //    AnyDrawRefFrame drw={RGB={0,1,0};};
+    
+    sRel = .Scale({-0.03, -0.04, 0.005})*.Mirror; //guesstimate
+  };
+  
+  
+  
+  
+  AnyRefNode I_Extensor_Pollicis_Brevis = {
+    //    AnyDrawRefFrame drw={};
+    sRel = .Scale({-0.055, -0.065, -0.003})*.Mirror; //guesstimate
+  };
+  
+  AnyRefNode Via1_Extensor_Pollicis_Brevis= {
+    //    AnyDrawRefFrame drw={RGB={0,1,0};};
+    
+    sRel = .Scale({-0.03, -0.04, 0.005})*.Mirror; //guesstimate
+  };
+  
+  
+  
+  
+  
+  AnyRefNode I_Abductor_Pollicis_Longus = {
+    //   AnyDrawRefFrame drw={};
+    sRel = .Scale({-0.04, -0.055, -0.01})*.Mirror; //guesstimate
+  };
+  
+  AnyRefNode Via1_Abductor_Pollicis_Longus= {
+    //    AnyDrawRefFrame drw={RGB={0,1,0};};
+    sRel = .Scale({-0.01, -0.02, 0.015})*.Mirror; //guesstimate
+  };
+  
+  
+  AnyRefNode I_Extensor_Carpi_Ulnaris= {
+    //    AnyDrawRefFrame drw={RGB={0,1,0};};
+    sRel = .Scale({-0.035, 0.017, 0.0053})*.Mirror; //guesstimate
+  };
+  
+  
+  AnyRefNode I_Extensor_Carpi_Radialis_Brevis= {
+    //    AnyDrawRefFrame drw={RGB={0,0,1};};
+    sRel = .Scale({-0.04, -0.014, 0.01})*.Mirror; //guesstimate
+  };
+  
+  AnyRefNode Via_Extensor_Carpi_Radialis_Brevis= {
+    //    AnyDrawRefFrame drw={RGB={0,1,0};};
+    sRel = .Scale({-0.025, -0.015, 0.01})*.Mirror; //guesstimate
+  };
+  
+  
+  AnyRefNode Via_Extensor_Carpi_Radialis_Longus ={
+    //    AnyDrawRefFrame drw={RGB={0,0,1};};
+    sRel = .Scale({-0.05, -0.02, 0.01})*.Mirror; //guesstimate
+    
+  };
+  AnyRefNode I_Flexor_Carpi_Ulnaris ={
+    sRel = .Scale({-0.04, 0.014, -0.0})*.Mirror; //guesstimate
+    // AnyDrawRefFrame drw={RGB={0,1,0};};
+  };
+  
+  
+  AnyRefNode I_Flexor_Carpi_Radialis ={
+    sRel = .Scale({-0.0335, -0.018, -0.0})*.Mirror; //guesstimate
+    //AnyDrawRefFrame drw={RGB={0,1,0};};
+  };
+  
+  AnyRefNode Via_Flexor_Carpi_Radialis ={
+    sRel = .Scale({-0.035, -0.005, -0.013})*.Mirror; //guesstimate
+    //    AnyDrawRefFrame drw={RGB={1,0,0};};
+  };
+  
+  AnyRefNode I_Palmaris_Longus ={
+    sRel = .Scale({-0.0435, 0.0, -0.007})*.Mirror; //guesstimate
+    //AnyDrawRefFrame drw={RGB={0,1,0};};
+  };
+  
+  
+  
+  AnyRefNode Via_Palmaris_Longus ={
+    sRel = .Scale({-0.035, -0.0, -0.014})*.Mirror; //guesstimate
+    //AnyDrawRefFrame drw={RGB={0,1,0};};
+  };
+  
+  
+  AnyRefNode I_Flexor_Digitorum_Superficialis_Digit2 ={
+    sRel = .Scale({-0.132, -0.05, -0.005})*.Mirror; //guesstimate
+    //   AnyDrawRefFrame drw={RGB={0,1,0};};
+  };
+  
+  AnyRefNode I_Flexor_Digitorum_Superficialis_Digit3 ={
+    sRel = .Scale({-0.143, -0.025, -0.005})*.Mirror; //guesstimate
+    //   AnyDrawRefFrame drw={RGB={0,1,0};};
+  };
+  
+  AnyRefNode I_Flexor_Digitorum_Superficialis_Digit4 ={
+    sRel = .Scale({-0.14, -0.006, -0.005})*.Mirror; //guesstimate
+    //   AnyDrawRefFrame drw={RGB={0,1,0};};
+  };
+  
+  AnyRefNode I_Flexor_Digitorum_Superficialis_Digit5 ={
+    sRel = .Scale({-0.125, 0.017, -0.00})*.Mirror; //guesstimate
+    //   AnyDrawRefFrame drw={RGB={0,1,1};};
+  };
+  
+  
+  
+  
+  AnyRefNode Via_Flexor_Digitorum_Superficialis_Digit5 ={
+    sRel = .Scale({-0.03, 0.00, -0.005})*.Mirror; //guesstimate
+    // AnyDrawRefFrame drw={RGB={0,1,0};};
+  };
+  
+  AnyRefNode Via_Flexor_Digitorum_Superficialis_Digit4 ={
+    sRel = .Scale({-0.03, -0.003, -0.005})*.Mirror; //guesstimate
+    // AnyDrawRefFrame drw={RGB={0,1,0};};
+  };
+  
+  AnyRefNode Via_Flexor_Digitorum_Superficialis_Digit3 ={
+    sRel = .Scale({-0.03, -0.006, -0.005})*.Mirror; //guesstimate
+    //AnyDrawRefFrame drw={RGB={0,1,0};};
+  };
+  
+  AnyRefNode Via_Flexor_Digitorum_Superficialis_Digit2 ={
+    sRel = .Scale({-0.03, -0.009, -0.005})*.Mirror; //guesstimate
+    //AnyDrawRefFrame drw={RGB={0,1,0};};
+  };
+  
+  
+  
+  
+  AnyRefNode I_Flexor_Digitorum_Profundus_Digit2 ={
+    sRel = .Scale({-0.152, -0.055, -0.007})*.Mirror; //guesstimate
+    //   AnyDrawRefFrame drw={RGB={0,1,0};};
+  };
+  
+  AnyRefNode I_Flexor_Digitorum_Profundus_Digit3 ={
+    sRel = .Scale({-0.169, -0.027, -0.005})*.Mirror; //guesstimate
+    //   AnyDrawRefFrame drw={RGB={0,1,0};};
+  };
+  
+  AnyRefNode I_Flexor_Digitorum_Profundus_Digit4 ={
+    sRel = .Scale({-0.165, -0.008, -0.008})*.Mirror; //guesstimate
+    //   AnyDrawRefFrame drw={RGB={0,1,0};};
+  };
+  
+  AnyRefNode I_Flexor_Digitorum_Profundus_Digit5 ={
+    sRel = .Scale({-0.145, 0.017, -0.009})*.Mirror; //guesstimate
+    //   AnyDrawRefFrame drw={RGB={0,1,1};};
+  };
+  
+  
+  
+  
+  
+  AnyRefNode Via_Flexor_Digitorum_Profundus_Digit5 ={
+    sRel = .Scale({-0.03, 0.00, -0.005})*.Mirror; //guesstimate
+    //AnyDrawRefFrame drw={RGB={0,1,0};};
+  };
+  
+  AnyRefNode Via_Flexor_Digitorum_Profundus_Digit4 ={
+    sRel = .Scale({-0.03, -0.002, -0.005})*.Mirror; //guesstimate
+    //AnyDrawRefFrame drw={RGB={0,1,0};};
+  };
+  
+  AnyRefNode Via_Flexor_Digitorum_Profundus_Digit3 ={
+    sRel = .Scale({-0.03, -0.004, -0.005})*.Mirror; //guesstimate
+    //AnyDrawRefFrame drw={RGB={0,1,0};};
+  };
+  
+  AnyRefNode Via_Flexor_Digitorum_Profundus_Digit2 ={
+    sRel = .Scale({-0.03, -0.006, -0.005})*.Mirror; //guesstimate
+    //AnyDrawRefFrame drw={RGB={0,1,0};};
+  };
+  
+  
+  
+  
+  
+  
+  
+  AnyRefNode I_Extensor_Digitorum_Digit2 ={
+    sRel = .Scale({-0.132, -0.05, 0.005})*.Mirror; //guesstimate
+    //   AnyDrawRefFrame drw={RGB={0,1,0};};
+  };
+  
+  AnyRefNode I_Extensor_Digitorum_Digit3 ={
+    sRel = .Scale({-0.143, -0.025, 0.005})*.Mirror; //guesstimate
+    //   AnyDrawRefFrame drw={RGB={0,1,0};};
+  };
+  
+  AnyRefNode I_Extensor_Digitorum_Digit4 ={
+    sRel = .Scale({-0.14, -0.006, 0.005})*.Mirror; //guesstimate
+    //   AnyDrawRefFrame drw={RGB={0,1,0};};
+  };
+  
+  AnyRefNode I_Extensor_Digitorum_Digit5 ={
+    sRel = .Scale({-0.125, 0.017, 0.002})*.Mirror; //guesstimate
+    //   AnyDrawRefFrame drw={RGB={0,1,1};};
+  };
+  
+  
+  
+  
+  
+  AnyRefNode Via_Extensor_Digitorum_Digit5 ={
+    sRel = .Scale({-0.02, 0.002, 0.011})*.Mirror; //guesstimate
+    //   AnyDrawRefFrame drw={RGB={0,1,0};};
+  };
+  
+  AnyRefNode Via_Extensor_Digitorum_Digit4 ={
+    sRel = .Scale({-0.02, 0.00, 0.011})*.Mirror; //guesstimate
+    //   AnyDrawRefFrame drw={RGB={0,1,0};};
+  };
+  
+  AnyRefNode Via_Extensor_Digitorum_Digit3 ={
+    sRel = .Scale({-0.02, -0.002, 0.011})*.Mirror; //guesstimate
+    //   AnyDrawRefFrame drw={RGB={0,1,0};};
+  };
+  
+  AnyRefNode Via_Extensor_Digitorum_Digit2 ={
+    sRel = .Scale({-0.02, -0.004, 0.011})*.Mirror; //guesstimate
+    //   AnyDrawRefFrame drw={RGB={0,1,0};};
+  };
+  
+  
+  
+  
+  
+  
+  
+  
+  AnyRefNode Via_Extensor_Digiti_Minimi={
+    sRel = .Scale({-0.02, 0.005, 0.01})*.Mirror; //guesstimate
+    //   AnyDrawRefFrame drw={RGB={0,1,0};};
+  };
+  
+  AnyRefNode I_Extensor_Digiti_Minimi ={
+    sRel = .Scale({-0.145, 0.017, 0.002})*.Mirror; //guesstimate
+    //   AnyDrawRefFrame drw={RGB={0,1,1};};
+  };
+  
+  
+  
+  
+  AnyRefNode Via_Flexor_Pollicis_Longus={
+    sRel = .Scale({-0.03, -0.025, -0.01})*.Mirror; //guesstimate
+    //AnyDrawRefFrame drw={RGB={0,1,0};};
+  };
+  
+  
+  
+  AnyRefNode I_Flexor_Pollicis_Longus ={
+    sRel = .Scale({-0.093, -0.08, -0.02})*.Mirror; //guesstimate
+    //AnyDrawRefFrame drw={RGB={0,1,1};};
+  };
+  
+  
+  //It is used for wrapping of the flexor muscles.
+  AnyRefNode FlexorMuscleCyl = { 
+    
+    sRel = .wj.sRel-.Scale({0,0.07,0})*.Mirror-..WristJointSeg.RadialUlnarDeviation.sRel;
+    
+    AnyVec3 P1= sRel;
+    AnyVec3 P3 =P1+ .Scale({0.0,0.0,0.0115})*.Mirror;
+    AnyVec3 P2 =P1+ .Scale({0.0, 0.14,0.0})*.Mirror;
+    
+    
+    
+    //Calculate rot matrix for cylinder using three points
+    //p2-p1 used to find x axis
+    //p3-p1 used to find the y axis
+    //z axis found as cross product
+    AnyMat33  Mat = RotMat(sRel,P3,P2);
+    
+    //Switch around the on the columns to compensate that the cylinder has 
+    //main axis along the zaxis
+    ARel={
+      {Mat[0][2],Mat[0][0],Mat[0][1]},
+      {Mat[1][2],Mat[1][0],Mat[1][1]},
+      {Mat[2][2],Mat[2][0],Mat[2][1]}};          
+    
+    AnySurfCylinder cyl = { 
+      Radius=((.sRel[0]-.P3[0])^2+(.sRel[1]-.P3[1])^2+(.sRel[2]-.P3[2])^2)^0.5;
+      Length= ((.sRel[0]-.P2[0])^2+(.sRel[1]-.P2[1])^2+(.sRel[2]-.P2[2])^2)^0.5;
+      //AnyDrawParamSurf drw={};
+    };
+    
+  };
+  AnyRefNode Thumb3joint={ sRel=.Scale({0.0,0,0.05})*.Mirror;};
+  
+  AnyDrawSurf DrwSurf = {
+    FileName = "hand_bone";
+    RGB = ...ColorRef.Segments;
+    ScaleXYZ = ({1,1.0,1})*.Mirror;
+    AnyFunTransform3D &Scale = .Scale;
+    Transparency = ...BonesTransparency.Hand;
+  };
+}; // End hand
+
+
+//this seg is introduced because the flexion extension axis in the wrist is not coincident with the radial ulnar deviation axis
+AnySeg WristJointSeg ={
+  Mass=0;
+  Jii={0,0,0};
+  r0=.Radius.wj.sRel*.Radius.Axes0'+.Radius.r0;
+  Axes0={
+    {.Hand.Axes0[0][0],.Hand.Axes0[0][1],.Hand.Axes0[0][2]},
+    {.Hand.Axes0[1][0],.Hand.Axes0[1][1],.Hand.Axes0[1][2]},
+    {.Hand.Axes0[2][0],.Hand.Axes0[2][1],.Hand.Axes0[2][2]}}*RotMat(0.5*(1-..Sign)*pi,x);
+  
+  AnyRefNode FlexionExtensionAxis={sRel={0.00,0,0};};
+  AnyRefNode RadialUlnarDeviation={sRel={-0.005,0,0};};
+};
+
+
+
+
+

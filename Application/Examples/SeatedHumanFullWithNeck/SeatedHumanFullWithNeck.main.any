@@ -1,0 +1,203 @@
+// --------------------------------------------------------
+// This is a model comprising the full body model, a chair
+// and an interface between them.
+// The interface is made such that the posture of the body
+// is dependent of the settings if the chair.
+// The settings of the chair (and thereby the posture of 
+// the body) are controlled by the parameters in the 
+// folders DrvPos and DrvVel.
+// The support between the body and the chair is made with artificial muscles
+// which also handles friction
+// --------------------------------------------------------
+
+Main = {
+  
+  /**Execute this operation to run the model in the intended operation sequence.  
+  It is also possible to run operations seperately, by manual selections in the operation tree*/
+  AnyOperationSequence RunApplication = {
+
+    /**This operation calibrates the muscles in the model if these are of the type AnyMuscleModel3E.
+    This will just be an empty operation if the model is using a muscle type that does not require calibration.*/
+    AnyOperation &CalibrationAnal = Main.HumanModel.Calibration.CalibrationSequence;  
+
+    ///This operation is the inverse dynamic analysis
+    AnyOperation &InvAnal=Main.Study.InverseDynamics;
+   
+  };
+
+
+
+  // ------------------------------------------------------
+  // Driver Positions - in degrees
+  // ------------------------------------------------------
+  AnyFolder DrvPos = {
+    AnyVar PelvisSeatLinXPos = 0.05;
+    AnyVar SeatGlobalLinYPos = 0;
+    AnyVar SeatGlobalRotZPos = 0; 
+    AnyVar BackRestHeadResRotZPos = 0;
+    AnyVar GlobalLegRestRotZPos = 0;
+    AnyVar GlobalBackRestRotZPos = 10;
+    AnyVar LegRestFootRestLinYPos = 0.15; 
+    //    AnyVar ArmrestSlide = -0.1;
+  }; // DrvPos
+  
+  // --------------------------------------------------------
+  // Driver Velocities - in degrees per second
+  // --------------------------------------------------------
+  AnyFolder DrvVel = {
+    AnyVar PelvisSeatLinXVel = 0.0;
+    AnyVar SeatGlobalLinYVel = 0;
+    AnyVar SeatGlobalRotZVel = 0;
+    AnyVar SeatInclVel = 0;
+    AnyVar GlobalBackRestRotZVel = 45;
+    AnyVar GlobalLegRestRotZVel = 0;
+    AnyVar LegRestFootRestLinYVel = 0; 
+    //    AnyVar ArmrestSlide =-0.003;
+  }; // DrvVel
+  
+  // --------------------------------------------------------
+  // Support settings 
+  // --------------------------------------------------------
+  AnyFolder SupportSettings = {
+    
+    //Friction coefficients between the human and the chair
+    AnyVar StaticFrictionSeat = 0.5;
+    AnyVar StaticFrictionBackrest = 0.5;
+    AnyVar StaticFrictionFootrest = 0.5; 
+    AnyVar StaticFrictionArmrest = 0.2; 
+    
+    //Strenght of the support muscles between the human and the chair
+    AnyVar SeatSupportStrength=10000;
+    AnyVar BackrestSupportStrength=10000;
+    AnyVar FootrestSupportStrength=10000;
+    AnyVar ArmrestSupportStrength=10000;
+  };
+  
+  // ----------------------------------------------------------
+  // Draw settings
+  // ----------------------------------------------------------
+  #include "DrawSettings.any"
+  
+  
+    
+    AnyFolder HumanModel={
+AnyFolder &Mannequin=.Model.Mannequin;
+
+      //This model should be used when playing around with the model in the 
+      //initial modelling phase since leaving the normal muscles out, makes the 
+      //model run much faster. The model uses artificial muscles on each dof. in 
+      //the joints which makes it possible also to run the inverse analysis.  
+      //#include  "..\..\..\Body\AAUHuman\BodyModels\FullBodyModelWithNeck\BodyModel_NoMuscles.any"    
+      
+      //This model uses the simple constant force muscles 
+      #include  "..\..\..\Body\AAUHuman\BodyModels\FullBodyModelWithNeck\BodyModel.any"    
+      
+      //This model uses the 3 element Hill type muscles
+      //#include  "..\..\..\Body\AAUHuman\BodyModels\FullBodyModelWithNeck\BodyModel_Mus3e.any"    
+      
+      AnyFolder StrengthParameters={
+        AnyVar SpecificMuscleTensionSpine= 90; //N/cm^2
+        AnyVar StrengthIndexLeg= 1; 
+        AnyVar SpecificMuscleTensionShoulderArm= 90; //N/cm^2
+      };
+      
+      /*
+      Choice of Scaling
+      */
+      #include "..\..\..\Body\AAUHuman\Scaling\ScalingStandard.any"
+      
+    };
+  
+    // ------------------------------------------------------------
+  // Model
+  // ------------------------------------------------------------
+  
+  AnyFolder Model = {
+
+    AnyFolder &HumanModel=.HumanModel.BodyModel;
+    
+    //The Mannequin values is used both for setting the initial positions of the model
+    //and driving the model at analysis time. So you can change the values in the Mannequin
+    //file and it will change both initial positions and how it is positioned at analysis time. 
+    //If you want to run the model into some posture and then dump the momentary joint angles as the
+    //initial ones then simply do the following:
+    // 1  Double click the folder Main.MannequinValuesFromModel.AnyFolder_Posture and it will dump the joint angles to the message window 
+    // 2. Copy the dumped text into the Mannequin.any replacing the "Posture" folder 
+    // 3. Press ctrl+h and search and replace "_" with " "
+    // 4. Once the model is reloaded it will start in the position corresponding to the one which was dumped.
+    #include "Mannequin.any"   
+    #include "MannequinValuesFromModel.any"   
+    
+    AnyFolder EnvironmentModel = {
+      #include "Environment.any"
+    };
+    
+    AnyFolder ModelEnvironmentConnection = {
+      #include "ConnectionSegments.any"
+      #include "JointsAndDrivers.any"
+      
+      AnyFolder &RefPM=Main.Model.EnvironmentModel;
+      #include "InitialPositionsEnvironment.any" 
+      #include "Measures.any"
+      #include "Support.any" 
+    }; // ModelEnvironmentConnection
+    
+    
+    // -------------------------------------------------------------
+    
+  }; // Model
+  
+  // --------------------------------------------------------------
+  // Studies
+  // --------------------------------------------------------------
+
+  AnyBodyStudy Study = {
+    AnyFolder &Model = .Model;
+   
+    
+    tEnd = 1;
+    Gravity = {0.0, -9.81, 0.0};
+    nStep = 1;
+    
+    //Output from the Vastus Muscles
+    AnyVar VastiAct = 
+    max({Main.Model.HumanModel.Right.Leg.Mus.VastusMedialis.Activity,
+      Main.Model.HumanModel.Right.Leg.Mus.VastusIntermedius.Activity,
+      Main.Model.HumanModel.Right.Leg.Mus.VastusLateralis.Activity});
+    
+    //Size of total force in the L5 Sacrum joint
+    AnyVar L5SacrumReac = (Main.Model.HumanModel.Trunk.JointsLumbar.L5SacrumJnt.Constraints.Reaction.Fout[0]^2+
+    Main.Model.HumanModel.Trunk.JointsLumbar.L5SacrumJnt.Constraints.Reaction.Fout[1]^2+
+    Main.Model.HumanModel.Trunk.JointsLumbar.L5SacrumJnt.Constraints.Reaction.Fout[2]^2)^0.5;
+    
+    
+    AnyOutputFun MaxAct = {
+      Val = .MaxMuscleActivity;
+    };    
+    AnyOutputFun MaxVastiAct = {
+      Val = .VastiAct;
+    };
+    AnyOutputFun L5SacrumR = {
+      Val = .L5SacrumReac;
+    }; 
+  }; // Study
+  
+  
+  
+};// Main
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

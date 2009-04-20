@@ -1,0 +1,88 @@
+/** This model investigates the connection between knee shear force
+and foot center of pressure */
+Main = {
+  
+   /**Execute this operation to run the model in the intended operation sequence.  
+  It is also possible to run operations seperately, by manual selections in the operation tree*/
+  AnyOperationSequence RunApplication = {
+
+    /**This operation calibrates the muscles in the model if these are of the type AnyMuscleModel3E.
+    This will just be an empty operation if the model is using a muscle type that does not require calibration.*/
+    AnyOperation &CalibrationAnal = Main.HumanModel.Calibration.CalibrationSequence;  
+
+    ///This operation is the inverse dynamic analysis
+    AnyOperation &InvAnal=Main.Study.InverseDynamics;
+   
+  };
+
+
+  #include "DrawSettings.any"
+  
+  AnyFolder HumanModel = {
+    AnyFolder &Mannequin=.Model.Mannequin;
+    
+    // Pick only one of the following
+    
+    // Version without muscles
+    //#include  "..\..\..\Body\AAUHuman\BodyModels\TrunkNoMusclesRightLeg\BodyModel_NoMuscles.any"    
+    
+    // Version with the simple one-parameter muscles 
+    //#include  "..\..\..\Body\AAUHuman\BodyModels\TrunkNoMusclesRightLeg\BodyModel.any"
+
+    // Version with three-element Hill muscles. They require calibration before
+    // analysis.
+    #include  "..\..\..\Body\AAUHuman\BodyModels\TrunkNoMusclesRightLeg\BodyModel_Mus3E.any" 
+    
+    AnyFolder StrengthParameters={
+      AnyVar SpecificMuscleTensionSpine= 90; //N/cm^2
+      AnyVar StrengthIndexLeg= 1; 
+      AnyVar SpecificMuscleTensionShoulderArm= 90; //N/cm^2
+    };
+
+    // Use the standard size Body model
+    #include "..\..\..\Body\AAUHuman\Scaling\ScalingStandard.any"
+    
+    // This changes the knee joint coordinate system
+    // from the femur to the tibia. This allows us to assess
+    // the shear forces in the knee as the x coordinate of the
+    // joint reaction.
+    BodyModel.Right.Leg.Jnt.Knee = {
+      Ref = -1;
+    };
+  };
+  
+  /// This folder collecst the entire model, body + environment.
+  AnyFolder Model = {
+    
+    AnyFolder &HumanModel=.HumanModel.BodyModel;
+    //The Mannequin values is used both for setting the initial positions of the model
+    //and driving the model at analysis time. So you can change the values in the Mannequin
+    //file and it will change both initial positions and how it is positioned at analysis time. 
+    //If you want to run the model into some posture and then dump the momentary joint angles as the
+    //initial ones then simply do the following:
+    // 1  Double click the folder Main.MannequinValuesFromModel.AnyFolder_Posture and it will dump the joint angles to the message window 
+    // 2. Copy the dumped text into the Mannequin.any replacing the "Posture" folder 
+    // 3. Press ctrl+h and search and replace "_" with " "
+    // 4. Once the model is reloaded it will start in the position corresponding to the one which was dumped.
+    #include "Mannequin.any"   
+    
+    // Folder containing the objects that bind the human model and
+    // the pedal together.
+    AnyFolder ModelEnvironmentConnection = {
+      #include "JointsAndDrivers.any"
+    };
+    #include "Environment.any"
+  };  
+  
+  // The study: Operations to be performed on the model
+  AnyBodyStudy Study = {
+    nStep = 50;
+    
+    /// This variable compiles the shear force in the knee.
+    AnyVar ShearForce = Main.HumanModel.BodyModel.Right.Leg.Jnt.Knee.Constraints.Reaction.Fout[0];
+    
+    AnyFolder &Model = .Model;
+    
+    Gravity = {0.0, -9.81, 0.0};
+  };
+};  // Main

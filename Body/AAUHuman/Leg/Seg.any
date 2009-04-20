@@ -1,0 +1,364 @@
+// Definitions of segments in the right lower extremity.
+
+// Mark de Zee
+
+// Added origin, via nodes, insertion of sartorius and 
+// gracilis 26-6-02
+// revised muscle via nodes as commented 26-6-02
+// revised muscle via nodes as commented 27-6-02
+// Mark Thompson
+
+AnySeg Foot = {
+  
+  r0=.Shank.AnkleJoint.sRel*.Shank.Axes0'+.Shank.r0-AnkleJoint.sRel*Axes0'; 
+  
+  #include "../DrawSettings/Nodes.any"
+  #include "../DrawSettings/SegmentAxes.any"
+  
+  AnyFunTransform3D &Scale =..Scaling.GeometricalScaling.Foot.ScaleFunction;  
+  
+  AnyVar MassS = ..Scaling.MassScaling.Foot.MassScale;
+  
+  //AnyVar MassStandard = 0.0145*..BodyParRef.BodyMass; // Winter
+  AnyVar MassStandard = ..StandardParameters.Foot.Mass;
+  
+  Mass = MassS*MassStandard;
+  
+  //The center of mass is found as the midpoint between Malleous lateral and Metatarsal markerII see D.A.Winter
+  sCoM=(MetatarsalJoint2Node.sRel-MalleousLateralNode.sRel)*0.5+MalleousLateralNode.sRel;
+    JaboutCoMOnOff = On;
+  
+  //AnyVar LengthStandard = ( (0.06+0.012)^2 + (0.06+0.126)^2 + 0.023^2 )^0.5;
+  //AnyVar LengthStandard = ..StandardParameters.Foot.Length;
+  
+  AnyVar Length = ( (Toetip.sRel[0]-AnkleJoint.sRel[0])^2 + (Toetip.sRel[1]-AnkleJoint.sRel[1])^2 + (Toetip.sRel[2]-AnkleJoint.sRel[2])^2 )^0.5;
+  AnyVar Radius = (Mass/(3.1416*Length*..StandardParameters.Foot.Density))^0.5;
+  
+  AnyVar Ixx = 0.25*Mass*Radius*Radius + 1/12*Mass*Length*Length;
+  AnyVar Iyy = 0.5*Mass*Radius*Radius;
+  AnyVar Izz = Ixx; 
+  Jii = {Ixx, Iyy, Izz};
+  
+  AnyRefNode AnkleJoint = {
+    sRel = .Scale({0.06, 0.06, ...Sign*0.0});
+    #include "../DrawSettings/JointAxesProximal.any"
+  };
+  
+  AnyRefNode Toetip = {
+    sRel = .Scale({-0.012,-0.126,...Sign*0.023});
+  };
+  
+  AnyRefNode GroundJoint = {
+    sRel = .Scale({0.0, 0.0, ...Sign*0.0});
+    ARel = {{0, 1, 0}, {-1, 0, 0}, {0, 0, 1}};
+  };
+  
+  AnyRefNode HeelJoint = {
+    sRel = .Scale({0.009, 0.115, ...Sign*0.00}); 
+  };
+  
+  AnyRefNode ToeJoint = {
+    sRel = .Scale({-0.0, -0.0671, ...Sign*0.025});
+    ARel = {{0, 1, 0}, {-1, 0, 0}, {0, 0, 1}};
+  };
+  
+  AnyRefNode ToeJointP = {
+    sRel = .Scale({-0.0, -0.0671, ...Sign*-0.025});
+    ARel = {{0, 1, 0}, {-1, 0, 0}, {0, 0, 1}};
+    
+  };
+  
+  AnyRefNode ToeJointBack = {
+    sRel = .Scale({-0.0, -0.05, ...Sign*0.025});
+    ARel = {{0, 1, 0}, {-1, 0, 0}, {0, 0, 1}};
+  };
+  
+  
+  //point used for contact with environment   
+  AnyRefNode HeelContactNode = {
+    sRel = .Scale({-0.015, 0.095, ...Sign*0.00}); 
+    ARel = {{0, 1, 0}, {-1, 0, 0}, {0, 0, 1}};
+  };
+  
+  //point used for contact with environment 
+  AnyRefNode ToeLateralContactNode = {
+    sRel = .Scale({-0.01, -0.0371, ...Sign*0.05});
+    ARel = {{0, 1, 0}, {-1, 0, 0}, {0, 0, 1}};
+  };
+  
+  //point used for contact with environment  
+  AnyRefNode ToeMedialContactNode = {
+    sRel = .Scale({-0.01, -0.0671, ...Sign*-0.01});
+    ARel = {{0, 1, 0}, {-1, 0, 0}, {0, 0, 1}};
+  };
+  
+  
+  
+  //Metatarsal joint centers
+  AnyRefNode MetatarsalJoint1Node = {sRel = .Scale({0.005, -0.07, ...Sign*-0.01});  };
+  AnyRefNode MetatarsalJoint2Node = {sRel = .Scale({0.00, -0.0725, ...Sign*0.015});  };
+  AnyRefNode MetatarsalJoint3Node = {sRel = .Scale({0.00, -0.065, ...Sign*0.027});   };
+  AnyRefNode MetatarsalJoint4Node = {sRel = .Scale({-0.005, -0.05, ...Sign*0.037});  };
+  AnyRefNode MetatarsalJoint5Node = {sRel = .Scale({-0.005, -0.043, ...Sign*0.05});  };
+  
+  AnyRefNode MalleousLateralNode = {sRel = .Scale({0.065, 0.053, ...Sign*0.025});};
+  
+  
+  
+  
+  
+  
+  AnyRefNode SoleusNode = {sRel = .Scale({0.028, 0.108, ...Sign*-0.001});};
+  
+  AnyRefNode GastrocnemiusNode = {sRel = .Scale({0.028, 0.108, ...Sign*-0.001});};
+  
+  AnyRefNode TibialisPosteriorNode = {sRel = .Scale({0.012, 0.007, ...Sign*-0.020}); };
+  AnyRefNode TibialisPosteriorViaNode = {sRel = .Scale({0.037, 0.085, ...Sign*-0.02});
+    
+  }; // Important for moment arm, needs to be checked.
+  
+  AnyRefNode FlexorDigitorumLongusNode = {sRel = .Scale({-0.013, -0.1, ...Sign*0.04});};
+  AnyRefNode FlexorDigitorumLongusViaNode = {sRel = .Scale({0.037, 0.070, ...Sign*-0.02});}; // Important for moment arm, needs to be checked.
+  // MST changed flex dig via node from {0.027, 0.080, -0.01} to above - tib post and flex dig tendons lie in same groove under medial malleolus.
+  
+  AnyRefNode FlexorHallucisLongusNode = {sRel = .Scale({-0.008, -0.113, ...Sign*-0.001});};
+  AnyRefNode FlexorHallucisLongusViaNode = {sRel = .Scale({0.027, 0.080, ...Sign*-0.01});}; // Important for moment arm, needs to be checked.
+  
+  AnyRefNode PeroneusBrevisNode = {sRel = .Scale({0.004, 0.025, ...Sign*0.036});};
+  AnyRefNode PeroneusBrevisViaNode = {sRel = .Scale({0.037, 0.070, ...Sign*0.018});}; // Important for moment arm, needs to be checked.
+  
+  AnyRefNode TibialisAnteriorNode = {
+    
+    sRel = .Scale({0.03, 0.0, ...Sign*-0.02});};
+  AnyRefNode TibialisAnteriorViaNode = {
+    //sRel = .Scale({0.05, 0.03, ...Sign*-0.01});};
+    sRel = .Scale({0.055, 0.015, ...Sign*-0.01});};
+  
+  AnyRefNode ExtensorDigitorumLongusNode = {sRel = .Scale({-0.007, -0.1, ...Sign*0.04});};
+  AnyRefNode ExtensorDigitorumViaNode = {
+    sRel = .Scale({0.055, 0.015, ...Sign*0.01});};
+  //   sRel = .Scale({0.05, 0.03, ...Sign*0.01});};
+  
+  AnyRefNode ExtensorHallucisLongusNode = {sRel = .Scale({-0.003, -0.113, ...Sign*-0.001});};
+  AnyRefNode ExtensorHallucisViaNode = {
+    sRel = .Scale({0.055, 0.015, ...Sign*0.0});};
+  // sRel = .Scale({0.05, 0.03, ...Sign*0.0});};
+  
+  
+  
+  AnyDrawSurf DrwSurf = {
+    FileName = "foot_bone";
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
+    RGB = ...ColorRef.Segments;
+    AnyFunTransform3D &Scale =.Scale;  
+    Transparency = ...BonesTransparency.Foot;
+  };
+  
+}; // End of Foot
+
+AnySeg Shank = {
+  
+  r0=.Thigh.KneeJoint.sRel*.Thigh.Axes0'+.Thigh.r0-KneeJoint.sRel*Axes0'; 
+  
+  #include "../DrawSettings/Nodes.any"
+  #include "../DrawSettings/SegmentAxes.any"
+  
+  AnyFunTransform3D &Scale =..Scaling.GeometricalScaling.Shank.ScaleFunction;    
+  
+  AnyVar MassS = ..Scaling.MassScaling.Shank.MassScale;
+  
+  
+  //AnyVar MassStandard = 0.0465*..BodyParRef.BodyMass; // Winter
+  AnyVar MassStandard = ..StandardParameters.Shank.Mass;
+  Mass = MassS*MassStandard;
+  
+  //AnyVar LengthStandard = 0.1992- (-0.2608);
+  
+  AnyVar Length = ( (KneeJoint.sRel[0]-AnkleJoint.sRel[0])^2 + (KneeJoint.sRel[1]-AnkleJoint.sRel[1])^2 + (KneeJoint.sRel[2]-AnkleJoint.sRel[2])^2 )^0.5;
+  
+  AnyVar Radius = (Mass/(3.1416*Length*..StandardParameters.Shank.Density))^0.5;
+  
+  AnyVar Ixx = 0.25*Mass*Radius*Radius + 1/12*Mass*Length*Length;
+  AnyVar Iyy = 0.5*Mass*Radius*Radius;
+  AnyVar Izz = Ixx; 
+  Jii = {Ixx, Iyy, Izz};
+  
+  AnyRefNode AnkleJoint = {sRel = .Scale({0.0, -0.2608, ...Sign*0.0});
+    #include "../DrawSettings/JointAxesDistal.any"
+  };
+  AnyRefNode KneeJoint = {
+    sRel = .Scale({0.0, 0.1992, ...Sign*0.0});
+    #include "../DrawSettings/JointAxesProximal.any"
+  };
+  
+  AnyRefNode QuadricepsNode = {sRel = .Scale({0.032, 0.110, ...Sign*0.01});}; // Node for Vasti and Rectus Femoris.
+  
+  AnyRefNode SemitendinosusViaNode = {sRel = .Scale({-0.025, 0.150, ...Sign*-0.032});};
+  AnyRefNode SemitendinosusNode = {sRel = .Scale({0.00, 0.125, ...Sign*-0.016});};
+  
+  AnyRefNode SemimembranosusNode = {sRel = .Scale({-0.024, 0.155, ...Sign*-0.018});};
+  AnyRefNode SemimembranosusViaNode = {sRel = .Scale({-0.027, 0.165, ...Sign*-0.018});}; 
+  
+  AnyRefNode BicepsFemorisCaputLongumNode = {sRel = .Scale({-0.015, 0.16, ...Sign*0.043});};
+  AnyRefNode BicepsFemorisCaputLongumViaNode = {sRel = .Scale({-0.0185, 0.17, ...Sign*0.043});};
+  
+  AnyRefNode BicepsFemorisCaputBreveNode = {sRel = .Scale({-0.015, 0.16, ...Sign*0.043});};
+  AnyRefNode BicepsFemorisCaputBreveViaNode = {sRel = .Scale({-0.0185, 0.17, ...Sign*0.043});};
+
+  //  AnyRefNode SemitendinosusViaNode = {sRel = .Scale({0.005, 0.150, ...Sign*-0.042});};
+//  AnyRefNode SemitendinosusNode = {sRel = .Scale({0.018, 0.13, ...Sign*-0.016});};
+//  
+//  AnyRefNode SemimembranosusNode = {sRel = .Scale({-0.027, 0.18-0.03, ...Sign*-0.018});};
+//  AnyRefNode SemimembranosusViaNode = {sRel = .Scale({-0.0185-0.015, 0.185-0.02, ...Sign*-0.018});}; 
+//  
+//  AnyRefNode BicepsFemorisCaputLongumNode = {sRel = .Scale({-0.015, 0.17-0.025, ...Sign*0.043});};
+//  AnyRefNode BicepsFemorisCaputLongumViaNode = {sRel = .Scale({-0.0185, 0.185-0.025, ...Sign*0.043});};
+//  
+//  AnyRefNode BicepsFemorisCaputBreveNode = {sRel = .Scale({-0.015, 0.17-0.025, ...Sign*0.043});};
+//  AnyRefNode BicepsFemorisCaputBreveViaNode = {sRel = .Scale({-0.0185, 0.185-0.025, ...Sign*0.043});};
+//  
+
+  AnyRefNode SoleusNode = {sRel = .Scale({-0.020, 0.1292, ...Sign*0.0});};
+  
+  AnyRefNode GastrocnemiusViaNode = {sRel = .Scale({-0.05, 0.05, ...Sign*0.0});};
+  
+  AnyRefNode FlexorDigitorumLongusNode = {sRel = .Scale({0.0, 0.04, ...Sign*-0.01});};
+  
+  AnyRefNode FlexorHallucisLongusNode = {sRel = .Scale({0.0, -0.04, ...Sign*0.01});};
+  
+  AnyRefNode TibialisPosteriorNode = {sRel = .Scale({0.0, 0.13, ...Sign*0.0});}; // original had {0.0, 0.16, 0.0} - too high, 
+  AnyRefNode PeroneusBrevisNode = {sRel = .Scale({0.0, -0.04, ...Sign*0.03});};
+  
+  AnyRefNode TibialisAnteriorNode = {sRel = .Scale({0.0, 0.0115, ...Sign*-0.01});};
+  
+  
+  AnyRefNode ExtensorDigitorumLongusNode = {sRel = .Scale({0.0, 0.16, ...Sign*0.01});};
+  
+  AnyRefNode ExtensorHallucisLongusNode = {sRel = .Scale({0.0, -0.05, ...Sign*0.0});};
+  
+  AnyRefNode SartoriusViaNode2 = {sRel = .Scale({-0.0185+0.025, 0.18, ...Sign*-0.038});};
+  AnyRefNode SartoriusViaNode3 = {sRel = .Scale({0.005+0.005, 0.150, ...Sign*-0.047000});};
+  
+  //AnyRefNode SartoriusViaNode2 = {sRel = .Scale({-0.0185, 0.18, ...Sign*-0.038});};
+  //AnyRefNode SartoriusViaNode3 = {sRel = .Scale({0.005, 0.150, ...Sign*-0.047000});}; 
+  AnyRefNode SartoriusNode = {sRel = .Scale({0.018, 0.13, ...Sign*-0.016});};
+  
+  AnyRefNode GracilisViaNode = {sRel = .Scale({-0.0185, 0.18, ...Sign*-0.018});};
+  AnyRefNode GracilisViaNode1 = {sRel = .Scale({0.005, 0.150, ...Sign*-0.042});};
+  AnyRefNode GracilisNode = {sRel = .Scale({0.018, 0.13, ...Sign*-0.016});};
+  AnyRefNode GluteusMaximus1Node = {sRel = .Scale({-0.0185, 0.185, ...Sign*0.043});};
+  AnyRefNode GluteusMaximus2Node = {sRel = .Scale({-0.0185, 0.185, ...Sign*0.043});};
+  AnyRefNode TensorFasciaeLataeNode = {sRel = .Scale({-0.0185, 0.185, ...Sign*0.043});};
+  
+  AnyDrawSurf DrwSurf = {
+    FileName = "tibia_bone";
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
+    RGB = ...ColorRef.Segments;
+    AnyFunTransform3D &Scale =.Scale; 
+    Transparency=1;
+    Face=1;
+  };
+
+}; // End of Shank
+
+AnySeg Thigh = {
+  
+  r0=..HipNodeRef.sRel*....Trunk.SegmentsLumbar.PelvisSeg.Axes0'+    ....Trunk.SegmentsLumbar.PelvisSeg.r0-    HipJoint.sRel*Axes0';
+  
+  #include "../DrawSettings/Nodes.any"
+  #include "../DrawSettings/SegmentAxes.any"
+  
+  AnyFunTransform3D &Scale =..Scaling.GeometricalScaling.Thigh.ScaleFunction;    
+  
+  AnyVar MassS = ..Scaling.MassScaling.Thigh.MassScale;  
+  
+  //AnyVar MassStandard = 0.1*..BodyParRef.BodyMass; // Winter
+  AnyVar MassStandard = ..StandardParameters.Thigh.Mass;
+  Mass = MassS*MassStandard;
+  
+  //AnyVar LengthStandard = ( (-0.025)^2 + (0.197+0.2580)^2 + (-0.028+0.038)^2 )^0.5;
+  AnyVar Length = ( (KneeJoint.sRel[0]-HipJoint.sRel[0])^2 + (KneeJoint.sRel[1]-HipJoint.sRel[1])^2 + (KneeJoint.sRel[2]-HipJoint.sRel[2])^2 )^0.5;
+  
+  AnyVar Radius = (Mass/(3.1416*Length*..StandardParameters.Thigh.Density))^0.5;
+  
+  AnyVar Ixx = 0.25*Mass*Radius*Radius + 1/12*Mass*Length*Length;
+  AnyVar Iyy = 0.5*Mass*Radius*Radius;
+  AnyVar Izz = Ixx;
+  Jii = {Ixx, Iyy, Izz};
+  
+  AnyRefNode KneeJoint = {
+    sRel = .Scale({-0.025, -0.2580, ...Sign*-0.028});
+    #include "../DrawSettings/JointAxesDistal.any"
+  };
+  
+  AnyRefNode HipJoint = {
+    #include "../DrawSettings/JointAxesProximal.any"
+    sRel = .Scale({0.0, 0.197, ...Sign*-0.038});
+    
+  };
+  
+  AnyRefNode CondylusMedialis = {sRel = .Scale({-0.025, -0.29, ...Sign*-0.028});
+    #include "../DrawSettings/BML.any"
+  }; // Guesstimate
+  
+  AnyRefNode GluteusMinimusNode = {sRel = .Scale({0.003, 0.173, ...Sign*0.037});};
+  
+  AnyRefNode GluteusMediusNode = {sRel = .Scale({-0.010, 0.177, ...Sign*0.032});};
+  
+  AnyRefNode GluteusMaximus1ViaNode2 = {sRel = .Scale({-0.020, 0.16, ...Sign*0.045});};
+  
+  AnyRefNode GluteusMaximus2ViaNode3 = {sRel = .Scale({-0.045, 0.16, ...Sign*-0.01});};
+  
+  AnyRefNode GluteusMaximus3Node = {sRel = .Scale({-0.016, 0.075, ...Sign*0.009});};
+  AnyRefNode GluteusMaximus3ViaNode2 = {sRel = .Scale({-0.045, 0.16, ...Sign*-0.01});};
+  
+  AnyRefNode TensorFasciaeLataeViaNode2 = {sRel = .Scale({-0.010, 0.13, ...Sign*0.042});};
+  
+  AnyRefNode AdductorLongusNode = {sRel = .Scale({-0.010, 0.0, ...Sign*-0.006});};
+  
+  AnyRefNode AdductorMagnus1Node = {sRel = .Scale({-0.021, 0.078, ...Sign*0.009});};
+  AnyRefNode AdductorMagnus2Node = {sRel = .Scale({-0.015, -0.029, ...Sign*0.001});};
+  AnyRefNode AdductorMagnus3Node = {sRel = .Scale({-0.025, -0.226, ...Sign*-0.044});};
+  
+  AnyRefNode IliopsoasNode = {sRel = .Scale({0.001, 0.120, ...Sign*-0.008});};
+  AnyRefNode &IliopubicEminenceEndNode = IliopsoasNode;
+  
+  AnyRefNode VastusLateralisNode = {sRel = .Scale({0.0, 0.0, ...Sign*0.013});};
+  AnyRefNode VastusMedialisNode = {sRel = .Scale({0.0, 0.041, ...Sign*-0.014});};
+  AnyRefNode VastusIntermediusNode = {sRel = .Scale({0.014, 0.0, ...Sign*0.0});};
+  AnyRefNode QuadricepsViaNode1 = {sRel = .Scale({0.021, -0.264, ...Sign*-0.018});};
+  AnyRefNode QuadricepsViaNode2 = {sRel = .Scale({0.007, -0.30, ...Sign*-0.018});};
+  
+  AnyRefNode BicepsFemorisCaputBreveNode = {sRel = .Scale({-0.014, -0.054, ...Sign*0.0});};
+  
+  AnyRefNode GastrocnemiusNode = {sRel = .Scale({-0.028, -0.237, ...Sign*-0.023});};
+  
+  AnyRefNode SartoriusViaNode1 = {    sRel = .Scale({0.045, 0, ...Sign*-0.03});  }; 
+  
+  
+  AnyRefNode QuadratusFemorisNode = {     sRel = .Scale({-0.025, 0.15, ...Sign*0.02}); }; 
+  AnyRefNode AbductorBrevisNode = {         sRel = .Scale({-0.0, 0.04, ...Sign*-0.014});  }; 
+  AnyRefNode ObturatoriusExternusNode = { sRel = .Scale({-0.017, 0.17, ...Sign*0.013}); }; 
+  AnyRefNode ObturatoriusInternusNode = { sRel = .Scale({0.01, 0.182, ...Sign*0.019});  }; 
+    
+  AnyRefNode PectineusNode = {sRel = .Scale({-0.025, 0.10, ...Sign*-0.004}); };
+  AnyRefNode GemellusSuperiorNode = { sRel = .Scale({0.013, 0.182, ...Sign*0.019});  }; 
+  AnyRefNode GemellusInferiorNode = { sRel = .Scale({0.007, 0.182, ...Sign*0.019});  }; 
+  AnyRefNode PiriformisNode = {sRel = .Scale({0.013, 0.183, ...Sign*0.028});}; 
+  
+  AnyDrawSurf Drw5 = {
+        FileName = "femur_bone";
+     
+
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
+    RGB = ...ColorRef.Segments;
+    Transparency = ...BonesTransparency.Thigh;
+    AnyFunTransform3D &Scale =.Scale;  
+   // Face = -1;
+  };
+
+  
+}; // End of Thigh
+
+
+

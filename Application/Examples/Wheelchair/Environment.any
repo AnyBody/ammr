@@ -1,0 +1,151 @@
+
+AnyFolder EnvironmentModel = {
+  
+  /* **********************************************************
+  This folder contains the definition of the Environment
+  - GlobalRefFrame
+  
+  ********************************************************** */  
+  
+  AnyFixedRefFrame GlobalRef = {
+//    Origin = {0.0,0.1,0.0}; 
+    #include "drawcoorsystem.any"
+    
+    // These points define the hubs of the wheels
+    AnyRefNode HubRight = {
+      sRel = {
+        Main.ChairParameters.AxleX,
+        Main.ChairParameters.WheelRad,
+        Main.ChairParameters.AxleZ
+      };
+    };
+    
+    AnyRefNode HubLeft = {
+      sRel = {
+        Main.ChairParameters.AxleX,
+        Main.ChairParameters.WheelRad,
+        -Main.ChairParameters.AxleZ
+      };
+    };
+    
+    AnyRefNode Seat = {
+      sRel = {
+        0.2,
+        Main.ChairParameters.SeatY+Main.ChairParameters.WheelRad,
+        0.0
+      };
+      AnyDrawSurf seat = {
+        FileName = "CAD\seat";
+        ScaleXYZ = {0.5, 1, 0.4};
+        RGB = {232,151,24}/256;
+      };
+      AnyDrawSurf back = {
+        FileName = "CAD\backrest";
+        ScaleXYZ = {0.4, 0.5, 0.3};
+        RGB = {232,151,24}/256;
+      };  
+      AnyRefNode BackrestSupportNode ={
+      sRel={-0.35,0.4,0};
+     
+      };
+      
+    };    
+//    AnyDrawRefFrame drw = {};
+  };//GlobalRef
+  
+  AnySeg WheelRight = {
+    Mass = 2.5;
+    Jii = {1,1,2}*0.1;
+    AnyRefNode PushRim = {
+      sRel = {0,Main.ChairParameters.PushRimRad,Main.ChairParameters.PushRimDist};
+    };
+    r0 ={
+      Main.ChairParameters.AxleX,
+      Main.ChairParameters.WheelRad,
+      Main.ChairParameters.AxleZ
+    };
+    AnyDrawSurf Wheel = {
+      FileName = "CAD/wheel";
+      RGB = {0.5, 0.5, 0.5};
+      ScaleXYZ = {1,1,1}*Main.ChairParameters.WheelRad;
+    };//    AnyDrawSeg drw = {};
+    AnyRefNode PushRimHub = {
+      sRel = {
+        0,
+        0,
+        Main.ChairParameters.PushRimDist
+      };
+      AnyDrawSurf Wheel = {
+        FileName = "CAD/wheel";
+        RGB = {0,0,1};
+        ScaleXYZ = {1,1,1}*Main.ChairParameters.PushRimRad;
+      };
+    };
+  };
+  
+  AnySeg WheelLeft = {
+    Mass = 2.5;
+    Jii = {1,1,2}*0.1;
+    AnyRefNode PushRim = {
+      sRel = {0,Main.ChairParameters.PushRimRad,-Main.ChairParameters.PushRimDist};
+    };
+    r0 ={
+      Main.ChairParameters.AxleX,
+      Main.ChairParameters.WheelRad,
+      -Main.ChairParameters.AxleZ
+    };
+    AnyDrawSurf Wheel = {
+      FileName = "CAD/wheel";
+      RGB = {0.5, 0.5, 0.5};
+      ScaleXYZ = {1,1,-1}*Main.ChairParameters.WheelRad;
+    };//    AnyDrawSeg drw = {};
+    AnyRefNode PushRimHub = {
+      sRel = {
+        0,
+        0,
+        -Main.ChairParameters.PushRimDist
+      };
+      AnyDrawSurf Wheel = {
+        FileName = "CAD/wheel";
+        RGB = {0,0,1};
+        ScaleXYZ = {1,1,-1}*Main.ChairParameters.PushRimRad;
+      };
+    };    
+  };
+  
+  // Join the wheels to the chair (ground, actually)
+  AnyRevoluteJoint HubRight = {
+    AnyRefNode &Chair = .GlobalRef.HubRight;
+    AnySeg &Wheel = .WheelRight;
+    Axis = z;
+  };
+  AnyRevoluteJoint HubLeft = {
+    AnyRefNode &Chair = .GlobalRef.HubLeft;
+    AnySeg &Wheel = .WheelLeft;
+    Axis = z;
+  };
+
+  // Drive the wheels. This in turn determines the hand movement
+  AnyKinEqSimpleDriver WheelRightDr = {
+    AnyRevoluteJoint &Joint = .HubRight;
+    DriverPos = {-Main.ChairParameters.StartPos*pi/180};
+    DriverVel = {-Main.ChairParameters.Vel/Main.ChairParameters.WheelRad};
+    Reaction.Type = {Off}; // Let applied moment through
+  };
+  AnyKinEqSimpleDriver WheelLeftDr = {
+    AnyRevoluteJoint &Joint = .HubLeft;
+    DriverPos = {-Main.ChairParameters.StartPos*pi/180};
+    DriverVel = {-Main.ChairParameters.Vel/Main.ChairParameters.WheelRad};
+    Reaction.Type = {Off}; // Let applied moment through
+  };
+
+  // Moment affecting the wheels and caried by the muscles
+  AnyForce RightMoment = {
+    AnyRevoluteJoint &Joint = .HubRight;
+    F = {Main.ChairParameters.WheelMoment};
+  };
+  AnyForce LeftMoment = {
+    AnyRevoluteJoint &Joint = .HubLeft;
+    F = {Main.ChairParameters.WheelMoment};
+  };
+};

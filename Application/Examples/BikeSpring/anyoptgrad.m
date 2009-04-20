@@ -1,0 +1,44 @@
+% Unconstrained optimization in the AnyBody Modeling System
+% using a golden section method and steeoest descen search
+% directions. Notice that this may not work if the problem
+% is non-smooth.
+% The side constraints, xmin and xmax, are handled by means of
+% an exterior penalty function.
+
+nOptimParam = 6;  % Number of design variables
+
+% Design variables as they appear in the AnyScript model
+    % AnyVar L0 = 0.24;             //Spring slack length
+    % AnyVar F1 = 100;              //Spring force at 50% strain
+    % AnyVar SpringRad = 0.15;      //Radius of spring attachment on the crank
+    % AnyVar SpringAngle = 45;      //Angle of spring attachment points on the crank
+    % AnyVar SpringX = -0.10;       //X coordinate of spring attachment on frame
+    % AnyVar SpringY = 0.30
+    
+% Initialize 
+%        L0        F1    SpringRad  SpringAngle   SpringY
+xmin = [0.1       0.0      0.01        0.0         0.1];   % Lower bound
+x =    [0.20    150.0      0.11       56.0         0.3];   % Initial guess
+xmax = [0.4    1000.0      0.40      180.0         0.5];   % Upper bound
+
+% Compute initial objective function value
+F = ObjectivePenal(xmin,x,xmax);
+
+% do optimization
+maxiter = 10;
+evals = 0;
+delta = 0.1;  % Relative perturbation
+
+while evals<maxiter
+    % Compute gradient
+    for j=1:length(x)
+        xp = x;
+        pert = (xmax(j)-xmin(j))*delta;
+        xp(j) = xp(j)+pert;
+        Fp = ObjectivePenal(xmin,xp,xmax);
+        d(j) = -(Fp-F)/pert;
+    end
+    [x F] = goldengrad(xmin,x,xmax,d,10);    % Perform golden section optimization in that direction
+    evals = evals + 1;
+end
+

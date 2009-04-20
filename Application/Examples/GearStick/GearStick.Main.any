@@ -1,0 +1,85 @@
+/**This is a model of a subject pulling on an instrumented gear shift. While
+doing so, the gear knob moves forward and the muscle activity can be computed
+for the different postures that arise.
+The purpose of the investigation is to determine the strength of the model 
+for different shoulder postures and compare with experimental results. */
+Main = {
+  
+ /**Execute this operation to run the model in the intended operation sequence.  
+  It is also possible to run operations seperately, by manual selections in the operation tree*/
+  AnyOperationSequence RunApplication = {
+
+    /**This operation calibrates the muscles in the model if these are of the type AnyMuscleModel3E.
+    This will just be an empty operation if the model is using a muscle type that does not require calibration.*/
+    AnyOperation &CalibrationAnal = Main.HumanModel.Calibration.CalibrationSequence;  
+
+    ///This operation is the inverse dynamic analysis
+    AnyOperation &InvAnal=Main.Study.InverseDynamics;
+   
+  };
+
+
+  /// Parameters for the experiment
+  AnyFolder Parameters = {
+    AnyVar KnobHeight = 0.0;       ///< Height of the gear knob
+    AnyVar KnobLat = 0.17;         ///< Lateral position of the gear knob
+    AnyVar SlideStart = 0.1;       ///< Start position of the knob
+    AnyVar SlideLength = 0.35;     ///< Distance the knob moves
+    AnyVar F = 100;                ///< Applied force to the hand
+  };
+  
+  #include "DrawSettings.any"
+  
+  AnyFolder HumanModel = {
+    AnyFolder &Mannequin=.Model.Mannequin;
+    #include  "..\..\..\Body\AAUHuman\BodyModels\TrunkTwoArms\BodyModel.any"    
+    //#include  "..\..\..\Body\AAUHuman\BodyModels\TrunkTwoArms\BodyModel_NoMuscles.any"    
+    
+    AnyFolder StrengthParameters={
+      AnyVar SpecificMuscleTensionSpine= 90; //N/cm^2
+      AnyVar StrengthIndexLeg= 1; 
+      AnyVar SpecificMuscleTensionShoulderArm= 90; //N/cm^2
+    };
+    
+    // Use the standard size human.
+    #include "..\..\..\Body\AAUHuman\Scaling\ScalingStandard.any"
+  };
+  
+  AnyFolder Model = {    
+    AnyFolder &HumanModel=.HumanModel.BodyModel;    
+    
+    #include "Environment.any"   
+    //The Mannequin values is used both for setting the initial positions of the model
+    //and driving the model at analysis time. So you can change the values in the Mannequin
+    //file and it will change both initial positions and how it is positioned at analysis time. 
+    //If you want to run the model into some posture and then dump the momentary joint angles as the
+    //initial ones then simply do the following:
+    // 1  Double click the folder Main.MannequinValuesFromModel.AnyFolder_Posture and it will dump the joint angles to the message window 
+    // 2. Copy the dumped text into the Mannequin.any replacing the "Posture" folder 
+    // 3. Press ctrl+h and search and replace "_" with " "
+    // 4. Once the model is reloaded it will start in the position corresponding to the one which was dumped.
+    #include "Mannequin.any"   
+    
+    AnyFolder ModelEnvironmentConnection = {
+      #include "JointsAndDrivers.any"
+    };
+  };
+
+  AnyBodyStudy Study = {
+    AnyFolder &Model = .Model;
+   
+    tEnd = 6;  // Slow, quasi-static movement
+    Gravity = {0, -9.81, 0};
+    nStep=10;
+      
+      /// This variable contains the applied force normalized 
+      /// with the MaxMuscleActivity, and this equals the strength
+      /// of the body in the situation. The small value added to
+      /// MaxMuscleActivity is only to avoid division by zero at load
+      /// time.
+      AnyVar StrengthSubject1=Main.Parameters.F/(MaxMuscleActivity+0.0001);
+//    };
+  }; // End of study  
+  
+ 
+}; //Main
