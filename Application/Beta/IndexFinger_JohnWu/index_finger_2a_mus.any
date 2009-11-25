@@ -1,0 +1,90 @@
+// 
+// Index Finger Model
+// Developed by John Z. Wu (NIOSH, Morgantown, WV 26505, USA)
+// Last revision: September, 2008.
+//
+// Detailed model information: 
+// Wu JZ, An KN, Cutlip RG, Krajnak K, Welcome D, Dong RG.
+// Analysis of musculoskeletal loading in an index finger during tapping.
+// Journal of Biomechanics.2008.41(3):668-76.
+//
+
+Main = {
+  
+  // The actual body model goes in this folder
+  AnyFolder IndexModel = {
+    
+    #include "Index_parameters.any"
+    
+    #include "Index_metacarpal.any"
+    
+    #include "Index_segments.any"
+    
+    #include "Index_joints.any"
+    
+    #include "Index_muscles_2.any"
+
+    #include "Index_forces.any"
+    
+  }; // IndexModel
+     
+    #include "Index_drivers.any"
+
+//  
+  AnyFolder CalibrationDrivers = {    
+    //---------------------------------
+      AnyKinEqSimpleDriver MCPCali = {
+      AnyUniversalJoint &Jnts = Main.IndexModel.Jnts.MCP;
+          DriverPos = {0, -(11.5/180)*pi};
+          DriverVel = {0, 0};
+      //    (-abduction/+adduction, +flextion/-externsion)
+      Reaction.Type = {Off,Off};
+    }; // MP driver
+    //---------------------------------  
+      AnyKinEqSimpleDriver PIPCali = {
+      AnyRevoluteJoint &Jnts = Main.IndexModel.Jnts.PIP;        
+          DriverPos = {-(28.5/180)*pi};
+          DriverVel = {0};
+      Reaction.Type = {Off};
+    }; // PIP driver
+    //---------------------------------  
+      AnyKinEqSimpleDriver DIPCali = {
+      AnyRevoluteJoint &Jnts = Main.IndexModel.Jnts.DIP;
+          DriverPos = {-(13.6/180)*pi};
+          DriverVel = {0};
+      Reaction.Type = {Off};
+    }; // DIP driver
+  };  //CalibrationDrivers
+  
+  AnyBodyCalibrationStudy Calibration = 
+  {
+    AnyFolder &Model = Main.IndexModel;
+    AnyFolder &Drivers = Main.CalibrationDrivers;
+    
+    tStart = 0;
+    tEnd = 0.240;
+    nStep = 1;
+  };
+  
+  AnyBodyStudy IndexModelStudy = {
+    AnyFolder &Model = Main.IndexModel;
+    AnyFolder &Drivers = Main.Drivers;
+    AnyFolder &Measurements = Main.Measurements;
+
+    RecruitmentSolver = MinMaxSimplex;
+    //    RecruitmentSolver = MinMaxOOSolSimplex;
+    //    RecruitmentSolver = MinMaxOOSolQP;
+    //    RecruitmentLpPenalty =1000.0;
+    //    RecruitmentQpPenalty=1000.0;
+    Gravity = {0.0, -9.81, 0.0};
+    nStep = 40;
+    tStart = 0;
+    tEnd = 0.240;
+    MuscleEliminationTol = 1e-3;
+    
+    #include "Output.any"
+    
+  }; //AnyBodyStudy
+  
+};  // Main
+

@@ -1,0 +1,616 @@
+//This file contains the marker toplogy of the data set it links free floating markers with the markers on the human 
+
+AnyFolder ModelSetup ={
+  
+  AnyString SaveMacroOperation=  "classoperation Main.Studies.ParameterIdentification " + strformat("\x22")+ "Save design" + strformat("\x22")+ " --file="+ strformat("\x22")+ C3DFileData.NameOfFile +"-"+"OptimizedParameters.txt" + strformat("\x22");
+  AnyString LoadMacroOperation=  "classoperation Main.Studies.LoadParametersOpimizationResults " + strformat("\x22")+ "Load design" + strformat("\x22")+ " --file="+ strformat("\x22")+ C3DFileData.NameOfFile +"-"+"OptimizedParameters.txt" + strformat("\x22");
+  
+  
+  
+  //This is the input file to the analysis
+  AnyInputC3D C3DFileData =   {
+    AnyString NameOfFile ="GaitNormal0002-processed"; //Write the name of the file here
+    FileName = NameOfFile + ".c3d"; //add the extension to the filename
+    ConstructModelOnOff = Off; //If this is set to on it will display the markers but slow down the analysis a lot....
+    MarkerUseAllPointsOnOff = Off; 
+    MarkerUseCamMaskOnOff = Off;
+    PointsScaleFactor = 1/1000;
+    
+    MarkerLabels = {"RFHD","LFHD","RBHD","LBHD","CLAV","C7","T10","STRN","RBAK","RSHO","LSHO","RUPA","LUPA","RELB","LELB","RFRA","LFRA","RWRA","LWRA","RWRB","LWRB","RFIN","LFIN","RASI",
+      "LASI","RPSI","LPSI","RTHI","LTHI","RKNE","LKNE","RTIB","LTIB","RANK","LANK","RHEE","LHEE","RTOE","LTOE","RMT5","LMT5"};
+    
+    
+    AnalogFilterIndex =1;
+    
+    Filter =  {
+      N = 2;
+      Fc = {5};
+      Type = LowPass;
+    };
+    
+    /// This filter is used for the analog data
+    AnyFunButterworthFilter LowPassFilter = {
+      FilterForwardBackwardOnOff = On;
+      AutomaticInitialConditionOnOff = On;
+      N = 2;
+      AnyVar CutOffFrequency=12;
+      AnyVar SampleFreq=.Header.VideoFrameRate* .Header.NoAnalogSamplesPer3DFrame   ;
+      W = {1/(SampleFreq*0.5)*CutOffFrequency};
+      Type = LowPass;
+    };
+    
+    
+    MarkerScaleXYZ = 0.015*{1,1,1};
+    MarkerRGB={0,0,1};
+  };
+  
+  
+  
+  
+  
+  AnyIntVar FirstFrame = C3DFileData.Header.FirstFrameNo; 
+  AnyIntVar LastFrame = C3DFileData.Header.LastFrameNo;
+  AnyIntVar nStep =(LastFrame-FirstFrame);
+  
+  AnyFloatVar  tStart = FirstFrame/C3DFileData.Header.VideoFrameRate;
+  AnyFloatVar   tEnd = LastFrame/C3DFileData.Header.VideoFrameRate;
+  
+  
+  
+  OptimizeAnthropometricsOnOff OptimizeOnOff (
+  PelvisWidthOnOff ="On", 
+  ThighLengthOnOff="On", 
+  ShankLengthOnOff="On", 
+  FootLengthOnOff="On", 
+  HeadHeightOnOff="Off", 
+  TrunkHeightOnOff="On", 
+  UpperArmLengthOnOff="On",
+  LowerArmLengthOnOff="On",
+  Model1=MotionAndParameterOptimizationModel, Model2= InverseDynamicModel
+  ) ={};
+  
+  
+  //OptimizeAnthropometricsOnOff OptimizeOnOff (
+  //Model1=MotionAndParameterOptimizationModel, Model2= InverseDynamicModel,
+  //PelvisWidth = "On"
+  //) ={};
+  
+  // This class creates a marker in each of the two models, additionally it creates marker drivers and design variables to opitmize marker location
+  //  CreateMarker MX (    //MX is the folder name for the marker all foldr names has to be different so usually use M1....MX
+  //  MarkerName=XXX,      //This is the name of you marker it has to be the same name as in the C3D file
+  //  MarkerPlacement =Right.Leg.Seg.Thigh,  //this is the segmnt 
+  //  OptX=1,OptY=1,OptZ=1,  //this determines if the design variable is going to be optimized or left unchanged in paramter optimization studies 1 is 
+  //  
+  //  
+  //  Model1=MotionAndParameterOptimizationModel, Model2= InverseDynamicModel   //always leave this line unchanged
+  //  ) = {
+  //    sRelOpt ={-0.0717627324329,-0.1724679985805,0.0763244306406};   //coordinates of the marker unscaled 
+  //  };
+  //  
+  // sRelOpt = {-0.04970743, -0.1556847, 0.08576939}
+  //   {-0.07176273, -0.172468, 0.07632443}
+  CreateMarker M1 ( 
+  MarkerName=RTHI,    
+  MarkerPlacement =Right.Leg.Seg.Thigh, 
+  OptX="On",OptY="On",OptZ="On",  
+  
+  Model1=MotionAndParameterOptimizationModel, Model2= InverseDynamicModel
+  ) = {
+    sRelOpt ={-0.0717627324329,-0.1724679985805,0.0763244306406};   //coordinates of the marker unscaled 
+  };
+  
+  
+  CreateMarker M2 (
+  MarkerName =RKNE,
+  MarkerPlacement= Right.Leg.Seg.Thigh,
+  OptX="On",OptY="Off",OptZ="On",  
+  
+  Model1=MotionAndParameterOptimizationModel, Model2= InverseDynamicModel
+  ) = {
+    sRelOpt= {-0.0360087765362,-0.4018638695800,0.0823124789225};
+  };
+  
+  CreateMarker M3 ( 
+  MarkerName=LKNE ,
+  MarkerPlacement=Left.Leg.Seg.Thigh,
+  OptX="On",OptY="Off",OptZ="On",  
+  
+  
+  
+  Model1=MotionAndParameterOptimizationModel, Model2= InverseDynamicModel
+  ) = {
+    sRelOpt ={-0.0382623976823,-0.4048008827840,-0.0700105767110};
+  };
+  
+  
+  CreateMarker M4 ( 
+  MarkerName=LPSI, 
+  MarkerPlacement=Trunk.SegmentsLumbar.PelvisSeg,
+  OptX="Off", OptY="Off", OptZ="On",
+  
+  
+  Model1=MotionAndParameterOptimizationModel, Model2= InverseDynamicModel
+  ) = {
+    sRelOpt ={-0.0772754403867,-0.03,-0.0374507107788};
+  };
+  
+  
+  
+  CreateMarker M5 (
+  MarkerName=RASI, 
+  MarkerPlacement=Trunk.SegmentsLumbar.PelvisSeg,
+  OptX="Off",OptY="Off",OptZ="Off",  
+  
+  
+  Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  ) = {
+    
+    sRelOpt = {0.1104314832245,-0.0481873163174,0.1454700654965};
+  };
+  
+  
+  
+  CreateMarker M6 (
+  MarkerName=RTIB, 
+  MarkerPlacement=Right.Leg.Seg.Shank,
+  OptX="On",OptY="On",OptZ="On",  
+  
+  
+  Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  ) = {
+    sRelOpt ={-0.0176043591042,-0.5289245519849,0.1069613358650};
+  };
+  
+  CreateMarker M7 ( 
+  MarkerName=RANK ,
+  MarkerPlacement=Right.Leg.Seg.Shank,
+  OptX="On",OptY="Off",OptZ="On",  
+  
+  
+  Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  ) = {
+    sRelOpt ={0.0762973905073,-0.8233340713391,0.0867524045603}+{-0.02,-0.0,-0.05};
+  };
+  
+  
+  CreateMarker M8 (
+  MarkerName=RTOE,  
+  MarkerPlacement=Right.Leg.Seg.Foot,
+  OptX="Off", OptY="Off", OptZ="Off",
+  
+  
+  Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  ) = {
+    sRelOpt= {0.2000436337426+0.0,-0.9315836934644-0.02,0.1154381507332-0.03}+{-0.005,0.0,-0.015};
+  };
+  
+  
+  
+  CreateMarker M9 (
+  MarkerName=LTIB,
+  MarkerPlacement=Left.Leg.Seg.Shank,
+  OptX="On",OptY="On",OptZ="On",  
+  
+  
+  Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  ) = {
+    sRelOpt= {0.0366768924813,-0.6927212030999,-0.0916837377067};
+  };
+  
+  CreateMarker M10 (
+  MarkerName=LANK,
+  MarkerPlacement=Left.Leg.Seg.Shank,
+  OptX="On",OptY="Off",OptZ="On",  
+  
+  
+  Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  ) = {
+    sRelOpt= {0.0688619052860,-0.8220126115162,-0.0834326127595}+{-0.02,-0.0,0.05};
+    
+  };
+  //tib
+  CreateMarker M11 (
+  MarkerName=RHEE ,
+  MarkerPlacement=Right.Leg.Seg.Foot,
+  OptX="Off", OptY="Off", OptZ="Off",
+  
+  Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  ) = {
+    sRelOpt= {0.0240761847216,-0.8192284210589,-0.0190000000000}+{-0.025,-0.01,0};
+    
+  };
+  
+  CreateMarker M12 (
+  MarkerName=LHEE, 
+  MarkerPlacement=Left.Leg.Seg.Foot,
+  OptX="Off", OptY="Off", OptZ="Off",
+  
+  
+  Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  ) = {
+    sRelOpt= {0.0240761847216,-0.8192284210589,0.0190000000000}+{-0.025,-0.01,0};
+  };
+  
+  
+  
+  CreateMarker M13 (
+  MarkerName=RPSI, 
+  MarkerPlacement=Trunk.SegmentsLumbar.PelvisSeg,
+  OptX="Of", OptY="Off", OptZ="On",
+  
+  
+  Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  ) = {
+    sRelOpt ={-0.0772754403867,-0.03,0.0374507107788};
+    
+  };
+  
+  CreateMarker M14 (
+  MarkerName=LTOE, 
+  MarkerPlacement=Left.Leg.Seg.Foot,
+  OptX="Off",OptY="Off",OptZ="Off",  
+  
+  
+  Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  ) = {
+    sRelOpt= {0.2000436337426+0.0,-0.9315836934644-0.02,-0.1154381507332+0.03}+{-0.005,0.0,0.015};
+  };
+  
+  CreateMarker M15 (
+  MarkerName=LASI ,
+  MarkerPlacement=Trunk.SegmentsLumbar.PelvisSeg,
+  OptX="Off",OptY="Off",OptZ="Off",  
+  
+  
+  Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  ) = {
+    sRelOpt= {0.1110573599032,-0.0518251878084,-0.1423300072336};
+  };
+  
+  CreateMarker M16 ( 
+  MarkerName=LTHI ,
+  MarkerPlacement=Left.Leg.Seg.Thigh,
+  OptX="On",OptY="On",OptZ="On",  
+  
+  
+  Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  ) = {
+    sRelOpt= {-0.0416373959213,-0.2882367269552,-0.0799662287952};
+  };
+  
+  
+  
+  
+  
+  
+  
+  
+  CreateMarker  M17  (
+  MarkerName=RFHD, 
+  MarkerPlacement=Trunk.SegmentsThorax.SkullSeg, 
+  OptX="Off",OptY="Off",OptZ="Off",  
+  
+  
+  Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  ) = {
+    sRelOpt = {0.08,0.06,0.07};
+  };
+  
+  
+  
+  CreateMarker  M18  (
+  MarkerName=LFHD,  
+  MarkerPlacement=Trunk.SegmentsThorax.SkullSeg, 
+  OptX="Off",OptY="Off",OptZ="Off",  
+  
+  
+  Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  ) = {
+    sRelOpt = {0.08,0.06,-0.07};
+  };
+  
+  
+  
+  CreateMarker  M19  (
+  MarkerName=RBHD,  
+  MarkerPlacement=Trunk.SegmentsThorax.SkullSeg, 
+  OptX="Off",OptY="Off",OptZ="Off",  
+  
+  
+  Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  ) = {
+    sRelOpt = {-0.07,0.05,0.08};
+  };
+  
+  
+  
+  CreateMarker  M20  (
+  MarkerName=LBHD,  
+  MarkerPlacement=Trunk.SegmentsThorax.SkullSeg, 
+  OptX="Off",OptY="Off",OptZ="Off",  
+  
+  
+  Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  ) = {
+    sRelOpt = {-0.07,0.05,-0.08};
+  };
+  
+  
+  
+  CreateMarker  M21  (
+  MarkerName=T10,  
+  MarkerPlacement=Trunk.SegmentsThorax.ThoraxSeg, 
+  OptX="Off",OptY="Off",OptZ="Off",  
+  
+  Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  ) = {
+    sRelOpt = {-0.052,0.187,0};
+  };
+  
+  
+  
+  //CreateMarker  M22  (
+  //MarkerName=C7,  
+  //MarkerPlacement=Trunk.SegmentsThorax.ThoraxSeg, 
+  //OptX="Off",OptY="On",OptZ="Off",  
+  //
+  //Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  //) = {
+  //  sRelOpt = {-0.04,0.47,0};
+  //};
+  //
+  
+  CreateMarker  M23  (
+  MarkerName=RBAK,  
+  MarkerPlacement=Right.ShoulderArm.Seg.Scapula,
+  OptX="Off",OptY="Off",OptZ="Off",  
+  
+  Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  ) = {
+    sRelOpt = {-0.115,-0.07,0.02};
+  };
+  
+  
+  
+  CreateMarker  M24  (
+  MarkerName=STRN,  
+  MarkerPlacement=Trunk.SegmentsThorax.ThoraxSeg, 
+  OptX="On",OptY="On",OptZ="Off",  
+  
+  Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  ) = {
+    sRelOpt = {0.15,0.24,0.0};
+    
+  };
+  
+  
+  
+  CreateMarker  M25  (
+  MarkerName=CLAV,  
+  MarkerPlacement=Trunk.SegmentsThorax.ThoraxSeg, 
+  OptX="On",OptY="On",OptZ="Off",  
+  
+  Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  ) = {
+    sRelOpt = {0.085,0.42,0.0};
+  };
+  
+  
+  
+  CreateMarker  M26  (
+  MarkerName=RSHO,  
+  MarkerPlacement=Right.ShoulderArm.Seg.Scapula, 
+  OptX="On",OptY="On",OptZ="On",  
+  
+  Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  ) = {
+    sRelOpt = {0.03,-0.0,-0.04};
+    
+  };
+  
+  
+  
+  CreateMarker  M27  (
+  MarkerName=LSHO,  
+  MarkerPlacement=Left.ShoulderArm.Seg.Scapula, 
+  OptX="On",OptY="On",OptZ="On",  
+  
+  Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  ) = {
+    sRelOpt = {0.03,0.0,-0.04};
+  };
+  
+  
+  
+  
+  CreateMarker  M28  (
+  MarkerName=RUPA,  
+  MarkerPlacement=Right.ShoulderArm.Seg.Humerus, 
+  OptX="On",OptY="On",OptZ="On",  
+  
+  Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  ) = {
+    sRelOpt ={0.03,-0.24,0.01}; 
+  };
+  
+  
+  //rupa
+  
+  CreateMarker  M29  (
+  MarkerName=LUPA,  
+  MarkerPlacement=Left.ShoulderArm.Seg.Humerus,
+  OptX="On",OptY="On",OptZ="On",  
+  
+  Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  ) = {
+    sRelOpt ={-0.03,-0.12,0.01}; 
+  };
+  
+  
+  
+  
+  CreateMarker  M30  (
+  MarkerName=RELB,  
+  MarkerPlacement=Right.ShoulderArm.Seg.Humerus, 
+  OptX="Off",OptY="Off",OptZ="Off",  
+  
+  Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  ) = {
+    sRelOpt = {0.0,-0.34,-0.01};
+  };
+  
+  
+  
+  
+  
+  CreateMarker  M31  (
+  MarkerName=LELB,  
+  MarkerPlacement=Left.ShoulderArm.Seg.Humerus, 
+  OptX="Off",OptY="Off",OptZ="Off",  
+  
+  Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  ) = {
+    sRelOpt = {0.0,-0.34,-0.01};
+  };
+  
+  
+  //LFRA
+  
+  CreateMarker  M32  (
+  MarkerName=LFRA,  
+  MarkerPlacement=Left.ShoulderArm.Seg.Radius,
+  OptX="On",OptY="On",OptZ="On",  
+  
+  Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  ) = {
+    sRelOpt = {-0.09, 0.03, 0.03};
+  };
+  
+  
+  
+  
+  CreateMarker  M33  (
+  MarkerName=RFRA,  
+  MarkerPlacement=Right.ShoulderArm.Seg.Radius, 
+  OptX="On",OptY="On",OptZ="On",  
+  
+  Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  ) = {
+    sRelOpt = {-0.16, -0.03, 0.03};
+  };
+  
+  
+  
+  
+  CreateMarker  M34  (
+  MarkerName=RWRA,  
+  MarkerPlacement=Right.ShoulderArm.Seg.Hand, 
+  OptX="Off",OptY="Off",OptZ="Off",  
+  
+  Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  ) = {
+    sRelOpt = {-0.0,-0.07,0.01};
+  };
+  
+  
+  
+  
+  CreateMarker  M35  (
+  MarkerName=RWRB,  
+  MarkerPlacement=Right.ShoulderArm.Seg.Hand, 
+  OptX="Off",OptY="Off",OptZ="Off",  
+  
+  Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  ) = {
+    sRelOpt = {0.0,0.07,0.01};
+  };
+  
+  
+  
+  
+  CreateMarker  M36  (
+  MarkerName=LWRA,  
+  MarkerPlacement=Left.ShoulderArm.Seg.Hand,
+  OptX="Off",OptY="Off",OptZ="Off",  
+  
+  Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  ) = {
+    sRelOpt = {-0.0,-0.07,0.01};
+  };
+  
+  
+  
+  
+  CreateMarker  M37  (
+  MarkerName=LWRB,  
+  MarkerPlacement=Left.ShoulderArm.Seg.Hand, 
+  OptX="Off",OptY="Off",OptZ="Off",  
+  
+  Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  ) = {
+    sRelOpt = {0.0,0.07,0.01};
+  };
+  
+  
+  
+  
+  
+  CreateMarker  M38  (
+  MarkerName=RFIN,  
+  MarkerPlacement=Right.ShoulderArm.Seg.Hand, 
+  OptX="Off",OptY="Off",OptZ="Off",  
+  
+  Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  ) = {
+    sRelOpt = {-0.085,-0.035,0.01};
+  };
+  
+  
+  
+  
+  CreateMarker  M39  (
+  MarkerName=LFIN,  
+  MarkerPlacement=Left.ShoulderArm.Seg.Hand, 
+  OptX="Off",OptY="Off",OptZ="Off",  
+  
+  Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  ) = {
+    sRelOpt = {-0.085,-0.035,-0.01};
+  };
+  
+  
+  
+  CreateMarker  M40  (
+  MarkerName=LMT5,  
+  MarkerPlacement=Left.Leg.Seg.Foot, 
+  OptX="Off",OptY="Off",OptZ="Off",  
+  
+  Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  ) = {
+    sRelOpt = {0.100436337426,-0.9315836934644,-0.1154381507332+0.01}+{-0.005,0.0,0.015};
+    
+    
+  };
+  
+  
+  
+  CreateMarker  M41  (
+  MarkerName=RMT5,  
+  MarkerPlacement=Right.Leg.Seg.Foot, 
+  OptX="Off",OptY="Off",OptZ="Off",  
+  
+  Model1=MotionAndParameterOptimizationModel,Model2= InverseDynamicModel
+  ) = {
+    sRelOpt = {0.100436337426,-0.9315836934644,0.1154381507332-0.01}+{-0.005,0.0,-0.015};
+    
+  };
+  
+  
+  
+  
+  
+  
+  
+};
+
+

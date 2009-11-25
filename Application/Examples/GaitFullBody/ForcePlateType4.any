@@ -1,0 +1,287 @@
+
+#class_template ForcePlateType4 (PlateName, Folder,AnySeg &Limb, No, Fx, Fy, Fz, Mx,My,Mz ){
+    
+ 
+     #var AnyFloat Cal;  // Variable with obligatory initialization
+
+   
+    AnyFixedRefFrame Corners ={
+      AnyVar CoordinateSystemSize= 0.1;
+      
+      AnyRefNode c01={
+        AnyInt i=0;
+        AnyInt plnr=No;
+        sRel=0.001*{Folder.Groups.FORCE_PLATFORM.CORNERS.Data[plnr][i][0],Folder.Groups.FORCE_PLATFORM.CORNERS.Data[No][i][1],Folder.Groups.FORCE_PLATFORM.CORNERS.Data[No][i][2]};
+        AnyDrawNode drw={ScaleXYZ=0.01*{1,1,1};RGB={1,0,0};};
+        AnyDrawVector  DrawName = {
+          Vec = {0.0,0,0};  //use zero length
+          Line.Thickness = 0.025; //arbitary value
+          Text = "1"; //make reference to name
+          Line.RGB={1,0,0};//make reference to color
+        };
+      };
+      
+      AnyRefNode c02={
+        AnyInt i=1;
+        AnyInt plnr=No;
+        sRel=0.001*{Folder.Groups.FORCE_PLATFORM.CORNERS.Data[plnr][i][0],Folder.Groups.FORCE_PLATFORM.CORNERS.Data[No][i][1],Folder.Groups.FORCE_PLATFORM.CORNERS.Data[No][i][2]};
+        AnyDrawNode drw={ScaleXYZ=0.01*{1,1,1};RGB={1,0,0};};
+        AnyDrawVector  DrawName = {
+          Vec = {0.0,0,0};  //use zero length
+          Line.Thickness = 0.025; //arbitary value
+          Text = "2"; //make reference to name
+          Line.RGB={1,0,0};//make reference to color
+        };
+      };
+      
+      AnyRefNode c03={
+        AnyInt i=2;
+        AnyInt plnr=No;
+        sRel=0.001*{Folder.Groups.FORCE_PLATFORM.CORNERS.Data[plnr][i][0],Folder.Groups.FORCE_PLATFORM.CORNERS.Data[No][i][1],Folder.Groups.FORCE_PLATFORM.CORNERS.Data[No][i][2]};
+        AnyDrawNode drw={ScaleXYZ=0.01*{1,1,1};RGB={1,0,0};};
+        
+        AnyDrawVector  DrawName = {
+          Vec = {0.0,0,0};  //use zero length
+          Line.Thickness = 0.025; //arbitary value
+          Text = "3"; //make reference to name
+          Line.RGB={1,0,0};//make reference to color
+        };
+      };
+      
+      AnyRefNode c04={
+        AnyInt i=3;
+        AnyInt plnr=No;
+        sRel=0.001*{Folder.Groups.FORCE_PLATFORM.CORNERS.Data[plnr][i][0],Folder.Groups.FORCE_PLATFORM.CORNERS.Data[No][i][1],Folder.Groups.FORCE_PLATFORM.CORNERS.Data[No][i][2]};
+        AnyDrawNode drw={ScaleXYZ=0.01*{1,1,1};RGB={1,0,0};};
+        AnyDrawVector  DrawName = {
+          Vec = {0.0,0,0};  //use zero length
+          Line.Thickness = 0.025; //arbitary value
+          Text = "4"; //make reference to name
+          Line.RGB={1,0,0};//make reference to color
+        };
+        
+      };
+      
+      
+      AnyRefNode PlateCenter={
+        sRel=0.25*(.c01.sRel+.c02.sRel+.c03.sRel+.c04.sRel);
+        AnyVec3 p1=sRel;
+        AnyVec3 p2=0.5*(.c01.sRel+.c04.sRel);
+        AnyVec3 p3=0.5*(.c01.sRel+.c02.sRel);
+        ARel =RotMat(p1,p2,p3);
+        
+        //      AnyDrawRefFrame drw={ScaleXYZ=..CoordinateSystemSize*{1,1,1};RGB={0,1,0};};
+        
+      };
+      
+    };
+    
+    
+    
+    
+    AnySeg ForcePlate={
+      Mass=0.0;
+      Jii={0,0,0};
+      r0=.Corners.PlateCenter.sRel;
+
+      //Rotational tranformation matrix for a coordinate system defined by three points. The first point is the origin of the system; the second gives the direction of the first (x) axis. Together all three points must span a plane which will be the plane of the first (x) and the second (y) axes, having the third (z) axis as normal. 
+      AnyVec3 p1=.Corners.PlateCenter.sRel;
+      AnyVec3 p2=0.5*(.Corners.c01.sRel+.Corners.c04.sRel);
+      AnyVec3 p3=0.5*(.Corners.c01.sRel+.Corners.c02.sRel);
+      Axes0 =RotMat(p1,p2,p3);
+      
+      
+      //Transducer location      
+      AnyRefNode TransducerLocation ={
+        AnyFloat Origins= Folder.Groups.FORCE_PLATFORM.ORIGIN.Data;
+        AnyVar ydist=-Origins[0][0]*Main.ModelSetup.C3DFileData.PointsScaleFactor; //distance from y axis on transducer to y axis of center of plate
+        AnyVar xdist=-Origins[0][1]*Main.ModelSetup.C3DFileData.PointsScaleFactor;//distance from x axis on transducer to x axis of center of plate
+        AnyVar zdist=-Origins[0][2]*Main.ModelSetup.C3DFileData.PointsScaleFactor;//distance from z axis on transducer to z surface of plate
+        
+        sRel={xdist,ydist,zdist};
+      AnyDrawRefFrame drw={ScaleXYZ=0.4*{1,1,1};RGB={1,0,0};};
+
+      };
+
+      
+      AnyRefNode PlateGraphics ={
+        sRel={0,0,0.05};
+        
+        AnyVec3 Size={vnorm(..Corners.c01.sRel-..Corners.c02.sRel,2),vnorm(..Corners.c02.sRel-..Corners.c03.sRel,2),0.1};
+        
+        AnyDrawSurf DrwBox = {
+          FileName = "box";
+          RGB = 0.45*{1,1,1};
+          ScaleXYZ=.Size/0.30;
+          Opacity =0.4;
+          Face=-1;
+        };
+        
+      };
+      
+      AnyFloat Origins= Folder.Groups.FORCE_PLATFORM.ORIGIN.Data;
+      AnyVar ydist=Origins[0][0]; //distance from y axis on transducer to y axis of center of plate
+      AnyVar xdist=Origins[0][1];//distance from x axis on transducer to x axis of center of plate
+      AnyVar zdist=Origins[0][2];//distance from z axis on transducer to z surface of plate
+    };  
+    
+    AnyKinEqSimpleDriver ForcePlateDriver ={
+      AnyKinLinear ForcePlateLin={
+        AnyRefNode &ref1=..Corners.PlateCenter;
+        AnySeg &ref2=..ForcePlate;
+        Ref=0;
+      };
+      
+      AnyKinRotational ForcePlateRot={
+        AnyRefNode &ref1=..Corners.PlateCenter;
+        AnySeg &ref2=..ForcePlate;
+        Type=RotAxesAngles;
+      };
+      DriverPos={0,0,0,0,0,0}; 
+      DriverVel={0,0,0,0,0,0};
+      Reaction.Type = {Off,Off,Off,Off,Off,Off};
+    };
+    
+      AnyReacForce PlateFootReaction={
+        
+        AnyKinLinear Lin={
+          Ref=0;
+          AnySeg &ref2=..ForcePlate;
+          AnySeg &ref1=..Limb;
+        };
+        
+        AnyKinRotational Rot={
+          AnySeg &ref2=..ForcePlate;
+          AnySeg &ref1=..Limb;
+          Type=RotAxesAngles;
+        };
+      };
+   
+
+
+ AnyInt   EndFrame =Folder.Header.FirstFrameNo-1+(Folder.Header.LastFrameNo-Folder.Header.FirstFrameNo+1)* Folder.Header.NoAnalogSamplesPer3DFrame;
+ AnyFloatVar  tStart = Folder.Header.FirstFrameNo/Folder.Header.VideoFrameRate;
+ AnyFloatVar   tEnd =  Folder.Header.LastFrameNo/Folder.Header.VideoFrameRate;
+ 
+ AnyInt AnalogData=EndFrame-Folder.Header.FirstFrameNo;
+ AnyFloat Time=tStart+(iarr(0,AnalogData)*(tEnd-tStart)/AnalogData);
+ 
+
+/// A lowpass butterworth filter
+AnyFunButterworthFilter LowPassFilter = 
+{
+  FilterForwardBackwardOnOff = On;
+  AutomaticInitialConditionOnOff = On;
+  N = 2;
+  AnyVar CutOffFrequency=15;
+  AnyVar SampleFreq=Main.ModelSetup.C3DFileData.Header.VideoFrameRate* Main.ModelSetup.C3DFileData.Header.NoAnalogSamplesPer3DFrame   ;
+  W = {1/(SampleFreq*0.5)*CutOffFrequency};
+  Type = LowPass;
+};
+
+ 
+ 
+ AnyFunInterpol load ={
+   Type=PiecewiseLinear;
+   T=.Time;
+   Data=.Cal'*{Fx,Fy,Fz,Mx,My,Mz};
+ //  Data=.Cal'*{.LowPassFilter(Fx),.LowPassFilter(Fy),.LowPassFilter(Fz),.LowPassFilter(Mx),.LowPassFilter(My),.LowPassFilter(Mz)};
+
+}; 
+ 
+ 
+ AnyVar FzTotal=load(ForcePlateDriver.t)[2];
+ AnyVar OnOff=iffun(gtfun(-FzTotal,10.0),1.0,0.0);
+ 
+ AnyForce3D Force ={
+   
+   AnyRefFrame  &ref=.ForcePlate.TransducerLocation ;
+   Flocal=.OnOff*{.load(.ForcePlateDriver.t)[0],.load(.ForcePlateDriver.t)[1],.load(.ForcePlateDriver.t)[2]};
+   AnyDrawVector DrawForce =     {
+     AnyRefFrame &ref=.ref;
+     Vec=.Flocal*1/1000;
+     PointAway = Off;
+     DrawCoord = Off;
+     
+     Line.RGB ={0,0,1};
+     Line.Thickness = 0.01;
+     Line.End.Thickness = 2*0.01;
+     Line.End.Length = 4*0.01;
+     GlobalCoord=Off;
+   };
+   
+   
+ };  
+ 
+ 
+  AnyMoment3D Moment ={
+   
+   AnyRefFrame  &ref=.ForcePlate.TransducerLocation ;
+   Mlocal=.OnOff*{.load(.ForcePlateDriver.t)[3],.load(.ForcePlateDriver.t)[4],.load(.ForcePlateDriver.t)[5]}*Main.ModelSetup.C3DFileData.PointsScaleFactor;
+   AnyDrawVector DrawMoment =     {
+     AnyRefFrame &ref=.ref;
+     Vec=.Mlocal*1/1000;
+     PointAway = Off;
+     DrawCoord = Off;
+     
+     Line.RGB ={1,0,0};
+     Line.Thickness = 0.01;
+     Line.End.Thickness = 2*0.01;
+     Line.End.Length = 4*0.01;
+     GlobalCoord=Off;
+   };
+ 
+   
+ };  
+
+ AnyFolder CenterOfPressure ={
+  
+   
+   AnyDrawVector vector =   {
+     AnyVar time=..ForcePlateDriver.t;
+     AnyVector Load=..load(time);
+     AnyVar OnOff=iffun(gtfun(Load[2],-10.0),0.0,1.0);
+ 
+     AnyVar fx= Load[0];
+     AnyVar fy= Load[1];
+     AnyVar fz= Load[2];
+     
+     AnyVar lx=..ForcePlate.ydist;
+     AnyVar ly=..ForcePlate.xdist;
+     AnyVar lz=..ForcePlate.zdist;
+     
+     AnyVar mx= Load[3]*Main.ModelSetup.C3DFileData.PointsScaleFactor;
+     AnyVar my= Load[4]*Main.ModelSetup.C3DFileData.PointsScaleFactor;
+     AnyVar mz= Load[5]*Main.ModelSetup.C3DFileData.PointsScaleFactor;
+     
+     AnyVar fzz =iffun(gtfun(  (fz^2)^0.5,0),fz,fz+1000000);
+     
+     AnyVar Vx= my/fzz;
+     AnyVar Vy= -mx/fzz;
+     AnyVar Vz= 0;
+     
+     
+     Vec = -..OnOff*{ Vx,Vy,Vz    };
+     GlobalCoord=Off;
+     PointAway = On;
+     DrawCoord = Off;
+     Line.Style=Line3DStyleFull;
+     Line.RGB = {0,1,0};
+     Line.Thickness = 0.000001;
+     
+     Line.End.Thickness = 2*0.015; 
+     Line.End.Length = 4*0.015;  
+     Line.End.Style=Line3DCapStyleEllipsoid;
+     //
+     Line.Start.Thickness = 0*0.015; 
+     Line.Start.Length = 0*0.015;  
+     Line.Start.Style=Line3DCapStyleEllipsoid;
+     
+     
+     AnyRefFrame &ref = ..ForcePlate;
+   };
+ };
+};
+
+
+

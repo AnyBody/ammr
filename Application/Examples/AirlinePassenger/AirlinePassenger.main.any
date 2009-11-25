@@ -1,0 +1,183 @@
+/** --------------------------------------------------------
+This is a model of a coach class airline passenger seat 
+characterized by the following:
+- No arm rests (you always lose the battle for the armrest
+to the person next to you)
+- Horizontal seat pan
+- Limited ability to incline the backrest due to the lack
+of clearance to the person behind
+
+The model assesses the comfort of the passenger in terms of
+the following:
+- Muscle effort computed as the percentage of maximum
+voluntary contraction to maintain the given posture.
+- The total shear force between the seat pan and the
+buttocks of the passenger. Shear forces are known to 
+cause particular discomfort in static loading situations,
+typically as when the passenger tries to sleep.
+
+The posture of the passenger is controlled by the backrest
+angle. The bacrest offers pressure support for the back 
+of the human model but no tension support. This means that 
+forward leaning postures are realized by inclining the 
+seat forward and the body is not getting any support from
+the backrest in this situation.
+
+The inverse dynamic analysis of the model inclines the 
+backrest backwards from an initial 10 degree forward 
+inclination to a 30 degree backward inclination, which
+is on the very upper limit of coach class passenger seats.
+-------------------------------------------------------- */
+Main = {
+  
+  /**Execute this operation to run the model in the intended operation sequence.  
+  It is also possible to run operations seperately, by manual selections in the operation tree*/
+  AnyOperationSequence RunApplication = {
+
+    /**This operation calibrates the muscles in the model if these are of the type AnyMuscleModel3E.
+    This will just be an empty operation if the model is using a muscle type that does not require calibration.*/
+    AnyOperation &CalibrationAnal = Main.HumanModel.Calibration.CalibrationSequence;  
+
+    ///This operation is the inverse dynamic analysis
+    AnyOperation &InvAnal=Main.Study.InverseDynamics;
+    
+  };
+  
+  // ------------------------------------------------------
+  // Driver Positions - distances in meters and angles
+  // in degrees
+  // ------------------------------------------------------
+  AnyFolder DrvPos = {
+    AnyVar PelvisSeatLinXPos = 0.05;
+    AnyVar SeatGlobalLinYPos = 0;
+    AnyVar SeatGlobalRotZPos = 0; 
+    AnyVar BackRestHeadResRotZPos = 0;
+    AnyVar GlobalLegRestRotZPos = 0;
+    AnyVar GlobalBackRestRotZPos = -10;
+    AnyVar LegRestFootRestLinYPos = 0.15; 
+  }; // DrvPos
+  
+  // --------------------------------------------------------
+  // Driver Velocities - in degrees per second
+  // --------------------------------------------------------
+  AnyFolder DrvVel = {
+    AnyVar PelvisSeatLinXVel = 0.0/Main.Study.tEnd;
+    AnyVar SeatGlobalLinYVel = 0/Main.Study.tEnd;
+    AnyVar SeatGlobalRotZVel = 0/Main.Study.tEnd;
+    AnyVar SeatInclVel = 0/Main.Study.tEnd;
+    AnyVar GlobalBackRestRotZVel = 40/Main.Study.tEnd;
+    AnyVar GlobalLegRestRotZVel = 0/Main.Study.tEnd;
+    AnyVar LegRestFootRestLinYVel = 0/Main.Study.tEnd;
+  }; // DrvVel
+  
+  // --------------------------------------------------------
+  // Support settings 
+  // --------------------------------------------------------
+  AnyFolder SupportSettings = {
+    
+    // Friction coefficients between the human and the chair
+    AnyVar StaticFrictionSeat= 0.5;
+    AnyVar StaticFrictionBackrest=0.5;
+    AnyVar StaticFrictionFootrest=0.5; 
+    
+    // Strenght of the supports between the human and the chair
+    AnyVar SeatSupportStrength=60000;
+    AnyVar BackrestSupportStrength=60000;
+    AnyVar FootrestSupportStrength=60000;
+    AnyVar ArmrestSupportStrength=60000;
+  };
+  
+  // ----------------------------------------------------------
+  // Draw settings
+  // ----------------------------------------------------------
+  #include "DrawSettings.any"
+  
+  // ------------------------------------------------------------
+  // Model
+  // ------------------------------------------------------------
+  
+  AnyFolder HumanModel={
+    
+    AnyFolder &Mannequin=.Model.Mannequin;
+    
+    // This model uses the simple constant strength muscles 
+    #include  "..\..\..\Body\AAUHuman\BodyModels\FullBodyModel\BodyModel.any"    
+    
+    AnyFolder StrengthParameters={
+      AnyVar SpecificMuscleTensionSpine= 90; //N/cm^2
+      AnyVar StrengthIndexLeg= 1; 
+      AnyVar SpecificMuscleTensionShoulderArm= 90; //N/cm^2
+    };
+    
+    // Use the standard size Body model
+    #include "..\..\..\Body\AAUHuman\Scaling\ScalingStandard.any"
+  };
+  
+  // ------------------------------------------------------------
+  // Model
+  // ------------------------------------------------------------
+  
+  AnyFolder Model = {
+    
+    AnyFolder &HumanModel=.HumanModel.BodyModel;
+    
+    // The Mannequin file specifies load-time positions for all the segments
+    // in the HumanModel. This is important for the model's ablity to resolve
+    // all the kinematic constraints when the model is analyzed.
+    // The mannequin file also drives those degrees of freedom of the human 
+    // model that are not governed by problem-specific drivers at run time.    
+    #include "Mannequin.any"   
+    
+    /// This folder contains the seat and other support conditions
+    AnyFolder EnvironmentModel = {
+      #include "Environment.any"
+    };
+    
+    /// Connections between the Body model and the seat.
+    AnyFolder ModelEnvironmentConnection = {
+      
+      #include "ConnectionSegments.any"
+      #include "JointsAndDrivers.any"
+      
+      AnyFolder &RefPM=Main.Model.EnvironmentModel;
+      #include "InitialPositionsEnvironment.any" 
+//      #include "Measures.any"
+      #include "Support.any" 
+    }; // ModelEnvironmentConnection    
+  }; // Model
+  
+  // --------------------------------------------------------------
+  // Studies
+  // --------------------------------------------------------------
+  AnyBodyStudy Study = {
+    AnyFolder &Model = .Model;
+        
+    tEnd = 100;
+    Gravity = {0.0, -9.81, 0.0};
+    nStep = 13;
+    
+    /** One of the interesting variables is the activity in the vasti muscles. 
+    This is because seats with slippery surfaces reduce the shear force on the
+    buttocks but in return require vasti muscle acitivity to prevent the body
+    from sliding forward on the seat pan.
+    */
+    AnyVar VastiAct = 
+    max({Main.Model.HumanModel.Right.Leg.Mus.VastusMedialis.Activity,
+      Main.Model.HumanModel.Right.Leg.Mus.VastusIntermedius.Activity,
+      Main.Model.HumanModel.Right.Leg.Mus.VastusLateralis.Activity});
+
+    /** This variable collects the shear force between the buttocks and the seat
+    by means of the shear reaction between the seat in the environment. Shear
+    force on the buttocks is known to cause discomfort.
+    */
+    AnyVar ShearForce = -Main.Study.Model.EnvironmentModel.Jnt.SeatSupport.Fout[1];
+
+    /** The maximum muscle activity is the percentage of maximum voluntary
+    contraction necessary to maintain the posture. You cannot sleep unless
+    this is very low. */
+    AnyOutputFun MaxAct = {
+      Val = .MaxMuscleActivity;
+    };    
+  }; 
+  
+};// Main
