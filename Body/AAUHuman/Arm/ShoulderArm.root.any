@@ -140,22 +140,60 @@ free which is pronation/supination of the forearm
 Wrist joint: created as two revolute joints where the axis of rotations are not coincident
 
 */
-AnyRefNode &GloveInsertationNode=Seg.Hand.PalmJoint;
-#include "Glove.any"
+AnyFolder ARM ={};
 
 #include "AddOnOutsideBlockForKinematics.any"
+
+#if RIGHT_DETAILLED_HAND*RIGHT_ARM + LEFT_DETAILLED_HAND*LEFT_ARM == 0
+AnyRefNode &GloveInsertationNode=Seg.Hand.PalmJoint;
+#include "Glove.any"
+#include "GloveMuscle.any"
+#endif
+
 
 ///Folder with segment for the arm
 AnyFolder Seg={
   #include "Seg.any"
-  #include "NodeForScalingExt.any"
+  
+  #if RIGHT_DETAILLED_HAND*RIGHT_ARM + LEFT_DETAILLED_HAND*LEFT_ARM == 0
+  #include "HandSeg.any"
+  Hand={
+    AnyRefFrame &CarpalsRef = Ref;
+    AnyRefFrame &HandRef = Ref;
+    AnyRefFrame &Finger1MetaRef = Ref;
+    AnyRefFrame &Finger2MetaRef = Ref;
+    AnyRefFrame &Finger3MetaRef = Ref;
+    AnyRefFrame &Finger4MetaRef = Ref;
+    AnyRefFrame &Finger5MetaRef = Ref;
+  };
+  
+  #else
+  
+  AnyFolder Hand = {
+    #include "../Hand/HandSeg.any"
+    AnyRefFrame &CarpalsRef = Carpals.CarpalsRef;
+    AnyRefFrame &HandRef = Carpals;
+    AnyRefFrame &Finger1MetaRef = Finger1.Seg.Metacarpal;
+    AnyRefFrame &Finger2MetaRef = Finger2.Seg.Metacarpal;
+    AnyRefFrame &Finger3MetaRef = Finger3.Seg.Metacarpal;
+    AnyRefFrame &Finger4MetaRef = Finger4.Seg.Metacarpal;
+    AnyRefFrame &Finger5MetaRef = Finger5.Seg.Metacarpal;
+  };
+  #endif
+  
+//  #include "NodeForScalingExt.any"
 };
+
+
 ///Joints for the arm
 AnyFolder Jnt ={
-  #include "Jnt.any"
+  #if RIGHT_SHOULDER_RHYTHM*RIGHT_ARM + LEFT_SHOULDER_RHYTHM*LEFT_ARM == 0
+    #include "Jnt.any"
+    #else
+    #include "JntSR.any"
+  #endif
 }; //End Jnt
 
-#include "GloveMuscle.any"
 
 ///Muscles for the arm
 AnyFolder Mus ={ 
@@ -181,11 +219,23 @@ AnyFolder MassSummation={
   AnyVar Mass=.Seg.Scapula.Mass+.Seg.Clavicula.Mass+.Seg.Ulna.Mass+.Seg.Humerus.Mass+.Seg.Radius.Mass+.Seg.Hand.Mass;
 };
 
-InterfaceFolder ={
-  #include "Interface.any"
+InterfaceFolder={
+   #include "Interface.any"
+   #if RIGHT_DETAILLED_HAND*RIGHT_ARM + LEFT_DETAILLED_HAND*LEFT_ARM == 0
+   #else
+   #include "../Hand/Interface.any"
+   #endif
 };
 
+#ifdef DONT_USE_INITIAL_POSITION_FROM_MANNEQUIN
+#else
 #include "InitialPositions.any"
+  #if RIGHT_DETAILLED_HAND*RIGHT_ARM + LEFT_DETAILLED_HAND*LEFT_ARM == 0
+  #include "InitialPositionsHand.any"
+  #else
+  #include "../Hand/InitialPositionsHand.any"
+  #endif
+#endif
 
 MannequinValuesFolder ={
   #include "MannequinValuesFromModel.any"

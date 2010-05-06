@@ -46,10 +46,11 @@ HipNodeRef = {
     sRel = .Scale(.v1+.HipOffset) - .Scale(.HipOffset); 
   }; //Via point for Psoas Major, will first be used as end point.
   
+  
   // Definition of cylinder used for wrapping of the psoas major muscle
   AnyRefNode pecent_ossis_pubis={ 
     sRel=  .Scale(.v2+.HipOffset) - .Scale(.HipOffset);
-//    AnyDrawRefFrame drw = {};
+    //AnyDrawRefFrame drw = {};
     AnyVec3 p2=.Scale(.v3+.HipOffset) - .Scale(.HipOffset);
     
     AnyVec3 p3=.Scale(.v4+.HipOffset) - .Scale(.HipOffset);
@@ -58,17 +59,21 @@ HipNodeRef = {
     //p2-p1 used to find x axis
     //p3-p1 used to find the y axis
     //z axis found as cross product
-    AnyMat33  Mat = RotMat(sRel,p3,p2);
+    AnyMat33  Mat = RotMat(sRel,p2,p3);
     
     //Switch around the on the columns to compensate that the cylinder has 
     //main axis along the zaxis
     ARel={
-      {Mat[0][2],Mat[0][0],Mat[0][1]},
-      {Mat[1][2],Mat[1][0],Mat[1][1]},
-      {Mat[2][2],Mat[2][0],Mat[2][1]}};          
+      {-Mat[0][2],Mat[0][1],Mat[0][0]},
+      {-Mat[1][2],Mat[1][1],Mat[1][0]},
+      {-Mat[2][2],Mat[2][1],Mat[2][0]}};          
+    
+    //This is the via node that should always be on the surface of the cylinder
+    //so it is used to calculate the radius (in local node coordinate).
+    AnyVec3 p4 = (.IliacusMidViaNode1.sRel - sRel)*ARel;
     
     AnySurfCylinder cyl = { 
-      Radius=((.sRel[0]-.p3[0])^2+(.sRel[1]-.p3[1])^2+(.sRel[2]-.p3[2])^2)^0.5;
+      Radius=((.sRel[0]-...Sign*.p4[0])^2+(.sRel[1]-.p4[1])^2)^0.5; //on XY plane
       Length= ((.sRel[0]-.p2[0])^2+(.sRel[1]-.p2[1])^2+(.sRel[2]-.p2[2])^2)^0.5;
       //AnyDrawParamSurf drw={RGB={0,0,1};
       //Opacity = 1;};
@@ -216,7 +221,16 @@ HipNodeRef = {
   
   AnyRefNode TensorFasciaeLatae1Node = {sRel =.Scale( {0.0283, 0.0799, ..Sign*0.0476});};
   AnyRefNode TensorFasciaeLatae2Node = {sRel = .Scale({0.0237, 0.0901, ..Sign*0.0513});};
+
+ //via points added based on moment arms curves and text book info 
+  AnyRefNode GluteusMaxViaNode1 =  {  sRel = .Scale({-0.0391, -0.07, ..Sign*-0.0407}); };  
+  AnyRefNode GluteusMaxViaNode2 =  {  sRel = .Scale({-0.03501, -0.06, -..Sign*0.005}); };  
+  AnyRefNode GluteusMaxViaNode3 =  {  sRel = .Scale({-0.0291, -0.04,..Sign*0.017});    };    
+  
+
 };
+
+
 
 /// Collection of the joints into JntDOF which are used by the applications.
 AnyKinMeasureOrg JntDOF = {
@@ -260,7 +274,10 @@ AnyFolder MassSummation={
   
 };
 
+#ifdef DONT_USE_INITIAL_POSITION_FROM_MANNEQUIN
+#else
 #include "InitialPositions.any"
+#endif
 
 InterfaceFolder ={
   #include "Interface.any"
@@ -270,11 +287,4 @@ MannequinValuesFolder ={
   #include "MannequinValuesFromModel.any"
 };
 
-StandardParameters ={
-   #ifdef SCALING_EXTERNAL
-   #include "StandardParametersExt.any"
-   #else
-   #include "StandardParameters.any"
-   #endif
-};
 

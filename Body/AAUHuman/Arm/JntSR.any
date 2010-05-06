@@ -1,0 +1,393 @@
+//This is the definition of the joints in the arm
+
+///Definition of SternoClavicular joint SC joint
+AnyKinRotational SCRot = {
+  AnyRefNode &thorax_sc = ..ShoulderRef.scj;
+  AnyRefNode &clavicula_sc = ..Seg.Clavicula.scj;    
+  Type = RotAxesAngles;
+  Axis1 = y;
+  Axis2 = z;
+  Axis3 = x;
+}; 
+
+AnyKinLinear SCLin = {
+  AnyRefNode &thorax_sc = ..ShoulderRef.scj;
+  AnyRefNode &clavicula_sc = ..Seg.Clavicula.scj;    
+  Ref=0;
+}; 
+
+AnyKinEq SCLinCon = {
+  AnyKinMeasure &SCLinCon = .SCLin;
+};
+
+
+///Defintion of AC joint
+AnyKinRotational ACRot = {
+  AnyRefNode &clavicula_ac = ..Seg.Clavicula.acj;
+  AnyRefNode &scapula_ac = ..Seg.Scapula.acj;
+  Type = RotAxesAngles;
+  Axis1 = y;
+  Axis2 = z;
+  Axis3 = x;
+}; 
+
+AnyKinLinear ACLin = {
+  AnyRefNode &clavicula_ac = ..Seg.Clavicula.acj;
+  AnyRefNode &scapula_ac = ..Seg.Scapula.acj;
+  Ref=0;
+}; 
+
+AnyKinEq ACLinCon = {
+  AnyKinMeasure &SCLinCon =.ACLin;
+};
+
+///Definition of GH joint
+AnyKinRotational GHRot = {
+  AnyRefNode &scapula_gh = ..Seg.Scapula.gh;
+  AnyRefNode &humerus_gh = ..Seg.Humerus.gh;
+  Type = RotAxesAngles;
+  Axis1 = y;
+  Axis2 = z;
+  Axis3 = y;
+  
+}; 
+
+AnyKinLinear GHLin = {
+  AnyRefNode &scapula_gh = ..Seg.Scapula.gh;
+  AnyRefNode &humerus_gh = ..Seg.Humerus.gh;
+  
+  Ref=0; //use this for shifting between the two ref systems: scapula=0, humerus=1
+  
+  
+}; 
+//This file includes the glenohumeral reactions created by a number of pushing muscles
+//if this file is not include the normal reactions of the GH joint should be set to "On On On"6
+#include "GHReactions.any"
+
+
+/**This is the reactions of the GH joint they are normally set to "Off Off Off" if the file 
+GHReactions.any is being used, if this is not the case the reactions should be set to "On On On"
+*/
+AnyKinEq GHLinCon = {
+  AnyKinMeasure &GHLinCon = .GHLin;
+  Reaction.Type={Off,Off,Off};
+};
+
+//Definition of elbow flexion extension joint
+AnyRevoluteJoint FE = {
+  Axis = x;
+  AnyRefNode &HumerusFE = ..Seg.Humerus.fe;
+  AnyRefNode &UlnaFE = ..Seg.Ulna.fe;
+  
+  
+};//End FE
+
+
+//Next three definitions equal to spherical joint 
+//Definition of proximal forearm pronation supination joint 
+AnyKinRotational PSRotProximal = {
+  Axis1 = x;
+  Axis2 = y;
+  Axis3 = z;
+  Type = RotAxesAngles;
+ 
+  AnyRefNode &RadiusPs = ..Seg.Radius.PointPS2;
+  AnyRefNode &UlnaPs = ..Seg.Ulna.ps2;
+};//End pronation supination joint proximal
+
+//Definition of forearm pronation supination joint 
+AnyKinLinear PSLinProximal = {
+  Ref=0;
+  
+  AnyRefNode &UlnaPs = ..Seg.Ulna.ps2;
+  AnyRefNode &RadiusPs = ..Seg.Radius.PointPS2;
+};//End pronation supination joint proximal
+
+AnyKinEq PSProximalConstraints = {
+  AnyKinLinear &Jnt = .PSLinProximal; 
+  Reaction.Type = {Off,Off,Off};
+};
+
+AnyReacForce PSProximalReacForce = 
+{
+  AnyKinMeasureOrg RadiusHumerus = {
+    MeasureOrganizer = {0};
+    AnyKinLinear Lin = 
+    {
+      Ref = 0;
+      AnyRefFrame &Radius = ....Seg.Radius.PointPS2.PointPS2Rot.PS2Reac;
+      AnyRefFrame &Humerus = ....Seg.Humerus.fe;
+    };
+  };
+  
+  AnyKinMeasureOrg RadiusUlna = {
+    MeasureOrganizer = {0,2};
+    AnyKinLinear Lin = 
+    {
+      Ref = 0;
+      AnyRefFrame &Ulna = ....Seg.Ulna.ps2.ps2Reac;
+      AnyRefFrame &Radius = ....Seg.Radius.PointPS2.PointPS2Rot.PS2Reac;
+    };
+  };
+};
+
+
+//This is measure which will be used by the applications
+AnyKinMeasureOrg PS = {
+  AnyKinRotational &Jnt = .PSRotProximal;
+  MeasureOrganizer = {0};
+};
+//End definitions of spherical joint
+
+AnyKinEq PSLinDistalConstraint = {
+  
+  //Definition of distal forearm pronation supination joint 
+  AnyKinLinear PSLinDistal = {
+    Ref = 0; //Uses coordinate system of the first defined segment
+
+    AnyRefNode &UlnaPs = ...Seg.Ulna.ps2.usRot;
+    AnyRefNode &RadiusPs = ...Seg.Radius.PS;
+  };//End pronation supination joint distal
+  MeasureOrganizer = {0,2};
+};
+
+//
+// //Definition of wrist joint
+//AnyUniversalJoint WristJoint = {
+//  Axis1 = y; //flexion extension
+//  Axis2 = z; //abduction adduction
+//  AnyRefNode &radius_wj = ..Seg.Radius.wj;
+//  
+//  AnyRefNode &hand_wj =..Seg.Hand.wj;
+//  
+//  radius_wj={AnyDrawRefFrame drw={};};
+//  hand_wj={AnyDrawRefFrame drw={};};
+//
+//};//End WristJoint
+//
+
+
+
+////Definition of wrist joint
+AnyRevoluteJoint WristJointFlexion = {
+  Axis = y; //flexion extension
+  AnyRefNode &radius_wj = ..Seg.Radius.wj;
+  AnyRefNode &hand_wj =..Seg.WristJointSeg.FlexionExtensionAxis;
+};//End WristJoint
+
+AnyRevoluteJoint WristJointDeviation = {
+  Axis = z; //radial ulnar deviation
+  AnyRefNode &radius_wj = ..Seg.WristJointSeg.RadialUlnarDeviation;
+  AnyRefNode &hand_wj =..Seg.Hand.HandRef.wj;
+};//End WristJoint
+
+
+
+//Scapula thorax gliding plane
+AnyKinPLine ScapulaAIThoraxNode = {
+  AnyRefNode &focustop= ..ShoulderRef.ScapulaEllipsoidOrigin.FocusPointTop;
+  AnyRefNode &scapula = ..Seg.Scapula.ai;
+  AnyRefNode &focusbottom= ..ShoulderRef.ScapulaEllipsoidOrigin.FocusPointBottom;
+  
+};
+
+AnyKinEqSimpleDriver ScapulaAIThoraxNodeDriver = {
+  AnyKinPLine &Jnt =  .ScapulaAIThoraxNode;
+  DriverPos = {..ShoulderRef.ScapulaEllipsoidOrigin.A*2};
+  DriverVel = {0.000};
+  MeasureOrganizer = {0};
+  Reaction.Type = {Off};
+};
+
+//Scapula thorax gliding plane
+AnyKinPLine ScapulaTSThoraxNode = {
+  AnyRefNode &focustop= ..ShoulderRef.ScapulaEllipsoidOrigin.FocusPointTop;
+  AnyRefNode &scapula = ..Seg.Scapula.ts;
+  AnyRefNode &focusbottom= ..ShoulderRef.ScapulaEllipsoidOrigin.FocusPointBottom;
+};
+
+
+//Replaced by rhythm
+//AnyKinEqSimpleDriver ScapulaTSThoraxNodeDriver = {
+//  AnyKinPLine &Jnt =  .ScapulaTSThoraxNode;
+//  DriverPos = {..ShoulderRef.ScapulaEllipsoidOrigin.A*2};
+//  DriverVel = {0.000};
+//  MeasureOrganizer = {0};
+//  Reaction.Type = {Off};
+//};
+
+
+
+// Scapula thorax gliding plane
+// The following lines should be used to avoid pulling force in the connection between  
+// the bonylandmarks AI and TS on scapula and thorax.
+// Remember to change reaction.type for AI and TS to {0} when this is used.
+
+//Simple muscle model 
+AnyMuscleModel ReactionMuscle = {
+  F0 = 5000;
+};
+
+//Artificial muscle that can only push 
+AnyGeneralMuscle ScapulaAIThoraxNodeReaction = {
+  AnyKinPLine &Jnt = .ScapulaAIThoraxNode;
+  AnyMuscleModel &ref = .ReactionMuscle; 
+  ForceDirection = 1;  //This changes the muscle force direction and means that it will only push
+};
+
+//Artificial muscle that can only push
+AnyGeneralMuscle ScapulaTSThoraxNodeReaction = {
+  AnyKinPLine &Jnt = .ScapulaTSThoraxNode;
+  AnyMuscleModel &ref = .ReactionMuscle; 
+  ForceDirection = 1;  //This changes the muscle force direction and means that it will only push
+};
+
+
+//Definitions of ligaments
+AnyKinPLine ConoideumLigament = {
+  AnyRefNode &scapula = ..Seg.Scapula.conoid;
+  AnyRefNode &clavicle = ..Seg.Clavicula.conoid;   
+  AnyDrawPLine drwline= {Thickness=0.005;RGB={1,0,0};};
+};
+
+
+//Replaced by rhythm
+//AnyKinEqSimpleDriver ConoideumLigamentDrv ={
+//  //This is the position of origo of clavicula unscaled
+//  AnyVec3  ClaviculaRStd=(-..Seg.Clavicula.NeutralPositionOnPelvis.StandardsRel*..Seg.Clavicula.Mirror)*..Seg.Clavicula.NeutralPositionOnPelvis.Clavicula_Axes';
+//  
+//  //This the position of conoid node on clavicual unscaled
+//  AnyVec3  ClaviculaConoidR=ClaviculaRStd+ (..Seg.Clavicula.ConoidStd*..Seg.Clavicula.Mirror)*..Seg.Clavicula.NeutralPositionOnPelvis.Clavicula_Axes';
+//  
+//  //This is the position of origo of Scapula unscaled
+//  AnyVec3  ScapulaRStd=(-..Seg.Scapula.NeutralPositionOnPelvis.StandardsRel*..Seg.Scapula.Mirror)*..Seg.Scapula.NeutralPositionOnPelvis.Scapula_Axes';
+//  // ScapulaRStd = {0.012783, 0.425831, 0.181893};
+//  
+//  //This the position of conoid node on clavicual unscaled
+//  AnyVec3  ScapulaConoidR=ScapulaRStd+ (..Seg.Scapula.ConoidStd*..Seg.Scapula.Mirror)*..Seg.Scapula.NeutralPositionOnPelvis.Scapula_Axes';
+//  //ScapulaConoidR = {0.024835, 0.413580, 0.137568};
+//  
+//  AnyVec3 StandardConoidVector= ClaviculaConoidR-ScapulaConoidR;
+//  AnyFunTransform3D &Scale=..Scaling.GeometricalScaling.Trunk.ScaleFunction;
+//  AnyVec3 ScaledStdConoidVector=Scale(StandardConoidVector);
+//  AnyVar ScaleStdConoidVectorLenght=((ScaledStdConoidVector[0])^2+(ScaledStdConoidVector[1])^2+(ScaledStdConoidVector[2])^2)^0.5;
+//  
+//  AnyKinPLine &ref=.ConoideumLigament;
+//  DriverPos={ScaleStdConoidVectorLenght};
+//  //DriverPos={ 0.020341};
+//  DriverVel={0};
+//  Reaction.Type={Off};
+//};
+
+
+//Artificial muscle will produce reaction in the ligament
+AnyViaPointMuscle ConoidLigamentReaction = {
+  AnyRefNode &scapula = ..Seg.Scapula.conoid;
+  AnyRefNode &clavicle = ..Seg.Clavicula.conoid; 
+  AnyMuscleModel &ref = .ReactionMuscle; 
+  AnyDrawMuscle drwlig = {RGB={0,0,1};MaxStress = 75000000.000000;};
+};
+//Artificial muscle will produce reaction in the ligament
+AnyViaPointMuscle TrapezoidLigamentReaction = {
+  AnyRefNode &scapula = ..Seg.Scapula.trapezoid;
+  AnyRefNode &clavicle = ..Seg.Clavicula.trapezoid;   
+  AnyMuscleModel &ref = .ReactionMuscle; 
+  AnyDrawMuscle drwlig = {RGB={0,0,1};MaxStress = 75000000.000000;};
+};
+
+
+
+//************ Shoulder Rhythm **********************
+
+AnyKinEqSimpleDriver ClaviculaProtractionDriver = 
+{
+  AnyKinMeasureLinComb ClaviculaProtractionRhythm = 
+  {
+    AnyKinMeasureOrg &ClaviculaProtraction = ...InterfaceFolder.SternoClavicularProtraction;
+    AnyKinMeasureOrg &HumerusElevation = ...InterfaceFolder.GlenohumeralAbduction;
+    AnyKinMeasureOrg &HumerusFlexion = ...InterfaceFolder.GlenohumeralFlexion;
+    //OutDim = 0;
+    Coef = {{1, 0.242, -0.12}};
+    Const = -1*{(-4.983*pi/180)+0.851*(-0.401)+(10*pi/180)}; // initial position -0.401 rad + correction of +10deg
+  };
+  DriverPos = {0};
+  DriverVel = {0};
+  Reaction.Type = {Off};
+};
+
+
+
+AnyKinEqSimpleDriver ClaviculaElevationDriver = 
+{
+  AnyKinMeasureLinComb ClaviculaElevationRhythm = 
+  {
+    AnyKinMeasureOrg &ClaviculaElevation = ...InterfaceFolder.SternoClavicularElevation;
+    AnyKinMeasureOrg &HumerusElevation = ...InterfaceFolder.GlenohumeralAbduction;
+    AnyKinMeasureOrg &HumerusFlexion =...InterfaceFolder.GlenohumeralFlexion;
+    //OutDim = 0;
+    Coef = {{1, -0.123, 0.046}};
+    Const = -1*{(3.917*pi/180)+0.493*(0.201)-(6*pi/180)}; // initial position 0.201 rad + correction of -6deg
+  };
+  DriverPos = {0};
+  DriverVel = {0};
+  Reaction.Type = {Off};
+};
+
+
+AnyKinEqSimpleDriver ClaviculaAxialRotationDriver = 
+{
+  AnyKinMeasureLinComb ClaviculaAxialRotationRhythm = 
+  {
+    AnyKinMeasureOrg &ClaviculaAxialRotation = ...InterfaceFolder.SternoClavicularAxialRotation;
+    AnyKinMeasureOrg &HumerusElevation = ...InterfaceFolder.GlenohumeralAbduction;
+    //OutDim = 0;
+    Coef = {{1, -0.422}};
+    Const = -1*{-0.423};   // initial position -0.349 rad, constant found by iteration (data non available)
+  };
+  DriverPos = {0};
+  DriverVel = {0};
+  Reaction.Type = {Off};
+};
+
+
+
+
+
+AnyKinEqSimpleDriver ScapulaProtractionDriver = 
+{
+  AnyKinMeasureLinComb ScapulaProtractionRhythm = 
+  {
+    AnyKinMeasureOrg &ScapulaProtraction = ...InterfaceFolder.ScapulaThoraxProtraction;
+    AnyKinMeasureOrg &HumerusElevation = ...InterfaceFolder.GlenohumeralAbduction;
+    AnyKinMeasureOrg &HumerusFlexion = ...InterfaceFolder.GlenohumeralFlexion;
+    //OutDim = 0;
+    Coef = {{1, 0.049*...Sign, -0.14*...Sign}};
+    Const = -...Sign*{(-1.203*pi/180)+0.901*(0.33)+(10*pi/180)}; // initial position 0.33 rad + correction of +10deg
+  };
+  DriverPos = {0};
+  DriverVel = {0};
+  Reaction.Type = {Off};
+};
+
+
+
+AnyKinEqSimpleDriver ScapulaElevationDriver = 
+{
+  AnyKinMeasureLinComb ScapulaElevationRhythm = 
+  {
+    AnyKinMeasureOrg &ScapulaElevation = ...InterfaceFolder.ScapulaThoraxElevation;
+    AnyKinMeasureOrg &HumerusElevation = ...InterfaceFolder.GlenohumeralAbduction;
+    AnyKinMeasureOrg &HumerusFlexion = ...InterfaceFolder.GlenohumeralFlexion;
+    //OutDim = 0;
+    Coef = {{1, -0.396*...Sign, 0.079*...Sign}};
+    Const = -...Sign*{(3.095*pi/180)+0.414*(0.307)-(10*pi/180)}; // initial position 0.307 rad + correction of -10deg
+  };
+  DriverPos = {0};
+  DriverVel = {0};
+  Reaction.Type = {Off};
+};
+
+
+
+
+

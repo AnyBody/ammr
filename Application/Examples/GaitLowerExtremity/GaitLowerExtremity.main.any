@@ -25,20 +25,28 @@
 
 //Set this to 1 if you want to run the motion and Parameter Optimization identification
 //**************************************************
-#define MotionAndParameterOptimizationModel 1
+#define MotionAndParameterOptimizationModel 0
 
 //Set this to 1 if you want to run the inverse dynamic analysis
-#define InverseDynamicModel 0
-//Usually only have one of the two swicthes active so set the inactive analysis to 0
+#define InverseDynamicModel 1
+//Usually only have one of the two switches active so set the inactive analysis to 0
 //**************************************************
+
+
 
 //This is a list of the classes used for defining the model
 //Class used for defining a marker
-#include "CreateMarkerClass.any"
+#include "../../../Body/AAUHuman/ToolBox/Mocap/CreateMarkerClass.any"
+//Class used for defining a marker
+#include "../../../Body/AAUHuman/ToolBox/Mocap/CreateMarkerClassTD.any"
 //Class used to construct a forceplate of type4
-#include "ForcePlateType4.any"
+#include "../../../Body/AAUHuman/ToolBox/Mocap/ForcePlateType4AutoDetection.any"
+#include "../../../Body/AAUHuman/ToolBox/Mocap/ForcePlateType4.any"
+
 //Class used for defining a which antrhopometics measurements will be part of the analysis
-#include "OptimizeAnthropometricsOnOff.any"
+#include "../../../Body/AAUHuman/ToolBox/Mocap/OptimizeAnthropometricsOnOff.any"
+
+
 
 
 
@@ -52,7 +60,8 @@ Main = {
   //make changes in the Mannequin file to position the human model close to the recorded markers.
   #include "ModelSetup.any" 
   
-  
+   #include "TrialSpecificData.any" 
+
   #if MotionAndParameterOptimizationModel
 
   //STEP1
@@ -96,7 +105,7 @@ Main = {
   //  runmacro   "SaveMacroOperation-Load.anymcr"
   //  runmacro   "RunMacroOperation-Load.anymcr"   
    //  operation Main.Studies.InverseDynamicStudy.InitialConditions;  //this is done to have the model updated before running calibration
- //  run
+  //  run
   //  operation Main.Studies.HumanModel.Calibration.CalibrationSequence
   //  run
   //  operation Main.Studies.InverseDynamicStudy.InverseDynamics;
@@ -105,18 +114,13 @@ Main = {
   #endif
   
   
-  #include "DrawSettings.any"
-  
-  
-  
-  
-  
+ #include "DrawSettings.any"
   
 
 
 //DESCRIPTIONS OF THE STUDIES IN THE MODEL
 //
-//KinematicStudyForParamterIdentification: 
+//KinematicStudyForParameterIdentification: 
 //    This study is the basis study for the Parameter identification study
 //
 //ParameterIdentification:
@@ -127,11 +131,11 @@ Main = {
 //    reduce the accuracy
 //    
 //MotionOptimization:
-//    This study will run the kinematic analysis using the optimize parameters from the ParamterIdentification study 
+//    This study will run the kinematic analysis using the optimize parameters from the ParameterIdentification study 
 //    This study will run with a high number of timesteps. It will automatically save the optimized motion in files 
 //    named according to name of the used C3D which is specified in the ModelSetup.any file
 //
-//LoadParametersOpimizationResults 
+//LoadParametersOptimizationResults 
 //    This study is used ONLY for loading the optimized results from the ParameterIdentification study
 //
 //InverseDynamicStudy:
@@ -152,7 +156,7 @@ Main = {
     #if  MotionAndParameterOptimizationModel
     
     
-    AnyBodyStudy KinematicStudyForParamterIdentification = {
+    AnyBodyStudy KinematicStudyForParameterIdentification = {
       AnyFolder &C3DData=..ModelSetup.C3DFileData ;
       
       AnyFolder &ref=HumanModel;
@@ -170,7 +174,11 @@ Main = {
       AnyFolder EnvironmentModel ={
         //Model of the floor and force plates this is where the force plates are defined        
         AnyFolder &HumanModelRef=.HumanModel.BodyModel;        
-        #include "Environment.any"
+        //This environment file makes use of automatic detecteion of which foot are incontact with which plate 
+        #include "EnvironmentAutoDetection.any"
+        //This environment file has no automatic detecteion of which foot are incontact with which plate it has to be set manually
+        //#include "Environment.any"
+        
       };
       
       //Connection between environment and the human    
@@ -189,15 +197,18 @@ Main = {
       Kinematics.PosAnalysisOnlyOnOff=On; //only run the position analysis 
       nStep=floor(Main.ModelSetup.nStep/6); //run this analysis with a reduced step number be carefull it can be too low!
       Gravity ={0.0, -9.81,0};
-      tStart = Main.ModelSetup.tStart+2*Kinematics.ApproxVelAccPerturb; 
-      tEnd = Main.ModelSetup.tEnd-2*Kinematics.ApproxVelAccPerturb;
+      tStart = Main.TrialSpecificData.tStart+2*Kinematics.ApproxVelAccPerturb; 
+      tEnd = Main.TrialSpecificData.tEnd-2*Kinematics.ApproxVelAccPerturb;
       
       InitialConditions.SolverType = KinSolOverDeterminate;
       Kinematics.SolverType = KinSolOverDeterminate;
+//      Main.Studies.KinematicStudyForParameterIdentification.InitialConditions.KinematicTol=1e-3;
+//      Main.Studies.KinematicStudyForParameterIdentification.Kinematics.KinematicTol=1e-3;
+//
     };
     
     AnyOptKinStudy ParameterIdentification =     {
-      AnyFolder &StudyRef = .KinematicStudyForParamterIdentification;
+      AnyFolder &StudyRef = .KinematicStudyForParameterIdentification;
       ParameterOptimization.ConvergenceTol=1e-2;
       Analysis =   {
         AnyOperation &ref = .StudyRef.Kinematics;
@@ -205,22 +216,29 @@ Main = {
     };   
     
     AnyBodyStudy MotionOptimization = {
+      
+      
       AnyFolder &C3DData=..ModelSetup.C3DFileData ;
       
-      AnyFolder &HumanModel=.KinematicStudyForParamterIdentification.HumanModel;
-      AnyFolder &ModelOptimizationModel=.KinematicStudyForParamterIdentification;
-      AnyFolder &JointAngleOutput=.KinematicStudyForParamterIdentification.JointAngleOutputs;
+      AnyFolder &HumanModel=.KinematicStudyForParameterIdentification.HumanModel;
+      AnyFolder &ModelOptimizationModel=.KinematicStudyForParameterIdentification;
+      AnyFolder &JointAngleOutput=.KinematicStudyForParameterIdentification.JointAngleOutputs;
       
       Kinematics.PosAnalysisOnlyOnOff=On;
       nStep=Main.ModelSetup.nStep; 
       Gravity ={0.0, -9.81,0};
-      tStart = Main.ModelSetup.tStart+2*Kinematics.ApproxVelAccPerturb; 
-      tEnd = Main.ModelSetup.tEnd-2*Kinematics.ApproxVelAccPerturb;
+      tStart = Main.TrialSpecificData.tStart+2*Kinematics.ApproxVelAccPerturb; 
+      tEnd = Main.TrialSpecificData.tEnd-2*Kinematics.ApproxVelAccPerturb;
       
       InitialConditions.SolverType = KinSolOverDeterminate;
       Kinematics.SolverType = KinSolOverDeterminate;
+   
+     
+    
     };
     
+   
+
     
     #endif
     
@@ -246,7 +264,10 @@ Main = {
         
         //Model of the floor and force plates this is where the force plates are defined
         AnyFolder &HumanModelRef=..HumanModel.BodyModel;
-        #include "Environment.any"
+        //This environment file makes use of automatic detecteion of which foot are incontact with which plate 
+        #include "EnvironmentAutoDetection.any"
+        //This environment file has no automatic detecteion of which foot are incontact with which plate it has to be set manually
+        //#include "Environment.any"
       };
       
       //Connection between environment and the human    
@@ -255,18 +276,20 @@ Main = {
         #include "JointsAndDriversOptimized.any"      
       };
       
+      AnyOperationReplay Replay =     {    };
+
       
       InverseDynamics.Criterion.UpperBoundOnOff=Off;
       nStep=Main.ModelSetup.nStep;
       Gravity ={0.0, -9.81,0};
-      tStart = Main.ModelSetup.tStart+2*Kinematics.ApproxVelAccPerturb; 
-      tEnd = Main.ModelSetup.tEnd-2*Kinematics.ApproxVelAccPerturb;
+      tStart = Main.TrialSpecificData.tStart+2*Kinematics.ApproxVelAccPerturb; 
+      tEnd = Main.TrialSpecificData.tEnd-2*Kinematics.ApproxVelAccPerturb;
       //#include "GCDOutput.any"
     };
     
     
     //This study is only used for loading the optimized parameters    
-    AnyOptKinStudy LoadParametersOpimizationResults =     {
+    AnyOptKinStudy LoadParametersOptimizationResults =     {
       AnyFolder &Study = .InverseDynamicStudy;
       AnyFolder &HumanModel = .HumanModel;
       ParameterOptimization.ConvergenceTol=1e-3;
@@ -279,5 +302,4 @@ Main = {
   };
   
 }; //Main
-
 

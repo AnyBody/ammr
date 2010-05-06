@@ -1,0 +1,106 @@
+//This model presents a new methodology for implementation of facet joints in the lumbar spine model
+//developed by De Zee et al. (2007: J Biomech. 40, 1219-1227). It enables the facet joint forces 
+//to become part of a redundant system of equilibrium equations for the entire system including
+//the muscles. This redundant system is subsequently solved uniquely thereby making it possible
+//to analyze the effect of whole body movements and loads on facet joint loading for the whole 
+//lumbar spine together with its muscles.
+
+//More details can also be found in the webcast
+//"Implementation of facet joints in a lumbar spine model (Mark de Zee, 25. September, 2008)" 
+//it can be found at http://www.anybodytech.com
+
+//NOTE: for dynamic situation this model should be used with care since the facet 
+//joint forces in this situation may add energy to the mechanical system.
+
+
+Main = {
+  
+  #include "DrawSettings.any"
+  
+  
+  AnyFolder HumanModel={
+    
+    AnyFolder &Mannequin=.Model.Mannequin;
+    
+    #include  "..\..\..\Body\AAUHuman\BodyModels\Trunk\BodyModel.any"
+    
+    AnyFolder StrengthParameters={
+      AnyVar SpecificMuscleTensionSpine= 90; //N/cm^2
+      AnyVar StrengthIndexLeg= 1; 
+      AnyVar SpecificMuscleTensionShoulderArm= 90; //N/cm^2
+    };
+    
+    //Choice of Scaling
+    #include "..\..\..\Body\AAUHuman\Scaling\ScalingStandard.any"
+    
+  };
+  
+  
+  // ------------------------------------------------------------
+  // Model
+  // ------------------------------------------------------------
+  
+  AnyFolder Model = {
+  
+    //Create a link to trunk folder
+    AnyFolder &TrunkFolder =   Main.HumanModel.BodyModel.Trunk;
+    TrunkFolder = {
+      //include the facet joints
+      #include "FacetJoints/FacetJointsLumbar.any"
+    };
+
+    AnyFolder &HumanModel=.HumanModel.BodyModel;
+    #include "Mannequin.any"   
+    
+    AnyFolder EnvironmentModel = {
+      #include "Environment.any"
+      
+    };
+    
+    AnyFolder ModelEnvironmentConnection = {
+      #include "JointsAndDriversSimple.any"
+    }; // ModelEnvironmentConnection
+    
+  }; // Model
+  
+  
+  
+  // --------------------------------------------------------------
+  // Studies
+  // --------------------------------------------------------------
+  AnyBodyStudy Study = {
+    AnyFolder &Model = .Model;
+    InverseDynamics.Criterion.Type=MR_Quadratic;
+    tEnd = 1;
+    tStart=0;
+    Gravity = {0.00, -9.81, 0.00};
+    nStep = 1;
+    
+    AnyOutputFile VertebraForcesL4L5 = {
+      FileName = "L4L5Forces.csv";
+      AnyVar FacetForceL4L5R_A = Main.HumanModel.BodyModel.Trunk.JointsLumbar.FacetJointL4L5R.Push.NormalForceScalar;
+      AnyVar FacetForceL4L5R_B = Main.HumanModel.BodyModel.Trunk.JointsLumbar.FacetJointL4L5R.Push.NormalForceScalar2;
+
+      AnyVar ReactionForceL4L5 = (Main.HumanModel.BodyModel.Trunk.JointsLumbar.L4L5Jnt.Constraints.Reaction.Fout[0]^2
+      + Main.HumanModel.BodyModel.Trunk.JointsLumbar.L4L5Jnt.Constraints.Reaction.Fout[1]^2
+      + Main.HumanModel.BodyModel.Trunk.JointsLumbar.L4L5Jnt.Constraints.Reaction.Fout[2]^2)^0.5;
+      AnyVar SpineAngle = Main.HumanModel.BodyModel.Trunk.JointsLumbar.PelvisThoraxRotMeasure.Pos[2]*180/pi*-1;
+    };
+    
+    
+    AnyOutputFun  FacetL4L5R = {
+      Val = .VertebraForcesL4L5.FacetForceL4L5R_B;      
+    };
+    
+    AnyOutputFun  ReactionForceL4L5= {
+      Val = .VertebraForcesL4L5.ReactionForceL4L5;
+    };
+    
+  }; // Study
+  
+  
+  
+};// Main
+
+
+
