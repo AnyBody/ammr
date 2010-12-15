@@ -1,0 +1,192 @@
+
+//This is a list of the classes used for defining the model
+//Class used for defining a marker
+#include "../../../Body/AAUHuman/ToolBox/Mocap/CreateMarkerClass.any"
+//Class used for defining a marker
+#include "../../../Body/AAUHuman/ToolBox/Mocap/CreateMarkerClassTD.any"
+#include "../../../Body/AAUHuman/ToolBox/Mocap/CreateMarkerClassTDWidget.any"
+//Class used to construct a forceplate of type4
+#include "../../../Body/AAUHuman/ToolBox/Mocap/ForcePlateType4AutoDetection.any"
+#include "../../../Body/AAUHuman/ToolBox/Mocap/ForcePlateType4.any"
+
+//Class used for defining a which antrhopometics measurements will be part of the analysis
+#include "../../../Body/AAUHuman/ToolBox/Mocap/OptimizeAnthropometricsOnOff.any"
+
+
+
+
+#define MotionAndParameterOptimizationModel 1
+#define InverseDynamicModel 0
+#define HumanModelPresent 1
+#define MotionAndParamOptimization 
+
+Main ={
+    Main.ModelSetup.C3DFileData ={
+        ConstructModelOnOff = Off; //If this is set to on it will display the markers but slow down the analysis a lot....
+
+        ConstructChartOnOff=Off;
+
+      };
+
+
+  
+     #include "GaitLowerExtremityProject.Main.any"
+
+  #include "ModelSetup.any" 
+  #include "TrialSpecificData.any" 
+  
+
+
+  //PLASE MAKE SURE THAT IF YOU PRESS File->Open YOU ARE IN THE DIRECTRORY OF THIS APPLICATION. If this is not the case go to this directory and open a file,
+  //otherwise the automatic procedure may not work
+  // Run this sequence of analysis by selecting it in the operation tree
+  AnyOperationMacro RunMotionAndParameterOptimizationSequence  = { 
+    MacroStr=strformat({
+      "operation Main.Studies.ParameterIdentification.ParameterOptimization",
+      "run",
+      "classoperation Main.Studies.ParameterIdentification" + strformat("\x22")+ "Save design" + strformat("\x22")+ " --file="+ strformat("\x22")+ Main.TrialSpecificData.NameOfFile +"-"+"OptimizedParameters.txt" + strformat("\x22"),
+      "operation Main.Studies.MotionOptimization.Kinematics",
+      "run"
+    });
+  };
+
+    Main.Project.Files.MainFile="MotionAndParamOptimization.Main.any";
+ 
+    
+    Main.Project ={
+      Files = {
+        SetValueFile = Main.TrialSpecificData.NameOfFile+"-MarkerPositionWidgetValues.txt";
+      };
+    };
+  
+  Main.Project.Tasks={
+    AnyFile marker= "Markers.any";
+  
+     Motion_and_Param_Optimization= {
+        Description = {
+          Title = "<h4>Modify ModelSetup file Task</h4>";
+          
+          BodyText = 
+          "This task can be used to do the following adjustments to the model:<br/>" +
+          strformat ("\t")+"1.) Set the optimization settings for bones<br/>"+
+          strformat ("\t")+"2.) Definition of markers and optimization settings <br/>"+
+          strformat ("\t")+"3.) Adjust the marker positions by dragging coordinate system in nodes<br/>"+
+          strformat ("\t")+"4.) Run the motion and optimization task<br/>"+
+          "It is only needed to modify this file if your experimental protocol is different from the one used in present ModelSetup.any file."+
+          "The same ModelSetup.any can be used for multiple trials using same experimental setup. <br/>" +
+          "<br/>" +
+          "<h4> 1.) Optimization settings for bones<br/></h4>"+
+          "For each bone evaluate if it should be allowed for the optimized to change its length"  + AnyScriptLinkOf(&Main.ModelSetup.OptimizeOnOff," here") +".<br/>" +
+          "Please note that depending on your marker configuration it may not be posible to have all bones lengths active in the optimization"+
+          "<h4> 2.) Definition of markers and optimization settings </h4>"+
+          "If you marker protocol is not similar to the one used in the ModelSetup.any file modify the "+  strlink(..marker,"markers ") + "to correspond with your protocol.<br/>"+
+          "Please note that the names of the markers need to be the same as found in the C3D file being" +AnyBodyLinkOf(&Main.ModelSetup.C3DFileData.Points.Markers," used")+ "<br/>"+
+          "Each defined markers driver introduces two spheres in the ModelView a red sphere which shows the marker position on the human model and a "+
+          "blue one which shows the recorded free floating marker position. The green and red arrow indicates if the marker is free to be optimized by the "+
+          "optimization sequence <br/>"+
+          "<h4> 3.) Adjust the marker positions by dragging coordinate system in red sphere </h4><br/>"+
+          "Once the markers has been defined their position can be adjusted by dragging their coordinate system in the ModelView"+
+          "The manipulated marker postions will automatically be used as part of the starting guess for the optimization. They will also be automatically "+
+          "be saved evertime the Load_Motion_And_Param_Opt_Model is being loaded. When this model loads the user will be asked if the values saved in" +
+          " the file should be used. Answering yes will read in previously adjusted marker positions. <br/>"+
+          "<h4> 4.) Run the motion and optimization task </h4> <br/>" +
+          "This will automatically execute a sequence of studies which optimize both motion and scale the models. <br/> " +
+          "The output from this sequence of operations is a set of files containing joint angles and model scaling parameters <br/>" +
+          "These files are automatically saved into file names containing the name of the C3D file as part of the name.<br/>" ;
+          
+          
+          Tooltip = "Sets Initial Conditions";
+          Files = {"MotionAndParamOptimization.Main.any"};
+        };
+       
+        Operation =  &Main.RunMotionAndParameterOptimizationSequence ;
+       
+      };
+};
+  
+  Studies ={
+  AnyBodyStudy KinematicStudyForParameterIdentification = {
+      AnyFolder &C3DData=..ModelSetup.C3DFileData ;
+      
+      AnyFolder &ref=HumanModel;
+      ref={ 
+        AnyFolder &Mannequin=.Mannequin;
+        #include  "BodyPartsSetupKin.any"
+      };
+      #include "HumanModel.any"
+      
+    
+
+      //This mannequin calculates a guess on the initial pelvis position based on ASIS and PSI markers
+      //if these markers do not exist in the markerset used this has to be changed
+      #include "Mannequin.any"  // this file controls the initial position of the model and he posture
+      
+      //Environment around the human
+      AnyFolder EnvironmentModel ={
+        //Model of the floor and force plates this is where the force plates are defined        
+        AnyFolder &HumanModelRef=.HumanModel.BodyModel;        
+        //This environment file makes use of automatic detection of which foot are incontact with which plate 
+        #include "EnvironmentAutoDetection.any"
+        //This environment file has no automatic detecteion of which foot are incontact with which plate it has to be set manually
+        //#include "Environment.any"
+      };
+      
+      //Connection between environment and the human    
+      AnyFolder ModelEnvironmentConnection = {
+        AnyFolder Drivers={
+          
+          // Aliases for convenient referencing
+          AnyFolder &JntPos=..Mannequin.Posture;  
+          AnyFolder &JntVel=..Mannequin.PostureVel;
+        };
+      };
+      
+      #include "JointAngleOutputs.any"
+      #include "UndefineBodyPartSetup.any"
+      
+      Kinematics.PosAnalysisOnlyOnOff=On; //only run the position analysis 
+      nStep=floor(Main.ModelSetup.nStep/6); //run this analysis with a reduced step number be carefull it can be too low!
+      Gravity = ..TrialSpecificData.Gravity;
+      tStart = Main.TrialSpecificData.tStart+2*Kinematics.ApproxVelAccPerturb; 
+      tEnd = Main.TrialSpecificData.tEnd-2*Kinematics.ApproxVelAccPerturb;
+      
+      InitialConditions.SolverType = KinSolOverDeterminate;
+      Kinematics.SolverType = KinSolOverDeterminate;
+      InitialConditions.KinematicTol=1e-3;
+      Kinematics.KinematicTol=1e-3;
+      
+    };
+    
+    AnyOptKinStudy ParameterIdentification =     {
+      AnyFolder &StudyRef = .KinematicStudyForParameterIdentification;
+      ParameterOptimization.ConvergenceTol=1e-2;
+      Analysis =   {
+        AnyOperation &ref = .StudyRef.Kinematics;
+      };
+    };   
+    
+    AnyBodyStudy MotionOptimization = {
+      AnyFolder &C3DData=..ModelSetup.C3DFileData ;
+      
+      AnyFolder &HumanModel=.KinematicStudyForParameterIdentification.HumanModel;
+      AnyFolder &ModelOptimizationModel=.KinematicStudyForParameterIdentification;
+      AnyFolder &JointAngleOutput=.KinematicStudyForParameterIdentification.JointAngleOutputs;
+      
+      Kinematics.PosAnalysisOnlyOnOff=On;
+      nStep=Main.ModelSetup.nStep; 
+      Gravity = ..TrialSpecificData.Gravity;
+      tStart = Main.TrialSpecificData.tStart+2*Kinematics.ApproxVelAccPerturb; 
+      tEnd = Main.TrialSpecificData.tEnd-2*Kinematics.ApproxVelAccPerturb;
+      
+      InitialConditions.SolverType = KinSolOverDeterminate;
+      Kinematics.SolverType = KinSolOverDeterminate;
+
+    
+    };
+  };
+};
+#undef MotionAndParameterOptimizationModel 
+#undef InverseDynamicModel 
+#undef HumanModelPresent
+#undef MotionAndParamOptimization 
+

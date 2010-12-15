@@ -1,0 +1,191 @@
+
+#define PelvisRotMat
+
+Main = {
+  
+  AnyFolder DrawGroups={
+    
+    AnyDrawGroup All = {
+      Objects = ObjSearchRecursive("Main.Studies","*");
+    };
+    
+    AnyDrawGroup Chart = {
+      Objects = ObjSearchRecursive("Main.ModelSetup.C3DFileData","*");
+    };
+    
+    AnyDrawGroup Environment= {
+      Objects = ObjSearchRecursive("Main.Studies.KinematicStudyForParameterIdentification.EnvironmentModel","*");
+    };
+  };
+  
+  AnyProject Project = {
+    
+    Tasks = {
+      AnyProjectTaskLoadModel Load_C3D_Markers_Model = {
+        Description =   {
+          BodyText = 
+         "This task loads the C3D file without any other model elements. " +
+          "This is useful for checking the presence and quality of the data. " +
+          "After load, open a Model View window and inspect the marker motion " +
+          "by dragging them with the mouse.";      
+          Title = "Load C3D Data";
+          Tooltip = "Load C3D Markers";
+        };
+        MainFile = "LoadC3DMarker.Main.any";
+      };
+      AnyProjectTaskOperation Set_C3D_Markers  = {
+        #ifndef LoadC3DMarkerModel 
+        Description = {
+          Title = "<h4>Please select the load the task above to enable content in this task</h4>";
+          BodyText="";
+        };
+        #endif
+      };
+      
+      AnyProjectTaskLoadModel Load_C3D_Markers_and_Plates_Model = {
+        Description =   {
+          BodyText = 
+          "Loading this model can be used for evaluating the quality of the C3D file, " +
+          "setting the name of the C3D file and for specifying the force plate definition." ;         
+          Title = "Load C3D Markers and Force plates";
+          Tooltip = "Load C3D Data";
+        };
+        MainFile = "LoadC3DMarkerAndPlate.Main.any";
+      };
+      
+      AnyProjectTaskOperation Set_C3D_File_and_Environment={
+        #ifndef LoadC3DMarkersandPlatesModel 
+        Description = {
+          Title = "<h4>Please select the load the task above to enable content in this task</h4>";
+          BodyText="";  
+        };
+        #endif
+      };
+      
+      AnyProjectTaskLoadModel Load_Initial_Position_Model = {
+        Description =         {
+          BodyText = "This model can be used to position the model wrt to the markers and for " +
+          "setting the initial scaling of the model <br/>"+
+          "<br/>"+
+          "<h4>Please note:</h4>"+
+          "When loading this model a pop up window will appear, answer yes if you want to overload model with values obtained through graphical widgets" +"<br/>"+
+          "<br/>"+
+          "Loading this model will produce the following two warnings this is ok"+"<br/>"+
+          "WARNING(OBJ1):..../JointsAndDrivers.any :PelvisPosLin.Target:'Set Value' operation in this value-object has broken symbolic dependecies. ('Reset Value' to re-establish this dependecy) <br/>"+
+           "WARNING(OBJ1):.../JointsAndDrivers.any :PelvisPosRot.Target:'Set Value' operation in this value-object has broken symbolic dependecies. ('Reset Value' to re-establish this dependecy)";
+                 
+          Title = "Initial position and size of human";
+          Tooltip = "";
+        };
+        
+        MainFile = "InitialPos.Main.any";
+      };
+      
+      AnyProjectTaskOperation Set_Initial_Position  = {
+        #ifndef SetIntialPosition 
+        Description = {
+          Title = "<h4>Please select the load the task above to enable content in this task</h4>";
+          BodyText="";
+        };
+        #endif
+      };
+      
+      AnyProjectTaskLoadModel Load_Motion_And_Param_Opt_Model = {
+        Description =         {
+          BodyText = "This model can be used to optimize the motion to fit the motion of the C3D file,"+
+          "and for automatic scaling of the model parameters <br/>"+
+          "<h4>Please note:</h4>"+
+          "When loading this model a pop up window will appear, answer yes if you want to overload model with values obtained through graphical widgets";
+
+         
+          Title = "<h4>Please select the load the task above to enable content in this task</h4>";
+          Tooltip = "Motion and parameter optimization model";
+        };
+        
+        MainFile = "MotionAndParamOptimization.Main.any";
+      };
+      
+      AnyProjectTaskOperation           Motion_and_Param_Optimization= {
+        #ifndef MotionAndParamOptimization 
+        Description = {
+          Title = "<h4>Please select the load the task above to enable content in this task</h4>";
+          BodyText="";
+        };
+        #endif
+      };
+      
+      AnyProjectTaskLoadModel Load_Inverse_Dynamic_Model = {
+        Description = {
+          BodyText = "This model can be used for calculating muscle and joint force based on the optimized motion created in the Motion_and_Param_Optimization task <br/>" +
+          "<h4>Please note:</h4>"+
+          "When loading this model a pop up window will appear, answer yes if you want to overload model with values obtained through graphical widgets";
+          Title = "Inverse dynamic model";
+          Tooltip = "Inverse dynamic model";
+        };
+        
+        MainFile = "InverseModel.Main.any";
+      };
+      
+      AnyProjectTaskOperation     InverseDynamicModelTask ={
+        
+        #ifndef LoadInverseDynamicModel 
+        Description = {
+          Title = "<h4>Please select the load the task above to enable content in this task</h4>";
+          BodyText="";
+        };
+        #endif
+      };
+      
+    };
+    
+    Views = {
+      AnyProjectModelViewDefinition Trajectories_Plates = {
+        DrawGroupSequence = {&Main.DrawGroups.All,&Main.DrawGroups.Chart,&Main.DrawGroups.Environment};
+   
+        ShowModelDefined = {Off,On,On};
+        ShowAutoGenerated = {On,On, On}; 
+        
+        Description ={
+          Title = "<h3>Marker trajectories and force plate view</h3>";
+          BodyText = strformat("This is a view showing the marker trajectories and force plates. <br/> <h4>Please note that the marker can be dragged with the mouse</h4>");
+          Tooltip = "Sets Marker trajectories and force plate view";
+        };
+      };
+      
+      AnyProjectModelViewDefinition HumanModel_Plates = {
+        DrawGroupSequence = {&Main.DrawGroups.All};
+        ShowModelDefined = {On};
+        Description ={
+          Title = "<h3>Human model and plate view</h3>";
+          BodyText = strformat("This is a view showing the human model and force plates");
+          Tooltip = "Sets Marker trajectories and force plate view";
+        };
+      };
+      
+      AnyProjectModelViewDefinition HumanModel_Plates_Trajectories = {
+        DrawGroupSequence = {&Main.DrawGroups.All,&Main.DrawGroups.Chart};
+        ShowModelDefined  = {On,On};
+        ShowAutoGenerated = {Off,Off}; 
+
+        Description ={
+          Title = "<h3>Human model, plate and trajectory view</h3>";
+          BodyText = strformat("This is a view showing the human model, the forceplate and marker trajectories<br/> <h4>Please note that the marker can be dragged with the mouse</h4>");
+          Tooltip = "Human model, plate and trajectory view";
+        };
+      };
+    };
+    
+    
+    
+  };
+  
+  #include "DrawSettings.any"
+  
+  AnyFolder Studies ={ };
+  
+}; //Main
+
+
+
+
+

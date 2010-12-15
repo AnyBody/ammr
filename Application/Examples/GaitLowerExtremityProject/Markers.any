@@ -1,77 +1,8 @@
-//This file contains the marker toplogy of the data set it links free floating markers with the markers on the human 
 
-AnyFolder ModelSetup ={
-  
-  AnyString SaveMacroOperation=  "classoperation Main.Studies.ParameterIdentification " + strformat("\x22")+ "Save design" + strformat("\x22")+ " --file="+ strformat("\x22")+ C3DFileData.NameOfFile +"-"+"OptimizedParameters.txt" + strformat("\x22");
-  AnyString LoadMacroOperation=  "classoperation Main.Studies.LoadParametersOpimizationResults " + strformat("\x22")+ "Load design" + strformat("\x22")+ " --file="+ strformat("\x22")+ C3DFileData.NameOfFile +"-"+"OptimizedParameters.txt" + strformat("\x22");
-  
-  
-  //This is the input file to the analysis
-  AnyInputC3D C3DFileData =   {
-    AnyString PrefixStr=""; //if the dataset makes use of a prefix name which goes in front of all markers and processed datanames write it here
-    #define PrefixDef(Arg) Arg
-    
-    AnyString NameOfFile ="GaitNormal0003-processed"; //Write the name of the file here
-    FileName = NameOfFile + ".c3d"; //add the extension to the file name here
-    ConstructModelOnOff = Off; //If this is set to on it will display the markers but slow down the analysis a lot....
-    MarkerUseAllPointsOnOff = Off; 
-    MarkerUseCamMaskOnOff = Off;
-    PointsScaleFactor = 1/1000;
-    ConstructChartOnOff=Off;
-    MarkerLabels = {"RFHD","LFHD","RBHD","LBHD","CLAV","C7","T10","STRN","RBAK","RSHO","LSHO","RUPA","LUPA","RELB","LELB","RFRA","LFRA","RWRA","LWRA","RWRB","LWRB","RFIN","LFIN","RASI",
-      "LASI","RPSI","LPSI","RTHI","LTHI","RKNE","LKNE","RTIB","LTIB","RANK","LANK","RHEE","LHEE","RTOE","LTOE","RMT5","LMT5"};
-    
-    
-    AnalogFilterIndex =1;
-    
-    Filter =  {
-      N = 2;
-      Fc = {5};
-      Type = LowPass;
-    };
-    
-    
-    /// This filter is used for the analog data
-    AnyFunButterworthFilter LowPassFilter = {
-      FilterForwardBackwardOnOff = On;
-      AutomaticInitialConditionOnOff = On;
-      N = 2;
-      AnyVar CutOffFrequency=12;
-      AnyVar SampleFreq=.Header.VideoFrameRate* .Header.NoAnalogSamplesPer3DFrame   ;
-      W = {1/(SampleFreq*0.5)*CutOffFrequency};
-      Type = LowPass;
-    };
-    
-    
-    MarkerScaleXYZ = 0.015*{1,1,1};
-    MarkerRGB={0,0,1};
-  };
-  
-  
-  AnyIntVar FirstFrame = C3DFileData.Header.FirstFrameNo; 
-  AnyIntVar LastFrame = C3DFileData.Header.LastFrameNo;
-  AnyIntVar nStep =(LastFrame-FirstFrame);
-  
-  AnyFloatVar  tStart = Main.TrialSpecificData.tStart;
-  AnyFloatVar   tEnd = Main.TrialSpecificData.tEnd;  
-  
-  OptimizeAnthropometricsOnOff OptimizeOnOff (
-  PelvisWidthOnOff ="On", 
-  ThighLengthOnOff="On", 
-  ShankLengthOnOff="On", 
-  FootLengthOnOff="On", 
-  HeadHeightOnOff="Off", 
-  TrunkHeightOnOff="On", 
-  UpperArmLengthOnOff="Off",
-  LowerArmLengthOnOff="Off",
-  VarusValgusOnOff="Off",
-  Model1=MotionAndParameterOptimizationModel, Model2= InverseDynamicModel
-  ) ={};
-  
-  //
+
   // This class creates a marker in each of the two models, additionally it creates marker drivers and design variables to opitmize marker location
   //
-  //  CreateMarker MX (    //MX is the folder name for the marker all foldr names has to be different so usually use M1....MX
+  //  CreateMarker MX (    //MX is the folder name for the marker all folder names has to be different so usually use M1....MX
   //  MarkerName=XXX,      //This is the name of you marker it has to be the same name as in the C3D file
   //  MarkerPlacement =Right.Leg.Seg.Thigh,  //this is the segmnt 
   //  OptX=On,OptY=Off,OptZ=On,  //this determines if the design variable is going to be optimized or left unchanged in paramter optimization studies  
@@ -85,8 +16,7 @@ AnyFolder ModelSetup ={
   // sRelOpt = {-0.04970743, -0.1556847, 0.08576939}
   //   {-0.07176273, -0.172468, 0.07632443}
   
-  
-  CreateMarkerTD RTHI ( 
+  CreateMarkerTDWidget RTHI ( 
   MarkerName=PrefixDef(RTHI),
   MarkerPlacement =Right.Leg.Seg.Thigh, 
   OptX="On",OptY="On",OptZ="On",
@@ -98,7 +28,7 @@ AnyFolder ModelSetup ={
   };
   
   
-  CreateMarkerTD RKNE (
+  CreateMarkerTDWidget RKNE (
   MarkerName=PrefixDef(RKNE),
   MarkerPlacement= Right.Leg.Seg.Thigh,
   OptX="Off",OptY="Off",OptZ="On",
@@ -110,7 +40,7 @@ AnyFolder ModelSetup ={
     sRelOpt= {0.031, -0.3992649, 0.05};
   };
   
-  CreateMarkerTD LKNE ( 
+  CreateMarkerTDWidget LKNE ( 
   MarkerName=PrefixDef(LKNE) ,
   MarkerPlacement=Left.Leg.Seg.Thigh,
   OptX="Off",OptY="Off",OptZ="On",  
@@ -122,7 +52,7 @@ AnyFolder ModelSetup ={
   };
   
   
-  CreateMarkerTD LPSI ( 
+  CreateMarkerTDWidget LPSI ( 
   MarkerName=PrefixDef(LPSI), 
   MarkerPlacement=Trunk.SegmentsLumbar.PelvisSeg,
   OptX="Off", OptY="Off", OptZ="On",
@@ -131,12 +61,12 @@ AnyFolder ModelSetup ={
   
   Model1=MotionAndParameterOptimizationModel, Model2= InverseDynamicModel 
   ) = {
-    sRelOpt ={-0.07727544, -0.03+0.02, -0.03745071};
+    sRelOpt ={-0.06727544, -0.03, -0.045};
   };
   
   
   
-  CreateMarkerTD RASI (
+  CreateMarkerTDWidget RASI (
   MarkerName=PrefixDef(RASI), 
   MarkerPlacement=Trunk.SegmentsLumbar.PelvisSeg,
   OptX="Off",OptY="Off",OptZ="Off",  
@@ -146,12 +76,12 @@ AnyFolder ModelSetup ={
   Model1=MotionAndParameterOptimizationModel, Model2= InverseDynamicModel 
   ) = {
     
-    sRelOpt =  {0.1, -0.05-0.02, 0.145};
+    sRelOpt =  {0.11, -0.03, 0.145};
   };
   
   
   //ok  
-  CreateMarkerTD RTIB (
+  CreateMarkerTDWidget RTIB (
   MarkerName=PrefixDef(RTIB), 
   MarkerPlacement=Right.Leg.Seg.Shank,
   OptX="On",OptY="On",OptZ="On",  
@@ -160,10 +90,10 @@ AnyFolder ModelSetup ={
   
   Model1=MotionAndParameterOptimizationModel, Model2= InverseDynamicModel 
   ) = {
-    sRelOpt = {0.01751226, 0.1039194, 0.1113902}; 
+    sRelOpt = {0.01751226, 0.2039194, 0.1113902}; 
   };
   
-  CreateMarkerTD RANK ( 
+  CreateMarkerTDWidget RANK ( 
   MarkerName=PrefixDef(RANK) ,
   MarkerPlacement=Right.Leg.Seg.Shank,
   OptX="On",OptY="Off",OptZ="On",  
@@ -178,7 +108,7 @@ AnyFolder ModelSetup ={
   
   
   
-  CreateMarkerTD LTIB (
+  CreateMarkerTDWidget LTIB (
   MarkerName=PrefixDef(LTIB),
   MarkerPlacement=Left.Leg.Seg.Shank,
   OptX="On",OptY="On",OptZ="On",  
@@ -190,7 +120,7 @@ AnyFolder ModelSetup ={
     sRelOpt=  {0.04017781, 0.1373229, -0.06342093};
   };
   
-  CreateMarkerTD LANK (
+  CreateMarkerTDWidget LANK (
   MarkerName=PrefixDef(LANK),
   MarkerPlacement=Left.Leg.Seg.Shank,
   OptX="On",OptY="Off",OptZ="On",  
@@ -203,7 +133,7 @@ AnyFolder ModelSetup ={
     
   };
   
-  CreateMarkerTD RHEE (
+  CreateMarkerTDWidget RHEE (
   MarkerName=PrefixDef(RHEE) ,
   MarkerPlacement=Right.Leg.Seg.Foot,
   OptX="Off", OptY="Off", OptZ="Off",
@@ -215,7 +145,7 @@ AnyFolder ModelSetup ={
     
   };
   
-  CreateMarkerTD LHEE(
+  CreateMarkerTDWidget LHEE(
   MarkerName=PrefixDef(LHEE), 
   MarkerPlacement=Left.Leg.Seg.Foot,
   OptX="Off", OptY="Off", OptZ="Off",
@@ -229,20 +159,20 @@ AnyFolder ModelSetup ={
   
   
   
-  CreateMarkerTD RPSI (
+  CreateMarkerTDWidget RPSI (
   MarkerName=PrefixDef(RPSI), 
   MarkerPlacement=Trunk.SegmentsLumbar.PelvisSeg,
-  OptX="Of", OptY="Off", OptZ="On",
+  OptX="Off", OptY="Off", OptZ="On",
   WeightX=1.0,WeightY=1.0,WeightZ=1.0,
   
   
   Model1=MotionAndParameterOptimizationModel, Model2= InverseDynamicModel 
   ) = {
-    sRelOpt = {-0.07727544, -0.03+0.02, 0.03745071};
+    sRelOpt = {-0.06727544, -0.03, 0.045};
     
   };
   
-  CreateMarkerTD RTOE (
+  CreateMarkerTDWidget RTOE (
   MarkerName=PrefixDef(RTOE),  
   MarkerPlacement=Right.Leg.Seg.Foot,
   OptX="Off", OptY="Off", OptZ="Off",
@@ -256,7 +186,7 @@ AnyFolder ModelSetup ={
   
   
   
-  CreateMarkerTD LTOE (
+  CreateMarkerTDWidget LTOE (
   MarkerName=PrefixDef(LTOE), 
   MarkerPlacement=Left.Leg.Seg.Foot,
   OptX="Off",OptY="Off",OptZ="Off",  
@@ -272,7 +202,7 @@ AnyFolder ModelSetup ={
   
   
   
-  CreateMarkerTD LMT5 (
+  CreateMarkerTDWidget LMT5 (
   MarkerName=PrefixDef(LMT5),  
   MarkerPlacement=Left.Leg.Seg.Foot, 
   OptX="Off",OptY="Off",OptZ="Off",  
@@ -285,7 +215,7 @@ AnyFolder ModelSetup ={
   
   
   
-  CreateMarkerTD RMT5 (
+  CreateMarkerTDWidget RMT5 (
   MarkerName=PrefixDef(RMT5),  
   MarkerPlacement=Right.Leg.Seg.Foot, 
   OptX="Off",OptY="Off",OptZ="Off",  
@@ -298,7 +228,7 @@ AnyFolder ModelSetup ={
   
   
   
-  CreateMarkerTD LASI (
+  CreateMarkerTDWidget  LASI (
   MarkerName=PrefixDef(LASI) ,
   MarkerPlacement=Trunk.SegmentsLumbar.PelvisSeg,
   OptX="Off",OptY="Off",OptZ="Off",  
@@ -307,10 +237,10 @@ AnyFolder ModelSetup ={
   
   Model1=MotionAndParameterOptimizationModel, Model2= InverseDynamicModel 
   ) = {
-    sRelOpt =  {0.1, -0.05-0.02, -0.145};
+    sRelOpt =  {0.11, -0.05+0.02, -0.145};
   };
   
-  CreateMarkerTD LTHI ( 
+  CreateMarkerTDWidget LTHI ( 
   MarkerName=PrefixDef(LTHI) ,
   MarkerPlacement=Left.Leg.Seg.Thigh,
   OptX="On",OptY="On",OptZ="On",  
@@ -648,11 +578,3 @@ AnyFolder ModelSetup ={
   
   
   
-  
-  
-};
-
-
-
-
-

@@ -1,9 +1,8 @@
 
-#class_template ForcePlateType4AutoDetection (PlateName, Folder,AnySeg &Limb1,AnySeg &Limb2, No,VerticalDirection,HeightTolerance,VelThreshold, Fx, Fy, Fz, Mx,My,Mz ){
+#class_template ForcePlateType4AutoDetection (PlateName, Folder,AnyRefFrame &Limb1,AnyRefFrame &Limb2, No,VerticalDirection,HeightTolerance,VelThreshold, Fx, Fy, Fz, Mx,My,Mz, FootPresent){
   
-  
-  #var AnyFloat Cal;  // Variable with obligatory initialization
-  
+  #var AnyFloat Cal;  // Variable with obligatory initialization  
+
   
   AnyFixedRefFrame Corners ={
     AnyVar CoordinateSystemSize= 0.1;
@@ -94,9 +93,9 @@
     //Transducer location      
     AnyRefNode TransducerLocation ={
       AnyFloat Origins= Folder.Groups.FORCE_PLATFORM.ORIGIN.Data;
-      AnyVar ydist=-Origins[0][0]*Main.ModelSetup.C3DFileData.PointsScaleFactor; //distance from y axis on transducer to y axis of center of plate
-      AnyVar xdist=-Origins[0][1]*Main.ModelSetup.C3DFileData.PointsScaleFactor;//distance from x axis on transducer to x axis of center of plate
-      AnyVar zdist=-Origins[0][2]*Main.ModelSetup.C3DFileData.PointsScaleFactor;//distance from z axis on transducer to z surface of plate
+      AnyVar ydist=-Origins[0][0]*Folder.PointsScaleFactor; //distance from y axis on transducer to y axis of center of plate
+      AnyVar xdist=-Origins[0][1]*Folder.PointsScaleFactor;//distance from x axis on transducer to x axis of center of plate
+      AnyVar zdist=-Origins[0][2]*Folder.PointsScaleFactor;//distance from z axis on transducer to z surface of plate
       
       sRel={xdist,ydist,zdist};
       AnyDrawRefFrame drw={ScaleXYZ=0.4*{1,1,1};RGB={1,0,0};};
@@ -160,7 +159,7 @@
     AutomaticInitialConditionOnOff = On;
     N = 2;
     AnyVar CutOffFrequency=15;
-    AnyVar SampleFreq=Main.ModelSetup.C3DFileData.Header.VideoFrameRate* Main.ModelSetup.C3DFileData.Header.NoAnalogSamplesPer3DFrame   ;
+    AnyVar SampleFreq=Folder.Header.VideoFrameRate* Folder.Header.NoAnalogSamplesPer3DFrame   ;
     W = {1/(SampleFreq*0.5)*CutOffFrequency};
     Type = LowPass;
   };
@@ -203,7 +202,7 @@
   AnyMoment3D Moment ={
     
     AnyRefFrame  &ref=.ForcePlate.TransducerLocation ;
-    Mlocal=.OnOff*{.load(.ForcePlateDriver.t)[3],.load(.ForcePlateDriver.t)[4],.load(.ForcePlateDriver.t)[5]}*Main.ModelSetup.C3DFileData.PointsScaleFactor;
+    Mlocal=.OnOff*{.load(.ForcePlateDriver.t)[3],.load(.ForcePlateDriver.t)[4],.load(.ForcePlateDriver.t)[5]}*Folder.PointsScaleFactor;
     AnyDrawVector DrawMoment =     {
       AnyRefFrame &ref=.ref;
       Vec=.Mlocal*1/1000;
@@ -236,9 +235,9 @@
       AnyVar ly=..ForcePlate.xdist;
       AnyVar lz=..ForcePlate.zdist;
       
-      AnyVar mx= Load[3]*Main.ModelSetup.C3DFileData.PointsScaleFactor;
-      AnyVar my= Load[4]*Main.ModelSetup.C3DFileData.PointsScaleFactor;
-      AnyVar mz= Load[5]*Main.ModelSetup.C3DFileData.PointsScaleFactor;
+      AnyVar mx= Load[3]*Folder.PointsScaleFactor;
+      AnyVar my= Load[4]*Folder.PointsScaleFactor;
+      AnyVar mz= Load[5]*Folder.PointsScaleFactor;
       
       AnyVar fzz =iffun(gtfun(  (fz^2)^0.5,0),fz,fz+1000000);
       
@@ -372,9 +371,11 @@
       F0 = 0;
     };
     
-    
+  #if FootPresent
+   
     AnyFolder PlateFootReactions={
       
+ 
       AnyKinLinear Lin={
         Ref=0;
         AnySeg &ref2=...ForcePlate;
@@ -386,7 +387,7 @@
         AnySeg &ref1=...Limb1;
         Type=PlanarAngles;
       };
-      
+
       
       AnyKinMeasureOrg lx={    AnyKinLinear &ref=.Lin;MeasureOrganizer ={0};   };
       AnyKinMeasureOrg ly={    AnyKinLinear &ref=.Lin;MeasureOrganizer ={1};   };
@@ -408,8 +409,12 @@
       AnyGeneralMuscle MxNeg = {ForceDirection = -1; AnyKinMeasure &ref1=.rx; AnyMuscleModel &ref2=..InContactMuscle;    };
       AnyGeneralMuscle MyNeg = {ForceDirection = -1; AnyKinMeasure &ref1=.ry; AnyMuscleModel &ref2=..InContactMuscle;    };
       AnyGeneralMuscle MzNeg = {ForceDirection = -1; AnyKinMeasure &ref1=.rz; AnyMuscleModel &ref2=..InContactMuscle;    };
-    };
+
     
+    };
+  #endif
+
+   
     AnyFolder PlateGroundReactions={
       
       AnyKinLinear Lin={
@@ -553,7 +558,8 @@
       F0 = 0;
     };
     
-    
+      #if FootPresent
+
     AnyFolder PlateFootReactions={
       
       AnyKinLinear Lin={
@@ -594,6 +600,8 @@
       
     };
     
+   #endif
+   
     AnyFolder PlateGroundReactions={
       
       AnyKinLinear Lin={
@@ -630,6 +638,7 @@
     };
   };
 };
+
 
 
 

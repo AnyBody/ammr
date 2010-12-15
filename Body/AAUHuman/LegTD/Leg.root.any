@@ -22,10 +22,6 @@ HipNodeRef = {
   AnyVec3 HipOffset = {0.035, -0.117, .Sign*0.088};//{0.03, -0.10, 0.08*.Sign};
    
   AnyVec3 v1 = {0.068+0.01,-0.1201+0.01,(0.056+0.015)*.Sign}-HipOffset;
-  AnyVec3 v2 = {0.045,-0.13,0.048*.Sign}-HipOffset;
-  AnyVec3 v3 = 0.1*{0,0.743294,0.668965*.Sign}+{0.012,-0.13,0.048*.Sign}-HipOffset;
-  AnyVec3 v4 = {0.04,-0.13,0.048*.Sign}+0.03*{0,0.668965,-0.743294*.Sign}-HipOffset;
-//  
 //
   AnyRefNode IliopubicEminenceEndNode = {
     sRel = .Scale(.v1+.HipOffset) - .Scale(.HipOffset); 
@@ -33,38 +29,69 @@ HipNodeRef = {
     
   
   
-  // Definition of cylinder used for wrapping of the psoas major muscle
-  AnyRefNode pecent_ossis_pubis={ 
-    sRel=  .Scale(.v2+.HipOffset) - .Scale(.HipOffset);
-    //AnyDrawRefFrame drw = {};
-    AnyVec3 p2=.Scale(.v3+.HipOffset) - .Scale(.HipOffset);
-    
-    AnyVec3 p3=.Scale(.v4+.HipOffset) - .Scale(.HipOffset);
-    
-    //Calculate rot matrix for cylinder using three points
-    //p2-p1 used to find x axis
-    //p3-p1 used to find the y axis
-    //z axis found as cross product
-    AnyMat33  Mat = RotMat(sRel,p2,p3);
-    
-    //Switch around the on the columns to compensate that the cylinder has 
-    //main axis along the zaxis
-    ARel={
-      {-Mat[0][2],Mat[0][1],Mat[0][0]},
-      {-Mat[1][2],Mat[1][1],Mat[1][0]},
-      {-Mat[2][2],Mat[2][1],Mat[2][0]}};          
-    
-    //This is the via node that should always be on the surface of the cylinder
-    //so it is used to calculate the radius (in local node coordinate).
-    AnyVec3 p4 = (.IliacusMidViaNode1.sRel - sRel)*ARel;
-    
-    AnySurfCylinder cyl = { 
-      Radius=((.sRel[0]-...Sign*.p4[0])^2+(.sRel[1]-.p4[1])^2)^0.5; //on XY plane
-      Length= ((.sRel[0]-.p2[0])^2+(.sRel[1]-.p2[1])^2+(.sRel[2]-.p2[2])^2)^0.5;
-      //AnyDrawParamSurf drw={RGB={0,0,1};
-      //Opacity = 1;};
-    };
+  //unscaled cylcenter
+  AnyRefNode P1 ={
+    sRel=0.01*{ -1.27,	0.97,..Sign*-1.75};
+    ARel=RotMat(sRel,.P2.sRel,{0.0,0.0,0.0})*RotMat(0.5*pi,y);
+//    AnyDrawRefFrame drw={RGB={1,0,0};};
   };
+  
+  //unscaled second point on cyl axis 
+  AnyRefNode P2 ={
+    sRel= (0.1*{0.21,	-0.14	,..Sign*-0.79})+.P1.sRel;
+//    AnyDrawRefFrame drw={RGB={1,0,0};};
+  };  
+  
+  //unscaled point on cyl surf
+  AnyRefNode P3={
+    sRel = .P1.sRel+{0.0,0.04,..Sign*0.0}*.P1.ARel';//*RotMat(pi*0.5,x);
+//    AnyDrawRefFrame drw={RGB={1,0,0};};
+  };
+  
+  //Scale cyl center
+  AnyRefNode P1_scaled ={
+    sRel=.Scale(.P1.sRel);
+    ARel= RotMat(sRel,.P2_scaled.sRel,{0.0,0.0,0.0})*RotMat(0.5*pi,y);
+//    AnyDrawRefFrame drw={RGB={1,0,1};};
+  };
+  
+  //unscaled second point on cyl axis 
+  AnyRefNode P2_scaled ={
+    sRel= .Scale(.P2.sRel);
+//    AnyDrawRefFrame drw={RGB={1,0,1};};
+  };  
+  
+  
+  //unscaled point on cyl surf
+  AnyRefNode P3_scaled={
+    sRel =.Scale(.P3.sRel);
+ //   AnyDrawRefFrame drw={RGB={1,0,1};};
+  };
+  
+  
+  
+  
+  
+  AnyRefNode pecent_ossis_pubis={
+    sRel=.P1_scaled.sRel; 
+    ARel=.P1_scaled.ARel;
+
+    
+    AnyRefNode Translate ={
+      sRel=..Scale({0,0,-0.05});
+      AnySurfCylinder cyl = { 
+        Radius=((..sRel[0]-...P3_scaled.sRel[0])^2+(..sRel[1]-...P3_scaled.sRel[1])^2+(..sRel[2]-...P3_scaled.sRel[2])^2)^0.5;
+        //This radius is a little more accurate but causes an error, to be fixed.
+        //Radius= ...HipJointRightTD.pecent_ossis_pubis.cyl.Radius;
+        //The lenght are extended by 25% too improve wrapping stability in extreme cases
+        Length= 1.5*((..sRel[0]-...P2_scaled.sRel[0])^2+(..sRel[1]-...P2_scaled.sRel[1])^2+(..sRel[2]-...P2_scaled.sRel[2])^2)^0.5;
+
+      };
+    };
+    
+    
+  };
+
 
 
     // Origin points on the Pelvis
@@ -146,17 +173,17 @@ HipNodeRef = {
   AnyRefNode IliacusLateralis1Node = {sRel = .Scale({-0.0295, 0.1323, ..Sign*0.0275});};
   AnyRefNode IliacusLateralis2Node = {sRel = .Scale({-0.0113, 0.1148, ..Sign*0.0292});};
   AnyRefNode IliacusLateralis3Node = {sRel = .Scale({-0.0034, 0.1001, ..Sign*0.0278});};
-  AnyRefNode IliacusLateralisViaNode1 = {sRel = .Scale({0.023, 0.038, ..Sign*-0.011});};
+  AnyRefNode IliacusLateralisViaNode1 = {sRel = .Scale({0.023, 0.032, ..Sign*-0.011});};
   
   AnyRefNode IliacusMid1Node = {sRel = .Scale({-0.0558, 0.1354, ..Sign*0.0003});};
   AnyRefNode IliacusMid2Node = {sRel = .Scale({-0.0432, 0.1103, ..Sign*-0.0021});};
   AnyRefNode IliacusMid3Node = {sRel = .Scale({-0.0308, 0.0861, ..Sign*-0.0038});};
-  AnyRefNode IliacusMidViaNode1 = {sRel = .Scale({0.023, 0.038, ..Sign*-0.011});};
+  AnyRefNode IliacusMidViaNode1 = {sRel = .Scale({0.023, 0.032, ..Sign*-0.011});};
   
   AnyRefNode IliacusMedialis1Node = {sRel =.Scale( {-0.0527, 0.1275, ..Sign*-0.0390});};
   AnyRefNode IliacusMedialis2Node = {sRel = .Scale({-0.0467, 0.1077, ..Sign*-0.0351});};
   AnyRefNode IliacusMedialis3Node = {sRel = .Scale({-0.0368, 0.0813, ..Sign*-0.0361});}; 
-  AnyRefNode IliacusMedialisViaNode1 = {sRel = .Scale({0.023, 0.038, ..Sign*-0.011});};
+  AnyRefNode IliacusMedialisViaNode1 = {sRel = .Scale({0.023, 0.032, ..Sign*-0.011});};
   
   AnyRefNode ObturatorExternusInferior1Node = {sRel = .Scale({-0.0004, -0.0483, ..Sign*-0.0675});};
   AnyRefNode ObturatorExternusInferior2Node = {sRel =.Scale( {0.0189, -0.0395, ..Sign*-0.0798});};
@@ -213,15 +240,20 @@ HipNodeRef = {
   AnyRefNode GluteusMaxViaNode2 =  {  sRel = .Scale({-0.03501, -0.06, -..Sign*0.005}); }; 
   AnyRefNode GluteusMaxViaNode3 =  {  sRel = .Scale({-0.0291, -0.04,..Sign*0.017});    };   
   
+  
+  
+  
+
+  
 };
- 
-  // Definition of cylinder used for wrapping of the iliopsoas major muscle
-  // Collection of the joints into JntDOF which are used by the applications.
+
+// Definition of cylinder used for wrapping of the iliopsoas major muscle
+// Collection of the joints into JntDOF which are used by the applications.
   AnyKinMeasureOrg JntDOF = {
     // This is where the DOF of the leg are assembled into one single measure, this measure has the following DOF:
-    // 0 Ankle flexion/extension
-    // 1 Ankle abduction adduction  
-    // 2 Knee flextion/extension
+  // 0 Ankle flexion/extension
+  // 1 Ankle abduction adduction  
+  // 2 Knee flextion/extension
     // 3 Hip adduction/abduction 
     // 4 Hip rotation externa/internal
     // 5 Hip flexion/extension 

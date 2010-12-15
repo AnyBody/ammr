@@ -1,0 +1,180 @@
+#class_template TripodOnPlane (AnyRefFrame &Base,AnyMechOpr &Study,LinOnOffX,LinOnOffY,LinOnOffZ,RotOnOffX,RotOnOffY,RotOnOffZ){
+  
+  
+  
+  
+  
+  #var AnyVec3 GlobalPos ;  // Variable with obligatory initialization
+  #var AnyVec3 GlobalRotZYX ;  // Variable with obligatory initialization
+  #var AnyVec3 LocalPos ;  // Variable with obligatory initialization
+  #var AnyVec3 LocalRotZYX ;  // Variable with obligatory initialization
+  #var AnyVar TripodSize;// Variable with obligatory initialization
+  
+  AnyDrawWidgetLin DrwWidget1 = {
+    RefFrame = &.Main.Model.EnvironmentModel.GlobalRef;
+    Target = &.Box.Origin;
+    AxisOnOff = {.LinOnOffX ,.LinOnOffY ,.LinOnOffZ };
+    UpdateEvent = OnMouseRelease;
+    Operation = &.Study;
+    MaxDrawSize=0.15;
+    AnyVec3 tt=.Box.BoxRot.CenterOfBox.sRel;
+    RelPos=&tt;
+    Opacity=0.5;
+    
+  };
+  
+  AnyDrawWidgetRot DrwWidget2 = {
+    RefFrame = &.Box;
+    Target = &.Box.BoxRot.ARel;
+    AxisOnOff = {.RotOnOffX ,.RotOnOffY ,.RotOnOffZ };
+    UpdateEvent = OnMouseRelease;
+    Operation = &.Study;
+    MaxDrawSize=0.05;
+    Opacity=0.5;
+    
+    
+    
+    
+  };
+  
+  AnyFixedRefFrame  Box ={
+    Origin =.GlobalPos;
+    
+    AnyRefNode BoxRot={
+      
+      ARel=RotMat(..GlobalRotZYX[0]*pi/180,z)*RotMat(..GlobalRotZYX[1]*pi/180,y)*RotMat(..GlobalRotZYX[2]*pi/180,x);
+      
+      AnyRefNode CenterContactNode ={
+        AnyDrawNode drw1={  RGB={1,0,0};    ScaleXYZ=0.01*{1,1,1};};
+        sRel={-0.5*...TripodSize,0,0};
+        
+      }; 
+      
+      AnyRefNode MedialContactNode ={
+        sRel={0.5*...TripodSize,-0.5*...TripodSize,0};
+        AnyDrawNode drw1={  RGB={1,0,0};    ScaleXYZ=0.01*{1,1,1};};
+      };
+      
+      AnyRefNode LateralContactNode ={
+        sRel={0.5*...TripodSize,0.5*...TripodSize,0};
+        AnyDrawNode drw1={  RGB={1,0,0};    ScaleXYZ=0.01*{1,1,1};};
+      };
+
+      AnyKinPLine Line  ={
+         AnyRefNode &ref1= .CenterContactNode ;
+         AnyRefNode &ref2= .MedialContactNode ;
+          AnyRefNode &ref3= .LateralContactNode;
+         AnyRefNode &ref4= .CenterContactNode ;
+      
+       AnyDrawPLine drw={Thickness=.001; RGB={1,0,0};};
+       };
+      
+      AnyRefNode CenterOfBox ={
+        sRel={0,0,0};
+      };
+
+      
+      
+//      AnyRefNode BoxNode ={
+//        sRel={...TripodSize*0.5,0,0}-{DrwBox.ScaleXYZ[0]*0.5,0,-0.5*DrwBox.ScaleXYZ[2] };
+////        AnyDrawSurf DrwBox = {
+////          FileName = "UnityBox";
+////          RGB = 0.45*{1,1,1};
+////          ScaleXYZ={....TripodSize,....TripodSize,....TripodSize*0.1};
+////          Opacity =0.15;
+////          Face=-1;
+////        };
+//        
+//      };
+    };
+  };
+  
+  //  AnySeg &Base=Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Hand;
+  
+  Base={
+    AnyRefNode CenterContactNode  ={
+      sRel=..LocalPos;
+      ARel=RotMat(..LocalRotZYX[0]*pi/180,z)*RotMat(..LocalRotZYX[1]*pi/180,y)*RotMat(..LocalRotZYX[2]*pi/180,x);
+      AnyDrawNode node={          ScaleXYZ=0.01*{1,1,1}; RGB={0,0,1};};
+      AnyDrawRefFrame drw2={       RGB = 0.45*{1,1,1};      ScaleXYZ=0.05*{1,1,1};    };
+      
+    };
+    
+    AnyRefNode MedialContactNode  ={
+      AnyDrawNode drw2={          ScaleXYZ=0.01*{1,1,1}; RGB={0,0,1};};
+      sRel={-..TripodSize,0.5*..TripodSize,0}*ARel+.CenterContactNode.sRel;
+      ARel=.CenterContactNode.ARel;
+    };
+    AnyRefNode LateralContactNode  ={
+      AnyDrawNode drw2={          ScaleXYZ=0.01*{1,1,1}; RGB={0,0,1};};
+      sRel={-..TripodSize,-0.5*..TripodSize,0}*ARel+.CenterContactNode.sRel;
+      ARel=.CenterContactNode.ARel;
+    };
+    
+  };
+  
+  AnyKinEqSimpleDriver CenterNode ={
+    AnyKinLinear Lin={
+      Ref=0;
+      AnyRefNode &ref1=..Base.CenterContactNode ;
+      AnyRefNode &ref2=..Box.BoxRot.CenterContactNode;
+    };
+    
+    
+    DriverPos={0,0,0};
+    DriverVel={0,0,0};
+    Reaction.Type={Off,Off,Off};
+    CType={Soft,Soft,Soft};
+  };
+  
+  AnyKinPLine CenterNodeLine ={
+    AnyRefFrame &ref1=.CenterNode.Lin.ref1;
+    AnyRefFrame &ref2=.CenterNode.Lin.ref2;
+    AnyDrawPLine drw={Thickness=0.001; RGB={0,0,1};};
+  };
+  
+  
+  
+  AnyKinEqSimpleDriver MedialContactNode ={
+    AnyKinLinear Lin={
+      Ref=0;
+      AnyRefNode &ref1=..Base.MedialContactNode ;
+      AnyRefNode &ref2=..Box.BoxRot.MedialContactNode ;
+    };
+    
+    
+    DriverPos={0,0,0};
+    DriverVel={0,0,0};
+    Reaction.Type={Off,Off,Off};
+    CType={Soft,Soft,Soft};
+  };
+  
+  AnyKinPLine MedialContactNodeLine ={
+    AnyRefFrame &ref1=.MedialContactNode.Lin.ref1;
+    AnyRefFrame &ref2=.MedialContactNode.Lin.ref2;
+    AnyDrawPLine drw={Thickness=0.001; RGB={0,0,1};};
+  };
+  
+  
+  AnyKinEqSimpleDriver LateralContactNode ={
+    AnyKinLinear Lin={
+      Ref=0;
+      AnyRefNode &ref1=..Base.LateralContactNode ;
+      AnyRefNode &ref2=..Box.BoxRot.LateralContactNode ;
+    };
+    
+    
+    DriverPos={0,0,0};
+    DriverVel={0,0,0};
+    Reaction.Type={Off,Off,Off};
+    CType={Soft,Soft,Soft};
+  };
+  AnyKinPLine LateralContactNodeLine ={
+    AnyRefFrame &ref1=.LateralContactNode.Lin.ref1;
+    AnyRefFrame &ref2=.LateralContactNode.Lin.ref2;
+    AnyDrawPLine drw={Thickness=0.0001; RGB={0,0,1};};
+  };
+  
+  
+  
+};
