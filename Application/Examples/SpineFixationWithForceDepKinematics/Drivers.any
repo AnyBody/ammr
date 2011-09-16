@@ -24,15 +24,14 @@ AnyFolder Drivers = {
   
   AnyKinEqSimpleDriver FDK_Measure = 
   {
-    // Initial guess for all joint angles to be used by the force-dependent kinematics solver.
+    // Initial guess for all joint angles, except freed up, to be used by the force-dependent kinematics solver.
     // Thorax-pelvis angles are distributed between all joint angles with the application of the following weight vectors:
-    AnyVector FE = {0.2538951, 0.2318493, 0.1894594, 0.1468712, 0.1020785, 0.0758465}*.JntPos.PelvisThoraxExtension/180*pi;
-    AnyVector LB = {0.2538951, 0.2318493, 0.1894594, 0.1468712, 0.1020785, 0.0758465}*.JntPos.PelvisThoraxLateralBending/180*pi;
-    AnyVector AT = {0.2908131, 0.2403102, 0.1937058, 0.1427486, 0.0910942, 0.0413281}*.JntPos.PelvisThoraxRotation/180*pi;
+    AnyVector FE = {0.2538951, 0.2318493, 0.1894594, 0.1468712, 0.1020785}*.JntPos.PelvisThoraxExtension/180*pi;
+    AnyVector LB = {0.2538951, 0.2318493, 0.1894594, 0.1468712, 0.1020785}*.JntPos.PelvisThoraxLateralBending/180*pi;
+    AnyVector AT = {0.2908131, 0.2403102, 0.1937058, 0.1427486, 0.0910942}*.JntPos.PelvisThoraxRotation/180*pi;
     DriverPos = arrcat({ FE, AT, LB }');
     
     DriverVel = {
-      0.0,0.0,0.0,      
       0.0,0.0,0.0,
       0.0,0.0,0.0,      
       0.0,0.0,0.0,
@@ -45,7 +44,7 @@ AnyFolder Drivers = {
     AnySphericalJoint &jnt23 = .refJoints.L2L3Jnt; 
     AnySphericalJoint &jnt34 = .refJoints.L3L4Jnt;
     AnySphericalJoint &jnt45 = .refJoints.L4L5Jnt;
-    AnySphericalJoint &jnt5sacrum = .refJoints.L5SacrumJnt;
+    //AnySphericalJoint &jnt5sacrum = .refJoints.L5SacrumJnt;      // this joint is commented to avoid over-constrained situation
     
     // constraints type has to be set ForceDep for the force-dependent 
     // degrees of freedom of the joint
@@ -54,8 +53,8 @@ AnyFolder Drivers = {
       ForceDep, ForceDep,ForceDep,
       ForceDep, ForceDep,ForceDep,
       ForceDep, ForceDep,ForceDep,
-      ForceDep, ForceDep,ForceDep,      
-      ForceDep, ForceDep,ForceDep
+      ForceDep, ForceDep,ForceDep      
+      //ForceDep, ForceDep,ForceDep                                // commented joint
     };
     
     Reaction.Type = {
@@ -63,8 +62,9 @@ AnyFolder Drivers = {
       Off,Off,Off,
       Off,Off,Off,
       Off,Off,Off,
-      Off,Off,Off,
-      Off,Off,Off};
+      Off,Off,Off
+      //Off,Off,Off                                                // commented joint
+      };
   };
   #endif
   
@@ -76,7 +76,13 @@ AnyFolder Drivers = {
     DriverVel = pi/180*{.JntVel.NeckExtension};
     Reaction.Type = {Off};
   };
-  
+  // negligible motion between sacrum and pelvis
+  AnyKinEqSimpleDriver SacrumPelvisDriver = {
+    AnySphericalJoint &Jnt = Main.HumanModel.BodyModel.Trunk.JointsLumbar.SacrumPelvisJnt;
+    DriverPos = pi/180*{0.0, 0.0, 0.0};
+    DriverVel = pi/180*{0.0, 0.0, 0.0};
+    Reaction.Type = {Off, Off, Off};
+  };  
   // THORAX PELVIS ROTATION DRIVER 
   // controls posture of the human 
   AnyKinEqSimpleDriver PostureDriver ={

@@ -4,16 +4,16 @@ and how AnyScript as s declarative language frees allows the user to
 simply declare the presence of objects whereafter the system sorts out
 the connections and computes the dynamics. */
 Main = {
-   /**Execute this operation to run the model in the intended operation sequence.  
+  /**Execute this operation to run the model in the intended operation sequence.  
   It is also possible to run operations seperately, by manual selections in the operation tree*/
   AnyOperationSequence RunApplication = {
-
+    
     ///This operation is the inverse dynamic analysis
     AnyOperation &InvAnal=Main.Study.InverseDynamics;
- 
+    
   };
-
-
+  
+  
   // The actual body model goes in this folder
   AnyFolder MyModel = {
     
@@ -76,7 +76,7 @@ Main = {
       };
       
       AnyRefNode StringNodeBottom={
-        sRel={-0.0,-0.207,0};
+        sRel={-0.0,-0.217,0};
       };      
       
       AnyRefNode LogoLocation={
@@ -165,68 +165,93 @@ Main = {
       };
     };
     
-    AnySeg Handle ={
-      Mass=9.869*10^-6*750;
-      Jii={2.13*10^-9,2.13*10^-9,4.147*10^-9}*750;
-      r0 ={0.000000, -0.399000, 0.000000};
+    AnyFixedRefFrame  Handle ={
+      //      Mass=9.869*10^-6*750;
+      //      Jii={2.13*10^-9,2.13*10^-9,4.147*10^-9}*750;
+      Origin={0.000000, -0.399000, 0.000000};
       AnyDrawSurf drw={
         FileName ="handle";
         RGB=..Colors.AnyBodyGreen;
       };
     };
     
-    AnySeg Logo={
-      Mass=0;
-      Jii={0,0,0};
-      
-      AnyDrawSTL Body = {
-        FileName = "../../../Body/AAUHuman/ToolBox/DrawObjects/Body-grey.stl";
-        RGB = ..Colors.AnyBodyRed;
+        AnySeg Logo={
+          Mass=0;
+          Jii={0,0,0};
+          r0 = {0, -0.12, 0.0045};
+          Axes0 = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
+          AnyDrawSTL Body = {
+            FileName = "../../../Body/AAUHuman/ToolBox/DrawObjects/Body-grey.stl";
+            RGB = ..Colors.AnyBodyRed;
+            
+            ScaleXYZ={0.002,0.002,0.002};
+            Opacity=..Colors.Opacity;
+          };
+          
+          AnyDrawSTL AnyTechnology = {
+            FileName = "../../../Body/AAUHuman/ToolBox/DrawObjects/AnyTechnology-red.stl";
+            RGB = ..Colors.AnyBodyGrey;
+            
+            ScaleXYZ={0.002,0.002,0.002};
+            Opacity=..Colors.Opacity;
+          };
+        };
+    
+        AnySphericalJoint LogoJnt={
+          AnyRefNode &ref1=.Body.LogoLocation;
+          AnySeg &ref2=.Logo;
+        };
         
-        ScaleXYZ={0.002,0.002,0.002};
-        Opacity=..Colors.Opacity;
+        AnyKinEqSimpleDriver LogoJntDrv={
+          AnySphericalJoint &ref1=.LogoJnt;
+          DriverPos={0,0,0};
+          DriverVel={0,0.0,0};
+        };
+        
+    AnyKinEq NailBodyJnt={
+      AnyKinLinear lin ={
+        AnyRefFrame &ref1=..GlobalRef;
+        AnyRefFrame &ref2=..Body.NailHole;
       };
       
-      AnyDrawSTL AnyTechnology = {
-        FileName = "../../../Body/AAUHuman/ToolBox/DrawObjects/AnyTechnology-red.stl";
-        RGB = ..Colors.AnyBodyGrey;
-        
-        ScaleXYZ={0.002,0.002,0.002};
-        Opacity=..Colors.Opacity;
+      AnyKinRotational rot ={
+        AnyRefFrame &ref1=..GlobalRef;
+        AnyRefFrame &ref2=..Body.NailHole;
+        Type=RotAxesAngles;
       };
     };
-    
-    AnySphericalJoint LogoJnt={
-      AnyRefNode &ref1=.Body.LogoLocation;
-      AnySeg &ref2=.Logo;
-    };
-    
-    AnyKinEqSimpleDriver LogoJntDrv={
-      AnySphericalJoint &ref1=.LogoJnt;
-      DriverPos={0,0,0};
-      DriverVel={0,0.0,0};
-    };
-    
-    AnyRevoluteJoint NailBodyJnt={
-      AnyRefFrame &ref1=.GlobalRef;
-      AnyRefFrame &ref2=.Body.NailHole;
-    }; 
-    
-    AnyKinEqSimpleDriver NailBodyDrv={
-      AnyRevoluteJoint &ref=.NailBodyJnt;
-      DriverPos={0};
-      DriverVel={0};
-    };
+    AnyFunConst WeightFun ={Value = {0.001};};
     
     AnyRevoluteJoint RightArmJnt={
       AnyRefFrame &ref1=.Body.RightArmJntNode;
       AnyRefFrame &ref2=.RightArm.JntNode;
     };
+    AnyKinEqSimpleDriver RightArmDrv ={
+      AnyRevoluteJoint &ref=.RightArmJnt;
+      DriverPos={0.6};
+      DriverVel={0.0};
+      CType={Soft};
+      Reaction.Type={Off};
+      WeightFun={&.WeightFun };
+      
+    };
+    
+    
     
     AnyRevoluteJoint LeftArmJnt={
       AnyRefFrame &ref1=.Body.LeftArmJntNode;
       AnyRefFrame &ref2=.LeftArm.JntNode;
     }; 
+    AnyKinEqSimpleDriver LeftArmDrv ={
+      AnyRevoluteJoint &ref=.LeftArmJnt;
+      DriverPos={2.544869};
+      DriverVel={0};
+      CType={Soft};
+      Reaction.Type={Off};
+      WeightFun={&.WeightFun };
+      
+    };
+    
     
     AnyRevoluteJoint RightLegJnt={
       AnyRefFrame &ref1=.Body.RightLegJntNode;
@@ -238,53 +263,57 @@ Main = {
       AnyRefFrame &ref2=.LeftLeg.JntNode;
     }; 
     
-    AnyPrismaticJoint HandleJnt={
-      AnyRefFrame &ref1=.GlobalRef.HandleBase;
-      AnyRefFrame &ref2=.Handle;
-      Axis=y;
+    AnyKinEqSimpleDriver RightLegJntDrv={
+      AnyRevoluteJoint &ref=.RightLegJnt;
+      DriverPos={0.09828748};
+      DriverVel={0};
+      CType={Soft};
+      Reaction.Type={Off};
+      WeightFun={&.WeightFun };
+      
     };
     
-    /// Fourier drivers are useful for specifying
-    /// cyclic or repetetive movements
-    AnyKinEqFourierDriver HandleJntDrv={
-      AnyPrismaticJoint &ref=.HandleJnt;
+    AnyKinEqSimpleDriver LeftLegJntDrv={
+      AnyRevoluteJoint &ref=.LeftLegJnt;
+      DriverPos={-0.09828748};
+      DriverVel={0};
+      CType={Soft};
+      Reaction.Type={Off};
+      WeightFun={&.WeightFun };
       
-      Type = Cos;
-      AnyVar a0 = 0.00125;
-      AnyVar a1 = 0.008;
-      AnyVar b0 = 0;
-      AnyVar b1 = 0;
-      
-      Freq = 1*0.1; 
-      A = { {a0,a1}  };
-      B = {{0,b1} }; 
     };
+    
+    
+    
+    
+    
+    
     
     AnyKinPLine RightArmString ={
       AnyRefNode &ref1=.RightArm.StringNode;
       AnyRefNode &ref2=.Body.StringNodeTop;
-      AnySeg &ref3=.Handle;   
+      AnyRefFrame &ref3=.Handle;   
       AnyDrawPLine drw={Thickness=0.0015; RGB={1,0,0};};
     };
     
     AnyKinPLine LeftArmString ={
       AnyRefNode &ref1=.LeftArm.StringNode;
       AnyRefNode &ref2=.Body.StringNodeTop;
-      AnySeg &ref3=.Handle;   
+      AnyRefFrame &ref3=.Handle;   
       AnyDrawPLine drw={Thickness=0.0015; RGB={1,0,0};};
     };    
     
     AnyKinPLine RightLegString ={
       AnyRefNode &ref1=.RightLeg.StringNode;
       AnyRefNode &ref2=.Body.StringNodeBottom;
-      AnySeg &ref3=.Handle;   
+      AnyRefFrame &ref3=.Handle;   
       AnyDrawPLine drw={Thickness=0.0015; RGB={1,0,0};};
     };
     
     AnyKinPLine LeftLegString ={
       AnyRefNode &ref1=.LeftLeg.StringNode;
       AnyRefNode &ref2=.Body.StringNodeBottom;
-      AnySeg &ref3=.Handle;   
+      AnyRefFrame &ref3=.Handle;   
       AnyDrawPLine drw={Thickness=0.0015; RGB={1,0,0};};
     }; 
     
@@ -292,7 +321,10 @@ Main = {
       AnyKinPLine &ref1=.RightArmString;
       AnyKinPLine &ref2=.LeftArmString;
       DriverPos={1,1}*0.334689;
-      DriverVel={0.00,0.00};   
+      DriverVel={0.00,0.00}; 
+      
+      CType = {Soft,Soft};
+      
     };
     
     AnyKinEqSimpleDriver LegStringsDrv={
@@ -300,18 +332,36 @@ Main = {
       AnyKinPLine &ref2=.LeftLegString;
       DriverPos={1,1}*0.223478;
       DriverVel={0.0,0.0}; 
+      CType = {Soft,Soft};
+      
     };
+    
+    
+    AnyDrawWidgetLin handle =         {
+      Operation = &Main.Study.Kinematics;
+      UpdateEvent = OnMouseRelease;
+      MaxDrawSize = 0.1;
+      MinDrawSize = 0.1;
+      RefFrame = &Main.MyModel.GlobalRef;
+      Target = &.Main.MyModel.Handle.Origin ;
+      AxisOnOff = {Off, On, Off};
+    };
+    
   }; // MyModel
   
   // The study: Operations to be performed on the model
   AnyBodyStudy Study = {
     AnyFolder &Model = .MyModel;
     
+    InitialConditions.SolverType = KinSolOverDeterminate;
+    Kinematics.SolverType = KinSolOverDeterminate;
+    
+    
     Gravity = {0.0, -9.81, 0.0};
     tEnd=10;
-    nStep=40;
+    nStep=1;
   };
-
+  
   
   
 };  // Main

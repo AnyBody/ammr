@@ -1,238 +1,306 @@
-/** 
-This application is based on the GaitUniMiami application of the Repository 7 which is public domain and can be found here:
-http://www.anybody.aau.dk/repository/index.htm
-It makes use of the motion capture data as well as the force plate data from a experiment. The body model in this 
-application is built with the new developed leg model. Please notice that this is a preliminary release for demonstration purpose. The newleg model 
-will be included in the next release of the Repository but may change in some minor details.
+//DESCRIPTION OF MODEL
+//The model has two models which can be switched in and out by switched in the top of the main 
+//file. The model  "MotionAndParameterOptimizationModel" is used for optimizing the motion and identifying model 
+//parameters such as segment lengths and local marker positions. The output from this analysis is 
+//a set of parameters which are automatically saved and the optimized motion in terms of joints angles.
+//The joint angles are automatically saved once the kinematic analysis is done. This model has no 
+//muscles applied. 
 
-------------------------------------------------------------------------------------------------
-
-This procedure explains the steps needed to create a gait model based on data from a C3D file.
-
-The data in this model was kindly provided by Dr.Shihab Asfour and Moataz Eltoukhy, Department of Industrial Engineering, University of Miami 
-
-
-This is a description of how AnyBody by means of some special studies can interact with Michael Skipper's application for mocap data processing. 
-In short, Skipper's application performs an optimization of segment scaling, marker positioning and joint angles to best fit measured data from 
-optical markers.
-
-This model takes you through the steps of having a C3D file with measured mocap on a gait experiment to having an equivalent AnyBody model of 
-the experiment allowing you to calculate muscles forces joint reactions ect. 
-
-In time this technology will be built directly into AnyBody, but for the time being we rely on processing the data by an external, stand-alone
-application called GaitAplication2.exe. This application reads marker trajectories from a gait experiment and processes them to joint angle
-variations that can subsequently be imposed on the AnyBody gait model. It also performs a scaling of the segments and local positioning of the 
-markers on the bones to comply optimally with the recorded data.
-
-The stand-alone version of GaitApplication2 is limited in the sense that it only works for a model comprising two rigid feet, two shanks, two 
-thighs, and a pelvis. The hip joints are spherical, the knees are hinges, and the ankles are universal joints.
-
-To facilitate practical work with the application, some special AnyScript models have been set up that will give the user an interface to 
-generate the necessary input data for GaitApplication2. Subsequently GaitApplication2 will process the data and generate input for the AnyBody
-model.
+//The second model is a normal inverse dynamics study which is driven by the optimized motion from 
+//the first study, this "InverseDynamicModel" model includes muscles.
+//It is recommended to have only one of the model active simultaneously
 
 
-Prerequisites to this procedure if you will run it on a new c3d file are the following:
-1) a suitable C3D file, with a reasonable amount of markers on the legs, together with force plate data. The more markers available on the feet 
-the better, this will make the process easier.
-2) c3d2any.exe converter application which converts the c3d file into AnyScript files, the file is available from www.AnyBodyTech.com
-3) gaitapplication2.exe the file is available from www.AnyBodytech.com, this application can optimize the marker locations, segment lengths and 
-joint angle variations.
 
-The following description assumes that a new data set is to be used in the descrition named NewDataSet, instead of the data set in this particular
-model which is trial13
-
-1)
-Locate the c3d2any.exe application on your pc, and open a dos prompt in that directory, place the c3D in the same directory. Run the converter by
-typing  "c3d2any <input filename> <output filename> <output directory>" <input filename> specifies the C3D file that has to be converted 
-<output filename> specifies the output file prefixes <output directory> specifies the absolute path of where the output is to be placed.
-Then move the in total seven output files to the directory where the gait model will be created. These will have the first part of their 
-equal to the name of the C3D file, in this case NewDataSet
-
-2)
-Open the Main file file named NewDataSet.Main.any copy the include statements in the top named
-#include "NewDataSet.Header.any" 
-#include "NewDataSet.Groups.any" 
-#include "NewDataSet.Analog.any" 
-#include "NewDataSet.PointsMarkers.any" 
-#include "NewDataSet.PointsProcessed.any" 
-And inserted the lines in the AnyGait.Main.any file replacing the similar include statements for the Trial13 files. Similarly identify the tEnd, 
-tStart and nstep values and replace the variables in the top of the AnyGait.Main.any file
-
-3)
-In the file named "MarkerListMoverInclude.any"  change the include statement to #include "NewDataSet.MarkerListMover.any""  You have to make sure
-that the new NewDataSet.MarkerListMover  file contain the data for all the markers. It can happen that all the markers are moved to the 
-ProcessedData file instead because they are tagged as such in the c3d  file. But it should be straight forward to move them back, and you can 
-also reuse the MarkerListMover file.
-
-4)
-After this, you have to open the MarkerMover.any file and uncomment the AnyOutputFile statement in the bottom. This will make sure that the marker
-data are written to text files when you run the  kinematic analysis of the MarkerModelStudy (But don't do that yet).
-
-5)
-Load your model.
-
-6)
-Run the kinematic analysis in the MarkerModelStudy. After this has successfully ended, please verify that you now have a set of text files with 
-the new marker data in. If they are all there now, comment out the AnyOuputFile statement in the MarkerMover.any file again (this is just to make
-sure that you don't have to rerun the MarkerModelStudy every time you reload your model). Here it is very important to make sure that the markers 
-moving in the positive x direction having y upward and z sideways, if this is not the case then modify the  Main.Orientaion matrix so that this will the case.
-
-At this point, we are ready to start to get the man to follow the new measured data, and this we can do by the following steps:
-
-7)
-In comment the MarkerPlacementStudy again
-
-8)
-Open the Mannequin.any file and adjust the initial condition of the man to fit the data. Again, how well this has to be done will depend on how
-much it takes to get GaitApplication2 to find the solution. While doing this it is also a good idea to adjust the segment lengths in the 
-LocalMarkerCoordinateAndSize.any file. Make sure that the model ends up close to the markers. How well this has to be done will depend on how
-much it takes to get GaitApplication2 to find the solution - but we'll again find out later.
-
-9)
-I you have another marker set than the one used in the Trial13 model, you will now need to create new markers according to the measured markers.
-This is done by editing two files, these are LocalMarkerCoordinateAndSize.any and MarkerTopology.any. Here you will need to modify the markernames
-in the Markertopology file and the coordinates in the LocalMarkerCoordinaesAndSize file. During this work it is very important to make sure that 
-the new markers get attached to the right segments and gets the correct SegNr applied, otherwise the gaitapplication2.exe will fail to optimize 
-the problem. 
+//HOWTO RUN IT
+//This model can be used as a template model for marker driven models. Running the model on 
+//requires 3 steps 
+//Steps:
+//1. Run the RunMotionAndParameterOptimizationSequence sequence  in the operation tree to optimize the man and save the joint angles (set the switch MotionAndParameterOptimizationModel 1 )
+//2. Reload the model (F7) to read in the saved joint angles (if you just want to run the model, (set the switch InverseDynamicModel 1 and MotionAndParameterOptimizationModel 0)
+//3. Run the InverseDynamicAnalysisSequence analysis sequence by pressing it in the operation tree
+//Please find a more detailed desciption of the below.
 
 
-10)
-Load the model again, open the MarkerPlacementStudy and execute  SetInitialConditions. This will make your man be located in your initial guess 
-and with the local markers placed according to what is  in LocalMarkerCoordinateAndSize file, repeat changing the marker coordinated until their
-location is close to location of the markers on the real subject
 
-11)
-In the model tree, locate MarkerPlacmentModel -> DataForConfigFile  ->  ModelGait1->String. Right click it and save it to a file named  
-ModelGait.txt . Open the StudyGait.txt and make sure that it has the  STUDYTYPE SCALE set.
+//Set this to 1 if you want to run the motion and Parameter Optimization identification
+//**************************************************
+#define MotionAndParameterOptimizationModel 0
 
-12) 
-Execute GaitApplication2. If this terminates successfully, reload  your model and execute the KinematicAnalysis in the OptStudy to see the results.
+//Set this to 1 if you want to run the inverse dynamic analysis
+#define InverseDynamicModel 1
+//Usually only have one of the two switches active so set the inactive analysis to 0
+//**************************************************
 
-If GaitApplication2 fails, please note where it fails. If it fails  before it writes out "Finished study of initial conditions", it means  that
-your start guess on the local marker coordinates, segment  lengths and initial condition of the man is not good enough for the  solver to find a 
-solution when the local maker coordinates and  segment lengths are kept fixed. In this case, you can inspect what goes wrong by changing the
-study type in StudyGait.txt to STUDYTYPE  POSONLY and rerunning GaitApplication2, reload your model and run the KinematicAnalysis in the OptStudy. Repeat step 8) - 12) until GaitApplication2 finishes successfully with the POSONLY  setting, then change it back to SCALE and run again.
 
-If GaitApplication2 fails after it has written "Finished study of  Initial conditions", or you are just not satisfied with the result, it means 
-that guesses were good enough for the solver to find a  solution with the local marker coordinates and segment lengths kept  fixed, but that it
-was unable to optimize their placement. Again,  repeating step 8) - 12) should make
-GaitApplication2 converge eventually.
 
-13) 
-Once the gaitApplication2 has converged enable the OptStudy again, in the environment.any file outcomment all of except the GlobalRef object 
-reload the model.
-Then run the kinematic analysis of the OptStudy, this will display the optimized motion. 
+//This is a list of the classes used for defining the model
+//Class used for defining a marker
+#include "../../../Body/AAUHuman/ToolBox/Mocap/CreateMarkerClass.any"
+//Class used for defining a marker
+#include "../../../Body/AAUHuman/ToolBox/Mocap/CreateMarkerClassTD.any"
+//Class used to construct a forceplate of type4
+#include "../../../Body/AAUHuman/ToolBox/Mocap/ForcePlateType3AutoDetection.any"
+#include "../../../Body/AAUHuman/ToolBox/Mocap/ForcePlateType3.any"
 
-14)
-Now all you need is to create a new environment.any file which fits the forceplate layout of the trial, this is done in the Environment.any file.
-Currently this file contains an environment of four force plates, all coordinates cornes, origins etc in this file originates from the C3D file. 
-There are inprinciple four ways the forceplate data can come in this is specified by the force plate type setting in the C3D file. The Trial13 
-data set is a type 3, meaning that for each force plate there are eight force signals, applied.  Depending on the Force_Plate.Type setting on the
-NewDataSet the Environment.any file will need to be changed, all four types should be possible to replicate.
+//Class used for defining a which antrhopometics measurements will be part of the analysis
+#include "../../../Body/AAUHuman/ToolBox/Mocap/OptimizeAnthropometricsOnOff.any"
 
-15)
-Once the environment file is ok then you are ready to run the OptStudy.InverseAnalysis which is the end goal of this exercise!, this will let you
-see muscles forces and joint reactions. Remember to calibrate the muscles.
 
-And that's all there really is to it to make the kinematics work in this new model. I am really sorry that it has to be so difficult for now, but 
-there's not much more we can do about it before all this is integrated into the AnyBody Modelling System - this it will be much much easier.
-*/
+
+
+
 Main = {
   
+  //This file controls most of the model setup, the following items is defined here:
+  //1. C3D file definition
+  //2. Optimization settings for which anthropometrics to optimize
+  //3. Defition of markers
+  //If you want to run the model on your own data this is the place to start, additioanlly it may need to 
+  //make changes in the Mannequin file to position the human model close to the recorded markers.
+  #include "ModelSetup.any" 
+  
+   #include "TrialSpecificData.any" 
+
+  #if MotionAndParameterOptimizationModel
+
+  //STEP1
+  //PLASE MAKE SURE THAT IF YOU PRESS File->Open YOU ARE IN THE DIRECTRORY OF THIS APPLICATION. If this is not the case go to this directory and open a file,
+  //otherwise the automatic procedure may not work
+  // Run this sequence of analysis by selecting it in the operation tree
+  AnyOperationMacro RunMotionAndParameterOptimizationSequence  = {  FileName = "Sequence1.anymcr";   };
+  //  This is the sequence of operation in the "Sequence1.anymcr" file
+  //  operation Main.Studies.ParameterIdentification.ParameterOptimization  //This will run the parameter identification
+  //  run
+  //  runmacro   "SaveMacroOperation-Save.anymcr" //This will save a string into a macro file, the string provides the filename to save 
+  //                                              //the optimized design in. The string is automatically set to be  the C3DFilename + OptimizedParameters
+  //  runmacro   "RunMacroOperation-Save.anymcr"  //This will save the optimized design into a file named according to the string 
+  //  operation Main.Studies.MotionOptimization.Kinematics 
+  //  run
     
-     /**Execute this operation to run the model in the intended operation sequence.  
-    It is also possible to run operations seperately, by manual selections in the operation tree*/
-    AnyOperationSequence RunApplication = {
-  
-      /**This operation calibrates the muscles in the model if these are of the type AnyMuscleModel3E.
-      This will just be an empty operation if the model is using a muscle type that does not require calibration.*/
-      AnyOperation &CalibrationAnal = Main.HumanModel.Calibration.CalibrationSequence;  
-  
-      ///This operation is the inverse dynamic analysis
-      AnyOperation &InvAnal=Main.OptStudy.InverseDynamics;
-    
-    };
-  
-  
-  
-  
-  AnyFolder C3DFileData ={ 
-    #include "trial13.Header.any" 
-    #include "trial13.Groups.any" 
-    #include "trial13.Analog.any" 
-    #include "trial13.PointsMarkers.any" 
-    //#include "trial13.PointsProcessed.any" 
-  }; 
-      AnyIntVar nStep = 158;
-      AnyFloatVar tStart = 2.6917+0.15;
-    AnyFloatVar tEnd = 5.3333-0.75;
-    
-  //Includes some settings for the visual representation of the model
-  #include "DrawSettings.any"
-  
-  
-  //This variable controls the orientation of the markers and the environment 
-  //it can be used to rotate it all 
-  //The makers must walk in the positive x direction in order for the gaitapplication2 to work
-  //if the experimental data does reflect this it can be changed by this variable.
-  AnyMat33 Orientation =RotMat(pi,z);
-  
-//  //This study is used for creating marker trajectories of the recorded markers
-//  AnyBodyStudy MarkerModelStudy = {
-//    //This is a model of containing only the free floating markers 
-//    AnyFolder MarkerModel={
-//      //Create segments for each of the markers and drive them according to data
-//      //which can be found in the files p1.any - p15.any
-//      //If you are running on a new data set you will need to make changes in this include statement
-//      #include "MarkerListMoverInclude.any"
-//    };
-//    
-//    nStep=Main.nStep;
-//    Gravity = {0.0000, 0.00000,-9.81};
-//    tStart=Main.tStart; 
-//    tEnd= Main.tEnd;
-//  };
-//  
-  
-//  
-//    //This study is used for creating the an input file for the gaitapplication2 study
-//    AnyBodyStudy MarkerPlacementStudy = {
-//      
-//      #include "MarkerPlacementModel.any"
-//  
-//      
-//      nStep=Main.nStep;
-//      Gravity = {0.0000, 0.00000,-9.81};
-//      tStart = Main.tStart; 
-//      tEnd = Main.tEnd;
-//          
-//      
-//    };
-//  
   
    
-   //This study is used for displaying and running the inverse dynamic analysis of the optimized motion created  by the gaitapllication2 
-    #include "HumanModel.any"
-     //This study makes use of the optimized joint angles
-
-    AnyBodyStudy OptStudy = {
-     
-      AnyFolder &C3DData=.C3DFileData ;
-      
-      #include "OptModel.any"
-      
-     
-      
-      nStep=Main.nStep;
-      Gravity ={0.0, 0.0,-9.81};
-      tStart=Main.tStart; 
-      tEnd= Main.tEnd-0.02; 
-    };
-     
+  // STEP 2:  Change the switches in the top of the main file to
+  //
+  //         MotionAndParameterOptimizationModel 0 
+  //         InverseDynamicModel 1
+  //
+  //         CLICK RELOAD
+  //
+  //         If you would like to see the markers floating around next to the man during
+  //         the inverse dynamics analysis, set ConstructModelOnOff = On; in the c3d file object.(ModelSetup.any)
+  //         Also they can also be included in the parameter optimization study, but will slow down the
+  //         analysis a lot
+           
+  
+  #endif 
+  
+  #if InverseDynamicModel
+  
+  
+  
+  // STEP 3: Run the operation InverseDynamicAnalysisSequence to calibrate the model and run inverse dynamic analysis.
+  
+  AnyOperationMacro InverseDynamicAnalysisSequence = {  FileName = "Sequence2.anymcr";   };
+  //  runmacro   "SaveMacroOperation-Load.anymcr"
+  //  runmacro   "RunMacroOperation-Load.anymcr"   
+   //  operation Main.Studies.InverseDynamicStudy.InitialConditions;  //this is done to have the model updated before running calibration
+  //  run
+  //  operation Main.Studies.HumanModel.Calibration.CalibrationSequence
+  //  run
+  //  operation Main.Studies.InverseDynamicStudy.InverseDynamics;
+  //  run
+  
+  #endif
+  
+  
+ #include "DrawSettings.any"
   
 
+
+//DESCRIPTIONS OF THE STUDIES IN THE MODEL
+//
+//KinematicStudyForParameterIdentification: 
+//    This study is the basis study for the Parameter identification study
+//
+//ParameterIdentification:
+//    Running this study will optimize the parameters of the model: segments length and marker positions
+//    It will also calculate the motion but usually this optimization is done with a lower amount of 
+//    timesteps so the produced motion is not usefull for an inverse dynamic analysis. The reduced 
+//    number of timesteps will speed the optimization it should however not be too low, this will
+//    reduce the accuracy
+//    
+//MotionOptimization:
+//    This study will run the kinematic analysis using the optimize parameters from the ParameterIdentification study 
+//    This study will run with a high number of timesteps. It will automatically save the optimized motion in files 
+//    named according to name of the used C3D which is specified in the ModelSetup.any file
+//
+//LoadParametersOptimizationResults 
+//    This study is used ONLY for loading the optimized results from the ParameterIdentification study
+//
+//InverseDynamicStudy:
+//    This study run the inverse dynamic analysis of the model with the optimized motion and optimized parameters
+//
+//
+//The studies has to to be activated in a certain sequence, to make this easier there are the following
+//operation sequences:
+//
+//MotionAndParameterOptimiztionSequence: 
+//    This seqeunce is used for determining the model parameters such as segment lenghts, marker positions
+//    
+//
+//InverseDynamicAnalysisSequence:
+//    This study sequence is used for calibrating the model and running the inverse dynamic analysis 
+  AnyFolder Studies ={
+    
+    #if  MotionAndParameterOptimizationModel
+    
+    
+    AnyBodyStudy KinematicStudyForParameterIdentification = {
+      AnyFolder &C3DData=..ModelSetup.C3DFileData ;
+      
+      AnyFolder &ref=HumanModel;
+      ref={ 
+        AnyFolder &Mannequin=.Mannequin;
+        #include  "BodyPartsSetup2.any"
+      };
+      #include "HumanModel.any"
+      
+      //This mannequin calculates a guess on the initial pelvis position based on ASIS and PSI markers
+      //if these markers do not exist in the markerset used this has to be changed
+      #include "Mannequin.any"  // this file controls the initial position of the model and he posture
+      
+      //Environment around the human
+      AnyFolder EnvironmentModel ={
+        //Model of the floor and force plates this is where the force plates are defined        
+        AnyFolder &HumanModelRef=.HumanModel.BodyModel;        
+        //This environment file makes use of automatic detecteion of which foot are incontact with which plate 
+        #include "EnvironmentAutoDetection.any"
+        //This environment file has no automatic detecteion of which foot are incontact with which plate it has to be set manually
+//        #include "Environment.any"
+        
+      };
+      
+      //Connection between environment and the human    
+      AnyFolder ModelEnvironmentConnection = {
+        AnyFolder Drivers={
+          #include "ExtraDrivers.any"
+          // Aliases for convenient referencing
+          AnyFolder &JntPos=..Mannequin.Posture;  
+          AnyFolder &JntVel=..Mannequin.PostureVel;
+        };
+      };
+      
+      #include "JointAngleOutputs.any"
+      #include "UndefineBodyPartSetup.any"
+      
+      Kinematics.PosAnalysisOnlyOnOff=On; //only run the position analysis 
+      nStep=floor(Main.ModelSetup.nStep/6); //run this analysis with a reduced step number be carefull it can be too low!
+      Gravity ={0.0, -9.81,0};
+      tStart = Main.TrialSpecificData.tStart+2*Kinematics.ApproxVelAccPerturb; 
+      tEnd = Main.TrialSpecificData.tEnd-2*Kinematics.ApproxVelAccPerturb;
+      
+      InitialConditions.SolverType = KinSolOverDeterminate;
+      Kinematics.SolverType = KinSolOverDeterminate;
+      Main.Studies.KinematicStudyForParameterIdentification.InitialConditions.KinematicTol=1e-3;
+      Main.Studies.KinematicStudyForParameterIdentification.Kinematics.KinematicTol=1e-3;
+
+    };
+    
+    AnyOptKinStudy ParameterIdentification =     {
+      AnyFolder &StudyRef = .KinematicStudyForParameterIdentification;
+      ParameterOptimization.ConvergenceTol=1e-2;
+      Analysis =   {
+        AnyOperation &ref = .StudyRef.Kinematics;
+      };
+    };   
+    
+    AnyBodyStudy MotionOptimization = {
+      
+      
+      AnyFolder &C3DData=..ModelSetup.C3DFileData ;
+      
+      AnyFolder &HumanModel=.KinematicStudyForParameterIdentification.HumanModel;
+      AnyFolder &ModelOptimizationModel=.KinematicStudyForParameterIdentification;
+      AnyFolder &JointAngleOutput=.KinematicStudyForParameterIdentification.JointAngleOutputs;
+      
+      Kinematics.PosAnalysisOnlyOnOff=On;
+      nStep=Main.ModelSetup.nStep; 
+      Gravity ={0.0, -9.81,0};
+      tStart = Main.TrialSpecificData.tStart+2*Kinematics.ApproxVelAccPerturb; 
+      tEnd = Main.TrialSpecificData.tEnd-2*Kinematics.ApproxVelAccPerturb;
+      
+      InitialConditions.SolverType = KinSolOverDeterminate;
+      Kinematics.SolverType = KinSolOverDeterminate;
+   
+     
+    
+    };
+    
+   
+
+    
+    #endif
+    
+    
+    
+    #if InverseDynamicModel
+    
+    //This study is used for running the inverse dynamic analysis of the optimized motion
+    //***********************************************************************************
+    HumanModel={
+      AnyFolder &Mannequin=.InverseDynamicStudy.Mannequin;
+      #include  "BodyPartsSetup.any"
+    };
+    #include "HumanModel.any"
+    
+    AnyBodyStudy InverseDynamicStudy = {
+      AnyFolder &C3DData=..ModelSetup.C3DFileData ;
+      AnyFolder &HumanModel=.HumanModel.BodyModel;
+      #include "Mannequin.any" 
+      
+      //Environment around the human
+      AnyFolder EnvironmentModel ={
+        
+        AnyFolder DrawC3DMarkers = {};
+        //Model of the floor and force plates this is where the force plates are defined
+        AnyFolder &HumanModelRef=..HumanModel.BodyModel;
+        //This environment file makes use of automatic detecteion of which foot are incontact with which plate 
+        #include "EnvironmentAutoDetection.any"
+        //This environment file has no automatic detecteion of which foot are incontact with which plate it has to be set manually
+     //   #include "Environment.any"
+      };
+      
+      //Connection between environment and the human    
+      AnyFolder ModelEnvironmentConnection = {
+        //Drivers for the model
+        #include "JointsAndDriversOptimized.any"      
+      };
+      
+     
+
+      
+      InverseDynamics.Criterion.UpperBoundOnOff=Off;
+      nStep=floor(Main.ModelSetup.nStep/2);
+      Gravity ={0.0, 0.0, -9.81};
+      tStart = Main.TrialSpecificData.tStart+2*Kinematics.ApproxVelAccPerturb; 
+      tEnd = Main.TrialSpecificData.tEnd-2*Kinematics.ApproxVelAccPerturb -0.2;
+      //#include "GCDOutput.any"
+    };
+    
+    
+    //This study is only used for loading the optimized parameters    
+    AnyOptKinStudy LoadParametersOptimizationResults =     {
+      AnyFolder &Study = .InverseDynamicStudy;
+      AnyFolder &HumanModel = .HumanModel;
+      ParameterOptimization.ConvergenceTol=1e-3;
+      Analysis =   {
+        AnyOperation &ref = .Study.Kinematics;
+      };
+    };
+    
+    #endif
   };
-
-
+  
+}; //Main
 

@@ -1,0 +1,118 @@
+#define MotionAndParameterOptimizationModel 1
+#define InverseDynamicModel 0
+#define HumanModelPresent 0
+#define LoadC3DMarkerModel 
+#define MarkersPresent 0
+
+//This is a list of the classes used for defining the model
+//Class used for defining a marker
+#include "../../../Body/AAUHuman/ToolBox/Mocap/CreateMarkerClass.any"
+//Class used for defining a marker
+#include "../../../Body/AAUHuman/ToolBox/Mocap/CreateMarkerClassTD.any"
+//Class used to construct a force plate of type4
+#include "../../../Body/AAUHuman/ToolBox/Mocap/ForcePlateType4AutoDetection.any"
+#include "../../../Body/AAUHuman/ToolBox/Mocap/ForcePlateType4.any"
+
+
+Main = {
+   #include "WidgetValues.any"
+  
+  #include "C3DProject.Main.any"
+
+  #include "<DataPath>/TrialSpecificData.any" 
+  #include "<DataPath>/ModelSetup.any"
+ 
+  Main.Project.Files.MainFile="LoadC3DData.Main.any";
+  
+
+  Main.Project={
+    Tasks.C3D_Data_Model.Set_C3D_Markers = {
+      
+      Description = {
+        Title = "<h4>Set C3D File </h4>";
+        
+        BodyText = 
+        "This task reviews the loaded data C3D data."+
+        "<br/>"+
+        "<br/>"+
+        "Below are pointers to the following tasks<br/>"+
+        strformat ("\t")+"1.) Specify C3D file<br/>"+
+        strformat ("\t")+"2.) Review trajectories<br/>"+
+        "<br/>" +
+        "<h4> 1.) Set specification for the C3D data  </h4>"+
+        "Make modifications in the <b>TrialSpecificData.any</b> file ,usually the following model parameters needs to be modified:"+
+        "<br/>"+
+        strformat ("\t")+"1.)"+ "Specify C3D file " + AnyScriptLinkOf(&Main.TrialSpecificData.NameOfFile,"NameOfFile") +"<br/>"+
+        strformat ("\t")+"2.)"+ "Set the direction of "+ AnyScriptLinkOf(&Main.ModelSetup.Gravity,"gravity") + " relative to the yellow coordinate system in ModelView<br/>"+
+        strformat ("\t")+"3.)"+ "Set " + AnyScriptLinkOf(&Main.TrialSpecificData.tStart,"Start ") + "and"+  AnyScriptLinkOf(&Main.TrialSpecificData.tEnd," End") + " times of analysis" + 
+        ", but only if they are different from the default values in the C3D file. The current values can be seen here"+ AnyBodyLinkOf(&Main.TrialSpecificData.tStart,"Start ") + "and"+  AnyBodyLinkOf(&Main.TrialSpecificData.tEnd," End") +"<br/>"+
+        "<h4> 2.) Review trajectories </h4>"+
+        "Review the marker trajectories and ensure that none of the markers drop out. " +
+        "Run the Execute task below this will automatically run a kinematic operation. Then inspect the smoothness of the data in a Chart view and adjust filtering if necessary.<br/>" +
+        "If you need to cut away time because markers are dropping out, then run the Execute task below and stop the analysis when markers drop out. Then the current time value can "+
+        "be found " + AnyBodyLinkOf(&Main.LoadC3DDataStudy.t,"here ")+ "(You need to double click the time value) <br/>" +
+        "Once the time value has been found it can be inserted into"+ AnyScriptLinkOf(&Main.TrialSpecificData.tStart," tStart") + " or " + AnyScriptLinkOf(&Main.TrialSpecificData.tEnd," tEnd") +" depending on if you are cuting the time in the start or end of analysis."
+        ;
+         
+        AnyFile filename = "Set_C3D_Markers.htm";
+        HTMLURL = "file:///"+FilePathCompleteOf(filename)+"?c3dfile="+Main.TrialSpecificData.NameOfFile
+        +"&gravity=("+strval(Main.ModelSetup.Gravity[0],"%4g")+", "+strval(Main.ModelSetup.Gravity[1],"%4g")+", "+strval(Main.ModelSetup.Gravity[2],"%4g")
+        +")&start="+strval(Main.TrialSpecificData.tStart,"%4g")+"&end="+strval(Main.TrialSpecificData.tEnd,"%4g");
+        
+        Tooltip = Title;
+        
+      };
+      
+      Operation =  &Main.LoadC3DDataStudy.Kinematics;
+      
+   
+  };
+  
+  Tasks.C3D_Data_Model.Replay = {
+    
+    Description = {
+      Title = "<h4>Replay motion</h4>";
+      
+      BodyText = 
+      "Executing this task will replay the motion." ;
+      
+      Tooltip = Title;
+      
+    };
+    
+    Operation =  &Main.LoadC3DDataStudy.Replay;
+    
+    
+  };
+  
+};
+  
+  AnyBodyStudy LoadC3DDataStudy = {
+    
+    AnyFolder DummyStructure= {  
+      AnyFolder Right ={ AnyFolder Leg ={AnyFolder Seg ={AnyFixedRefFrame  Foot ={ AnyRefNode HeelContactNodeLow={};AnyRefNode ToeLateralContactNode={};};};};  };
+      AnyFolder Left ={ AnyFolder Leg ={AnyFolder Seg ={AnyFixedRefFrame Foot ={ AnyRefNode HeelContactNodeLow={}; AnyRefNode ToeLateralContactNode={};};};}; };
+    };
+
+    
+    //Environment around the human
+    AnyFolder EnvironmentModel ={
+      AnyFixedRefFrame GlobalRef ={
+        Origin={0,0,0};
+        AnyDrawRefFrame drw={ScaleXYZ=0.4*{1,1,1};};
+      };     };
+    
+    AnyFixedRefFrame GlobalRef ={       AnyDrawRefFrame drw={ScaleXYZ=0.4*{1,1,1};};    };  
+    AnyFolder &C3DData=.ModelSetup.C3DFileData ;
+    Gravity = .ModelSetup.Gravity;
+    tStart = Main.TrialSpecificData.tStart+2*Kinematics.ApproxVelAccPerturb; 
+    tEnd = Main.TrialSpecificData.tEnd-2*Kinematics.ApproxVelAccPerturb;
+    
+  };      
+  
+};  
+#undef InverseDynamicModel
+#undef MotionAndParameterOptimizationModel
+#undef HumanModelPresent
+#undef LoadC3DMarkerModel 
+#undef MarkersPresent 

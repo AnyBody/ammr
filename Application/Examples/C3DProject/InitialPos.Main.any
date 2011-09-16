@@ -1,0 +1,217 @@
+
+//This is a list of the classes used for defining the model
+//Class used for defining a marker
+#include "../../../Body/AAUHuman/ToolBox/Mocap/CreateMarkerClass.any"
+//Class used for defining a marker
+#include "../../../Body/AAUHuman/ToolBox/Mocap/CreateMarkerClassTD.any"
+//Class used to construct a forceplate of type4
+#include "../../../Body/AAUHuman/ToolBox/Mocap/ForcePlateType2AutoDetection.any"
+#include "../../../Body/AAUHuman/ToolBox/Mocap/ForcePlateType2.any"
+#include "../../../Body/AAUHuman/ToolBox/Mocap/ForcePlateType3AutoDetection.any"
+#include "../../../Body/AAUHuman/ToolBox/Mocap/ForcePlateType3.any"
+#include "../../../Body/AAUHuman/ToolBox/Mocap/ForcePlateType4AutoDetection.any"
+#include "../../../Body/AAUHuman/ToolBox/Mocap/ForcePlateType4.any"
+
+//Class used for defining a which antrhopometics measurements will be part of the analysis
+#include "../../../Body/AAUHuman/ToolBox/Mocap/OptimizeAnthropometricsOnOffV2.any"
+
+
+#define MotionAndParameterOptimizationModel 0
+#define InverseDynamicModel 0
+#define HumanModelPresent  1
+#define MarkersPresent 0
+#define IntialPositionStudy 1 
+
+#define SetIntialPosition 
+
+
+
+
+Main ={
+  #include "WidgetValues.any"
+  
+  AnyOperationMacro SaveWidgetValues = { 
+    MacroStr={
+      "classoperation Main" + " " + strquote("Save Values") + " --file=" + strquote(FilePathCompleteOf(Main.ModelSetup.FileNames.WidgetValues )) 
+    };
+  };
+  
+  
+  AnyOperationMacro LoadWidgetValues = { 
+    MacroStr={
+      "classoperation Main" + " " + strquote("Load Values") + " --file=" + strquote(FilePathCompleteOf(Main.ModelSetup.FileNames.WidgetValues )) 
+    };
+  };
+  
+  #include "C3dProject.Main.any"
+  
+  
+  #include "<DataPath>/TrialSpecificData.any" 
+  #include "<DataPath>/ModelSetup.any"
+  
+  
+  Main.ModelSetup.C3DFileData ={
+    Model.GlobalRef.drw.ScaleXYZ=0.2*{1,1,1};
+    ConstructModelOnOff = On; //If this is set to on it will display the markers but slow down the analysis a lot....
+    ConstructChartOnOff=Off;
+  };
+  
+  
+  Main.Project.Files.MainFile="InitialPos.Main.any";
+  
+  
+  Main.Project={
+    
+    Files = {
+      SetValueFile = FilePathCompleteOf(Main.ModelSetup.FileNames.WidgetValues);
+    };
+  
+    
+    Tasks.Initial_Position_and_Anthropometry_Model.SaveWidgetValues = {
+      Description = {
+        Title = "<h4>Save Widget values</h4>";
+        BodyText = "Executing this task will save widget values to file named:<br/>" + strquote(FilePathCompleteOf(Main.ModelSetup.FileNames.WidgetValues)) +"<br/>"+   
+        "This file contains all results and can be used saving graphical manipulations";
+        Tooltip = Title;
+      };
+      Operation = &Main.SaveWidgetValues ;
+      
+    };
+    
+    Tasks.Initial_Position_and_Anthropometry_Model.LoadWidgetValues = {
+      Description = {
+        Title = "<h4>Load all reuslts Task</h4>";
+        BodyText = "Executing this task will load all widget values from the file:<br/>" + strquote(FilePathCompleteOf(Main.ModelSetup.FileNames.WidgetValues)) +"<br/>"+         
+        "Please note that the name of this file is specified here " + AnyScriptLinkOf(&Main.TrialSpecificData.NameOfFile,"NameOfFile") +"<br/>"+
+        "To load another file this name should be changed <br/>" +
+        "<br/>"+
+        "Note that the ModelView is not updated until a kinematic operation has been executed.";
+        Tooltip = Title;
+      };
+      Operation = &Main.LoadWidgetValues ;
+    };
+    
+    
+    
+    
+    Tasks.Initial_Position_and_Anthropometry_Model.Set_Initial_Position_and_Anthropometry  = {
+      
+      Description = {
+        Title = "<h4>Set Initial Position and Anthropometry</h4>";
+        
+        BodyText = 
+        "This task can be used to do the following two initial adjustments of the model<br/>" +
+        strformat ("\t")+"1.) Set the initial scaling of human model <br/>"+
+        strformat ("\t")+"2.) Set the initial joint angles and pelvis position<br/>"+
+        
+        "<h4> 1.) Set the initial scaling of human model</h4>"+
+        "The initial size of the human body can be set "+  AnyScriptLinkOf(&Main.TrialSpecificData.Anthropometrics,"here")+
+        "<br/>" +
+        "Please note that these values (except mass) may be changed if the motion is being optimized later, in that case these values are only used " +
+        "as the initial guess." +
+        "<br/>" +
+        "<h4> 2.) Set the initial joint angles and pelvis position </h4>"+
+        "The initial position and orientation of pelvis can be set "+  AnyScriptLinkOf(&Main.TrialSpecificData.InitialPositionOfBody,"here") + 
+        " additionally the joint angles can be adjusted. More detailed positioning can be done directly in the mannequin file "+
+        AnyScriptLinkOf(&Main.InitialPosStudy.Mannequin,"mannequin file")+
+        "<br/>" +
+        " <h4> Execute Task Description</h4>"+
+        "Executing the task will drive the position of pelvis and the joint angles into the specified positions. This task can be used to finetune the initial position "+ 
+        "to macth the recorded marker positions." +
+        "This is needed for the subsequent analysis of parameter and motion optimization";
+        
+        Tooltip = "Adjust the initial position";
+        
+        AnyFile filename = "Set_Initial_Position_and_Anthropometry.htm";
+        HTMLURL = "file:///"+FilePathCompleteOf(filename)
+        +"?numvals=12"
+        +"&prefix=Main.TrialSpecificData.Macros.Anthropometrics"
+        +"&0n="+NameOf(Main.TrialSpecificData.Anthropometrics.BodyMass)
+        +"&0v="+strval(Main.TrialSpecificData.Anthropometrics.BodyMass,"%5g")
+        +"&1n="+NameOf(Main.TrialSpecificData.Anthropometrics.BodyHeight)
+        +"&1v="+strval(Main.TrialSpecificData.Anthropometrics.BodyHeight,"%5g")
+        +"&2n="+NameOf(Main.TrialSpecificData.Anthropometrics.ThighLength)
+        +"&2v="+strval(Main.TrialSpecificData.Anthropometrics.ThighLength,"%5g")
+        +"&3n="+NameOf(Main.TrialSpecificData.Anthropometrics.ShankLength)
+        +"&3v="+strval(Main.TrialSpecificData.Anthropometrics.ShankLength,"%5g")
+        +"&4n="+NameOf(Main.TrialSpecificData.Anthropometrics.FootLength)
+        +"&4v="+strval(Main.TrialSpecificData.Anthropometrics.FootLength,"%5g")
+        +"&5n="+NameOf(Main.TrialSpecificData.Anthropometrics.PelvisWidth)
+        +"&5v="+strval(Main.TrialSpecificData.Anthropometrics.PelvisWidth,"%5g")
+        +"&6n="+NameOf(Main.TrialSpecificData.Anthropometrics.HeadHeight)
+        +"&6v="+strval(Main.TrialSpecificData.Anthropometrics.HeadHeight,"%5g")
+        +"&7n="+NameOf(Main.TrialSpecificData.Anthropometrics.TrunkHeight)
+        +"&7v="+strval(Main.TrialSpecificData.Anthropometrics.TrunkHeight,"%5g")
+        +"&8n="+NameOf(Main.TrialSpecificData.Anthropometrics.UpperArmLength)
+        +"&8v="+strval(Main.TrialSpecificData.Anthropometrics.UpperArmLength,"%5g")
+        +"&9n="+NameOf(Main.TrialSpecificData.Anthropometrics.LowerArmLength)
+        +"&9v="+strval(Main.TrialSpecificData.Anthropometrics.LowerArmLength,"%5g")
+        +"&10n="+NameOf(Main.TrialSpecificData.Anthropometrics.HandLength)
+        +"&10v="+strval(Main.TrialSpecificData.Anthropometrics.HandLength,"%5g")
+        +"&11n="+NameOf(Main.TrialSpecificData.Anthropometrics.HandBreadth)
+        +"&11v="+strval(Main.TrialSpecificData.Anthropometrics.HandBreadth,"%5g");
+      };
+      
+      Operation =  &Main.InitialPosStudy.Kinematics;
+      
+    };
+  };  
+  HumanModel={
+    AnyFolder &Mannequin=.InitialPosStudy.Mannequin;
+    #include  "BodyPartsSetupKin.any"
+  };
+  
+  #include "HumanModel.any"
+  
+  
+  AnyBodyStudy InitialPosStudy = {
+    
+    
+    
+    AnyFolder &UpdateHTMLURL = Main.Project.Tasks.Initial_Position_and_Anthropometry_Model.Set_Initial_Position_and_Anthropometry.Description;
+    
+    
+    AnyFolder &HumanModel=.HumanModel.BodyModel;
+    
+    
+    AnyFolder &C3DData=.ModelSetup.C3DFileData ;
+    
+    
+    //This mannequin calculates a guess on the initial pelvis position based on ASIS and PSI markers
+    //if these markers do not exist in the markerset used this has to be changed
+    #include "Mannequin.any"  // this file controls the initial position of the model and he posture
+    Gravity = .ModelSetup.Gravity;
+    tStart = Main.TrialSpecificData.tStart+2*Kinematics.ApproxVelAccPerturb; 
+    tEnd = Main.TrialSpecificData.tEnd-2*Kinematics.ApproxVelAccPerturb;
+    
+    nStep=1;
+    
+    AnyFolder ModelEnvironmentConnection = {
+      AnyFolder &HumanModel=.HumanModel;
+      #include "JointsAndDrivers.any"
+      
+      
+    };
+    //Environment around the human
+    AnyFolder EnvironmentModel ={
+      
+      //    AnyFixedRefFrame GlobalRef ={       AnyDrawRefFrame drw={ScaleXYZ=0.4*{1,1,1};};    };  
+      //Model of the floor and force plates this is where the force plates are defined        
+      AnyFolder &HumanModelRef=..HumanModel.BodyModel;        
+      //This environment file makes use of automatic detection of which foot are incontact with which plate 
+      #include "<DataPath>/EnvironmentAutoDetection.any"
+      //This environment file has no automatic detecteion of which foot are incontact with which plate it has to be set manually
+      //#include "<DataPath>/Environment.any"
+    };
+    
+    
+  };   
+};
+#undef InverseDynamicModel
+#undef MotionAndParameterOptimizationModel
+#undef HumanModelPresent
+#undef SetIntialPosition 
+#undef IntialPositionStudy 
+#undef MarkersPresent 
+
+

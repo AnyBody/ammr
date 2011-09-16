@@ -1,0 +1,108 @@
+
+AnyFolder TrialSpecificData={
+  
+  //Name of the C3D file to be analysed
+  
+ 
+  AnyString NameOfFile ="GaitNormal0003-processed"; //Write the name of the file here
+
+  AnyFloatVar  tStart =tStartC3DFile; //  GaitNormal
+  AnyFloatVar  tEnd = tEndC3DFile-0.1;//  GaitNormal
+
+
+  
+
+  //original values from c3d file
+  AnyFloatVar  tStartC3DFile =Main.ModelSetup.C3DFileData.Header.FirstFrameNo/Main.ModelSetup.C3DFileData.Header.VideoFrameRate;
+  AnyFloatVar  tEndC3DFile = Main.ModelSetup.C3DFileData.Header.LastFrameNo/Main.ModelSetup.C3DFileData.Header.VideoFrameRate-0.1;
+  AnyFloatVar  tTotalC3DFile=tEndC3DFile -tStartC3DFile ;
+
+
+  AnyFloatVar  tTotal=tEnd-tStart;
+   
+  AnyVar TimeReductionFraction = tTotalC3DFile/tTotal;
+  AnyInt DownSampleRate =round(6*TimeReductionFraction); //this down sampling rate is used for the kinematic optimization only
+
+  
+  
+  //These antrhopometric data will be used as initial guess for the optimization alogorithm the optimization algoritm will allow changes to the 
+  //segment lengths
+  AnyFolder Anthropometrics={
+   
+    AnyVar BodyMassIni=62;
+    AnyVar BodyMass=DesignVar(BodyMassIni); //  GaitNormal //the mass is automatically distributed to the segments
+    AnyVar BodyHeight=1.73;//  GaitNormal  //height
+    
+    
+    AnyVar ThighLengthIni= 0.4234534;  //rigth and left side is mirrored 
+    AnyVar ShankLengthIni= 0.4120814;
+    AnyVar FootLengthIni=0.21;
+    AnyVar PelvisWidthIni=0.16; //distance between hip joints
+    
+    AnyVar HeadHeightIni =0.14;//height in neutral position from  C1HatNode to top of head
+    AnyVar TrunkHeightIni =0.620233);//height in neautral position from  C1HatNode to L5SacrumJnt
+    AnyVar UpperArmLengthIni = 0.340079;
+    AnyVar LowerArmLengthIni =0.2690167;
+    AnyVar HandLengthIni = 0.182;
+    AnyVar HandBreadth = 0.085;
+  
+  };
+  
+  
+
+  
+  //This is the initial position of the body it should only be touched it the kinematics does not work it first timestep
+  //then these variable can be used to create a better guess, otherwise leave them unchanged
+  AnyFolder InitialPositionOfBody ={
+    
+     AnyVar PelvisRotX=0.0;
+     AnyVar PelvisRotY=0.0;
+     AnyVar PelvisRotZ=0.0;
+      
+     AnyVar PelvisPosX=0.0;
+     AnyVar PelvisPosY=0.0;
+     AnyVar PelvisPosZ=0.0;
+     
+    AnyMat33 PelvisRotMatrix=DesignVar(RotMat(PelvisRotZ*pi/180,z)*RotMat(PelvisRotY*pi/180,y)*RotMat(PelvisRotX*pi/180,x));  //Z,Y,X  in degress
+    AnyVec3 PelvisPos=DesignVar({PelvisPosX,PelvisPosY,PelvisPosZ});//X,Y,Z 
+    
+  
+   
+    
+    AnyFolder Right={
+      AnyVar HipFlexion = 20.31705;
+      AnyVar HipAbduction = 5.707386;
+      AnyVar HipExternalRotation = -3.079478;
+      AnyVar KneeFlexion = 6.493074;
+      AnyVar AnklePlantarFlexion = 41.576023-30;
+      AnyVar SubTalarEversion = 0.229261;
+    };
+    
+    AnyFolder Left ={
+      AnyVar HipFlexion = -20.1819;
+      AnyVar HipAbduction = -3.050171;
+      AnyVar HipExternalRotation = 0*-16.907892;
+      AnyVar KneeFlexion = 7.764009;
+      AnyVar AnklePlantarFlexion = 48.790382-30;
+      AnyVar SubTalarEversion =0.20658;
+    };
+  };
+
+  
+  AnyFolder Macros = {
+    AnyFolder Anthropometrics = {
+    AnyStringVar SetBodyMass = ("classoperation Main.TrialSpecificData.Anthropometrics.BodyMass" + " " + strquote("Set Value")+ strformat ("\n")+  "classoperation Main" + strquote("Update Values") + strformat ("\n")+  "operation Main.InitialPosStudy.InitialConditions" +strformat("\n")+"run");
+    AnyStringVar SetBodyHeight = ("classoperation Main.TrialSpecificData.Anthropometrics.BodyHeight" + " " + strquote("Set Value") +strformat ("\n")+  "classoperation Main " + strquote("Update Values") + strformat ("\n")+  "operation Main.InitialPosStudy.InitialConditions" +strformat("\n")+"run");
+    AnyStringVar SetThighLength = ("classoperation Main.TrialSpecificData.Anthropometrics.ThighLength" + " " + strquote("Set Value")+ strformat ("\n")+  "classoperation Main " + strquote("Update Values") + strformat ("\n")+  "operation Main.InitialPosStudy.InitialConditions" +strformat("\n")+"run");
+    AnyStringVar SetShankLength = ("classoperation Main.TrialSpecificData.Anthropometrics.ShankLength" + " " + strquote("Set Value")+ strformat ("\n")+  "classoperation Main " + strquote("Update Values") + strformat ("\n")+  "operation Main.InitialPosStudy.InitialConditions" +strformat("\n")+"run");
+    AnyStringVar SetFootLength = ("classoperation Main.TrialSpecificData.Anthropometrics.FootLength" + " " + strquote("Set Value") +strformat ("\n")+  "classoperation Main" + strquote("Update Values") + strformat ("\n")+  "operation Main.InitialPosStudy.InitialConditions" +strformat("\n")+"run");
+    AnyStringVar SetPelvisWidth = ("classoperation Main.TrialSpecificData.Anthropometrics.PelvisWidth" + " " + strquote("Set Value") +strformat ("\n")+  "classoperation Main" + strquote("Update Values") + strformat ("\n")+  "operation Main.InitialPosStudy.InitialConditions" +strformat("\n")+"run");
+    AnyStringVar SetHeadHeight = ("classoperation Main.TrialSpecificData.Anthropometrics.HeadHeight" + " " + strquote("Set Value")+ strformat ("\n")+  "classoperation Main" + strquote("Update Values") + strformat ("\n")+  "operation Main.InitialPosStudy.InitialConditions" +strformat("\n")+"run");
+    AnyStringVar SetTrunkHeight = ("classoperation Main.TrialSpecificData.Anthropometrics.TrunkHeight" + " " + strquote("Set Value") +strformat ("\n")+  "classoperation Main" + strquote("Update Values") + strformat ("\n")+  "operation Main.InitialPosStudy.InitialConditions" +strformat("\n")+"run");
+    AnyStringVar SetUpperArmLength = ("classoperation Main.TrialSpecificData.Anthropometrics.UpperArmLength" + " " + strquote("Set Value")+ strformat ("\n")+  "classoperation Main" + strquote("Update Values") + strformat ("\n")+  "operation Main.InitialPosStudy.InitialConditions" +strformat("\n")+"run");
+    AnyStringVar SetLowerArmLength = ("classoperation Main.TrialSpecificData.Anthropometrics.LowerArmLength" + " " + strquote("Set Value")+ strformat ("\n")+  "classoperation Main" + strquote("Update Values") + strformat ("\n")+  "operation Main.InitialPosStudy.InitialConditions" +strformat("\n")+"run");
+    AnyStringVar SetHandLength = ("classoperation Main.TrialSpecificData.Anthropometrics.HandLength" + " " + strquote("Set Value") +strformat ("\n")+  "classoperation Main" + strquote("Update Values") + strformat ("\n")+  "operation Main.InitialPosStudy.InitialConditions" +strformat("\n")+"run");
+    AnyStringVar SetHandBreadth = ("classoperation Main.TrialSpecificData.Anthropometrics.HandBreadth" + " " + strquote("Set Value") +strformat ("\n")+  "classoperation Main" + strquote("Update Values") + strformat ("\n")+  "operation Main.InitialPosStudy.InitialConditions" +strformat("\n")+"run");
+  };
+  };
+};

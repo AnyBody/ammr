@@ -1,5 +1,5 @@
 //This force plate has dynamic detection of which foot is touching the plate
-#class_template ForcePlateType2AutoDetection (PlateName, Folder,AnySeg &Limb1,AnySeg &Limb2, No,VerticalDirection,HeightTolerance,VelThreshold, Fx, Fy, Fz, Mx,My,Mz){
+#class_template ForcePlateType2AutoDetection (PlateName, Folder,AnySeg &Limb1,AnySeg &Limb2, No,VerticalDirection,HeightTolerance,VelThreshold, Fx, Fy, Fz, Mx,My,Mz,FootPresent){
   
   
   AnyFixedRefFrame Corners ={
@@ -280,98 +280,30 @@
     };
   };
   
-AnyFolder ContactDetectionLimb1 ={
-    
-    
-    
+  
+  
+  
+  
+  #if VerticalDirection=="X"
+  AnyIntArray Index={1,2,0};
+  #endif
+  
+  #if VerticalDirection=="Y" 
+  AnyIntArray Index={0,2,1};
+  #endif
+  
+  #if VerticalDirection=="Z" 
+  AnyIntArray Index={0,1,2};
+  #endif
+  
+  AnyFolder ContactDetectionLimb1 ={
     AnyVec3 P1= .Limb1.HeelContactNodeLow.r;
     AnyVar P1Vel= vnorm(.Limb1.HeelContactNodeLow.rDot,2);
-    
     
     AnyVec3 P2= .Limb1.ToeLateralContactNode.r;
     AnyVar P2Vel= vnorm(.Limb1.HeelContactNodeLow.rDot,2);
     
-    
-    #if VerticalDirection=="X"
-    AnyIntArray Index={1,2,0};
-    #endif
-    
-    #if VerticalDirection=="Y" 
-    AnyIntArray Index={0,2,1};
-    #endif
-    
-    
-    #if VerticalDirection=="Z" 
-    AnyIntArray Index={0,1,2};
-    #endif
-    
-    AnyFolder NodeWithInBox={
-      
-      // A
-      // l
-      // l 
-      // 
-      //
-      // 1 ----------- 2    ---> X
-      //
-      //
-      //     p1 or p2
-      //
-      //
-      // 4 ----------- 3
-      
-      //2 decide if node is inside bc
-      //3 decide if node is within contact limits of plate
-      
-      AnyVec3 n1=..Corners.c01.r;
-      AnyVec3 n3=..Corners.c03.r;
- 
-      AnyVar  P1Cond1Pos = iffun(ltfun( .P1[.Index[0]],  n3[.Index[0]]),  1,  0);
-      AnyVar  P1Cond2Pos = iffun(gtfun( .P1[.Index[0]],  n1[.Index[0]]),  1,  0);
-      AnyVar  P1Cond3Pos = iffun(ltfun( .P1[.Index[1]],  n1[.Index[1]]),  1,  0);
-      AnyVar  P1Cond4Pos = iffun(gtfun( .P1[.Index[1]],  n3[.Index[1]]),  1,  0);
-      
-      AnyVar  P1Cond1Neg = iffun(gtfun( .P1[.Index[0]],  n3[.Index[0]]),  1,  0);
-      AnyVar  P1Cond2Neg = iffun(ltfun( .P1[.Index[0]],  n1[.Index[0]]),  1,  0);
-      AnyVar  P1Cond3Neg = iffun(gtfun( .P1[.Index[1]],  n1[.Index[1]]),  1,  0);
-      AnyVar  P1Cond4Neg = iffun(ltfun( .P1[.Index[1]],  n3[.Index[1]]),  1,  0);
-
-      AnyVar  P1Cond5 = iffun(ltfun( .P1[.Index[2]],  n1[.Index[2]]+HeightTolerance),  1, 0 );
-      AnyVar  P1Cond6 = iffun(gtfun( .P1[.Index[2]],  n1[.Index[2]]-HeightTolerance),  1, 0 );
-      
-      AnyVar  P1WithinBoxPos=  andfun(andfun(andfun(P1Cond1Pos,P1Cond2Pos),andfun(P1Cond3Pos, P1Cond4Pos)),andfun(P1Cond5,P1Cond6));
-      AnyVar  P1WithinBoxNeg=  andfun(andfun(andfun(P1Cond1Neg,P1Cond2Neg),andfun(P1Cond3Neg, P1Cond4Neg)),andfun(P1Cond5,P1Cond6));
-      AnyVar  P1WithinBox=  orfun(P1WithinBoxPos,P1WithinBoxNeg);
-      AnyVar  P1OutsideBox=  iffun(P1WithinBox,0,1);
-      
-      
-      AnyVar  P2Cond1Pos = iffun(ltfun( .P2[.Index[0]],  n3[.Index[0]]),  1,  0);
-      AnyVar  P2Cond2Pos = iffun(gtfun( .P2[.Index[0]],  n1[.Index[0]]),  1,  0);
-      AnyVar  P2Cond3Pos = iffun(ltfun( .P2[.Index[1]],  n1[.Index[1]]),  1,  0);
-      AnyVar  P2Cond4Pos = iffun(gtfun( .P2[.Index[1]],  n3[.Index[1]]),  1,  0);
-
-      AnyVar  P2Cond1Neg = iffun(gtfun( .P2[.Index[0]],  n3[.Index[0]]),  1,  0);
-      AnyVar  P2Cond2Neg = iffun(ltfun( .P2[.Index[0]],  n1[.Index[0]]),  1,  0);
-      AnyVar  P2Cond3Neg = iffun(gtfun( .P2[.Index[1]],  n1[.Index[1]]),  1,  0);
-      AnyVar  P2Cond4Neg = iffun(ltfun( .P2[.Index[1]],  n3[.Index[1]]),  1,  0);
-      
-      AnyVar  P2Cond5 = iffun(ltfun( .P2[.Index[2]],  n1[.Index[2]]+HeightTolerance),  1, 0 );
-      AnyVar  P2Cond6 = iffun(gtfun( .P2[.Index[2]],  n1[.Index[2]]-HeightTolerance),  1, 0 );
-
-      AnyVar  P2WithinBoxPos=  andfun(andfun(andfun(P2Cond1Pos,P2Cond2Pos),andfun(P2Cond3Pos, P2Cond4Pos)),andfun(P2Cond5,P2Cond6));
-      AnyVar  P2WithinBoxNeg=  andfun(andfun(andfun(P2Cond1Neg,P2Cond2Neg),andfun(P2Cond3Neg, P2Cond4Neg)),andfun(P2Cond5,P2Cond6));
-      AnyVar  P2WithinBox=  orfun(P2WithinBoxPos,P2WithinBoxNeg);
-      
-      AnyVar  P2OutsideBox=  iffun(P2WithinBox,0,1);
-      
-      
-      AnyVar WithinBox =orfun(P1WithinBox,P2WithinBox);
-      AnyVar OutsideBox=  iffun(WithinBox,0,1);
-      
-      AnyVar WithinBoxAndVelBelowThreshold =WithinBox*iffun(ltfun(.P1Vel,VelThreshold),1,0);
-      AnyVar OutsideBoxOrVelHigherThanThreshold=  iffun(WithinBoxAndVelBelowThreshold ,0,1);
-      
-    };  
+    #include "ContactDetection.any"
     
     AnyMuscleModelUsr1 InContactMuscle = {
       F0 = 0;
@@ -384,175 +316,32 @@ AnyFolder ContactDetectionLimb1 ={
       F0 = 0;
     };
     
+    #if FootPresent
     
-    AnyFolder PlateFootReactions={
-      
-      AnyKinLinear Lin={
-        Ref=0;
-        AnySeg &ref2=...ForcePlate;
-        AnySeg &ref1=...Limb1;
-      };
-      
-      AnyKinRotational Rot={
-        AnySeg &ref2=...ForcePlate;
-        AnySeg &ref1=...Limb1;
-        Type=RotAxesAngles;
-      };
-      
-      
-      AnyKinMeasureOrg lx={    AnyKinLinear &ref=.Lin;MeasureOrganizer ={0};   };
-      AnyKinMeasureOrg ly={    AnyKinLinear &ref=.Lin;MeasureOrganizer ={1};   };
-      AnyKinMeasureOrg lz={    AnyKinLinear &ref=.Lin;MeasureOrganizer ={2};   };
-      AnyKinMeasureOrg rx={    AnyKinRotational &ref=.Rot;MeasureOrganizer ={0};   };
-      AnyKinMeasureOrg ry={    AnyKinRotational &ref=.Rot;MeasureOrganizer ={1};   };
-      AnyKinMeasureOrg rz={    AnyKinRotational &ref=.Rot;MeasureOrganizer ={2};   };
-      
-      AnyGeneralMuscle FxPos = {ForceDirection = 1; AnyKinMeasure &ref1=.lx; AnyMuscleModel &ref2=..InContactMuscle;    };
-      AnyGeneralMuscle FyPos = {ForceDirection = 1; AnyKinMeasure &ref1=.ly; AnyMuscleModel &ref2=..InContactMuscle;    };
-      AnyGeneralMuscle FzPos = {ForceDirection = 1; AnyKinMeasure &ref1=.lz; AnyMuscleModel &ref2=..InContactMuscle;    };
-      AnyGeneralMuscle FxNeg = {ForceDirection = -1; AnyKinMeasure &ref1=.lx; AnyMuscleModel &ref2=..InContactMuscle;    };
-      AnyGeneralMuscle FyNeg = {ForceDirection = -1; AnyKinMeasure &ref1=.ly; AnyMuscleModel &ref2=..InContactMuscle;    };
-      AnyGeneralMuscle FzNeg = {ForceDirection = -1; AnyKinMeasure &ref1=.lz; AnyMuscleModel &ref2=..InContactMuscle;    };
-      
-      AnyGeneralMuscle MxPos = {ForceDirection = 1; AnyKinMeasure &ref1=.rx; AnyMuscleModel &ref2=..InContactMuscle;    };
-      AnyGeneralMuscle MyPos = {ForceDirection = 1; AnyKinMeasure &ref1=.ry; AnyMuscleModel &ref2=..InContactMuscle;    };
-      AnyGeneralMuscle MzPos = {ForceDirection = 1; AnyKinMeasure &ref1=.rz; AnyMuscleModel &ref2=..InContactMuscle;    };
-      AnyGeneralMuscle MxNeg = {ForceDirection = -1; AnyKinMeasure &ref1=.rx; AnyMuscleModel &ref2=..InContactMuscle;    };
-      AnyGeneralMuscle MyNeg = {ForceDirection = -1; AnyKinMeasure &ref1=.ry; AnyMuscleModel &ref2=..InContactMuscle;    };
-      AnyGeneralMuscle MzNeg = {ForceDirection = -1; AnyKinMeasure &ref1=.rz; AnyMuscleModel &ref2=..InContactMuscle;    };
+    AnyFolder PlateFootReactions = {
+      AnySeg &ref1=..ForcePlate;
+      AnySeg &ref2=..Limb1;
+      AnyMuscleModel &MusMdl=.InContactMuscle;
+      #include "ArtificialMuscleConnection.any"
     };
+    #endif
     
     AnyFolder PlateGroundReactions={
-      
-      AnyKinLinear Lin={
-        Ref=0;
-        AnySeg &ref2=...ForcePlate;
-      };
-      
-      AnyKinRotational Rot={
-        AnySeg &ref2=...ForcePlate;
-        Type=RotAxesAngles;
-      };    
-      
-      AnyKinMeasureOrg lx={ AnyKinLinear &ref=.Lin;MeasureOrganizer ={0};};
-      AnyKinMeasureOrg ly={ AnyKinLinear &ref=.Lin;MeasureOrganizer ={1};};
-      AnyKinMeasureOrg lz={ AnyKinLinear &ref=.Lin;MeasureOrganizer ={2};};
-      AnyKinMeasureOrg rx={ AnyKinRotational &ref=.Rot;MeasureOrganizer ={0};};
-      AnyKinMeasureOrg ry={ AnyKinRotational &ref=.Rot;MeasureOrganizer ={1};};
-      AnyKinMeasureOrg rz={ AnyKinRotational &ref=.Rot;MeasureOrganizer ={2};};
-      
-      AnyGeneralMuscle FxPos = {ForceDirection = 1; AnyKinMeasure &ref1=.lx; AnyMuscleModel &ref2=..NoContactMuscle;    };
-      AnyGeneralMuscle FyPos = {ForceDirection = 1; AnyKinMeasure &ref1=.ly; AnyMuscleModel &ref2=..NoContactMuscle;    };
-      AnyGeneralMuscle FzPos = {ForceDirection = 1; AnyKinMeasure &ref1=.lz; AnyMuscleModel &ref2=..NoContactMuscle;    };
-      AnyGeneralMuscle FxNeg = {ForceDirection = -1; AnyKinMeasure &ref1=.lx; AnyMuscleModel &ref2=..NoContactMuscle;    };
-      AnyGeneralMuscle FyNeg = {ForceDirection = -1; AnyKinMeasure &ref1=.ly; AnyMuscleModel &ref2=..NoContactMuscle;    };
-      AnyGeneralMuscle FzNeg = {ForceDirection = -1; AnyKinMeasure &ref1=.lz; AnyMuscleModel &ref2=..NoContactMuscle;    };
-      
-      AnyGeneralMuscle MxPos = {ForceDirection = 1; AnyKinMeasure &ref1=.rx; AnyMuscleModel &ref2=..NoContactMuscle;    };
-      AnyGeneralMuscle MyPos = {ForceDirection = 1; AnyKinMeasure &ref1=.ry; AnyMuscleModel &ref2=..NoContactMuscle;    };
-      AnyGeneralMuscle MzPos = {ForceDirection = 1; AnyKinMeasure &ref1=.rz; AnyMuscleModel &ref2=..NoContactMuscle;    };
-      AnyGeneralMuscle MxNeg = {ForceDirection = -1; AnyKinMeasure &ref1=.rx; AnyMuscleModel &ref2=..NoContactMuscle;    };
-      AnyGeneralMuscle MyNeg = {ForceDirection = -1; AnyKinMeasure &ref1=.ry; AnyMuscleModel &ref2=..NoContactMuscle;    };
-      AnyGeneralMuscle MzNeg = {ForceDirection = -1; AnyKinMeasure &ref1=.rz; AnyMuscleModel &ref2=..NoContactMuscle;    };
+      AnyRefFrame &ref1=..Corners.PlateCenter;
+      AnySeg &ref2=..ForcePlate;
+      AnyMuscleModel &MusMdl=.NoContactMuscle;
+      #include "ArtificialMuscleConnection.any"
     };
   };
-  
-  
-  
-  AnyFolder ContactDetectionLimb2 ={
-    
-    
-    
-    
-    
+ 
+  AnyFolder ContactDetectionLimb2 = {
     AnyVec3 P1= .Limb2.HeelContactNodeLow.r;
     AnyVar P1Vel= vnorm(.Limb2.HeelContactNodeLow.rDot,2);
-    AnyRefNode &HeelNode= .Limb2.HeelContactNodeLow;
     
     AnyVec3 P2= .Limb2.ToeLateralContactNode.r;
     AnyVar P2Vel= vnorm(.Limb2.HeelContactNodeLow.rDot,2);
-    AnyRefNode &ToeNode= .Limb2.ToeLateralContactNode;
     
-    
-    
-    #if VerticalDirection=="X" 
-    AnyIntArray Index={1,2,0};
-    #endif
-    
-    #if VerticalDirection=="Y" 
-    AnyIntArray Index={0,2,1};
-    #endif
-    
-    
-    #if VerticalDirection=="Z" 
-    AnyIntArray Index={0,1,2};
-    #endif
-    
-    AnyFolder NodeWithInBox={
-      
-      // A
-      // l
-      // l 
-      // 
-      //
-      // 1 ----------- 2    ---> X
-      //
-      //
-      //     p1 or p2
-      //
-      //
-      // 4 ----------- 3
-      
-      //2 decide if node is inside bc
-      //3 decide if node is within contact limits of plate
-      
-      AnyVec3 n1=..Corners.c01.r;
-      AnyVec3 n3=..Corners.c03.r;
-      AnyVar  P1Cond1Pos = iffun(ltfun( .P1[.Index[0]],  n3[.Index[0]]),  1,  0);
-      AnyVar  P1Cond2Pos = iffun(gtfun( .P1[.Index[0]],  n1[.Index[0]]),  1,  0);
-      AnyVar  P1Cond3Pos = iffun(ltfun( .P1[.Index[1]],  n1[.Index[1]]),  1,  0);
-      AnyVar  P1Cond4Pos = iffun(gtfun( .P1[.Index[1]],  n3[.Index[1]]),  1,  0);
-      
-      AnyVar  P1Cond1Neg = iffun(gtfun( .P1[.Index[0]],  n3[.Index[0]]),  1,  0);
-      AnyVar  P1Cond2Neg = iffun(ltfun( .P1[.Index[0]],  n1[.Index[0]]),  1,  0);
-      AnyVar  P1Cond3Neg = iffun(gtfun( .P1[.Index[1]],  n1[.Index[1]]),  1,  0);
-      AnyVar  P1Cond4Neg = iffun(ltfun( .P1[.Index[1]],  n3[.Index[1]]),  1,  0);
-
-      AnyVar  P1Cond5 = iffun(ltfun( .P1[.Index[2]],  n1[.Index[2]]+HeightTolerance),  1, 0 );
-      AnyVar  P1Cond6 = iffun(gtfun( .P1[.Index[2]],  n1[.Index[2]]-HeightTolerance),  1, 0 );
-      
-      AnyVar  P1WithinBoxPos=  andfun(andfun(andfun(P1Cond1Pos,P1Cond2Pos),andfun(P1Cond3Pos, P1Cond4Pos)),andfun(P1Cond5,P1Cond6));
-      AnyVar  P1WithinBoxNeg=  andfun(andfun(andfun(P1Cond1Neg,P1Cond2Neg),andfun(P1Cond3Neg, P1Cond4Neg)),andfun(P1Cond5,P1Cond6));
-      AnyVar  P1WithinBox=  orfun(P1WithinBoxPos,P1WithinBoxNeg);
-      AnyVar  P1OutsideBox=  iffun(P1WithinBox,0,1);
-      
-      
-      AnyVar  P2Cond1Pos = iffun(ltfun( .P2[.Index[0]],  n3[.Index[0]]),  1,  0);
-      AnyVar  P2Cond2Pos = iffun(gtfun( .P2[.Index[0]],  n1[.Index[0]]),  1,  0);
-      AnyVar  P2Cond3Pos = iffun(ltfun( .P2[.Index[1]],  n1[.Index[1]]),  1,  0);
-      AnyVar  P2Cond4Pos = iffun(gtfun( .P2[.Index[1]],  n3[.Index[1]]),  1,  0);
-
-      AnyVar  P2Cond1Neg = iffun(gtfun( .P2[.Index[0]],  n3[.Index[0]]),  1,  0);
-      AnyVar  P2Cond2Neg = iffun(ltfun( .P2[.Index[0]],  n1[.Index[0]]),  1,  0);
-      AnyVar  P2Cond3Neg = iffun(gtfun( .P2[.Index[1]],  n1[.Index[1]]),  1,  0);
-      AnyVar  P2Cond4Neg = iffun(ltfun( .P2[.Index[1]],  n3[.Index[1]]),  1,  0);
-      
-      AnyVar  P2Cond5 = iffun(ltfun( .P2[.Index[2]],  n1[.Index[2]]+HeightTolerance),  1, 0 );
-      AnyVar  P2Cond6 = iffun(gtfun( .P2[.Index[2]],  n1[.Index[2]]-HeightTolerance),  1, 0 );
-
-      AnyVar  P2WithinBoxPos=  andfun(andfun(andfun(P2Cond1Pos,P2Cond2Pos),andfun(P2Cond3Pos, P2Cond4Pos)),andfun(P2Cond5,P2Cond6));
-      AnyVar  P2WithinBoxNeg=  andfun(andfun(andfun(P2Cond1Neg,P2Cond2Neg),andfun(P2Cond3Neg, P2Cond4Neg)),andfun(P2Cond5,P2Cond6));
-      AnyVar  P2WithinBox=  orfun(P2WithinBoxPos,P2WithinBoxNeg);
-      
-      AnyVar  P2OutsideBox=  iffun(P2WithinBox,0,1);
-      
-      
-      AnyVar WithinBox =orfun(P1WithinBox,P2WithinBox);
-      AnyVar OutsideBox=  iffun(WithinBox,0,1);
-      
-      AnyVar WithinBoxAndVelBelowThreshold =WithinBox*iffun(ltfun(.P1Vel,VelThreshold),1,0);
-      AnyVar OutsideBoxOrVelHigherThanThreshold=  iffun(WithinBoxAndVelBelowThreshold ,0,1);
-    };  
+    #include "ContactDetection.any"
     
     AnyMuscleModelUsr1 InContactMuscle = {
       F0 = 0;
@@ -565,82 +354,31 @@ AnyFolder ContactDetectionLimb1 ={
       F0 = 0;
     };
     
+    #if FootPresent
     
     AnyFolder PlateFootReactions={
-      
-      AnyKinLinear Lin={
-        Ref=0;
-        AnySeg &ref2=...ForcePlate;
-        AnySeg &ref1=...Limb2;
-      };
-      
-      AnyKinRotational Rot={
-        AnySeg &ref2=...ForcePlate;
-        AnySeg &ref1=...Limb2;
-        Type=PlanarAngles;
-      };
-      
-      
-      AnyKinMeasureOrg lx={    AnyKinLinear &ref=.Lin;MeasureOrganizer ={0};   };
-      AnyKinMeasureOrg ly={    AnyKinLinear &ref=.Lin;MeasureOrganizer ={1};   };
-      AnyKinMeasureOrg lz={    AnyKinLinear &ref=.Lin;MeasureOrganizer ={2};   };
-      AnyKinMeasureOrg rx={    AnyKinRotational &ref=.Rot;MeasureOrganizer ={0};   };
-      AnyKinMeasureOrg ry={    AnyKinRotational &ref=.Rot;MeasureOrganizer ={1};   };
-      AnyKinMeasureOrg rz={    AnyKinRotational &ref=.Rot;MeasureOrganizer ={2};   };
-      
-      AnyGeneralMuscle FxPos = {ForceDirection = 1; AnyKinMeasure &ref1=.lx; AnyMuscleModel &ref2=..InContactMuscle;    };
-      AnyGeneralMuscle FyPos = {ForceDirection = 1; AnyKinMeasure &ref1=.ly; AnyMuscleModel &ref2=..InContactMuscle;    };
-      AnyGeneralMuscle FzPos = {ForceDirection = 1; AnyKinMeasure &ref1=.lz; AnyMuscleModel &ref2=..InContactMuscle;    };
-      AnyGeneralMuscle FxNeg = {ForceDirection = -1; AnyKinMeasure &ref1=.lx; AnyMuscleModel &ref2=..InContactMuscle;    };
-      AnyGeneralMuscle FyNeg = {ForceDirection = -1; AnyKinMeasure &ref1=.ly; AnyMuscleModel &ref2=..InContactMuscle;    };
-      AnyGeneralMuscle FzNeg = {ForceDirection = -1; AnyKinMeasure &ref1=.lz; AnyMuscleModel &ref2=..InContactMuscle;    };
-      
-      AnyGeneralMuscle MxPos = {ForceDirection = 1; AnyKinMeasure &ref1=.rx; AnyMuscleModel &ref2=..InContactMuscle;    };
-      AnyGeneralMuscle MyPos = {ForceDirection = 1; AnyKinMeasure &ref1=.ry; AnyMuscleModel &ref2=..InContactMuscle;    };
-      AnyGeneralMuscle MzPos = {ForceDirection = 1; AnyKinMeasure &ref1=.rz; AnyMuscleModel &ref2=..InContactMuscle;    };
-      AnyGeneralMuscle MxNeg = {ForceDirection = -1; AnyKinMeasure &ref1=.rx; AnyMuscleModel &ref2=..InContactMuscle;    };
-      AnyGeneralMuscle MyNeg = {ForceDirection = -1; AnyKinMeasure &ref1=.ry; AnyMuscleModel &ref2=..InContactMuscle;    };
-      AnyGeneralMuscle MzNeg = {ForceDirection = -1; AnyKinMeasure &ref1=.rz; AnyMuscleModel &ref2=..InContactMuscle;    };
-      
-      
-      
+      AnySeg &ref1=..ForcePlate;
+      AnySeg &ref2=..Limb2;
+      AnyMuscleModel &MusMdl=.InContactMuscle;
+      #include "ArtificialMuscleConnection.any"
     };
     
+    #endif
+    
     AnyFolder PlateGroundReactions={
-      
-      AnyKinLinear Lin={
-        Ref=0;
-        AnySeg &ref2=...ForcePlate;
-      };
-      
-      AnyKinRotational Rot={
-        AnySeg &ref2=...ForcePlate;
-        Type=RotAxesAngles;
-      };    
-      
-      AnyKinMeasureOrg lx={ AnyKinLinear &ref=.Lin;MeasureOrganizer ={0};};
-      AnyKinMeasureOrg ly={ AnyKinLinear &ref=.Lin;MeasureOrganizer ={1};};
-      AnyKinMeasureOrg lz={ AnyKinLinear &ref=.Lin;MeasureOrganizer ={2};};
-      AnyKinMeasureOrg rx={ AnyKinRotational &ref=.Rot;MeasureOrganizer ={0};};
-      AnyKinMeasureOrg ry={ AnyKinRotational &ref=.Rot;MeasureOrganizer ={1};};
-      AnyKinMeasureOrg rz={ AnyKinRotational &ref=.Rot;MeasureOrganizer ={2};};
-      
-      AnyGeneralMuscle FxPos = {ForceDirection = 1; AnyKinMeasure &ref1=.lx; AnyMuscleModel &ref2=..NoContactMuscle;    };
-      AnyGeneralMuscle FyPos = {ForceDirection = 1; AnyKinMeasure &ref1=.ly; AnyMuscleModel &ref2=..NoContactMuscle;    };
-      AnyGeneralMuscle FzPos = {ForceDirection = 1; AnyKinMeasure &ref1=.lz; AnyMuscleModel &ref2=..NoContactMuscle;    };
-      AnyGeneralMuscle FxNeg = {ForceDirection = -1; AnyKinMeasure &ref1=.lx; AnyMuscleModel &ref2=..NoContactMuscle;    };
-      AnyGeneralMuscle FyNeg = {ForceDirection = -1; AnyKinMeasure &ref1=.ly; AnyMuscleModel &ref2=..NoContactMuscle;    };
-      AnyGeneralMuscle FzNeg = {ForceDirection = -1; AnyKinMeasure &ref1=.lz; AnyMuscleModel &ref2=..NoContactMuscle;    };
-      
-      AnyGeneralMuscle MxPos = {ForceDirection = 1; AnyKinMeasure &ref1=.rx; AnyMuscleModel &ref2=..NoContactMuscle;    };
-      AnyGeneralMuscle MyPos = {ForceDirection = 1; AnyKinMeasure &ref1=.ry; AnyMuscleModel &ref2=..NoContactMuscle;    };
-      AnyGeneralMuscle MzPos = {ForceDirection = 1; AnyKinMeasure &ref1=.rz; AnyMuscleModel &ref2=..NoContactMuscle;    };
-      AnyGeneralMuscle MxNeg = {ForceDirection = -1; AnyKinMeasure &ref1=.rx; AnyMuscleModel &ref2=..NoContactMuscle;    };
-      AnyGeneralMuscle MyNeg = {ForceDirection = -1; AnyKinMeasure &ref1=.ry; AnyMuscleModel &ref2=..NoContactMuscle;    };
-      AnyGeneralMuscle MzNeg = {ForceDirection = -1; AnyKinMeasure &ref1=.rz; AnyMuscleModel &ref2=..NoContactMuscle;    };
-      
+      AnyRefFrame &ref1=..Corners.PlateCenter;
+      AnySeg &ref2=..ForcePlate;
+      AnyMuscleModel &MusMdl=.NoContactMuscle;
+      #include "ArtificialMuscleConnection.any"
     };
   };
+
+  
+  
+  
+  
+  
+  
 };
 
 
