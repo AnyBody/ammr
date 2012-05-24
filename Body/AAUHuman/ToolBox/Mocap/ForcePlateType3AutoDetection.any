@@ -1,7 +1,6 @@
 #class_template ForcePlateType3AutoDetection (PlateName, Folder,AnySeg &Limb1,AnySeg &Limb2,No,VerticalDirection,HeightTolerance,VelThreshold,Fx_12,Fx_34,Fy_14,Fy_23,Fz_1,Fz_2,Fz_3,Fz_4, FootPresent){
 
-  
-
+  #var AnySwitch Switch_DrawForceVectorFromCOP = On;
   
   AnyFixedRefFrame Corners ={
     AnyVar CoordinateSystemSize= 0.1;
@@ -400,11 +399,67 @@
    };
  };
 
- 
- 
- 
- 
-   #if VerticalDirection=="X"
+  AnyFolder CenterOfPressure =
+  {
+     AnyForceMomentMeasure2 NetEffectMeasure = 
+     {
+         AnyRefFrame& ref = ..ForcePlate;
+         AnyForceBase& Fx12 = ..Fx12;
+         AnyForceBase& Fx34 = ..Fx34;
+         AnyForceBase& Fy14 = ..Fy14;
+         AnyForceBase& Fy23 = ..Fy23;
+         AnyForceBase& Fz1 = ..Fz1;
+         AnyForceBase& Fz2 = ..Fz2; 
+         AnyForceBase& Fz3 = ..Fz3;
+         AnyForceBase& Fz4 = ..Fz4;
+         
+         AnyVec3 Flocal = F*ref.Axes;
+         AnyVec3 Mlocal = M*ref.Axes;
+     };
+     
+     AnyVar fx = NetEffectMeasure.Flocal[0]; 
+     AnyVar fy = NetEffectMeasure.Flocal[1]; 
+     AnyVar fz = NetEffectMeasure.Flocal[2];
+     AnyVar mx = NetEffectMeasure.Mlocal[0]; 
+     AnyVar my = NetEffectMeasure.Mlocal[1]; 
+     AnyVar mz = NetEffectMeasure.Mlocal[2]; 
+
+     AnyVar fzz =iffun(gtfun(  (fz^2)^0.5,0),fz,fz+1000000);
+     
+     AnyVar Vx= my/fzz;
+     AnyVar Vy= -mx/fzz;
+     AnyVar Vz= 0;     
+      
+     AnyVar OnOff=iffun(gtfun(fz,-10.0),0.0,1.0);
+     
+     AnyRefFrame& ref_ForcePlate = .ForcePlate;
+     ref_ForcePlate  = 
+     {
+        AnyDrawSphere COP_ball = 
+        {
+            RGB = {0,1,0};
+            ScaleXYZ = 0.015 *{1,1,1};
+            Opacity = iffun(gtfun(..fz, -10.0), 0.0, 1.0);
+            Position = -{..Vx, ..Vy, ..Vz};
+        };       
+     };
+     
+     AnyDrawLine Line = 
+     {
+       p0 = -{.Vx, .Vy, .Vz};
+       p1 = p0+0.004*.OnOff*{.fx, .fy, .fz};
+       Visible = ..Switch_DrawForceVectorFromCOP ;
+       AnyRefFrame &ref = ..ForcePlate;
+       
+       Line.RGB ={0,0,1};
+       Line.Thickness = 0.01;
+       Line.End.Thickness = 2*0.01;
+       Line.End.Length = 4*0.01;
+       GlobalCoord=Off;
+     };         
+  };
+
+  #if VerticalDirection=="X"
   AnyIntArray Index={1,2,0};
   #endif
   

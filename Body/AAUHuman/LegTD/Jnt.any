@@ -105,9 +105,12 @@ AnyFolder KinematicMeasures = {
   AnyKinEqSimpleDriver PatellaMovement = {
     AnyKinPLine &Jnt = .KinematicMeasures.Patella;
     
-    AnyFloat gscale = vnorm(..GeoScaling.Shank.ScaleFunction.ScaleMat);
-    
-    DriverPos = gscale[1]*{0.0605};
+    // Scale patella tendon length based on the over all leg length
+    AnyVar lengthScale = vnorm(..Seg.Thigh.HipJoint.sRel- ..Seg.Shank.AnkleJoint.sRel)
+                / vnorm(..Seg.Thigh.StdPar.HipJoint - ..Seg.Shank.StdPar.AnkleJoint);
+    AnyVar TendonLength =  lengthScale *0.0605; 
+
+    DriverPos = {TendonLength};
     DriverVel = {0.0};
     Reaction.Type = {On};  // The muscles must do the work
   };
@@ -125,7 +128,7 @@ AnyFolder KinematicMeasures = {
   // Defined with the femoral node first so reactions are reported in femur based reference frame.
   AnySphericalJoint Hip = {
     AnyRefNode &ThighNode = ..Seg.Thigh.HipJoint;
-    AnyRefNode &PelvisNode = ..HipNodeRef;
+    AnyRefNode &PelvisNode = ..HipNodeRef.HipJoint;
     
   }; // End of Hip
   

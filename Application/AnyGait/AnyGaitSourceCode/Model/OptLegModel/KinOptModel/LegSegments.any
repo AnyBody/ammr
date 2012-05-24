@@ -1,0 +1,258 @@
+AnyFolder Seg = {
+  
+  #if IncludeKnee + IncludeHip > 0
+  
+  AnySeg Thigh = {
+   // AnyDrawRefFrame drw ={RGB={1,0,0};};
+   #include "MorphNodesThigh.any"  
+    
+    Mass = 50.5; 
+    Jii = {0.01, 0.005, 0.01};
+    
+    #ifdef RightLeg
+    r0 = ....StickFigure .Posture.Right.Thigh.InitialPos.r0;
+    Axes0 = ....StickFigure .Posture.Right.Thigh.InitialPos.Axes0;
+    #endif
+    
+    #ifdef LeftLeg
+    r0 = ....StickFigure .Posture.Left.Thigh.InitialPos.r0;
+    Axes0 = ....StickFigure .Posture.Left.Thigh.InitialPos.Axes0;
+    #endif
+    
+    AnyRefNode HipJoint = {  
+      #ifdef RightLeg
+      //#if UseAnatomicalValuesRightHip == 1 
+      sRel = .....StickFigure .Posture.Right.Thigh.HipJoint.sRel_static;//{0.0,0.0,0.0};
+      //#endif
+      #else
+//      #if UseAnatomicalValuesLeftHip == 1
+      sRel = .....StickFigure .Posture.Left.Thigh.HipJoint.sRel_static;
+//      #endif
+      #endif
+    };  
+    
+    
+    AnyRefNode KneeJoint = {    
+      //AnyDrawRefFrame drw ={};
+      AnyMat33 InitialRotation= RotMat(sRel, sRel+{0,0,1}, .HipJoint.sRel)
+      * RotMat(90*pi/180,y);
+      
+      #ifdef RightLeg 
+      sRel = .....StickFigure .Posture.Right.Thigh.KneeJoint.sRel_static;
+      ARel = InitialRotation;
+      #endif
+      #ifdef LeftLeg
+      sRel = .....StickFigure .Posture.Left.Thigh.KneeJoint.sRel_static;
+      ARel = InitialRotation;
+      #endif
+      
+    };//KneeJoint
+    
+    // Node used in measuring the angle between the thigh and pelvis
+    AnyRefNode DriveNode = { // Todo: Rename 
+      AnyVec3 KneeAxisVec = (.MorphNodes.ARel*(.MorphNodes.LateralKneeControlPoint.sRel' - .MorphNodes.MedialKneeControlPoint.sRel')  )';
+      sRel = .HipJoint.sRel;
+      ARel = RotMat(.HipJoint.sRel,
+      .KneeJoint.sRel,
+      .HipJoint.sRel +KneeAxisVec );
+    };
+
+    
+    
+    
+    
+    #if HideStickModelGraphics == 0 
+    #include "DrawNodes.any"
+    AnyDrawLine DrwLine = 
+    {
+      p0 = .HipJoint.sRel;
+      p1 = .KneeJoint.sRel;
+      GlobalCoord = Off;
+      Line.Thickness = 0.01;
+      Line.RGB = {1,0,0};
+    };
+//    AnyDrawRefFrame drwref = 
+//    {
+//      RGB = {0.91796875, 0,0};
+//      ScaleXYZ = {0.1, 0.1, 0.1};
+//    };
+    #endif
+    
+    
+  }; // End of ThighSeg
+  #endif
+  
+  
+  
+  #if IncludeKnee + IncludeAnkle > 0 
+  
+  AnySeg Shank = {
+   // AnyDrawRefFrame drw ={RGB={1,0,0};};
+ 
+   #include "MorphNodesShank.any"
+    
+    
+    
+    // Initial Segment position
+    #ifdef RightLeg 
+    r0 = ....StickFigure .Posture.Right.Shank.InitialPos.r0;
+    Axes0 = ....StickFigure .Posture.Right.Shank.InitialPos.Axes0;
+    #endif
+    #ifdef LeftLeg
+    r0 = ....StickFigure .Posture.Left.Shank.InitialPos.r0;
+    Axes0 = ....StickFigure .Posture.Left.Shank.InitialPos.Axes0;
+    #endif
+    
+    
+    Mass = 7.5; 
+    Jii = {0.005, 0.0025, 0.005};
+    
+    AnyRefNode KneeJoint = {
+     // AnyDrawRefFrame drw ={};
+      //AnyMat33 InitialRotation = RotMat(sRel, sRel+{0,0,1},.AnkleJoint.sRel) * RotMat(...Sign*90*pi/180,y)*RotMat(pi,z);
+      
+      #ifdef RightLeg 
+      sRel = .....StickFigure .Posture.Right.Shank.RKneeJoint.sRel_static; 
+      ARel = .....StickFigure .Posture.Right.Shank.RKneeJoint.ARel_static;             
+      #endif
+      
+      #ifdef LeftLeg
+      sRel = .....StickFigure .Posture.Left.Shank.KneeJoint.sRel_static; 
+      ARel = .....StickFigure .Posture.Left.Shank.KneeJoint.ARel_static;
+      #endif
+    };
+    
+    
+    AnyRefNode AnkleJoint = {
+      //AnyDrawRefFrame drw ={};
+      AnyMat33 InitialRotation = RotMat(sRel, sRel+{0,0,1}, .KneeJoint.sRel)
+      * RotMat(...Sign*90*pi/180,y);
+      
+      #ifdef RightLeg 
+      sRel = .....StickFigure .Posture.Right.Shank.AnkleJoint.sRel_static;
+      #endif
+      #ifdef LeftLeg
+      sRel = .....StickFigure .Posture.Left.Shank.AnkleJoint.sRel_static;
+      #endif
+    };
+    
+    #include "DrawNodes.any"
+    
+    #if HideStickModelGraphics == 0
+    AnyDrawLine DrwLine = 
+    {
+      //Visible = On;
+      //Opacity = 1;
+      p0 = .KneeJoint.sRel;
+      p1 = .AnkleJoint.sRel;
+      //Offset = {0, 0, 0};
+      GlobalCoord = Off;
+      //DirAxis = ;
+      Line.Thickness = 0.01;
+      Line.RGB = {1,0,1};
+    };
+    //   AnyDrawRefFrame drwref = 
+    // {
+    //   RGB = {1, 0,1};
+    //   ScaleXYZ = {0.1, 0.1, 0.1};
+    // };
+    #endif
+    
+  }; // End of Shank Seg
+  #endif
+  
+  
+  #if IncludeAnkle == 1
+  
+  AnySeg Foot = {
+//    AnyDrawRefFrame drw ={RGB={1,0,0};};
+
+    #include "MorphNodesFoot2.any"
+    
+    // Initial Segment position
+    #ifdef RightLeg
+    r0 = ....StickFigure .Posture.Right.Foot.InitialPos.r0; 
+    Axes0 = ....StickFigure .Posture.Right.Foot.InitialPos.Axes0; 
+    #endif
+    
+    #ifdef LeftLeg
+    r0 = ....StickFigure .Posture.Left.Foot.InitialPos.r0; 
+    Axes0 = ....StickFigure .Posture.Left.Foot.InitialPos.Axes0; 
+    #endif
+    
+    
+    Mass = 0.8; 
+    sCoM = {0.16,0, 0};
+    Jii = {0.0002, 0.003, 0.00295};
+    JaboutCoMOnOff = On;
+    //Jij = {0.01,0.1, 0.01};
+    
+    
+    AnyRefNode AnkleJoint = {
+      //AnyDrawRefFrame drw ={};
+      #ifdef RightLeg 
+      sRel = .....StickFigure .Posture.Right.Foot.AnkleJoint.sRel_static;
+      ARel = .....StickFigure .Posture.Right.Foot.AnkleJoint.ARel_static;
+      #endif
+      
+      #ifdef LeftLeg
+      sRel = .....StickFigure .Posture.Left.Foot.AnkleJoint.sRel_static;
+      ARel = .....StickFigure .Posture.Left.Foot.AnkleJoint.ARel_static;
+      #endif  
+    };
+    
+    #if HideStickModelGraphics == 0
+    //  Draw foot stick lines
+    AnyDrawLine DrwLine0 = 
+    {
+      #ifdef RightLeg    
+      p0 = .RHEE.sRel;
+      p1 = .RTOE.sRel;
+      #else
+      p0 = .LHEE.sRel;
+      p1 = .LTOE.sRel;
+      #endif
+      
+      GlobalCoord = Off;
+      Line.Thickness = 0.01;
+      Line.RGB = {1,0,0};
+    };
+    AnyDrawLine DrwLine1 = 
+    {
+      #ifdef RightLeg    
+      p0 = .RHEE.sRel;
+      #else
+      p0 = .LHEE.sRel;
+      #endif
+      
+      p1 = .AnkleJoint.sRel;
+      
+      GlobalCoord = Off;
+      Line.Thickness = 0.01;
+      Line.RGB = {1,0,0};
+    };
+    AnyDrawLine DrwLine2 = 
+    {
+      #ifdef RightLeg    
+      p0 = .RTOE.sRel;
+      #else
+      p0 = .LTOE.sRel;
+      #endif
+      
+      p1 = .AnkleJoint.sRel;
+      GlobalCoord = Off;
+      Line.Thickness = 0.01;
+      Line.RGB = {1,0,0};
+    };
+    
+    AnyDrawNodes DrwNodes = {
+      RGB = {1,0,0};
+      Opacity = 0.5;
+      ScaleXYZ = {0.005, 0.005, 0.005};
+    };
+    #endif
+  };
+  
+  #endif
+  
+};

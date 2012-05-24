@@ -1,5 +1,7 @@
 #class_template ForcePlateType3 (PlateName, Folder,AnySeg &Limb,No,Fx_12,Fx_34,Fy_14,Fy_23,Fz_1,Fz_2,Fz_3,Fz_4){
   
+  #var AnySwitch Switch_DrawForceVectorFromCOP = On;
+
   AnyFixedRefFrame Corners ={
     AnyVar CoordinateSystemSize= 0.1;
     
@@ -414,89 +416,67 @@
  };
   
   
-  AnyFolder CenterOfPressureAndResultant ={
-   AnyDrawVector CenterOfPressure =   {
-     AnyVar time=..ForcePlateDriver.t;
+  AnyFolder CenterOfPressure =
+  {
+     AnyForceMomentMeasure2 NetEffectMeasure = 
+     {
+         AnyRefFrame& ref = ..ForcePlate;
+         AnyForceBase& Fx12 = ..Fx12;
+         AnyForceBase& Fx34 = ..Fx34;
+         AnyForceBase& Fy14 = ..Fy14;
+         AnyForceBase& Fy23 = ..Fy23;
+         AnyForceBase& Fz1 = ..Fz1;
+         AnyForceBase& Fz2 = ..Fz2; 
+         AnyForceBase& Fz3 = ..Fz3;
+         AnyForceBase& Fz4 = ..Fz4;
+         
+         AnyVec3 Flocal = F*ref.Axes;
+         AnyVec3 Mlocal = M*ref.Axes;
+     };
      
-     AnyVar az0= -..ForcePlate.zdist*0.001;
-      
+     AnyVar fx = NetEffectMeasure.Flocal[0]; 
+     AnyVar fy = NetEffectMeasure.Flocal[1]; 
+     AnyVar fz = NetEffectMeasure.Flocal[2];
+     AnyVar mx = NetEffectMeasure.Mlocal[0]; 
+     AnyVar my = NetEffectMeasure.Mlocal[1]; 
+     AnyVar mz = NetEffectMeasure.Mlocal[2]; 
 
-     AnyVar Fz1 = ..Fz1.f(..ForcePlateDriver.t)[0];
-     AnyVar Fz2 = ..Fz2.f(..ForcePlateDriver.t)[0];
-     AnyVar Fz3 = ..Fz3.f(..ForcePlateDriver.t)[0];
-     AnyVar Fz4 = ..Fz4.f(..ForcePlateDriver.t)[0];
+     AnyVar fzz =iffun(gtfun(  (fz^2)^0.5,0),fz,fz+1000000);
      
-     AnyVar Fx12 = ..Fx12.f(..ForcePlateDriver.t)[0];
-     AnyVar Fx34 = ..Fx34.f(..ForcePlateDriver.t)[0];
+     AnyVar Vx= my/fzz;
+     AnyVar Vy= -mx/fzz;
+     AnyVar Vz= 0;     
      
-     AnyVar Fy14 = ..Fy14.f(..ForcePlateDriver.t)[0];
-     AnyVar Fy23 = ..Fy23.f(..ForcePlateDriver.t)[0];
-     
-     AnyVar Fx=Fx12+Fx34;
-     AnyVar Fy=Fy14+Fy23;
-     AnyVar Fz=Fz1+Fz2+Fz3+Fz4;
+     AnyVar OnOff=iffun(gtfun(fz,-10.0),0.0,1.0);
 
-     AnyVar a = ..ForcePlate.P1.sRel[0];
-     AnyVar b = ..ForcePlate.P1.sRel[1];
+     AnyRefFrame& ref_ForcePlate = .ForcePlate;
+     ref_ForcePlate  = 
+     {
+        AnyDrawSphere COP_ball = 
+        {
+            RGB = {0,1,0};
+            ScaleXYZ = 0.015 *{1,1,1};
+            Opacity = iffun(gtfun(..fz, -10.0), 0.0, 1.0);
+            Position = -{..Vx, ..Vy, ..Vz};
+        };       
+     };
+     
+     AnyDrawLine Line = 
+     {
+       p0 = -{.Vx, .Vy, .Vz};
+       p1 = p0+0.004*.OnOff*{.fx, .fy, .fz};
+       Visible = ..Switch_DrawForceVectorFromCOP ;
+       AnyRefFrame &ref = ..ForcePlate;
+       
+       Line.RGB ={0,0,1};
+       Line.Thickness = 0.01;
+       Line.End.Thickness = 2*0.01;
+       Line.End.Length = 4*0.01;
+       GlobalCoord=Off;
+     };
+     
+  };
    
-     AnyVar Mx=b*(Fz1+Fz2-Fz3-Fz4);
-     AnyVar My=a*(-Fz1+Fz2+Fz3-Fz4);
-     AnyVar Mz=b*(-Fx12+Fx34)+a*(Fy14-Fy23);
-     
-     AnyVar Mx_top=Mx+Fy*az0;
-     AnyVar My_top=My-Fx*az0;
-
-     AnyVar Vx=-My_top/Fz;
-     AnyVar Vy=Mx_top/Fz;
-     AnyVar Vz=0;
-        
-     
-     Vec = ..OnOff*{Vx,Vy,Vz};
-     GlobalCoord=Off;
-     PointAway = On;
-     DrawCoord = Off;
-     Line.Style=Line3DStyleFull;
-     Line.RGB = {0,1,0};
-     Line.Thickness = 0.000001;
-     
-     Line.End.Thickness = 2*0.015; 
-     Line.End.Length = 4*0.015;  
-     Line.End.Style=Line3DCapStyleEllipsoid;
-     //
-     Line.Start.Thickness = 0*0.015; 
-     Line.Start.Length = 0*0.015;  
-     Line.Start.Style=Line3DCapStyleEllipsoid;
-     
-     AnyRefFrame &ref = ..ForcePlate;
-   };
-   
-   
-   AnyDrawVector Resultant =   {
-     AnyVar time=..ForcePlateDriver.t;
-     
-     AnyVec3 F1 = ..Fz1.Flocal;
-     AnyVec3 F2 = ..Fz2.Flocal;
-     AnyVec3 F3 = ..Fz3.Flocal;
-     AnyVec3 F4 = ..Fz4.Flocal;
-     AnyVec3 F5 = ..Fx12.Flocal;
-     AnyVec3 F6 = ..Fx34.Flocal;
-     AnyVec3 F7 = ..Fy14.Flocal;
-     AnyVec3 F8 = ..Fy23.Flocal;
-     
-     
-     Vec = -..OnOff*(F1+F2+F3+F4+F5+F6+F7+F8)/1000;
-     GlobalCoord=Off;
-     PointAway = On;
-     DrawCoord = Off;
-     Line.Style=Line3DStyleFull;
-     Line.RGB = {0,0,1};
-     Line.Thickness = 0.01;
-          
-     AnyRefFrame &ref = ..ForcePlate;
-   };
- };
-  
- 
 };
 
 

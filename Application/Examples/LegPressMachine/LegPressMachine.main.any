@@ -1,0 +1,108 @@
+#include "../libdef.any"
+
+#include "<ANYBODY_PATH_TOOLBOX>SolidModeling/SolidModeling.any"
+
+Main =
+{
+  AnyOperationSequence RunApplication = 
+  {
+
+    /**This operation calibrates the muscles in the model if these are of the type AnyMuscleModel3E.
+    This will just be an empty operation if the model is using a muscle type that does not require calibration.*/
+    AnyOperation &CalibrationAnal = Main.HumanModel.Calibration.CalibrationSequence;  
+
+    ///This operation is the inverse dynamic analysis
+    AnyOperation &InvAnal=Main.Study.InverseDynamics;
+    
+  };  
+  
+  #include "DrawSettings.any"
+  
+  AnyFolder Parameters = 
+  {
+      #include "DesignParameters.any"
+      #include "SupportParameters.any"
+      #include "TrialSpecificData.any"
+  };
+  
+  AnyFolder HumanModel=
+  {  
+    AnyFolder &Mannequin=.Model.Mannequin;
+    
+    #include  "BodyPartsSetup.any"
+    //#include  "BodyPartsSetup2.any"
+    #include  "<ANYBODY_PATH_BODY>/BodyModels/GenericBodyModel/BodyModel.any"
+    
+    AnyFolder StrengthParameters=
+    {
+      AnyVar SpecificMuscleTensionSpine= 90; //N/cm^2
+      AnyVar StrengthIndexLeg= 1; 
+      AnyVar SpecificMuscleTensionShoulderArm= 90; //N/cm^2
+    };
+    #include "<ANYBODY_PATH_BODY>Scaling/ScalingStandard.any"
+  };
+ 
+  AnyFolder Model = 
+  {
+    AnyFolder &HumanModel=.HumanModel.BodyModel;
+    
+    #include "Mannequin.any"
+    #include "HumanRefNodes.any"
+    
+    #include "SolidModelingOperations.any"
+    
+    AnyFolder EnvironmentModel = 
+    {
+        AnyFixedRefFrame GlobalRef = 
+        {
+            AnyDrawRefFrame drw_Frame = 
+            {
+                RGB = {0,1,0};
+                ScaleXYZ = 0.5* {1, 1, 1};
+            };
+
+            AnyRefNode bottom_node = 
+            {
+              sRel = {0, -Main.Parameters.DesignParameters.Back_Rest_Thick, 0};
+              AnyDrawSurf surf =
+              {
+                  FileName = "box";
+                  RGB = Main.DrawSettings.Colors.AnyBodyPaleYellow;
+                  ScaleXYZ = {1, Main.Parameters.DesignParameters.Back_Rest_Thick/2, 1}/0.15;
+                  Opacity = 0.2;
+              };              
+            }; 
+        };
+        AnyFolder Segs = {};
+        AnyFolder Joints = {};
+    };
+       
+    AnyFolder ModelEnvironmentConnection = 
+    {
+      #include "JointsAndDrivers.any"
+      
+      AnyFolder Support = 
+      {
+          #include "BackrestSupport.any"
+          #include "LowerBodySupport.any"
+          #include "FootrestSupport.any"
+      };
+    };
+   
+  };
+  
+  AnyBodyStudy Study = 
+  {
+      AnyFolder& Model = .Model;
+      Gravity = {0, -9.81, 0};
+      tStart = Main.Parameters.TrialSpecificData.tStart;
+      tEnd = Main.Parameters.TrialSpecificData.tEnd;
+      nStep = Main.Parameters.TrialSpecificData.nStep;
+      //InitialConditions.SolverType = KinSolOverDeterminate;
+      //Kinematics.SolverType = KinSolOverDeterminate;
+      //InverseDynamics.Criterion.UpperBoundOnOff = Off;      
+      //InverseDynamics.Criterion.Type = MR_MinMaxStrict;
+      //InverseDynamics.Criterion.Type = MR_Quadratic;
+      InverseDynamics.Criterion.Type = MR_Polynomial;
+  };
+};

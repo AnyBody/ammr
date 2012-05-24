@@ -1,0 +1,71 @@
+ AnyRefNode MorphNodes = {
+   AnyVar MarkerRadius = 0.012;
+   sRel = .KneeJoint.sRel;
+     #ifdef RightLeg     
+       AnyVar Sign=1;
+       // Coordinates of Medial and Lateral condyle markers in Thigh ref system
+       AnyVec3 LatKneeRef = .....StickFigure .Posture.Right.Thigh.RKNE.sRel_static;
+       AnyVec3 MedKneeRef = .....StickFigure .Posture.Right.Thigh.RTHL.sRel_static;
+       //AnyVec3 PatellaRef = .....StickFigure .Posture.Right.Thigh.RPatella.sRel_static;
+
+     #endif
+     #ifdef LeftLeg 
+       AnyVar Sign=-1;
+       // Coordinates of Medial and Lateral condyle markers in Thigh ref system
+       AnyVec3 LatKneeRef = .....StickFigure .Posture.Left.Thigh.LKNE.sRel_static;
+       AnyVec3 MedKneeRef = .....StickFigure .Posture.Left.Thigh.LTHL.sRel_static;
+       //AnyVec3 PatellaRef = .....StickFigure .Posture.Left.Thigh.LPatella.sRel_static;
+     #endif
+
+    AnyVec3 sKneeAxisZ = ( ARel'* .KneeJoint.ARel*{0,0,Sign*1}' )';
+    AnyVec3 sKneeAxisX = ( ARel'* .KneeJoint.ARel*{1,0,0}' )';
+
+    AnyVec3 sMedKneeMarker = ( ARel'*(MedKneeRef - sRel)' )';
+    AnyVec3 sLatKneeMarker = ( ARel'*(LatKneeRef - sRel)' )';
+    //AnyVec3 sPatellaMarker = ( ARel'*(PatellaRef - sRel)' )';
+
+    // Calculate a scale factor for the knee based on the knee width
+    AnyVar KneeWidth = vnorm(sMedKneeMarker  - sLatKneeMarker )-2*MarkerRadius;
+    AnyVar LegTDWidthStandard = 0.09796637;
+    AnyVar KneeScaleFactor = KneeWidth /LegTDWidthStandard ;
+     
+    
+    ARel = RotMat(.KneeJoint.sRel, .HipJoint.sRel ,LatKneeRef );
+
+    // Lateral target morph node. Found by projection of the lateral knee marker
+    // onto the knee axis
+    AnyRefNode LateralKneeControlPoint = {
+       sRel = (.sLatKneeMarker*.sKneeAxisZ'-.MarkerRadius) * .sKneeAxisZ;
+       #include "ControlPointsDrw.any"
+    };
+       
+    
+    // Medial target morph node. Found by projection of the medial knee marker
+    // onto the knee axis
+    AnyRefNode MedialKneeControlPoint = {
+       sRel = (.sMedKneeMarker*.sKneeAxisZ' + .MarkerRadius) * .sKneeAxisZ;
+       #include "ControlPointsDrw.any"
+    };     
+        
+    
+    // Anterior target morph node. Found by projecting the patella marker onto 
+    // x-axis of the kneeJoint. 
+    AnyRefNode AnteriorKneeControlPoint = {
+       //sRel = (.sPatellaMarker*{0,1,0}' - .MarkerRadius) * {0,1,0};
+       //sRel = (.sPatellaMarker*.sKneeAxisX' - .MarkerRadius) * .sKneeAxisX;
+       sRel = 0.1*.KneeScaleFactor * .sKneeAxisX;
+       #include "ControlPointsDrw.any"
+    };   
+    
+
+    
+//      AnyDrawRefFrame test = 
+//      {
+//        ScaleXYZ = {0.1, 0.1, 0.1};
+//      };
+//      
+     
+
+     
+ }; //thigh morph node
+ 

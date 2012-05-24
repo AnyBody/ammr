@@ -8,7 +8,6 @@ AnyFolder ModelSetup ={
   AnyInputC3D C3DFileData =   {
     AnyString PrefixStr=""; //if the dataset makes use of a prefix name which goes in front of all markers and processed datanames write it here
     #define PrefixDef(Arg) Arg
-    ConstructChartOnOff=Off;
 
     AnyString NameOfFile =Main.TrialSpecificData.NameOfFile; //Write the name of the file here
     FileName = NameOfFile + ".c3d"; //add the extension to the filename
@@ -16,6 +15,14 @@ AnyFolder ModelSetup ={
     MarkerUseAllPointsOnOff = Off; 
     MarkerUseCamMaskOnOff = Off;
     PointsScaleFactor = 1/1000;
+    
+    #if MotionAndParameterOptimizationModel 
+    ConstructChartOnOff = On;
+    #endif
+    
+    #if InverseDynamicModel
+    ConstructChartOnOff = Off;
+    #endif
     
     MarkerLabels = {"RFHD","LFHD","RBHD","LBHD","CLAV","C7","T10","STRN","RBAK","RSHO","LSHO","RUPA","LUPA","RELB","LELB","RFRA","LFRA","RWRA","LWRA","RWRB","LWRB","RFIN","LFIN","RASI",
       "LASI","RPSI","LPSI","RTHI","LTHI","RKNE","LKNE","RTIB","LTIB","RANK","LANK","RHEE","LHEE","RTOE","LTOE","RMT5","LMT5"};
@@ -44,17 +51,17 @@ AnyFolder ModelSetup ={
     MarkerScaleXYZ = 0.015*{1,1,1};
     MarkerRGB={0,0,1};
   };
-  
-  
-  
-  
-  AnyIntVar FirstFrame = C3DFileData.Header.FirstFrameNo; 
-  AnyIntVar LastFrame = C3DFileData.Header.LastFrameNo;
-  AnyIntVar nStep =(LastFrame-FirstFrame);
-  
-//  AnyFloatVar  tStart = Main.TrialSpecificData.tStart;
-//  AnyFloatVar  tEnd = Main.TrialSpecificData.tEnd;
-  
+
+  // FrontFrameOffset is the offset value from the first frame of C3D file
+  AnyIntVar FrontFrameOffset = 0;
+  // LastFrameOffset is the offset value from the last frame of C3D file
+  AnyIntVar LastFrameOffset = 0;
+  AnyIntVar FirstFrame = C3DFileData.Header.FirstFrameNo + FrontFrameOffset; 
+  AnyIntVar LastFrame = C3DFileData.Header.LastFrameNo - LastFrameOffset;
+  AnyIntVar nStep =(LastFrame-FirstFrame+1);
+  AnyFloatVar tStart = FirstFrame/C3DFileData.Header.VideoFrameRate;
+  AnyFloatVar tEnd = LastFrame/C3DFileData.Header.VideoFrameRate;
+
   OptimizeAnthropometricsOnOff OptimizeOnOff (
   PelvisWidthOnOff ="On", 
   ThighLengthOnOff="On", 
@@ -90,7 +97,7 @@ AnyFolder ModelSetup ={
   // sRelOpt = {-0.04970743, -0.1556847, 0.08576939}
   //   {-0.07176273, -0.172468, 0.07632443}
   
- CreateMarkerTD RTHI ( 
+  CreateMarkerTD RTHI ( 
   MarkerName=PrefixDef(RTHI),
   MarkerPlacement =Right.Leg.Seg.Thigh, 
   OptX="On",OptY="On",OptZ="On",
@@ -332,11 +339,6 @@ AnyFolder ModelSetup ={
   ) = {
     sRelOpt=  {-0.007238141, -0.2855959, -0.09793496};
   };
-  
-
-  
-  
-  
   
   
   

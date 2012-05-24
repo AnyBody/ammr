@@ -3,26 +3,26 @@
 Left = {
   
 AnyFolder Leg = {  
-  
+  #include "../../LegTD/CadaverParameters.any"
   #include "..\..\LegTD\LegNoMuscles.root.any"
   
       #include "../Include/SettingsLeg.any" 
       AnyFolder &InterfaceFolder =..Interface.Left;
-      //Reference to folder 
       AnyFolder &MannequinValuesFolder = ..MannequinValuesFromModel.AnyFolder_Posture.AnyFolder_Left;
       
-      //-------------------------------------------------------
-      // Interface references that specifies what the leg "Leg/Leg.any" should connect to 
-      //-------------------------------------------------------
-          AnyFolder &Scaling =...Scaling;
-    AnyFolder &StandardParameters =...Scaling.StandardParameters.Left;
+      AnyFolder &Scaling =...Scaling;
+      AnyFolder &StandardParameters =...Scaling.StandardParameters.Left;
       AnyFolder &GeoScaling =...Scaling.GeometricalScaling.Left;
       AnyFolder &MassScaling =...Scaling.MassScaling.Left;
       AnyFolder &FiberLengthScaling =...Scaling.FiberLengthScaling.Left;
       AnyFolder &StrengthScaling =...Scaling.StrengthScaling.Left;
 
-      AnyRefFrame &HipNodeRef= ..Trunk.SegmentsLumbar.PelvisSeg.HipJointLeftTD;
-      //This is a sign variable which indicates that this is the right side
+      /// Reference to the coordinate system in pelvis where the hip LegTD data is 
+      /// added. This is done, since the leg muscles on the pelvis are given in their 
+      /// own coordinate system
+      AnyRefFrame &HipNodeRef = ..Trunk.SegmentsLumbar.PelvisSeg.Left;
+
+      //This is a sign variable which indicates that this is the left side
       AnyVar Sign =-1;
       
       AnyFolder BonesOpacity = {
@@ -35,19 +35,18 @@ AnyFolder Leg = {
       
       
       AnyFolder MomentMeasure={
-        AnyForceMomentMeasure KneeJointReactionMoments = 
-        {
-          AnyForceBase &Force = ..Jnt.Knee.Constraints.Reaction;
-          AnyRefFrame &Thighknee = ..Seg.Thigh.KneeJoint;
-          AnyVec3 Mlocal = M*Thighknee.Axes;
-        };
+        #if TRUNK_SIMPLE_MUSCLES == 1
+          #define LEG_WITH_PSOAS_MUSCLES 
+          AnyFolder &TrunkMuscles = ...Trunk.MusclesSpineLeft;
+        #endif
         
-        AnyForceMomentMeasure AnkleJointReactionMoments = 
-        {
-          AnyForceBase &Force = ..Jnt.Ankle.Constraints.Reaction;
-          AnyRefFrame &Shankankle = ..Seg.Shank.AnkleJoint;
-          AnyVec3 Mlocal = M*Shankankle.Axes;
-        };
+        #define LEG_WITH_JOINT_MUSCLES
+        #include "..\..\LegTD\LegMoments.any"
+        #undef LEG_WITH_JOINT_MUSCLES
+        
+        #ifdef LEG_WITH_PSOAS_MUSCLES 
+        #undef LEG_WITH_PSOAS_MUSCLES 
+        #endif
       };
       
     }; //End Leg

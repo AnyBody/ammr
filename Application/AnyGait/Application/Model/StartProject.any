@@ -1,0 +1,76 @@
+  #include "../libdef.any"
+  #path Mainpath "."
+  #ifdef ANYGAIT_PATH_SETUPFILE
+  #include "<ANYGAIT_PATH_SETUPFILE>AnyGaitSetup.any"
+  #endif
+  #include "../AnyGaitCommonSetup.any"
+
+  //#path ANYGAIT_PATH_PROJECTS "Projects/"
+  #define LoadSetup
+  #define SetupSubject //JDT: Temporary define for testing. Will be set through 
+
+Main = {
+
+  
+
+  
+  
+//  #include "<ANYGAIT_PATH_PROJECTS>CurrentConfig.any" 
+
+//  AnyStringVar SubjectInit = SubjectDef; //Uncomment this line to make the AnyGaitApp start with the latest subjectname selected by default
+  AnyStringVar SubjectInit = ""; //Uncomment this line to make the AnyGaitApp load with no subjectname selected by default.
+  AnyStringVar Subject = DesignVar(SubjectInit);
+  
+  
+//  Project.Files = {
+//    MainFile = "StartProject.Main.any";
+//
+//  };
+  
+  AnyProject Project = {
+    Tasks = {
+      AnyProjectTaskLoadModel StartProject = {
+        Description = {
+          AnyFile filename = "OptLegModel/ProjectModel/StartProject.htm";
+          HTMLURL = "file:///"+FilePathCompleteOf(filename)
+          +"?numvals=4"
+          +"&0n="+CompleteNameOf(Main.Subject)
+          +"&0v="+Main.Subject
+          +"&savestringmacro="+CompleteNameOf(Main.Macros.SaveMacro)
+          +"&createfoldermacro="+CompleteNameOf(Main.Macros.CreateFolder)
+         ;
+        };
+        MainFile = "OptLegModel/ProjectModel/AnyGait.Main.any";
+#ifdef ANYGAIT_PATH_SETUPFILE
+        AnyStringVar AnyBody_SetupFileDir = ANYGAIT_PATH_SETUPFILE;
+        Arguments = "-p ANYGAIT_PATH_SETUPFILE="+strquote(AnyBody_SetupFileDir);
+#endif
+        ShowMainFile = Off;
+      };
+      
+    };
+  };
+  AnyFile savestringfile = ANYGAIT_PATH_PROJECTS + "CurrentConfig.any";
+  AnyFolder Macros = {
+    AnyStringVar SaveMacro = ("classoperation Main.savestring" + " " + strquote("Save AnyString to file")+"--file="+strquote(FilePathCompleteOf(Main.savestringfile))+ strformat ("\n"));
+    AnyStringVar CreateFolder = ("operation Main.foldercreation" + strformat ("\n")+"run"+strformat ("\n"));
+  };
+  AnyStringVar savestring = "#define SubjectDef "
+                            +strquote(Main.Subject)
+                            +strformat("\n")
+                            +"#path SubjectPath "
+                            +strquote(Main.Subject)
+                            +strformat("\n");
+  AnyOperationShellExec foldercreation = 
+  {
+    Settings = 
+    {
+      Echo = Off;
+    };
+    FileName = "TemplateFiles/CreateSubject.bat";
+    Arguments = strquote(ANYGAIT_PATH_PROJECTS+Main.Subject);
+    WorkDir = Mainpath;
+    Show = Off;
+    Wait = Off;
+  };
+};

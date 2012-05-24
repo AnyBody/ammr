@@ -1,0 +1,198 @@
+#include "../libdef.any"
+
+/**
+This model simulates a knee bend for a body model with a total hip arthroplasty (THA)
+using:
+    - either an ideal spherical joint with joint reaction forces
+    - or force dependent kinematics and a contact model.
+
+In the body model, the hip joint is excluded from the AnyBodyStudy and a new force dependent 
+hip joint is included. Therefore, a Acetabular cup and a femoral component (1) are included into the model 
+and a contact force between these implants is defined. For stabiliy reasons an artifical spring
+is implemented to avoid the joint to disconnect.
+
+---
+(1) The geometry data of the femoral component was kindly provided by Edmundo Fuentes via GrabCAD.com
+    http://edmundofuentes.com
+
+*/
+Main = {
+  
+// Switches to include AnyDrawWidgets to change the positions and 
+// orientation of the hip implants.
+//
+// Widget to rotate the femoral component
+#define FEM_STEM_ROT 0  
+// Widget to move the femoral component
+#define FEM_STEM_LIN 0  
+// Widget to rotate the Acetabular cup
+#define PELVIS_CUP_ROT 0
+
+
+// Switch to use an ideal spherical joint, or force dependent kinematics for the right hip joint.
+#define USE_FDK 1
+
+  
+  /**Execute this operation to run the model in the intended operation sequence.  
+  It is also possible to run operations seperately, by manual selections in the operation tree*/
+  AnyOperationSequence RunApplication = {
+
+    /**This operation calibrates the muscles in the model if these are of the type AnyMuscleModel3E.
+    This will just be an empty operation if the model is using a muscle type that does not require calibration.*/
+    AnyOperation &CalibrationAnal = Main.HumanModel.Calibration.CalibrationSequence;  
+
+    ///This operation is the inverse dynamic analysis
+    AnyOperation &InvAnal=Main.Study.InverseDynamics;
+  
+  };
+
+
+
+  #include "DrawSettings.any"
+  
+  AnyFolder HumanModel = {
+    
+    AnyFolder &Mannequin=.Model.Mannequin;
+    
+    
+    // Select the body model:
+    // ----------------------
+    // This file contains a list of all body parts, select them to create
+    // the body model wanted.
+    #include  "BodyPartsSetup.any"
+    
+    // This file creates the body model from the selected list.
+    #include  "<ANYBODY_PATH_BODY>\BodyModels\GenericBodyModel\BodyModel.any"
+    
+    
+
+    // The StrengthParameters folder allows for simple scaling of strength
+    // between the spine, the legs and the ShoulderArm body parts. The methods
+    // are slightly different to adhere to the anatomical literature on which the
+    // models are based.
+    AnyFolder StrengthParameters = {
+      AnyVar SpecificMuscleTensionSpine = 90; //N/cm^2
+      AnyVar StrengthIndexLeg = 1; 
+      AnyVar SpecificMuscleTensionShoulderArm = 90; //N/cm^2
+    };    
+    
+    // This section below offers the choice between two scaling strategies for the
+    // human model. 
+    
+    // ScalingStandard means that all the body parts will have the standard size 
+    // at which they were originally developed, i.e. with anthropometric
+    // data from the anatomical literature. This roughly corresponds to a 50th
+    // percentile European male.    
+    #include "<ANYBODY_PATH_BODY>\Scaling\ScalingStandard.any"
+    
+    // ScalingLengthMassFat will scale each segment of the body to anthropometric data
+    // specified in the selected AnyFamily include file, attempting to take the
+    // fat percentage into account in the assessment of the muscle strength.
+    // #include "<ANYBODY_PATH_BODY>\Scaling\ScalingLengthMassFat.any" 
+    // Scaling = {
+    //   #include "<ANYBODY_PATH_BODY>\Scaling\AnyFamily\AnyMan.any"
+    // };
+    
+  };
+  
+  // This folder collects the elements of the model. It is referred by the
+  // study section below as the target of the analyses.  
+  AnyFolder Model = {
+    
+    AnyFolder &HumanModel=.HumanModel.BodyModel;
+    #include "Environment.any"   
+    
+    // The Mannequin file specifies load-time positions for all the segments
+    // in the HumanModel. This is important for the model's ablity to resolve
+    // all the kinematic constraints when the model is analyzed.
+    // The mannequin file also drives those degrees of freedom of the human 
+    // model that are not governed by problem-specific drivers at run time.    
+    #include "Mannequin.any" 
+    
+    // The include file below, MannequinValuesFromModel, is not strictly
+    // necessary but can be helpful when developing new applications
+    // based on this application, particularly when the new application
+    // involves an environment that somehow governs the kinematics of
+    // the human body.
+    
+    // When included, MannequinValuesFromModel creates a folder named
+    // Main.HumanModel.BodyModel.MannequinValuesFromModel that contains 
+    // variables with the human model's joint angles as they are defined
+    // in the mennequin model. When the model has been loaded and the
+    // SetInitialConditions operation has been executed successfully once,
+    // you can look up 
+    // Main.HumanModel.BodyModel.MannequinValuesFromModel in the model
+    // tree and dump its values. The output is very similar to the content
+    // of the mannequin file, so the output can be saved and edited slightly
+    // and then replace the existing mannequin.any file. The new file will
+    // cause the model to have the exactly correct load-time positions.
+    // #include "MannequinValuesFromModel.any"
+
+    
+    // Implants defines and positions the stl surfaces of the hip implants.
+    #include "Implants.any"
+
+        
+        
+        
+        
+    AnyFolder ModelEnvironmentConnection = {
+      AnyFolder &HumanModel=.HumanModel;
+      #include "JointsAndDrivers.any"
+    };
+  };
+  
+  AnyBodyStudy Study = {
+    AnyFolder &Model = .Model;
+
+    // This file implements the implant contact forces.
+    #if USE_FDK
+    #include "ContactForces.any"
+    #endif
+    
+    // In this file, the bone of the femur is replaced.
+    #include "BoneExchange.any"
+
+        
+    tEnd = 10.0;
+    Gravity = {0.0, -9.81, 0.0};
+    nStep = 10;
+ 
+    
+    AnyFolder HipComparison =
+    {
+      
+      #if USE_FDK 
+      AnyFloat RightHipReactionForceFDK = (Main.Study.FSurf.Fslave[0]^2 
+                                          + Main.Study.FSurf.Fslave[1]^2 
+                                          + Main.Study.FSurf.Fslave[2]^2)^0.5;
+      #else
+      AnyFloat RightHipReactionForce = (Main.HumanModel.BodyModel.Right.Leg.Jnt.Hip.Constraints.Reaction.Fout[0]^2 
+                                       + Main.HumanModel.BodyModel.Right.Leg.Jnt.Hip.Constraints.Reaction.Fout[1]^2 
+                                       + Main.HumanModel.BodyModel.Right.Leg.Jnt.Hip.Constraints.Reaction.Fout[2]^2)^0.5;
+      #endif   
+      
+      AnyFloat LeftHipReactionForce = (Main.HumanModel.BodyModel.Left.Leg.Jnt.Hip.Constraints.Reaction.Fout[0]^2 
+                                       + Main.HumanModel.BodyModel.Left.Leg.Jnt.Hip.Constraints.Reaction.Fout[1]^2 
+                                     + Main.HumanModel.BodyModel.Left.Leg.Jnt.Hip.Constraints.Reaction.Fout[2]^2)^0.5;
+    };
+
+    #if USE_FDK 
+    // Here the hip joint from the body model is removed 
+    // and new FDK drivers for the contact hip joint are 
+    // defined.
+    #include "HipExchange.any"
+
+    InverseDynamics.ForceDepKinOnOff=On;               //Values gained by experience
+    InverseDynamics.ForceDepKin.ForceTol=10;           //Values gained by experience
+    InverseDynamics.ForceDepKin.Perturbation=5e-5;     //Values gained by experience
+    InverseDynamics.ForceDepKin.LocalSearchOnOff = On; //Values gained by experience
+    InverseDynamics.ForceDepKin.MaxNewtonStep = 10;    //Values gained by experience
+   #endif
+    
+  }; // End of study
+
+ 
+  
+}; //Main
+

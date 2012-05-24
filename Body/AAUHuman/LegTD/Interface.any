@@ -108,48 +108,103 @@ AnyKinMeasureOrg KneeFlexion = {
 //};
 //
 
-
-AnyKinMeasureOrg HipFlexion = {
-  //create new rotated node 
-  AnyFolder &HipNodeRef=..HipNodeRef;
-  HipNodeRef={
-    AnyRefNode RotNode={
-      ARel= {{....Sign*-1,0,0},{0,....Sign*-1,0},{0,0,1}};
+/// This Folder contains hip angle measures which are compliant the sequence of 
+/// hip joint rotation sequence recommended by International Society of 
+/// Biomechanics (ISB). The seqence is hip flexion (Z), hip abduction (X) and hip
+/// external rotation (Y). These measuers in this folder are used by default in the
+/// interface folder. 
+AnyFolder HipJoint_SeqZXY = {
+  AnyKinMeasureOrg HipFlexion = {
+    AnyKinRotational HipMeasure ={
+      AnyRefNode &PelvisNode = ....HipNodeRef.HipJoint.RotNode;
+      AnyRefNode &ThighNode = ....Seg.Thigh.HipJoint.RotNode;
+      PelvisNode={AnyDrawRefFrame drw={RGB={1,0,0};Visible = Off;}; };
+      ThighNode={AnyDrawRefFrame drw={RGB={0,1,0};Visible = Off;};  };
+      Axis1 = z; Axis2 = x;  Axis3 = y;
+      Type=RotAxesAngles;
     };
+    MeasureOrganizer={0};
   };
-  AnyFolder &ThighNodeRef = ..Seg.Thigh.HipJoint;
-  ThighNodeRef ={
-    AnyRefNode RotNode={
-      ARel={{....Sign*-1,0,0},{0,....Sign*-1,0},{0,0,1}};
-    };
+  AnyKinMeasureOrg HipAbduction = {
+    AnyKinRotational &HipJoint =.HipFlexion.HipMeasure; 
+    MeasureOrganizer={1};
   };
-  AnyKinRotational HipMeasure ={
-    AnyRefNode &PelvisNode = ...HipNodeRef.RotNode;
-    AnyRefNode &ThighNode = ...Seg.Thigh.HipJoint.RotNode;
-    
-    PelvisNode={//AnyDrawRefFrame drw={RGB={1,0,0};};
-    };
-    ThighNode={//AnyDrawRefFrame drw={RGB={0,1,0};};
-    };
-
-    Type=RotAxesAngles;
+  AnyKinMeasureOrg HipExternalRotation ={
+    AnyKinRotational &HipJoint =.HipFlexion.HipMeasure; 
+    MeasureOrganizer={2};
   };
-  MeasureOrganizer={0};
-};
-AnyKinMeasureOrg HipAbduction = {
-  AnyKinRotational &HipJoint =.HipFlexion.HipMeasure; 
-  MeasureOrganizer={2};
-};
-AnyKinMeasureOrg HipExternalRotation ={
-  AnyKinRotational &HipJoint =.HipFlexion.HipMeasure; 
-  MeasureOrganizer={1};
 };
 
+/// This Folder contains hip angle measures which use the rotation sequence
+/// applied by AMMR 1.4 and earlier. The sequence of rotation is Hip flexion (Z), 
+/// Hip external roation (Y) and Hip Abduction (X). This sequence is no longer the
+/// the default in AMMR 1.5, since it is not compliant with the recommendations of
+/// the International Society of Biomechanics (ISB). 
+/// The measures are provided for backward compatability, and can be activated by 
+/// setting the flag #define USE_AMMR14_HIP_ROTATIONS
+AnyFolder HipJoint_SeqZYX = {
 
+  AnyKinMeasureOrg HipFlexion = {
+    //create new rotated node 
+    AnyFolder &HipJointRef=...HipNodeRef.HipJoint;
+    HipJointRef={
+      AnyRefNode RotNode={
+        ARel= {{.....Sign*-1,0,0},{0,.....Sign*-1,0},{0,0,1}};
+      };
+    };
+    AnyFolder &ThighNodeRef = ...Seg.Thigh.HipJoint;
+    ThighNodeRef ={
+      AnyRefNode RotNode={
+        ARel={{.....Sign*-1,0,0},{0,.....Sign*-1,0},{0,0,1}};
+      };
+    };
+    AnyKinRotational HipMeasure ={
+      AnyRefNode &PelvisNode = ....HipNodeRef.HipJoint.RotNode;
+      AnyRefNode &ThighNode = ....Seg.Thigh.HipJoint.RotNode;
+      
+      PelvisNode={//AnyDrawRefFrame drw={RGB={1,0,0};};
+      };
+      ThighNode={//AnyDrawRefFrame drw={RGB={0,1,0};};
+      };
+  
+      Type=RotAxesAngles;
+    };
+    MeasureOrganizer={0};
+  };
+  AnyKinMeasureOrg HipAbduction = {
+    AnyKinRotational &HipJoint =.HipFlexion.HipMeasure; 
+    MeasureOrganizer={2};
+  };
+  AnyKinMeasureOrg HipExternalRotation = {
+    AnyKinRotational &HipJoint =.HipFlexion.HipMeasure; 
+    MeasureOrganizer={1};
+  };
+
+};
+#ifndef USE_AMMR14_HIP_ROTATIONS
+AnyKinMeasureOrg &HipFlexion = HipJoint_SeqZXY.HipFlexion;
+AnyKinMeasureOrg &HipAbduction = HipJoint_SeqZXY.HipAbduction;
+AnyKinMeasureOrg &HipExternalRotation = HipJoint_SeqZXY.HipExternalRotation;
+#else 
+/// This message warns the user that the model is loaded with hip angles measured 
+/// as it was done in AMMR < 1.5. The sequence of rotation is Hip flexion (Z), 
+/// Hip external roation (Y) and Hip Abduction (X). This sequence is no longer the
+/// the default in AMMR 1.5, since it is not compliant with the recommendations of
+/// the International Society of Biomechanics (ISB). 
+///
+/// This notice appears since the flag #define USE_AMMR14_HIP_ROTATIONS have been set.
+AnyMessage HipRotationSequenceMessage = {
+  TriggerConst = On;
+  Message = "Model is using the old hip rotation sequence (AMMR < 1.5).";
+};
+AnyKinMeasureOrg &HipFlexion = HipJoint_SeqZYX.HipFlexion;
+AnyKinMeasureOrg &HipAbduction = HipJoint_SeqZYX.HipAbduction;
+AnyKinMeasureOrg &HipExternalRotation = HipJoint_SeqZYX.HipExternalRotation;
+#endif
 
 AnyKinMeasureOrg HipFlexionJntMus = {
   AnyKinRotational HipMeasure ={
-    AnyRefNode &PelvisNode = ...HipNodeRef.RotNode;
+    AnyRefNode &PelvisNode = ...HipNodeRef.HipJoint.RotNode;
     AnyRefNode &ThighNode = ...Seg.Thigh.HipJoint.RotNode;
     AngVelOnOff = On; // xyz vector output
     Type=RotAxesAngles;

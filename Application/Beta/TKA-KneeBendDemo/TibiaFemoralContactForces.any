@@ -1,0 +1,237 @@
+#include "DrawContactForces.any"
+
+
+Main.HumanModel.BodyModel.Right.Leg.Jnt = {
+  
+  AnyFolder TibiaFemoralContactForces = {  
+    
+    AnyFolder &LigamentLength = Main.HumanModel.KneeLigamentLength;
+    
+    AnyFolder SurfaceForce =
+    {
+      AnyVar SurfStiffness = Main.Parameters.ContactStiffnessTibiaFemur;
+      AnyRefFrame &segMaster = ...Seg.Thigh;
+      AnyRefFrame &segSlave = ...Seg.Shank;
+      
+      
+      AnyForceSurfaceContact FContactFemTibLateral = 
+      { 
+        AnySurface &sMaster = .segMaster.KneeContactSurfaceLateral;
+        AnySurface &sSlave = .segSlave.KneeContactSurfaceLateral;
+        
+        PressureModule = .SurfStiffness;
+        
+        ForceViewOnOff = On;
+        MeshRefinementMaster = Main.Parameters.MeshRefinementMaster;
+        MeshRefinementSlave = Main.Parameters.MeshRefinementSlave;
+        SingleSidedOnOff= Main.Parameters.SingleSidedContact;
+        
+      };
+      
+      
+      
+      AnyForceSurfaceContact FContactFemTibMedial = 
+      {
+        AnySurface &sMaster = .segMaster.KneeContactSurfaceMedial;
+        AnySurface &sSlave = .segSlave.KneeContactSurfaceMedial;
+        
+        PressureModule = .SurfStiffness;
+        
+        ForceViewOnOff = On;
+        MeshRefinementMaster = Main.Parameters.MeshRefinementMaster;
+        MeshRefinementSlave = Main.Parameters.MeshRefinementSlave;
+        SingleSidedOnOff= Main.Parameters.SingleSidedContact;
+        
+      };
+    };  
+    
+    
+    
+    AnyFolder &refThigh = ..Seg.Thigh;
+    AnyFolder &refShank = ..Seg.Shank;
+    
+ 
+    AnyRGB RGB = Main.DrawSettings.Ligament.RGB;
+
+    #include "KneeLigamentGeometry.any"
+    
+
+AnyForce MedialLateralStiffness = {
+  AnyVar k=500;
+  AnyVar l0=0.00;
+  
+  AnyKinMeasureOrg meas = {
+    AnyKinLinear lin = {
+      Ref=1;    
+      //      ShankNode = {AnyDrawRefFrame drw = {};};
+      AnyRefNode &ThighNode = .....Seg.Thigh.KneeJoint;
+      AnyRefNode &ShankNode = .....Seg.Shank.KneeJoint;    
+    };
+    MeasureOrganizer={2};
+  };
+  
+  #include "LigamentModelPoly2.any"
+  F = Val;
+};
+  
+  
+    AnyForce AnteriorPosteriorStiffness = {
+      AnyVar k=100;
+      AnyVar l0=0.0;
+      
+      AnyKinMeasureOrg meas = {
+        AnyKinLinear lin = {
+          Ref=1;    
+          AnyRefNode &ThighNode = .....Seg.Thigh.KneeJoint;
+          AnyRefNode &ShankNode = .....Seg.Shank.KneeJoint;    
+        };
+        MeasureOrganizer={0};
+      };
+      
+      #include "LigamentModelPoly2.any"
+      F = Val;
+    };
+    
+    AnyForce DistractionCompressionStiffness = {
+      AnyVar k=0;
+      AnyVar l0=0.00;
+      
+      AnyKinMeasureOrg meas = {
+        AnyKinLinear lin = {
+          Ref=1;    
+          AnyRefNode &ThighNode = .....Seg.Thigh.KneeJoint;
+          AnyRefNode &ShankNode = .....Seg.Shank.KneeJoint;    
+        };
+        MeasureOrganizer={1};
+      };
+      
+      #include "LigamentModelPoly2.any"
+      F = Val;
+    };
+    
+    AnyForce InternalRotationStiffness = {
+      AnyVar k=100;
+      AnyVar l0=0.00;
+      
+      AnyKinMeasureOrg meas = {
+        AnyKinRotational rot = {
+          Type = RotAxesAngles;
+          AnyRefNode &ThighNode = .....Seg.Thigh.KneeJoint.RotNode;
+          AnyRefNode &ShankNode = .....Seg.Shank.KneeJoint.RotNode;
+          
+        };
+        MeasureOrganizer={1};
+      };
+      
+      #include "LigamentModelPoly2.any"
+      F = Val;
+    };
+    
+    AnyForce AbductionAdductionStiffness = {
+      AnyVar k=100;
+      AnyVar l0=0.00;
+      
+      AnyKinMeasureOrg meas = {
+        AnyKinRotational rot = {
+          Type = RotAxesAngles;
+          AnyRefNode &ThighNode = .....Seg.Thigh.KneeJoint.RotNode;
+          AnyRefNode &ShankNode = .....Seg.Shank.KneeJoint.RotNode;
+          
+        };
+        MeasureOrganizer={2};
+      };
+      
+      #include "LigamentModelPoly2.any"
+      F = Val;
+    };
+    
+    
+    
+    AnyForce MedialLigament1 = {
+      AnyVar k=1000;       
+      AnyVar lr=.LigamentLength.MedialLigament1lr; 
+      AnyVar er=0.03;
+      
+      AnyKinMeasure &meas = .MedialLigPLine1;
+      #include "LigamentModelPoly.any"
+      F = Val;
+    };
+    
+    AnyForce MedialLigament2 = {
+      AnyVar k=1000; 
+      
+      AnyVar lr=.LigamentLength.MedialLigament2lr;
+      AnyVar er=0.03;
+      
+      AnyKinMeasure &meas = .MedialLigPLine2;
+      #include "LigamentModelPoly.any"
+      F = Val;
+    };
+    
+    AnyForce MedialLigament3 = {
+      AnyVar k=1000; 
+      
+      AnyVar lr=.LigamentLength.MedialLigament3lr;
+      AnyVar er=0.03;
+      
+      AnyKinMeasure &meas = .MedialLigPLine3;
+      #include "LigamentModelPoly.any"
+      F = Val;
+    };
+    
+    
+    AnyForce LateralLigment1 = {
+      AnyVar k=1000;
+      AnyVar lr=.LigamentLength.LateralLigament1lr;
+      AnyVar er=0.03;
+      AnyKinMeasure &meas = .LateralLigPLine1;
+      #include "LigamentModelPoly.any"
+      F = Val;
+    };
+    
+    AnyForce LateralLigment2 = {
+      AnyVar k=1000;
+      AnyVar lr=.LigamentLength.LateralLigament2lr;
+      AnyVar er=0.03;
+      AnyKinMeasure &meas = .LateralLigPLine2;
+      #include "LigamentModelPoly.any"
+      F = Val;
+    };
+    
+    AnyForce LateralLigment3 = {
+      AnyVar k=1000;
+      AnyVar lr=.LigamentLength.LateralLigament3lr;
+      AnyVar er=0.03;
+      AnyKinMeasure &meas = .LateralLigPLine3;
+      #include "LigamentModelPoly.any"
+      F = Val;
+    };
+    
+    AnyForce PCL = {
+      AnyVar k=2500;
+      
+      AnyVar lr=.LigamentLength.PCLlr;
+           AnyVar er=Main.Parameters.PCLSlackStrain;
+           AnyKinMeasure &meas = .PCLPLine;
+      #include "LigamentModelPoly.any"
+      F = Val;
+    };
+    
+
+    
+    
+    AnyForce ObliquePopliteal = {
+      AnyVar k=1000;
+      
+      AnyVar lr=.LigamentLength.ObliquePopliteallr;
+      AnyVar er=0.0;
+      AnyKinMeasure &meas = .ObliquePoplitealPLine;
+      #include "LigamentModelPoly.any"
+      F = Val;
+    };
+    
+    
+    
+    
+  };
+};

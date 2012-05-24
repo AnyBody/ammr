@@ -1,8 +1,7 @@
 
 #class_template ForcePlateType2 (PlateName, Folder,AnySeg &Limb, No, Fx, Fy, Fz, Mx,My,Mz ){
   
-  
-  
+  #var AnySwitch Switch_DrawForceVectorFromCOP = On;
   
   AnyFixedRefFrame Corners ={
     AnyVar CoordinateSystemSize= 0.1;
@@ -89,13 +88,19 @@
     AnyVec3 p3=0.5*(.Corners.c01.sRel+.Corners.c02.sRel);
     Axes0 =RotMat(p1,p2,p3);
     
-    
+    AnyVar z_check = iffun(gtfun(Origins[0][2], 0), 1, -1);
+    AnyMessage ForcePlateType2_Origin_Z_value_message= 
+    {
+      TriggerConst = iffun(gteqfun(.z_check,0), 1, 0);
+      Type = MSG_Message ;
+      Message = "The older AMTI origin has its Z value as positive. So this value is converted automatically. Please refer to www.c3d.org/HTML/type21.htm.";
+    };
     //Transducer location      
     AnyRefNode TransducerLocation ={
       AnyFloat Origins= Folder.Groups.FORCE_PLATFORM.ORIGIN.Data;
-      AnyVar ydist=-Origins[0][0]*Folder.PointsScaleFactor; //distance from y axis on transducer to y axis of center of plate
-      AnyVar xdist=-Origins[0][1]*Folder.PointsScaleFactor;//distance from x axis on transducer to x axis of center of plate
-      AnyVar zdist=-Origins[0][2]*Folder.PointsScaleFactor;//distance from z axis on transducer to z surface of plate
+      AnyVar ydist=.z_check*Origins[0][0]*Folder.PointsScaleFactor; //distance from y axis on transducer to y axis of center of plate
+      AnyVar xdist=.z_check*Origins[0][1]*Folder.PointsScaleFactor;//distance from x axis on transducer to x axis of center of plate
+      AnyVar zdist=.z_check*Origins[0][2]*Folder.PointsScaleFactor;//distance from z axis on transducer to z surface of plate
       
       sRel={xdist,ydist,zdist};
       AnyDrawRefFrame drw={ScaleXYZ=0.4*{1,1,1};RGB={1,0,0};};
@@ -119,9 +124,6 @@
     };
     
     AnyFloat Origins= Folder.Groups.FORCE_PLATFORM.ORIGIN.Data;
-    AnyVar ydist=Origins[0][0]; //distance from y axis on transducer to y axis of center of plate
-    AnyVar xdist=Origins[0][1];//distance from x axis on transducer to x axis of center of plate
-    AnyVar zdist=Origins[0][2];//distance from z axis on transducer to z surface of plate
   };  
   
   AnyKinEqSimpleDriver ForcePlateDriver ={
@@ -223,7 +225,7 @@
       PointAway = Off;
       DrawCoord = Off;
       
-      Line.RGB ={1,0,0};
+      Line.RGB ={0,1,1};
       Line.Thickness = 0.01;
       Line.End.Thickness = 2*0.01;
       Line.End.Length = 4*0.01;
@@ -233,69 +235,54 @@
     
   };  
   
-  AnyFolder CenterOfPressure ={
-    
-      AnyDrawLine Line = 
-   {
-     p0 = -{.vector.Vx,.vector.Vy,.vector.Vz};
-     p1 = p0+0.01*{..Force.Flocal[0],..Force.Flocal[1],..Force.Flocal[2]};
+  AnyFolder CenterOfPressure =
+  {
+     AnyVar time=.ForcePlateDriver.t;
+     AnyVector Load=.load(time);
+     AnyVar OnOff=iffun(gtfun(Load[2],-10.0),0.0,1.0);
      
+     AnyVar fx= Load[0];
+     AnyVar fy= Load[1];
+     AnyVar fz= Load[2];     
+    
+     AnyVar mx= Load[3]*Folder.PointsScaleFactor;
+     AnyVar my= Load[4]*Folder.PointsScaleFactor;
+     AnyVar mz= Load[5]*Folder.PointsScaleFactor;
+     
+     AnyVar fzz =iffun(gtfun(  (fz^2)^0.5,0),fz,fz+1000000);
+     
+     AnyVar Vx= my/fzz;
+     AnyVar Vy= -mx/fzz;
+     AnyVar Vz= 0;     
+     
+     AnyRefFrame& ref_ForcePlate = .ForcePlate;
+     ref_ForcePlate  = 
+     {
+         AnyDrawSphere COP_ball = 
+         {
+            RGB = {0,1,0};
+            ScaleXYZ = 0.015 *{1,1,1};
+            Opacity = iffun(gtfun(..fz, -10.0), 0.0, 1.0);
+            Position = -{..Vx, ..Vy, ..Vz};
+         };        
+     };
+     
+     AnyDrawLine Line = 
+     {
+       p0 = -{.Vx, .Vy, .Vz};
+       p1 = p0+0.004*.OnOff*{.fx, .fy, .fz};
+       Visible = ..Switch_DrawForceVectorFromCOP ;
        AnyRefFrame &ref = ..ForcePlate;
-   
-    
-    
+       
+       Line.RGB ={0,0,1};
+       Line.Thickness = 0.01;
+       Line.End.Thickness = 2*0.01;
+       Line.End.Length = 4*0.01;
+       GlobalCoord=Off;
+     };
      
-     Line.RGB ={0,0,1};
-     Line.Thickness = 0.01;
-     Line.End.Thickness = 2*0.01;
-     Line.End.Length = 4*0.01;
-     GlobalCoord=Off;
-   };
-
-    AnyDrawVector vector =   {
-      AnyVar time=..ForcePlateDriver.t;
-      AnyVector Load=..load(time);
-      AnyVar OnOff=iffun(gtfun(Load[2],-10.0),0.0,1.0);
-      
-      AnyVar fx= Load[0];
-      AnyVar fy= Load[1];
-      AnyVar fz= Load[2];
-      
-      AnyVar lx=..ForcePlate.ydist;
-      AnyVar ly=..ForcePlate.xdist;
-      AnyVar lz=..ForcePlate.zdist;
-      
-      AnyVar mx= Load[3]*Folder.PointsScaleFactor;
-      AnyVar my= Load[4]*Folder.PointsScaleFactor;
-      AnyVar mz= Load[5]*Folder.PointsScaleFactor;
-      
-      AnyVar fzz =iffun(gtfun(  (fz^2)^0.5,0),fz,fz+1000000);
-      
-      AnyVar Vx= my/fzz;
-      AnyVar Vy= -mx/fzz;
-      AnyVar Vz= 0;
-      
-      
-      Vec = -..OnOff*{ Vx,Vy,Vz    };
-      GlobalCoord=Off;
-      PointAway = On;
-      DrawCoord = Off;
-      Line.Style=Line3DStyleFull;
-      Line.RGB = {0,1,0};
-      Line.Thickness = 0.000001;
-      
-      Line.End.Thickness = 2*0.015; 
-      Line.End.Length = 4*0.015;  
-      Line.End.Style=Line3DCapStyleEllipsoid;
-      //
-      Line.Start.Thickness = 0*0.015; 
-      Line.Start.Length = 0*0.015;  
-      Line.Start.Style=Line3DCapStyleEllipsoid;
-      
-      
-      AnyRefFrame &ref = ..ForcePlate;
-    };
   };
+  
 };
 
 

@@ -3,7 +3,7 @@
 Right = {
 
   AnyFolder Leg = {  
-    
+    #include "../../LegTD/CadaverParameters.any"
     #include "..\..\LegTD\LegNoMuscles.root.any"
     
       //Reference to folder which contains the interface of the right side
@@ -25,12 +25,10 @@ Right = {
       //This is a sign variable which indicates that this is the right side
       AnyVar Sign =1;
       
-      //-------------------------------------------------------
-      // Interface references that specifies what the leg "Leg/Leg.any" should connect to 
-      //-------------------------------------------------------
-      // INPUT
-      
-      AnyRefFrame &HipNodeRef= ..Trunk.SegmentsLumbar.PelvisSeg.HipJointRightTD;
+      /// Reference to the coordinate system in pelvis where the hip LegTD data is 
+      /// added. This is done, since the leg muscles on the pelvis are given in their 
+      /// own coordinate system
+      AnyRefFrame &HipNodeRef = ..Trunk.SegmentsLumbar.PelvisSeg.Right;
       
       AnyFolder BonesOpacity = {
         AnyVar Foot = Main.DrawSettings.BonesOpacity.RightFoot;
@@ -42,19 +40,18 @@ Right = {
 
       
       AnyFolder MomentMeasure={
-        AnyForceMomentMeasure KneeJointReactionMoments = 
-        {
-          AnyForceBase &Force = ..Jnt.Knee.Constraints.Reaction;
-          AnyRefFrame &Thighknee = ..Seg.Thigh.KneeJoint;
-          AnyVec3 Mlocal = M*Thighknee.Axes;
-        };
+        #if TRUNK_SIMPLE_MUSCLES == 1
+          #define LEG_WITH_PSOAS_MUSCLES 
+          AnyFolder &TrunkMuscles = ...Trunk.MusclesSpineRight;
+        #endif
         
-        AnyForceMomentMeasure AnkleJointReactionMoments = 
-        {
-          AnyForceBase &Force = ..Jnt.Ankle.Constraints.Reaction;
-          AnyRefFrame &Shankankle = ..Seg.Shank.AnkleJoint;
-          AnyVec3 Mlocal = M*Shankankle.Axes;
-        };
+        #define LEG_WITH_JOINT_MUSCLES
+        #include "..\..\LegTD\LegMoments.any"
+        #undef LEG_WITH_JOINT_MUSCLES
+        
+        #ifdef LEG_WITH_PSOAS_MUSCLES 
+        #undef LEG_WITH_PSOAS_MUSCLES 
+        #endif
       };
       
     };//End Leg

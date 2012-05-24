@@ -1,0 +1,114 @@
+ 
+AnyVar LengthScale = ...AnthroSegmentLengths.Right.TalusLength / ...StandardParameters.Right.Talus.Length;    
+AnyVar ms = ...MassScaling.Right.Talus.MassScale;
+AnyVar ls = LengthScale;
+
+
+AnyFolder MorphSourcePoints = {
+  //......BodyModel.Right.Leg.Seg.Shank.AnkleJointStandard 
+  AnyVec3 KneeJointStandard = {0.0384, -0.4078, ..Sign* 0.0138};
+  AnyVec3 AnkleJointStandard = {0.0633, -0.83, ..Sign*0.0214};
+  AnyVec3 AnkleJointAxisStandard = {-0.683553, -0.2060334, ..Sign*0.7002182 }/vnorm({-0.683553, -0.2060334, ..Sign*0.7002182 });
+  AnyVec3 MedialMalleolusStandard = {0.1120, -0.7921,..Sign*0.0104};
+  AnyVec3 LateralMalleolusStandard = {0.045, -0.8159,..Sign*0.0455};  
+  AnyVec3 SubTalarJointStandard={  0.070, -0.851, ..Sign*0.015};  
+  AnyVec3 SubTalarJointAxisStandard = { -0.9416034, -0.2229949, ..Sign*  -0.2523019 }/vnorm({ -0.9416034, -0.2229949, ..Sign*  -0.2523019 } );
+
+  
+  AnyMat33 ARelAnkle = RotMat(AnkleJointStandard,
+  AnkleJointStandard +AnkleJointAxisStandard ,
+  KneeJointStandard)
+  *RotMat(90*pi/180,y);
+  
+  //Calc MalleousMedialis projection on Ankle joint z axis.
+  AnyVar MedMallAxisProj = ( MedialMalleolusStandard - AnkleJointStandard ) * ARelAnkle *{0,0,1}' ;
+  //Calc MalleousLateralis projection on Ankle joint z axis.
+  AnyVar LatMallAxisProj = ( LateralMalleolusStandard - AnkleJointStandard ) * ARelAnkle *{0,0,1}';
+  
+//  AnyVec3 LateralAnklePoint = AnkleJointStandard + (ARelAnkle * LatMallAxisProj * {0,0,1}' )';
+//  AnyVec3 MedialAnklePoint = AnkleJointStandard + (ARelAnkle * MedMallAxisProj * {0,0,1}' )';
+
+  AnyVec3 LateralAnklePoint = AnkleJointStandard + 0.02*AnkleJointAxisStandard ;
+  
+  AnyVec3 MedialAnklePoint = AnkleJointStandard - 0.02*AnkleJointAxisStandard ;
+  
+  AnyVec3 CenterAnklePoint = AnkleJointStandard;
+  
+  AnyVec3 CenterSubTalarPoint = SubTalarJointStandard;
+
+  AnyVec3 PosteriorSubTalarPoint = SubTalarJointStandard +0.02*SubTalarJointAxisStandard;
+  
+  AnyVec3 AnterirorSubTalarPoint = SubTalarJointStandard -0.02*SubTalarJointAxisStandard;
+
+
+  AnyFolder &TalusRef = Main.AnyBodyGaitAppModel.HumanModel.BodyModel.Right.Leg.Seg.Talus;
+  
+  TalusRef = {
+    AnyRefNode MorphNodes = {
+      AnySwitch ShowNodes = Off;
+      AnyRefNode SourceLateralAnklePoint = {
+        sRel = ...LateralAnklePoint ; AnyDrawNode refnode = { Visible = .....ShowNodes; ScaleXYZ = {0.005,0.005,0.005}; RGB = {0.91796875, 0.76953125, 0.06640625};};
+      };  
+      AnyRefNode SourceMedialAnklePoint = {
+        sRel = ...MedialAnklePoint ; AnyDrawNode refnode = { Visible = .....ShowNodes; ScaleXYZ = {0.005,0.005,0.005}; RGB = {0.91796875, 0.76953125, 0.06640625};};
+      };        
+      AnyRefNode SourceCenterAnklePoint = {
+        sRel = ...CenterAnklePoint ; AnyDrawNode refnode = { Visible = .....ShowNodes; ScaleXYZ = {0.005,0.005,0.005}; RGB = {0.91796875, 0.76953125, 0.06640625};};
+      };  
+      AnyRefNode SourceCenterSubTalarPoint = {
+        sRel = ...CenterSubTalarPoint ; AnyDrawNode refnode = { Visible = .....ShowNodes; ScaleXYZ = {0.005,0.005,0.005}; RGB = {0.91796875, 0.76953125, 0.06640625};};
+      };     
+      AnyRefNode SourcePosteriorSubTalarPoint  = {
+        sRel = ...PosteriorSubTalarPoint  ; AnyDrawNode refnode = { Visible = .....ShowNodes; ScaleXYZ = {0.005,0.005,0.005}; RGB = {0.91796875, 0.76953125, 0.06640625};};
+      }; 
+      AnyRefNode SourceAnterirorSubTalarPoint   = {
+        sRel = ...AnterirorSubTalarPoint   ; AnyDrawNode refnode = { Visible = .....ShowNodes; ScaleXYZ = {0.005,0.005,0.005}; RGB = {0.91796875, 0.76953125, 0.06640625};};
+      };       
+    };
+  };
+};
+
+AnyFolder MorphTargetPoints = {
+  AnyVec3 AnkleJointStandard = {0.0633, -0.83, ..Sign*0.0214};
+  AnyVec3 AnkleJointAxisStandard = {-0.683553, -0.2060334, ..Sign*0.7002182 }/vnorm({-0.683553, -0.2060334, ..Sign*0.7002182 });
+  AnyVec3 SubTalarJointStandard={  0.070, -0.851, ..Sign*0.015};  
+  AnyVec3 SubTalarJointAxisStandard = { -0.9416034, -0.2229949, ..Sign*  -0.2523019 }/vnorm({ -0.9416034, -0.2229949, ..Sign*  -0.2523019 } );
+  
+  //Define rotation matrix corresponding to the one used for target morphnodes. 
+  // (That is one based on Ankle joint, Point on the ankle joint axis, and a central point on patella) 
+  AnyMat33 TalusControlPointRot = RotMat( AnkleJointStandard,
+  AnkleJointStandard + AnkleJointAxisStandard,
+  SubTalarJointStandard
+  );
+  AnyFolder &TalusMorphNodes = Main.JntParameterOptModel.LegModel.Right.Seg.Talus.MorphNodes;
+
+  AnyVec3 CenterAnklePoint = AnkleJointStandard;
+  AnyVec3 MedialAnklePoint = AnkleJointStandard + (TalusControlPointRot * TalusMorphNodes.MedialAnkleControlPoint.sRel')'; 
+  AnyVec3 LateralAnklePoint = AnkleJointStandard + (TalusControlPointRot * TalusMorphNodes.LateralAnkleControlPoint.sRel')';
+  AnyVec3 CenterSubTalarPoint = AnkleJointStandard + (TalusControlPointRot * TalusMorphNodes.SubTalarJointControlPoint.sRel')'; 
+  AnyVec3 AnterirorSubTalarPoint = AnkleJointStandard + (TalusControlPointRot * TalusMorphNodes.AnteriorSubTalarControlPoint.sRel')';
+  AnyVec3 PosteriorSubTalarPoint = AnkleJointStandard + (TalusControlPointRot * TalusMorphNodes.PosteriorSubTalarControlPoint.sRel')';
+
+  AnyFolder &TalusRef = Main.AnyBodyGaitAppModel.HumanModel.BodyModel.Right.Leg.Seg.Talus;
+    TalusRef.MorphNodes = {
+      AnyRefNode TargetLateralAnklePoint = {
+        sRel = ...LateralAnklePoint ; AnyDrawNode refnode = { Visible = .....ShowNodes; ScaleXYZ = {0.005,0.005,0.005}; RGB = {0.01796875, 0.76953125, 0.06640625};};
+      };  
+      AnyRefNode TargetMedialAnklePoint = {
+        sRel = ...MedialAnklePoint ; AnyDrawNode refnode = { Visible = .....ShowNodes; ScaleXYZ = {0.005,0.005,0.005}; RGB = {0.01796875, 0.76953125, 0.06640625};};
+      };        
+      AnyRefNode TargetCenterAnklePoint = {
+        sRel = ...CenterAnklePoint; AnyDrawNode refnode = { Visible = .....ShowNodes; ScaleXYZ = {0.005,0.005,0.005}; RGB = {0.01796875, 0.76953125, 0.06640625};};
+      };  
+      AnyRefNode TargetCenterSubTalarPoint = {
+        sRel = ...CenterSubTalarPoint; AnyDrawNode refnode = { Visible = .....ShowNodes; ScaleXYZ = {0.005,0.005,0.005}; RGB = {0.01796875, 0.76953125, 0.06640625};};
+      };     
+      AnyRefNode TargetPosteriorSubTalarPoint  = {
+        sRel = ...PosteriorSubTalarPoint; AnyDrawNode refnode = { Visible = .....ShowNodes; ScaleXYZ = {0.005,0.005,0.005}; RGB = {0.01796875, 0.76953125, 0.06640625};};
+      }; 
+      AnyRefNode TargetAnterirorSubTalarPoint   = {
+        sRel = ...AnterirorSubTalarPoint; AnyDrawNode refnode = { Visible = .....ShowNodes; ScaleXYZ = {0.005,0.005,0.005}; RGB = {0.01796875, 0.76953125, 0.06640625};};
+      };    
+    };
+    
+ };

@@ -1,0 +1,252 @@
+AnyFolder Interface = {
+  
+  #if IncludeHip == 1
+  AnyFolder Trunk = {
+     
+      AnyFolder &PelvisRef = ..Trunk.Seg.Pelvis;
+      PelvisRef = {
+        AnyRefNode DriveNode = {
+          AnyVec3 HipJointMidPoint = (.RHipJoint.sRel + .LHipJoint.sRel)/2;
+
+          sRel = (.RASI.sRel + .LASI.sRel)/2;
+          ARel = RotMat(sRel, HipJointMidPoint , (.RPSI.sRel+.LPSI.sRel)/2);
+        };
+      };
+      
+      AnyKinMeasureOrg PelvisDriveNodePosX = {
+        AnyKinLinear DriveNodeLin = {
+          AnyRefFrame &DriveNode = ..PelvisRef.DriveNode;
+        };
+        MeasureOrganizer={0};
+      };
+      AnyKinMeasureOrg PelvisDriveNodePosY = {
+        AnyKinLinear &DriveNodeLin = .PelvisDriveNodePosX.DriveNodeLin;
+        MeasureOrganizer={1};
+      };
+      AnyKinMeasureOrg PelvisDriveNodePosZ = {
+        AnyKinLinear &DriveNodeLin = .PelvisDriveNodePosX.DriveNodeLin;
+        MeasureOrganizer={2};
+      };      
+      
+      AnyKinMeasureOrg PelvisDriveNodeRot0 = {
+        AnyKinRotational DriveNodeRot = {
+          Type = RotAxesAngles;
+          AnyRefFrame &DriveNode = ..PelvisRef.DriveNode;
+        };
+        MeasureOrganizer={0};
+      };
+      AnyKinMeasureOrg PelvisDriveNodeRot1 = { 
+        AnyKinRotational &DriveNodeRot = .PelvisDriveNodeRot0.DriveNodeRot;
+        MeasureOrganizer={1};
+      };      
+      AnyKinMeasureOrg PelvisDriveNodeRot2 = {
+        AnyKinRotational &DriveNodeRot = .PelvisDriveNodeRot0.DriveNodeRot;
+        MeasureOrganizer={2};
+      };      
+  };
+  #endif
+  
+  
+  #if IncludeRight == 1
+  AnyFolder Right = {
+  
+  #if IncludeHip == 1
+  AnyKinMeasureOrg HipJointMeasure0 = {
+    AnyKinRotational HipMeasure ={
+      // Two reference frames form pelvis and thigh is used to 
+      // calculate the angles
+      AnyRefNode &PelvisNode = ....Trunk.Seg.Pelvis.DriveNode;
+      AnyRefNode &ThighNode = ....Right.Seg.Thigh.DriveNode;
+           
+      Type=RotAxesAngles;
+    };
+    MeasureOrganizer={0};
+  };
+  
+  AnyKinMeasureOrg HipJointMeasure1 = {
+    AnyKinRotational &HipJoint =.HipJointMeasure0.HipMeasure; 
+    MeasureOrganizer={1};
+  };
+  AnyKinMeasureOrg HipJointMeasure2 ={
+    AnyKinRotational &HipJoint =.HipJointMeasure0.HipMeasure; 
+    MeasureOrganizer={2};
+  };
+
+  #endif
+  
+  #if IncludeKnee == 1
+  AnyFolder &ThighRef = ..Right.Seg.Thigh;
+  ThighRef = {
+    AnyRefNode DriveNodeKnee = {
+     sRel = .KneeJoint.sRel;
+     ARel = RotMat(sRel,sRel+{0,0,1}*.KneeJoint.ARel', .HipJoint.sRel)
+     * RotMat(90*pi/180,y);
+   };  
+  };
+  AnyFolder &ShankRef = ..Right.Seg.Shank;
+  ShankRef = {
+    AnyRefNode DriveNodeKnee = {
+     sRel = .KneeJoint.sRel;
+     ARel = RotMat(sRel,sRel+{0,0,1}*.KneeJoint.ARel', .AnkleJoint.sRel)
+     * RotMat(90*pi/180,y)*RotMat(pi,z);
+   };  
+  };
+  
+  AnyKinMeasureOrg KneeJointMeasure = {
+     AnyKinRotational KneeRot ={
+       AnyRefNode &KneeRef1 = ....Right.Seg.Thigh.DriveNodeKnee;
+       AnyRefNode &KneeRef2 = ....Right.Seg.Shank.DriveNodeKnee;
+
+       Type=RotAxesAngles;
+     };
+    MeasureOrganizer={0};
+  };
+  
+  
+  #endif
+  
+  #if IncludeAnkle == 1
+ 
+ ShankRef = {
+    AnyRefNode DriveNodeAnkle = {
+     sRel = .AnkleJoint.sRel;
+     ARel = RotMat(sRel,sRel+{0,0,1}*.AnkleJoint.ARel', .KneeJoint.sRel);
+     //AnyDrawRefFrame drw ={};
+   };     
+ };
+  
+ AnyFolder &FootRef = ..Right.Seg.Foot;
+ FootRef = {
+   AnyRefNode DriveNode = {
+     sRel = .AnkleJoint.sRel;
+     //ARel = .AnkleJoint.ARel*RotMat(11*pi/180,z);
+     ARel = RotMat(sRel,sRel+{0,0,1}*.AnkleJoint.ARel', .RTOE.sRel);
+     //AnyDrawRefFrame drw ={};
+//     ARel = RotMat(.AnkleJoint.,.AnkleJoint.sRel,.KneeJoint.sRel,)
+   };     
+ };
+ 
+ 
+  AnyKinMeasureOrg AnkleJointMeasure = {
+     AnyKinRotational AnkleRot ={
+       AnyRefNode &AnkleRef1 = ....Right.Seg.Shank.DriveNodeAnkle;
+       AnyRefNode &AnkleRef2 = ....Right.Seg.Foot.DriveNode;
+
+//       AnkleRef1 = {AnyDrawRefFrame drw ={RGB={1,0,0};};};
+//       AnkleRef2 = {AnyDrawRefFrame drw ={};};
+       
+       Type=RotAxesAngles;
+       Axis1 = x;
+       Axis2 = y;
+       Axis3 = z;
+     };
+    MeasureOrganizer={0};
+  };
+  #endif
+    
+  
+};
+  #endif
+  
+  #if IncludeLeft == 1
+  AnyFolder Left = {
+  
+  #if IncludeHip == 1
+  AnyKinMeasureOrg HipJointMeasure0 = {
+    AnyKinRotational HipMeasure ={
+      // Two reference frames form pelvis and thigh is used to 
+      // calculate the angles
+      AnyRefNode &PelvisNode = ....Trunk.Seg.Pelvis.DriveNode;
+      AnyRefNode &ThighNode = ....Left.Seg.Thigh.DriveNode;
+           
+      Type=RotAxesAngles;
+    };
+    MeasureOrganizer={0};
+  };
+  
+  AnyKinMeasureOrg HipJointMeasure1 = {
+    AnyKinRotational &HipJoint =.HipJointMeasure0.HipMeasure; 
+    MeasureOrganizer={1};
+  };
+  AnyKinMeasureOrg HipJointMeasure2 ={
+    AnyKinRotational &HipJoint =.HipJointMeasure0.HipMeasure; 
+    MeasureOrganizer={2};
+  };
+
+  #endif
+  
+  #if IncludeKnee == 1
+  AnyFolder &ThighRef = ..Left.Seg.Thigh;
+  ThighRef = {
+    AnyRefNode DriveNodeKnee = {
+     sRel = .KneeJoint.sRel;
+     ARel = RotMat(sRel,sRel+{0,0,1}*.KneeJoint.ARel', .HipJoint.sRel)
+     * RotMat(90*pi/180,y);
+   };  
+  };
+  AnyFolder &ShankRef = ..Left.Seg.Shank;
+  ShankRef = {
+    AnyRefNode DriveNodeKnee = {
+     sRel = .KneeJoint.sRel;
+     ARel = RotMat(sRel,sRel+{0,0,1}*.KneeJoint.ARel', .AnkleJoint.sRel)
+     * RotMat(90*pi/180,y)*RotMat(pi,z);
+   };  
+  };
+  
+  AnyKinMeasureOrg KneeJointMeasure = {
+     AnyKinRotational KneeRot ={
+       AnyRefNode &KneeRef1 = ....Left.Seg.Thigh.DriveNodeKnee;
+       AnyRefNode &KneeRef2 = ....Left.Seg.Shank.DriveNodeKnee;
+
+       Type=RotAxesAngles;
+     };
+    MeasureOrganizer={0};
+  };
+  
+  
+  #endif
+  
+  #if IncludeAnkle == 1
+  
+ ShankRef = {
+    AnyRefNode DriveNodeAnkle = {
+     sRel = .AnkleJoint.sRel;
+     ARel = RotMat(sRel,sRel+{0,0,1}*.AnkleJoint.ARel', .KneeJoint.sRel);
+     //AnyDrawRefFrame drw ={};
+   };     
+ };
+  
+ AnyFolder &FootRef = ..Left.Seg.Foot;
+ FootRef = {
+   AnyRefNode DriveNode = {
+     sRel = .AnkleJoint.sRel;
+     //ARel = .AnkleJoint.ARel*RotMat(11*pi/180,z);
+     ARel = RotMat(sRel,sRel+{0,0,1}*.AnkleJoint.ARel', .LTOE.sRel);
+     //AnyDrawRefFrame drw ={};
+//     ARel = RotMat(.AnkleJoint.,.AnkleJoint.sRel,.KneeJoint.sRel,)
+   };     
+ };
+ 
+ 
+  AnyKinMeasureOrg AnkleJointMeasure = {
+     AnyKinRotational AnkleRot ={
+       AnyRefNode &AnkleRef1 = ....Left.Seg.Shank.DriveNodeAnkle;
+       AnyRefNode &AnkleRef2 = ....Left.Seg.Foot.DriveNode;
+
+//       AnkleRef1 = {AnyDrawRefFrame drw ={RGB={1,0,0};};};
+//       AnkleRef2 = {AnyDrawRefFrame drw ={};};
+       
+       Type=RotAxesAngles;
+       Axis1 = x;
+       Axis2 = y;
+       Axis3 = z;
+     };
+    MeasureOrganizer={0};
+  };
+  #endif
+    
+  
+};
+  #endif  
+  
+};

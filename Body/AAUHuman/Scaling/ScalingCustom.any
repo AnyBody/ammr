@@ -1,0 +1,559 @@
+/*  AUTHOR: Pavel Galibarov, peg@anybodytech.com
+
+To include a custom scaling law please wrap existing scaling law folder by another Scaling folder and include "ScalingCustom.any". 
+
+For example:
+HumanModel = {
+    #include "<ANYBODY_PATH_BODY>\Scaling\ScalingStandard.any"
+};
+
+has to be replaced to by:
+
+HumanModel = {
+
+    // customization interface 
+    #include "<ANYBODY_PATH_BODY>\Scaling\ScalingCustom.any"    
+
+    // specification of segments to be scaled
+    #define CUSTOM_SCALING_PelvisSeg     // CUSTOM_SCALING_<Segment Name> 
+    // please note that it may also require right/left flags: 
+    #define CUSTOM_SCALING_Right_Thigh
+
+    // 'Scaling' subfolder with the base scaling to be used for segments where no scaling was specified
+    Scaling = { 
+        #include "<ANYBODY_PATH_BODY>\Scaling\ScalingStandard.any"
+    };
+    
+    Scaling.GeometricalScaling.Right.Thigh = {
+      AnyFunTransform3D &ScaleFunction = Main.MyScalingLaws.RightThighScaleFunction;    // your custom scaling law for right thigh
+    }
+
+    Scaling.GeometricalScaling.PelvisSeg = {
+      AnyFunTransform3D &ScaleFunction = Main.MyScalingLaws.PelvisScaleFunction;        // your custom scaling law for pelvis
+    }
+    
+}
+
+*/
+
+AnyFolder Scaling = {
+
+  AnyFolder &StandardParameters = Scaling.StandardParameters;
+  AnyFolder &MassScaling = Scaling.MassScaling;
+  AnyFolder &StrengthScaling = Scaling.StrengthScaling;
+  AnyFolder &FiberLengthScaling = Scaling.FiberLengthScaling;
+
+  AnyFolder GeometricalScaling = {
+    
+    // Seleccion of the appropriate law depending on the included leg
+    // **************************************************************
+    
+    #if RIGHT_LEG_TD + LEFT_LEG_TD == 0
+    
+    AnyFolder Foot  = { 
+    #ifndef CUSTOM_SCALING_Foot
+      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.Foot.ScaleFunction;
+    #else
+      AnyMessage scaling_message_Foot = 
+      {
+        TriggerPreProcess = On;
+        Type = MSG_Warning;
+        Message = "Custom scaling for 'Foot' segment is used! Please specify a scaling law should an 'Unresolved object' error occur";
+      };           
+    #endif
+    };
+    
+    AnyFolder Shank = {
+    #ifndef CUSTOM_SCALING_Shank
+      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.Shank.ScaleFunction;
+    #else
+      AnyMessage scaling_message_Shank = 
+      {
+        TriggerPreProcess = On;
+        Type = MSG_Warning;
+        Message = "Custom scaling for 'Shank' segment is used! Please specify a scaling law should an 'Unresolved object' error occur";
+      };           
+    #endif    
+    };
+    
+    AnyFolder Thigh = {
+    #ifndef CUSTOM_SCALING_Thigh
+      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.Thigh.ScaleFunction;
+    #else
+      AnyMessage scaling_message_Thigh = 
+      {
+        TriggerPreProcess = On;
+        Type = MSG_Warning;
+        Message = "Custom scaling for 'Thigh' segment is used! Please specify a scaling law should an 'Unresolved object' error occur";
+      };           
+    #endif    
+    };
+      #else
+      
+      #if RIGHT_LEG_TD == 1
+      
+      AnyFolder Right ={
+        
+        AnyFolder Foot  = {
+        #ifndef CUSTOM_SCALING_Right_Foot
+          AnyFunTransform3D &ScaleFunction = ...Scaling.GeometricalScaling.Right.Foot.ScaleFunction;
+        #else
+          AnyMessage scaling_message_Right_Foot = 
+          {
+            TriggerPreProcess = On;
+            Type = MSG_Warning;
+            Message = "Custom scaling for 'Right.Foot' segment is used! Please specify a scaling law should an 'Unresolved object' error occur";
+          };           
+        #endif
+        };
+        
+        AnyFolder Talus  = {
+        #ifndef CUSTOM_SCALING_Right_Talus         
+          AnyFunTransform3D &ScaleFunction = ...Scaling.GeometricalScaling.Right.Talus.ScaleFunction;
+        #else
+          AnyMessage scaling_message_Right_Talus = 
+          {
+            TriggerPreProcess = On;
+            Type = MSG_Warning;
+            Message = "Custom scaling for 'Right.Talus' segment is used! Please specify a scaling law should an 'Unresolved object' error occur";
+          };           
+        #endif
+        };
+        
+        AnyFolder Shank = {
+        #ifndef CUSTOM_SCALING_Right_Shank
+          AnyFunTransform3D &ScaleFunction = ...Scaling.GeometricalScaling.Right.Shank.ScaleFunction;
+        #else
+          AnyMessage scaling_message_Right_Shank = 
+          {
+            TriggerPreProcess = On;
+            Type = MSG_Warning;
+            Message = "Custom scaling for 'Right.Shank' segment is used! Please specify a scaling law should an 'Unresolved object' error occur";
+          };           
+        #endif        
+        };    
+        
+        AnyFolder Thigh = {
+        #ifndef CUSTOM_SCALING_Right_Thigh
+          AnyFunTransform3D &ScaleFunction = ...Scaling.GeometricalScaling.Right.Thigh.ScaleFunction;
+        #else
+          AnyMessage scaling_message_Right_Thigh = 
+          {
+            TriggerPreProcess = On;
+            Type = MSG_Warning;
+            Message = "Custom scaling for 'Right.Thigh' segment is used! Please specify a scaling law should an 'Unresolved object' error occur";
+          };           
+        #endif        
+        };
+      };//Right
+      #endif
+    
+      #if LEFT_LEG_TD == 1
+      
+      AnyFolder Left ={
+        AnyFolder Foot  = {
+        #ifndef CUSTOM_SCALING_Left_Foot
+          AnyFunTransform3D &ScaleFunction = ...Scaling.GeometricalScaling.Left.Foot.ScaleFunction;
+        #else
+          AnyMessage scaling_message_Left_Foot = 
+          {
+            TriggerPreProcess = On;
+            Type = MSG_Warning;
+            Message = "Custom scaling for 'Left.Foot' segment is used! Please specify a scaling law should an 'Unresolved object' error occur";
+          };           
+        #endif           
+        };
+        AnyFolder Talus  = {
+        #ifndef CUSTOM_SCALING_Left_Talus
+          AnyFunTransform3D &ScaleFunction = ...Scaling.GeometricalScaling.Left.Talus.ScaleFunction;
+        #else
+          AnyMessage scaling_message_Left_Talus = 
+          {
+            TriggerPreProcess = On;
+            Type = MSG_Warning;
+            Message = "Custom scaling for 'Left.Talus' segment is used! Please specify a scaling law should an 'Unresolved object' error occur";
+          };           
+        #endif           
+        };
+        AnyFolder Shank = {
+        #ifndef CUSTOM_SCALING_Left_Shank
+          AnyFunTransform3D &ScaleFunction = ...Scaling.GeometricalScaling.Left.Shank.ScaleFunction;
+        #else
+          AnyMessage scaling_message_Left_Shank = 
+          {
+            TriggerPreProcess = On;
+            Type = MSG_Warning;
+            Message = "Custom scaling for 'Left.Shank' segment is used! Please specify a scaling law should an 'Unresolved object' error occur";
+          };           
+        #endif           
+        };        
+        AnyFolder Thigh = {
+        #ifndef CUSTOM_SCALING_Left_Thigh
+          AnyFunTransform3D &ScaleFunction = ...Scaling.GeometricalScaling.Left.Thigh.ScaleFunction;
+        #else
+          AnyMessage scaling_message_Left_Thigh = 
+          {
+            TriggerPreProcess = On;
+            Type = MSG_Warning;
+            Message = "Custom scaling for 'Left.Thigh' segment is used! Please specify a scaling law should an 'Unresolved object' error occur";
+          };           
+        #endif           
+        };
+      };//Left
+      #endif
+
+    #endif
+    
+    
+    
+    // Common law for the upper body
+    // *****************************
+    
+    AnyFolder PelvisSeg = {
+    #ifndef CUSTOM_SCALING_PelvisSeg
+      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.PelvisSeg.ScaleFunction;
+    #else
+      AnyMessage scaling_message_PelvisSeg = 
+      {
+        TriggerPreProcess = On;
+        Type = MSG_Warning;
+        Message = "Custom scaling for 'PelvisSeg' segment is used! Please specify a scaling law should an 'Unresolved object' error occur";
+      };           
+    #endif           
+    };
+    
+    AnyFolder Trunk = {
+    #ifndef CUSTOM_SCALING_Trunk
+      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.Trunk.ScaleFunction;
+    #else
+      AnyMessage scaling_message_Trunk = 
+      {
+        TriggerPreProcess = On;
+        Type = MSG_Warning;
+        Message = "Custom scaling for 'Trunk' segment is used! Please specify a scaling law should an 'Unresolved object' error occur";
+      };           
+    #endif           
+    };
+    
+    AnyFolder Head = {
+    #ifndef CUSTOM_SCALING_Head
+      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.Head.ScaleFunction;
+    #else
+      AnyMessage scaling_message_Head = 
+      {
+        TriggerPreProcess = On;
+        Type = MSG_Warning;
+        Message = "Custom scaling for 'Head' segment is used! Please specify a scaling law should an 'Unresolved object' error occur";
+      };           
+    #endif           
+    };
+    
+    
+    AnyFolder SkullSeg = {
+    #ifndef CUSTOM_SCALING_SkullSeg
+      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.SkullSeg.ScaleFunction;
+    #else
+      AnyMessage scaling_message_SkullSeg = 
+      {
+        TriggerPreProcess = On;
+        Type = MSG_Warning;
+        Message = "Custom scaling for 'SkullSeg' segment is used! Please specify a scaling law should an 'Unresolved object' error occur";
+      };           
+    #endif       
+    };
+    AnyFolder ThoraxSeg = {
+    #ifndef CUSTOM_SCALING_ThoraxSeg
+      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.ThoraxSeg.ScaleFunction;
+    #else
+      AnyMessage scaling_message_ThoraxSeg = 
+      {
+        TriggerPreProcess = On;
+        Type = MSG_Warning;
+        Message = "Custom scaling for 'ThoraxSeg' segment is used! Please specify a scaling law should an 'Unresolved object' error occur";
+      };           
+    #endif       
+    };
+    
+    AnyFolder C1Seg = {
+    #ifndef CUSTOM_SCALING_C1Seg
+        AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.C1Seg.ScaleFunction;
+    #else
+      AnyMessage scaling_message_C1Seg = 
+      {
+        TriggerPreProcess = On;
+        Type = MSG_Warning;
+        Message = "Custom scaling for 'C1Seg' segment is used! Please specify a scaling law should an 'Unresolved object' error occur";
+      };           
+    #endif           
+    };
+
+    AnyFolder C2Seg = {
+    #ifndef CUSTOM_SCALING_C2Seg
+      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.C2Seg.ScaleFunction;
+    #else
+      AnyMessage scaling_message_C2Seg = 
+      {
+        TriggerPreProcess = On;
+        Type = MSG_Warning;
+        Message = "Custom scaling for 'C2Seg' segment is used! Please specify a scaling law should an 'Unresolved object' error occur";
+      };           
+    #endif           
+    };
+    
+    AnyFolder C3Seg = {
+    #ifndef CUSTOM_SCALING_C3Seg
+        AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.C3Seg.ScaleFunction;
+    #else
+      AnyMessage scaling_message_C3Seg = 
+      {
+        TriggerPreProcess = On;
+        Type = MSG_Warning;
+        Message = "Custom scaling for 'C3Seg' segment is used! Please specify a scaling law should an 'Unresolved object' error occur";
+      };           
+    #endif           
+    };
+    
+    AnyFolder C4Seg = {
+    #ifndef CUSTOM_SCALING_C4Seg
+      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.C4Seg.ScaleFunction;
+    #else
+      AnyMessage scaling_message_C4Seg = 
+      {
+        TriggerPreProcess = On;
+        Type = MSG_Warning;
+        Message = "Custom scaling for 'C4Seg' segment is used! Please specify a scaling law should an 'Unresolved object' error occur";
+      };           
+    #endif           
+    };
+    
+    AnyFolder C5Seg = {
+    #ifndef CUSTOM_SCALING_C5Seg
+      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.C5Seg.ScaleFunction;
+    #else
+      AnyMessage scaling_message_C5Seg = 
+      {
+        TriggerPreProcess = On;
+        Type = MSG_Warning;
+        Message = "Custom scaling for 'C5Seg' segment is used! Please specify a scaling law should an 'Unresolved object' error occur";
+      };           
+    #endif      
+    };
+    AnyFolder C6Seg = {
+    #ifndef CUSTOM_SCALING_C6Seg    
+      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.C6Seg.ScaleFunction;
+    #else
+      AnyMessage scaling_message_C6Seg = 
+      {
+        TriggerPreProcess = On;
+        Type = MSG_Warning;
+        Message = "Custom scaling for 'C6Seg' segment is used! Please specify a scaling law should an 'Unresolved object' error occur";
+      };           
+    #endif       
+    };
+    AnyFolder C7Seg = {
+    #ifndef CUSTOM_SCALING_C7Seg    
+      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.C7Seg.ScaleFunction;
+    #else
+      AnyMessage scaling_message_C7Seg = 
+      {
+        TriggerPreProcess = On;
+        Type = MSG_Warning;
+        Message = "Custom scaling for 'C7Seg' segment is used! Please specify a scaling law should an 'Unresolved object' error occur";
+      };           
+    #endif           
+    };
+    AnyFolder Cervical = {
+    #ifndef CUSTOM_SCALING_Cervical
+      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.Cervical.ScaleFunction;
+    #else
+      AnyMessage scaling_message_Cervical = 
+      {
+        TriggerPreProcess = On;
+        Type = MSG_Warning;
+        Message = "Custom scaling for 'Cervical' group is used! Please specify a scaling law should an 'Unresolved object' error occur";
+      };           
+    #endif           
+    };
+    
+    AnyFolder L1Seg = {
+    #ifndef CUSTOM_SCALING_L1Seg
+      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.L1Seg.ScaleFunction;
+    #else
+      AnyMessage scaling_message_L1Seg = 
+      {
+        TriggerPreProcess = On;
+        Type = MSG_Warning;
+        Message = "Custom scaling for 'L1Seg' segment is used! Please specify a scaling law should an 'Unresolved object' error occur";
+      };           
+    #endif           
+    };
+
+    AnyFolder L2Seg = {
+    #ifndef CUSTOM_SCALING_L2Seg
+      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.L2Seg.ScaleFunction;
+    #else
+      AnyMessage scaling_message_L2Seg = 
+      {
+        TriggerPreProcess = On;
+        Type = MSG_Warning;
+        Message = "Custom scaling for 'L2Seg' segment is used! Please specify a scaling law should an 'Unresolved object' error occur";
+      };           
+    #endif           
+    };
+
+    AnyFolder L3Seg = {
+    #ifndef CUSTOM_SCALING_L3Seg
+      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.L3Seg.ScaleFunction;
+    #else
+      AnyMessage scaling_message_L3Seg = 
+      {
+        TriggerPreProcess = On;
+        Type = MSG_Warning;
+        Message = "Custom scaling for 'L3Seg' segment is used! Please specify a scaling law should an 'Unresolved object' error occur";
+      };           
+    #endif           
+    };
+    AnyFolder L4Seg = {
+    #ifndef CUSTOM_SCALING_L4Seg
+      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.L4Seg.ScaleFunction;
+    #else
+      AnyMessage scaling_message_L4Seg = 
+      {
+        TriggerPreProcess = On;
+        Type = MSG_Warning;
+        Message = "Custom scaling for 'L4Seg' segment is used! Please specify a scaling law should an 'Unresolved object' error occur";
+      };           
+    #endif           
+    };
+    AnyFolder L5Seg = {
+    #ifndef CUSTOM_SCALING_L5Seg
+      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.L5Seg.ScaleFunction;
+    #else
+      AnyMessage scaling_message_L5Seg = 
+      {
+        TriggerPreProcess = On;
+        Type = MSG_Warning;
+        Message = "Custom scaling for 'L5Seg' segment is used! Please specify a scaling law should an 'Unresolved object' error occur";
+      };           
+    #endif           
+    };
+    AnyFolder SacrumSeg = {
+    #ifndef CUSTOM_SCALING_SacrumSeg    
+      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.SacrumSeg.ScaleFunction;
+    #else
+      AnyMessage scaling_message_SacrumSeg = 
+      {
+        TriggerPreProcess = On;
+        Type = MSG_Warning;
+        Message = "Custom scaling for 'SacrumSeg' segment is used! Please specify a scaling law should an 'Unresolved object' error occur";
+      };           
+    #endif           
+    };
+    
+    AnyFolder Lumbar = {
+    #ifndef CUSTOM_SCALING_Lumbar
+      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.Lumbar.ScaleFunction;
+    #else
+      AnyMessage scaling_message_Lumbar = 
+      {
+        TriggerPreProcess = On;
+        Type = MSG_Warning;
+        Message = "Custom scaling for 'Lumbar' group is used! Please specify a scaling law should an 'Unresolved object' error occur";
+      };           
+    #endif           
+    };
+    
+    AnyFolder Clavicula = {
+    #ifndef CUSTOM_SCALING_Clavicula
+      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.Clavicula.ScaleFunction;
+    #else
+      AnyMessage scaling_message_Clavicula = 
+      {
+        TriggerPreProcess = On;
+        Type = MSG_Warning;
+        Message = "Custom scaling for 'Clavicula' segment is used! Please specify a scaling law should an 'Unresolved object' error occur";
+      };           
+    #endif           
+    };
+    
+    AnyFolder Scapula = {
+    #ifndef CUSTOM_SCALING_Scapula
+      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.Scapula.ScaleFunction;
+    #else
+      AnyMessage scaling_message_Scapula = 
+      {
+        TriggerPreProcess = On;
+        Type = MSG_Warning;
+        Message = "Custom scaling for 'Scapula' segment is used! Please specify a scaling law should an 'Unresolved object' error occur";
+      };           
+    #endif           
+    };
+    
+    AnyFolder Humerus = {
+    #ifndef CUSTOM_SCALING_Humerus
+      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.Humerus.ScaleFunction;
+    #else
+      AnyMessage scaling_message_Humerus = 
+      {
+        TriggerPreProcess = On;
+        Type = MSG_Warning;
+        Message = "Custom scaling for 'Humerus' segment is used! Please specify a scaling law should an 'Unresolved object' error occur";
+      };           
+    #endif           
+    };
+    
+    AnyFolder Ulna = {
+    #ifndef CUSTOM_SCALING_Ulna
+      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.Ulna.ScaleFunction;
+    #else
+      AnyMessage scaling_message_Ulna = 
+      {
+        TriggerPreProcess = On;
+        Type = MSG_Warning;
+        Message = "Custom scaling for 'Ulna' segment is used! Please specify a scaling law should an 'Unresolved object' error occur";
+      };           
+    #endif           
+    };
+    
+    AnyFolder Radius = {
+    #ifndef CUSTOM_SCALING_Radius
+      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.Radius.ScaleFunction;
+    #else
+      AnyMessage scaling_message_Radius = 
+      {
+        TriggerPreProcess = On;
+        Type = MSG_Warning;
+        Message = "Custom scaling for 'Radius' segment is used! Please specify a scaling law should an 'Unresolved object' error occur";
+      };           
+    #endif           
+    };
+    
+    AnyFolder Hand = {
+    #ifndef CUSTOM_SCALING_Hand
+      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.Hand.ScaleFunction;
+    #else
+      AnyMessage scaling_message_Hand = 
+      {
+        TriggerPreProcess = On;
+        Type = MSG_Warning;
+        Message = "Custom scaling for 'Hand' segment is used! Please specify a scaling law should an 'Unresolved object' error occur";
+      };           
+    #endif           
+    };
+    
+  };
+  
+};
+
+
+
+
+
+
+
+
+
+
+
+
+

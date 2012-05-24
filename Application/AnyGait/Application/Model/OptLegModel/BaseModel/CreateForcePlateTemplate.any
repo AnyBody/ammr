@@ -1,0 +1,104 @@
+
+#class_template CreateForcePlate (AnySeg &Limb, Time, Fx, Fy, Fz, COPx, COPy, COPz, Mz) {
+  
+  AnyVector T = Time;
+  
+  AnyFixedRefFrame GlobalRef ={
+    Origin={0,0,0}; 
+  };
+  
+  AnySeg CenterOfPressure={
+    Mass=0;
+    Jii={0.0,0.0,0.0};
+    AnyRefNode node={
+      sRel={0,0,0};
+      AnyDrawNode drw={ScaleXYZ={0.015,.015,.005}; RGB={1,0,0};};
+    };
+  };
+  
+  AnyKinLinear Lin1={
+    AnyRefFrame &ref1=.GlobalRef;
+    AnyRefFrame &ref2=.CenterOfPressure;
+  };
+  
+  AnyKinRotational Rot1={
+    AnyRefFrame &ref1=.GlobalRef;
+    AnyRefFrame &ref2=.CenterOfPressure;
+    Type=RotVector;
+  };
+  
+  //In other models the center of pressure is moved sideways a bit to get realistic adduction/abduction of the ankel
+  AnyKinEqInterPolDriver LinDrv={
+    AnyKinLinear &ref1= .Lin1;
+    Type=PiecewiseLinear;
+    T = .T;
+    Data = { COPx, COPy, COPz};
+    Reaction.Type={Off,Off,Off};
+  };
+  
+  AnyKinEqSimpleDriver RotDrv={
+    AnyKinRotational &ref1= .Rot1;
+    DriverPos={0,0,0};
+    DriverVel={0,0,0};
+    Reaction.Type={Off,Off,Off};
+  };
+  
+  AnyReacForce ForcePlateContactForce={
+    
+    AnyKinLinear Lin={
+      //very very important this ensure that the reaction is between artifical segment and the foot
+      //and not between foot and globalref if Ref had been equal -1 which is default
+      Ref=0; 
+      AnySeg &ref1=..CenterOfPressure;
+      AnySeg &ref2= ..Limb;
+    };
+    
+    AnyKinRotational Rot= {
+      AnySeg &ref1=..CenterOfPressure;
+      AnySeg &ref2= ..Limb;
+      Type=RotVector;
+    };
+  };
+  
+  
+  AnyForce3D ForceOnForcePlate ={
+    
+    AnyFunInterpol force ={
+      Type=Bspline;
+      BsplineOrder = 8;
+      T = ..T;
+      Data = { Fx, Fy, Fz};
+    }; 
+    AnySeg &ref1=.CenterOfPressure;
+    F = force(t);
+    
+  };
+  
+  
+  AnyMoment3D MomentOnForcePlate ={
+    
+    AnyFunInterpol moment ={
+      Type=Bspline;
+      BsplineOrder = 8;
+      T = ..T;
+      Data = { 0*iarr(1,NumElemOf(Mz)) , 0*iarr(1,NumElemOf(Mz)) , Mz};
+    }; 
+    AnySeg &ref1=.CenterOfPressure;
+    M = moment(t);
+  };
+  
+  AnyDrawVector DrawSupport = {
+    AnyRefFrame &ref = .CenterOfPressure;
+    Vec = 0.0005*.ForceOnForcePlate.F;
+    
+    PointAway = Off;
+    DrawCoord = Off;
+    
+    Line.RGB = {0,0,1};
+    Line.Thickness =0.0075;
+    Line.End.Thickness = 2*0.0075;
+    Line.End.Length = 4*0.0075;
+  };
+
+
+};

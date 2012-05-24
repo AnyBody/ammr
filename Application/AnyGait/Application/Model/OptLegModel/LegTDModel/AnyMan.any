@@ -1,0 +1,100 @@
+// File of anthropometric data based on data from the book 
+//Dynamics of Human Gait (Second Edition)
+//Christopher L Vaughan, PhD
+//University of Cape Town
+//Brian L Davis, PhD
+//Cleveland Clinic Foundation
+//Jeremy C O’Connor, BSc (Eng)
+//University of Cape Town
+
+AnyVar BMI = AnthroData.Body_Mass/(AnthroData.body_height^2);
+  AnyVar FatPercent = (-0.09 + 0.0149*BMI - 0.00009*BMI^2)*100; //Estimation from Frankenfield et al. (2001) valid for men
+
+
+
+AnyFolder AnthroData = {
+
+  
+  AnyVar Body_Mass = Main.BodyMass;
+  AnyVar  body_height = Main.BodyHeight;
+  //Only the masses for the leg are used for the gait model, but the a full dataset
+  //needs to be present in order to load the model
+  
+  
+  //Segment masses in kg from Winter ("Biomechanics and motor control of human movement." David A. Winter)
+  AnyVar lumbar = 0.139*Body_Mass; // T12-L1 to L5-Sacrum
+  AnyVar thorax = 0.1894*Body_Mass; // C7-T1 to T12-L1 (modified from 0.216 winter to separate scapula)
+  AnyVar pelvis = 0.142*Body_Mass;
+  AnyVar clavicle_r = 0.0133*Body_Mass;
+  AnyVar upper_arm_r = 0.028*Body_Mass;
+  AnyVar lower_arm_r = 0.016*Body_Mass;
+  AnyVar hand_r = 0.006*Body_Mass;
+  AnyVar clavicle_l = 0.0133*Body_Mass;
+  AnyVar upper_arm_l = 0.028*Body_Mass;
+  AnyVar lower_arm_l = 0.016*Body_Mass;
+  AnyVar hand_l = 0.006*Body_Mass;
+  AnyVar head = 0.081*Body_Mass; // head and cervical
+  AnyVar thigh_r = 0.1*Body_Mass;
+  AnyVar lower_leg_r = 0.0465*Body_Mass;
+  AnyVar foot_r = 0.0145*Body_Mass;
+  AnyVar ball_r = 0.000;
+  AnyVar thigh_l = 0.1*Body_Mass;
+  AnyVar lower_leg_l = 0.0465*Body_Mass;
+  AnyVar foot_l = 0.0145*Body_Mass;
+  AnyVar ball_l = 0.000;
+
+  
+  // Those two folders are used by the TD leg
+  AnyFolder Right ={
+    AnyVar thigh = 0.1*.Body_Mass;
+    AnyVar lower_leg = 0.0465*.Body_Mass;
+    AnyVar talus = 0.00020*.Body_Mass;
+    AnyVar foot = 0.0145*.Body_Mass;
+    AnyVar ball = 0.000;
+  };
+  AnyFolder Left={
+    AnyVar thigh = 0.1*.Body_Mass;
+    AnyVar lower_leg = 0.0465*.Body_Mass;
+    AnyVar talus = 0.020*.Body_Mass;
+    AnyVar foot = 0.0145*.Body_Mass;
+    AnyVar ball = 0.000;
+  };
+  
+};
+
+//Only the lenghts for the leg are used for this model, but the a full dataset
+//needs to be present in order to load the model
+AnyFolder AnthroSegmentLengths = {
+  
+  
+  AnyVar ThighLength = 0.45579;
+  AnyVar ShankLength = 0.46;
+  AnyVar FootLength = 0.200771;
+  AnyVar PelvisWidth = 0.16; //distance between hip joints
+  AnyVar HeadHeight = 0.14;//height in neutral position from  C1HatNode to top of head
+    AnyFolder &SP = Main.AnyBodyGaitAppModel.HumanModel.Scaling.StandardParameters;
+    AnyVar StandardBodyHeight = SP.Head.Height+SP.Trunk.Height+SP.Right.LengthLeg+0.05;
+    AnyVar TrunkHeight = SP.Trunk.Height * Main.BodyHeight/StandardBodyHeight;
+//  AnyVar TrunkHeight = Main.SubjectSpecificData.Anthropometrics.TrunkHeight;//....SubjectSpecificData.Anthropometrics.TrunkHeight;//height in neautral position from  C1HatNode to L5SacrumJnt
+  AnyVar UpperArmLength = 0.340079;
+  AnyVar LowerArmLength =0.2690167;
+  AnyVar HandLength = 0.182;
+  AnyVar HandBreadth = 0.085;
+  
+  
+  // Those two folders are used by the TD leg
+  AnyFolder Right ={
+    AnyVar ThighLength = vnorm(Main.JntParameterOptModel.LegModel.Right.Seg.Thigh.HipJoint.sRel-Main.JntParameterOptModel.LegModel.Right.Seg.Thigh.KneeJoint.sRel);
+    AnyVar ShankLength = vnorm(Main.JntParameterOptModel.LegModel.Right.Seg.Shank.KneeJoint.sRel-Main.JntParameterOptModel.LegModel.Right.Seg.Shank.AnkleJoint.sRel);
+    AnyVar FootLength = vnorm(Main.AnyBodyGaitAppModel.HumanModel.BodyModel.Right.Leg.Seg.Foot.SubTalarJoint.sRel-Main.AnyBodyGaitAppModel.HumanModel.BodyModel.Right.Leg.Seg.Foot.ToeJoint.sRel);
+    AnyVar TalusLength = 0.133*FootLength; // calculated automaticaly from the foot size
+  };
+  
+  AnyFolder Left ={
+    AnyVar ThighLength = vnorm(Main.JntParameterOptModel.LegModel.Left.Seg.Thigh.HipJoint.sRel-Main.JntParameterOptModel.LegModel.Left.Seg.Thigh.KneeJoint.sRel);
+    AnyVar ShankLength = vnorm(Main.JntParameterOptModel.LegModel.Left.Seg.Shank.KneeJoint.sRel-Main.JntParameterOptModel.LegModel.Left.Seg.Shank.AnkleJoint.sRel);
+    AnyVar FootLength = vnorm(Main.AnyBodyGaitAppModel.HumanModel.BodyModel.Left.Leg.Seg.Foot.SubTalarJoint.sRel-Main.AnyBodyGaitAppModel.HumanModel.BodyModel.Left.Leg.Seg.Foot.ToeJoint.sRel);
+    AnyVar TalusLength = 0.133*FootLength; // calculated automaticaly from the foot size
+  };  
+};
+

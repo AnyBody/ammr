@@ -1,0 +1,187 @@
+ 
+AnyVar ShankLength = vnorm(  Main.JntParameterOptModel.LegModel.Left.Seg.Shank.KneeJoint.sRel 
+- Main.JntParameterOptModel.LegModel.Left.Seg.Shank.AnkleJoint.sRel);
+AnyVar ShankLengthStandard = vnorm(MorphSourcePoints.KneeJointStandard - MorphSourcePoints.AnkleJointStandard );
+
+AnyVar LengthScale = ShankLength / ShankLengthStandard;  
+AnyVar ms = ...MassScaling.Left.Shank.MassScale;
+AnyVar ls = LengthScale;
+
+
+AnyFolder MorphSourcePoints = {
+  AnyVec3 KneeJointStandard = .....BodyModel.Left.Leg.Seg.Shank.KneeJoint.sRelUnscaled;
+
+//  AnyVec3 KneeJointAxisStandard = (EpicondylusFemorisLateralStandard-EpicondylusFemorisMedialisStandard)/vnorm(EpicondylusFemorisLateralStandard-EpicondylusFemorisMedialisStandard);
+
+  AnyVec3 PatellaTendonOriginStandard = .....BodyModel.Left.Leg.CadaverParameters.Patella.Origin_patella_tendon ;
+  AnyVec3 AnkleJointStandard =.....BodyModel.Left.Leg.Seg.Shank.AnkleJoint.sRelUnscaled; 
+
+  AnyVec3 EpicondylusFemorisLateralStandard= .....BodyModel.Left.Leg.Seg.Shank.KneeJoint.LateralFemuralCondyleInNeutralConf ;
+  AnyVec3 EpicondylusFemorisMedialisStandard= .....BodyModel.Left.Leg.Seg.Shank.KneeJoint.MedialFemuralCondyleInNeutralConf ;
+  AnyVec3 MedialMalleolusStandard = .....BodyModel.Left.Leg.CadaverParameters.Shank.MedialAnkleAxisMarker ;
+  AnyVec3 LateralMalleolusStandard = .....BodyModel.Left.Leg.CadaverParameters.Shank.LateralAnkleAxisMarker ;
+  
+  AnyMat33 ARelAnkle = .....BodyModel.Left.Leg.Seg.Shank.AnkleJoint.ARelUnscaled;
+    
+  AnyMat33 ARelKnee = .....BodyModel.Left.Leg.Seg.Shank.KneeJoint.ARelUnscaled;
+  
+  //Calc EpicondylusFemorisMedialis projection on knee joint z axis.
+  AnyVar EpiMedAxisProj = (EpicondylusFemorisMedialisStandard-KneeJointStandard ) * ARelKnee *{0,0,1}' ;
+  
+  //Calc EpicondylusFemorisMedialis projection on knee joint z axis.
+  AnyVar EpiLatAxisProj = (EpicondylusFemorisLateralStandard-KneeJointStandard ) * ARelKnee *{0,0,1}';
+  
+  // Calc Patella tendon origin projection on knee joint x axis 
+  AnyVar PatellaProj = (PatellaTendonOriginStandard -KneeJointStandard ) * ARelKnee *{1,0,0}';
+  
+  //Calc MalleousMedialis projection on Ankle joint z axis.
+  AnyVar MedMallAxisProj = ( MedialMalleolusStandard - AnkleJointStandard ) * ARelAnkle *{0,0,1}' ;
+  
+  //Calc MalleousLateralis projection on Ankle joint z axis.
+  AnyVar LatMallAxisProj = ( LateralMalleolusStandard - AnkleJointStandard ) * ARelAnkle *{0,0,1}';
+  
+  // Center Ankle source control point.
+  AnyVec3 CenterAnklePoint = AnkleJointStandard;
+    
+  // Lateral Ankle source control point, found by projecting the lateral Malleolus to the ankle axis.
+  AnyVec3 LateralAnklePoint = AnkleJointStandard + (ARelAnkle * LatMallAxisProj * {0,0,1}' )';
+  
+  // Medial Ankle source control point, found by projecting the lateral Malleolus to the ankle axis.
+  AnyVec3 MedialAnklePoint = AnkleJointStandard + (ARelAnkle * MedMallAxisProj * {0,0,1}' )';
+  
+  // Anterior ankle control source point. Placed 5 cm anterior to the ankle axis.
+  AnyVec3 AnteriorAnklePoint = AnkleJointStandard + (ARelAnkle * 0.05 * {1,0,0}')';
+
+  // Lateral knee source control point, found by projecting the lateral Epicondyle to the knee axis.
+  AnyVec3 LateralKneePoint = KneeJointStandard + (ARelKnee * EpiLatAxisProj * {0,0,1}' )';
+  
+  // Medial knee source control point, found by projecting the medial Epicondyle to the knee axis.
+  AnyVec3 MedialKneePoint = KneeJointStandard + (ARelKnee * EpiMedAxisProj * {0,0,1}' )';
+  
+  // Anterior knee control source point. Placed 10 cm anterior to the knee axis.
+  AnyVec3 AnteriorKneePoint = KneeJointStandard + (ARelKnee * 0.1 * {1,0,0}' )';  
+
+  // Center knee control source point. 
+  AnyVec3 CenterKneePoint = KneeJointStandard;  
+  
+  // Set of control points above the knee to avoid weird RBF behavior
+  AnyVec3 AboveAnteriorKneePoint = AnteriorKneePoint - 0.1*(AnkleJointStandard-KneeJointStandard);
+  AnyVec3 AboveLateralKneePoint = LateralKneePoint - 0.1*(AnkleJointStandard-KneeJointStandard);
+  AnyVec3 AboveMedialKneePoint = MedialKneePoint - 0.1*(AnkleJointStandard-KneeJointStandard);
+  
+  
+  // Rotation matrix for the scalingNode coordinate system
+//  AnyMat33 scaleRot = .....BodyModel.Left.Leg.Seg.Shank.ScalingNode.Rotation;
+  
+  
+  AnyFolder &ShankRef = Main.AnyBodyGaitAppModel.HumanModel.BodyModel.Left.Leg.Seg.Shank;
+  ShankRef = {
+    AnyRefNode MorphNodes = {
+      AnyRefNode SourceLateralAnklePoint = {
+        sRel = ...LateralAnklePoint; AnyDrawNode refnode = { Visible = .....ShowNodes; ScaleXYZ = {0.005, 0.005, 0.005}; RGB = {0.91796875, 0.76953125, 0.06640625};};
+      };
+      AnyRefNode SourceMedialAnklePoint = {
+        sRel = ...MedialAnklePoint; AnyDrawNode refnode = {Visible = .....ShowNodes; ScaleXYZ = {0.005, 0.005, 0.005};  RGB = {0.91796875, 0.76953125, 0.06640625}; };
+      };
+      AnyRefNode SourceCenterAnklePoint = {
+        sRel = ...CenterAnklePoint; AnyDrawNode refnode = {Visible = .....ShowNodes; ScaleXYZ = {0.005, 0.005, 0.005};  RGB = {0.91796875, 0.76953125, 0.06640625}; };
+      };
+      AnyRefNode SourceAnteriorAnklePoint = {
+        sRel = ...AnteriorAnklePoint; AnyDrawNode refnode = {Visible = .....ShowNodes; ScaleXYZ = {0.005, 0.005, 0.005};  RGB = {0.91796875, 0.76953125, 0.06640625}; };
+      }; 
+      AnyRefNode SourceCenterKneePoint = {
+        sRel = ...CenterKneePoint; AnyDrawNode refnode = { Visible = .....ShowNodes; ScaleXYZ = {0.005, 0.005, 0.005}; RGB = {0.91796875, 0.76953125, 0.06640625};};
+      };
+      AnyRefNode SourceLateralKneePoint = {
+        sRel = ...LateralKneePoint; AnyDrawNode refnode = { Visible = .....ShowNodes; ScaleXYZ = {0.005, 0.005, 0.005}; RGB = {0.91796875, 0.76953125, 0.06640625};};
+      };
+      AnyRefNode SourceMedialKneePoint = {
+        sRel = ...MedialKneePoint; AnyDrawNode refnode = { Visible = .....ShowNodes; ScaleXYZ = { 0.005, 0.005, 0.005 };  RGB = { 0.91796875, 0.76953125, 0.06640625 }; };
+      };
+      AnyRefNode SourceAnteriorKneePoint= {
+        sRel = ...AnteriorKneePoint; AnyDrawNode drw =  { Visible = .....ShowNodes; RGB = { 0.91796875, 0.76953125, 0.06640625 }; ScaleXYZ = {0.005, 0.005, 0.005};  };
+      };    
+      AnyRefNode SourceAboveAnteriorKneePoint = {
+        sRel = ...AboveAnteriorKneePoint; AnyDrawNode drw =  { Visible = .....ShowNodes; RGB = { 0.91796875, 0.76953125, 0.06640625 }; ScaleXYZ = {0.005, 0.005, 0.005};  };
+      };    
+      AnyRefNode SourceAboveLateralKneePoint  = {
+        sRel = ...AboveLateralKneePoint ; AnyDrawNode drw =  { Visible = .....ShowNodes; RGB = { 0.91796875, 0.76953125, 0.06640625 }; ScaleXYZ = {0.005, 0.005, 0.005};  };
+      };       
+      AnyRefNode SourceAboveMedialKneePoint   = {
+        sRel = ...AboveMedialKneePoint; AnyDrawNode drw =  { Visible = .....ShowNodes; RGB = { 0.91796875, 0.76953125, 0.06640625 }; ScaleXYZ = {0.005, 0.005, 0.005};  };
+      };     
+    };
+  };//ShankRef
+  
+};// SourceMorphNode
+
+AnyFolder MorphTargetPoints = {
+  
+  AnyVec3 KneeJointStandard = .....BodyModel.Left.Leg.Seg.Shank.KneeJoint.sRelUnscaled;
+  AnyVec3 PatellaTendonOriginStandard = .....BodyModel.Left.Leg.CadaverParameters.Patella.Origin_patella_tendon ;
+  AnyVec3 EpicondylusFemorisLateralisStandard = .....BodyModel.Left.Leg.Seg.Shank.KneeJoint.LateralFemuralCondyleInNeutralConf ;
+  AnyVec3 AnkleJointStandard = .....BodyModel.Left.Leg.Seg.Shank.AnkleJoint.sRelUnscaled;
+  
+  AnyFolder &ShankMorphNodes = Main.JntParameterOptModel.LegModel.Left.Seg.Shank.MorphNodes;
+  AnyMat33 ShankControlPointRot = RotMat(KneeJointStandard, AnkleJointStandard , EpicondylusFemorisLateralisStandard );
+  
+
+  
+  AnyMat33 LMFScaleMat =  {{(.ms/.ls)^0.5,0,0},{0, .ls, 0},{0, 0, (.ms/.ls)^0.5 }};              
+  
+  AnyMat33 scaleRot = .....BodyModel.Left.Leg.Seg.Shank.ScalingNode.Rotation;
+  
+  
+  AnyVec3 targetCenterKneeJoint = KneeJointStandard;
+  AnyVec3 targetMedialKneePoint = KneeJointStandard + (ShankControlPointRot * ShankMorphNodes.MedialKneeControlPoint.sRel')';
+  AnyVec3 targetLateralKneePoint = KneeJointStandard + (ShankControlPointRot * ShankMorphNodes.LateralKneeControlPoint.sRel')';
+  AnyVec3 targetAnteriorKneePoint = KneeJointStandard + (ShankControlPointRot * ShankMorphNodes.AnteriorKneeControlPoint.sRel')';
+  AnyVec3 targetAnkleCenter = KneeJointStandard + (ShankControlPointRot * ShankMorphNodes.AnkleCenterControlPoint.sRel')';
+  AnyVec3 targetMedialAnklePoint = KneeJointStandard + (ShankControlPointRot * ShankMorphNodes.MedialAnkleControlPoint.sRel')';
+  AnyVec3 targetLateralAnklePoint = KneeJointStandard + (ShankControlPointRot * ShankMorphNodes.LateralAnkleControlPoint.sRel')';
+  AnyVec3 targetAnteriorAnklePoint = KneeJointStandard + (ShankControlPointRot * ShankMorphNodes.AnteriorAnkleControlPoint.sRel')';
+
+  AnyVec3 AboveAnteriorKneePoint = targetAnteriorKneePoint - 0.1*(targetAnkleCenter-targetCenterKneeJoint);
+  AnyVec3 AboveLateralKneePoint = targetLateralKneePoint - 0.1*(targetAnkleCenter-targetCenterKneeJoint);
+  AnyVec3 AboveMedialKneePoint = targetMedialKneePoint - 0.1*(targetAnkleCenter-targetCenterKneeJoint);
+  
+  
+  AnyFolder &ShankRef = Main.AnyBodyGaitAppModel.HumanModel.BodyModel.Left.Leg.Seg.Shank;
+  ShankRef.MorphNodes  = {
+    AnyRefNode TargetLateralAnklePoint = {
+      sRel = ...targetLateralAnklePoint; AnyDrawNode refnode = { Visible = .....ShowNodes; ScaleXYZ = {0.005, 0.005, 0.005}; RGB = {0.01796875, 0.76953125, 0.06640625};};
+    };
+    AnyRefNode TargetMedialAnklePoint = {
+      sRel = ...targetMedialAnklePoint; AnyDrawNode refnode = { Visible = .....ShowNodes; ScaleXYZ = {0.005, 0.005, 0.005}; RGB = {0.01796875, 0.76953125, 0.06640625};};
+    };
+    AnyRefNode TargetAnkleJointCenter = {
+      sRel = ...targetAnkleCenter; AnyDrawNode refnode = { Visible = .....ShowNodes; ScaleXYZ = {0.005, 0.005, 0.005}; RGB = {0.01796875, 0.76953125, 0.06640625};};
+    };
+    AnyRefNode TargetAnteriorAnklePoint = {
+      sRel = ...targetAnteriorAnklePoint; AnyDrawNode refnode = { Visible = .....ShowNodes; ScaleXYZ = {0.005, 0.005, 0.005}; RGB = {0.01796875, 0.76953125, 0.06640625};};
+    };  
+    AnyRefNode TargetCenterKneePoint = {
+      sRel = ...targetCenterKneeJoint; AnyDrawNode refnode = { Visible = .....ShowNodes; ScaleXYZ = {0.005, 0.005, 0.005}; RGB = {0.01796875, 0.76953125, 0.06640625};};
+    };
+    AnyRefNode TargetLateralKneePoint = {
+      sRel = ...targetLateralKneePoint; AnyDrawNode refnode = { Visible = .....ShowNodes; ScaleXYZ = {0.005, 0.005, 0.005}; RGB = {0.01796875, 0.76953125, 0.06640625};};
+    };
+    AnyRefNode TargetMedialKneePoint = {
+      sRel = ...targetMedialKneePoint; AnyDrawNode refnode = { Visible = .....ShowNodes; ScaleXYZ = {0.005, 0.005, 0.005}; RGB = {0.01796875, 0.76953125, 0.06640625};};
+    };
+    AnyRefNode TargetAnteriorKneePoint= {
+      sRel = ...targetAnteriorKneePoint; AnyDrawNode refnode = { Visible = .....ShowNodes; ScaleXYZ = {0.005, 0.005, 0.005}; RGB = {0.01796875, 0.76953125, 0.06640625};};
+    };    
+    AnyRefNode TargetAboveAnteriorKneePoint = {
+      sRel = ...AboveAnteriorKneePoint ; AnyDrawNode refnode = { Visible = .....ShowNodes; ScaleXYZ = {0.005, 0.005, 0.005}; RGB = {0.01796875, 0.76953125, 0.06640625};};
+    };  
+    AnyRefNode TargetAboveLateralKneePoint  = {
+      sRel = ...AboveLateralKneePoint; AnyDrawNode refnode = { Visible = .....ShowNodes; ScaleXYZ = {0.005, 0.005, 0.005}; RGB = {0.01796875, 0.76953125, 0.06640625};};
+    };  
+    AnyRefNode TargetAboveMedialKneePoint   = {
+      sRel = ...AboveMedialKneePoint; AnyDrawNode refnode = { Visible = .....ShowNodes; ScaleXYZ = {0.005, 0.005, 0.005}; RGB = {0.01796875, 0.76953125, 0.06640625};};
+    };      
+  };//ShankMorphNodes
+  
+};//TargetMorphNodes
+

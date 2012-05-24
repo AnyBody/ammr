@@ -1,9 +1,4 @@
 
-//These nodes are used for adding extra used by other body parts to the right 
-//and left side of the segment
-AnyRefNode Right= { sRel = .Scale({0.0,0.0,0.0});};
-AnyRefNode Left= { sRel = .Scale({0.0,0.0,0.0});};
-
 // Ligament Nodes    
 AnyRefNode ALLNodeSuperior = {sRel = .Scale({0.058,-0.018,0});};
 
@@ -160,36 +155,25 @@ Right ={
   
   // Definition of cylinder used for wrapping of the psoas major muscle
   
-  AnyRefNode pecent_ossis_pubis={ 
-    sRel=  ..Scale({0.04,-0.13,0.048});
-    AnyVec3 p2=..Scale(0.1*{0,0.743294,0.668965}+{0.04,-0.13,0.048});
-    
-    AnyVec3 p3=..Scale({0.04,-0.13,0.048}+0.03*{0,0.668965,-0.743294});
-    
-    
-    //Calculate rot matrix for cylinder using three points
-    //p2-p1 used to find x axis
-    //p3-p1 used to find the y axis
-    //z axis found as cross product
-    AnyMat33  Mat = RotMat(sRel,p2,p3);
-    
-    //Switch around the on the columns to compensate that the cylinder has 
-    //main axis along the zaxis
-    ARel={
-      {-Mat[0][2],Mat[0][1],Mat[0][0]},
-      {-Mat[1][2],Mat[1][1],Mat[1][0]},
-      {-Mat[2][2],Mat[2][1],Mat[2][0]}};          
-    
-    AnySurfCylinder cyl = { 
-      Radius=((.sRel[0]-.p3[0])^2+(.sRel[1]-.p3[1])^2+(.sRel[2]-.p3[2])^2)^0.5;
-      //This radius is a little more accurate but causes an error, to be fixed.
-      //Radius= ...HipJointRightTD.pecent_ossis_pubis.cyl.Radius;
-      //The lenght are extended by 25% too improve wrapping stability in extreme cases
-      Length= 1.25*((.sRel[0]-.p2[0])^2+(.sRel[1]-.p2[1])^2+(.sRel[2]-.p2[2])^2)^0.5;
-      //AnyDrawParamSurf drw={RGB={0,1,0};};
-    };
-  }; 
   
+  AnyRefNode PsoasWrapSurf = {
+      AnyFunTransform3D &Scale = ..Scale;
+      AnyFloat lengthscalefactor = 2;
+      AnyFloat radiusscalefactor=1;
+      AnyFloat p = {  {0.07, -0.13, 0.048}
+        , {0.07, -0.0770403, 0.09566376}
+        , {0.0685317, -0.1008952, 0.08666655}
+        , {0.07, -0.09097706, 0.08312066}
+        , {0.0667302, -0.07814948, 0.07634204}};
+      AnyMat33 transform = RotMat(0.0,x);
+      #include "../ToolBox/WrappingSurfaces/WrappingCylinder5PointFit.any"
+      cyl = {
+//        AnyDrawParamSurf drw={RGB={1,0,0};};
+      };
+    };
+
+  
+//test
   
 };
 
@@ -199,37 +183,55 @@ Left ={
   };
   
 
-  AnyRefNode pecent_ossis_pubis={ 
+  AnyRefNode PsoasWrapSurf = {
+    AnyFunTransform3D &Scale = ..Scale;
+    AnyFloat lengthscalefactor = 2;
+    AnyFloat radiusscalefactor=1;
     
-    sRel=  {..Right.pecent_ossis_pubis.sRel[0],..Right.pecent_ossis_pubis.sRel[1],..Right.pecent_ossis_pubis.sRel[2]*-1};
-    
-    AnyVec3 p2= {..Right.pecent_ossis_pubis.p2[0],..Right.pecent_ossis_pubis.p2[1],..Right.pecent_ossis_pubis.p2[2]*-1};
-    
-    AnyVec3 p3= {..Right.pecent_ossis_pubis.p3[0],..Right.pecent_ossis_pubis.p3[1],..Right.pecent_ossis_pubis.p3[2]*-1};
-    
-    
-    //Calculate rot matrix for cylinder using three points
-    //p2-p1 used to find x axis
-    //p3-p1 used to find the y axis
-    //z axis found as cross product
-    AnyMat33  Mat = RotMat(sRel,p2,p3);
-    
-    //Switch around the on the columns to compensate that the cylinder has 
-    //main axis along the zaxis
-    ARel={
-      {-Mat[0][2],Mat[0][1],Mat[0][0]},
-      {-Mat[1][2],Mat[1][1],Mat[1][0]},
-      {-Mat[2][2],Mat[2][1],Mat[2][0]}};          
-    
-    AnySurfCylinder cyl= { 
-      Radius=((.sRel[0]-.p3[0])^2+(.sRel[1]-.p3[1])^2+(.sRel[2]-.p3[2])^2)^0.5;
-      //This radius is a little more accurate but causes an error, to be fixed.
-      //Radius= ...HipJointLeftTD.pecent_ossis_pubis.cyl.Radius;
-      Length= 1.25*((.sRel[0]-.p2[0])^2+(.sRel[1]-.p2[1])^2+(.sRel[2]-.p2[2])^2)^0.5;
-      //AnyDrawParamSurf drw={RGB={0,1,0};};
+    AnyFloat p = {  {0.07, -0.13, -0.048}
+      , {0.07, -0.0770403, -0.09566376}
+      , {0.0685317, -0.1008952, -0.08666655}
+      , {0.07, -0.09097706, -0.08312066}
+      , {0.0667302, -0.07814948, -0.07634204}};
+    AnyMat33 transform = RotMat(pi,x);
+    #include "../ToolBox/WrappingSurfaces/WrappingCylinder5PointFit.any"
+    cyl = {
+      //        AnyDrawParamSurf drw={RGB={1,0,0};};
     };
-    
-  }; 
+  };
+  
+  
+  //  AnyRefNode pecent_ossis_pubis={ 
+  //    
+  //    sRel=  {..Right.pecent_ossis_pubis.sRel[0],..Right.pecent_ossis_pubis.sRel[1],..Right.pecent_ossis_pubis.sRel[2]*-1};
+  //    
+  //    AnyVec3 p2= {..Right.pecent_ossis_pubis.p2[0],..Right.pecent_ossis_pubis.p2[1],..Right.pecent_ossis_pubis.p2[2]*-1};
+  //    
+  //    AnyVec3 p3= {..Right.pecent_ossis_pubis.p3[0],..Right.pecent_ossis_pubis.p3[1],..Right.pecent_ossis_pubis.p3[2]*-1};
+  //    
+  //    
+  //    //Calculate rot matrix for cylinder using three points
+  //    //p2-p1 used to find x axis
+  //    //p3-p1 used to find the y axis
+  //    //z axis found as cross product
+  //    AnyMat33  Mat = RotMat(sRel,p2,p3);
+  //    
+  //    //Switch around the on the columns to compensate that the cylinder has 
+  //    //main axis along the zaxis
+  //    ARel={
+  //      {-Mat[0][2],Mat[0][1],Mat[0][0]},
+  //      {-Mat[1][2],Mat[1][1],Mat[1][0]},
+  //      {-Mat[2][2],Mat[2][1],Mat[2][0]}};          
+  //        
+  //    AnySurfCylinder cylold= { 
+  //      Radius=((.sRel[0]-.p3[0])^2+(.sRel[1]-.p3[1])^2+(.sRel[2]-.p3[2])^2)^0.5;
+  //      //This radius is a little more accurate but causes an error, to be fixed.
+  //      //Radius= ...HipJointLeftTD.pecent_ossis_pubis.cyl.Radius;
+  //      Length= 1.25*((.sRel[0]-.p2[0])^2+(.sRel[1]-.p2[1])^2+(.sRel[2]-.p2[2])^2)^0.5;
+  //      //AnyDrawParamSurf drw={RGB={0,1,0};};
+  //    };
+  //    
+  //  }; 
   
 };
 AnyVar Translation =0.015;

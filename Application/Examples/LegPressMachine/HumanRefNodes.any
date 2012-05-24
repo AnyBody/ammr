@@ -1,0 +1,329 @@
+AnyFolder HumanRefNodes =
+{
+  AnySeg& ThoraxSeg = Main.HumanModel.BodyModel.Trunk.SegmentsThorax.ThoraxSeg;
+  ThoraxSeg = 
+  {
+      AnyFolder EllipDef = 
+      {
+          AnyVec3 p_top = .Scale({0.141,0.266,0.0}*1.15);          
+          AnyVec3 p_side_pos = .Scale( {0.044, 0.2475, 0.16}*1.05);
+          AnyVec3 p_side_neg = .Scale( {0.044, 0.2475, -0.16}*1.05);
+          AnyVec3 p_front = .Scale({-0.04988194, 0.5019326, 0});
+          AnyVec3 org = (p_side_pos + p_side_neg) / 2.0 ;
+          AnyVec3 axis_x = (p_top - org) / vnorm(p_top - org) ;
+          AnyVec3 axis_z = (p_side_pos - org) / vnorm(p_side_pos - org) ;
+          AnyVec3 axis_y = cross(axis_z, axis_x) ;
+          
+          AnyMat33 rotMat = {axis_x, axis_y, axis_z}';
+          AnyVec3 p_front_local = (p_front - org) * rotMat ;
+          
+          AnyVar Rx = vnorm(p_top - org);
+          AnyVar Rz = vnorm(p_side_pos - org);
+          AnyVar Ry = p_front_local[1] ;
+      };
+
+      AnyRefNode GeomCenterNode = 
+      {
+
+          sRel = .EllipDef.org;
+          ARel = .EllipDef.rotMat ;    
+          AnySurfEllipsoid geom =
+          {
+              Radius = {..EllipDef.Rx, ..EllipDef.Ry, ..EllipDef.Rz};
+//              AnyDrawParamSurf drw = 
+//              {
+//                  RGB = {1,1,0};
+//                  Opacity = 0.5;
+//              };
+          };
+//          AnyDrawRefFrame drw = 
+//          {
+//              ScaleXYZ = 0.1 * {1,1,1};
+//              RGB = {1,0,0};
+//          };           
+          AnyRefNode SubGeomNode_Left_Hand =
+          {
+              AnyVar a = .geom.Radius[0];
+              AnyVar b = .geom.Radius[1];
+              AnyVar c = .geom.Radius[2];
+              AnyVar alpha = 0 * pi / 180;
+              AnyVar beta = -20 * pi / 180;
+              AnyVar pt_x = a * cos(alpha) * cos(beta);
+              AnyVar pt_y = b * cos(alpha) * sin(beta);
+              AnyVar pt_z = c * sin(alpha);              
+              sRel = {pt_x, pt_y, pt_z};
+              //-->Test
+              AnyVec3 normal_vec = 2*{pt_x/pow(a,2), pt_y/pow(b,2), pt_z/pow(c,2)};
+              AnyVec3 new_x = {0,0,1};
+              AnyVec3 new_y = normal_vec / vnorm(normal_vec);
+              AnyVec3 new_z = cross(new_x, new_y);
+              ARel = {new_x, new_y, new_z}';
+              //<--Test              
+          };
+          AnyRefNode SubGeomNode_Right_Hand =
+          {
+              AnyVar a = .geom.Radius[0];
+              AnyVar b = .geom.Radius[1];
+              AnyVar c = .geom.Radius[2];
+              AnyVar alpha = 0 * pi / 180;
+              AnyVar beta = -20 * pi / 180;
+
+              AnyVar pt_x = a * cos(alpha) * cos(beta);
+              AnyVar pt_y = b * cos(alpha) * sin(beta);
+              AnyVar pt_z = c * sin(alpha);              
+              sRel = {pt_x, pt_y, pt_z};
+              //-->Test
+              AnyVec3 normal_vec = 2*{pt_x/pow(a,2), pt_y/pow(b,2), pt_z/pow(c,2)};
+              AnyVec3 new_x = {0,0,1};
+              AnyVec3 new_y = normal_vec / vnorm(normal_vec);
+              AnyVec3 new_z = cross(new_x, new_y);
+              ARel = {new_x, new_y, new_z}';
+              //<--Test                          
+          };
+          AnyRefNode SubGeomNode_Back = 
+          {
+              sRel = {-.geom.Radius[0], 0, 0};
+          };
+      };  
+      AnyRefNode GeomLeftNode = 
+      {
+          sRel = .iji.sRel + (.iji.O_serratus_anterior_4.sRel * .iji.ARel');
+          ARel = RotMat(20*pi/180, z);
+
+          AnySurfEllipsoid geom =
+          {
+              Radius = {0.06, 0.1, 0.11};
+//              AnyDrawParamSurf drw = 
+//              {
+//                  RGB = {1,1,0};
+//                  Opacity = 0.5;
+//              };
+          };
+          AnyRefNode SubUpperGeomNode =
+          {
+              AnyVar a = .geom.Radius[0];
+              AnyVar b = .geom.Radius[1];
+              AnyVar c = .geom.Radius[2];
+              AnyVar alpha = -20 * pi / 180;
+              AnyVar beta = 0 * pi / 180;
+              AnyVar pt_x = a * cos(alpha) * cos(beta);
+              AnyVar pt_y = b * cos(alpha) * sin(beta);
+              AnyVar pt_z = c * sin(alpha);
+              sRel = {pt_x, pt_y, pt_z};
+              //-->Test
+              AnyVec3 normal_vec = 2*{pt_x/pow(a,2), pt_y/pow(b,2), pt_z/pow(c,2)};
+              AnyVec3 new_x = normal_vec / vnorm(normal_vec);
+              AnyVec3 new_y = {0,1,0};
+              AnyVec3 new_z = cross(new_x, new_y);
+              ARel = {new_x, new_y, new_z}';
+              //<--Test           
+          };   
+      };
+      AnyRefNode GeomRightNode = 
+      {
+          sRel = .ij.sRel + (.ij.O_serratus_anterior_4.sRel * .ij.ARel');
+          ARel = RotMat(20*pi/180, z);
+
+          AnySurfEllipsoid geom =
+          {
+              Radius = {0.06, 0.1, 0.11};
+//              AnyDrawParamSurf drw = 
+//              {
+//                  RGB = {1,1,0};
+//                  Opacity = 0.5;
+//              };
+          };
+          AnyRefNode SubUpperGeomNode =
+          {
+              AnyVar a = .geom.Radius[0];
+              AnyVar b = .geom.Radius[1];
+              AnyVar c = .geom.Radius[2];
+              AnyVar alpha = 20 * pi / 180;
+              AnyVar beta = 0 * pi / 180;
+              AnyVar pt_x = a * cos(alpha) * cos(beta);
+              AnyVar pt_y = b * cos(alpha) * sin(beta);
+              AnyVar pt_z = c * sin(alpha);              
+              sRel = {pt_x, pt_y, pt_z};
+              //-->Test
+              AnyVec3 normal_vec = 2*{pt_x/pow(a,2), pt_y/pow(b,2), pt_z/pow(c,2)};
+              AnyVec3 new_x = normal_vec / vnorm(normal_vec);
+              AnyVec3 new_y = {0,1,0};
+              AnyVec3 new_z = cross(new_x, new_y);
+              ARel = {new_x, new_y, new_z}';
+              //<--Test                          
+          };          
+      };
+      AnyRefNode GeomNode_Waist_Left = 
+      {
+          sRel = {.OEC11_CINodeL.sRel[0]*1.6,
+                  .OEC11_CINodeL.sRel[1],
+                  .OEC11_CINodeL.sRel[2]*1.3};            
+      };
+      AnyRefNode GeomNode_Waist_Right = 
+      {
+          sRel = {.OEC11_CINodeR.sRel[0]*1.6,
+                  .OEC11_CINodeR.sRel[1],
+                  .OEC11_CINodeR.sRel[2]*1.3};            
+      };
+          
+  };
+  
+  AnySeg& PelvisSeg = Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg;
+  PelvisSeg = 
+  {
+      AnyRefNode CenterNode = 
+      {
+          sRel = .Scale({0.0,0.0,0.0});
+          ARel = RotMat(-90*pi/180,z);
+          AnyDrawRefFrame drw = 
+          {
+              ScaleXYZ = 0.1 * {1,1,1};
+              RGB = {1,0,0};
+          };
+        
+      };
+      AnyRefNode GeomCenterNode = 
+      {
+          sRel = (.ILptC5SIPSNodeL.sRel + .ILptC5SIPSNodeR.sRel +
+                  .Tuber_ischiadicumL.sRel + .Tuber_ischiadicumR.sRel +
+                  .OICI_RS3NodeL.sRel + .OICI_RS3NodeR.sRel +
+                  .OICI_C10NodeL.sRel + .OICI_C10NodeR.sRel) / 8;
+//          AnyDrawRefFrame drw = 
+//          {
+//              ScaleXYZ = 0.1 * {1,1,1};
+//              RGB = {1,0,0};
+//          };                  
+          AnySurfEllipsoid geom =
+          {
+              Radius = {0.12, 0.135, 0.165};
+//              AnyDrawParamSurf drw = 
+//              {
+//                  RGB = {1,1,0};
+//                  Opacity = 0.5;
+//              };
+          };          
+      };
+      AnyRefNode LeftWaistNode = 
+      {
+          sRel = {.OICI_C10NodeL.sRel[0],
+                  .OICI_C12NodeL.sRel[1],
+                  .OICI_C10NodeL.sRel[2]*1};
+//          AnyDrawRefFrame drw = 
+//          {
+//              ScaleXYZ = 0.1 * {1,1,1};
+//              RGB = {1,0,0};
+//          };          
+      };
+      AnyRefNode RightWaistNode = 
+      {
+          sRel = {.OICI_C10NodeR.sRel[0],
+                  .OICI_C12NodeR.sRel[1],
+                  .OICI_C10NodeR.sRel[2]*1};          
+//          AnyDrawRefFrame drw = 
+//          {
+//              ScaleXYZ = 0.1 * {1,1,1};
+//              RGB = {1,0,0};
+//          };          
+      };      
+  };
+  
+  AnySeg& RightGlove = Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Glove;
+  RightGlove = 
+  {
+      AnyRefNode PalmNode = 
+      {
+          sRel = .Scale({0.0,0.0,0.0});
+          ARel = RotMat(90*pi/180,x);
+          AnyDrawRefFrame drw = 
+          {
+              ScaleXYZ = 0.05 * {1,1,1};
+              RGB = {1,0,0};
+          };
+      };  
+   };
+  AnySeg& LeftGlove = Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Glove;
+  LeftGlove = 
+  {
+      AnyRefNode PalmNode = 
+      {
+          sRel = .Scale({0.0,0.0,0.0});
+          ARel = RotMat(180*pi/180,z)*RotMat(-90*pi/180,x);
+          AnyDrawRefFrame drw = 
+          {
+              ScaleXYZ = 0.05 * {1,1,1};
+              RGB = {1,0,0};
+          };
+      };  
+   };
+   
+   AnySeg& RightFoot = Main.HumanModel.BodyModel.Right.Leg.Seg.Foot;
+   RightFoot = 
+   {
+       AnyRefNode FootNode = 
+       {
+           sRel = .GroundJoint.sRel;
+           ARel = .ScalingNode.ARel;
+//           AnyDrawRefFrame drw = 
+//           {
+//             ScaleXYZ = 0.05 * {1,1,1};
+//             RGB = {1,0,0};               
+//           };  
+           AnyRefNode DrwNode =
+           {
+               ARel = RotMat(90*pi/180, y);
+//               AnyDrawRefFrame drw = 
+//               {
+//                 ScaleXYZ = 0.1 * {1,1,1};
+//                 RGB = {0,1,0};               
+//               };
+           };
+       };
+       AnyRefNode ToeNode = 
+       {
+           sRel = .MetatarsalJoint2Node.sRel;
+           ARel = .ScalingNode.ARel;
+           AnyDrawRefFrame drw = 
+           {
+             ScaleXYZ = 0.05 * {1,1,1};
+             RGB = {1,0,0};               
+           };  
+           
+       };
+
+   };
+   AnySeg& LeftFoot = Main.HumanModel.BodyModel.Left.Leg.Seg.Foot;
+   LeftFoot = 
+   {
+       AnyRefNode FootNode = 
+       {
+           sRel = .GroundJoint.sRel;
+           ARel = .ScalingNode.ARel;
+//           AnyDrawRefFrame drw = 
+//           {
+//             ScaleXYZ = 0.05 * {1,1,1};
+//             RGB = {1,0,0};               
+//           };
+           AnyRefNode DrwNode =
+           {
+               ARel = RotMat(90*pi/180, y);
+//               AnyDrawRefFrame drw = 
+//               {
+//                 ScaleXYZ = 0.1 * {1,1,1};
+//                 RGB = {0,1,0};               
+//               }; 
+           };           
+       };
+       AnyRefNode ToeNode = 
+       {
+           sRel = .MetatarsalJoint2Node.sRel;
+           ARel = .ScalingNode.ARel;
+           AnyDrawRefFrame drw = 
+           {
+             ScaleXYZ = 0.05 * {1,1,1};
+             RGB = {1,0,0};               
+           };  
+           
+       };       
+   };
+   
+};

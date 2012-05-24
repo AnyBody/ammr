@@ -1,0 +1,428 @@
+#class_template MomentArmStudy (AnyFolder &HModel,AnyKinMeasure& Measure,Side,OutputFile,SingleStepAnalysis) {
+  
+  
+  #var AnyVector RangeOfMotion;
+  
+  #if SingleStepAnalysis == "On"
+    AnyInt NoOfSteps = 1;
+  #else
+    AnyInt NoOfSteps = floor( abs(RangeOfMotion[1]-RangeOfMotion[0]) ) + 1;
+  #endif
+  
+  #var AnyVar PelvisThoraxExtension = 0;
+  #var AnyVar PelvisThoraxLateralBending = 0;
+  #var AnyVar PelvisThoraxRotation = 0;
+  #var AnyVar HipFlexion = 0;
+  #var AnyVar HipAbduction = 0;
+  #var AnyVar HipExternalRotation = 0;
+  #var AnyVar KneeFlexion = 0;
+  #var AnyVar AnklePlantarFlexion = 0;
+  #var AnyVar SubTalarEversion = 0;
+//  
+//  AnyOperationSequence BatchRun = 
+//  {
+//    Settings.Echo = Off;
+//    Settings.ModelSceneUpdate = Off;
+//    AnyOperation &ref = .Study.Kinematics;
+//  };
+  
+  AnyKinStudy Study = {
+    MechObjectExclude = ObjSearchRecursive("Main.JntParameterOptModel.LegModel","*","AnyMechObject");
+    AnyFolder &OptKinModel = Main.JntParameterOptModel.LegModel;
+    
+    InitialConditions.SolverType = KinSolOverDeterminate;
+    Kinematics.SolverType = KinSolOverDeterminate;   
+    InitialConditions.PosAnalysisOnlyOnOff=Off;
+    Kinematics.PosAnalysisOnlyOnOff=Off;
+        
+    tStart = 0;
+    tEnd = 1;
+    nStep = .NoOfSteps;
+    Gravity = {0, 0, 0};
+    
+    AnyFolder &HumanModel = .HModel;
+    
+    
+    AnyVector ROM = .RangeOfMotion*pi/180;
+    #if SingleStepAnalysis == "On"
+        AnyVar AngularVelocity = 1;
+    #else
+        AnyVar AngularVelocity = ROM[1]-ROM[0];
+    #endif
+    AnyKinEqSimpleDriver HardDriver = 
+    {
+      CType = Hard;
+      AnyKinMeasure &ref = ..Measure;
+      DriverPos = {.ROM[0]};
+      DriverVel = {.AngularVelocity};
+      Reaction.Type= {Off};
+    }; 
+    
+    AnyFolder MomentArms = {
+      
+      AnyFloat Angle = .HardDriver.ref.Pos*180/pi;
+      
+     #if Side == "Right"
+       AnyFolder &LegMusRef = .HumanModel.BodyModel.Right.Leg.Mus;
+       AnyFolder &SpineMusRef = .HumanModel.BodyModel.Trunk.MusclesSpineRight;
+     #endif
+     #if Side == "Left"
+       AnyFolder &LegMusRef = .HumanModel.BodyModel.Left.Leg.Mus;
+       AnyFolder &SpineMusRef = .HumanModel.BodyModel.Trunk.MusclesSpineLeft;
+     #endif
+     
+      AnyVar PsoasMajorT12I = SpineMusRef.PsoasMajor.PMT12I_TM.LmtDot/.AngularVelocity;
+      AnyVar PsoasMajorL1I = SpineMusRef.PsoasMajor.PML1I_TM.LmtDot/.AngularVelocity;
+      AnyVar PsoasMajorL1T = SpineMusRef.PsoasMajor.PML1T_TM.LmtDot/.AngularVelocity;
+      AnyVar PsoasMajorL2I = SpineMusRef.PsoasMajor.PML2I_TM.LmtDot/.AngularVelocity;
+      AnyVar PsoasMajorL2T = SpineMusRef.PsoasMajor.PML2T_TM.LmtDot/.AngularVelocity;
+      AnyVar PsoasMajorL3I = SpineMusRef.PsoasMajor.PML3I_TM.LmtDot/.AngularVelocity;
+      AnyVar PsoasMajorL3T = SpineMusRef.PsoasMajor.PML3T_TM.LmtDot/.AngularVelocity;
+      AnyVar PsoasMajorL4I = SpineMusRef.PsoasMajor.PML4I_TM.LmtDot/.AngularVelocity;
+      AnyVar PsoasMajorL4T = SpineMusRef.PsoasMajor.PML4T_TM.LmtDot/.AngularVelocity;
+      AnyVar PsoasMajorL5 = SpineMusRef.PsoasMajor.PML5_TM.LmtDot/.AngularVelocity;
+      AnyVar PsoasMajorL5T = SpineMusRef.PsoasMajor.PML5T_TM.LmtDot/.AngularVelocity;
+      
+      
+      AnyVar SoleusMedialis1 = ( LegMusRef.SoleusMedialis1.LmtDot/.AngularVelocity);
+      AnyVar SoleusMedialis2 = ( LegMusRef.SoleusMedialis2.LmtDot/.AngularVelocity);
+      AnyVar SoleusMedialis3 = ( LegMusRef.SoleusMedialis3.LmtDot/.AngularVelocity);
+      AnyVar SoleusLateralis4 = ( LegMusRef.SoleusLateralis4.LmtDot/.AngularVelocity);
+      AnyVar SoleusLateralis5 = ( LegMusRef.SoleusLateralis5.LmtDot/.AngularVelocity);
+      AnyVar SoleusLateralis6 = ( LegMusRef.SoleusLateralis6.LmtDot/.AngularVelocity);
+      AnyVar GastrocnemiusLateralis1 = ( LegMusRef.GastrocnemiusLateralis1.LmtDot/.AngularVelocity);
+      AnyVar GastrocnemiusMedialis1 = ( LegMusRef.GastrocnemiusMedialis1.LmtDot/.AngularVelocity);
+      AnyVar FlexorDigitorumLongus1 = ( LegMusRef.FlexorDigitorumLongus1.LmtDot/.AngularVelocity);
+      AnyVar FlexorDigitorumLongus2 = ( LegMusRef.FlexorDigitorumLongus2.LmtDot/.AngularVelocity);
+      AnyVar FlexorDigitorumLongus3 = ( LegMusRef.FlexorDigitorumLongus3.LmtDot/.AngularVelocity);
+      AnyVar FlexorHallucisLongus1 = ( LegMusRef.FlexorHallucisLongus1.LmtDot/.AngularVelocity);
+      AnyVar FlexorHallucisLongus2 = ( LegMusRef.FlexorHallucisLongus2.LmtDot/.AngularVelocity);
+      AnyVar FlexorHallucisLongus3 = ( LegMusRef.FlexorHallucisLongus3.LmtDot/.AngularVelocity);
+      AnyVar TibialisPosteriorLateralis1 = ( LegMusRef.TibialisPosteriorLateralis1.LmtDot/.AngularVelocity);
+      AnyVar TibialisPosteriorLateralis2 = ( LegMusRef.TibialisPosteriorLateralis2.LmtDot/.AngularVelocity);
+      AnyVar TibialisPosteriorLateralis3 = ( LegMusRef.TibialisPosteriorLateralis3.LmtDot/.AngularVelocity);
+      AnyVar TibialisPosteriorMedialis1 = ( LegMusRef.TibialisPosteriorMedialis1.LmtDot/.AngularVelocity);
+      AnyVar TibialisPosteriorMedialis2 = ( LegMusRef.TibialisPosteriorMedialis2.LmtDot/.AngularVelocity);
+      AnyVar TibialisPosteriorMedialis3 = ( LegMusRef.TibialisPosteriorMedialis3.LmtDot/.AngularVelocity);
+      AnyVar TibialisAnterior1 = ( LegMusRef.TibialisAnterior1.LmtDot/.AngularVelocity);
+      AnyVar TibialisAnterior2 = ( LegMusRef.TibialisAnterior2.LmtDot/.AngularVelocity);
+      AnyVar TibialisAnterior3 = ( LegMusRef.TibialisAnterior3.LmtDot/.AngularVelocity);
+      AnyVar PeroneusBrevis1 = ( LegMusRef.PeroneusBrevis1.LmtDot/.AngularVelocity);
+      AnyVar PeroneusBrevis2 = ( LegMusRef.PeroneusBrevis2.LmtDot/.AngularVelocity);
+      AnyVar PeroneusBrevis3 = ( LegMusRef.PeroneusBrevis3.LmtDot/.AngularVelocity);
+      AnyVar PeroneusLongus1 = ( LegMusRef.PeroneusLongus1.LmtDot/.AngularVelocity);
+      AnyVar PeroneusLongus2 = ( LegMusRef.PeroneusLongus2.LmtDot/.AngularVelocity);
+      AnyVar PeroneusLongus3 = ( LegMusRef.PeroneusLongus3.LmtDot/.AngularVelocity);
+      AnyVar PeroneusTertius1 = ( LegMusRef.PeroneusTertius1.LmtDot/.AngularVelocity);
+      AnyVar PeroneusTertius2 = ( LegMusRef.PeroneusTertius2.LmtDot/.AngularVelocity);
+      AnyVar PeroneusTertius3 = ( LegMusRef.PeroneusTertius3.LmtDot/.AngularVelocity);
+      AnyVar ExtensorDigitorumLongus1 = ( LegMusRef.ExtensorDigitorumLongus1.LmtDot/.AngularVelocity);
+      AnyVar ExtensorDigitorumLongus2 = ( LegMusRef.ExtensorDigitorumLongus2.LmtDot/.AngularVelocity);
+      AnyVar ExtensorDigitorumLongus3 = ( LegMusRef.ExtensorDigitorumLongus3.LmtDot/.AngularVelocity);
+      AnyVar ExtensorHallucisLongus1 = ( LegMusRef.ExtensorHallucisLongus1.LmtDot/.AngularVelocity);
+      AnyVar ExtensorHallucisLongus2 = ( LegMusRef.ExtensorHallucisLongus2.LmtDot/.AngularVelocity);
+      AnyVar ExtensorHallucisLongus3 = ( LegMusRef.ExtensorHallucisLongus3.LmtDot/.AngularVelocity);
+      AnyVar VastusLateralisInferior1 = ( LegMusRef.VastusLateralisInferior1.LmtDot/.AngularVelocity);
+      AnyVar VastusLateralisInferior2 = ( LegMusRef.VastusLateralisInferior2.LmtDot/.AngularVelocity);
+      AnyVar VastusLateralisInferior3 = ( LegMusRef.VastusLateralisInferior3.LmtDot/.AngularVelocity);
+      AnyVar VastusLateralisInferior4 = ( LegMusRef.VastusLateralisInferior4.LmtDot/.AngularVelocity);
+      AnyVar VastusLateralisInferior5 = ( LegMusRef.VastusLateralisInferior5.LmtDot/.AngularVelocity);
+      AnyVar VastusLateralisInferior6 = ( LegMusRef.VastusLateralisInferior6.LmtDot/.AngularVelocity);
+      AnyVar VastusLateralisSuperior7 = ( LegMusRef.VastusLateralisSuperior7.LmtDot/.AngularVelocity);
+      AnyVar VastusLateralisSuperior8 = ( LegMusRef.VastusLateralisSuperior8.LmtDot/.AngularVelocity);
+      AnyVar VastusMedialisInferior1 = ( LegMusRef.VastusMedialisInferior1.LmtDot/.AngularVelocity);
+      AnyVar VastusMedialisInferior2 = ( LegMusRef.VastusMedialisInferior2.LmtDot/.AngularVelocity);
+      AnyVar VastusMedialisMid3 = ( LegMusRef.VastusMedialisMid3.LmtDot/.AngularVelocity);
+      AnyVar VastusMedialisMid4 = ( LegMusRef.VastusMedialisMid4.LmtDot/.AngularVelocity);
+      AnyVar VastusMedialisSuperior5 = ( LegMusRef.VastusMedialisSuperior5.LmtDot/.AngularVelocity);
+      AnyVar VastusMedialisSuperior6 = ( LegMusRef.VastusMedialisSuperior6.LmtDot/.AngularVelocity);
+      AnyVar VastusMedialisSuperior7 = ( LegMusRef.VastusMedialisSuperior7.LmtDot/.AngularVelocity);
+      AnyVar VastusMedialisSuperior8 = ( LegMusRef.VastusMedialisSuperior8.LmtDot/.AngularVelocity);
+      AnyVar VastusMedialisSuperior9 = ( LegMusRef.VastusMedialisSuperior9.LmtDot/.AngularVelocity);
+      AnyVar VastusMedialisSuperior10 = ( LegMusRef.VastusMedialisSuperior10.LmtDot/.AngularVelocity);
+      AnyVar VastusIntermedius1 = ( LegMusRef.VastusIntermedius1.LmtDot/.AngularVelocity);
+      AnyVar VastusIntermedius2 = ( LegMusRef.VastusIntermedius2.LmtDot/.AngularVelocity);
+      AnyVar VastusIntermedius3 = ( LegMusRef.VastusIntermedius3.LmtDot/.AngularVelocity);
+      AnyVar VastusIntermedius4 = ( LegMusRef.VastusIntermedius4.LmtDot/.AngularVelocity);
+      AnyVar VastusIntermedius5 = ( LegMusRef.VastusIntermedius5.LmtDot/.AngularVelocity);
+      AnyVar VastusIntermedius6 = ( LegMusRef.VastusIntermedius6.LmtDot/.AngularVelocity);
+      AnyVar RectusFemoris1 = ( LegMusRef.RectusFemoris1.LmtDot/.AngularVelocity);
+      AnyVar RectusFemoris2 = ( LegMusRef.RectusFemoris2.LmtDot/.AngularVelocity);
+      AnyVar Semitendinosus1 = ( LegMusRef.Semitendinosus1.LmtDot/.AngularVelocity);
+      AnyVar Semimembranosus1 = ( LegMusRef.Semimembranosus1.LmtDot/.AngularVelocity);
+      AnyVar BicepsFemorisCaputLongum1 = ( LegMusRef.BicepsFemorisCaputLongum1.LmtDot/.AngularVelocity);
+      AnyVar BicepsFemorisCaputBreve1 = ( LegMusRef.BicepsFemorisCaputBreve1.LmtDot/.AngularVelocity);
+      AnyVar BicepsFemorisCaputBreve2 = ( LegMusRef.BicepsFemorisCaputBreve2.LmtDot/.AngularVelocity);
+      AnyVar SartoriusProximal1 = ( LegMusRef.SartoriusProximal1.LmtDot/.AngularVelocity);
+      AnyVar SartoriusDistal1 = ( LegMusRef.SartoriusDistal1.LmtDot/.AngularVelocity);
+      AnyVar IliacusLateralis1 = ( LegMusRef.IliacusLateralis1.LmtDot/.AngularVelocity);
+      AnyVar IliacusLateralis2 = ( LegMusRef.IliacusLateralis2.LmtDot/.AngularVelocity);
+      AnyVar IliacusLateralis3 = ( LegMusRef.IliacusLateralis3.LmtDot/.AngularVelocity);
+      AnyVar IliacusMid1 = ( LegMusRef.IliacusMid1.LmtDot/.AngularVelocity);
+      AnyVar IliacusMid2 = ( LegMusRef.IliacusMid2.LmtDot/.AngularVelocity);
+      AnyVar IliacusMedialis1 = ( LegMusRef.IliacusMedialis1.LmtDot/.AngularVelocity);
+      AnyVar IliacusMedialis2 = ( LegMusRef.IliacusMedialis2.LmtDot/.AngularVelocity);
+      AnyVar IliacusMedialis3 = ( LegMusRef.IliacusMedialis3.LmtDot/.AngularVelocity);
+      AnyVar GluteusMinimusAnterior1 = ( LegMusRef.GluteusMinimusAnterior1.LmtDot/.AngularVelocity);
+      AnyVar GluteusMinimusMid1 = ( LegMusRef.GluteusMinimusMid1.LmtDot/.AngularVelocity);
+      AnyVar GluteusMinimusPosterior1 = ( LegMusRef.GluteusMinimusPosterior1.LmtDot/.AngularVelocity);
+      AnyVar GluteusMediusAnterior1 = ( LegMusRef.GluteusMediusAnterior1.LmtDot/.AngularVelocity);
+      AnyVar GluteusMediusAnterior2 = ( LegMusRef.GluteusMediusAnterior2.LmtDot/.AngularVelocity);
+      AnyVar GluteusMediusAnterior3 = ( LegMusRef.GluteusMediusAnterior3.LmtDot/.AngularVelocity);
+      AnyVar GluteusMediusAnterior4 = ( LegMusRef.GluteusMediusAnterior4.LmtDot/.AngularVelocity);
+      AnyVar GluteusMediusAnterior5 = ( LegMusRef.GluteusMediusAnterior5.LmtDot/.AngularVelocity);
+      AnyVar GluteusMediusAnterior6 = ( LegMusRef.GluteusMediusAnterior6.LmtDot/.AngularVelocity);
+      AnyVar GluteusMediusPosterior1 = ( LegMusRef.GluteusMediusPosterior1.LmtDot/.AngularVelocity);
+      AnyVar GluteusMediusPosterior2 = ( LegMusRef.GluteusMediusPosterior2.LmtDot/.AngularVelocity);
+      AnyVar GluteusMediusPosterior3 = ( LegMusRef.GluteusMediusPosterior3.LmtDot/.AngularVelocity);
+      AnyVar GluteusMediusPosterior4 = ( LegMusRef.GluteusMediusPosterior4.LmtDot/.AngularVelocity);
+      AnyVar GluteusMediusPosterior5 = ( LegMusRef.GluteusMediusPosterior5.LmtDot/.AngularVelocity);
+      AnyVar GluteusMediusPosterior6 = ( LegMusRef.GluteusMediusPosterior6.LmtDot/.AngularVelocity);
+      AnyVar GluteusMaximusSuperior1 = ( LegMusRef.GluteusMaximusSuperior1.LmtDot/.AngularVelocity);
+      AnyVar GluteusMaximusSuperior2 = ( LegMusRef.GluteusMaximusSuperior2.LmtDot/.AngularVelocity);
+      AnyVar GluteusMaximusSuperior3 = ( LegMusRef.GluteusMaximusSuperior3.LmtDot/.AngularVelocity);
+      AnyVar GluteusMaximusSuperior4 = ( LegMusRef.GluteusMaximusSuperior4.LmtDot/.AngularVelocity);
+      AnyVar GluteusMaximusSuperior5 = ( LegMusRef.GluteusMaximusSuperior5.LmtDot/.AngularVelocity);
+      AnyVar GluteusMaximusSuperior6 = ( LegMusRef.GluteusMaximusSuperior6.LmtDot/.AngularVelocity);
+      AnyVar GluteusMaximusInferior1 = ( LegMusRef.GluteusMaximusInferior1.LmtDot/.AngularVelocity);
+      AnyVar GluteusMaximusInferior2 = ( LegMusRef.GluteusMaximusInferior2.LmtDot/.AngularVelocity);
+      AnyVar GluteusMaximusInferior3 = ( LegMusRef.GluteusMaximusInferior3.LmtDot/.AngularVelocity);
+      AnyVar GluteusMaximusInferior4 = ( LegMusRef.GluteusMaximusInferior4.LmtDot/.AngularVelocity);
+      AnyVar GluteusMaximusInferior5 = ( LegMusRef.GluteusMaximusInferior5.LmtDot/.AngularVelocity);
+      AnyVar GluteusMaximusInferior6 = ( LegMusRef.GluteusMaximusInferior6.LmtDot/.AngularVelocity);
+      AnyVar TensorFasciaeLatae1 = ( LegMusRef.TensorFasciaeLatae1.LmtDot/.AngularVelocity);
+      AnyVar TensorFasciaeLatae2 = ( LegMusRef.TensorFasciaeLatae2.LmtDot/.AngularVelocity);
+      AnyVar Piriformis1 = ( LegMusRef.Piriformis1.LmtDot/.AngularVelocity);
+      AnyVar Gracilis1 = ( LegMusRef.Gracilis1.LmtDot/.AngularVelocity);
+      AnyVar Gracilis2 = ( LegMusRef.Gracilis2.LmtDot/.AngularVelocity);
+      AnyVar AdductorLongus1 = ( LegMusRef.AdductorLongus1.LmtDot/.AngularVelocity);
+      AnyVar AdductorLongus2 = ( LegMusRef.AdductorLongus2.LmtDot/.AngularVelocity);
+      AnyVar AdductorLongus3 = ( LegMusRef.AdductorLongus3.LmtDot/.AngularVelocity);
+      AnyVar AdductorLongus4 = ( LegMusRef.AdductorLongus4.LmtDot/.AngularVelocity);
+      AnyVar AdductorLongus5 = ( LegMusRef.AdductorLongus5.LmtDot/.AngularVelocity);
+      AnyVar AdductorLongus6 = ( LegMusRef.AdductorLongus6.LmtDot/.AngularVelocity);
+      AnyVar AdductorMagnusDistal1 = ( LegMusRef.AdductorMagnusDistal1.LmtDot/.AngularVelocity);
+      AnyVar AdductorMagnusDistal2 = ( LegMusRef.AdductorMagnusDistal2.LmtDot/.AngularVelocity);
+      AnyVar AdductorMagnusDistal3 = ( LegMusRef.AdductorMagnusDistal3.LmtDot/.AngularVelocity);
+      AnyVar AdductorMagnusMid1 = ( LegMusRef.AdductorMagnusMid1.LmtDot/.AngularVelocity);
+      AnyVar AdductorMagnusMid2 = ( LegMusRef.AdductorMagnusMid2.LmtDot/.AngularVelocity);
+      AnyVar AdductorMagnusMid3 = ( LegMusRef.AdductorMagnusMid3.LmtDot/.AngularVelocity);
+      AnyVar AdductorMagnusMid4 = ( LegMusRef.AdductorMagnusMid4.LmtDot/.AngularVelocity);
+      AnyVar AdductorMagnusMid5 = ( LegMusRef.AdductorMagnusMid5.LmtDot/.AngularVelocity);
+      AnyVar AdductorMagnusMid6 = ( LegMusRef.AdductorMagnusMid6.LmtDot/.AngularVelocity);
+      AnyVar AdductorMagnusProximal1 = ( LegMusRef.AdductorMagnusProximal1.LmtDot/.AngularVelocity);
+      AnyVar AdductorMagnusProximal2 = ( LegMusRef.AdductorMagnusProximal2.LmtDot/.AngularVelocity);
+      AnyVar AdductorMagnusProximal3 = ( LegMusRef.AdductorMagnusProximal3.LmtDot/.AngularVelocity);
+      AnyVar AdductorMagnusProximal4 = ( LegMusRef.AdductorMagnusProximal4.LmtDot/.AngularVelocity);
+      AnyVar AdductorBrevisProximal1 = ( LegMusRef.AdductorBrevisProximal1.LmtDot/.AngularVelocity);
+      AnyVar AdductorBrevisProximal2 = ( LegMusRef.AdductorBrevisProximal2.LmtDot/.AngularVelocity);
+      AnyVar AdductorBrevisMid3 = ( LegMusRef.AdductorBrevisMid3.LmtDot/.AngularVelocity);
+      AnyVar AdductorBrevisMid4 = ( LegMusRef.AdductorBrevisMid4.LmtDot/.AngularVelocity);
+      AnyVar AdductorBrevisDistal5 = ( LegMusRef.AdductorBrevisDistal5.LmtDot/.AngularVelocity);
+      AnyVar AdductorBrevisDistal6 = ( LegMusRef.AdductorBrevisDistal6.LmtDot/.AngularVelocity);
+      AnyVar GemellusInferior1 = ( LegMusRef.GemellusInferior1.LmtDot/.AngularVelocity);
+      AnyVar GemellusSuperior1 = ( LegMusRef.GemellusSuperior1.LmtDot/.AngularVelocity);
+      AnyVar ObturatorExternusSuperior1 = ( LegMusRef.ObturatorExternusSuperior1.LmtDot/.AngularVelocity);
+      AnyVar ObturatorExternusSuperior2 = ( LegMusRef.ObturatorExternusSuperior2.LmtDot/.AngularVelocity);
+      AnyVar ObturatorExternusSuperior3 = ( LegMusRef.ObturatorExternusSuperior3.LmtDot/.AngularVelocity);
+      AnyVar ObturatorExternusInferior1 = ( LegMusRef.ObturatorExternusInferior1.LmtDot/.AngularVelocity);
+      AnyVar ObturatorExternusInferior2 = ( LegMusRef.ObturatorExternusInferior2.LmtDot/.AngularVelocity);
+      AnyVar ObturatorInternus1 = ( LegMusRef.ObturatorInternus1.LmtDot/.AngularVelocity);
+      AnyVar ObturatorInternus2 = ( LegMusRef.ObturatorInternus2.LmtDot/.AngularVelocity);
+      AnyVar ObturatorInternus3 = ( LegMusRef.ObturatorInternus3.LmtDot/.AngularVelocity);
+      AnyVar Pectineus1 = ( LegMusRef.Pectineus1.LmtDot/.AngularVelocity);
+      AnyVar Pectineus2 = ( LegMusRef.Pectineus2.LmtDot/.AngularVelocity);
+      AnyVar Pectineus3 = ( LegMusRef.Pectineus3.LmtDot/.AngularVelocity);
+      AnyVar Pectineus4 = ( LegMusRef.Pectineus4.LmtDot/.AngularVelocity);
+      AnyVar Plantaris1 = ( LegMusRef.Plantaris1.LmtDot/.AngularVelocity);
+      //    AnyVar Popliteus1 = ( LegMusRef.Popliteus1.LmtDot/.AngularVelocity);
+      //    AnyVar Popliteus2 = ( LegMusRef.Popliteus2.LmtDot/.AngularVelocity);
+      AnyVar QuadratusFemoris1 = ( LegMusRef.QuadratusFemoris1.LmtDot/.AngularVelocity);
+      AnyVar QuadratusFemoris2 = ( LegMusRef.QuadratusFemoris2.LmtDot/.AngularVelocity);
+      AnyVar QuadratusFemoris3 = ( LegMusRef.QuadratusFemoris3.LmtDot/.AngularVelocity);
+      AnyVar QuadratusFemoris4 = ( LegMusRef.QuadratusFemoris4.LmtDot/.AngularVelocity);
+      
+      #if OutputFile != ""
+      AnyOutputFile outfile = 
+      {
+        FileName = OutputFile;
+        NumberFormat = 
+        {
+        Digits = 5;
+        Width = 12;
+        Style = ScientificNumber;
+        };
+        AnyFloat Angle  = .Angle;
+        
+        AnyVar PsoasMajor = 1/11*(.PsoasMajorT12I + .PsoasMajorL1I +.PsoasMajorL1T +.PsoasMajorL2I 
+        + .PsoasMajorL2T + .PsoasMajorL3I + .PsoasMajorL3T + .PsoasMajorL4I + .PsoasMajorL4T  
+        + .PsoasMajorL5 + .PsoasMajorL5T );
+        
+        AnyVar SoleusMedialis = 1/3*( .SoleusMedialis1 + .SoleusMedialis2 + .SoleusMedialis3);
+        AnyVar SoleusLateralis = 1/3*(.SoleusLateralis4 + .SoleusLateralis5 + .SoleusLateralis6);
+        AnyVar GastrocnemiusLateralis = .GastrocnemiusLateralis1;
+        AnyVar GastrocnemiusMedialis = .GastrocnemiusMedialis1;
+        AnyVar FlexorDigitorumLongus =1/3*( .FlexorDigitorumLongus1 + .FlexorDigitorumLongus2 + .FlexorDigitorumLongus3);
+        AnyVar FlexorHallucisLongus = 1/3*(.FlexorHallucisLongus1 + .FlexorHallucisLongus2 + .FlexorHallucisLongus3);
+        AnyVar TibialisPosteriorLateralis = 1/3*(.TibialisPosteriorLateralis1 + .TibialisPosteriorLateralis2 + .TibialisPosteriorLateralis3);
+        AnyVar TibialisPosteriorMedialis = 1/3*(.TibialisPosteriorMedialis1 + .TibialisPosteriorMedialis2 + .TibialisPosteriorMedialis3);
+        AnyVar TibialisAnterior = 1/3*(.TibialisAnterior1 + .TibialisAnterior2 + .TibialisAnterior3);
+        AnyVar PeroneusBrevis = 1/3*(.PeroneusBrevis1 + .PeroneusBrevis2 + .PeroneusBrevis3);
+        AnyVar PeroneusLongus = 1/3*(.PeroneusLongus1 + .PeroneusLongus2 + .PeroneusLongus3);
+        AnyVar PeroneusTertius = 1/3*(.PeroneusTertius1 + .PeroneusTertius2 + .PeroneusTertius3);
+        AnyVar ExtensorDigitorumLongus = 1/3*(.ExtensorDigitorumLongus1 + .ExtensorDigitorumLongus2 + .ExtensorDigitorumLongus3);
+        AnyVar ExtensorHallucisLongus = 1/3*(.ExtensorHallucisLongus1 + .ExtensorHallucisLongus2 + .ExtensorHallucisLongus3);
+        AnyVar VastusLateralisInferior = 1/6*(.VastusLateralisInferior1 + .VastusLateralisInferior2 + .VastusLateralisInferior3 + .VastusLateralisInferior4
+        + .VastusLateralisInferior5 + .VastusLateralisInferior6);
+        AnyVar VastusLateralisSuperior = 1/2*(.VastusLateralisSuperior7 + .VastusLateralisSuperior8);
+        AnyVar VastusMedialisInferior = 1/2*(.VastusMedialisInferior1 + .VastusMedialisInferior2);
+        AnyVar VastusMedialisMid = 1/2*(.VastusMedialisMid3 + .VastusMedialisMid4);
+        AnyVar VastusMedialisSuperior = 1/6*(.VastusMedialisSuperior5 + .VastusMedialisSuperior6 + .VastusMedialisSuperior7 + .VastusMedialisSuperior8 + .VastusMedialisSuperior9 + .VastusMedialisSuperior10);
+        AnyVar VastusIntermedius = 1/6*(.VastusIntermedius1 + .VastusIntermedius2 + .VastusIntermedius3 + .VastusIntermedius4 + .VastusIntermedius5 + .VastusIntermedius6);
+        AnyVar RectusFemoris = 1/2*(.RectusFemoris1 + .RectusFemoris2);
+        AnyVar Semitendinosus = .Semitendinosus1;
+        AnyVar Semimembranosus = .Semimembranosus1;
+        AnyVar BicepsFemorisCaputLongum = .BicepsFemorisCaputLongum1;
+        AnyVar BicepsFemorisCaputBreve = 1/2*(.BicepsFemorisCaputBreve1 + .BicepsFemorisCaputBreve2);
+        AnyVar SartoriusProximal = .SartoriusProximal1;
+        AnyVar SartoriusDistal = .SartoriusDistal1;
+        AnyVar IliacusLateralis = 1/2*(.IliacusLateralis1 + .IliacusLateralis2 + .IliacusLateralis3);
+        AnyVar IliacusMid = 1/2*(.IliacusMid1 + .IliacusMid2);
+        AnyVar IliacusMedialis = 1/3*(.IliacusMedialis1 + .IliacusMedialis2 + .IliacusMedialis3);
+        AnyVar GluteusMinimusAnterior = .GluteusMinimusAnterior1;
+        AnyVar GluteusMinimusMid = .GluteusMinimusMid1;
+        AnyVar GluteusMinimusPosterior = .GluteusMinimusPosterior1;
+        AnyVar GluteusMediusAnterior = 1/6*(.GluteusMediusAnterior1 + .GluteusMediusAnterior2 + .GluteusMediusAnterior3 + .GluteusMediusAnterior4 + .GluteusMediusAnterior5 + .GluteusMediusAnterior6);
+        AnyVar GluteusMediusPosterior = 1/6*(.GluteusMediusPosterior1 + .GluteusMediusPosterior2 + .GluteusMediusPosterior3 + .GluteusMediusPosterior4 + .GluteusMediusPosterior5 + .GluteusMediusPosterior6);
+        AnyVar GluteusMaximusSuperior = 1/6*(.GluteusMaximusSuperior1 + .GluteusMaximusSuperior2 + .GluteusMaximusSuperior3 + .GluteusMaximusSuperior4 + .GluteusMaximusSuperior5 + .GluteusMaximusSuperior6);
+        AnyVar GluteusMaximusInferior = 1/6*(.GluteusMaximusInferior1 + .GluteusMaximusInferior2 + .GluteusMaximusInferior3 + .GluteusMaximusInferior4 + .GluteusMaximusInferior5 + .GluteusMaximusInferior6);
+        AnyVar TensorFasciaeLatae = 1/2*(.TensorFasciaeLatae1 + .TensorFasciaeLatae2);
+        AnyVar Piriformis = .Piriformis1;
+        AnyVar Gracilis = 1/2*(.Gracilis1 + .Gracilis2);
+        AnyVar AdductorLongus = 1/6*(.AdductorLongus1 + .AdductorLongus2 + .AdductorLongus3 + .AdductorLongus4 + .AdductorLongus5 + .AdductorLongus6);
+        AnyVar AdductorMagnusDistal = 1/3*(.AdductorMagnusDistal1 + .AdductorMagnusDistal2 + .AdductorMagnusDistal3);
+        AnyVar AdductorMagnusMid = 1/6*(.AdductorMagnusMid1 + .AdductorMagnusMid2 + .AdductorMagnusMid3 + .AdductorMagnusMid4 + .AdductorMagnusMid5 + .AdductorMagnusMid6);
+        AnyVar AdductorMagnusProximal =1/4*(.AdductorMagnusProximal1 + .AdductorMagnusProximal2 + .AdductorMagnusProximal3 + .AdductorMagnusProximal4);
+        AnyVar AdductorBrevisProximal = 1/2*(.AdductorBrevisProximal1 + .AdductorBrevisProximal2);
+        AnyVar AdductorBrevisMid = 1/2*(.AdductorBrevisMid3 + .AdductorBrevisMid4);
+        AnyVar AdductorBrevisDistal = 1/2*(.AdductorBrevisDistal5 + .AdductorBrevisDistal6);
+        AnyVar GemellusInferior = .GemellusInferior1;
+        AnyVar GemellusSuperior = .GemellusSuperior1;
+        AnyVar ObturatorExternusSuperior = 1/3*(.ObturatorExternusSuperior1 + .ObturatorExternusSuperior2 + .ObturatorExternusSuperior3);
+        AnyVar ObturatorExternusInferior = 1/2*(.ObturatorExternusInferior1 + .ObturatorExternusInferior2);
+        AnyVar ObturatorInternus = 1/3*( .ObturatorInternus1 + .ObturatorInternus2 + .ObturatorInternus3);
+        AnyVar Pectineus = 1/4*(.Pectineus1 + .Pectineus2 + .Pectineus3 + .Pectineus4);
+        AnyVar Plantaris = .Plantaris1;
+        AnyVar QuadratusFemoris = 1/4*(.QuadratusFemoris1 + .QuadratusFemoris2 + .QuadratusFemoris3 + .QuadratusFemoris4);
+      };
+    #endif
+    
+    
+    
+    };
+    
+    
+    AnyFolder SoftDrivers = {
+      AnyKinEqDriver PelvisDriver = {
+        CType = {Hard,Hard,Hard,Hard,Hard,Hard};
+        AnyKinMeasure &ref1 = ..HumanModel.BodyModel.Interface.Trunk.PelvisPosX;
+        AnyKinMeasure &ref2 = ..HumanModel.BodyModel.Interface.Trunk.PelvisPosY;
+        AnyKinMeasure &ref3 = ..HumanModel.BodyModel.Interface.Trunk.PelvisPosZ;
+        AnyKinMeasure &ref4 = ..HumanModel.BodyModel.Interface.Trunk.PelvisRotZ;
+        AnyKinMeasure &ref5 = ..HumanModel.BodyModel.Interface.Trunk.PelvisRotY;
+        AnyKinMeasure &ref6 = ..HumanModel.BodyModel.Interface.Trunk.PelvisRotX;
+        Reaction.Type={On,On,On,On,On,On};
+      };    
+      AnyKinEqSimpleDriver NeckDriver= {
+        CType= Hard;
+        AnyKinMeasure &ref1= ..HumanModel.BodyModel.Interface.Trunk.NeckJoint;  
+        DriverPos = {0};
+        DriverVel = {0};
+        Reaction.Type= {On};
+      };
+      AnyKinEqSimpleDriver PelvisThoraxExtension = 
+      {
+        CType = Hard;
+        AnyKinMeasure &ref = ..HumanModel.BodyModel.Interface.Trunk.PelvisThoraxExtension;
+        DriverPos = {0};
+        DriverVel = {0};
+        Reaction.Type= {On};
+      };        
+      AnyKinEqSimpleDriver PelvisThoraxLateralBending = 
+      {
+        CType = Hard;
+        AnyKinMeasure &ref = ..HumanModel.BodyModel.Interface.Trunk.PelvisThoraxLateralBending;
+        DriverPos = {...PelvisThoraxLateralBending*pi/180 };
+        DriverVel = {0};
+        Reaction.Type= {On};
+      };        
+      AnyKinEqSimpleDriver PelvisThoraxRotation = 
+      {
+        DriverPos = {...PelvisThoraxRotation*pi/180 };
+        DriverVel = {0};
+        CType = Hard;
+        AnyKinMeasure &ref = ..HumanModel.BodyModel.Interface.Trunk.PelvisThoraxRotation;
+        Reaction.Type= {On};
+      };
+      AnyKinEqSimpleDriver HipFlexion = 
+      {
+        CType = Soft;
+        AnyKinMeasure &ref = ..HumanModel.BodyModel.Interface.Right.HipFlexion;
+        DriverPos = {...HipFlexion*pi/180 };
+        DriverVel = {0};
+        Reaction.Type= {On};
+        
+      };        
+      AnyKinEqSimpleDriver HipAbduction = 
+      {
+        CType = Soft;
+        AnyKinMeasure &ref = ..HumanModel.BodyModel.Interface.Right.HipAbduction ;
+        DriverPos = {...HipAbduction*pi/180 };
+        DriverVel = {0}; 
+        Reaction.Type= {On};
+      };
+      AnyKinEqSimpleDriver HipExternalRotation = 
+      {
+        CType = Soft;
+        AnyKinMeasure &ref = ..HumanModel.BodyModel.Interface.Right.HipExternalRotation;
+        DriverPos = {...HipExternalRotation*pi/180  };
+        DriverVel = {0};
+        Reaction.Type= {On}; 
+      };      
+      AnyKinEqSimpleDriver KneeFlexion = 
+      {
+        CType = Soft;
+        AnyKinMeasure &ref = ..HumanModel.BodyModel.Interface.Right.KneeFlexion;
+        DriverPos = {...KneeFlexion*pi/180  };
+        DriverVel = {0};
+        Reaction.Type= {Off};
+      };  
+      AnyKinEqSimpleDriver AnklePlantarFlexion = 
+      {
+        CType = Soft;
+        AnyKinMeasure &ref = ..HumanModel.BodyModel.Interface.Right.AnklePlantarFlexion;
+        DriverPos = {...AnklePlantarFlexion*pi/180  };
+        DriverVel = {0};
+        Reaction.Type= {On};
+      };        
+      AnyKinEqSimpleDriver SubTalarEversion = 
+      {
+        CType = Soft;
+        AnyKinMeasure &ref = ..HumanModel.BodyModel.Interface.Right.SubTalarEversion;
+        DriverPos = {...SubTalarEversion*pi/180 };
+        DriverVel = {0};
+        Reaction.Type= {On};
+      };  
+    };// SoftDrivers
+    
+    
+    
+    
+    
+  };
+  
+};
+
+
+
+

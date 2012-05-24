@@ -1,0 +1,111 @@
+#include "../libdef.any"
+
+/**
+This model demonstrates how to replace the knee joint by a contact model 
+using a total knee arthroplasty for a knee bend model.
+
+The model is performing a knee bend, which is driven by positions of the hip and foot
+and ground reaction forces added from external sources.
+The knee joints (tibial femur joint and patella femur joint) from the standard repository body 
+is excluded from the inverse dynamic study and a new joint is implemented using force dependent 
+degrees of freedom (DOF). The forces in the knee joint are provided by a contact force between a 
+femoral and a tibial implant(1) (defided into medial and lateral part), contact forces between the 
+femoral implant and the patella as well as ligament forcess from medial and lateral collateral ligaments
+and posterior cruciate ligament (PCL) and muscle forces.
+For computational reasons, the model was reduced to simulate only one leg.
+
+----
+(1) The raw data of the implant geometries used in this model where kindly 
+    provided by the committee of the "First Grand Challenge Competition 
+    to Predict In Vivo Knee Loads" project (https://simtk.org/home/kneeloads).
+    The data used in this model are filtered, remeshed and parts of it are 
+    partitioned into different pieces.
+    
+    For publication using this models or the geometry data out of it, please reference also to 
+    Fregly, B. J.; Besier, T. F.; Lloyd, D. G.; Delp, S. L.; Banks, S. A.; Pandy, M. G. & D'Lima, D. D. 
+    Grand challenge competition to predict in vivo knee loads Journal of Orthopaedic Research, Wiley Subscription Services, Inc., A Wiley Company, 2012, 30, 503-513
+    doi: 10.1002/jor.22023
+    
+    
+
+*/
+Main = {
+  
+  #define USE_FDK 1
+  
+  AnyOperationSequence RunApplication = {
+    AnyOperation &CalibrationAnal = Main.HumanModel.Calibration.CalibrationSequence;  
+    AnyOperation &InvAnal=Main.Study.InverseDynamics;
+  };
+  
+  
+  #include "DrawSettings.any"
+  
+  // This implements parameters for the contact definition and the study
+  #include "Parameters.any"
+
+  AnyFolder HumanModel = {
+    
+    AnyFolder &Mannequin=.Model.Mannequin;
+    
+    
+    #include "BodyPartsSetup.any"
+
+    #include  "<ANYBODY_PATH_BODY>\BodyModels\GenericBodyModel\BodyModel.any"
+    
+    
+    
+    AnyFolder StrengthParameters = {
+      AnyVar SpecificMuscleTensionSpine = 90; //N/cm^2
+      AnyVar StrengthIndexLeg = 1; 
+      AnyVar SpecificMuscleTensionShoulderArm = 90; //N/cm^2
+    };    
+    
+    #include "<ANYBODY_PATH_BODY>\Scaling\ScalingStandard.any"
+  };
+  
+  AnyFolder Model = {
+    
+    AnyFolder &HumanModel=.HumanModel.BodyModel;
+    #include "Environment.any"   
+
+    #include "Mannequin.any" 
+    
+    AnyFolder ModelEnvironmentConnection = {
+      AnyFolder &HumanModel=.HumanModel;
+      #include "JointsAndDrivers.any"
+    };
+    
+    // This file includes the geometry of the implants and defines
+    // the attachment points of the ligaments.
+    #include "Implants.any"
+    
+  };
+  
+  
+  
+  AnyBodyStudy Study = {
+    AnyFolder &Model = .Model;
+    
+    tEnd = Main.Parameters.Duration;
+    Gravity = {0.0, -9.81, 0.0};
+    nStep = Main.Parameters.TimeSteps;
+    
+    // This file implements the contact forces and the ligaments in the knee.
+    #include "ContactForces.any"
+    
+    
+    #if USE_FDK    
+    // This file implements the new joint definition for the contact knee.
+    #include "KneeExchange.any"
+    
+    InverseDynamics.ForceDepKinOnOff=On;
+    InverseDynamics.ForceDepKin.ForceTol=1;// 5e-1;
+    InverseDynamics.ForceDepKin.Perturbation=5e-5;
+    InverseDynamics.ForceDepKin.LocalSearchOnOff = On;
+    InverseDynamics.ForceDepKin.MaxNewtonStep = 10; //10;   
+    #endif
+  }; // End of study
+}; //Main
+
+
