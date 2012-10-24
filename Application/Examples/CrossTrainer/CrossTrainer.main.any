@@ -1,0 +1,77 @@
+#include "../libdef.any"
+
+Main = 
+{
+  
+   /**Execute this operation to run the model in the intended operation sequence.  
+  It is also possible to run operations seperately, by manual selections in the operation tree*/
+  AnyOperationSequence RunApplication = {
+
+    /**This operation calibrates the muscles in the model if these are of the type AnyMuscleModel3E.
+    This will just be an empty operation if the model is using a muscle type that does not require calibration.*/
+    AnyOperation &CalibrationAnal = Main.HumanModel.Calibration.CalibrationSequence;  
+
+    ///This operation is the inverse dynamic analysis
+    AnyOperation &InvAnal=Main.Study.InverseDynamics;
+   
+  };
+  
+  #include "DrawSettings.any"
+  
+  AnyFolder HumanModel=
+  {  
+    AnyFolder &Mannequin=.Model.Mannequin;
+    #include  "BodyPartsSetup_SimpleMuscle.any"
+    
+    #include  "<ANYBODY_PATH_BODY>\BodyModels\GenericBodyModel\BodyModel.any"
+    
+    AnyFolder StrengthParameters=
+    {
+      AnyVar SpecificMuscleTensionSpine= 90; //N/cm^2
+      AnyVar StrengthIndexLeg= 1; 
+      AnyVar SpecificMuscleTensionShoulderArm= 90; //N/cm^2
+    };
+    
+    #include "<ANYBODY_PATH_BODY>\Scaling\ScalingUniform.any" 
+
+    Scaling = 
+    {
+      #include "AnyManUniform.any" 
+
+    };
+  };
+  
+  AnyFolder Model = 
+  {
+    AnyFolder &HumanModel = .HumanModel.BodyModel;
+    
+    // Setting for initial posture of human model
+    #include "Mannequin.any"
+    
+    // Definition for CoM(Center of Mass) of Human Model
+    #include "CoM_View.any"
+    
+    // Definition of additional AnyRefNode object in the human model
+    #include "HumanRefNodes.any"
+    
+    // AnyScript file for the fitness machine from SolidWorks
+    #include "FitnessMachine.any"
+    #include "LogoAdd.any"
+    
+    // Definition of drivers and constraints
+    AnyFolder ModelEnvironmentConnection = 
+    {
+      #include "JointsAndDrivers.any"
+      #include "MachineOperation.any"
+    };    
+  };
+  
+  AnyBodyStudy Study =
+  {
+    AnyFolder& Model = .Model;
+    tStart = 0;
+    tEnd = 1;
+    nStep = 61;
+    Gravity = {0, -9.81, 0};
+  };
+}; 
