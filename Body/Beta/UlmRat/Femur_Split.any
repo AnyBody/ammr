@@ -1,0 +1,2185 @@
+
+AnyFolder Femur = {
+  
+  AnyVar LengthFemur = Main.RatModel.Seg.Femur.v_Knee[0]-Main.RatModel.Seg.Femur.v_Hip[0];
+  
+  AnyVar LengthDistal = Main.RatModel.FracturRatio*LengthFemur;  //Length of distal segment
+  AnyVar LengthProximal = LengthFemur - LengthDistal;    //Length of proximal segment
+  
+  AnyVar Ld = LengthDistal;  //Length of distal segment
+  AnyVar Lp = LengthProximal;  //Length of proximal segment
+  
+  //Local position vectors in CS F (old local CS of Femur), CS A (new local CS of new distal Femur Segment) or CS B (new local CS of new proximal Femur Segment)
+  AnyVector f_r_H = {-0.00865241480000,   0.00498824800000,  0.00246587170000};  //Hipjoint in CS F
+  AnyVector f_r_K = {0.02010306200000,  0.00010467243000,   -0.00096203734000}; //Anklejoint in CS F
+  
+  AnyVector a_r_K = {Ld/2, f_r_K[1], f_r_K[2]};  //Kneejoint in CS A
+  AnyVector a_r_S = {-Ld/2, 0.0, 0.0}; //Cuttingplane in CS A
+  AnyVector a_r_f = -f_r_K+a_r_K;	    //old CoM of Femursegment in CS A
+  
+  AnyVector b_r_H = {-Lp/2, f_r_H[1], f_r_H[2]}; //Hipjoint in CS B		
+  AnyVector b_r_S = {Lp/2, 0.0, 0.0};  //Cuttingplane in CS B
+  AnyVector b_r_f = -f_r_H+b_r_H;	    //old CoM of Femursegment in CS B
+  
+  AnyVar betr_a_r_f= (a_r_f[0]^2+a_r_f[1]^2+a_r_f[2]^2)^0.5; //length of position vector a_r_t
+  AnyVar betr_b_r_f= (b_r_f[0]^2+b_r_f[1]^2+b_r_f[2]^2)^0.5; //length of position vector b_r_t
+  
+  //      //Kinetic parameters of old femur segment
+  AnyVar MassS = 0.009238579;
+  AnyVector inertia =   {1.1245034e+003,1.2166950e+003,4.0551146e+002,5.5697794e+001,-1.5093965e+002,-3.1721455e+001}; //ohne rot
+  AnyVar Ixx = inertia[2]/1000000000;
+  AnyVar Iyy = inertia[0]/1000000000;
+  AnyVar Izz = inertia[1]/1000000000; 
+  //      
+  AnyVar MassS_d = MassS*betr_b_r_f/(betr_a_r_f+betr_b_r_f); // Mass of segment
+  AnyVar MassS_p = MassS*betr_a_r_f/(betr_a_r_f+betr_b_r_f); // Mass of segment
+  //      
+  //      WICHTIG: AENDERUNG DER AUSRICHTUNG DER KS:  
+  //      Originalumrechnung aus Wehner et al., 2009:
+  //      AnyMat33 Jred = {{Ixx-MassS_p*betr_b_r_f^2-MassS_d*betr_a_r_f^2,0,0},{0,Iyy,0},{0,0,Izz-MassS_p*betr_b_r_f^2-MassS_d*betr_a_r_f^2}};
+  //      AnyMat33 J_p = {{MassS_p*Lp^2/(MassS_d*Ld^2+MassS_p*Lp^2),0,0},{0,MassS_p^2*Ld/(MassS_d^2*Lp+MassS_p^2*Ld),0},{0,0,MassS_p*Lp^2/(MassS_d*Ld^2+MassS_p*Lp^2)}}*Jred;
+  //      AnyMat33 J_d = {{MassS_d*Ld^2/(MassS_d*Ld^2+MassS_p*Lp^2),0,0},{0,MassS_d^2*Lp/(MassS_d^2*Lp+MassS_p^2*Ld),0},{0,0,MassS_d*Ld^2/(MassS_d*Ld^2+MassS_p*Lp^2)}}*Jred;
+  
+  //neue Umrechnung mit x-achse als longitudinalachse
+  AnyMat33 Jred = {{Ixx,0,0},{0,Iyy-MassS_p*betr_b_r_f^2-MassS_d*betr_a_r_f^2,0},{0,0,Izz-MassS_p*betr_b_r_f^2-MassS_d*betr_a_r_f^2}};
+  AnyMat33 J_p = {{MassS_p^2*Ld/(MassS_d^2*Lp+MassS_p^2*Ld),0,0},{0,MassS_p*Lp^2/(MassS_d*Ld^2+MassS_p*Lp^2),0},{0,0,MassS_p*Lp^2/(MassS_d*Ld^2+MassS_p*Lp^2)}}*Jred;
+  AnyMat33 J_d = {{MassS_d^2*Lp/(MassS_d^2*Lp+MassS_p^2*Ld),0,0},{0,MassS_d*Ld^2/(MassS_d*Ld^2+MassS_p*Lp^2),0},{0,0,MassS_d*Ld^2/(MassS_d*Ld^2+MassS_p*Lp^2)}}*Jred;
+  //                                                                                           
+  
+  #include "AttachmentLocation.any"
+  
+};
+
+
+#if FRACTUREMODEL 
+
+AnySeg Femur_d = {
+  
+  AnyVector a_r_S = .Femur.a_r_S;
+  AnyVector a_r_f = .Femur.a_r_f;
+  
+  r0 = {-0.05, -0.05, -0.05};  
+  Axes0 = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
+  
+  
+  Mass=.Femur.MassS_d;
+  Jii = {.Femur.J_d[0][0],.Femur.J_d[1][1],.Femur.J_d[2][2]};
+  
+  AnyRefNode PalmNode = {
+    sRel = .Hip.sRel - {-0.00865241480000,   0.00498824800000,  0.00246587170000
+    };
+    ARel = {{0, 0, 1}, {1, 0, 0}, {0, 1, 0}};
+    AnyDrawSurf Drw = {
+      FileName = "Femur";
+      ScaleXYZ = {0.001, 0.001, 0.001};
+      Opacity = 1;
+      RGB = .....DrawSettings.Colors.Segments;
+    };
+  };
+  
+  AnyDrawSeg DrwBeam =      {
+    RGB = {1, 0, 0};
+    Opacity = 1;
+    InertiaScale = 0.25*0.3;
+  };
+  
+  AnyString loc = "dist";
+  
+  //Vectors of RefNodes of new distal Femur segment
+  AnyVector d_Hip 		   = .Femur.v_Hip 			 	+ a_r_f;
+  AnyVector d_Knee 		   = .Femur.v_Knee 	      	+ a_r_f;	
+  AnyVector d_Pat 		   = .Femur.v_Pat 			 	+ a_r_f;
+  AnyVector d_Femur_mus_extensor_digitorum_longus_1Node0  = .Femur.v_Femur_mus_extensor_digitorum_longus_1Node0 	+ a_r_f;
+  AnyVector d_Femur_mus_extensor_digitorum_longus_2Node0  = .Femur.v_Femur_mus_extensor_digitorum_longus_2Node0 	+ a_r_f;
+  AnyVector d_Femur_mus_extensor_digitorum_longus_3Node0  = .Femur.v_Femur_mus_extensor_digitorum_longus_3Node0 	+ a_r_f;
+  AnyVector d_Femur_mus_extensor_digitorum_longus_4Node0  = .Femur.v_Femur_mus_extensor_digitorum_longus_4Node0 	+ a_r_f;
+  AnyVector d_Femur_mus_popliteus_1Node0  = .Femur.v_Femur_mus_popliteus_1Node0 	+ a_r_f;
+  AnyVector d_Femur_mus_popliteus_1Node1  = .Femur.v_Femur_mus_popliteus_1Node1 	+ a_r_f;
+  AnyVector d_Femur_mus_popliteus_2Node0  = .Femur.v_Femur_mus_popliteus_2Node0 	+ a_r_f;
+  AnyVector d_Femur_mus_popliteus_2Node1  = .Femur.v_Femur_mus_popliteus_2Node1 	+ a_r_f;
+  AnyVector d_Femur_mus_tibialis_anteriorNode0 = .Femur.v_Femur_mus_tibialis_anteriorNode0	+ a_r_f;
+  AnyVector d_Femur_mus_gastrocnemius_soleus_1Node0 = .Femur.v_Femur_mus_gastrocnemius_soleus_1Node0	+ a_r_f;
+  AnyVector d_Femur_mus_gastrocnemius_soleus_2Node0 = .Femur.v_Femur_mus_gastrocnemius_soleus_2Node0	+ a_r_f;
+  AnyVector d_Femur_mus_tensor_fasciae_latae_1Node3 = .Femur.v_Femur_mus_tensor_fasciae_latae_1Node3	+ a_r_f;
+  AnyVector d_Femur_mus_tensor_fasciae_latae_1Node4 = .Femur.v_Femur_mus_tensor_fasciae_latae_1Node4	+ a_r_f;
+  AnyVector d_Femur_mus_tensor_fasciae_latae_1Node5 = .Femur.v_Femur_mus_tensor_fasciae_latae_1Node5	+ a_r_f;
+  AnyVector d_Femur_mus_tensor_fasciae_latae_2Node3 = .Femur.v_Femur_mus_tensor_fasciae_latae_2Node3	+ a_r_f;
+  AnyVector d_Femur_mus_tensor_fasciae_latae_2Node4 = .Femur.v_Femur_mus_tensor_fasciae_latae_2Node4	+ a_r_f;
+  AnyVector d_Femur_mus_tensor_fasciae_latae_2Node5 = .Femur.v_Femur_mus_tensor_fasciae_latae_2Node5	+ a_r_f;
+  AnyVector d_Femur_mus_fasciae_latae_3Node3 = .Femur.v_Femur_mus_fasciae_latae_3Node3	+ a_r_f;
+  AnyVector d_Femur_mus_fasciae_latae_3Node4 = .Femur.v_Femur_mus_fasciae_latae_3Node4	+ a_r_f;
+  AnyVector d_Femur_mus_fasciae_latae_3Node5 = .Femur.v_Femur_mus_fasciae_latae_3Node5	+ a_r_f;
+  AnyVector d_Femur_mus_semitendinosusNode1 = .Femur.v_Femur_mus_semitendinosusNode1	+ a_r_f;
+  AnyVector d_Femur_mus_semitendinosusNode2 = .Femur.v_Femur_mus_semitendinosusNode2	+ a_r_f;
+  AnyVector d_Femur_mus_semimembranosusNode1 = .Femur.v_Femur_mus_semimembranosusNode1	+ a_r_f;
+  AnyVector d_Femur_mus_semimembranosusNode2 = .Femur.v_Femur_mus_semimembranosusNode2	+ a_r_f;
+  AnyVector d_Femur_mus_quadratus_femorisNode2 = .Femur.v_Femur_mus_quadratus_femorisNode2	+ a_r_f;
+  AnyVector d_Femur_mus_psoas_minor_1Node1 = .Femur.v_Femur_mus_psoas_minor_1Node1	+ a_r_f;
+  AnyVector d_Femur_mus_psoas_minor_1Node2 = .Femur.v_Femur_mus_psoas_minor_1Node2	+ a_r_f;
+  AnyVector d_Femur_mus_psoas_minor_2Node1 = .Femur.v_Femur_mus_psoas_minor_2Node1	+ a_r_f;
+  AnyVector d_Femur_mus_psoas_minor_2Node2 = .Femur.v_Femur_mus_psoas_minor_2Node2	+ a_r_f;
+  AnyVector d_Femur_mus_psoas_minor_3Node1 = .Femur.v_Femur_mus_psoas_minor_3Node1	+ a_r_f;
+  AnyVector d_Femur_mus_psoas_minor_3Node2 = .Femur.v_Femur_mus_psoas_minor_3Node2	+ a_r_f;
+  AnyVector d_Femur_mus_psoas_minor_4Node1 = .Femur.v_Femur_mus_psoas_minor_4Node1	+ a_r_f;
+  AnyVector d_Femur_mus_psoas_minor_4Node2 = .Femur.v_Femur_mus_psoas_minor_4Node2	+ a_r_f;
+  AnyVector d_Femur_mus_psoas_major_1Node1 = .Femur.v_Femur_mus_psoas_major_1Node1	+ a_r_f;
+  AnyVector d_Femur_mus_psoas_major_1Node2 = .Femur.v_Femur_mus_psoas_major_1Node2	+ a_r_f;
+  AnyVector d_Femur_mus_psoas_major_2Node1 = .Femur.v_Femur_mus_psoas_major_2Node1	+ a_r_f;
+  AnyVector d_Femur_mus_psoas_major_2Node2 = .Femur.v_Femur_mus_psoas_major_2Node2	+ a_r_f;
+  AnyVector d_Femur_mus_psoas_major_3Node1 = .Femur.v_Femur_mus_psoas_major_3Node1	+ a_r_f;
+  AnyVector d_Femur_mus_psoas_major_3Node2 = .Femur.v_Femur_mus_psoas_major_3Node2	+ a_r_f;
+  AnyVector d_Femur_mus_psoas_major_4Node1 = .Femur.v_Femur_mus_psoas_major_4Node1	+ a_r_f;
+  AnyVector d_Femur_mus_psoas_major_4Node2 = .Femur.v_Femur_mus_psoas_major_4Node2	+ a_r_f;
+  AnyVector d_Femur_mus_pectineusNode1 = .Femur.v_Femur_mus_pectineusNode1	+ a_r_f;
+  AnyVector d_Femur_mus_obturatorius_internus_1Node2 = .Femur.v_Femur_mus_obturatorius_internus_1Node2	+ a_r_f;
+  AnyVector d_Femur_mus_obturatorius_internus_2Node2 = .Femur.v_Femur_mus_obturatorius_internus_2Node2	+ a_r_f;
+  AnyVector d_Femur_mus_obturatorius_externus_1Node2 = .Femur.v_Femur_mus_obturatorius_externus_1Node2	+ a_r_f;
+  AnyVector d_Femur_mus_obturatorius_externus_2Node2 = .Femur.v_Femur_mus_obturatorius_externus_2Node2	+ a_r_f;
+  AnyVector d_Femur_mus_extensor_digitorum_brevis_11Node2 = .Femur.v_Femur_mus_extensor_digitorum_brevis_11Node2	+ a_r_f;
+  AnyVector d_Femur_mus_extensor_digitorum_brevis_12Node2 = .Femur.v_Femur_mus_extensor_digitorum_brevis_12Node2	+ a_r_f;
+  AnyVector d_Femur_mus_extensor_digitorum_brevis_13Node2 = .Femur.v_Femur_mus_extensor_digitorum_brevis_13Node2	+ a_r_f;
+  AnyVector d_Femur_mus_extensor_digitorum_brevis_14Node2 = .Femur.v_Femur_mus_extensor_digitorum_brevis_14Node2	+ a_r_f;
+  AnyVector d_Femur_mus_extensor_digitorum_brevis_15Node2 = .Femur.v_Femur_mus_extensor_digitorum_brevis_15Node2	+ a_r_f;
+  AnyVector d_Femur_mus_iliacusNode3 = .Femur.v_Femur_mus_iliacusNode3	+ a_r_f;
+  AnyVector d_Femur_mus_iliacusNode4 = .Femur.v_Femur_mus_iliacusNode4	+ a_r_f;
+  AnyVector d_Femur_mus_gracilis_posticusNode2 = .Femur.v_Femur_mus_gracilis_posticusNode2	+ a_r_f;
+  AnyVector d_Femur_mus_gracilis_posticusNode3 = .Femur.v_Femur_mus_gracilis_posticusNode3	+ a_r_f;
+  AnyVector d_Femur_mus_gracilis_posticusNode4 = .Femur.v_Femur_mus_gracilis_posticusNode4	+ a_r_f;
+  AnyVector d_Femur_mus_gracilis_anticusNode2 = .Femur.v_Femur_mus_gracilis_anticusNode2	+ a_r_f;
+  AnyVector d_Femur_mus_gracilis_anticusNode3 = .Femur.v_Femur_mus_gracilis_anticusNode3	+ a_r_f;
+  AnyVector d_Femur_mus_gracilis_anticusNode4 = .Femur.v_Femur_mus_gracilis_anticusNode4	+ a_r_f;
+  AnyVector d_Femur_mus_gluteus_minimus_1Node3 = .Femur.v_Femur_mus_gluteus_minimus_1Node3	+ a_r_f;
+  AnyVector d_Femur_mus_gluteus_minimus_2Node2 = .Femur.v_Femur_mus_gluteus_minimus_2Node2	+ a_r_f;
+  AnyVector d_Femur_mus_gluteus_mediusNode3 = .Femur.v_Femur_mus_gluteus_mediusNode3	+ a_r_f;
+  AnyVector d_Femur_mus_gluteus_mediusNode4 = .Femur.v_Femur_mus_gluteus_mediusNode4	+ a_r_f;
+  AnyVector d_Femur_mus_gluteus_maximus_1Node3 = .Femur.v_Femur_mus_gluteus_maximus_1Node3	+ a_r_f;
+  AnyVector d_Femur_mus_gluteus_maximus_1Node4 = .Femur.v_Femur_mus_gluteus_maximus_1Node4	+ a_r_f;
+  AnyVector d_Femur_mus_gluteus_maximus_1Node5 = .Femur.v_Femur_mus_gluteus_maximus_1Node5	+ a_r_f;
+  AnyVector d_Femur_mus_gluteus_maximus_2Node3 = .Femur.v_Femur_mus_gluteus_maximus_2Node3	+ a_r_f;
+  AnyVector d_Femur_mus_gluteus_maximus_2Node4 = .Femur.v_Femur_mus_gluteus_maximus_2Node4	+ a_r_f;
+  AnyVector d_Femur_mus_gluteus_maximus_2Node5 = .Femur.v_Femur_mus_gluteus_maximus_2Node5	+ a_r_f;
+  AnyVector d_Femur_mus_gluteus_maximus_2Node6 = .Femur.v_Femur_mus_gluteus_maximus_2Node6	+ a_r_f;
+  AnyVector d_Femur_mus_gluteus_maximus_3Node3 = .Femur.v_Femur_mus_gluteus_maximus_3Node3	+ a_r_f;
+  AnyVector d_Femur_mus_gluteus_maximus_3Node4 = .Femur.v_Femur_mus_gluteus_maximus_3Node4	+ a_r_f;
+  AnyVector d_Femur_mus_gluteus_maximus_3Node5 = .Femur.v_Femur_mus_gluteus_maximus_3Node5	+ a_r_f;
+  AnyVector d_Femur_mus_gluteus_maximus_3Node6 = .Femur.v_Femur_mus_gluteus_maximus_3Node6	+ a_r_f;
+  AnyVector d_Femur_mus_gluteus_maximus_4Node3 = .Femur.v_Femur_mus_gluteus_maximus_4Node3	+ a_r_f;
+  AnyVector d_Femur_mus_gluteus_maximus_4Node4 = .Femur.v_Femur_mus_gluteus_maximus_4Node4	+ a_r_f;
+  AnyVector d_Femur_mus_gluteus_maximus_4Node5 = .Femur.v_Femur_mus_gluteus_maximus_4Node5	+ a_r_f;
+  AnyVector d_Femur_mus_gluteus_maximus_5Node3 = .Femur.v_Femur_mus_gluteus_maximus_5Node3	+ a_r_f;
+  AnyVector d_Femur_mus_gluteus_maximus_5Node4 = .Femur.v_Femur_mus_gluteus_maximus_5Node4	+ a_r_f;
+  AnyVector d_Femur_mus_gluteus_maximus_5Node5 = .Femur.v_Femur_mus_gluteus_maximus_5Node5	+ a_r_f;
+  AnyVector d_Femur_mus_gluteus_maximus_5Node6 = .Femur.v_Femur_mus_gluteus_maximus_5Node6	+ a_r_f;
+  AnyVector d_Femur_mus_gemellus_inferiorNode2 = .Femur.v_Femur_mus_gemellus_inferiorNode2	+ a_r_f;
+  AnyVector d_Femur_mus_gemellus_inferiorNode3 = .Femur.v_Femur_mus_gemellus_inferiorNode3	+ a_r_f;
+  AnyVector d_Femur_mus_gemellus_superiorNode3 = .Femur.v_Femur_mus_gemellus_superiorNode3	+ a_r_f;
+  AnyVector d_Femur_mus_gemellus_superiorNode4 = .Femur.v_Femur_mus_gemellus_superiorNode4	+ a_r_f;
+  AnyVector d_Femur_mus_rectus_femoris_1Node1 = .Femur.v_Femur_mus_rectus_femoris_1Node1	+ a_r_f;
+  AnyVector d_Femur_mus_rectus_femoris_1Node2 = .Femur.v_Femur_mus_rectus_femoris_1Node2	+ a_r_f;
+  AnyVector d_Femur_mus_rectus_femoris_1Node3 = .Femur.v_Femur_mus_rectus_femoris_1Node3	+ a_r_f;
+  AnyVector d_Femur_mus_rectus_femoris_2Node1 = .Femur.v_Femur_mus_rectus_femoris_2Node1	+ a_r_f;
+  AnyVector d_Femur_mus_rectus_femoris_2Node2 = .Femur.v_Femur_mus_rectus_femoris_2Node2	+ a_r_f;
+  AnyVector d_Femur_mus_rectus_femoris_2Node3 = .Femur.v_Femur_mus_rectus_femoris_2Node3	+ a_r_f;
+  AnyVector d_Femur_mus_rectus_femoris_3Node1 = .Femur.v_Femur_mus_rectus_femoris_3Node1	+ a_r_f;
+  AnyVector d_Femur_mus_rectus_femoris_3Node2 = .Femur.v_Femur_mus_rectus_femoris_3Node2	+ a_r_f;
+  AnyVector d_Femur_mus_rectus_femoris_3Node3 = .Femur.v_Femur_mus_rectus_femoris_3Node3	+ a_r_f;
+  AnyVector d_Femur_mus_rectus_femoris_4Node1 = .Femur.v_Femur_mus_rectus_femoris_4Node1	+ a_r_f;
+  AnyVector d_Femur_mus_rectus_femoris_4Node2 = .Femur.v_Femur_mus_rectus_femoris_4Node2	+ a_r_f;
+  AnyVector d_Femur_mus_rectus_femoris_5Node1 = .Femur.v_Femur_mus_rectus_femoris_5Node1	+ a_r_f;
+  AnyVector d_Femur_mus_rectus_femoris_5Node2 = .Femur.v_Femur_mus_rectus_femoris_5Node2	+ a_r_f;
+  AnyVector d_Femur_mus_vastus_lateralis_1Node0 = .Femur.v_Femur_mus_vastus_lateralis_1Node0	+ a_r_f;
+  AnyVector d_Femur_mus_vastus_lateralis_1Node1 = .Femur.v_Femur_mus_vastus_lateralis_1Node1	+ a_r_f;
+  AnyVector d_Femur_mus_vastus_lateralis_2Node0 = .Femur.v_Femur_mus_vastus_lateralis_2Node0	+ a_r_f;
+  AnyVector d_Femur_mus_vastus_lateralis_2Node1 = .Femur.v_Femur_mus_vastus_lateralis_2Node1	+ a_r_f;
+  AnyVector d_Femur_mus_vastus_lateralis_2Node2 = .Femur.v_Femur_mus_vastus_lateralis_2Node2	+ a_r_f;
+  AnyVector d_Femur_mus_vastus_lateralis_3Node0 = .Femur.v_Femur_mus_vastus_lateralis_3Node0	+ a_r_f;
+  AnyVector d_Femur_mus_vastus_lateralis_3Node1 = .Femur.v_Femur_mus_vastus_lateralis_3Node1	+ a_r_f;
+  AnyVector d_Femur_mus_vastus_lateralis_3Node2 = .Femur.v_Femur_mus_vastus_lateralis_3Node2	+ a_r_f;
+  AnyVector d_Femur_mus_vastus_lateralis_4Node0 = .Femur.v_Femur_mus_vastus_lateralis_4Node0	+ a_r_f;
+  AnyVector d_Femur_mus_vastus_lateralis_4Node1 = .Femur.v_Femur_mus_vastus_lateralis_4Node1	+ a_r_f;
+  AnyVector d_Femur_mus_vastus_medialisNode0 = .Femur.v_Femur_mus_vastus_medialisNode0	+ a_r_f;
+  AnyVector d_Femur_mus_vastus_medialisNode1 = .Femur.v_Femur_mus_vastus_medialisNode1	+ a_r_f;
+  AnyVector d_Femur_mus_vastus_intermediusNode0 = .Femur.v_Femur_mus_vastus_intermediusNode0	+ a_r_f;
+  AnyVector d_Femur_mus_vastus_intermediusNode1 = .Femur.v_Femur_mus_vastus_intermediusNode1	+ a_r_f;
+  AnyVector d_Femur_mus_caudofemoralisNode3 = .Femur.v_Femur_mus_caudofemoralisNode3	+ a_r_f;
+  AnyVector d_Femur_mus_caudofemoralisNode4 = .Femur.v_Femur_mus_caudofemoralisNode4	+ a_r_f;
+  AnyVector d_Femur_mus_caudofemoralisNode5 = .Femur.v_Femur_mus_caudofemoralisNode5	+ a_r_f;
+  AnyVector d_Femur_mus_caudofemoralisNode6 = .Femur.v_Femur_mus_caudofemoralisNode6	+ a_r_f;
+  AnyVector d_Femur_mus_biceps_femoris_1Node2 = .Femur.v_Femur_mus_biceps_femoris_1Node2	+ a_r_f;
+  AnyVector d_Femur_mus_biceps_femoris_1Node3 = .Femur.v_Femur_mus_biceps_femoris_1Node3	+ a_r_f;
+  AnyVector d_Femur_mus_biceps_femoris_1Node4 = .Femur.v_Femur_mus_biceps_femoris_1Node4	+ a_r_f;
+  AnyVector d_Femur_mus_popliteus_12Node3 = .Femur.v_Femur_mus_popliteus_12Node3	+ a_r_f;
+  AnyVector d_Femur_mus_biceps_femoris_3Node2 = .Femur.v_Femur_mus_biceps_femoris_3Node2	+ a_r_f;
+  AnyVector d_Femur_mus_adductor_brevis_1Node2 = .Femur.v_Femur_mus_adductor_brevis_1Node2	+ a_r_f;
+  AnyVector d_Femur_mus_adductor_brevis_1Node3 = .Femur.v_Femur_mus_adductor_brevis_1Node3	+ a_r_f;
+  AnyVector d_Femur_mus_adductor_brevis_1Node4 = .Femur.v_Femur_mus_adductor_brevis_1Node4	+ a_r_f;
+  AnyVector d_Femur_mus_adductor_brevis_2Node2 = .Femur.v_Femur_mus_adductor_brevis_2Node2	+ a_r_f;
+  AnyVector d_Femur_mus_adductor_brevis_2Node3 = .Femur.v_Femur_mus_adductor_brevis_2Node3	+ a_r_f;
+  AnyVector d_Femur_mus_adductor_brevis_2Node4 = .Femur.v_Femur_mus_adductor_brevis_2Node4	+ a_r_f;
+  AnyVector d_Femur_mus_adductor_brevis_3Node2 = .Femur.v_Femur_mus_adductor_brevis_3Node2	+ a_r_f;
+  AnyVector d_Femur_mus_adductor_brevis_3Node3 = .Femur.v_Femur_mus_adductor_brevis_3Node3	+ a_r_f;
+  AnyVector d_Femur_mus_adductor_brevis_4Node2 = .Femur.v_Femur_mus_adductor_brevis_4Node2	+ a_r_f;
+  AnyVector d_Femur_mus_adductor_brevis_4Node3 = .Femur.v_Femur_mus_adductor_brevis_4Node3	+ a_r_f;
+  AnyVector d_Femur_mus_adductor_brevis_4Node4 = .Femur.v_Femur_mus_adductor_brevis_4Node4	+ a_r_f;
+  AnyVector d_Femur_mus_adductor_longus_1Node2 = .Femur.v_Femur_mus_adductor_longus_1Node2	+ a_r_f;
+  AnyVector d_Femur_mus_adductor_longus_1Node3 = .Femur.v_Femur_mus_adductor_longus_1Node3	+ a_r_f;
+  AnyVector d_Femur_mus_adductor_longus_2Node2 = .Femur.v_Femur_mus_adductor_longus_2Node2	+ a_r_f;
+  AnyVector d_Femur_mus_adductor_longus_2Node3 = .Femur.v_Femur_mus_adductor_longus_2Node3	+ a_r_f;
+  AnyVector d_Femur_mus_adductor_longus_3Node2 = .Femur.v_Femur_mus_adductor_longus_3Node2	+ a_r_f;
+  AnyVector d_Femur_mus_adductor_longus_3Node3 = .Femur.v_Femur_mus_adductor_longus_3Node3	+ a_r_f;
+  AnyVector d_Femur_mus_adductor_magnusNode2 = .Femur.v_Femur_mus_adductor_magnusNode2	+ a_r_f;
+  AnyVector d_Femur_mus_adductor_magnusNode3 = .Femur.v_Femur_mus_adductor_magnusNode3	+ a_r_f;
+  AnyVector d_Femur_mus_adductor_magnusNode4 = .Femur.v_Femur_mus_adductor_magnusNode4	+ a_r_f;
+  AnyVector d_Femur_mus_adductor_magnusNode5 = .Femur.v_Femur_mus_adductor_magnusNode5	+ a_r_f;
+  AnyVector d_Cut_Node = a_r_S;
+  
+  
+  
+  AnyRefNode Hip 			  = {
+    sRel = .d_Hip 	 	   ;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+    #include "DrawNodeDistProx.any"
+  };
+  AnyRefNode Knee 		  = {
+    sRel = .d_Knee 	         ;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+	
+  AnyRefNode Pat 			  = {
+    sRel = .d_Pat 		   ;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_extensor_digitorum_longus_1Node0  = {
+    sRel = .d_Femur_mus_extensor_digitorum_longus_1Node0 ;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_extensor_digitorum_longus_2Node0  = {
+    sRel = .d_Femur_mus_extensor_digitorum_longus_2Node0 ;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_extensor_digitorum_longus_3Node0  = {
+    sRel = .d_Femur_mus_extensor_digitorum_longus_3Node0 ;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_extensor_digitorum_longus_4Node0  = {
+    sRel = .d_Femur_mus_extensor_digitorum_longus_4Node0 ;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_popliteus_1Node0  = {
+    sRel = .d_Femur_mus_popliteus_1Node0 ;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_popliteus_1Node1  = {
+    sRel = .d_Femur_mus_popliteus_1Node1 ;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_popliteus_2Node0  = {
+    sRel = .d_Femur_mus_popliteus_2Node0 ;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_popliteus_2Node1  = {
+    sRel = .d_Femur_mus_popliteus_2Node1 ;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_tibialis_anteriorNode0 = {
+    sRel = .d_Femur_mus_tibialis_anteriorNode0;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gastrocnemius_soleus_1Node0 = {
+    sRel = .d_Femur_mus_gastrocnemius_soleus_1Node0;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gastrocnemius_soleus_2Node0 = {
+    sRel = .d_Femur_mus_gastrocnemius_soleus_2Node0;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_tensor_fasciae_latae_1Node3 = {
+    sRel = .d_Femur_mus_tensor_fasciae_latae_1Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_tensor_fasciae_latae_1Node4 = {
+    sRel = .d_Femur_mus_tensor_fasciae_latae_1Node4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_tensor_fasciae_latae_1Node5 = {
+    sRel = .d_Femur_mus_tensor_fasciae_latae_1Node5;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_tensor_fasciae_latae_2Node3 = {
+    sRel = .d_Femur_mus_tensor_fasciae_latae_2Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_tensor_fasciae_latae_2Node4 = {
+    sRel = .d_Femur_mus_tensor_fasciae_latae_2Node4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_tensor_fasciae_latae_2Node5 = {
+    sRel = .d_Femur_mus_tensor_fasciae_latae_2Node5;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_fasciae_latae_3Node3 = {
+    sRel = .d_Femur_mus_fasciae_latae_3Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_fasciae_latae_3Node4 = {
+    sRel = .d_Femur_mus_fasciae_latae_3Node4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_fasciae_latae_3Node5 = {
+    sRel = .d_Femur_mus_fasciae_latae_3Node5;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_semitendinosusNode1 = {
+    sRel = .d_Femur_mus_semitendinosusNode1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_semitendinosusNode2 = {
+    sRel = .d_Femur_mus_semitendinosusNode2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_semimembranosusNode1 = {
+    sRel = .d_Femur_mus_semimembranosusNode1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_semimembranosusNode2 = {
+    sRel = .d_Femur_mus_semimembranosusNode2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_quadratus_femorisNode2 = {
+    sRel = .d_Femur_mus_quadratus_femorisNode2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_psoas_minor_1Node1 = {
+    sRel = .d_Femur_mus_psoas_minor_1Node1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_psoas_minor_1Node2 = {
+    sRel = .d_Femur_mus_psoas_minor_1Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_psoas_minor_2Node1 = {
+    sRel = .d_Femur_mus_psoas_minor_2Node1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_psoas_minor_2Node2 = {
+    sRel = .d_Femur_mus_psoas_minor_2Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_psoas_minor_3Node1 = {
+    sRel = .d_Femur_mus_psoas_minor_3Node1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_psoas_minor_3Node2 = {
+    sRel = .d_Femur_mus_psoas_minor_3Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_psoas_minor_4Node1 = {
+    sRel = .d_Femur_mus_psoas_minor_4Node1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_psoas_minor_4Node2 = {
+    sRel = .d_Femur_mus_psoas_minor_4Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_psoas_major_1Node1 = {
+    sRel = .d_Femur_mus_psoas_major_1Node1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_psoas_major_1Node2 = {
+    sRel = .d_Femur_mus_psoas_major_1Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_psoas_major_2Node1 = {
+    sRel = .d_Femur_mus_psoas_major_2Node1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_psoas_major_2Node2 = {
+    sRel = .d_Femur_mus_psoas_major_2Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_psoas_major_3Node1 = {
+    sRel = .d_Femur_mus_psoas_major_3Node1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_psoas_major_3Node2 = {
+    sRel = .d_Femur_mus_psoas_major_3Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_psoas_major_4Node1 = {
+    sRel = .d_Femur_mus_psoas_major_4Node1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_psoas_major_4Node2 = {
+    sRel = .d_Femur_mus_psoas_major_4Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_pectineusNode1 = {
+    sRel = .d_Femur_mus_pectineusNode1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_obturatorius_internus_1Node2 = {
+    sRel = .d_Femur_mus_obturatorius_internus_1Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_obturatorius_internus_2Node2 = {
+    sRel = .d_Femur_mus_obturatorius_internus_2Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_obturatorius_externus_1Node2 = {
+    sRel = .d_Femur_mus_obturatorius_externus_1Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_obturatorius_externus_2Node2 = {
+    sRel = .d_Femur_mus_obturatorius_externus_2Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_extensor_digitorum_brevis_11Node2 = {
+    sRel = .d_Femur_mus_extensor_digitorum_brevis_11Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_extensor_digitorum_brevis_12Node2 = {
+    sRel = .d_Femur_mus_extensor_digitorum_brevis_12Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_extensor_digitorum_brevis_13Node2 = {
+    sRel = .d_Femur_mus_extensor_digitorum_brevis_13Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_extensor_digitorum_brevis_14Node2 = {
+    sRel = .d_Femur_mus_extensor_digitorum_brevis_14Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_extensor_digitorum_brevis_15Node2 = {
+    sRel = .d_Femur_mus_extensor_digitorum_brevis_15Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_iliacusNode3 = {
+    sRel = .d_Femur_mus_iliacusNode3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_iliacusNode4 = {
+    sRel = .d_Femur_mus_iliacusNode4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gracilis_posticusNode2 = {
+    sRel = .d_Femur_mus_gracilis_posticusNode2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gracilis_posticusNode3 = {
+    sRel = .d_Femur_mus_gracilis_posticusNode3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gracilis_posticusNode4 = {
+    sRel = .d_Femur_mus_gracilis_posticusNode4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gracilis_anticusNode2 = {
+    sRel = .d_Femur_mus_gracilis_anticusNode2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gracilis_anticusNode3 = {
+    sRel = .d_Femur_mus_gracilis_anticusNode3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gracilis_anticusNode4 = {
+    sRel = .d_Femur_mus_gracilis_anticusNode4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_minimus_1Node3 = {
+    sRel = .d_Femur_mus_gluteus_minimus_1Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_minimus_2Node2 = {
+    sRel = .d_Femur_mus_gluteus_minimus_2Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_mediusNode3 = {
+    sRel = .d_Femur_mus_gluteus_mediusNode3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_mediusNode4 = {
+    sRel = .d_Femur_mus_gluteus_mediusNode4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_maximus_1Node3 = {
+    sRel = .d_Femur_mus_gluteus_maximus_1Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_maximus_1Node4 = {
+    sRel = .d_Femur_mus_gluteus_maximus_1Node4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_maximus_1Node5 = {
+    sRel = .d_Femur_mus_gluteus_maximus_1Node5;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_maximus_2Node3 = {
+    sRel = .d_Femur_mus_gluteus_maximus_2Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_maximus_2Node4 = {
+    sRel = .d_Femur_mus_gluteus_maximus_2Node4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_maximus_2Node5 = {
+    sRel = .d_Femur_mus_gluteus_maximus_2Node5;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_maximus_2Node6 = {
+    sRel = .d_Femur_mus_gluteus_maximus_2Node6;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_maximus_3Node3 = {
+    sRel = .d_Femur_mus_gluteus_maximus_3Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_maximus_3Node4 = {
+    sRel = .d_Femur_mus_gluteus_maximus_3Node4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_maximus_3Node5 = {
+    sRel = .d_Femur_mus_gluteus_maximus_3Node5;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_maximus_3Node6 = {
+    sRel = .d_Femur_mus_gluteus_maximus_3Node6;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_maximus_4Node3 = {
+    sRel = .d_Femur_mus_gluteus_maximus_4Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_maximus_4Node4 = {
+    sRel = .d_Femur_mus_gluteus_maximus_4Node4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_maximus_4Node5 = {
+    sRel = .d_Femur_mus_gluteus_maximus_4Node5;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_maximus_5Node3 = {
+    sRel = .d_Femur_mus_gluteus_maximus_5Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_maximus_5Node4 = {
+    sRel = .d_Femur_mus_gluteus_maximus_5Node4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_maximus_5Node5 = {
+    sRel = .d_Femur_mus_gluteus_maximus_5Node5;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_maximus_5Node6 = {
+    sRel = .d_Femur_mus_gluteus_maximus_5Node6;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gemellus_inferiorNode2 = {
+    sRel = .d_Femur_mus_gemellus_inferiorNode2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gemellus_inferiorNode3 = {
+    sRel = .d_Femur_mus_gemellus_inferiorNode3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gemellus_superiorNode3 = {
+    sRel = .d_Femur_mus_gemellus_superiorNode3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gemellus_superiorNode4 = {
+    sRel = .d_Femur_mus_gemellus_superiorNode4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_rectus_femoris_1Node1 = {
+    sRel = .d_Femur_mus_rectus_femoris_1Node1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_rectus_femoris_1Node2 = {
+    sRel = .d_Femur_mus_rectus_femoris_1Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_rectus_femoris_1Node3 = {
+    sRel = .d_Femur_mus_rectus_femoris_1Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_rectus_femoris_2Node1 = {
+    sRel = .d_Femur_mus_rectus_femoris_2Node1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_rectus_femoris_2Node2 = {
+    sRel = .d_Femur_mus_rectus_femoris_2Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_rectus_femoris_2Node3 = {
+    sRel = .d_Femur_mus_rectus_femoris_2Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_rectus_femoris_3Node1 = {
+    sRel = .d_Femur_mus_rectus_femoris_3Node1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_rectus_femoris_3Node2 = {
+    sRel = .d_Femur_mus_rectus_femoris_3Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_rectus_femoris_3Node3 = {
+    sRel = .d_Femur_mus_rectus_femoris_3Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_rectus_femoris_4Node1 = {
+    sRel = .d_Femur_mus_rectus_femoris_4Node1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_rectus_femoris_4Node2 = {
+    sRel = .d_Femur_mus_rectus_femoris_4Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_rectus_femoris_5Node1 = {
+    sRel = .d_Femur_mus_rectus_femoris_5Node1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_rectus_femoris_5Node2 = {
+    sRel = .d_Femur_mus_rectus_femoris_5Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_vastus_lateralis_1Node0 = {
+    sRel = .d_Femur_mus_vastus_lateralis_1Node0;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_vastus_lateralis_1Node1 = {
+    sRel = .d_Femur_mus_vastus_lateralis_1Node1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_vastus_lateralis_2Node0 = {
+    sRel = .d_Femur_mus_vastus_lateralis_2Node0;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_vastus_lateralis_2Node1 = {
+    sRel = .d_Femur_mus_vastus_lateralis_2Node1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_vastus_lateralis_2Node2 = {
+    sRel = .d_Femur_mus_vastus_lateralis_2Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_vastus_lateralis_3Node0 = {
+    sRel = .d_Femur_mus_vastus_lateralis_3Node0;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_vastus_lateralis_3Node1 = {
+    sRel = .d_Femur_mus_vastus_lateralis_3Node1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_vastus_lateralis_3Node2 = {
+    sRel = .d_Femur_mus_vastus_lateralis_3Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_vastus_lateralis_4Node0 = {
+    sRel = .d_Femur_mus_vastus_lateralis_4Node0;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_vastus_lateralis_4Node1 = {
+    sRel = .d_Femur_mus_vastus_lateralis_4Node1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_vastus_medialisNode0 = {
+    sRel = .d_Femur_mus_vastus_medialisNode0;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_vastus_medialisNode1 = {
+    sRel = .d_Femur_mus_vastus_medialisNode1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_vastus_intermediusNode0 = {
+    sRel = .d_Femur_mus_vastus_intermediusNode0;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_vastus_intermediusNode1 = {
+    sRel = .d_Femur_mus_vastus_intermediusNode1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_caudofemoralisNode3 = {
+    sRel = .d_Femur_mus_caudofemoralisNode3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_caudofemoralisNode4 = {
+    sRel = .d_Femur_mus_caudofemoralisNode4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_caudofemoralisNode5 = {
+    sRel = .d_Femur_mus_caudofemoralisNode5;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_caudofemoralisNode6 = {
+    sRel = .d_Femur_mus_caudofemoralisNode6;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_biceps_femoris_1Node2 = {
+    sRel = .d_Femur_mus_biceps_femoris_1Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_biceps_femoris_1Node3 = {
+    sRel = .d_Femur_mus_biceps_femoris_1Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_biceps_femoris_1Node4 = {
+    sRel = .d_Femur_mus_biceps_femoris_1Node4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_popliteus_12Node3 = {
+    sRel = .d_Femur_mus_popliteus_12Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_biceps_femoris_3Node2 = {
+    sRel = .d_Femur_mus_biceps_femoris_3Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_brevis_1Node2 = {
+    sRel = .d_Femur_mus_adductor_brevis_1Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_brevis_1Node3 = {
+    sRel = .d_Femur_mus_adductor_brevis_1Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_brevis_1Node4 = {
+    sRel = .d_Femur_mus_adductor_brevis_1Node4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_brevis_2Node2 = {
+    sRel = .d_Femur_mus_adductor_brevis_2Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_brevis_2Node3 = {
+    sRel = .d_Femur_mus_adductor_brevis_2Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_brevis_2Node4 = {
+    sRel = .d_Femur_mus_adductor_brevis_2Node4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_brevis_3Node2 = {
+    sRel = .d_Femur_mus_adductor_brevis_3Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_brevis_3Node3 = {
+    sRel = .d_Femur_mus_adductor_brevis_3Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_brevis_4Node2 = {
+    sRel = .d_Femur_mus_adductor_brevis_4Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_brevis_4Node3 = {
+    sRel = .d_Femur_mus_adductor_brevis_4Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_brevis_4Node4 = {
+    sRel = .d_Femur_mus_adductor_brevis_4Node4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_longus_1Node2 = {
+    sRel = .d_Femur_mus_adductor_longus_1Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_longus_1Node3 = {
+    sRel = .d_Femur_mus_adductor_longus_1Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_longus_2Node2 = {
+    sRel = .d_Femur_mus_adductor_longus_2Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_longus_2Node3 = {
+    sRel = .d_Femur_mus_adductor_longus_2Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_longus_3Node2 = {
+    sRel = .d_Femur_mus_adductor_longus_3Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_longus_3Node3 = {
+    sRel = .d_Femur_mus_adductor_longus_3Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_magnusNode2 = {
+    sRel = .d_Femur_mus_adductor_magnusNode2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_magnusNode3 = {
+    sRel = .d_Femur_mus_adductor_magnusNode3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_magnusNode4 = {
+    sRel = .d_Femur_mus_adductor_magnusNode4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_magnusNode5 = {
+    sRel = .d_Femur_mus_adductor_magnusNode5;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Cut_Node           = {
+    sRel = .d_Cut_Node;
+        AnyDrawRefFrame drw = 
+    {
+      RGB = {1,0,0};
+      ScaleXYZ = 0.01*{1, 1, 1};
+    };
+    AnyRefNode surfnode = {
+      ARel = RotMat(pi/2, y);
+      AnySurfCylinder cuttingplane = 
+      {
+        Radius = 0.01;
+        Length = 0.00001;
+        CapRatio = 0.001;
+        AnyDrawParamSurf drw = 
+        {
+        };
+        
+      };
+    };
+  };
+};  // AnySeg Femur_d
+
+
+
+AnySeg Femur_p = {
+  
+  AnyVector b_r_S = .Femur.b_r_S;
+  AnyVector b_r_f = .Femur.b_r_f;
+  
+  r0 = {-0.05, -0.05, -0.05};  
+  Axes0 = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
+  
+  
+  
+  Mass=.Femur.MassS_p;
+  Jii = {.Femur.J_p[0][0],.Femur.J_p[1][1],.Femur.J_p[2][2]};
+  
+  AnyDrawSeg DrwBeam =      {
+    RGB = {0, 1, 0};
+    Opacity = 1;
+    InertiaScale = 0.25 * 0.3;
+  };
+  
+  AnyString loc = "dist";
+  
+  //Vectors of RefNodes of new proximal Femur segment      
+  AnyVector p_Hip 		   = .Femur.v_Hip 			 	+ b_r_f;
+  AnyVector p_Knee 		   = .Femur.v_Knee 			+ b_r_f;	
+  AnyVector p_Pat 		   = .Femur.v_Pat 			 	+ b_r_f;
+  AnyVector p_Femur_mus_extensor_digitorum_longus_1Node0  = .Femur.v_Femur_mus_extensor_digitorum_longus_1Node0 	+ b_r_f;
+  AnyVector p_Femur_mus_extensor_digitorum_longus_2Node0  = .Femur.v_Femur_mus_extensor_digitorum_longus_2Node0 	+ b_r_f;
+  AnyVector p_Femur_mus_extensor_digitorum_longus_3Node0  = .Femur.v_Femur_mus_extensor_digitorum_longus_3Node0 	+ b_r_f;
+  AnyVector p_Femur_mus_extensor_digitorum_longus_4Node0  = .Femur.v_Femur_mus_extensor_digitorum_longus_4Node0 	+ b_r_f;
+  AnyVector p_Femur_mus_popliteus_1Node0  = .Femur.v_Femur_mus_popliteus_1Node0 	+ b_r_f;
+  AnyVector p_Femur_mus_popliteus_1Node1  = .Femur.v_Femur_mus_popliteus_1Node1 	+ b_r_f;
+  AnyVector p_Femur_mus_popliteus_2Node0  = .Femur.v_Femur_mus_popliteus_2Node0 	+ b_r_f;
+  AnyVector p_Femur_mus_popliteus_2Node1  = .Femur.v_Femur_mus_popliteus_2Node1 	+ b_r_f;
+  AnyVector p_Femur_mus_tibialis_anteriorNode0 = .Femur.v_Femur_mus_tibialis_anteriorNode0	+ b_r_f;
+  AnyVector p_Femur_mus_gastrocnemius_soleus_1Node0 = .Femur.v_Femur_mus_gastrocnemius_soleus_1Node0	+ b_r_f;
+  AnyVector p_Femur_mus_gastrocnemius_soleus_2Node0 = .Femur.v_Femur_mus_gastrocnemius_soleus_2Node0	+ b_r_f;
+  AnyVector p_Femur_mus_tensor_fasciae_latae_1Node3 = .Femur.v_Femur_mus_tensor_fasciae_latae_1Node3	+ b_r_f;
+  AnyVector p_Femur_mus_tensor_fasciae_latae_1Node4 = .Femur.v_Femur_mus_tensor_fasciae_latae_1Node4	+ b_r_f;
+  AnyVector p_Femur_mus_tensor_fasciae_latae_1Node5 = .Femur.v_Femur_mus_tensor_fasciae_latae_1Node5	+ b_r_f;
+  AnyVector p_Femur_mus_tensor_fasciae_latae_2Node3 = .Femur.v_Femur_mus_tensor_fasciae_latae_2Node3	+ b_r_f;
+  AnyVector p_Femur_mus_tensor_fasciae_latae_2Node4 = .Femur.v_Femur_mus_tensor_fasciae_latae_2Node4	+ b_r_f;
+  AnyVector p_Femur_mus_tensor_fasciae_latae_2Node5 = .Femur.v_Femur_mus_tensor_fasciae_latae_2Node5	+ b_r_f;
+  AnyVector p_Femur_mus_fasciae_latae_3Node3 = .Femur.v_Femur_mus_fasciae_latae_3Node3	+ b_r_f;
+  AnyVector p_Femur_mus_fasciae_latae_3Node4 = .Femur.v_Femur_mus_fasciae_latae_3Node4	+ b_r_f;
+  AnyVector p_Femur_mus_fasciae_latae_3Node5 = .Femur.v_Femur_mus_fasciae_latae_3Node5	+ b_r_f;
+  AnyVector p_Femur_mus_semitendinosusNode1 = .Femur.v_Femur_mus_semitendinosusNode1	+ b_r_f;
+  AnyVector p_Femur_mus_semitendinosusNode2 = .Femur.v_Femur_mus_semitendinosusNode2	+ b_r_f;
+  AnyVector p_Femur_mus_semimembranosusNode1 = .Femur.v_Femur_mus_semimembranosusNode1	+ b_r_f;
+  AnyVector p_Femur_mus_semimembranosusNode2 = .Femur.v_Femur_mus_semimembranosusNode2	+ b_r_f;
+  AnyVector p_Femur_mus_quadratus_femorisNode2 = .Femur.v_Femur_mus_quadratus_femorisNode2	+ b_r_f;
+  AnyVector p_Femur_mus_psoas_minor_1Node1 = .Femur.v_Femur_mus_psoas_minor_1Node1	+ b_r_f;
+  AnyVector p_Femur_mus_psoas_minor_1Node2 = .Femur.v_Femur_mus_psoas_minor_1Node2	+ b_r_f;
+  AnyVector p_Femur_mus_psoas_minor_2Node1 = .Femur.v_Femur_mus_psoas_minor_2Node1	+ b_r_f;
+  AnyVector p_Femur_mus_psoas_minor_2Node2 = .Femur.v_Femur_mus_psoas_minor_2Node2	+ b_r_f;
+  AnyVector p_Femur_mus_psoas_minor_3Node1 = .Femur.v_Femur_mus_psoas_minor_3Node1	+ b_r_f;
+  AnyVector p_Femur_mus_psoas_minor_3Node2 = .Femur.v_Femur_mus_psoas_minor_3Node2	+ b_r_f;
+  AnyVector p_Femur_mus_psoas_minor_4Node1 = .Femur.v_Femur_mus_psoas_minor_4Node1	+ b_r_f;
+  AnyVector p_Femur_mus_psoas_minor_4Node2 = .Femur.v_Femur_mus_psoas_minor_4Node2	+ b_r_f;
+  AnyVector p_Femur_mus_psoas_major_1Node1 = .Femur.v_Femur_mus_psoas_major_1Node1	+ b_r_f;
+  AnyVector p_Femur_mus_psoas_major_1Node2 = .Femur.v_Femur_mus_psoas_major_1Node2	+ b_r_f;
+  AnyVector p_Femur_mus_psoas_major_2Node1 = .Femur.v_Femur_mus_psoas_major_2Node1	+ b_r_f;
+  AnyVector p_Femur_mus_psoas_major_2Node2 = .Femur.v_Femur_mus_psoas_major_2Node2	+ b_r_f;
+  AnyVector p_Femur_mus_psoas_major_3Node1 = .Femur.v_Femur_mus_psoas_major_3Node1	+ b_r_f;
+  AnyVector p_Femur_mus_psoas_major_3Node2 = .Femur.v_Femur_mus_psoas_major_3Node2	+ b_r_f;
+  AnyVector p_Femur_mus_psoas_major_4Node1 = .Femur.v_Femur_mus_psoas_major_4Node1	+ b_r_f;
+  AnyVector p_Femur_mus_psoas_major_4Node2 = .Femur.v_Femur_mus_psoas_major_4Node2	+ b_r_f;
+  AnyVector p_Femur_mus_pectineusNode1 = .Femur.v_Femur_mus_pectineusNode1	+ b_r_f;
+  AnyVector p_Femur_mus_obturatorius_internus_1Node2 = .Femur.v_Femur_mus_obturatorius_internus_1Node2	+ b_r_f;
+  AnyVector p_Femur_mus_obturatorius_internus_2Node2 = .Femur.v_Femur_mus_obturatorius_internus_2Node2	+ b_r_f;
+  AnyVector p_Femur_mus_obturatorius_externus_1Node2 = .Femur.v_Femur_mus_obturatorius_externus_1Node2	+ b_r_f;
+  AnyVector p_Femur_mus_obturatorius_externus_2Node2 = .Femur.v_Femur_mus_obturatorius_externus_2Node2	+ b_r_f;
+  AnyVector p_Femur_mus_extensor_digitorum_brevis_11Node2 = .Femur.v_Femur_mus_extensor_digitorum_brevis_11Node2	+ b_r_f;
+  AnyVector p_Femur_mus_extensor_digitorum_brevis_12Node2 = .Femur.v_Femur_mus_extensor_digitorum_brevis_12Node2	+ b_r_f;
+  AnyVector p_Femur_mus_extensor_digitorum_brevis_13Node2 = .Femur.v_Femur_mus_extensor_digitorum_brevis_13Node2	+ b_r_f;
+  AnyVector p_Femur_mus_extensor_digitorum_brevis_14Node2 = .Femur.v_Femur_mus_extensor_digitorum_brevis_14Node2	+ b_r_f;
+  AnyVector p_Femur_mus_extensor_digitorum_brevis_15Node2 = .Femur.v_Femur_mus_extensor_digitorum_brevis_15Node2	+ b_r_f;
+  AnyVector p_Femur_mus_iliacusNode3 = .Femur.v_Femur_mus_iliacusNode3	+ b_r_f;
+  AnyVector p_Femur_mus_iliacusNode4 = .Femur.v_Femur_mus_iliacusNode4	+ b_r_f;
+  AnyVector p_Femur_mus_gracilis_posticusNode2 = .Femur.v_Femur_mus_gracilis_posticusNode2	+ b_r_f;
+  AnyVector p_Femur_mus_gracilis_posticusNode3 = .Femur.v_Femur_mus_gracilis_posticusNode3	+ b_r_f;
+  AnyVector p_Femur_mus_gracilis_posticusNode4 = .Femur.v_Femur_mus_gracilis_posticusNode4	+ b_r_f;
+  AnyVector p_Femur_mus_gracilis_anticusNode2 = .Femur.v_Femur_mus_gracilis_anticusNode2	+ b_r_f;
+  AnyVector p_Femur_mus_gracilis_anticusNode3 = .Femur.v_Femur_mus_gracilis_anticusNode3	+ b_r_f;
+  AnyVector p_Femur_mus_gracilis_anticusNode4 = .Femur.v_Femur_mus_gracilis_anticusNode4	+ b_r_f;
+  AnyVector p_Femur_mus_gluteus_minimus_1Node3 = .Femur.v_Femur_mus_gluteus_minimus_1Node3	+ b_r_f;
+  AnyVector p_Femur_mus_gluteus_minimus_2Node2 = .Femur.v_Femur_mus_gluteus_minimus_2Node2	+ b_r_f;
+  AnyVector p_Femur_mus_gluteus_mediusNode3 = .Femur.v_Femur_mus_gluteus_mediusNode3	+ b_r_f;
+  AnyVector p_Femur_mus_gluteus_mediusNode4 = .Femur.v_Femur_mus_gluteus_mediusNode4	+ b_r_f;
+  AnyVector p_Femur_mus_gluteus_maximus_1Node3 = .Femur.v_Femur_mus_gluteus_maximus_1Node3	+ b_r_f;
+  AnyVector p_Femur_mus_gluteus_maximus_1Node4 = .Femur.v_Femur_mus_gluteus_maximus_1Node4	+ b_r_f;
+  AnyVector p_Femur_mus_gluteus_maximus_1Node5 = .Femur.v_Femur_mus_gluteus_maximus_1Node5	+ b_r_f;
+  AnyVector p_Femur_mus_gluteus_maximus_2Node3 = .Femur.v_Femur_mus_gluteus_maximus_2Node3	+ b_r_f;
+  AnyVector p_Femur_mus_gluteus_maximus_2Node4 = .Femur.v_Femur_mus_gluteus_maximus_2Node4	+ b_r_f;
+  AnyVector p_Femur_mus_gluteus_maximus_2Node5 = .Femur.v_Femur_mus_gluteus_maximus_2Node5	+ b_r_f;
+  AnyVector p_Femur_mus_gluteus_maximus_2Node6 = .Femur.v_Femur_mus_gluteus_maximus_2Node6	+ b_r_f;
+  AnyVector p_Femur_mus_gluteus_maximus_3Node3 = .Femur.v_Femur_mus_gluteus_maximus_3Node3	+ b_r_f;
+  AnyVector p_Femur_mus_gluteus_maximus_3Node4 = .Femur.v_Femur_mus_gluteus_maximus_3Node4	+ b_r_f;
+  AnyVector p_Femur_mus_gluteus_maximus_3Node5 = .Femur.v_Femur_mus_gluteus_maximus_3Node5	+ b_r_f;
+  AnyVector p_Femur_mus_gluteus_maximus_3Node6 = .Femur.v_Femur_mus_gluteus_maximus_3Node6	+ b_r_f;
+  AnyVector p_Femur_mus_gluteus_maximus_4Node3 = .Femur.v_Femur_mus_gluteus_maximus_4Node3	+ b_r_f;
+  AnyVector p_Femur_mus_gluteus_maximus_4Node4 = .Femur.v_Femur_mus_gluteus_maximus_4Node4	+ b_r_f;
+  AnyVector p_Femur_mus_gluteus_maximus_4Node5 = .Femur.v_Femur_mus_gluteus_maximus_4Node5	+ b_r_f;
+  AnyVector p_Femur_mus_gluteus_maximus_5Node3 = .Femur.v_Femur_mus_gluteus_maximus_5Node3	+ b_r_f;
+  AnyVector p_Femur_mus_gluteus_maximus_5Node4 = .Femur.v_Femur_mus_gluteus_maximus_5Node4	+ b_r_f;
+  AnyVector p_Femur_mus_gluteus_maximus_5Node5 = .Femur.v_Femur_mus_gluteus_maximus_5Node5	+ b_r_f;
+  AnyVector p_Femur_mus_gluteus_maximus_5Node6 = .Femur.v_Femur_mus_gluteus_maximus_5Node6	+ b_r_f;
+  AnyVector p_Femur_mus_gemellus_inferiorNode2 = .Femur.v_Femur_mus_gemellus_inferiorNode2	+ b_r_f;
+  AnyVector p_Femur_mus_gemellus_inferiorNode3 = .Femur.v_Femur_mus_gemellus_inferiorNode3	+ b_r_f;
+  AnyVector p_Femur_mus_gemellus_superiorNode3 = .Femur.v_Femur_mus_gemellus_superiorNode3	+ b_r_f;
+  AnyVector p_Femur_mus_gemellus_superiorNode4 = .Femur.v_Femur_mus_gemellus_superiorNode4	+ b_r_f;
+  AnyVector p_Femur_mus_rectus_femoris_1Node1 = .Femur.v_Femur_mus_rectus_femoris_1Node1	+ b_r_f;
+  AnyVector p_Femur_mus_rectus_femoris_1Node2 = .Femur.v_Femur_mus_rectus_femoris_1Node2	+ b_r_f;
+  AnyVector p_Femur_mus_rectus_femoris_1Node3 = .Femur.v_Femur_mus_rectus_femoris_1Node3	+ b_r_f;
+  AnyVector p_Femur_mus_rectus_femoris_2Node1 = .Femur.v_Femur_mus_rectus_femoris_2Node1	+ b_r_f;
+  AnyVector p_Femur_mus_rectus_femoris_2Node2 = .Femur.v_Femur_mus_rectus_femoris_2Node2	+ b_r_f;
+  AnyVector p_Femur_mus_rectus_femoris_2Node3 = .Femur.v_Femur_mus_rectus_femoris_2Node3	+ b_r_f;
+  AnyVector p_Femur_mus_rectus_femoris_3Node1 = .Femur.v_Femur_mus_rectus_femoris_3Node1	+ b_r_f;
+  AnyVector p_Femur_mus_rectus_femoris_3Node2 = .Femur.v_Femur_mus_rectus_femoris_3Node2	+ b_r_f;
+  AnyVector p_Femur_mus_rectus_femoris_3Node3 = .Femur.v_Femur_mus_rectus_femoris_3Node3	+ b_r_f;
+  AnyVector p_Femur_mus_rectus_femoris_4Node1 = .Femur.v_Femur_mus_rectus_femoris_4Node1	+ b_r_f;
+  AnyVector p_Femur_mus_rectus_femoris_4Node2 = .Femur.v_Femur_mus_rectus_femoris_4Node2	+ b_r_f;
+  AnyVector p_Femur_mus_rectus_femoris_5Node1 = .Femur.v_Femur_mus_rectus_femoris_5Node1	+ b_r_f;
+  AnyVector p_Femur_mus_rectus_femoris_5Node2 = .Femur.v_Femur_mus_rectus_femoris_5Node2	+ b_r_f;
+  AnyVector p_Femur_mus_vastus_lateralis_1Node0 = .Femur.v_Femur_mus_vastus_lateralis_1Node0	+ b_r_f;
+  AnyVector p_Femur_mus_vastus_lateralis_1Node1 = .Femur.v_Femur_mus_vastus_lateralis_1Node1	+ b_r_f;
+  AnyVector p_Femur_mus_vastus_lateralis_2Node0 = .Femur.v_Femur_mus_vastus_lateralis_2Node0	+ b_r_f;
+  AnyVector p_Femur_mus_vastus_lateralis_2Node1 = .Femur.v_Femur_mus_vastus_lateralis_2Node1	+ b_r_f;
+  AnyVector p_Femur_mus_vastus_lateralis_2Node2 = .Femur.v_Femur_mus_vastus_lateralis_2Node2	+ b_r_f;
+  AnyVector p_Femur_mus_vastus_lateralis_3Node0 = .Femur.v_Femur_mus_vastus_lateralis_3Node0	+ b_r_f;
+  AnyVector p_Femur_mus_vastus_lateralis_3Node1 = .Femur.v_Femur_mus_vastus_lateralis_3Node1	+ b_r_f;
+  AnyVector p_Femur_mus_vastus_lateralis_3Node2 = .Femur.v_Femur_mus_vastus_lateralis_3Node2	+ b_r_f;
+  AnyVector p_Femur_mus_vastus_lateralis_4Node0 = .Femur.v_Femur_mus_vastus_lateralis_4Node0	+ b_r_f;
+  AnyVector p_Femur_mus_vastus_lateralis_4Node1 = .Femur.v_Femur_mus_vastus_lateralis_4Node1	+ b_r_f;
+  AnyVector p_Femur_mus_vastus_medialisNode0 = .Femur.v_Femur_mus_vastus_medialisNode0	+ b_r_f;
+  AnyVector p_Femur_mus_vastus_medialisNode1 = .Femur.v_Femur_mus_vastus_medialisNode1	+ b_r_f;
+  AnyVector p_Femur_mus_vastus_intermediusNode0 = .Femur.v_Femur_mus_vastus_intermediusNode0	+ b_r_f;
+  AnyVector p_Femur_mus_vastus_intermediusNode1 = .Femur.v_Femur_mus_vastus_intermediusNode1	+ b_r_f;
+  AnyVector p_Femur_mus_caudofemoralisNode3 = .Femur.v_Femur_mus_caudofemoralisNode3	+ b_r_f;
+  AnyVector p_Femur_mus_caudofemoralisNode4 = .Femur.v_Femur_mus_caudofemoralisNode4	+ b_r_f;
+  AnyVector p_Femur_mus_caudofemoralisNode5 = .Femur.v_Femur_mus_caudofemoralisNode5	+ b_r_f;
+  AnyVector p_Femur_mus_caudofemoralisNode6 = .Femur.v_Femur_mus_caudofemoralisNode6	+ b_r_f;
+  AnyVector p_Femur_mus_biceps_femoris_1Node2 = .Femur.v_Femur_mus_biceps_femoris_1Node2	+ b_r_f;
+  AnyVector p_Femur_mus_biceps_femoris_1Node3 = .Femur.v_Femur_mus_biceps_femoris_1Node3	+ b_r_f;
+  AnyVector p_Femur_mus_biceps_femoris_1Node4 = .Femur.v_Femur_mus_biceps_femoris_1Node4	+ b_r_f;
+  AnyVector p_Femur_mus_popliteus_12Node3 = .Femur.v_Femur_mus_popliteus_12Node3	+ b_r_f;
+  AnyVector p_Femur_mus_biceps_femoris_3Node2 = .Femur.v_Femur_mus_biceps_femoris_3Node2	+ b_r_f;
+  AnyVector p_Femur_mus_adductor_brevis_1Node2 = .Femur.v_Femur_mus_adductor_brevis_1Node2	+ b_r_f;
+  AnyVector p_Femur_mus_adductor_brevis_1Node3 = .Femur.v_Femur_mus_adductor_brevis_1Node3	+ b_r_f;
+  AnyVector p_Femur_mus_adductor_brevis_1Node4 = .Femur.v_Femur_mus_adductor_brevis_1Node4	+ b_r_f;
+  AnyVector p_Femur_mus_adductor_brevis_2Node2 = .Femur.v_Femur_mus_adductor_brevis_2Node2	+ b_r_f;
+  AnyVector p_Femur_mus_adductor_brevis_2Node3 = .Femur.v_Femur_mus_adductor_brevis_2Node3	+ b_r_f;
+  AnyVector p_Femur_mus_adductor_brevis_2Node4 = .Femur.v_Femur_mus_adductor_brevis_2Node4	+ b_r_f;
+  AnyVector p_Femur_mus_adductor_brevis_3Node2 = .Femur.v_Femur_mus_adductor_brevis_3Node2	+ b_r_f;
+  AnyVector p_Femur_mus_adductor_brevis_3Node3 = .Femur.v_Femur_mus_adductor_brevis_3Node3	+ b_r_f;
+  AnyVector p_Femur_mus_adductor_brevis_4Node2 = .Femur.v_Femur_mus_adductor_brevis_4Node2	+ b_r_f;
+  AnyVector p_Femur_mus_adductor_brevis_4Node3 = .Femur.v_Femur_mus_adductor_brevis_4Node3	+ b_r_f;
+  AnyVector p_Femur_mus_adductor_brevis_4Node4 = .Femur.v_Femur_mus_adductor_brevis_4Node4	+ b_r_f;
+  AnyVector p_Femur_mus_adductor_longus_1Node2 = .Femur.v_Femur_mus_adductor_longus_1Node2	+ b_r_f;
+  AnyVector p_Femur_mus_adductor_longus_1Node3 = .Femur.v_Femur_mus_adductor_longus_1Node3	+ b_r_f;
+  AnyVector p_Femur_mus_adductor_longus_2Node2 = .Femur.v_Femur_mus_adductor_longus_2Node2	+ b_r_f;
+  AnyVector p_Femur_mus_adductor_longus_2Node3 = .Femur.v_Femur_mus_adductor_longus_2Node3	+ b_r_f;
+  AnyVector p_Femur_mus_adductor_longus_3Node2 = .Femur.v_Femur_mus_adductor_longus_3Node2	+ b_r_f;
+  AnyVector p_Femur_mus_adductor_longus_3Node3 = .Femur.v_Femur_mus_adductor_longus_3Node3	+ b_r_f;
+  AnyVector p_Femur_mus_adductor_magnusNode2 = .Femur.v_Femur_mus_adductor_magnusNode2	+ b_r_f;
+  AnyVector p_Femur_mus_adductor_magnusNode3 = .Femur.v_Femur_mus_adductor_magnusNode3	+ b_r_f;
+  AnyVector p_Femur_mus_adductor_magnusNode4 = .Femur.v_Femur_mus_adductor_magnusNode4	+ b_r_f;
+  AnyVector p_Femur_mus_adductor_magnusNode5 = .Femur.v_Femur_mus_adductor_magnusNode5	+ b_r_f;
+  AnyVector p_Cut_Node = b_r_S;
+  
+  
+  AnyRefNode Hip 			  = {
+    sRel = .p_Hip 	 	   ;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Knee 		  = {
+    sRel = .p_Knee 	         ;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+	
+  AnyRefNode Pat 			  = {
+    sRel = .p_Pat 		   ;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_extensor_digitorum_longus_1Node0  = {
+    sRel = .p_Femur_mus_extensor_digitorum_longus_1Node0 ;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_extensor_digitorum_longus_2Node0  = {
+    sRel = .p_Femur_mus_extensor_digitorum_longus_2Node0 ;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_extensor_digitorum_longus_3Node0  = {
+    sRel = .p_Femur_mus_extensor_digitorum_longus_3Node0 ;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_extensor_digitorum_longus_4Node0  = {
+    sRel = .p_Femur_mus_extensor_digitorum_longus_4Node0 ;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_popliteus_1Node0  = {
+    sRel = .p_Femur_mus_popliteus_1Node0 ;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_popliteus_1Node1  = {
+    sRel = .p_Femur_mus_popliteus_1Node1 ;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_popliteus_2Node0  = {
+    sRel = .p_Femur_mus_popliteus_2Node0 ;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_popliteus_2Node1  = {
+    sRel = .p_Femur_mus_popliteus_2Node1 ;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_tibialis_anteriorNode0 = {
+    sRel = .p_Femur_mus_tibialis_anteriorNode0;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gastrocnemius_soleus_1Node0 = {
+    sRel = .p_Femur_mus_gastrocnemius_soleus_1Node0;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gastrocnemius_soleus_2Node0 = {
+    sRel = .p_Femur_mus_gastrocnemius_soleus_2Node0;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_tensor_fasciae_latae_1Node3 = {
+    sRel = .p_Femur_mus_tensor_fasciae_latae_1Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_tensor_fasciae_latae_1Node4 = {
+    sRel = .p_Femur_mus_tensor_fasciae_latae_1Node4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_tensor_fasciae_latae_1Node5 = {
+    sRel = .p_Femur_mus_tensor_fasciae_latae_1Node5;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_tensor_fasciae_latae_2Node3 = {
+    sRel = .p_Femur_mus_tensor_fasciae_latae_2Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_tensor_fasciae_latae_2Node4 = {
+    sRel = .p_Femur_mus_tensor_fasciae_latae_2Node4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_tensor_fasciae_latae_2Node5 = {
+    sRel = .p_Femur_mus_tensor_fasciae_latae_2Node5;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_fasciae_latae_3Node3 = {
+    sRel = .p_Femur_mus_fasciae_latae_3Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_fasciae_latae_3Node4 = {
+    sRel = .p_Femur_mus_fasciae_latae_3Node4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_fasciae_latae_3Node5 = {
+    sRel = .p_Femur_mus_fasciae_latae_3Node5;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_semitendinosusNode1 = {
+    sRel = .p_Femur_mus_semitendinosusNode1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_semitendinosusNode2 = {
+    sRel = .p_Femur_mus_semitendinosusNode2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_semimembranosusNode1 = {
+    sRel = .p_Femur_mus_semimembranosusNode1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_semimembranosusNode2 = {
+    sRel = .p_Femur_mus_semimembranosusNode2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_quadratus_femorisNode2 = {
+    sRel = .p_Femur_mus_quadratus_femorisNode2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_psoas_minor_1Node1 = {
+    sRel = .p_Femur_mus_psoas_minor_1Node1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_psoas_minor_1Node2 = {
+    sRel = .p_Femur_mus_psoas_minor_1Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_psoas_minor_2Node1 = {
+    sRel = .p_Femur_mus_psoas_minor_2Node1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_psoas_minor_2Node2 = {
+    sRel = .p_Femur_mus_psoas_minor_2Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_psoas_minor_3Node1 = {
+    sRel = .p_Femur_mus_psoas_minor_3Node1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_psoas_minor_3Node2 = {
+    sRel = .p_Femur_mus_psoas_minor_3Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_psoas_minor_4Node1 = {
+    sRel = .p_Femur_mus_psoas_minor_4Node1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_psoas_minor_4Node2 = {
+    sRel = .p_Femur_mus_psoas_minor_4Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_psoas_major_1Node1 = {
+    sRel = .p_Femur_mus_psoas_major_1Node1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_psoas_major_1Node2 = {
+    sRel = .p_Femur_mus_psoas_major_1Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_psoas_major_2Node1 = {
+    sRel = .p_Femur_mus_psoas_major_2Node1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_psoas_major_2Node2 = {
+    sRel = .p_Femur_mus_psoas_major_2Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_psoas_major_3Node1 = {
+    sRel = .p_Femur_mus_psoas_major_3Node1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_psoas_major_3Node2 = {
+    sRel = .p_Femur_mus_psoas_major_3Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_psoas_major_4Node1 = {
+    sRel = .p_Femur_mus_psoas_major_4Node1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_psoas_major_4Node2 = {
+    sRel = .p_Femur_mus_psoas_major_4Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_pectineusNode1 = {
+    sRel = .p_Femur_mus_pectineusNode1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_obturatorius_internus_1Node2 = {
+    sRel = .p_Femur_mus_obturatorius_internus_1Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_obturatorius_internus_2Node2 = {
+    sRel = .p_Femur_mus_obturatorius_internus_2Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_obturatorius_externus_1Node2 = {
+    sRel = .p_Femur_mus_obturatorius_externus_1Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_obturatorius_externus_2Node2 = {
+    sRel = .p_Femur_mus_obturatorius_externus_2Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_extensor_digitorum_brevis_11Node2 = {
+    sRel = .p_Femur_mus_extensor_digitorum_brevis_11Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_extensor_digitorum_brevis_12Node2 = {
+    sRel = .p_Femur_mus_extensor_digitorum_brevis_12Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_extensor_digitorum_brevis_13Node2 = {
+    sRel = .p_Femur_mus_extensor_digitorum_brevis_13Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_extensor_digitorum_brevis_14Node2 = {
+    sRel = .p_Femur_mus_extensor_digitorum_brevis_14Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_extensor_digitorum_brevis_15Node2 = {
+    sRel = .p_Femur_mus_extensor_digitorum_brevis_15Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_iliacusNode3 = {
+    sRel = .p_Femur_mus_iliacusNode3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_iliacusNode4 = {
+    sRel = .p_Femur_mus_iliacusNode4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gracilis_posticusNode2 = {
+    sRel = .p_Femur_mus_gracilis_posticusNode2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gracilis_posticusNode3 = {
+    sRel = .p_Femur_mus_gracilis_posticusNode3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gracilis_posticusNode4 = {
+    sRel = .p_Femur_mus_gracilis_posticusNode4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gracilis_anticusNode2 = {
+    sRel = .p_Femur_mus_gracilis_anticusNode2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gracilis_anticusNode3 = {
+    sRel = .p_Femur_mus_gracilis_anticusNode3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gracilis_anticusNode4 = {
+    sRel = .p_Femur_mus_gracilis_anticusNode4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_minimus_1Node3 = {
+    sRel = .p_Femur_mus_gluteus_minimus_1Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_minimus_2Node2 = {
+    sRel = .p_Femur_mus_gluteus_minimus_2Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_mediusNode3 = {
+    sRel = .p_Femur_mus_gluteus_mediusNode3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_mediusNode4 = {
+    sRel = .p_Femur_mus_gluteus_mediusNode4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_maximus_1Node3 = {
+    sRel = .p_Femur_mus_gluteus_maximus_1Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_maximus_1Node4 = {
+    sRel = .p_Femur_mus_gluteus_maximus_1Node4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_maximus_1Node5 = {
+    sRel = .p_Femur_mus_gluteus_maximus_1Node5;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_maximus_2Node3 = {
+    sRel = .p_Femur_mus_gluteus_maximus_2Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_maximus_2Node4 = {
+    sRel = .p_Femur_mus_gluteus_maximus_2Node4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_maximus_2Node5 = {
+    sRel = .p_Femur_mus_gluteus_maximus_2Node5;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_maximus_2Node6 = {
+    sRel = .p_Femur_mus_gluteus_maximus_2Node6;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_maximus_3Node3 = {
+    sRel = .p_Femur_mus_gluteus_maximus_3Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_maximus_3Node4 = {
+    sRel = .p_Femur_mus_gluteus_maximus_3Node4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_maximus_3Node5 = {
+    sRel = .p_Femur_mus_gluteus_maximus_3Node5;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_maximus_3Node6 = {
+    sRel = .p_Femur_mus_gluteus_maximus_3Node6;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_maximus_4Node3 = {
+    sRel = .p_Femur_mus_gluteus_maximus_4Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_maximus_4Node4 = {
+    sRel = .p_Femur_mus_gluteus_maximus_4Node4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_maximus_4Node5 = {
+    sRel = .p_Femur_mus_gluteus_maximus_4Node5;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_maximus_5Node3 = {
+    sRel = .p_Femur_mus_gluteus_maximus_5Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_maximus_5Node4 = {
+    sRel = .p_Femur_mus_gluteus_maximus_5Node4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_maximus_5Node5 = {
+    sRel = .p_Femur_mus_gluteus_maximus_5Node5;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gluteus_maximus_5Node6 = {
+    sRel = .p_Femur_mus_gluteus_maximus_5Node6;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gemellus_inferiorNode2 = {
+    sRel = .p_Femur_mus_gemellus_inferiorNode2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gemellus_inferiorNode3 = {
+    sRel = .p_Femur_mus_gemellus_inferiorNode3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gemellus_superiorNode3 = {
+    sRel = .p_Femur_mus_gemellus_superiorNode3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_gemellus_superiorNode4 = {
+    sRel = .p_Femur_mus_gemellus_superiorNode4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_rectus_femoris_1Node1 = {
+    sRel = .p_Femur_mus_rectus_femoris_1Node1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_rectus_femoris_1Node2 = {
+    sRel = .p_Femur_mus_rectus_femoris_1Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_rectus_femoris_1Node3 = {
+    sRel = .p_Femur_mus_rectus_femoris_1Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_rectus_femoris_2Node1 = {
+    sRel = .p_Femur_mus_rectus_femoris_2Node1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_rectus_femoris_2Node2 = {
+    sRel = .p_Femur_mus_rectus_femoris_2Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_rectus_femoris_2Node3 = {
+    sRel = .p_Femur_mus_rectus_femoris_2Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_rectus_femoris_3Node1 = {
+    sRel = .p_Femur_mus_rectus_femoris_3Node1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_rectus_femoris_3Node2 = {
+    sRel = .p_Femur_mus_rectus_femoris_3Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_rectus_femoris_3Node3 = {
+    sRel = .p_Femur_mus_rectus_femoris_3Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_rectus_femoris_4Node1 = {
+    sRel = .p_Femur_mus_rectus_femoris_4Node1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_rectus_femoris_4Node2 = {
+    sRel = .p_Femur_mus_rectus_femoris_4Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_rectus_femoris_5Node1 = {
+    sRel = .p_Femur_mus_rectus_femoris_5Node1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_rectus_femoris_5Node2 = {
+    sRel = .p_Femur_mus_rectus_femoris_5Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_vastus_lateralis_1Node0 = {
+    sRel = .p_Femur_mus_vastus_lateralis_1Node0;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_vastus_lateralis_1Node1 = {
+    sRel = .p_Femur_mus_vastus_lateralis_1Node1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_vastus_lateralis_2Node0 = {
+    sRel = .p_Femur_mus_vastus_lateralis_2Node0;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_vastus_lateralis_2Node1 = {
+    sRel = .p_Femur_mus_vastus_lateralis_2Node1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_vastus_lateralis_2Node2 = {
+    sRel = .p_Femur_mus_vastus_lateralis_2Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_vastus_lateralis_3Node0 = {
+    sRel = .p_Femur_mus_vastus_lateralis_3Node0;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_vastus_lateralis_3Node1 = {
+    sRel = .p_Femur_mus_vastus_lateralis_3Node1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_vastus_lateralis_3Node2 = {
+    sRel = .p_Femur_mus_vastus_lateralis_3Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_vastus_lateralis_4Node0 = {
+    sRel = .p_Femur_mus_vastus_lateralis_4Node0;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_vastus_lateralis_4Node1 = {
+    sRel = .p_Femur_mus_vastus_lateralis_4Node1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_vastus_medialisNode0 = {
+    sRel = .p_Femur_mus_vastus_medialisNode0;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_vastus_medialisNode1 = {
+    sRel = .p_Femur_mus_vastus_medialisNode1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_vastus_intermediusNode0 = {
+    sRel = .p_Femur_mus_vastus_intermediusNode0;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_vastus_intermediusNode1 = {
+    sRel = .p_Femur_mus_vastus_intermediusNode1;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_caudofemoralisNode3 = {
+    sRel = .p_Femur_mus_caudofemoralisNode3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_caudofemoralisNode4 = {
+    sRel = .p_Femur_mus_caudofemoralisNode4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_caudofemoralisNode5 = {
+    sRel = .p_Femur_mus_caudofemoralisNode5;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_caudofemoralisNode6 = {
+    sRel = .p_Femur_mus_caudofemoralisNode6;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_biceps_femoris_1Node2 = {
+    sRel = .p_Femur_mus_biceps_femoris_1Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_biceps_femoris_1Node3 = {
+    sRel = .p_Femur_mus_biceps_femoris_1Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_biceps_femoris_1Node4 = {
+    sRel = .p_Femur_mus_biceps_femoris_1Node4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_popliteus_12Node3 = {
+    sRel = .p_Femur_mus_popliteus_12Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_biceps_femoris_3Node2 = {
+    sRel = .p_Femur_mus_biceps_femoris_3Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_brevis_1Node2 = {
+    sRel = .p_Femur_mus_adductor_brevis_1Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_brevis_1Node3 = {
+    sRel = .p_Femur_mus_adductor_brevis_1Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_brevis_1Node4 = {
+    sRel = .p_Femur_mus_adductor_brevis_1Node4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_brevis_2Node2 = {
+    sRel = .p_Femur_mus_adductor_brevis_2Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_brevis_2Node3 = {
+    sRel = .p_Femur_mus_adductor_brevis_2Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_brevis_2Node4 = {
+    sRel = .p_Femur_mus_adductor_brevis_2Node4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_brevis_3Node2 = {
+    sRel = .p_Femur_mus_adductor_brevis_3Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_brevis_3Node3 = {
+    sRel = .p_Femur_mus_adductor_brevis_3Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_brevis_4Node2 = {
+    sRel = .p_Femur_mus_adductor_brevis_4Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_brevis_4Node3 = {
+    sRel = .p_Femur_mus_adductor_brevis_4Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_brevis_4Node4 = {
+    sRel = .p_Femur_mus_adductor_brevis_4Node4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_longus_1Node2 = {
+    sRel = .p_Femur_mus_adductor_longus_1Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_longus_1Node3 = {
+    sRel = .p_Femur_mus_adductor_longus_1Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_longus_2Node2 = {
+    sRel = .p_Femur_mus_adductor_longus_2Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_longus_2Node3 = {
+    sRel = .p_Femur_mus_adductor_longus_2Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_longus_3Node2 = {
+    sRel = .p_Femur_mus_adductor_longus_3Node2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_longus_3Node3 = {
+    sRel = .p_Femur_mus_adductor_longus_3Node3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_magnusNode2 = {
+    sRel = .p_Femur_mus_adductor_magnusNode2;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_magnusNode3 = {
+    sRel = .p_Femur_mus_adductor_magnusNode3;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_magnusNode4 = {
+    sRel = .p_Femur_mus_adductor_magnusNode4;
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Femur_mus_adductor_magnusNode5 = {
+    sRel = .p_Femur_mus_adductor_magnusNode5;
+    AnyVar test = .b_r_f[0] + ..Femur.LengthProximal/2;
+    AnyVar test2 = .Cut_Node.sRel[0];
+    //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
+  #include "DrawNodeDistProx.any"
+};
+
+  AnyRefNode Cut_Node           = {
+    sRel = .p_Cut_Node;
+    AnyDrawRefFrame drw = 
+    {
+      RGB = {0,1,0};
+      ScaleXYZ = 0.01*{1, 1, 1};
+    };
+
+  };
+};  // AnySeg Femur_p
+
+#endif //FRACTUREMODEL

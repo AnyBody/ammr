@@ -1,0 +1,88 @@
+Left = 
+{
+  AnyFolder Leg = 
+  {  
+    
+    #define LEG_SIMPLE_MUSCLES_LOCAL 1*((LEFT_LEG)*(LEFT_LEG_SIMPLE_MUSCLES))
+    #define LEG_MUS_3E_LOCAL 1*((LEFT_LEG)*(LEFT_LEG_MUS_3E))
+    
+    #include "..\..\Leg\Leg.root.any"
+    
+    #undef LEG_SIMPLE_MUSCLES_LOCAL
+    #undef LEG_MUS_3E_LOCAL    
+    
+    AnyFolder &InterfaceFolder =..Interface.Left;
+    //Reference to folder 
+    AnyFolder &MannequinValuesFolder = ..MannequinValuesFromModel.AnyFolder_Posture.AnyFolder_Left;
+
+    
+    #include "../Include/SettingsLeg.any"
+    AnyFolder &Scaling = ...Scaling;
+    AnyFolder &StandardParameters =...Scaling.StandardParameters.Left;
+    AnyFolder &GeoScaling =...Scaling.GeometricalScaling.Left;
+    AnyFolder &MassScaling =...Scaling.MassScaling.Left;
+    AnyFolder &FiberLengthScaling =...Scaling.FiberLengthScaling.Left;
+    AnyFolder &StrengthScaling =...Scaling.StrengthScaling.Left;
+    
+    //-------------------------------------------------------
+    // Interface references that specifies what the leg "Leg/Leg.any" should connect to 
+    //-------------------------------------------------------
+    AnyRefFrame &HipNodeRef= ..Trunk.SegmentsLumbar.PelvisSeg.HipJointLeft;
+    //This is a sign variable which indicates that this is the left side
+    AnyVar Sign =-1;
+    
+    AnyFolder BonesOpacity = 
+    {
+      AnyVar Foot = Main.DrawSettings.BonesOpacity.LeftFoot;
+      AnyVar Shank = Main.DrawSettings.BonesOpacity.LeftShank;
+      AnyVar Thigh = Main.DrawSettings.BonesOpacity.LeftThigh;
+    };
+
+    
+    AnyFolder MomentMeasure=
+    {
+      #if (LEFT_LEG_SIMPLE_MUSCLES) + (LEFT_LEG_MUS_3E) == 0
+        AnyForceMomentMeasure KneeJointReactionMoments = 
+        {
+          AnyForceBase &Force = ..Jnt.Knee.Constraints.Reaction;
+          AnyRefFrame &Thighknee = ..Seg.Thigh.KneeJoint;
+          AnyVec3 Mlocal = M*Thighknee.Axes;
+        };        
+      #else        
+        AnyFolder &TrunkMuscles = ...Trunk.MusclesSpineLeft;
+        #include "..\..\Leg\LegMoments.any"
+      #endif
+    };
+
+      
+  };//End Leg
+  
+};
+
+  
+Trunk = 
+{
+  AnyRefFrame &PsoasMajorLeftReference=.Left.Leg.Seg.Thigh;
+};
+
+  
+#if (LEFT_LEG_SIMPLE_MUSCLES) + (LEFT_LEG_MUS_3E) == 0
+  #include "../../Leg/LeftLegNoMusclesSelectedOutput.any"
+#else
+  #if LEFT_LEG_SIMPLE_MUSCLES == 1
+    #include "../../Leg/LeftLegSimpleMusclesSelectedOutput.any"
+  #endif
+  
+  #if LEFT_LEG_MUS_3E == 1
+    #include "../../Leg/LeftLegMuscles3ESelectedOutput.any"
+  #endif
+#endif
+  
+#if (LEFT_LEG_SIMPLE_MUSCLES) + (LEFT_LEG_MUS_3E) != 0
+
+ #ifdef TRUNK_NO_MUSCLES
+ #include "LeftPsoas.any"
+ #else
+ #endif  
+
+#endif

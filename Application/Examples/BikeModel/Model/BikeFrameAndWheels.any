@@ -1,0 +1,134 @@
+  
+AnyFolder BikeModel = {
+  
+  
+  /*
+  This folder contains the definition of the bike
+  - GlobalRefFrame
+  - BikeFrame
+  - Crank motion and loading
+  - Rear wheel definition   
+  
+*/  
+  //Bike Segment
+  AnySeg BikeFrame = {
+    Jii = {0.00,0.00,0.00};
+    Mass =0.0; 
+    AnyRefNode SaddlePos = {
+       sRel = {Main.BikeParameters.SaddlePos,Main.BikeParameters.SaddleHeight,0}; 
+    };
+    AnyRefNode Crank = { sRel = {0,0,0}; };
+    AnyRefNode RearWheel = { sRel = {-0.45,0.01,0}; };
+    
+    AnyRefNode FrontWheel = { sRel = {0.71,0.01,0}; };
+    
+
+    AnyRefNode RightHand={
+      sRel={0.65,0.67,0.21};
+    };
+    
+    AnyRefNode LeftHand={
+      sRel={0.65,0.67,-0.21};
+    };
+    
+    AnyRefNode ElbowPosRight={
+      sRel={0.0,0,0.25};
+    };
+    AnyRefNode ElbowPosLeft={
+      sRel={0.0,0,-0.25};
+    };
+    
+    AnyDrawSurf BikeFrameSurf ={
+      FileName = ANYBODY_PATH_MAINFILEDIR+"/Input/bikeframe2";
+      ScaleXYZ={0.9,0.9,0.9};
+      RGB=Main.DrawSettings.Colors.AnyBodyBlue;
+    };  
+    
+  };  // BikeFrame
+  
+  AnySeg Crank = {
+    Mass=0.5;
+    Jii = {0.001,0.001,0.001};
+    AnyRefNode CrankJoint = { sRel = {0,0,0}; };
+    AnyRefNode RPedal = { sRel = {0,....BikeParameters.PedalArmLength,....BikeParameters.PedalArmWidth}; };      
+    AnyRefNode LPedal = { sRel = {0,-....BikeParameters.PedalArmLength,-....BikeParameters.PedalArmWidth}; };      
+    AnyDrawSurf CrankSurf ={
+      FileName = ANYBODY_PATH_MAINFILEDIR+"/Input/crank";
+      ScaleXYZ={0.9,0.9,0.9};
+      RGB=Main.DrawSettings.Colors.AnyBodyGreen; 
+    };  
+  };//Crank
+  
+  AnyRevoluteJoint CrankJoint ={
+    Axis = z;
+    AnyRefNode &Ground = .BikeFrame.Crank;
+    AnyRefNode &Crank = .Crank.CrankJoint;     
+  };
+  
+  AnyKinEqSimpleDriver CrankRotation = {
+    AnyRevoluteJoint &Jnt = .CrankJoint;
+    DriverPos = {0};
+    DriverVel = {-(...BikeParameters.Cadence/60)*pi*2};
+    Reaction.Type = {Off}; //This has to be zero otherwise the crank driver will carry the applied load
+  };
+  
+  //This is the definiton of the crank moment
+  AnyForce CrankMoment ={
+    AnyJoint &Jnt=.CrankJoint;
+    F={...BikeParameters.CrankMomentOffset-...BikeParameters.CrankMomentAmp*cos(4*pi*t/...BikeParameters.T+ ...BikeParameters.CrankMomentPhase)};
+  };
+  
+  //This is the definition of the rear wheel its pure graphics!
+  AnySeg RearWheel = {
+    Mass=0.0;
+    Jii = {0.00,0.00,0.00};
+    AnyRefNode Wheel = { sRel = {0,0,0}; };
+//    r0 ={0.550000, 0.010000, 0.000000};
+    
+    AnyDrawSurf Crank ={
+      FileName = ANYBODY_PATH_MAINFILEDIR+"/Input/wheel";
+      ScaleXYZ={0.9,0.9,0.9};
+      RGB=Main.DrawSettings.Colors.AnyBodyGreen;
+    };  
+  };
+  
+  AnyRevoluteJoint RearWheelJoint ={
+    Axis = z;
+    AnyRefNode& Ground = .BikeFrame.RearWheel;
+    AnyRefNode &Wheel = .RearWheel.Wheel;     
+  };
+  
+  AnyKinEqSimpleDriver RearWheelRotation = {
+    AnyRevoluteJoint &Jnt = .RearWheelJoint;
+    DriverPos = {0};
+    DriverVel = -{0.9*(...BikeParameters.Cadence/60)*pi*2};
+    Reaction.Type = {On}; //Setting Reaction.Type=1 means the joint should provide the needed moment to turn the wheel
+  };
+  
+  //This is the definition of the front wheel its pure graphics!
+  AnySeg FrontWheel = {
+    Mass=0.0;
+    Jii = {0.00,0.00,0.00};
+    AnyRefNode Wheel = { sRel = {0,0,0}; };
+    AnyDrawSurf Crank ={
+      FileName = ANYBODY_PATH_MAINFILEDIR+"/Input/wheel";
+      ScaleXYZ={0.9,0.9,0.9};
+      RGB=Main.DrawSettings.Colors.AnyBodyGreen;
+    };  
+  };
+  
+  AnyRevoluteJoint FrontWheelJoint ={
+    Axis = z;
+    AnyRefNode &Ground = .BikeFrame.FrontWheel;
+    AnyRefNode &Wheel = .FrontWheel.Wheel;     
+  };
+  
+  AnyKinEqSimpleDriver WheelRotation = {
+    AnyRevoluteJoint &Jnt = .FrontWheelJoint;
+    DriverPos = {0};
+    DriverVel = -{0.9*(...BikeParameters.Cadence/60)*pi*2};
+    Reaction.Type = {On}; //Setting Reaction.Type=1 means the joint should provide the needed moment to turn the wheel
+  };
+  
+}; //Bikemodel
+  

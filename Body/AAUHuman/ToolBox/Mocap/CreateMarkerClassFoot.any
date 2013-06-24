@@ -1,0 +1,238 @@
+
+
+#class_template CreateMarkerFoot (MarkerName, MarkerPlacement,WeightX,WeightY,WeightZ, OptX, OptY,OptZ,Model1, Model2){
+  
+  AnyVec3 RGB={1,0,0};  //color of initial markers
+  
+  
+  #var AnyVec3 sRelOpt ;  // Variable with obligatory initialization
+  
+  #if Model1 == 1
+  
+  AnyFolder &HumanModel = Main.Studies.KinematicStudyForParameterIdentification.HumanModel;
+  
+  AnyFolder &InsertionNode1 =Main.Studies.KinematicStudyForParameterIdentification.HumanModel.BodyModel.MarkerPlacement;
+  
+  InsertionNode1 ={
+    
+
+    AnyRefNode MarkerName={
+     
+         sRel=.Scale(..sRelOpt);
+
+      
+     
+      #if OptX =="On" 
+      
+      AnyDrawVector XDir =   {
+        Line.RGB={0,1,0};
+        Vec = {size,0, 0};
+        #include "DrawVector.any"
+        Text="X";
+      };
+      #endif
+      
+      #if OptY =="On" 
+      
+      AnyDrawVector YDir =   {
+        Line.RGB={0,1,0};
+        Vec = {0,size, 0};
+        #include "DrawVector.any"
+        Text="Y";
+      };
+      #endif      
+      
+      #if OptZ =="On" 
+      
+      AnyDrawVector ZDir =   {
+        Line.RGB={0,1,0};
+        Vec = {0,0,size};
+        #include "DrawVector.any"
+        Text="Z";
+      };
+      #endif
+      
+      
+      #if OptX =="Off" 
+      
+      AnyDrawVector XDir =   {
+        Line.RGB={1,0,0};
+        Vec = {size,0, 0};
+        Text="X";
+        #include "DrawVector.any"
+      };
+      #endif
+      
+      #if OptY =="Off" 
+      
+      AnyDrawVector YDir =   {
+        Vec = {0,size, 0};
+        Line.RGB={1,0,0};
+        #include "DrawVector.any"
+        Text="Y";
+      };
+      #endif      
+      
+      #if OptZ =="Off" 
+      
+      AnyDrawVector ZDir =   {
+        Line.RGB={1,0,0};
+        Vec = {0,0,size};
+        #include "DrawVector.any"
+        Text="Z";
+      };
+      #endif      
+      
+    }; //create the marker 
+  };
+  
+  AnyFolder &DriverFolder =Main.Studies.KinematicStudyForParameterIdentification.ModelEnvironmentConnection.Drivers;
+  DriverFolder ={
+    AnyFolder MarkerName ={
+      
+      AnyFunConst WeightFun ={Value = {WeightX,WeightY,WeightZ};};
+      
+      AnyKinDriverMarker Driver =    {
+        Linear.Ref=0;
+        AnyRefFrame &ref1 = ...InsertionNode1.MarkerName;
+        AnyParamFun &ref2 = Main.ModelSetup.C3DFileData.Points.Markers.MarkerName.PosInterpol;
+        WeightFun={&.WeightFun};
+     
+        AnyDrawKinMeasure Draw =         {
+        Visible = On;
+        Opacity = 1;
+        Label = Off;
+        Size = 0.0035;
+        Line = Off;
+        Text = "";
+        TextSize = 30;
+      };
+      
+
+      };
+      
+    };
+  };
+  
+  
+  AnyFolder &ref=  Main.Studies.ParameterIdentification ;
+  
+  ref={
+    
+    
+    
+    #if OptX =="On" 
+    
+    AnyDesVar MarkerName##X = {      Val =..sRelOpt[0];    
+      Min=-100;
+      Max=100;      
+    };
+    
+    #endif
+    
+    #if OptY =="On"
+    AnyDesVar MarkerName##Y = {    Val = ..sRelOpt[1];   
+      Min=-100;
+      Max=100;      
+      
+    };
+    
+    #endif
+    
+    #if OptZ =="On"
+    AnyDesVar MarkerName##Z = {      Val = ..sRelOpt[2];   
+      Min=-100;
+      Max=100;      
+    };
+    
+    #endif    
+  };
+  
+  #endif 
+  
+  
+  
+  
+  #if Model2 == 1
+  
+  AnyFolder &HumanModel = Main.Studies.HumanModel;
+  
+  AnyFolder &InsertionNode2 =Main.Studies.HumanModel.BodyModel.MarkerPlacement;
+  InsertionNode2 ={
+    AnyRefNode MarkerName={
+      sRel=.Scale(..sRelOpt);
+      AnyDrawNode DrawMarker = 
+      {
+        Visible = On;
+        Opacity = 0.5;
+        RGB = {1, 0, 0};
+        ScaleXYZ = {0.0035, 0.0035, 0.0035}*0.5;
+      };
+    };//create the marker 
+  };
+  
+  
+  Main.Studies.InverseDynamicStudy.EnvironmentModel.DrawC3DMarkers = {
+    
+      AnyDrawVector MarkerName = 
+      {
+        Visible = On;
+        Opacity = 0.5;
+        Vec = {Main.ModelSetup.C3DFileData.Points.Markers.MarkerName.PosInterpol(Main.Studies.InverseDynamicStudy.t)}[0];
+        PointAway = On;
+        GlobalCoord = On;
+        Line = 
+        {
+          Style = Line3DStyleFull;
+          Thickness = 0.0000000001;
+          RGB = {0, 0, 1};
+          End = 
+          {
+            Style = Line3DCapStyleEllipsoid;
+            RGB = {0, 0, 1};
+            Thickness = 0.007*0.5;
+            Length = 0.014*0.5;
+          };
+        };
+        AnyRefFrame &Globalref = Main.Studies.InverseDynamicStudy.EnvironmentModel.GlobalRef;
+      };
+  };
+  
+  
+  AnyFolder &ref2=  Main.Studies.LoadParametersOptimizationResults;
+  
+  ref2={
+    #if OptX =="On" 
+    
+    AnyDesVar MarkerName##X = {      Val =..sRelOpt[0];    
+      Min=-100;
+      Max=100;      
+    };
+    
+    #endif
+    
+    #if OptY =="On"
+    AnyDesVar MarkerName##Y = {    Val = ..sRelOpt[1];   
+      Min=-100;
+      Max=100;      
+      
+    };
+    
+    #endif
+    
+    #if OptZ =="On"
+    AnyDesVar MarkerName##Z = {      Val = ..sRelOpt[2];   
+      Min=-100;
+      Max=100;      
+    };
+    
+    #endif
+  
+  };
+  #endif 
+  
+}; // End of InsertSegmentClass
+
+
+
+

@@ -17,115 +17,62 @@ to the normal force and the user can supply a friction
 coefficient for each surface such that the effect of different 
 surface fabrics can be investigated.*/
 Main = {
-  
-  /**Execute this operation to run the model in the intended operation sequence.  
-  It is also possible to run operations seperately, by manual selections in the operation tree*/
-  AnyOperationSequence RunApplication = {
-
-    /**This operation calibrates the muscles in the model if these are of the type AnyMuscleModel3E.
-    This will just be an empty operation if the model is using a muscle type that does not require calibration.*/
-    AnyOperation &CalibrationAnal = Main.HumanModel.Calibration.CalibrationSequence;  
-
-    ///This operation is the inverse dynamic analysis
-    AnyOperation &InvAnal=Main.Study.InverseDynamics;
-  
-  };
-  
-  /// Driver Positions - in degrees
-  AnyFolder DrvPos = {
-    AnyVar PelvisSeatLinXPos = 0.05;      ///< Position of the pelvis on the seat
-    AnyVar SeatGlobalLinYPos = 0;         ///< Seat Height
-    AnyVar SeatGlobalZRot = 0;            ///< Forward seat inclination
-    AnyVar BackRestHeadResRotZPos = 0;    ///< Rotation of the head rest wrt the back rest
-    AnyVar GlobalLegRestRotZPos = 30;     ///< Inclination of the leg rest
-    AnyVar GlobalBackRestRotZPos = 0;    ///< Back rest inclination
-    AnyVar LegRestFootRestLinYPos = 0.1; ///< Position of the footrest along the leg rest
-  }; // DrvPos
-  
-  /// Driver Velocities - angles are in degrees per second
-  AnyFolder DrvVel = {
-    AnyVar PelvisSeatLinXVel = 0;         ///< Movement of the pelvis on the seat
-    AnyVar SeatGlobalLinYVel = 0;         ///< Movement of the seat Height
-    AnyVar SeatGlobalZRotVel = 0;         ///< Movement of seat inclination
-    AnyVar GlobalBackRestRotZVel = 30;     ///< Back rest inclination velocity
-    AnyVar GlobalLegRestRotZVel = 0;      ///< Leg rest inclination velocity
-    AnyVar LegRestFootRestLinYVel = 0;    ///< Movement of the footrest along the leg rest
-  }; // DrvVel
-  
-  // --------------------------------------------------------
-  // Support settings 
-  // --------------------------------------------------------
-  /// Settings for the support elements, friction coefficients and
-  /// strength of the support contact elements. If the strength 
-  /// gets too low it means that the body will start using muscle
-  /// force to avoid laying too much 
-  AnyFolder SupportSettings = {
-    
-    //Friction coefficients between the human and the chair
-    AnyVar StaticFrictionSeat = 0.5;
-    AnyVar StaticFrictionBackrest = 0.5;
-    AnyVar StaticFrictionFootrest = 0.5; 
-    AnyVar StaticFrictionArmrest = 0.2; 
-    
-    //Strenght of the support muscles between the human and the chair
-    AnyVar SeatSupportStrength=10000;
-    AnyVar BackrestSupportStrength=10000;
-    AnyVar FootrestSupportStrength=10000;
-    AnyVar ArmrestSupportStrength=10000;
-  };
+  // ----------------------------------------------------------
+  // Model parameters: Driver position and support settings
+  // ----------------------------------------------------------
+  #include "Model/InputParameters.any"
   
   // ----------------------------------------------------------
-  // Draw settings
+  // Path to draw settings
   // ----------------------------------------------------------
-  #include "DrawSettings.any"
+  #path BM_DRAWSETTINGS_FILE "Model/DrawSettings.any"
   
-  AnyFolder HumanModel = {
-    
-    AnyFolder &Mannequin=.Model.Mannequin;
-    
-    // The NoMuscles version is useful for playing around with the kinematics
-    //#include  "<ANYBODY_PATH_BODY>\BodyModels\FullBodyModel\BodyModel_NoMuscles.any"    
-    
-    // This model uses the simple one-parameter muscles 
-    #include  "BodyPartsSetup.any"
-    #include  "<ANYBODY_PATH_BODY>/BodyModels/GenericBodyModel/BodyModel.any"
-    
-    AnyFolder StrengthParameters={
-      AnyVar SpecificMuscleTensionSpine= 90; //N/cm^2
-      AnyVar StrengthIndexLeg= 1; 
-      AnyVar SpecificMuscleTensionShoulderArm= 90; //N/cm^2
-    };
-    
-    // Use the standard size human model.
-    #include "<ANYBODY_PATH_BODY>\Scaling\ScalingStandard.any"
-  };
+  // ----------------------------------------------------------
+  // Model configuration:
+  // For more info on body model configuration options please load the model and double click on: 
+  // #include "<ANYBODY_PATH_BODY>\Documentation\BodyModel.parameters.any"
+  // ----------------------------------------------------------
+
+  // Application was created using previous leg model
+  #define BM_LEG_RIGHT CONST_LEG_MODEL_Leg
+  #define BM_LEG_LEFT CONST_LEG_MODEL_Leg
   
-  // ------------------------------------------------------------
-  // Model
-  // ------------------------------------------------------------
-  
-  /// This folder collects all the objects in the model.
-  AnyFolder Model = {
+  // The Mannequin file specifies load-time positions for all the segments
+  // in the HumanModel. This is important for the model's ablity to resolve
+  // all the kinematic constraints when the model is analyzed.
+  // The mannequin file also drives those degrees of freedom of the human 
+  // model that are not governed by problem-specific drivers at run time.    
+  #path BM_MANNEQUIN_FILE "Model/Mannequin.any" 
+
+  // Model of the human body to be used for the analysis  
+  #include "<ANYBODY_PATH_BODY>/HumanModel.any"
+//  HumanModel.BodyModel.Left.Leg.Seg.Thigh.AnatomicalFrame={//.FootFootRestJntNode={
+//    AnyDrawRefFrame a={ScaleXYZ={1,1,1}*0.5;RGB={1,0,0};};
+//  };
+  /// The actual model where all components are assembled  
+  AnyFolder Model ={
+    /// Body model without default drivers
     AnyFolder &HumanModel=.HumanModel.BodyModel;
-    #include "Mannequin.any"
-    #include "Environment.any"
+    /// Reference to the mannequin folder (used by drivers)
+    AnyFolder &Mannequin =.HumanModel.Mannequin;  
+    
+    #include "Model/Environment.any"
     
     /// Objects connecting the human to the chair
     AnyFolder ModelEnvironmentConnection = {
       
-      #include "ConnectionSegments.any"
-      #include "JointsAndDrivers.any"
+      #include "Model/ConnectionSegments.any"
+      #include "Model/JointsAndDrivers.any"
       
       AnyFolder &RefPM=Main.Model.EnvironmentModel;
-      #include "InitialPositionsEnvironment.any" 
-      #include "Support.any" 
+      #include "Model/InitialPositionsEnvironment.any" 
+      #include "Model/Support.any" 
     }; // ModelEnvironmentConnection
   }; // Model
   
   // --------------------------------------------------------------
   // Study
   // --------------------------------------------------------------
-
   AnyBodyStudy Study = {
     AnyFolder &Model = .Model;
    
@@ -139,5 +86,7 @@ Main = {
     Main.Model.HumanModel.Trunk.JointsLumbar.L5SacrumJnt.Constraints.Reaction.Fout[2]^2)^0.5;
   }; // Study  
 
+  // Include an operation sequence to run all required steps of your application (see Operations tab)
+    #include "<ANYBODY_PATH_TOOLBOX>\Operations\RunAppSequence.any"      
   
 };// Main

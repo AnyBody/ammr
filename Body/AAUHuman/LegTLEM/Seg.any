@@ -1,0 +1,2639 @@
+/***************** Seg.any *******************************
+This files construct all segments in the LegTLEM model. 
+
+This model is based on the cadaver dataset published in:
+M.D. Klein Horsman, H.F.J.M. Koopman, F.C.T. van der Helm,
+L. Poliacu Pros? H.E.J. Veeger Morphological muscle and 
+joint parameters for musculoskeletal modelling of the lower
+extremity Clinical Biomechanics, Volume 22, Issue 2, 
+February 2007, Pages 239-247, ISSN 0268-0033
+
+Klein Horsman,M.D.; Koopman,H.F.J.M.; van der Helm,F.C.T.;
+Pros?L.Poliacu; Veeger,H.E.J. (2007). The dataset is also 
+know as also know as the Twente Lower Extremity Model (TLEM).
+
+The implementation in AnyBody retains the coordinate system of 
+the original dataset, to allow direct comparison with the
+published data. Thus, all segment have their same technical
+coordinate which correspond to the lab coordinate system during
+the cadaver study. The lab coordinate system was fixed at the 
+hip joint center and alligned with the anatomical coordinate
+system of the pelvis during the cadaver session. 
+
+The first implementation in AnyScript was done by Karin Gorter
+in 2007. Some bug fixes and and structural changes have been 
+added implemention. These also include correction due to errors 
+in the original dataset. 
+
+Brief change log:
+-------------------------------------------------
+Sep.  Translation vectors added to some of the foot and tibia 
+2007  insertion points or viapoints, to obtain a reasonable fit
+      with the anatomical position (and viapoints 9-13 for the
+      Extensor Hallucis Longus commented out for the same reason).
+
+Mar.  Axes of Rotation and Centers of Rotation of the Ankle and 
+2008  Subtalar joint changed with respect to a improved anatomical
+      position. Some muscle insertion and via point translated
+      (addtional translation vectors) 
+      Sebastian Dendorfer March 2008
+      
+Sep.  Added via points to the medial and lateral gastroc
+2011
+      
+Apr.  Restructring of the file. All hardcoded values have been moved 
+2012  to the file 'ModelParameters.any'. Added an option to redine 
+      the ankle and knee joint to be defined by bony landmarks
+      instead of the original joint definitions. This new definition
+      of joint parameters is used in by some applications in AMMR1.5.
+      Moments of inertia have been changed to follow the main axis of
+      thigh and shank. Added coordinate system based on the ISB 
+      definition of coordinate systems in the G. Wu, S. Siegler, 
+      P. Allard, C. Kirtley, A. Leardini, D. Rosenbaum, M. Whittle, 
+      D. D'Lima, L. Cristofolini, H. Witte, O. Schmid, I. Stokes. 
+      J. Biomech.35(4):543-548, 2002
+
+Apr.  Restructure scaling for more accurate definition of anatomical 
+2013  frames for scaling including handling of un-scaled and scaled
+      definitions of these.
+	  Furthermore, model updates arising from the TLEMsafe project 
+	  have been implemented and a new model morphology has been 
+	  introduced as a parallel option to the existing one. 
+	  The new morphology is prepared for TLEM version 2.0, which 
+	  is not released yet.
+*/
+
+
+// The Talus segment represents the part between the ankle joint
+// and the subtalar joint. 
+#ifndef SKIN
+  #define SKIN 0
+#endif
+
+#ifndef MUSCLETISSUE
+  #define MUSCLETISSUE 0
+#endif
+
+#ifndef DRAWAXES
+  #define DRAWAXES 0
+#endif
+
+AnyFolder STL = {
+    #include "<TLEM_PATH_VERSION>STL.any" 
+  };
+  
+AnySeg Talus = {
+  AnyFolder &StdPar = ..ModelParameters.Talus;
+    
+  JaboutCoMOnOff = On;
+  AnyVar  MassS=..MassScaling.Talus.MassScale;
+  
+  r0=.Shank.AnkleJoint.sRel*.Shank.Axes0'+.Shank.r0-AnkleJoint.sRel*Axes0'; 
+  
+  AnyFloat pUnscaled = {StdPar.LateralMalleolus, StdPar.MedialMalleolus};
+  AnyFloat dAxisFixed = { (StdPar.MedialTibialEpicondyle + StdPar.LateralTibialEpicondyle)*0.5 - StdPar.SubTalarJoint, (StdPar.MedialTibialEpicondyle - StdPar.LateralTibialEpicondyle ) };
+  //AnyFunTransform3D& GeomScale = ..GeoScaling.Talus.ScaleFunction;  
+  AnyFunTransform3D& GeomScale = ..GeoScaling.Foot.ScaleFunction;
+  AnyVar Sign = ..Sign;
+  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(p, SIGN) 0.5*(p[0]+p[1])
+  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2(p, d, SIGN) RotMat(0.5*(p[0]+p[1]), 0.5*(p[0]+p[1]) + d[0], 0.5*(p[0]+p[1]) + d[1] ) * RotMat(-0.5*pi,z) * RotMat(0.5*pi,y) * RotMat(0.5*(SIGN-1)*pi,y)
+  #include "..\Scaling\SegScaleFunWrtAnatomicalFrame.any"  
+  
+  AnyRefNode AnatomicalFrame =
+  {    
+    AnyFloat pScaled = .Scale(.pUnscaled);
+    sRel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(pScaled, .Sign);
+    ARel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2(pScaled, .dAxisFixed, .Sign);
+    AnyVec3 sRelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(.pUnscaled, .Sign); ///< Generic unscaled position of talus ScalingNode
+    AnyMat33 ARelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2(.pUnscaled, .dAxisFixed, .Sign);///< Generic unscaled rotation of talus ScalingNode        
+  };
+  AnyRefNode& ScalingNode = AnatomicalFrame ;
+  #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_s
+  #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2   
+  
+  //#if TLEM_VERSION == "2.0"
+   sCoM = Scale(StdPar.sCoM); 
+   Mass = MassS*StdPar.MassStandard; 
+   Jii = StdPar.Jii; 
+   Jij = StdPar.Jij;   
+  //#else
+  // sCoM = (AnkleJoint.sRel + SubTalarJoint.sRel)/2;
+  // Mass = MassS*StdPar.Mass; 
+  // AnyVar Ixx = 2/5 * Mass * (vnorm(0.5*(AnkleJoint.sRel - MedialMalleolus.sRel)))^2;
+  // AnyVar Iyy = Ixx;
+  // AnyVar Izz = Ixx;
+  // Jii = {Ixx, Iyy, Izz};  
+  //#endif
+  
+
+  
+  AnyRefNode MedialMalleolus = {
+    sRel = .Scale(.StdPar.MedialMalleolus );
+    #include "../DrawSettings/BML.any"
+  };
+  
+  AnyRefNode SubTalarJoint = 
+  {
+      //AnyVec3 KneeJointInNeutralConfig = .StdPar.KneeJointInNeutralConfig;
+      //AnyVec3 sRelUnscaled = .StdPar.SubTalarsRelUnscaled;
+      //AnyMat33 ARelUnscaled = .StdPar.SubTalarARelUnscaled;   
+      //sRel = .StdPar.SubTalarsRel;
+      //ARel = .StdPar.SubTalarARel;
+//      #if TLEM_MORPHOLOGY == 1   
+//        AnyVec3 sRelUnscaled = .StdPar.SubTalarJoint;
+//        AnyMat33 ARelUnscaled = RotMat( sRelUnscaled, sRelUnscaled+ .StdPar.SubTalarJointAxis, .StdPar.KneeJointInNeutralConfig )*RotMat(pi/2,y);   
+//        sRel = .Scale(sRelUnscaled);      
+//        ARel = RotMat( sRel, sRel + .StdPar.SubTalarJointAxis, .StdPar.KneeJointInNeutralConfig )*RotMat(pi/2,y);
+//      #endif
+//      #if TLEM_MORPHOLOGY == 2
+//        AnySeg& ref_Shank = ..Shank;      
+//        AnyVec3 sRelUnscaled = .StdPar.SubTalarJoint;
+//        AnyMat33 ARelUnscaled = RotMat( ((.StdPar.MedialMalleolus)+(.StdPar.LateralMalleolus))/2, 
+//                                        ((.StdPar.MedialMalleolus)+(.StdPar.LateralMalleolus))/2 + .StdPar.SubTalarJointAxis,
+//                                        ((.StdPar.MedialTibialEpicondyle)+(.StdPar.LateralTibialEpicondyle))/2)*RotMat(pi/2,y);
+//        sRel = .Scale(sRelUnscaled);      
+//        ARel = RotMat((ref_Shank.Scale(ref_Shank.StdPar.MedialMalleolus)+ref_Shank.Scale(ref_Shank.StdPar.LateralMalleolus))/2, 
+//                      (ref_Shank.Scale(ref_Shank.StdPar.MedialMalleolus)+ref_Shank.Scale(ref_Shank.StdPar.LateralMalleolus))/2 + .StdPar.SubTalarJointAxis,
+//                      (ref_Shank.Scale(ref_Shank.StdPar.MedialTibialEpicondyle)+ref_Shank.Scale(ref_Shank.StdPar.LateralTibialEpicondyle))/2)*RotMat(pi/2,y);
+//      #endif
+    sRel = .Scale(.StdPar.SubTalarJoint);
+    ARel = RotMat({0.0,0,0}, .StdPar.SubTalarJointAxis, .AnatomicalFrame.ARel'[1])*RotMat(pi/2,y);
+         
+    #include "../DrawSettings/JointAxesProximal.any"
+    
+    #if DRAWAXES
+    AnyDrawLine SJaxis2 = {
+      Visible = On;
+      p0 = ..StdPar.SubTalarsRel + {..StdPar.SubTalarJointAxis[2],..StdPar.SubTalarJointAxis[1],..StdPar.SubTalarJointAxis[0]}*0.2;
+      p1 = ..StdPar.SubTalarsRel - {..StdPar.SubTalarJointAxis[2],..StdPar.SubTalarJointAxis[1],..StdPar.SubTalarJointAxis[0]}*0.2;      //Offset = {0, 0, 0};
+//      p0 = ..StdPar.SubTalarsRel + ..StdPar.SubTalarJointAxis*0.1;
+//      p1 = ..StdPar.SubTalarsRel - ..StdPar.SubTalarJointAxis*0.1;      //Offset = {0, 0, 0};
+      Line = {
+      Thickness = 0.001;
+      RGB = {0, 0, 0};
+      };
+    };    
+    #endif  
+  };
+  
+
+  AnyRefNode AnkleJoint = {
+//    AnyVec3 KneeJointInNeutralConfig = .StdPar.KneeJointInNeutralConfig;
+//    AnyVec3 sRelUnscaled = .StdPar.TalocruralsRelUnscaled;
+//    AnyMat33 ARelUnscaled = .StdPar.TalocruralARelUnscaled;   
+//    sRel = .StdPar.TalocruralsRel;
+//    ARel = .StdPar.TalocruralARel;
+    #if TLEM_MORPHOLOGY == 1
+     #ifdef BONY_LANDMARK_DEFINED_JOINTAXIS
+       AnyVec3 sRelUnscaled =  0.5*(.StdPar.LateralAnkleAxisMarker+.StdPar.MedialAnkleAxisMarker);
+       AnyMat33 ARelUnscaled = RotMat(sRelUnscaled, 
+                                      sRelUnscaled + ...Sign*(.StdPar.LateralAnkleAxisMarker - .StdPar.MedialAnkleAxisMarker ), 
+                                     .StdPar.KneeJointInNeutralConfig )*RotMat(pi/2,y);
+       // Ankle joint is defined from the two malleolus bony landmarks
+       sRel = 0.5*(.Scale(.StdPar.LateralAnkleAxisMarker)+.Scale(.StdPar.MedialAnkleAxisMarker));
+       // Ankle joint axis is defined from the two malleolus bony landmarks
+       ARel = RotMat(sRel, sRel+ ...Sign*(.Scale(.StdPar.LateralAnkleAxisMarker) - .Scale(.StdPar.MedialAnkleAxisMarker) ), .StdPar.KneeJointInNeutralConfig )*RotMat(pi/2,y); 
+     #else
+       AnyVec3 sRelUnscaled = .StdPar.AnkleJoint;
+       AnyMat33 ARelUnscaled = RotMat(sRelUnscaled, sRelUnscaled +.Sign*.StdPar.AnkleJointAxis, .StdPar.KneeJointInNeutralConfig )*RotMat(pi/2,y);
+       // Control point for the Ankle joint. Found by projecting the malleolus bony landmarks onto the 
+       // ankle axis from the cadaver data set. Thus, scaling that moves the control points will also scale the ankle joint axis
+       AnyVec3 LateralControlPoint = .Scale(.StdPar.AnkleJoint + (.StdPar.LateralMalleolus - .StdPar.AnkleJoint)*.StdPar.AnkleJointAxis'*.StdPar.AnkleJointAxis);
+       // Control point for the Ankle joint. Found by projecting the malleolus bony landmarks onto the 
+       // ankle axis from the cadaver data set. Thus, scaling that moves the control points will also scale the ankle joint axis
+       AnyVec3 MedialControlPoint = .Scale(.StdPar.AnkleJoint + (.StdPar.MedialMalleolus - .StdPar.AnkleJoint)*.StdPar.AnkleJointAxis'*.StdPar.AnkleJointAxis );
+       // Ankle Joint defined directly from the cadaver dataset. 
+       sRel = .Scale(.StdPar.AnkleJoint);
+       // Ankle Joint orientation is calculated based on the direction between the two control points.   
+       ARel = RotMat(sRel, sRel + .Sign*(LateralControlPoint-MedialControlPoint ), .StdPar.KneeJointInNeutralConfig )*RotMat(pi/2,y);
+     #endif      
+    #endif
+    #if TLEM_MORPHOLOGY == 2
+     #ifdef BONY_LANDMARK_DEFINED_JOINTAXIS
+      AnyVec3 sRelUnscaled =  0.5*(.StdPar.LateralAnkleAxisMarker + .StdPar.MedialAnkleAxisMarker);
+      AnyMat33 ARelUnscaled = RotMat(((.StdPar.MedialMalleolus)+(.StdPar.LateralMalleolus))/2, 
+                                    ((.StdPar.MedialMalleolus)+(.StdPar.LateralMalleolus))/2  + ...Sign*(.StdPar.LateralAnkleAxisMarker - .StdPar.MedialAnkleAxisMarker ), 
+                                    ((.StdPar.MedialTibialEpicondyle)+(.StdPar.LateralTibialEpicondyle))/2)*RotMat(pi/2,y);
+      // Ankle joint is defined from the two malleolus bony landmarks
+      sRel = 0.5*(.Scale(.StdPar.LateralAnkleAxisMarker)+.Scale(.StdPar.MedialAnkleAxisMarker));
+      // Ankle joint axis is defined from the two malleolus bony landmarks
+      ARel = RotMat((.Scale(.StdPar.MedialMalleolus)+.Scale(.StdPar.LateralMalleolus))/2, 
+                    (.Scale(.StdPar.MedialMalleolus)+.Scale(.StdPar.LateralMalleolus))/2  + ...Sign*(.Scale(.StdPar.LateralAnkleAxisMarker) - .Scale(.StdPar.MedialAnkleAxisMarker)), 
+                    (.Scale(.StdPar.MedialTibialEpicondyle)+.Scale(.StdPar.LateralTibialEpicondyle))/2)*RotMat(pi/2,y);
+     #else
+      AnySeg& ref_Shank = ..Shank;   
+      AnyVec3 sRelUnscaled = .StdPar.AnkleJoint;
+      AnyMat33 ARelUnscaled = RotMat(((.StdPar.MedialMalleolus)+(.StdPar.LateralMalleolus))/2, 
+                                     ((.StdPar.MedialMalleolus)+(.StdPar.LateralMalleolus))/2  + .Sign*((LateralControlPoint)-(MedialControlPoint)), 
+                                     ((.StdPar.MedialTibialEpicondyle)+(.StdPar.LateralTibialEpicondyle))/2)*RotMat(pi/2,y);    
+      // Control point for the Ankle joint. Found by projecting the malleolus bony landmarks onto the 
+      // ankle axis from the cadaver data set. Thus, scaling that moves the control points will also scale the ankle joint axis
+      AnyVec3 LateralControlPoint = (.StdPar.AnkleJoint + (.StdPar.LateralMalleolus - .StdPar.AnkleJoint)*.StdPar.AnkleJointAxis'*.StdPar.AnkleJointAxis);
+      // Control point for the Ankle joint. Found by projecting the malleolus bony landmarks onto the 
+      // ankle axis from the cadaver data set. Thus, scaling that moves the control points will also scale the ankle joint axis
+      AnyVec3 MedialControlPoint = (.StdPar.AnkleJoint + (.StdPar.MedialMalleolus - .StdPar.AnkleJoint)*.StdPar.AnkleJointAxis'*.StdPar.AnkleJointAxis );
+      // Ankle Joint defined directly from the cadaver dataset. 
+      sRel = .Scale(sRelUnscaled);
+      // Ankle Joint orientation is calculated based on the direction between the two control points.   
+      ARel = RotMat((ref_Shank.Scale(ref_Shank.StdPar.MedialMalleolus)+ref_Shank.Scale(ref_Shank.StdPar.LateralMalleolus))/2, 
+                    (ref_Shank.Scale(ref_Shank.StdPar.MedialMalleolus)+ref_Shank.Scale(ref_Shank.StdPar.LateralMalleolus))/2  +.Sign*(ref_Shank.Scale(LateralControlPoint)-ref_Shank.Scale(MedialControlPoint)), 
+                    (ref_Shank.Scale(ref_Shank.StdPar.MedialTibialEpicondyle)+ref_Shank.Scale(ref_Shank.StdPar.LateralTibialEpicondyle))/2)*RotMat(pi/2,y);
+     #endif    
+    #endif
+    
+    #include "../DrawSettings/JointAxesDistal.any" 
+
+    #if DRAWAXES    
+    AnyDrawLine SJaxis2 = {
+      Visible = On;
+      p0 = ..StdPar.TalocruralsRel + {..StdPar.AnkleJointAxis[2],..StdPar.AnkleJointAxis[1],..StdPar.AnkleJointAxis[0]}*0.2;
+      p1 = ..StdPar.TalocruralsRel - {..StdPar.AnkleJointAxis[2],..StdPar.AnkleJointAxis[1],..StdPar.AnkleJointAxis[0]}*0.2;      //Offset = {0, 0, 0};
+//      p0 = ..StdPar.TalocruralsRel + ..StdPar.AnkleJointAxis*0.2;
+//      p1 = ..StdPar.TalocruralsRel - ..StdPar.AnkleJointAxis*0.2;      //Offset = {0, 0, 0};
+      Line = {Thickness = 0.001; RGB = {0, 0, 0};};
+    };
+    #endif
+    
+     
+  };
+      
+  #include "../DrawSettings/Nodes.any"
+  #include "../DrawSettings/SegmentAxes.any"
+  
+  AnyDrawSurf DrwSurf = {
+    FileName = ..STL.FilenameTalus;
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
+    RGB = ...ColorRef.Segments;
+    AnyFunTransform3D &Scale =.Scale;  
+    Opacity = ...BonesOpacity.Talus; 
+  };  
+}; // end of Talus segment
+
+AnySeg Foot = { 
+   
+  AnyFolder &StdPar = ..ModelParameters.Foot;
+  
+  JaboutCoMOnOff = On;
+  
+  r0=.Talus.SubTalarJoint.sRel*.Talus.Axes0'+.Talus.r0-SubTalarJoint.sRel*Axes0'; 
+  
+  AnyFloat pUnscaled = {StdPar.LateralMalleolus, StdPar.MedialMalleolus};
+  AnyFloat dAxisFixed = { (StdPar.MedialTibialEpicondyle + StdPar.LateralTibialEpicondyle)*0.5 - StdPar.SubTalarJoint, (StdPar.MedialTibialEpicondyle - StdPar.LateralTibialEpicondyle ) };
+  AnyFunTransform3D& GeomScale = ..GeoScaling.Foot.ScaleFunction;  
+  AnyVar Sign = ..Sign;
+  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(p, SIGN) 0.5*(p[0]+p[1])
+  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2(p, d, SIGN) RotMat(0.5*(p[0]+p[1]), 0.5*(p[0]+p[1]) + d[0], 0.5*(p[0]+p[1]) + d[1] ) * RotMat(-0.5*pi,z) * RotMat(0.5*pi,y) * RotMat(0.5*(SIGN-1)*pi,y)
+  #include "..\Scaling\SegScaleFunWrtAnatomicalFrame.any" 
+  
+  AnyRefNode AnatomicalFrame =
+  {    
+    AnyFloat pScaled = .Scale(.pUnscaled);
+    sRel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(pScaled, .Sign);
+    ARel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2(pScaled, .dAxisFixed, .Sign);
+    AnyVec3 sRelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(.pUnscaled, .Sign);///< Generic unscaled position of foot ScalingNode
+    AnyMat33 ARelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2(.pUnscaled, .dAxisFixed, .Sign);///< Generic unscaled rotation of foot ScalingNode
+
+  };
+  AnyRefNode& ScalingNode=AnatomicalFrame ;
+  #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_s
+  #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2  
+
+  /// Please notice that this node is deprecated; it will be removed in future versions
+  AnyRefNode ScalingNodeOld={
+    AnyMat33 Rotation=RotMat(...Sign*-30*pi/180,y)*RotMat(-30*pi/180,z)*RotMat(-0.5*pi,z);
+    ARel=Rotation;
+    sRel=.Scale(.StdPar.SubTalarJoint);
+  };  
+  
+  AnyVar LengthStandard = vnorm(StdPar.SubTalarJoint-StdPar.ToeJoint,2);
+  AnyVar MassS = ..MassScaling.Foot.MassScale;
+  Mass = MassS*StdPar.MassStandard;  
+  sCoM = Scale(StdPar.sCoM);
+  Jii = StdPar.Jii; 
+  Jij = StdPar.Jij;
+  
+  AnyRefNode HeelContactNodeLow = {
+    sRel = .Scale(.StdPar.HeelContactNodeLow);
+  };
+  
+  AnyRefNode &HeelJoint = HeelContactNodeLow;
+  
+  AnyRefNode SubTalarJoint = 
+  {
+    #if TLEM_MORPHOLOGY == 1
+      sRel = .Scale(.StdPar.SubTalarJoint);
+      /// Notice we are using non-scaled position of the KneeJoint because this cannot scale with the foot.
+      /// It is a reasonable decision for defining the axis.
+      ARel = RotMat(sRel, sRel + .StdPar.SubTalarJointAxis, .StdPar.KneeJoint)*RotMat(pi/2,y);     
+    #endif
+    
+    #if TLEM_MORPHOLOGY == 2
+      AnySeg& ref_Shank = ..Shank;   
+      sRel = .Scale(.StdPar.SubTalarJoint);
+      ARel = RotMat((ref_Shank.Scale(ref_Shank.StdPar.MedialMalleolus)+ref_Shank.Scale(ref_Shank.StdPar.LateralMalleolus))/2, 
+            (ref_Shank.Scale(ref_Shank.StdPar.MedialMalleolus)+ref_Shank.Scale(ref_Shank.StdPar.LateralMalleolus))/2 + .StdPar.SubTalarJointAxis,
+            (ref_Shank.Scale(ref_Shank.StdPar.MedialTibialEpicondyle)+ref_Shank.Scale(ref_Shank.StdPar.LateralTibialEpicondyle))/2)*RotMat(pi/2,y);  
+    #endif
+
+  //  #include "../DrawSettings/JointAxesProximal.any" 
+  };
+
+  /// This coordinate system is placed according the International Society of Biomechanics' (ISB)
+  /// recommendations for an anatomical coordinate system for the hip joint in the thigh segment.
+  /// See ISB proposal by G. Wu, S. Siegler, P. Allard, C. Kirtley, A. Leardini, D. Rosenbaum, M. Whittle, D. 
+  /// D'Lima, L. Cristofolini, H. Witte, O. Schmid, I. Stokes. J. Biomech. 35(4):543-548, 2002
+  /// Section 3.4 
+  AnyRefNode AnkleJointComplexAnatomicalFrame = {
+    #ifdef BONY_LANDMARK_DEFINED_JOINTAXIS
+      sRel = 0.5*(.Scale(.StdPar.MedialAnkleAxisMarkerInNeutralConf) + .Scale(.StdPar.LateralAnkleAxisMarkerInNeutralConf));
+    #else 
+      sRel = (.MedialMalleolus.sRel + .LateralMalleolus.sRel)*0.5;
+    #endif
+    ARel = .AnatomicalFrame.ARel;
+  };
+  
+  //bonylandmarks
+  AnyRefNode MedialMalleolus = {
+    sRel = .Scale(.StdPar.MedialMalleolusInNeutralConf );
+    #include "../DrawSettings/BML.any"
+  };
+  AnyRefNode LateralMalleolus = {
+    sRel = .Scale(.StdPar.LateralMalleolusInNeutralConf );
+    #include "../DrawSettings/BML.any"
+  };
+  
+  AnyRefNode IntraMallolar = {
+    sRel =0.5* (.MedialMalleolus.sRel+.LateralMalleolus.sRel);
+    #include "../DrawSettings/BML.any"
+  };
+  
+  AnyRefNode GroundJoint = {
+    sRel = .Scale(.StdPar.GroundJoint);// Estimation, between Heel and Toetip
+    ARel = .ScalingNode.ARel;//*RotMat(0.5*pi,z);//*RotMat(10*pi/180,y);
+  };
+  
+  AnyRefNode GroundJoint2 = {
+    sRel = .Scale(.StdPar.GroundJoint);// Estimation, between Heel and Toetip
+    ARel = .ScalingNodeOld.ARel*RotMat(0.5*pi,z);//*RotMat(10*pi/180,y);
+  };
+  
+  AnyRefNode ToeJoint = {
+    sRel = .Scale(.StdPar.ToeJoint); 
+  };
+  
+  AnyRefNode HeelNode = {
+    sRel = .Scale(.StdPar.HeelNode ); // Estimation, Bony Landmark Heel
+    ARel = {{0, 1, 0}, {-1, 0, 0}, {0, 0, 1}}; 
+  };
+  
+////  AnyRefNode OriginalHeelNode = {
+////    sRel = .Scale(.StdPar.OriginalHeelNode);
+////    AnyDrawNode drw={RGB={0,1,1};ScaleXYZ={1,1,1}*0.01;};
+////  };
+  
+  AnyRefNode ToeLateralContactNode = {
+    sRel = .Scale(.StdPar.ToeLateralContactNode ); // Estimation, Bony landmark, distal 5th metatarsal
+    ARel = {{0, 1, 0}, {-1, 0, 0}, {0, 0, 1}};
+  };
+  
+  AnyRefNode ToeMedialContactNode = {
+    sRel = .Scale(.StdPar.ToeMedialContactNode ); // Estimation, Bony landmark, distal 1st metatarsal
+    ARel = {{0, 1, 0}, {-1, 0, 0}, {0, 0, 1}}; 
+     
+  };
+  
+  //Big toe , Estimation
+  AnyRefNode BigToeNode = {
+    sRel = .Scale(.StdPar.BigToeNode); 
+  };
+  
+  //Metatarsal joint centers , Estimation
+  AnyRefNode MetatarsalJoint1Node = {
+    sRel = .Scale(.StdPar.MetatarsalJoint1Node ); 
+  };
+  
+  AnyRefNode MetatarsalJoint2Node = {
+    sRel = .Scale( .StdPar.MetatarsalJoint2Node ); 
+    ARel = .ScalingNodeOld.ARel*RotMat(0.5*pi,z);
+  };
+  
+  AnyRefNode MetatarsalJoint3Node = {
+    sRel =.Scale( .StdPar.MetatarsalJoint3Node ); 
+  };
+  
+  AnyRefNode MetatarsalJoint4Node = {
+    sRel = .Scale( .StdPar.MetatarsalJoint4Node ); 
+  };
+  
+  AnyRefNode MetatarsalJoint5Node = {
+    sRel =.Scale( .StdPar.MetatarsalJoint5Node ); 
+  };
+  
+//  AnyRefNode MetatarsalProximal5 = {
+//    sRel = .Scale(.StdPar.MetatarsalProximal5);
+//     AnyDrawNode drw={RGB={0,1,1};ScaleXYZ={1,1,1}*0.01;};
+//
+//  }; 
+//  
+//  AnyRefNode MetatarsalDistal1 = {
+//    sRel = .Scale(.StdPar.MetatarsalDistal1);
+//     AnyDrawNode drw={RGB={0,1,1};ScaleXYZ={1,1,1}*0.01;};
+//
+//  }; 
+
+//  AnyRefNode MetatarsalProximal1 = {
+//    sRel = .Scale(.StdPar.MetatarsalProximal1);
+//     AnyDrawNode drw={RGB={1,1,1};ScaleXYZ={1,1,1}*0.01;};
+//  };   
+//    
+//    AnyRefNode MetatarsalDistal5 = {
+//    sRel = .Scale(.StdPar.MetatarsalDistal5);
+//     AnyDrawNode drw={RGB={1,1,1};ScaleXYZ={1,1,1}*0.01;};
+//
+//  }; 
+  // Bony landmarks transformed into foot coordinatesystem in the neutral configuration of the model.
+  AnyRefNode MalleousLateralNode = {sRel = .Scale( ..Shank.StdPar.LateralMalleolus);}; //*..Shank.StdPar.RotNeutral'+..Shank.StdPar.PosNeutral-.StdPar.PosNeutral)*.StdPar.RotNeutral); }; 
+  
+  //Insertion points on Phalanges: 
+  AnyRefNode ExtensorDigitorumLongus1Node = {sRel = .Scale( .StdPar.ExtensorDigitorumLongus1Node );};
+  AnyRefNode ExtensorDigitorumLongus2Node = {sRel = .Scale( .StdPar.ExtensorDigitorumLongus2Node );};
+  AnyRefNode ExtensorDigitorumLongus3Node = {sRel = .Scale( .StdPar.ExtensorDigitorumLongus3Node );};
+  #if TLEM_MORPHOLOGY == 2
+  AnyRefNode ExtensorDigitorumLongus4Node = {sRel = .Scale( .StdPar.ExtensorDigitorumLongus4Node );};
+  #endif
+  AnyRefNode ExtensorDigitorumLongusViaNode5 = {sRel = .Scale( .StdPar.ExtensorDigitorumLongusViaNode5 );};
+  #if TLEM_MORPHOLOGY == 2
+  AnyRefNode ExtensorDigitorumLongusViaNode6 = {sRel = .Scale( .StdPar.ExtensorDigitorumLongusViaNode6 );};
+  AnyRefNode ExtensorDigitorumLongusViaNode7 = {sRel = .Scale( .StdPar.ExtensorDigitorumLongusViaNode7 );};
+  AnyRefNode ExtensorDigitorumLongusViaNode8 = {sRel = .Scale( .StdPar.ExtensorDigitorumLongusViaNode8 );};
+  AnyRefNode ExtensorDigitorumLongusViaNode9 = {sRel = .Scale( .StdPar.ExtensorDigitorumLongusViaNode9 );};
+  AnyRefNode ExtensorDigitorumLongusViaNode10 = {sRel = .Scale( .StdPar.ExtensorDigitorumLongusViaNode10 );};
+  #endif
+  
+  #if TLEM_MORPHOLOGY == 1
+  AnyRefNode ExtensorHallucisLongus1Node = {sRel = .Scale( .StdPar.ExtensorHallucisLongus1Node );};
+  AnyRefNode ExtensorHallucisLongus2Node = {sRel = .Scale( .StdPar.ExtensorHallucisLongus2Node );};
+  AnyRefNode ExtensorHallucisLongus3Node = {sRel = .Scale( .StdPar.ExtensorHallucisLongus3Node );};
+  AnyRefNode ExtensorHallucisLongusViaNode7 = {sRel = .Scale( .StdPar.ExtensorHallucisLongusViaNode7 );};
+  AnyRefNode ExtensorHallucisLongusViaNode8 = {sRel = .Scale( .StdPar.ExtensorHallucisLongusViaNode8 );};
+//  AnyRefNode ExtensorHallucisLongusViaNode9 = {sRel = .Scale( .StdPar.ExtensorHallucisLongusViaNode9 );};
+  //  AnyRefNode ExtensorHallucisLongusViaNode10 = {sRel = .Scale( .StdPar.ExtensorHallucisLongusViaNode10 );};
+  //  AnyRefNode ExtensorHallucisLongusViaNode11 = {sRel = .Scale( .StdPar.ExtensorHallucisLongusViaNode11 );};
+  //  AnyRefNode ExtensorHallucisLongusViaNode12 = {sRel = .Scale( .StdPar.ExtensorHallucisLongusViaNode12 );};
+  //  AnyRefNode ExtensorHallucisLongusViaNode13 = {sRel = .Scale( .StdPar.ExtensorHallucisLongusViaNode13 );};
+  #endif
+  #if TLEM_MORPHOLOGY == 2
+  AnyRefNode ExtensorHallucisLongus1Node = {sRel = .Scale( .StdPar.ExtensorHallucisLongus1Node );};
+  AnyRefNode ExtensorHallucisLongus2Node = {sRel = .Scale( .StdPar.ExtensorHallucisLongus1Node );};
+  AnyRefNode ExtensorHallucisLongus3Node = {sRel = .Scale( .StdPar.ExtensorHallucisLongus1Node );};
+  AnyRefNode ExtensorHallucisLongusViaNode4 = {sRel = .Scale( .StdPar.ExtensorHallucisLongusViaNode4 );};
+  AnyRefNode ExtensorHallucisLongusViaNode5 = {sRel = .Scale( .StdPar.ExtensorHallucisLongusViaNode5 );};
+  #endif
+
+  AnyRefNode FlexorDigitorumLongus1Node = {sRel = .Scale( .StdPar.FlexorDigitorumLongus1Node );};
+  AnyRefNode FlexorDigitorumLongus2Node = {sRel = .Scale( .StdPar.FlexorDigitorumLongus2Node );};
+  AnyRefNode FlexorDigitorumLongus3Node = {sRel = .Scale( .StdPar.FlexorDigitorumLongus3Node );};
+  #if TLEM_MORPHOLOGY == 2
+  AnyRefNode FlexorDigitorumLongus4Node = {sRel = .Scale( .StdPar.FlexorDigitorumLongus4Node );};  
+  #endif
+  #if TLEM_MORPHOLOGY == 1
+  AnyRefNode FlexorDigitorumLongusViaNode7 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode7 );};
+  AnyRefNode FlexorDigitorumLongusViaNode8 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode8 );};
+  #endif
+  #if TLEM_MORPHOLOGY == 2
+  AnyRefNode FlexorDigitorumLongusViaNode7 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode7 );};
+  AnyRefNode FlexorDigitorumLongusViaNode8 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode8 );};
+  AnyRefNode FlexorDigitorumLongusViaNode9 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode9 );};
+  AnyRefNode FlexorDigitorumLongusViaNode10 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode10);};
+  AnyRefNode FlexorDigitorumLongusViaNode11 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode11);};
+  AnyRefNode FlexorDigitorumLongusViaNode12 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode12);};
+  #endif
+  
+  #if TLEM_MORPHOLOGY == 1
+  AnyRefNode FlexorHallucisLongus1Node = {sRel = .Scale( .StdPar.FlexorHallucisLongus1Node );};
+  AnyRefNode FlexorHallucisLongus2Node = {sRel = .Scale( .StdPar.FlexorHallucisLongus2Node );};
+  AnyRefNode FlexorHallucisLongus3Node = {sRel = .Scale( .StdPar.FlexorHallucisLongus3Node );};
+  #endif
+  #if TLEM_MORPHOLOGY == 2
+  AnyRefNode FlexorHallucisLongus1Node = {sRel = .Scale( .StdPar.FlexorHallucisLongus1Node );};
+  AnyRefNode FlexorHallucisLongus2Node = {sRel = .Scale( .StdPar.FlexorHallucisLongus1Node );};
+  AnyRefNode FlexorHallucisLongus3Node = {sRel = .Scale( .StdPar.FlexorHallucisLongus1Node );};
+  #endif
+  AnyRefNode FlexorHallucisLongusViaNode7 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode7 );}; 
+  AnyRefNode FlexorHallucisLongusViaNode8 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode8 );};
+
+  
+  
+  //Insertion points on Hindfoot: 
+  AnyRefNode TendonCalcaneousNode = {sRel = .Scale( .StdPar.TendonCalcaneousNode );};
+  
+  AnyRefNode GastrocnemiusLateralis1Node = {sRel = .Scale( .StdPar.GastrocnemiusLateralis1Node );};
+  AnyRefNode GastrocnemiusMedialis1Node =  {sRel = .Scale( .StdPar.GastrocnemiusMedialis1Node );};
+  
+  AnyRefNode Plantaris1Node = {sRel = .Scale( .StdPar.Plantaris1Node );};
+  
+  AnyRefNode SoleusMedialis1Node = {sRel = .Scale( .StdPar.SoleusMedialis1Node );};
+  AnyRefNode SoleusMedialis2Node = {sRel = .Scale( .StdPar.SoleusMedialis2Node );};
+  AnyRefNode SoleusMedialis3Node =  {sRel = .Scale( .StdPar.SoleusMedialis3Node );};
+  AnyRefNode SoleusLateralis1Node = {sRel = .Scale( .StdPar.SoleusLateralis1Node );};
+  AnyRefNode SoleusLateralis2Node = {sRel = .Scale( .StdPar.SoleusLateralis2Node );};
+  AnyRefNode SoleusLateralis3Node =  {sRel = .Scale( .StdPar.SoleusLateralis3Node );};
+  
+  //Insertion points on Midfoot:
+  #if TLEM_MORPHOLOGY == 1
+  AnyRefNode PeroneusBrevis1Node = {sRel = .Scale( .StdPar.PeroneusBrevis1Node );};
+  AnyRefNode PeroneusBrevis2Node = {sRel = .Scale( .StdPar.PeroneusBrevis2Node );};
+  AnyRefNode PeroneusBrevis3Node = {sRel = .Scale( .StdPar.PeroneusBrevis3Node );};
+  #endif
+  #if TLEM_MORPHOLOGY == 2
+  AnyRefNode PeroneusBrevis1Node = {sRel = .Scale( .StdPar.PeroneusBrevis1Node );};
+  AnyRefNode PeroneusBrevis2Node = {sRel = .Scale( .StdPar.PeroneusBrevis1Node );};
+  AnyRefNode PeroneusBrevis3Node = {sRel = .Scale( .StdPar.PeroneusBrevis1Node );};
+  #endif
+  AnyRefNode PeroneusBrevisViaNode4 = {sRel = .Scale( .StdPar.PeroneusBrevisViaNode4 );};
+  #if TLEM_MORPHOLOGY == 2
+  AnyRefNode PeroneusBrevisViaNode5 = {sRel = .Scale( .StdPar.PeroneusBrevisViaNode5 );};
+  #endif
+  
+  #if TLEM_MORPHOLOGY == 1
+  AnyRefNode PeroneusLongus1Node = {sRel = .Scale( .StdPar.PeroneusLongus1Node );};
+  AnyRefNode PeroneusLongus2Node = {sRel = .Scale( .StdPar.PeroneusLongus2Node );};
+  AnyRefNode PeroneusLongus3Node = {sRel = .Scale( .StdPar.PeroneusLongus3Node );};  
+  AnyRefNode PeroneusTertius1Node = {sRel = .Scale( .StdPar.PeroneusTertius1Node );};
+  AnyRefNode PeroneusTertius2Node = {sRel = .Scale( .StdPar.PeroneusTertius2Node );};
+  AnyRefNode PeroneusTertius3Node = {sRel = .Scale( .StdPar.PeroneusTertius3Node );};
+  AnyRefNode PeroneusLongusViaNode4 = {sRel = .Scale( .StdPar.PeroneusLongusViaNode4 );};
+  #endif
+  #if TLEM_MORPHOLOGY == 2
+  AnyRefNode PeroneusLongus1Node = {sRel = .Scale( .StdPar.PeroneusLongus1Node );};
+  AnyRefNode PeroneusLongus2Node = {sRel = .Scale( .StdPar.PeroneusLongus1Node );};
+  AnyRefNode PeroneusLongus3Node = {sRel = .Scale( .StdPar.PeroneusLongus1Node );};  
+  AnyRefNode PeroneusLongusViaNode5 = {sRel = .Scale( .StdPar.PeroneusLongusViaNode5 );};
+  AnyRefNode PeroneusLongusViaNode6 = {sRel = .Scale( .StdPar.PeroneusLongusViaNode6 );};
+  AnyRefNode PeroneusLongusViaNode7 = {sRel = .Scale( .StdPar.PeroneusLongusViaNode7 );};
+  #endif  
+  
+  #if TLEM_MORPHOLOGY == 1  
+  AnyRefNode TibialisAnterior1Node = {sRel = .Scale( .StdPar.TibialisAnterior1Node );};
+  AnyRefNode TibialisAnterior2Node = {sRel = .Scale( .StdPar.TibialisAnterior2Node );};
+  AnyRefNode TibialisAnterior3Node = {sRel = .Scale( .StdPar.TibialisAnterior3Node );};
+  #endif
+  #if TLEM_MORPHOLOGY == 2 
+  AnyRefNode TibialisAnterior1Node = {sRel = .Scale( .StdPar.TibialisAnterior1Node );};
+  AnyRefNode TibialisAnterior2Node = {sRel = .Scale( .StdPar.TibialisAnterior1Node );};
+  AnyRefNode TibialisAnterior3Node = {sRel = .Scale( .StdPar.TibialisAnterior1Node );};
+  #endif 
+  AnyRefNode TibialisAnteriorViaNode2 = {sRel = .Scale( .StdPar.TibialisAnteriorViaNode2 );};
+  #if TLEM_MORPHOLOGY == 2 
+  AnyRefNode TibialisAnteriorViaNode3 = {sRel = .Scale( .StdPar.TibialisAnteriorViaNode3 );};
+  #endif
+  
+  #if TLEM_MORPHOLOGY == 1
+  AnyRefNode TibialisPosteriorMedialis1Node = {sRel = .Scale( .StdPar.TibialisPosteriorMedialis1Node );};
+  AnyRefNode TibialisPosteriorMedialis2Node = {sRel = .Scale( .StdPar.TibialisPosteriorMedialis2Node );};
+  AnyRefNode TibialisPosteriorMedialis3Node = {sRel = .Scale( .StdPar.TibialisPosteriorMedialis3Node );};
+  AnyRefNode TibialisPosteriorLateralis1Node = {sRel = .Scale( .StdPar.TibialisPosteriorLateralis1Node );};
+  AnyRefNode TibialisPosteriorLateralis2Node = {sRel = .Scale( .StdPar.TibialisPosteriorLateralis2Node );};
+  AnyRefNode TibialisPosteriorLateralis3Node = {sRel = .Scale( .StdPar.TibialisPosteriorLateralis3Node );};
+  AnyRefNode TibialisPosteriorLateralisViaNode10 = {sRel = .Scale( .StdPar.TibialisPosteriorLateralisViaNode10 );};
+  AnyRefNode TibialisPosteriorMedialisViaNode10 = {sRel = .Scale( .StdPar.TibialisPosteriorMedialisViaNode10 );};
+  AnyRefNode TibialisPosteriorMedialisViaNode11 = {sRel = .Scale( .StdPar.TibialisPosteriorMedialisViaNode11 );};
+  #endif
+  #if TLEM_MORPHOLOGY == 2
+  AnyRefNode TibialisPosteriorMedialis1Node = {sRel = .Scale( .StdPar.TibialisPosterior1Node );};
+  AnyRefNode TibialisPosteriorMedialis2Node = {sRel = .Scale( .StdPar.TibialisPosterior1Node );};
+  AnyRefNode TibialisPosteriorMedialis3Node = {sRel = .Scale( .StdPar.TibialisPosterior1Node );};
+  AnyRefNode TibialisPosteriorLateralis1Node = {sRel = .Scale( .StdPar.TibialisPosterior1Node );};
+  AnyRefNode TibialisPosteriorLateralis2Node = {sRel = .Scale( .StdPar.TibialisPosterior1Node );};
+  AnyRefNode TibialisPosteriorLateralis3Node = {sRel = .Scale( .StdPar.TibialisPosterior1Node );};
+  AnyRefNode TibialisPosteriorViaNode5 = {sRel = .Scale( .StdPar.TibialisPosteriorViaNode5 );};
+  AnyRefNode TibialisPosteriorViaNode6 = {sRel = .Scale( .StdPar.TibialisPosteriorViaNode6 );};
+  AnyRefNode TibialisPosteriorViaNode7 = {sRel = .Scale( .StdPar.TibialisPosteriorViaNode7 );};
+  #endif 
+  
+  #if TLEM_MORPHOLOGY == 2
+  AnyRefNode HeelContact  = {sRel = .Scale( .StdPar.HeelContact );};
+  AnyRefNode Metatarsal1Contact  = {sRel = .Scale( .StdPar.Metatarsal1Contact );};
+  AnyRefNode Metatarsal2Contact  = {sRel = .Scale( .StdPar.Metatarsal2Contact );};
+  AnyRefNode Metatarsal5Contact  = {sRel = .Scale( .StdPar.Metatarsal5Contact );};
+  AnyRefNode MetatarsalJoint  = {sRel = .Scale( .StdPar.MetatarsalJoint );};
+  #endif  
+  
+  #if TLEM_MORPHOLOGY == 2
+//  AnyRefNode Heel   = { sRel= { 0        , 0        , 0        };  AnyDrawNode Heel   = { ScaleXYZ = {0.005, 0.005, 0.005};};};
+//  AnyRefNode First  = { sRel= { 0.1522612, 0        ,-0.0181064};  AnyDrawNode First  = { ScaleXYZ = {0.005, 0.005, 0.005};};};
+//  AnyRefNode Second = { sRel= { 0.1448399, 0        , 0        };  AnyDrawNode Second = { ScaleXYZ = {0.005, 0.005, 0.005};};};
+//  AnyRefNode Fifth  = { sRel= { 0.1225758, 0        , 0.0543191};  AnyDrawNode Fifth  = { ScaleXYZ = {0.005, 0.005, 0.005};};};
+//  AnyRefNode Achil  = { sRel= {-0.0093487, 0.0288859,-0.0216510};  AnyDrawNode Fifth  = { ScaleXYZ = {0.005, 0.005, 0.005};};};
+  #endif
+  
+    #include "../DrawSettings/Nodes.any"
+  #include "../DrawSettings/SegmentAxes.any"
+
+  AnyDrawSurf DrwSurf = {
+    FileName = ..STL.FilenameFoot;
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
+    RGB = ...ColorRef.Segments;
+    AnyFunTransform3D &Scale =.Scale;  
+    Opacity = ...BonesOpacity.Foot;
+  };
+
+   #if SKIN
+    AnyDrawSurf Drw2 = {
+    FileName = ..STL.FilenameFootSkin;
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
+    RGB = ...ColorRef.Skin;
+    Opacity = Main.DrawSettings.SkinOpacity.Opacity;
+    AnyFunTransform3D &Scale =.Scale;  
+    Face=-1;
+  };
+  #endif
+
+   #if MUSCLETISSUE
+    AnyDrawSurf Drw1 = {
+    FileName = ..STL.FilenameFootMuscleTissue;
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
+    RGB = ...ColorRef.MuscleTissue;
+    Opacity = Main.DrawSettings.MuscleTissueOpacity.Opacity;
+    AnyFunTransform3D &Scale =.Scale;  
+    Face=-1;
+  };
+  #endif
+
+
+};// End of foot
+
+
+
+AnySeg Shank = {
+  AnyFolder &StdPar = ..ModelParameters.Shank;
+  
+  JaboutCoMOnOff = On;
+  r0=.Thigh.KneeJoint.sRel*.Thigh.Axes0'+.Thigh.r0-KneeJoint.sRel*Axes0';
+    
+  AnyVec3 r01 = .Thigh.KneeJoint.sRel;
+  AnyVec3 r02 = .Thigh.KneeJoint.sRel*.Thigh.Axes0';
+  AnyVec3 r03 = .Thigh.r0;
+  AnyVec3 r04 = KneeJoint.sRel*Axes0'; 
+  
+  AnyFloat pUnscaled = {StdPar.LateralMalleolus, StdPar.MedialMalleolus, StdPar.LateralTibialEpicondyle, StdPar.MedialTibialEpicondyle};
+  AnyFunTransform3D& GeomScale = ..GeoScaling.Shank.ScaleFunction;
+  AnyVar Sign = ..Sign;
+  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(p, SIGN) 0.5*(p[2]+p[3])
+  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(p, SIGN) RotMat(0.5*(p[2]+p[3]), 0.5*(p[0]+p[1]), p[2]) *RotMat(0.5*pi,y)*RotMat(-0.5*pi,x)*RotMat(0.5*(SIGN-1)*pi,y) 
+ 
+  #include "..\Scaling\SegScaleFunWrtAnatomicalFrame.any"  
+  
+  AnyRefNode AnatomicalFrame =
+  {    
+    AnyFloat pScaled = .Scale(.pUnscaled);
+    sRel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(pScaled, .Sign);
+    ARel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(pScaled, .Sign);
+    AnyVec3 sRelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(.pUnscaled, .Sign); ///< Generic unscaled position of shank ScalingNode
+    AnyMat33 ARelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(.pUnscaled, .Sign);///< Generic unscaled rotation of shank ScalingNode    
+  };
+  AnyRefNode& ScalingNode=AnatomicalFrame ;
+  #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_s
+  #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_A  
+
+  AnyVar MassS = ..MassScaling.Shank.MassScale;
+  
+  Mass = MassS*StdPar.MassStandard;
+  sCoM = Scale(StdPar.sCoM);
+  Jii = StdPar.Jii; 
+  Jij = StdPar.Jij;
+  /// This coordinate system is placed based on the bony landmarks of tibial plateau.
+  /// O: Center of the two tibial epicondyles
+  /// Z: A vector going through the lateral and medial tibial epicondyle pointing to the right
+  /// X: The vector perpendicular to Z axis and the long axis of the shank point anteriorly
+  /// Y: The vector perpendicular to Z and X
+  AnyRefNode KneeJointAnatomicalFrame = {
+    AnyVec3 O = 0.5*(.Scale(.StdPar.LateralTibialEpicondyle ) + .Scale(.StdPar.MedialTibialEpicondyle ) );
+    AnyVec3 Z = ...Sign*(.Scale(.StdPar.LateralTibialEpicondyle ) - .Scale(.StdPar.MedialTibialEpicondyle ) );
+    AnyVec3 X = cross(O-.AnkleJoint.sRel,Z);
+    AnyVec3 Y = cross(Z,X);
+    sRel = O;
+    ARel = {X/vnorm(X),Y/vnorm(Y),Z/vnorm(Z)}';
+  };
+  
+
+  /// This coordinate system is placed according the International Society of Biomechanics' (ISB)
+  /// recommendations for an anatomical coordinate system for the hip joint in the thigh segment.
+  /// See ISB proposal by G. Wu, S. Siegler, P. Allard, C. Kirtley, A. Leardini, D. Rosenbaum, M. Whittle, D. 
+  /// D'Lima, L. Cristofolini, H. Witte, O. Schmid, I. Stokes. J. Biomech. 35(4):543-548, 2002
+  /// Section 3.3 
+  AnyRefNode AnkleJointComplexAnatomicalFrame = {
+    #ifdef BONY_LANDMARK_DEFINED_JOINTAXIS
+      AnyVec3 O = 0.5*(.Scale(.StdPar.LateralAnkleAxisMarker) + .Scale(.StdPar.MedialAnkleAxisMarker) );
+      AnyVec3 Z = ...Sign*(.Scale(.StdPar.LateralAnkleAxisMarker) - .Scale(.StdPar.MedialAnkleAxisMarker) );
+    #else
+      AnyVec3 O = 0.5*(.Scale(.StdPar.LateralMalleolus) + .Scale(.StdPar.MedialMalleolus));
+      AnyVec3 Z = ...Sign*(.Scale(.StdPar.LateralMalleolus) - .Scale(.StdPar.MedialMalleolus) );
+    #endif
+    AnyVec3 X = cross(0.5*( .Scale(.StdPar.LateralTibialEpicondyle) + .Scale(.StdPar.MedialTibialEpicondyle))-O,Z);
+    AnyVec3 Y = cross(Z,X);
+    sRel = O;
+    ARel = {X/vnorm(X),Y/vnorm(Y),Z/vnorm(Z)}';
+  };
+
+
+ 
+  AnyRefNode AnkleJoint = 
+  {
+
+    #if TLEM_MORPHOLOGY == 1
+     // Neutral definition of talocrural joint
+     // This switch is used to control two definition of the joint axis. One specified by the original cadaver data set (default),
+     // and one where the joint is defined to through the bony landmarks. 
+     #ifdef BONY_LANDMARK_DEFINED_JOINTAXIS
+       AnyVec3 sRelUnscaled =  0.5*(.StdPar.LateralAnkleAxisMarker+ .StdPar.MedialAnkleAxisMarker);       
+       AnyMat33 ARelUnscaled = RotMat(sRelUnscaled ,sRelUnscaled + .Sign*(.StdPar.LateralAnkleAxisMarker - .StdPar.MedialAnkleAxisMarker ), .KneeJoint.sRelUnscaled)*RotMat(pi/2,y);
+       sRel = 0.5*(.Scale(.StdPar.LateralAnkleAxisMarker) + .Scale(.StdPar.MedialAnkleAxisMarker));
+       ARel = RotMat(sRel, sRel+ .Sign*(.Scale(.StdPar.LateralAnkleAxisMarker) - .Scale(.StdPar.MedialAnkleAxisMarker) ),.KneeJoint.sRel)*RotMat(pi/2,y); 
+    #else
+       AnyVec3 sRelUnscaled =  .StdPar.AnkleJoint;
+       AnyMat33 ARelUnscaled =   RotMat(sRelUnscaled, sRelUnscaled + .Sign*(AnkleLateralControlPoint-AnkleMedialControlPoint ), .StdPar.KneeJoint)*RotMat(pi/2,y);
+       // Control point for the Ankle joint. Found by projecting the malleolus bony landmarks onto the 
+       // ankle axis from the cadaver data set. Thus, scaling the control points will also scale the ankle joint axis
+       AnyVec3 AnkleLateralControlPoint =  .StdPar.AnkleJoint + (.StdPar.LateralMalleolus - .StdPar.AnkleJoint)*.StdPar.AnkleJointAxis'*.StdPar.AnkleJointAxis;
+       // Control point for the Ankle joint. Found by projecting the malleolus bony landmarks onto the 
+       // ankle axis from the cadaver data set. Thus, scaling the control points will also scale the ankle joint axis
+       AnyVec3 AnkleMedialControlPoint = .StdPar.AnkleJoint + (.StdPar.MedialMalleolus - .StdPar.AnkleJoint)*.StdPar.AnkleJointAxis'*.StdPar.AnkleJointAxis;
+       sRel = .Scale(.StdPar.AnkleJoint);
+       // Ankle Joint orientation is calculated based on the direction between the two control points.   
+       ARel = RotMat(sRel, sRel + .Sign*(.Scale(AnkleLateralControlPoint) - .Scale(AnkleMedialControlPoint) ), .Scale(.StdPar.KneeJoint))*RotMat(pi/2,y);
+     #endif    
+    #endif
+    
+    #if TLEM_MORPHOLOGY == 2
+     // Neutral definition of talocrural joint
+     // Switch to change the joint definition to follow bony landmarks instead of the original dataset 
+     // Default is the orginal dataset. 
+     #ifdef BONY_LANDMARK_DEFINED_JOINTAXIS
+      AnyVec3 sRelUnscaled =  0.5*(.StdPar.LateralAnkleAxisMarker + .StdPar.MedialAnkleAxisMarker);
+      AnyMat33 ARelUnscaled = RotMat(((.StdPar.MedialMalleolus)+(.StdPar.LateralMalleolus))/2, ((.StdPar.MedialMalleolus)+(.StdPar.LateralMalleolus))/2  + 
+                              .Sign*(.StdPar.LateralAnkleAxisMarker - .StdPar.MedialAnkleAxisMarker ), ((.StdPar.MedialTibialEpicondyle)+(.StdPar.LateralTibialEpicondyle))/2)*RotMat(pi/2,y);
+      // Ankle joint is defined from the two malleolus bony landmarks
+      
+      sRel = 0.5*(.Scale(.StdPar.LateralAnkleAxisMarker) + .Scale(.StdPar.MedialAnkleAxisMarker));
+      // Ankle joint axis is defined from the two malleolus bony landmarks
+      ARel = RotMat((.Scale(.StdPar.MedialMalleolus)+.Scale(.StdPar.LateralMalleolus))/2, (.Scale(.StdPar.MedialMalleolus)+.Scale(.StdPar.LateralMalleolus))/2  + 
+             .Sign*(.Scale(.StdPar.LateralAnkleAxisMarker) - .Scale(.StdPar.MedialAnkleAxisMarker)), (.Scale(.StdPar.MedialTibialEpicondyle) + .Scale(.StdPar.LateralTibialEpicondyle))/2)*RotMat(pi/2,y);
+     #else
+      AnyVec3 sRelUnscaled = .StdPar.AnkleJoint;
+      AnyMat33 ARelUnscaled = RotMat(((.StdPar.MedialMalleolus)+(.StdPar.LateralMalleolus))/2, ((.StdPar.MedialMalleolus)+(.StdPar.LateralMalleolus))/2  + .Sign*((LateralControlPoint)-(MedialControlPoint)), 
+                              ((.StdPar.MedialTibialEpicondyle)+(.StdPar.LateralTibialEpicondyle))/2)*RotMat(pi/2,y);
+      // Control point for the Ankle joint. Found by projecting the malleolus bony landmarks onto the 
+      // ankle axis from the cadaver data set. Thus, scaling that moves the control points will also scale the ankle joint axis
+      AnyVec3 LateralControlPoint = (.StdPar.AnkleJoint + (.StdPar.LateralMalleolus - .StdPar.AnkleJoint)*.StdPar.AnkleJointAxis'*.StdPar.AnkleJointAxis);
+      // Control point for the Ankle joint. Found by projecting the malleolus bony landmarks onto the 
+      // ankle axis from the cadaver data set. Thus, scaling that moves the control points will also scale the ankle joint axis
+      AnyVec3 MedialControlPoint = (.StdPar.AnkleJoint + (.StdPar.MedialMalleolus - .StdPar.AnkleJoint)*.StdPar.AnkleJointAxis'*.StdPar.AnkleJointAxis );
+      // Ankle Joint defined directly from the cadaver dataset. 
+      sRel = .Scale(.StdPar.AnkleJoint);
+      // Ankle Joint orientation is calculated based on the direction between the two control points.   
+      ARel = RotMat((.Scale(.StdPar.MedialMalleolus)+.Scale(.StdPar.LateralMalleolus))/2, (.Scale(.StdPar.MedialMalleolus)+.Scale(.StdPar.LateralMalleolus))/2  +
+             .Sign*(.Scale(LateralControlPoint)-.Scale(MedialControlPoint)), (.Scale(.StdPar.MedialTibialEpicondyle)+.Scale(.StdPar.LateralTibialEpicondyle))/2)*RotMat(pi/2,y);
+     #endif    
+    #endif
+    
+//    AnyVec3 sRelUnscaled = .StdPar.TalocruralsRelUnscaled;
+//    AnyMat33 ARelUnscaled = .StdPar.TalocruralARelUnscaled;   
+//    sRel = .StdPar.TalocruralsRel;
+//    ARel = .StdPar.TalocruralARel;
+    #include "../DrawSettings/JointAxesDistal.any"   
+  };
+  
+  AnyRefNode KneeJoint = 
+  {
+    #if TLEM_MORPHOLOGY == 1
+     // This switch is used to control two definition of the joint axis. One specified by the original cadaver data set (default),
+     // and one where the joint is defined to through the bony landmarks. 
+     #ifdef BONY_LANDMARK_DEFINED_JOINTAXIS
+       AnyVec3 sRelUnscaled = 0.5*(.StdPar.LateralFemuralCondyleInNeutralConf + .StdPar.MedialFemuralCondyleInNeutralConf);
+       AnyMat33 ARelUnscaled =  RotMat(sRelUnscaled, sRelUnscaled + .Sign*(.StdPar.LateralFemuralCondyleInNeutralConf - .StdPar.MedialFemuralCondyleInNeutralConf), 
+                                 .AnkleJoint.sRelUnscaled)*RotMat(pi,z)*RotMat(-pi/2,y);
+       // Knee joint is defined from the two epicondyle bony landmarks
+       sRel = 0.5*(.Scale(.StdPar.LateralFemuralCondyleInNeutralConf )+.Scale(.StdPar.MedialFemuralCondyleInNeutralConf));
+       // Knee joint axis is defined from the two epicondyle bony landmarks
+       ARel = RotMat(sRel, sRel+ .Sign*(.Scale(.StdPar.LateralFemuralCondyleInNeutralConf) - .Scale(.StdPar.MedialFemuralCondyleInNeutralConf)), .AnkleJoint.sRel)*RotMat(pi,z)*RotMat(-pi/2,y);
+     #else
+       AnyVec3 sRelUnscaled = .StdPar.KneeJoint;
+       AnyMat33 ARelUnscaled =  RotMat(sRelUnscaled , sRelUnscaled + .Sign*(LateralControlPoint - MedialControlPoint), .StdPar.AnkleJoint)*RotMat(pi,z)*RotMat(-pi/2,y);
+       // Control point for the knee joint. Found by projecting the EpicondylusFemoris bony landmarks onto the 
+       // knee axis from the cadaver data set. Thus, scaling the control points will also scale the Knee joint axis
+       AnyVec3 LateralControlPoint = .StdPar.KneeJoint + (.StdPar.LateralFemuralCondyleInNeutralConf - .StdPar.KneeJoint)*.StdPar.KneeJointAxis'*.StdPar.KneeJointAxis;
+       // Control point for the knee joint. Found by projecting the EpicondylusFemoris bony landmarks onto the 
+       // knee axis from the cadaver data set. Thus, scaling the control points will also scale the Knee joint axis
+       AnyVec3 MedialControlPoint = .StdPar.KneeJoint + (.StdPar.MedialFemuralCondyleInNeutralConf - .StdPar.KneeJoint)*.StdPar.KneeJointAxis'*.StdPar.KneeJointAxis;
+       sRel = .Scale(.StdPar.KneeJoint);
+       
+       // Setting the USE_AMMR14_HIP_ROTATIONS flag will imitate AMMR1.4 behaviour
+       #ifdef USE_AMMR14_HIP_ROTATIONS
+         ARel = RotMat(.Sign*7.46*pi/180,x) * RotMat(.Sign*-32.25*pi/180,y);
+       #else
+         // Knee Joint orientation is calculated based on the direction between the two control points.   
+         ARel = RotMat(sRel, sRel + .Sign*(.Scale(LateralControlPoint)-.Scale(MedialControlPoint)), .Scale(.StdPar.AnkleJoint))*RotMat(pi,z)*RotMat(-pi/2,y);
+       #endif
+     #endif    
+    #endif
+    
+    #if TLEM_MORPHOLOGY == 2
+     // This switch is used to control two definition of the joint axis. One specified by the original cadaver data set (default),
+     // and one where the joint is defined to through the bony landmarks. 
+     #ifdef BONY_LANDMARK_DEFINED_JOINTAXIS
+      AnyVec3 sRelUnscaled = 0.5*(.StdPar.LateralFemuralCondyleInNeutralConf + .StdPar.MedialFemuralCondyleInNeutralConf);
+      AnyMat33 ARelUnscaled = RotMat(((.StdPar.MedialTibialEpicondyle)+(.StdPar.LateralTibialEpicondyle))/2, 
+                              ((.StdPar.MedialTibialEpicondyle)+(.StdPar.LateralTibialEpicondyle))/2 + .Sign*(.StdPar.LateralFemuralCondyleInNeutralConf - .StdPar.MedialFemuralCondyleInNeutralConf), 
+                              ((.StdPar.MedialMalleolus)+(.StdPar.LateralMalleolus))/2)*RotMat(pi,z)*RotMat(-pi/2,y);
+      // Knee joint is defined from the two epicondyle bony landmarks
+      sRel = 0.5*(.Scale(.StdPar.LateralFemuralCondyleInNeutralConf ) + .Scale(.StdPar.MedialFemuralCondyleInNeutralConf));
+      // Knee joint axis is defined from the two epicondyle bony landmarks
+      ARel = RotMat((.Scale(.StdPar.MedialTibialEpicondyle)+.Scale(.StdPar.LateralTibialEpicondyle))/2, 
+      (.Scale(.StdPar.MedialTibialEpicondyle)+.Scale(.StdPar.LateralTibialEpicondyle))/2 + .Sign*(.Scale(.StdPar.LateralFemuralCondyleInNeutralConf) - .Scale(.StdPar.MedialFemuralCondyleInNeutralConf)), 
+      (.Scale(.StdPar.MedialMalleolus)+.Scale(.StdPar.LateralMalleolus))/2)*RotMat(pi,z)*RotMat(-pi/2,y);
+     #else
+      AnyVec3 sRelUnscaled = .StdPar.KneeJoint;
+      AnyMat33 ARelUnscaled = RotMat(((.StdPar.MedialTibialEpicondyle)+(.StdPar.LateralTibialEpicondyle))/2, 
+      ((.StdPar.MedialTibialEpicondyle)+(.StdPar.LateralTibialEpicondyle))/2 + .Sign*(LateralControlPointKnee-MedialControlPointKnee), 
+      ((.StdPar.MedialMalleolus)+(.StdPar.LateralMalleolus))/2)*RotMat(pi,z)*RotMat(-pi/2,y);
+    
+      // Control point for the knee joint. Found by projecting the EpicondylusFemoris bony landmarks onto the 
+      // knee axis from the cadaver data set. Thus, scaling the control points will also scale the Knee joint axis
+      AnyVec3 LateralControlPointKnee = .StdPar.KneeJoint + (.StdPar.LateralFemuralCondyleInNeutralConf - .StdPar.KneeJoint)*.StdPar.KneeJointAxis'*.StdPar.KneeJointAxis;
+      // Control point for the knee joint. Found by projecting the EpicondylusFemoris bony landmarks onto the 
+      // knee axis from the cadaver data set. Thus, scaling the control points will also scale the Knee joint axis
+      AnyVec3 MedialControlPointKnee = .StdPar.KneeJoint + (.StdPar.MedialFemuralCondyleInNeutralConf - .StdPar.KneeJoint)*.StdPar.KneeJointAxis'*.StdPar.KneeJointAxis;
+      sRel = .Scale(.StdPar.KneeJoint);
+      
+      // Setting the USE_AMMR14_HIP_ROTATIONS flag will imitate AMMR1.4 behaviour
+      #ifdef USE_AMMR14_HIP_ROTATIONS
+        ARel = RotMat(..Sign*7.46*pi/180,x) * RotMat(..Sign*-32.25*pi/180,y);
+      #else
+      // Knee Joint orientation is calculated based on the direction between the two control points.   
+        ARel = RotMat((.Scale(.StdPar.MedialTibialEpicondyle)+.Scale(.StdPar.LateralTibialEpicondyle))/2, 
+        (.Scale(.StdPar.MedialTibialEpicondyle)+.Scale(.StdPar.LateralTibialEpicondyle))/2 + .Sign*(.Scale(.StdPar.LateralFemuralCondyleInNeutralConf) - .Scale(.StdPar.MedialFemuralCondyleInNeutralConf)), 
+        (.Scale(.StdPar.MedialMalleolus)+.Scale(.StdPar.LateralMalleolus))/2)*RotMat(pi,z)*RotMat(-pi/2,y);
+      #endif
+     #endif    
+    #endif
+    
+//    AnyVec3 sRelUnscaled = .StdPar.KneesRelUnscaled;
+//    AnyMat33 ARelUnscaled = .StdPar.KneeARelUnscaled;   
+//    sRel = .StdPar.KneesRel;
+//    ARel = .StdPar.KneeARel;
+    #include "../DrawSettings/JointAxesDistal.any"    
+  };
+  
+  //BonyLandMarks
+  AnyRefNode MedialTibialEpicondyle = {
+    sRel = .Scale(.StdPar.MedialTibialEpicondyle);
+    #include "../DrawSettings/BML.any"
+  };
+  AnyRefNode LateralTibialEpicondyle = {
+    sRel = .Scale( .StdPar.LateralTibialEpicondyle );
+    #include "../DrawSettings/BML.any"
+  };
+  AnyRefNode IntraTibialEpicondyle = {
+    sRel = (.MedialTibialEpicondyle.sRel+.LateralTibialEpicondyle.sRel)*0.5 ;
+    #include "../DrawSettings/BML.any"
+  };
+  AnyRefNode TibialTuberosity = {
+    sRel = .Scale( .StdPar.TibialTuberosity  );
+    #include "../DrawSettings/BML.any"
+  };
+  AnyRefNode FibularHead = {
+    sRel = .Scale( .StdPar.FibularHead );
+    #include "../DrawSettings/BML.any"
+  };
+  AnyRefNode MedialMalleolus = {
+    sRel = .Scale( .StdPar.MedialMalleolus );
+    #include "../DrawSettings/BML.any"
+    
+  };
+  AnyRefNode LateralMalleolus = {
+    sRel = .Scale( .StdPar.LateralMalleolus );
+    #include "../DrawSettings/BML.any"
+  
+  };
+  AnyRefNode IntraMallolar = {
+    sRel =0.5* (.MedialMalleolus.sRel+.LateralMalleolus.sRel);
+    #include "../DrawSettings/BML.any"
+  };
+  
+  
+  // The node below is a reference node for the patella tendon to define the movement of 
+  // the patella. The tendon will be regarded as being stiff, so the length will not change. 
+  // This is defined by an AnyKinPLine in the file Jnt.any.
+  // The Origin lies on the Patella segment. 
+  AnyRefNode Insertion_patella_tendon = {
+    sRel = .Scale( .StdPar.Insertion_patella_tendon  );
+  };
+  
+  //Origin points on the Tibia:
+  #if TLEM_MORPHOLOGY == 1
+  AnyRefNode GastrocnemiusLateralis1ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusLateralis1ViaNode );};
+  AnyRefNode GastrocnemiusMedialis1ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusMedialis1ViaNode );};  
+  #endif
+  
+  
+  #if TLEM_MORPHOLOGY == 2
+  AnyRefNode GastrocnemiusLateralis7ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusLateralis7ViaNode );};
+  AnyRefNode GastrocnemiusLateralis8ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusLateralis8ViaNode );};
+  AnyRefNode GastrocnemiusLateralis9ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusLateralis9ViaNode );};
+  AnyRefNode GastrocnemiusLateralis10ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusLateralis10ViaNode );};
+ 
+  AnyRefNode GastrocnemiusMedialis4ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusMedialis4ViaNode );};  
+  AnyRefNode GastrocnemiusMedialis5ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusMedialis5ViaNode );};  
+  AnyRefNode GastrocnemiusMedialis6ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusMedialis6ViaNode );};  
+  AnyRefNode GastrocnemiusMedialis7ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusMedialis7ViaNode );};  
+  AnyRefNode GastrocnemiusMedialis8ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusMedialis8ViaNode );};  
+  AnyRefNode GastrocnemiusMedialis9ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusMedialis9ViaNode );};  
+  #endif
+
+
+  //////
+  
+  //Origin points on the Tibia:
+  
+  AnyRefNode ExtensorDigitorumLongus1Node = {sRel = .Scale( .StdPar.ExtensorDigitorumLongus1Node );};
+  AnyRefNode ExtensorDigitorumLongus2Node = {sRel = .Scale( .StdPar.ExtensorDigitorumLongus2Node );};
+  AnyRefNode ExtensorDigitorumLongus3Node = {sRel = .Scale( .StdPar.ExtensorDigitorumLongus3Node );};
+  #if TLEM_MORPHOLOGY == 2
+  AnyRefNode ExtensorDigitorumLongus4Node = {sRel = .Scale( .StdPar.ExtensorDigitorumLongus4Node );};
+  #endif
+  AnyRefNode ExtensorDigitorumLongusViaNode1 = {sRel = .Scale( .StdPar.ExtensorDigitorumLongusViaNode1 );};
+  AnyRefNode ExtensorDigitorumLongusViaNode2 = {sRel = .Scale( .StdPar.ExtensorDigitorumLongusViaNode2 );};
+  AnyRefNode ExtensorDigitorumLongusViaNode3 = {sRel = .Scale( .StdPar.ExtensorDigitorumLongusViaNode3 );};
+  AnyRefNode ExtensorDigitorumLongusViaNode4 = {sRel = .Scale( .StdPar.ExtensorDigitorumLongusViaNode4 );};
+  
+  AnyRefNode ExtensorHallucisLongus1Node = {sRel = .Scale( .StdPar.ExtensorHallucisLongus1Node );};
+  AnyRefNode ExtensorHallucisLongus2Node = {sRel = .Scale( .StdPar.ExtensorHallucisLongus2Node );};
+  AnyRefNode ExtensorHallucisLongus3Node = {sRel = .Scale( .StdPar.ExtensorHallucisLongus3Node );};
+
+  
+  #if TLEM_MORPHOLOGY == 1
+  AnyRefNode ExtensorHallucisLongusViaNode1 = {sRel = .Scale( .StdPar.ExtensorHallucisLongusViaNode1 );};
+  AnyRefNode ExtensorHallucisLongusViaNode2 = {sRel = .Scale( .StdPar.ExtensorHallucisLongusViaNode2 );};
+  //AnyRefNode ExtensorHallucisLongusViaNode3 = {sRel = .Scale( .StdPar.ExtensorHallucisLongusViaNode3 );};
+  //AnyRefNode ExtensorHallucisLongusViaNode4 = {sRel = .Scale( .StdPar.ExtensorHallucisLongusViaNode4 );};
+  //AnyRefNode ExtensorHallucisLongusViaNode5 = {sRel = .Scale( .StdPar.ExtensorHallucisLongusViaNode5 );};
+  AnyRefNode ExtensorHallucisLongusViaNode6 = {sRel = .Scale( .StdPar.ExtensorHallucisLongusViaNode6 );};
+  #endif
+  #if TLEM_MORPHOLOGY == 2
+  AnyRefNode ExtensorHallucisLongusViaNode1 = {sRel = .Scale( .StdPar.ExtensorHallucisLongusViaNode1 );};
+  AnyRefNode ExtensorHallucisLongusViaNode2 = {sRel = .Scale( .StdPar.ExtensorHallucisLongusViaNode2 );};
+  AnyRefNode ExtensorHallucisLongusViaNode3 = {sRel = .Scale( .StdPar.ExtensorHallucisLongusViaNode3 );};
+  #endif
+ 
+  AnyRefNode FlexorDigitorumLongus1Node = {sRel = .Scale( .StdPar.FlexorDigitorumLongus1Node );};
+  AnyRefNode FlexorDigitorumLongus2Node = {sRel = .Scale( .StdPar.FlexorDigitorumLongus2Node );};
+  AnyRefNode FlexorDigitorumLongus3Node = {sRel = .Scale( .StdPar.FlexorDigitorumLongus3Node );};
+  #if TLEM_MORPHOLOGY == 2 
+  AnyRefNode FlexorDigitorumLongus4Node = {sRel = .Scale( .StdPar.FlexorDigitorumLongus4Node );};
+  #endif
+  
+  #if TLEM_MORPHOLOGY == 1
+  AnyRefNode FlexorDigitorumLongusViaNode1 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode1 );};
+  AnyRefNode FlexorDigitorumLongusViaNode2 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode2 );};
+  // AnyRefNode FlexorDigitorumLongusViaNode3 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode3 );};
+  //AnyRefNode FlexorDigitorumLongusViaNode4 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode4 );};
+  AnyRefNode FlexorDigitorumLongusViaNode5 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode5 );};
+  AnyRefNode FlexorDigitorumLongusViaNode6 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode6 );};
+  AnyRefNode FlexorDigitorumLongusViaNode7 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode7 );};
+  AnyRefNode FlexorDigitorumLongusViaNode8 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode8 );};
+  #endif
+  #if TLEM_MORPHOLOGY == 2
+  AnyRefNode FlexorDigitorumLongusViaNode1 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode1 );};
+  AnyRefNode FlexorDigitorumLongusViaNode2 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode2 );};
+  AnyRefNode FlexorDigitorumLongusViaNode3 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode3 );};
+  AnyRefNode FlexorDigitorumLongusViaNode4 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode4 );};
+  AnyRefNode FlexorDigitorumLongusViaNode5 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode5 );};
+  AnyRefNode FlexorDigitorumLongusViaNode6 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode6 );};
+  #endif
+  
+  AnyRefNode FlexorHallucisLongus1Node = {sRel = .Scale( .StdPar.FlexorHallucisLongus1Node );};
+  AnyRefNode FlexorHallucisLongus2Node = {sRel = .Scale( .StdPar.FlexorHallucisLongus2Node );};
+  AnyRefNode FlexorHallucisLongus3Node = {sRel = .Scale( .StdPar.FlexorHallucisLongus3Node );};
+  
+  #if TLEM_MORPHOLOGY == 1
+  AnyRefNode FlexorHallucisLongusViaNode1 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode1 );};
+  AnyRefNode FlexorHallucisLongusViaNode3 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode3 );};
+  AnyRefNode FlexorHallucisLongusViaNode4 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode4 );};
+  AnyRefNode FlexorHallucisLongusViaNode5 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode5 );};
+  AnyRefNode FlexorHallucisLongusViaNode6 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode6 );};
+  AnyRefNode FlexorHallucisLongusViaNode7 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode7 );}; 
+  //AnyRefNode FlexorHallucisLongusViaNode8 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode8 );};
+  #endif
+  
+  
+  #if TLEM_MORPHOLOGY == 2
+  AnyRefNode FlexorHallucisLongusViaNode1 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode1 );};
+  AnyRefNode FlexorHallucisLongusViaNode2 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode2 );};
+  AnyRefNode FlexorHallucisLongusViaNode3 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode3 );};
+  AnyRefNode FlexorHallucisLongusViaNode4 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode4 );};
+  AnyRefNode FlexorHallucisLongusViaNode5 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode5 );};
+  AnyRefNode FlexorHallucisLongusViaNode6 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode6 );};
+  #endif
+
+//  #if TLEM_MORPHOLOGY == 1
+//  AnyRefNode FlexorHallucisLongusViaNode1 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode1 );};
+//  //AnyRefNode FlexorHallucisLongusViaNode2 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode2 );};
+//  AnyRefNode FlexorHallucisLongusViaNode3 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode3 );};
+//  AnyRefNode FlexorHallucisLongusViaNode4 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode4 );};
+//  AnyRefNode FlexorHallucisLongusViaNode5 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode5 );};
+//  AnyRefNode FlexorHallucisLongusViaNode6 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode6 );};
+//  AnyRefNode FlexorHallucisLongusViaNode7 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode7 );}; 
+//  //AnyRefNode FlexorHallucisLongusViaNode8 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode8 );};
+//  #endif
+  
+  AnyRefNode PeroneusBrevis1Node = {sRel = .Scale( .StdPar.PeroneusBrevis1Node );};
+  AnyRefNode PeroneusBrevis2Node = {sRel = .Scale( .StdPar.PeroneusBrevis2Node );};
+  AnyRefNode PeroneusBrevis3Node = {sRel = .Scale( .StdPar.PeroneusBrevis3Node );};
+  AnyRefNode PeroneusBrevisViaNode1 = {sRel = .Scale( .StdPar.PeroneusBrevisViaNode1 );};
+  AnyRefNode PeroneusBrevisViaNode2 = {sRel = .Scale( .StdPar.PeroneusBrevisViaNode2 );};
+  AnyRefNode PeroneusBrevisViaNode3 = {sRel = .Scale( .StdPar.PeroneusBrevisViaNode3 );};
+  
+  AnyRefNode PeroneusLongus1Node = {sRel = .Scale( .StdPar.PeroneusLongus1Node );};
+  AnyRefNode PeroneusLongus2Node = {sRel = .Scale( .StdPar.PeroneusLongus2Node );};
+  AnyRefNode PeroneusLongus3Node = {sRel = .Scale( .StdPar.PeroneusLongus3Node );};
+  AnyRefNode PeroneusLongusViaNode1 = {sRel = .Scale( .StdPar.PeroneusLongusViaNode1 );};
+  AnyRefNode PeroneusLongusViaNode2 = {sRel = .Scale( .StdPar.PeroneusLongusViaNode2 );};
+  AnyRefNode PeroneusLongusViaNode3 = {sRel = .Scale( .StdPar.PeroneusLongusViaNode3 );};
+  AnyRefNode PeroneusLongusViaNode4 = {sRel = .Scale( .StdPar.PeroneusLongusViaNode4 );};
+  
+  
+  #if TLEM_MORPHOLOGY == 1
+  AnyRefNode PeroneusTertius1Node = {sRel = .Scale( .StdPar.PeroneusTertius1Node );};
+  AnyRefNode PeroneusTertius2Node = {sRel = .Scale( .StdPar.PeroneusTertius2Node );};
+  AnyRefNode PeroneusTertius3Node = {sRel = .Scale( .StdPar.PeroneusTertius3Node );};
+  AnyRefNode PeroneusTertiusViaNode1 = {sRel = .Scale( .StdPar.PeroneusTertiusViaNode1 );};
+  AnyRefNode PeroneusTertiusViaNode2 = {sRel = .Scale( .StdPar.PeroneusTertiusViaNode2 );};
+  AnyRefNode PeroneusTertiusViaNode3 = {sRel = .Scale( .StdPar.PeroneusTertiusViaNode3 );};
+  #endif
+  
+  AnyRefNode SoleusMedialis1Node = {sRel = .Scale( .StdPar.SoleusMedialis1Node );};
+  AnyRefNode SoleusMedialis2Node = {sRel = .Scale( .StdPar.SoleusMedialis2Node );};
+  AnyRefNode SoleusMedialis3Node = {sRel = .Scale( .StdPar.SoleusMedialis3Node );};
+  AnyRefNode SoleusLateralis1Node = {sRel = .Scale( .StdPar.SoleusLateralis1Node );};
+  AnyRefNode SoleusLateralis2Node = {sRel = .Scale( .StdPar.SoleusLateralis2Node );};
+  AnyRefNode SoleusLateralis3Node = {sRel = .Scale( .StdPar.SoleusLateralis3Node );};
+  
+  AnyRefNode TibialisAnterior1Node = {sRel = .Scale( .StdPar.TibialisAnterior1Node );};
+  AnyRefNode TibialisAnterior2Node = {sRel = .Scale( .StdPar.TibialisAnterior2Node );};
+  AnyRefNode TibialisAnterior3Node = {sRel = .Scale( .StdPar.TibialisAnterior3Node );};
+  AnyRefNode TibialisAnteriorViaNode1 = {sRel =.Scale( .StdPar.TibialisAnteriorViaNode1 );};
+  
+  AnyRefNode TibialisPosteriorMedialis1Node = {sRel = .Scale( .StdPar.TibialisPosteriorMedialis1Node );};
+  AnyRefNode TibialisPosteriorMedialis2Node = {sRel = .Scale( .StdPar.TibialisPosteriorMedialis2Node );};
+  AnyRefNode TibialisPosteriorMedialis3Node = {sRel = .Scale( .StdPar.TibialisPosteriorMedialis3Node );};
+  
+  
+  #if TLEM_MORPHOLOGY == 1
+  AnyRefNode TibialisPosteriorMedialisViaNode1 = {sRel = .Scale( .StdPar.TibialisPosteriorMedialisViaNode1 );};
+  AnyRefNode TibialisPosteriorMedialisViaNode2 = {sRel = .Scale( .StdPar.TibialisPosteriorMedialisViaNode2 );};
+  AnyRefNode TibialisPosteriorMedialisViaNode3 = {sRel = .Scale( .StdPar.TibialisPosteriorMedialisViaNode3 );};
+  AnyRefNode TibialisPosteriorMedialisViaNode4 = {sRel = .Scale( .StdPar.TibialisPosteriorMedialisViaNode4 );};
+  AnyRefNode TibialisPosteriorMedialisViaNode5 = {sRel = .Scale( .StdPar.TibialisPosteriorMedialisViaNode5 );};
+  AnyRefNode TibialisPosteriorMedialisViaNode6 = {sRel = .Scale( .StdPar.TibialisPosteriorMedialisViaNode6 );};
+  AnyRefNode TibialisPosteriorMedialisViaNode7 = {sRel = .Scale( .StdPar.TibialisPosteriorMedialisViaNode7 );};
+  AnyRefNode TibialisPosteriorMedialisViaNode8 = {sRel = .Scale( .StdPar.TibialisPosteriorMedialisViaNode8 );};
+  AnyRefNode TibialisPosteriorMedialisViaNode9 = {sRel = .Scale( .StdPar.TibialisPosteriorMedialisViaNode9 );};
+  AnyRefNode TibialisPosteriorMedialisViaNode10 = {sRel = .Scale( .StdPar.TibialisPosteriorMedialisViaNode10 );};
+  AnyRefNode TibialisPosteriorMedialisViaNode11 = {sRel = .Scale( .StdPar.TibialisPosteriorMedialisViaNode11 );};
+  #endif
+  
+  AnyRefNode TibialisPosteriorLateralis1Node = {sRel = .Scale( .StdPar.TibialisPosteriorLateralis1Node );};
+  AnyRefNode TibialisPosteriorLateralis2Node = {sRel = .Scale( .StdPar.TibialisPosteriorLateralis2Node );};
+  AnyRefNode TibialisPosteriorLateralis3Node = {sRel = .Scale( .StdPar.TibialisPosteriorLateralis3Node );};
+  
+  
+  #if TLEM_MORPHOLOGY == 1
+  AnyRefNode TibialisPosteriorLateralisViaNode1 = {sRel = .Scale( .StdPar.TibialisPosteriorLateralisViaNode1 );};
+  AnyRefNode TibialisPosteriorLateralisViaNode2 = {sRel = .Scale( .StdPar.TibialisPosteriorLateralisViaNode2 );};
+  AnyRefNode TibialisPosteriorLateralisViaNode3 = {sRel = .Scale( .StdPar.TibialisPosteriorLateralisViaNode3 );};
+  AnyRefNode TibialisPosteriorLateralisViaNode4 = {sRel = .Scale( .StdPar.TibialisPosteriorLateralisViaNode4 );};
+  AnyRefNode TibialisPosteriorLateralisViaNode5 = {sRel = .Scale( .StdPar.TibialisPosteriorLateralisViaNode5 );};
+  AnyRefNode TibialisPosteriorLateralisViaNode6 = {sRel = .Scale( .StdPar.TibialisPosteriorLateralisViaNode6 );};
+  AnyRefNode TibialisPosteriorLateralisViaNode7 = {sRel = .Scale( .StdPar.TibialisPosteriorLateralisViaNode7 );};
+  AnyRefNode TibialisPosteriorLateralisViaNode8 = {sRel = .Scale( .StdPar.TibialisPosteriorLateralisViaNode8 );};
+  AnyRefNode TibialisPosteriorLateralisViaNode9 = {sRel = .Scale( .StdPar.TibialisPosteriorLateralisViaNode9 );};
+  AnyRefNode TibialisPosteriorLateralisViaNode10 = {sRel = .Scale( .StdPar.TibialisPosteriorLateralisViaNode10 );};
+  #endif
+ 
+  
+  #if TLEM_MORPHOLOGY == 2
+  AnyRefNode TibialisPosteriorViaNode1 = {sRel = .Scale( .StdPar.TibialisPosteriorViaNode1 );};
+  AnyRefNode TibialisPosteriorViaNode2 = {sRel = .Scale( .StdPar.TibialisPosteriorViaNode2 );};
+  AnyRefNode TibialisPosteriorViaNode3 = {sRel = .Scale( .StdPar.TibialisPosteriorViaNode3 );};
+  AnyRefNode TibialisPosteriorViaNode4 = {sRel = .Scale( .StdPar.TibialisPosteriorViaNode4 );};
+ #endif
+  //Insertion points on the Tibia (all these muscles, exept for the Biceps Femoris Caput Breve, originate from the Pelvis):
+  
+  //  AnyRefNode AdductorMagnusDistal1Node = {sRel = .Scale( .StdPar.AdductorMagnusDistal1Node );};
+  //  AnyRefNode AdductorMagnusDistal2Node = {sRel = .Scale( .StdPar.AdductorMagnusDistal2Node );};
+  //  AnyRefNode AdductorMagnusDistal3Node = {sRel = .Scale( .StdPar.AdductorMagnusDistal3Node );};
+  //  
+  
+  
+  #if TLEM_MORPHOLOGY == 1
+  AnyRefNode BicepsFemorisCaputLongum1Node = {sRel = .Scale( .StdPar.BicepsFemorisCaputLongum1Node );};
+  AnyRefNode BicepsFemorisCaputBreve1Node = {sRel = .Scale( .StdPar.BicepsFemorisCaputBreve1Node );};
+  AnyRefNode BicepsFemorisCaputBreve2Node = {sRel = .Scale( .StdPar.BicepsFemorisCaputBreve2Node );};
+  AnyRefNode BicepsFemorisCaputBreve3Node = {sRel = .Scale( .StdPar.BicepsFemorisCaputBreve3Node );};
+  #endif
+  
+  
+  #if TLEM_MORPHOLOGY == 2
+  AnyRefNode BicepsFemorisCaputLongum1Node = {sRel = .Scale( .StdPar.BicepsFemoris1Node );};
+  AnyRefNode BicepsFemorisCaputBreve1Node = {sRel = .Scale( .StdPar.BicepsFemoris1Node );};
+  AnyRefNode BicepsFemorisCaputBreve2Node = {sRel = .Scale( .StdPar.BicepsFemoris1Node );};
+  AnyRefNode BicepsFemorisCaputBreve3Node = {sRel = .Scale( .StdPar.BicepsFemoris1Node );};
+  #endif
+
+  
+  #if TLEM_MORPHOLOGY == 1
+  AnyRefNode Gracilis1Node = {sRel = .Scale( .StdPar.Gracilis1Node );}; 
+  AnyRefNode Gracilis2Node = {sRel = .Scale( .StdPar.Gracilis2Node );};
+  AnyRefNode GracilisViaNode1 = {sRel = .Scale( .StdPar.GracilisViaNode1 );};
+  AnyRefNode GracilisViaNode2 = {sRel = .Scale( .StdPar.GracilisViaNode2 );};
+  //AnyRefNode GracilisViaNode3 = {sRel = .Scale( .StdPar.GracilisViaNode3 );};
+  //AnyRefNode GracilisViaNode4 = {sRel = .Scale( .StdPar.GracilisViaNode4 );};
+  //AnyRefNode GracilisViaNode5 = {sRel = .Scale( .StdPar.GracilisViaNode5 );};
+  AnyRefNode GracilisViaNode6 = {sRel = .Scale( .StdPar.GracilisViaNode6 );};
+  AnyRefNode GracilisViaNode7 = {sRel = .Scale( .StdPar.GracilisViaNode7 );};
+  AnyRefNode GracilisViaNode8 = {sRel = .Scale( .StdPar.GracilisViaNode8 );};    
+  #endif
+  #if TLEM_MORPHOLOGY == 2
+  AnyRefNode Gracilis1Node = {sRel = .Scale( .StdPar.Gracilis1Node );};  
+  AnyRefNode Gracilis2Node = {sRel = .Scale( .StdPar.Gracilis1Node );};
+  AnyRefNode GracilisViaNode1 = {sRel = .Scale( .StdPar.GracilisViaNode1 );};
+  AnyRefNode GracilisViaNode2 = {sRel = .Scale( .StdPar.GracilisViaNode2 );};
+  AnyRefNode GracilisViaNode3 = {sRel = .Scale( .StdPar.GracilisViaNode3 );};
+  #endif
+
+  
+  #if TLEM_MORPHOLOGY == 1
+  AnyRefNode SartoriusProximal1Node = {sRel = .Scale( .StdPar.SartoriusProximal1Node );};
+  AnyRefNode SartoriusDistal1Node = {sRel = .Scale( .StdPar.SartoriusDistal1Node );};
+  #endif
+  
+  
+  #if TLEM_MORPHOLOGY == 2
+  AnyRefNode Sartorius1Node = {sRel = .Scale( .StdPar.Sartorius1Node );};
+  AnyRefNode SartoriusVia1Node = {sRel = .Scale( .StdPar.SartoriusVia1Node );};
+  AnyRefNode SartoriusVia2Node = {sRel = .Scale( .StdPar.SartoriusVia2Node );};
+  AnyRefNode SartoriusVia3Node = {sRel = .Scale( .StdPar.SartoriusVia3Node );};
+  #endif
+  
+  AnyRefNode Semimembranosus1Node = {sRel = .Scale( .StdPar.Semimembranosus1Node );};
+  
+  
+  #if TLEM_MORPHOLOGY == 2
+  AnyRefNode Semimembranosus2Node = {sRel = .Scale( .StdPar.Semimembranosus2Node );};
+  AnyRefNode Semimembranosus3Node = {sRel = .Scale( .StdPar.Semimembranosus3Node );};
+  #endif
+  
+  AnyRefNode Semitendinosus1Node = {sRel = .Scale( .StdPar.Semitendinosus1Node );};
+  AnyRefNode SemitendinosusViaNode1 = {sRel = .Scale( .StdPar.SemitendinosusViaNode1 );};
+  
+  
+  #if TLEM_MORPHOLOGY == 1
+  AnyRefNode SemitendinosusViaNode2 = {sRel = .Scale( .StdPar.SemitendinosusViaNode2 );};
+  AnyRefNode SemitendinosusViaNode3 = {sRel = .Scale( .StdPar.SemitendinosusViaNode3 );};
+  AnyRefNode SemitendinosusViaNode4 = {sRel = .Scale( .StdPar.SemitendinosusViaNode4 );};
+  AnyRefNode SemitendinosusViaNode5 = {sRel = .Scale( .StdPar.SemitendinosusViaNode5 );};
+  AnyRefNode SemitendinosusViaNode6 = {sRel = .Scale( .StdPar.SemitendinosusViaNode6 );};
+  AnyRefNode SemitendinosusViaNode7 = {sRel = .Scale( .StdPar.SemitendinosusViaNode7 );};
+  #endif
+  
+  //Original nodes are placed to high on tibia this can not be correct
+  //  AnyRefNode TensorFasciaeLatae1Node = {sRel = .Scale( .StdPar.TensorFasciaeLatae1Node );};
+  //  AnyRefNode TensorFasciaeLatae2Node = {sRel = .Scale( .StdPar.TensorFasciaeLatae2Node );};
+  
+  //New positions are based on bone 
+  
+  #if TLEM_MORPHOLOGY == 1
+  AnyRefNode TensorFasciaeLatae1Node = {sRel = .Scale( .StdPar.TensorFasciaeLatae1Node );};
+  AnyRefNode TensorFasciaeLatae2Node = {sRel = .Scale( .StdPar.TensorFasciaeLatae2Node );};
+  #endif
+
+  
+  #if TLEM_MORPHOLOGY == 2
+  AnyRefNode TensorFasciaeLatae1Node = {sRel = .Scale( .StdPar.TensorFasciaeLatae1Node );};
+  AnyRefNode TensorFasciaeLatae2Node = {sRel = .Scale( .StdPar.TensorFasciaeLatae1Node );};
+  #endif
+  
+  AnyRefNode Popliteus1Node = {sRel = .Scale( .StdPar.Popliteus1Node );};
+  AnyRefNode Popliteus2Node = {sRel = .Scale( .StdPar.Popliteus2Node );};
+  #if TLEM_MORPHOLOGY == 2
+  AnyRefNode Popliteus3Node = {sRel = .Scale( .StdPar.Popliteus3Node );};
+  #endif
+  AnyRefNode PopliteusViaNode1 = {sRel = .Scale( .StdPar.PopliteusViaNode1 );};
+  
+  AnyDrawSurf DrwSurf3 = {
+    FileName = ..STL.FilenameShank;
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0}*1;
+    RGB = ...ColorRef.Segments;
+    AnyFunTransform3D &Scale =.Scale; 
+    Opacity = ...BonesOpacity.Shank;
+    Face=-1;
+  };  
+  
+   #if SKIN
+    AnyDrawSurf Drw2 = {
+    FileName = ..STL.FilenameShankSkin;
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
+    RGB = ...ColorRef.Skin;
+    Opacity = Main.DrawSettings.SkinOpacity.Opacity;
+    AnyFunTransform3D &Scale =.Scale;  
+    Face=-1;
+  };
+  #endif
+
+   #if MUSCLETISSUE
+    AnyDrawSurf Drw1 = {
+    FileName = ..STL.FilenameShankMuscleTissue;
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
+    RGB = ...ColorRef.MuscleTissue;
+    Opacity = Main.DrawSettings.MuscleTissueOpacity.Opacity;
+    AnyFunTransform3D &Scale =.Scale;  
+    Face=-1;
+  };
+  #endif
+
+   #include "../DrawSettings/Nodes.any"
+  #include "../DrawSettings/SegmentAxes.any"
+
+}; // End of Shank
+
+
+
+AnySeg Thigh = {
+  AnyFolder &StdPar = ..ModelParameters.Thigh;
+ 
+  JaboutCoMOnOff = On;
+  r0=.Pelvis.HipJoint.sRel*....Trunk.SegmentsLumbar.PelvisSeg.Axes0'+    ....Trunk.SegmentsLumbar.PelvisSeg.r0-    HipJoint.sRel*Axes0';
+  
+  #include "../DrawSettings/Nodes.any"
+  #include "../DrawSettings/SegmentAxes.any"
+
+  AnyFloat pUnscaled = {HipJoint.sRelUnscaled, StdPar.EpicondylusFemorisMedialis, StdPar.EpicondylusFemorisLateralis};
+  AnyFunTransform3D& GeomScale = ..GeoScaling.Thigh.ScaleFunction;
+  AnyVar Sign = ..Sign;
+  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(p, SIGN) p[0]
+  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(p, SIGN) RotMat(p[0],0.5*(p[1]+p[2]), p[1]) * RotMat(pi*0.5,x) * RotMat(pi*0.5,z) * RotMat(0.5*(SIGN-1)*pi,y)
+  #include "..\Scaling\SegScaleFunWrtAnatomicalFrame.any"  
+  
+  AnyRefNode AnatomicalFrame =
+  {    
+    AnyFloat pScaled = .Scale(.pUnscaled);
+    sRel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(pScaled, .Sign);
+    ARel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(pScaled, .Sign);
+    AnyVec3 sRelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(.pUnscaled, .Sign); ///< Generic unscaled position of thigh ScalingNode
+    AnyMat33 ARelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(.pUnscaled, .Sign);///< Generic unscaled rotation of thigh ScalingNode
+  };
+  AnyRefNode& ScalingNode=AnatomicalFrame ;
+  #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_s
+  #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_A  
+
+
+  AnyVar MassS = ..MassScaling.Thigh.MassScale;  
+  Mass = MassS*StdPar.MassStandard;
+  AnyVar LengthStandard = vnorm(StdPar.KneeJoint-StdPar.HipJoint,2);
+  
+  /// This coordinate system is placed according the International Society of Biomechanics' (ISB)
+  /// recommendations for an anatomical coordinate system for the hip joint in the thigh segment.
+  /// See ISB proposal by G. Wu, S. Siegler, P. Allard, C. Kirtley, A. Leardini, D. Rosenbaum, M. Whittle, D. 
+  /// D'Lima, L. Cristofolini, H. Witte, O. Schmid, I. Stokes. J. Biomech. 35(4):543-548, 2002
+  /// Section 4.4 
+  AnyRefNode HipJointAnatomicalFrame = {
+    AnyVec3 O = .Scale(.StdPar.HipJoint);
+    AnyVec3 Y = O - 0.5*(.Scale(.StdPar.EpicondylusFemorisLateralis) + .Scale(.StdPar.EpicondylusFemorisMedialis) );
+    AnyVec3 X = cross(Y,...Sign*(.Scale(.StdPar.EpicondylusFemorisLateralis) - .Scale(.StdPar.EpicondylusFemorisMedialis) ));
+    AnyVec3 Z = cross(X,Y);
+    sRel = O;
+    ARel = {X/vnorm(X),Y/vnorm(Y),Z/vnorm(Z)}';  
+  };
+   
+  /// This coordinate system is placed based on the bony landmarks of femur.
+  /// O: Center of the two femural epicondyles
+  /// Z: A vector going through the lateral and medial femural epicondyle pointing to the right
+  /// X: The vector perpendicular to Z axis and the long axis of the femur point anteriorly
+  /// Y: The vector perpendicular to Z and X
+  AnyRefNode KneeJointAnatomicalFrame = {
+    AnyVec3 O = 0.5*(.Scale(.StdPar.EpicondylusFemorisLateralis) + .Scale(.StdPar.EpicondylusFemorisMedialis) );
+    AnyVec3 Z = ...Sign*(.Scale(.StdPar.EpicondylusFemorisLateralis) - .Scale(.StdPar.EpicondylusFemorisMedialis) );
+    AnyVec3 X = cross(.HipJoint.sRel-O,Z);
+    AnyVec3 Y = cross(Z,X);
+    sRel = O;
+    ARel = {X/vnorm(X),Y/vnorm(Y),Z/vnorm(Z)}';
+  };
+      
+  sCoM = Scale(StdPar.sCoM); 
+  Jii = StdPar.Jii; 
+  Jij = StdPar.Jij; 
+  
+  
+  #if TLEM_MORPHOLOGY == 1
+  AnyRefNode RectusVastiiWrapSurf = {
+    AnyMatrix p = .Scale(.StdPar.RectusVastiiWrapLandmarks);	//dn(20120614): moved scaling out of WrappingCylinder5PointFit.any
+    AnyFloat lengthscalefactor = 1.4;
+    AnyFloat radiusscalefactor = 1;
+
+    //AnyFunTransform3D &Scale = .Scale;
+    AnyMat33 transform = RotMat(pi*(1-...Sign)*0.5, y);
+    
+    #include "../ToolBox/WrappingSurfaces/WrappingCylinder5PointFit.any"
+    cyl = {
+      // AnyDrawParamSurf drw={RGB={1,0,0};};
+    };
+  };
+    #endif
+    
+  
+  #if TLEM_MORPHOLOGY == 2
+   AnyRefNode RectusVastiiWrapSurf = {
+     AnyVec3 P1 = .Scale({-0.002238568432175, -0.006658755248427, ...Sign*-0.058894807052181});
+     AnyVec3 P2 = .Scale({0.021387933407231,  0.003777610106051,  ...Sign*0.058294836521901}); 
+     sRel = P1;
+     ARel = RotMat(P1, P2, P2 + 0.1)*RotMat(pi/2,y);
+
+     AnySurfCylinder cyl = {
+       Radius = 0.025;
+       Length = 0.15;
+       //AnyDrawParamSurf drw={RGB={1,0,0};Opacity = 0.5;Visible = On;};
+       CapRatio = 0.1;
+     };
+   };
+  #endif
+
+  
+  #if TLEM_MORPHOLOGY == 2  
+   AnyRefNode IliacusWrapSurf = {
+     AnyVec3 P2 = .Scale({0.016083961136943 ,  0.311718500853209 , ...Sign*0.063290693129396});
+     AnyVec3 P1 = .Scale({ -0.014918624554361 ,  0.388966513443324 , ...Sign* -0.035039316948254}); 
+     sRel = P1;
+     ARel = RotMat(P1, P2, P2 + 0.1)*RotMat(pi/2,y); 
+     AnySurfCylinder cyl = {
+       Radius = 0.0225+0.005;
+       Length = 0.15;
+  //     AnyDrawParamSurf drw={RGB={1,0,0};Opacity = 0.5;Visible = On;};
+       CapRatio = 0.1;
+     };
+   };
+    AnyRefNode RectusWrapSurf = {
+//     AnyVec3 P2 = .Scale({0.016083961136943 ,  0.311718500853209 , ...Sign*0.063290693129396});
+     //AnyVec3 P1 = .Scale({ -0.014918624554361 ,  0.388966513443324 , ...Sign* -0.035039316948254}); 
+     sRel = .Scale({-0.3, 0.2, 0});
+     ARel = {{1,0,0}, {0,1,0}, {0,0,1}};//*RotMat(pi/2,y); 
+     AnySurfCylinder cyl = {
+       Radius = 0.35;
+       Length = 0.15;
+//       AnyDrawParamSurf drw={RGB={1,0,0};Opacity = 0.5;Visible = On;};
+       CapRatio = 0.1;
+     };
+   };
+
+  #endif
+
+
+  
+  
+   AnyRefNode KneeJoint= 
+   {
+    #if TLEM_MORPHOLOGY == 1
+     AnyVar AxisRot=0;
+     #ifdef BONY_LANDMARK_DEFINED_JOINTAXIS
+       AnyVec3 sRelUnscaled = 0.5*(.StdPar.EpicondylusFemorisLateralis + .StdPar.EpicondylusFemorisMedialis);
+       AnyMat33 ARelUnscaled = RotMat(sRelUnscaled , sRelUnscaled + .Sign*(.StdPar.EpicondylusFemorisLateralis - .StdPar.EpicondylusFemorisMedialis), .StdPar.HipJoint)
+                               *RotMat(pi/2,y)*RotMat(AxisRot,x);
+       // Knee joint is defined from the two epicondyle bony landmarks
+       sRel =0.5*(.Scale(.StdPar.EpicondylusFemorisLateralis) + .Scale(.StdPar.EpicondylusFemorisMedialis));
+       // Knee joint axis is defined from the two epicondyle bony landmarks
+       ARel = RotMat(sRel, sRel + .Sign*(.Scale(.StdPar.EpicondylusFemorisLateralis) - .Scale(.StdPar.EpicondylusFemorisMedialis)), .Scale(.StdPar.HipJoint))
+               *RotMat(pi/2,y)*RotMat(AxisRot,x);
+     #else
+       AnyVec3 sRelUnscaled = .StdPar.KneeJoint;
+       AnyMat33 ARelUnscaled = RotMat(sRelUnscaled , sRelUnscaled + .Sign*(KneeLateralControlPoint-KneeMedialControlPoint ), .StdPar.HipJoint)*RotMat(pi/2,y)*RotMat(AxisRot,x);
+       // Control point for the knee joint. Found by projecting the EpicondylusFemoris bony landmarks onto the 
+       // knee axis from the cadaver data set. Thus, scaling which moves the control points will also scale the Knee joint axis
+       AnyVec3 KneeLateralControlPoint = .StdPar.KneeJoint + (.StdPar.EpicondylusFemorisLateralis - .StdPar.KneeJoint)*.StdPar.KneeJointAxis'*.StdPar.KneeJointAxis;
+       // Control point for the knee joint. Found by projecting the EpicondylusFemoris bony landmarks onto the 
+       // knee axis from the cadaver data set. Thus, scaling which moves the control points will also scale the Knee joint axis
+       AnyVec3 KneeMedialControlPoint = .StdPar.KneeJoint + (.StdPar.EpicondylusFemorisMedialis - .StdPar.KneeJoint)*.StdPar.KneeJointAxis'*.StdPar.KneeJointAxis;
+       sRel = .Scale(.StdPar.KneeJoint);
+       // Setting the USE_AMMR14_HIP_ROTATIONS flag will imitate AMMR1.4 behaviour
+       #ifndef USE_AMMR14_HIP_ROTATIONS
+         // Knee Joint orientation is calculated based on the direction between the two control points.   
+         ARel = RotMat(sRel, sRel + .Sign*(.Scale(KneeLateralControlPoint)-.Scale(KneeMedialControlPoint)), .Scale(.StdPar.HipJoint))*RotMat(pi/2,y)*RotMat(AxisRot,x);
+       #else
+         ARel = RotMat(.Sign*7.46*pi/180,x) * RotMat(.Sign*-32.25*pi/180,y)*RotMat(.Sign*AxisRot*pi/180,x);
+       #endif
+     #endif    
+    #endif 
+    
+    #if TLEM_MORPHOLOGY == 2
+     AnyVar AxisRot=0;  
+     #ifdef BONY_LANDMARK_DEFINED_JOINTAXIS
+       AnyVec3 sRelUnscaled = 0.5*(.StdPar.EpicondylusFemorisLateralis + .StdPar.EpicondylusFemorisMedialis);
+       AnyMat33 ARelUnscaled = RotMat(sRelUnscaled , sRelUnscaled + .Sign*(.StdPar.EpicondylusFemorisLateralis - .StdPar.EpicondylusFemorisMedialis), .StdPar.HipJoint)
+                               *RotMat(pi/2,y)*RotMat(AxisRot,x);
+       // Knee joint is defined from the two epicondyle bony landmarks
+       sRel =0.5*(.Scale(.StdPar.EpicondylusFemorisLateralis) + .Scale(.StdPar.EpicondylusFemorisMedialis));
+       // Knee joint axis is defined from the two epicondyle bony landmarks
+       ARel = RotMat(sRel, sRel + .Sign*(.Scale(.StdPar.EpicondylusFemorisLateralis) - .Scale(.StdPar.EpicondylusFemorisMedialis)), .Scale(.StdPar.HipJoint))*RotMat(pi/2,y)*RotMat(AxisRot,x);
+     #else
+       AnyVec3 sRelUnscaled = .StdPar.KneeJoint;
+       AnyMat33 ARelUnscaled = RotMat(0.5*(.StdPar.EpicondylusFemorisLateralis + .StdPar.EpicondylusFemorisMedialis), 
+                               0.5*(.StdPar.EpicondylusFemorisLateralis + .StdPar.EpicondylusFemorisMedialis) + .Sign*(KneeLateralControlPoint-KneeMedialControlPoint ), .StdPar.HipJoint)
+                               *RotMat(pi/2,y)*RotMat(AxisRot,x);
+       // Control point for the knee joint. Found by projecting the EpicondylusFemoris bony landmarks onto the 
+       // knee axis from the cadaver data set. Thus, scaling which moves the control points will also scale the Knee joint axis
+       AnyVec3 KneeLateralControlPoint = .StdPar.KneeJoint + ((.StdPar.EpicondylusFemorisLateralis - .StdPar.KneeJoint)*.StdPar.KneeJointAxis')*.StdPar.KneeJointAxis;
+       // Control point for the knee joint. Found by projecting the EpicondylusFemoris bony landmarks onto the 
+       // knee axis from the cadaver data set. Thus, scaling which moves the control points will also scale the Knee joint axis
+       AnyVec3 KneeMedialControlPoint = .StdPar.KneeJoint + ((.StdPar.EpicondylusFemorisMedialis - .StdPar.KneeJoint)*.StdPar.KneeJointAxis')*.StdPar.KneeJointAxis;
+       sRel = .Scale(.StdPar.KneeJoint);
+       // Setting the USE_AMMR14_HIP_ROTATIONS flag will imitate AMMR1.4 behaviour
+       #ifndef USE_AMMR14_HIP_ROTATIONS
+         ARel = RotMat(sRel, sRel + .Sign*(.Scale(.StdPar.EpicondylusFemorisLateralis) - .Scale(.StdPar.EpicondylusFemorisMedialis)), .Scale(.StdPar.HipJoint))*RotMat(pi/2,y)*RotMat(AxisRot,x);
+       #else
+         ARel = RotMat(.Sign*7.46*pi/180,x) * RotMat(.Sign*-32.25*pi/180,y)*RotMat(.Sign*AxisRot*pi/180,x);
+       #endif
+     #endif    
+    #endif    
+//    AnyVec3 sRelUnscaled = .StdPar.KneesRelUnscaled;
+//    AnyMat33 ARelUnscaled = .StdPar.KneeARelUnscaled;   
+//    sRel = .StdPar.KneesRel;
+//    ARel = .StdPar.KneeARel;
+
+    #include "../DrawSettings/JointAxesDistal.any" 
+
+    #if DRAWAXES  
+    AnyDrawLine SJaxis2 = {
+      Visible = On;
+      p0 = ..StdPar.KneesRel + {..StdPar.KneeJointAxis[2],..StdPar.KneeJointAxis[1],..StdPar.KneeJointAxis[0]}*0.2;
+      p1 = ..StdPar.KneesRel - {..StdPar.KneeJointAxis[2],..StdPar.KneeJointAxis[1],..StdPar.KneeJointAxis[0]}*0.2;      //Offset = {0, 0, 0};
+      Line = {
+      Thickness = 0.001;
+      RGB = {0, 0, 0};
+      };
+    };
+    #endif
+    
+  };  
+  
+
+  AnyRefNode HipJoint = 
+  {
+    #if TLEM_MORPHOLOGY == 1
+     AnyVec3 sRelUnscaled = .StdPar.HipJoint;
+     AnyMat33 ARelUnscaled = RotMat(sRelUnscaled , .StdPar.KneeJoint, sRelUnscaled + .KneeJoint.ARelUnscaled'[2])*RotMat(-pi/2,x)*RotMat(pi/2,z);
+     sRel = .Scale(.StdPar.HipJoint);
+     // Setting the USE_AMMR14_HIP_ROTATIONS flag will imitate AMMR1.4 behaviour
+     #ifndef USE_AMMR14_HIP_ROTATIONS
+       // The orientation of the HipJoint coordinate system follows ISB recommendation. The y axis follows the 
+       // long axis of the thigh, and the knee axis lies in the z-y plane
+       ARel = RotMat(sRel, .Scale(.StdPar.KneeJoint), sRel+ .KneeJoint.ARel'[2])*RotMat(-pi/2,x)*RotMat(pi/2,z);
+     #else
+       ARel = RotMat(.Sign*-30*pi/180,y) * RotMat(-18*pi/180,z);
+     #endif    
+    #endif
+     
+    #if TLEM_MORPHOLOGY == 2    
+     AnyVec3 sRelUnscaled = .StdPar.HipJoint;
+     AnyMat33 ARelUnscaled = RotMat(sRelUnscaled , ((.StdPar.EpicondylusFemorisLateralis)+(.StdPar.EpicondylusFemorisMedialis))/2, 
+                             sRelUnscaled  + .Sign*((.StdPar.EpicondylusFemorisLateralis)-(.StdPar.EpicondylusFemorisMedialis))/2)*RotMat(-pi/2,x)*RotMat(pi/2,z);
+     
+     sRel = .Scale(.StdPar.HipJoint);
+     // Setting the USE_AMMR14_HIP_ROTATIONS flag will imitate AMMR1.4 behaviour
+     #ifndef USE_AMMR14_HIP_ROTATIONS
+       /// The orientation of the HipJoint coordinate system follows ISB recommendation. The y axis follows the thigh bone axis.
+       ARel = RotMat(sRel, (.Scale(.StdPar.EpicondylusFemorisLateralis)+.Scale(.StdPar.EpicondylusFemorisMedialis))/2, 
+              sRel + .Sign*(.Scale(.StdPar.EpicondylusFemorisLateralis)-.Scale(.StdPar.EpicondylusFemorisMedialis))/2)*RotMat(-pi/2,x)*RotMat(pi/2,z);
+     #else
+       /// Hip rotation set according to AMMR v.1.4 definition. This definition is deprecated and will be removed!
+       ARel = RotMat(.Sign*-30*pi/180,y) * RotMat(-18*pi/180,z); 
+     #endif    
+    #endif
+     
+    #include "../DrawSettings/JointAxesProximal.any" 
+  };
+  
+   AnyRefNode PatellaFemurJoint = 
+   {
+    #if TLEM_MORPHOLOGY == 1
+     // Neutral definition of the patella-femur joint
+     // Control point for the PatellaFemurJoint. Found by projecting the EpicondylusFemoris bony landmarks onto the 
+     // PatellaFemurJoint axis from the cadaver data set. Thus, scaling which moves the control points will also scale the PatellaFemurJointjoint axis
+     AnyVec3 PFLateralControlPoint = .Scale(.StdPar.PatellaFemurJoint + (.StdPar.EpicondylusFemorisLateralis - .StdPar.PatellaFemurJoint)*.StdPar.PatellaFemurJointAxis'*.StdPar.PatellaFemurJointAxis);
+     // Control point for the PatellaFemurJoint. Found by projecting the EpicondylusFemoris bony landmarks onto the 
+     // PatellaFemurJoint axis from the cadaver data set. Thus, scaling which moves the control points will also scale the PatellaFemurJointjoint axis
+     AnyVec3 PFMedialControlPoint = .Scale(.StdPar.PatellaFemurJoint + (.StdPar.EpicondylusFemorisMedialis - .StdPar.PatellaFemurJoint)*.StdPar.PatellaFemurJointAxis'*.StdPar.PatellaFemurJointAxis);
+     sRel = .Scale(.StdPar.PatellaFemurJoint);
+     // PatellaFemurJoint Joint orientation is calculated based on the direction between the two control points.   
+     ARel = RotMat(sRel, sRel + .Sign*(PFLateralControlPoint-PFMedialControlPoint ), .Scale(.StdPar.HipJoint))*RotMat(pi/2,y);    
+    #endif
+    
+    #if TLEM_MORPHOLOGY == 2
+     // Neutral definition of the patella-femur joint
+     // Control point for the PatellaFemurJoint. Found by projecting the EpicondylusFemoris bony landmarks onto the 
+     // PatellaFemurJoint axis from the cadaver data set. Thus, scaling which moves the control points will also scale the PatellaFemurJointjoint axis
+     AnyVec3 PFLateralControlPoint = .Scale(.StdPar.PatellaFemurJoint + (.StdPar.EpicondylusFemorisLateralis - .StdPar.PatellaFemurJoint)*.StdPar.PatellaFemurJointAxis'*.StdPar.PatellaFemurJointAxis);
+     // Control point for the PatellaFemurJoint. Found by projecting the EpicondylusFemoris bony landmarks onto the 
+     // PatellaFemurJoint axis from the cadaver data set. Thus, scaling which moves the control points will also scale the PatellaFemurJointjoint axis
+     AnyVec3 PFMedialControlPoint = .Scale(.StdPar.PatellaFemurJoint + (.StdPar.EpicondylusFemorisMedialis - .StdPar.PatellaFemurJoint)*.StdPar.PatellaFemurJointAxis'*.StdPar.PatellaFemurJointAxis);
+     sRel = .Scale(.StdPar.PatellaFemurJoint);
+     // PatellaFemurJoint Joint orientation is calculated based on the direction between the two control points.   
+     ARel = RotMat( 0.5*(.Scale(.StdPar.EpicondylusFemorisLateralis) + .Scale(.StdPar.EpicondylusFemorisMedialis)), 
+            0.5*(.Scale(.StdPar.EpicondylusFemorisLateralis) + .Scale(.StdPar.EpicondylusFemorisMedialis)) + .Sign*(PFLateralControlPoint-PFMedialControlPoint ), .Scale(.StdPar.HipJoint))*RotMat(pi/2,y);    
+    #endif
+    
+    #include "../DrawSettings/JointAxesDistal.any" 
+
+    #if DRAWAXES
+    AnyDrawLine SJaxis2 = {
+      Visible = On;
+      p0 = ..StdPar.PatellaFemursRel + {..StdPar.PatellaFemurJointAxis[2],..StdPar.PatellaFemurJointAxis[1],..StdPar.PatellaFemurJointAxis[0]}*0.2;
+      p1 = ..StdPar.PatellaFemursRel - {..StdPar.PatellaFemurJointAxis[2],..StdPar.PatellaFemurJointAxis[1],..StdPar.PatellaFemurJointAxis[0]}*0.2;      //Offset = {0, 0, 0};
+//      p0 = ..StdPar.PatellaFemursRel + ..StdPar.PatellaFemurJointAxis*0.2;
+//      p1 = ..StdPar.PatellaFemursRel - ..StdPar.PatellaFemurJointAxis*0.2;      //Offset = {0, 0, 0};
+      Line = {
+      Thickness = 0.001;
+      RGB = {0, 0, 0};
+      };
+    };
+    #endif
+  };    
+  
+  AnyRefNode EpicondylusFemorisMedialis = {
+    sRel=.Scale(.StdPar.EpicondylusFemorisMedialis);// Coordinates of the Medial Femur Epicondyle bony landmark, Klein Horsman
+    #include "../DrawSettings/BML.any"
+  }; 
+  AnyRefNode EpicondylusFemorisLateralis = {sRel = .Scale(.StdPar.EpicondylusFemorisLateralis );// Coordinates of the lateral Femur Epicondyle bony landmark, Klein Horsman
+    #include "../DrawSettings/BML.any"
+  }; 
+  AnyRefNode EpicondylusFemorisMidPoint ={
+    sRel=0.5*(.EpicondylusFemorisMedialis.sRel+.EpicondylusFemorisLateralis.sRel)  ;    
+  };
+  
+  // Origin points on the Femur (all Vastus muscles have their insertion point situated on the Patella) :
+  AnyRefNode BicepsFemorisCaputBreve1Node = {sRel = .Scale( .StdPar.BicepsFemorisCaputBreve1Node );};
+  AnyRefNode BicepsFemorisCaputBreve2Node = {sRel = .Scale( .StdPar.BicepsFemorisCaputBreve2Node );};
+  AnyRefNode BicepsFemorisCaputBreve3Node = {sRel = .Scale( .StdPar.BicepsFemorisCaputBreve3Node );};
+  
+  AnyRefNode GastrocnemiusLateralis1Node = {sRel = .Scale( .StdPar.GastrocnemiusLateralis1Node );};
+  
+  #if TLEM_MORPHOLOGY == 2
+  AnyRefNode GastrocnemiusLateralis1ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusLateralisVia1Node );};
+  AnyRefNode GastrocnemiusLateralis2ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusLateralisVia2Node );};
+  AnyRefNode GastrocnemiusLateralis3ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusLateralisVia3Node );};
+  AnyRefNode GastrocnemiusLateralis4ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusLateralisVia4Node );};
+  AnyRefNode GastrocnemiusLateralis5ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusLateralisVia5Node );};
+  AnyRefNode GastrocnemiusLateralis6ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusLateralisVia6Node );};
+  #endif
+  
+  AnyRefNode GastrocnemiusMedialis1Node = {sRel = .Scale( .StdPar.GastrocnemiusMedialis1Node );};
+  
+  #if TLEM_MORPHOLOGY == 2
+  AnyRefNode GastrocnemiusMedialis1ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusMedialisVia1Node );};
+  AnyRefNode GastrocnemiusMedialis2ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusMedialisVia2Node );};
+  AnyRefNode GastrocnemiusMedialis3ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusMedialisVia3Node );};
+  #endif
+ 
+
+  AnyRefNode Plantaris1Node = {sRel = .Scale( .StdPar.Plantaris1Node );};
+  
+  AnyRefNode Popliteus1Node = {sRel = .Scale( .StdPar.Popliteus1Node );};
+  AnyRefNode Popliteus2Node = {sRel = .Scale( .StdPar.Popliteus2Node );};
+  #if TLEM_MORPHOLOGY == 2
+  AnyRefNode Popliteus3Node = {sRel = .Scale( .StdPar.Popliteus3Node );};
+  #endif
+  
+  AnyRefNode VastusIntermedius1Node = {sRel = .Scale( .StdPar.VastusIntermedius1Node );};
+  AnyRefNode VastusIntermedius2Node = {sRel = .Scale( .StdPar.VastusIntermedius2Node );};
+  AnyRefNode VastusIntermedius3Node = {sRel = .Scale( .StdPar.VastusIntermedius3Node );};
+  AnyRefNode VastusIntermedius4Node = {sRel = .Scale( .StdPar.VastusIntermedius4Node );};
+  AnyRefNode VastusIntermedius5Node = {sRel = .Scale( .StdPar.VastusIntermedius5Node );};
+  AnyRefNode VastusIntermedius6Node = {sRel = .Scale( .StdPar.VastusIntermedius6Node );};
+  
+  AnyRefNode VastusLateralisInferior1Node = {sRel = .Scale( .StdPar.VastusLateralisInferior1Node );};
+  AnyRefNode VastusLateralisInferior2Node = {sRel = .Scale( .StdPar.VastusLateralisInferior2Node );};
+  AnyRefNode VastusLateralisInferior3Node = {sRel = .Scale( .StdPar.VastusLateralisInferior3Node );};
+  AnyRefNode VastusLateralisInferior4Node = {sRel = .Scale( .StdPar.VastusLateralisInferior4Node );};
+  AnyRefNode VastusLateralisInferior5Node = {sRel = .Scale( .StdPar.VastusLateralisInferior5Node );};
+  AnyRefNode VastusLateralisInferior6Node = {sRel = .Scale( .StdPar.VastusLateralisInferior6Node );};
+  AnyRefNode VastusLateralisSuperior1Node = {sRel = .Scale( .StdPar.VastusLateralisSuperior1Node );};
+  AnyRefNode VastusLateralisSuperior2Node = {sRel = .Scale( .StdPar.VastusLateralisSuperior2Node );};
+  
+  AnyRefNode VastusMedialisInferior1Node = {sRel = .Scale( .StdPar.VastusMedialisInferior1Node );};    
+  AnyRefNode VastusMedialisInferior2Node = {sRel = .Scale( .StdPar.VastusMedialisInferior2Node );};
+  
+  AnyRefNode VastusMedialisMid1Node = {sRel = .Scale( .StdPar.VastusMedialisMid1Node );};   
+  AnyRefNode VastusMedialisMid2Node = {sRel = .Scale( .StdPar.VastusMedialisMid2Node );};   
+
+    
+  AnyRefNode VastusMedialisSuperior1Node = {sRel = .Scale( .StdPar.VastusMedialisSuperior1Node );};
+  AnyRefNode VastusMedialisSuperior2Node = {sRel = .Scale( .StdPar.VastusMedialisSuperior2Node );};
+  AnyRefNode VastusMedialisSuperior3Node = {sRel = .Scale( .StdPar.VastusMedialisSuperior3Node );};
+  AnyRefNode VastusMedialisSuperior4Node = {sRel = .Scale( .StdPar.VastusMedialisSuperior4Node );};
+  
+  
+  #if TLEM_MORPHOLOGY == 1
+  AnyRefNode VastusMedialisSuperior5Node = {sRel = .Scale( .StdPar.VastusMedialisSuperior5Node );};
+  AnyRefNode VastusMedialisSuperior6Node = {sRel = .Scale( .StdPar.VastusMedialisSuperior6Node );}; 
+  #endif
+  
+  AnyRefNode AdductorBrevisProximal1Node = {sRel = .Scale( .StdPar.AdductorBrevisProximal1Node );};
+  AnyRefNode AdductorBrevisProximal2Node = {sRel = .Scale( .StdPar.AdductorBrevisProximal2Node );};
+  AnyRefNode AdductorBrevisMid1Node = {sRel = .Scale( .StdPar.AdductorBrevisMid1Node );};
+  AnyRefNode AdductorBrevisMid2Node = {sRel = .Scale( .StdPar.AdductorBrevisMid2Node );};
+  AnyRefNode AdductorBrevisDistal1Node = {sRel = .Scale( .StdPar.AdductorBrevisDistal1Node );};
+  AnyRefNode AdductorBrevisDistal2Node = {sRel = .Scale( .StdPar.AdductorBrevisDistal2Node );};
+  
+  AnyRefNode AdductorLongus1Node = {sRel = .Scale( .StdPar.AdductorLongus1Node );};
+  AnyRefNode AdductorLongus2Node = {sRel = .Scale( .StdPar.AdductorLongus2Node );};
+  AnyRefNode AdductorLongus3Node = {sRel = .Scale( .StdPar.AdductorLongus3Node );};
+  AnyRefNode AdductorLongus4Node = {sRel = .Scale( .StdPar.AdductorLongus4Node );};
+  AnyRefNode AdductorLongus5Node = {sRel = .Scale( .StdPar.AdductorLongus5Node );};
+  AnyRefNode AdductorLongus6Node = {sRel = .Scale( .StdPar.AdductorLongus6Node );};
+  
+  AnyRefNode AdductorMagnusMid1Node = {sRel = .Scale( .StdPar.AdductorMagnusMid1Node );};
+  AnyRefNode AdductorMagnusMid2Node = {sRel = .Scale( .StdPar.AdductorMagnusMid2Node );};
+  AnyRefNode AdductorMagnusMid3Node = {sRel = .Scale( .StdPar.AdductorMagnusMid3Node );};
+  AnyRefNode AdductorMagnusMid4Node = {sRel = .Scale( .StdPar.AdductorMagnusMid4Node );};
+  AnyRefNode AdductorMagnusMid5Node = {sRel = .Scale( .StdPar.AdductorMagnusMid5Node );};
+  AnyRefNode AdductorMagnusMid6Node = {sRel = .Scale( .StdPar.AdductorMagnusMid6Node );};
+  
+  AnyRefNode AdductorMagnusProximal1Node = {sRel = .Scale( .StdPar.AdductorMagnusProximal1Node );};
+  AnyRefNode AdductorMagnusProximal2Node = {sRel = .Scale( .StdPar.AdductorMagnusProximal2Node );};
+  AnyRefNode AdductorMagnusProximal3Node = {sRel = .Scale( .StdPar.AdductorMagnusProximal3Node );};
+  AnyRefNode AdductorMagnusProximal4Node = {sRel = .Scale( .StdPar.AdductorMagnusProximal4Node );};
+  
+  
+  #if TLEM_MORPHOLOGY == 1
+  AnyRefNode AdductorMagnusDistal1Node = {sRel = .Scale( .StdPar.AdductorMagnusDistal1Node );};
+  AnyRefNode AdductorMagnusDistal2Node = {sRel = .Scale( .StdPar.AdductorMagnusDistal2Node );};
+  AnyRefNode AdductorMagnusDistal3Node = {sRel = .Scale( .StdPar.AdductorMagnusDistal3Node );};
+  #endif
+  
+  
+  #if TLEM_MORPHOLOGY == 2
+  AnyRefNode AdductorMagnusDistal1Node = {sRel = .Scale( .StdPar.AdductorMagnusDistal1Node );};
+  AnyRefNode AdductorMagnusDistal2Node = {sRel = .Scale( .StdPar.AdductorMagnusDistal1Node );};
+  AnyRefNode AdductorMagnusDistal3Node = {sRel = .Scale( .StdPar.AdductorMagnusDistal1Node );};
+  #endif
+  
+  AnyRefNode GemellusInferior1Node = {sRel = .Scale( .StdPar.GemellusInferior1Node );};
+  
+  AnyRefNode GemellusSuperior1Node = {sRel = .Scale( .StdPar.GemellusSuperior1Node );};
+  
+  AnyRefNode GluteusMaximusSuperior1Node = {sRel = .Scale( .StdPar.GluteusMaximusSuperior1Node );};
+  AnyRefNode GluteusMaximusSuperior2Node = {sRel = .Scale( .StdPar.GluteusMaximusSuperior2Node );};
+  AnyRefNode GluteusMaximusSuperior3Node = {sRel = .Scale( .StdPar.GluteusMaximusSuperior3Node );};
+  AnyRefNode GluteusMaximusSuperior4Node = {sRel = .Scale( .StdPar.GluteusMaximusSuperior4Node );};
+  AnyRefNode GluteusMaximusSuperior5Node = {sRel = .Scale( .StdPar.GluteusMaximusSuperior5Node );};
+  AnyRefNode GluteusMaximusSuperior6Node = {sRel = .Scale( .StdPar.GluteusMaximusSuperior6Node );};
+
+  
+  AnyRefNode GluteusMaximusInferior1Node = {sRel = .Scale( .StdPar.GluteusMaximusInferior1Node );};
+  AnyRefNode GluteusMaximusInferior2Node = {sRel = .Scale( .StdPar.GluteusMaximusInferior2Node );};
+  AnyRefNode GluteusMaximusInferior3Node = {sRel = .Scale( .StdPar.GluteusMaximusInferior3Node );};
+  AnyRefNode GluteusMaximusInferior4Node = {sRel = .Scale( .StdPar.GluteusMaximusInferior4Node );};
+  AnyRefNode GluteusMaximusInferior5Node = {sRel = .Scale( .StdPar.GluteusMaximusInferior5Node );};
+  AnyRefNode GluteusMaximusInferior6Node = {sRel = .Scale( .StdPar.GluteusMaximusInferior6Node );};
+
+  
+  AnyRefNode GluteusMediusAnterior1Node = {sRel = .Scale( .StdPar.GluteusMediusAnterior1Node );};
+  AnyRefNode GluteusMediusAnterior2Node = {sRel = .Scale( .StdPar.GluteusMediusAnterior2Node );};
+  AnyRefNode GluteusMediusAnterior3Node = {sRel = .Scale( .StdPar.GluteusMediusAnterior3Node );};
+  AnyRefNode GluteusMediusAnterior4Node = {sRel = .Scale( .StdPar.GluteusMediusAnterior4Node );};
+  AnyRefNode GluteusMediusAnterior5Node = {sRel = .Scale( .StdPar.GluteusMediusAnterior5Node );};
+  AnyRefNode GluteusMediusAnterior6Node = {sRel = .Scale( .StdPar.GluteusMediusAnterior6Node );};
+  
+  AnyRefNode GluteusMediusPosterior1Node = {sRel = .Scale( .StdPar.GluteusMediusPosterior1Node );};
+  AnyRefNode GluteusMediusPosterior2Node = {sRel = .Scale( .StdPar.GluteusMediusPosterior2Node );};
+  AnyRefNode GluteusMediusPosterior3Node = {sRel = .Scale( .StdPar.GluteusMediusPosterior3Node );};
+  AnyRefNode GluteusMediusPosterior4Node = {sRel = .Scale( .StdPar.GluteusMediusPosterior4Node );};
+  AnyRefNode GluteusMediusPosterior5Node = {sRel = .Scale( .StdPar.GluteusMediusPosterior5Node );};
+  AnyRefNode GluteusMediusPosterior6Node = {sRel = .Scale( .StdPar.GluteusMediusPosterior6Node );};
+  
+  AnyRefNode GluteusMinimusAnterior1Node = {sRel = .Scale( .StdPar.GluteusMinimusAnterior1Node );};
+
+  AnyRefNode GluteusMinimusMid1Node = {sRel = .Scale( .StdPar.GluteusMinimusMid1Node );};
+  
+  AnyRefNode GluteusMinimusPosterior1Node = {sRel = .Scale( .StdPar.GluteusMinimusPosterior1Node );};
+  
+  
+  #if TLEM_MORPHOLOGY == 1
+  AnyRefNode IliacusLateralis1Node = {sRel = .Scale( .StdPar.IliacusLateralis1Node );};
+  AnyRefNode IliacusLateralis2Node = {sRel = .Scale( .StdPar.IliacusLateralis2Node );};
+  AnyRefNode IliacusLateralis3Node = {sRel = .Scale( .StdPar.IliacusLateralis3Node );};
+  
+  AnyRefNode IliacusMid1Node = {sRel = .Scale( .StdPar.IliacusMid1Node );};
+  AnyRefNode IliacusMid2Node = {sRel = .Scale( .StdPar.IliacusMid2Node );};
+  AnyRefNode IliacusMid3Node = {sRel = .Scale( .StdPar.IliacusMid3Node );};
+  
+  AnyRefNode IliacusMedialis1Node = {sRel = .Scale( .StdPar.IliacusMedialis1Node );};
+  AnyRefNode IliacusMedialis2Node = {sRel = .Scale( .StdPar.IliacusMedialis2Node );};
+  AnyRefNode IliacusMedialis3Node = {sRel = .Scale( .StdPar.IliacusMedialis3Node );};
+
+  AnyRefNode ObturatorExternusInferior1Node = {sRel = .Scale( .StdPar.ObturatorExternusInferior1Node );};
+  AnyRefNode ObturatorExternusInferior2Node = {sRel = .Scale( .StdPar.ObturatorExternusInferior2Node );};
+  
+  AnyRefNode ObturatorExternusSuperior1Node = {sRel = .Scale( .StdPar.ObturatorExternusSuperior1Node );};
+  AnyRefNode ObturatorExternusSuperior2Node = {sRel = .Scale( .StdPar.ObturatorExternusSuperior2Node );};
+  AnyRefNode ObturatorExternusSuperior3Node = {sRel = .Scale( .StdPar.ObturatorExternusSuperior3Node );};
+  AnyRefNode ObturatorExternusSuperiorViaNode1 = {sRel = .Scale( .StdPar.ObturatorExternusSuperiorViaNode1 );};
+  #endif
+  
+  #if TLEM_MORPHOLOGY == 2
+  AnyRefNode ObturatorExternus1Node = {sRel = .Scale( .StdPar.ObturatorExternus1Node );};
+  AnyRefNode ObturatorExternusVia1Node = {sRel = .Scale( .StdPar.ObturatorExternusVia1Node );};
+  #endif
+  
+  AnyRefNode ObturatorInternus1Node = {sRel = .Scale( .StdPar.ObturatorInternus1Node );};
+ 
+  #if TLEM_MORPHOLOGY == 1
+  AnyRefNode ObturatorInternus2Node = {sRel = .Scale( .StdPar.ObturatorInternus2Node );};
+  AnyRefNode ObturatorInternus3Node = {sRel = .Scale( .StdPar.ObturatorInternus3Node );};
+  #endif
+  
+  AnyRefNode Pectineus1Node = {sRel = .Scale( .StdPar.Pectineus1Node );};
+  AnyRefNode Pectineus2Node = {sRel = .Scale( .StdPar.Pectineus2Node );};
+  AnyRefNode Pectineus3Node = {sRel = .Scale( .StdPar.Pectineus3Node );};
+  AnyRefNode Pectineus4Node = {sRel = .Scale( .StdPar.Pectineus4Node );};
+  
+  AnyRefNode Piriformis1Node = {sRel = .Scale( .StdPar.Piriformis1Node );};
+
+  #if TLEM_MORPHOLOGY == 1
+  AnyRefNode PsoasMinor1Node = {sRel = .Scale( .StdPar.PsoasMinor1Node );}; 
+  AnyRefNode PsoasMajor1Node = {sRel = .Scale( .StdPar.PsoasMajor1Node );};
+  AnyRefNode PsoasMajor2Node = {sRel = .Scale( .StdPar.PsoasMajor2Node );};
+  AnyRefNode PsoasMajor3Node = {sRel = .Scale( .StdPar.PsoasMajor3Node );};
+  #endif
+  
+  #if TLEM_MORPHOLOGY == 2
+  AnyRefNode Iliopsoas1Node = {sRel = .Scale( .StdPar.Iliopsoas1Node );};
+  AnyRefNode Iliopsoas2Node = {sRel = .Scale( .StdPar.Iliopsoas2Node );};
+  AnyRefNode Iliopsoas3Node = {sRel = .Scale( .StdPar.Iliopsoas3Node );};
+  
+  #endif
+  
+  AnyRefNode QuadratusFemoris1Node	= {sRel = .Scale( .StdPar.QuadratusFemoris1Node );};
+  AnyRefNode QuadratusFemoris2Node	= {sRel = .Scale( .StdPar.QuadratusFemoris2Node );};
+  AnyRefNode QuadratusFemoris3Node	= {sRel = .Scale( .StdPar.QuadratusFemoris3Node );};
+  AnyRefNode QuadratusFemoris4Node	= {sRel = .Scale( .StdPar.QuadratusFemoris4Node );};
+  
+  #if TLEM_MORPHOLOGY == 1
+  AnyRefNode SartoriusProximalViaNode1 = {sRel = .Scale( .StdPar.SartoriusProximalViaNode1 );};
+  AnyRefNode SartoriusProximalViaNode2 = {sRel = .Scale( .StdPar.SartoriusProximalViaNode2 );};
+  AnyRefNode SartoriusProximalViaNode3 = {sRel = .Scale( .StdPar.SartoriusProximalViaNode3 );};
+  AnyRefNode SartoriusProximalViaNode4 = {sRel = .Scale( .StdPar.SartoriusProximalViaNode4 );};
+  AnyRefNode SartoriusProximalViaNode5 = {sRel = .Scale( .StdPar.SartoriusProximalViaNode5 );};
+  AnyRefNode SartoriusProximalViaNode6 = {sRel = .Scale( .StdPar.SartoriusProximalViaNode6 );};
+  AnyRefNode SartoriusProximalViaNode7 = {sRel = .Scale( .StdPar.SartoriusProximalViaNode7 );};
+  AnyRefNode SartoriusProximalViaNode8 = {sRel = .Scale( .StdPar.SartoriusProximalViaNode8 );};
+  AnyRefNode SartoriusProximalViaNode9 = {sRel = .Scale( .StdPar.SartoriusProximalViaNode9 );};
+  AnyRefNode SartoriusProximalViaNode10 = {sRel = .Scale( .StdPar.SartoriusProximalViaNode10 );};
+  AnyRefNode SartoriusProximalViaNode11 = {sRel = .Scale( .StdPar.SartoriusProximalViaNode11 );};
+  AnyRefNode SartoriusProximalViaNode12 = {sRel = .Scale( .StdPar.SartoriusProximalViaNode12 );};
+  AnyRefNode SartoriusProximalViaNode13 = {sRel = .Scale( .StdPar.SartoriusProximalViaNode13 );};
+  
+  AnyRefNode SartoriusDistalViaNode1 = {sRel = .Scale( .StdPar.SartoriusDistalViaNode1 );};
+  #endif
+  
+  #if TLEM_MORPHOLOGY == 2
+  AnyRefNode SartoriusVia1Node = {sRel = .Scale( .StdPar.SartoriusVia1Node );};
+  AnyRefNode SartoriusVia2Node = {sRel = .Scale( .StdPar.SartoriusVia2Node );};
+  AnyRefNode SartoriusVia3Node = {sRel = .Scale( .StdPar.SartoriusVia3Node );};
+  AnyRefNode SartoriusVia4Node = {sRel = .Scale( .StdPar.SartoriusVia4Node );};
+  AnyRefNode SartoriusVia5Node = {sRel = .Scale( .StdPar.SartoriusVia5Node );};
+  AnyRefNode SartoriusVia6Node = {sRel = .Scale( .StdPar.SartoriusVia6Node );};
+  #endif
+
+  #if TLEM_MORPHOLOGY == 2
+    AnyRefNode &IliopubicEminenceEndNode  =Iliopsoas1Node;
+  #endif
+  
+  #if TLEM_MORPHOLOGY == 1
+  AnyRefNode &IliopubicEminenceEndNode  =IliacusMid1Node;
+  AnyRefNode IlioFemAntIns  = {sRel = .Scale( .StdPar.IlioFemAntIns );};
+  AnyRefNode IlioFemAntIns2  = {sRel = .Scale( .StdPar.IlioFemAntIns2 );}; 
+  AnyRefNode IlioFemLatIns  = {sRel = .Scale( .StdPar.IlioFemLatIns );};
+  AnyRefNode IlioFemLatIns2 = {sRel = .Scale( .StdPar.IlioFemLatIns2 );};
+  AnyRefNode PuboFemIns  = {sRel = .Scale( .StdPar.PuboFemIns );};
+  AnyRefNode IschioFemIns  = {sRel = .Scale( .StdPar.IschioFemIns );};
+  #endif
+  
+  #if TLEM_MORPHOLOGY == 1
+  AnyRefNode GastroWrapSurf = {
+    AnyMatrix p = .Scale(.StdPar.GastroWrapLandmarks);  //dn(20120614): moved scaling out of WrappingCylinder5PointFit.any
+    AnyFloat lengthscalefactor = 2;
+    AnyFloat radiusscalefactor = 1;
+
+    //AnyFunTransform3D &Scale = .Scale;
+    AnyMat33 transform = RotMat(pi+pi*(...Sign-1)*0.5, y);
+    
+    #include "../ToolBox/WrappingSurfaces/WrappingCylinder5PointFit.any"  
+    cyl = {
+      //        AnyDrawParamSurf drw={RGB={1,0,0};};
+    };
+  };
+  #endif
+  
+  #if TLEM_MORPHOLOGY == 2
+     AnyRefNode GastroWrapSurf = {
+     AnyVec3 P2 = .Scale({-0.018034442096318 , -0.007767247360624 , ...Sign*- 0.052589511021570});
+     AnyVec3 P1 = .Scale({-0.003017818917271 , -0.006791155770546 , ...Sign*0.058590245003105}); 
+
+     sRel = P2;
+     ARel = RotMat(P1, P2, P2 + 0.3)*RotMat(-pi/2,y);
+
+     AnySurfCylinder cyl = {
+       Radius = 0.0175000;
+       Length = 0.15;
+       AnyDrawParamSurf drw={RGB={1,0,0};Opacity = 0.5;Visible = On;};
+       CapRatio = 0.1;
+     };
+   };
+   #endif
+
+  AnyDrawSurf Drw3 = {
+    FileName = ..STL.FilenameThigh;
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0}*1;
+    RGB = ...ColorRef.Segments;
+    Opacity = ...BonesOpacity.Thigh;
+    AnyFunTransform3D &Scale =.Scale;  
+    Face=-1;
+  };
+//     AnyFunTransform3D &Scale2 =..GeoScaling.Thigh.ScaleFunction.ScaleMat;
+  
+  
+  #if SKIN
+  AnyRefNode SkinsRel  = {
+    sRel = {0,0,0};
+    ARel = RotMat(...Sign*-27*pi/180, y);
+    AnyDrawSurf Drw2 = {
+      FileName = ...STL.FilenameThighSkin;
+      ScaleXYZ = {1.0, 1.0, ....Sign*1.0};
+      RGB = ....ColorRef.Skin;
+      Opacity = Main.DrawSettings.SkinOpacity.Opacity;
+      AnyFunTransform3D &Scale =..Scale;  
+      Face=-1;
+    };
+  };
+  #endif
+ 
+  #if MUSCLETISSUE
+  AnyRefNode MuscleTissuesRel  = {
+    sRel = {0,0,0};
+    ARel = RotMat(...Sign*-27*pi/180, y);
+    AnyDrawSurf Drw2 = {
+    FileName = ...STL.FilenameThighMuscleTissue;
+    ScaleXYZ = {1.0, 1.0, ....Sign*1.0};
+    RGB = ....ColorRef.MuscleTissue;
+    Opacity = Main.DrawSettings.MuscleTissueOpacity.Opacity;
+    AnyFunTransform3D &Scale =..Scale;  
+    Face=-1;
+  };
+}; 
+  #endif
+  
+};
+
+
+AnySeg Patella = {
+  AnyFolder &StdPar = ..ModelParameters.Patella;
+  JaboutCoMOnOff = On;
+  
+  r0=.Thigh.PatellaFemurJoint.sRel*.Thigh.Axes0'+.Thigh.r0-PatellaFemurJoint.sRel*Axes0'; 
+  //AnyFunTransform3D &Scale =..GeoScaling.Thigh.ScaleFunction;    
+  AnyFunTransform3D &Scale = .Thigh.Scale;    
+  
+  AnyVar MassS = ..MassScaling.Shank.MassScale;
+  Mass = MassS*StdPar.MassStandard;
+  Jii = StdPar.Jii; 
+  Jij = StdPar.Jij; 
+   
+  AnyVar Sign = ..Sign;
+  
+  AnyRefNode AnatomicalFrame=
+  {
+    AnyMat33 Rotation={{1,0,0},{0,1,0},{0,0,1}};
+    ARel=Rotation;
+    sRel=.StdPar.PatellaFemurJoint;
+  };
+  AnyRefNode& ScalingNode=AnatomicalFrame ;
+  
+  AnyRefNode PatellaFemurJoint = 
+  {
+    #if TLEM_MORPHOLOGY == 1
+     // Control point for the PatellaFemurJoint. Found by projecting the EpicondylusFemoris bony landmarks onto the 
+     // PatellaFemurJoint axis from the cadaver data set. Thus, scaling which moves the control points will also scale the PatellaFemurJointjoint axis
+     AnyVec3 LateralControlPoint = .Scale(.StdPar.PatellaFemurJoint + (.StdPar.EpicondylusFemorisLateralis - .StdPar.PatellaFemurJoint)*.StdPar.PatellaFemurJointAxis'*.StdPar.PatellaFemurJointAxis);
+     // Control point for the PatellaFemurJoint. Found by projecting the EpicondylusFemoris bony landmarks onto the 
+     // PatellaFemurJoint axis from the cadaver data set. Thus, scaling which moves the control points will also scale the PatellaFemurJointjoint axis
+     AnyVec3 MedialControlPoint = .Scale(.StdPar.PatellaFemurJoint + (.StdPar.EpicondylusFemorisMedialis - .StdPar.PatellaFemurJoint )*.StdPar.PatellaFemurJointAxis'*.StdPar.PatellaFemurJointAxis);
+     sRel = .Scale(.StdPar.PatellaFemurJoint);
+     // PatellaFemurJoint Joint orientation is calculated based on the direction between the two control points.   
+     ARel = RotMat(sRel, sRel + .Sign*(LateralControlPoint-MedialControlPoint ), .Scale(.StdPar.HipJoint))*RotMat(pi/2,y);    
+    #endif
+    
+    #if TLEM_MORPHOLOGY == 2
+      AnyVec3 LateralControlPoint = .Scale(.StdPar.PatellaFemurJoint + (.StdPar.EpicondylusFemorisLateralis - .StdPar.PatellaFemurJoint)*.StdPar.PatellaFemurJointAxis'*.StdPar.PatellaFemurJointAxis);
+      // Control point for the PatellaFemurJoint. Found by projecting the EpicondylusFemoris bony landmarks onto the 
+      // PatellaFemurJoint axis from the cadaver data set. Thus, scaling which moves the control points will also scale the PatellaFemurJointjoint axis
+      AnyVec3 MedialControlPoint = .Scale(.StdPar.PatellaFemurJoint + (.StdPar.EpicondylusFemorisMedialis - .StdPar.PatellaFemurJoint )*.StdPar.PatellaFemurJointAxis'*.StdPar.PatellaFemurJointAxis);
+      sRel = .Scale(.StdPar.PatellaFemurJoint);
+      // PatellaFemurJoint Joint orientation is calculated based on the direction between the two control points.   
+      ARel = RotMat(0.5*(.Scale(.StdPar.EpicondylusFemorisLateralis) + .Scale(.StdPar.EpicondylusFemorisMedialis)), 
+      0.5*(.Scale(.StdPar.EpicondylusFemorisLateralis) + .Scale(.StdPar.EpicondylusFemorisMedialis)) + .Sign*(LateralControlPoint-MedialControlPoint ), 
+      .Scale(.StdPar.HipJoint))*RotMat(-pi/2,y);
+    #endif
+    
+//    sRel = .StdPar.PatellasRel;
+//    ARel = .StdPar.PatellaARel;
+  };   
+  
+  AnyDrawSurf DrwSurf = {
+   FileName = ..STL.FilenamePatella;
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
+    RGB = ...ColorRef.Segments;
+    AnyFunTransform3D &Scale =.Scale;  
+    Opacity = ...BonesOpacity.Talus; 
+
+  };  
+  
+  /// A reference node for the patella tendon to define the movement of 
+  /// the patella. The tendon will be regarded as being stiff, so the length will not change. 
+  /// This is defined by an AnyKinPLine in the file Jnt.any. 
+  /// The insertion lies on the Shank segment. 
+  AnyRefNode Origin_patella_tendon = {
+    sRel = .Scale( .StdPar.Origin_patella_tendon );//AnyDrawRefFrame drw = {RGB = {0,1,0};};
+    ARel = ..Thigh.KneeJoint.ARel;
+  }; 
+//  
+//  AnyRefNode Insertion_patella_tendon = {
+//    sRel = .Scale( .StdPar.Insertion_patella_tendon );
+//  };
+//  
+  #include "../DrawSettings/Nodes.any"
+  #include "../DrawSettings/SegmentAxes.any"
+  
+  // Patella insertion points
+  
+  #if TLEM_MORPHOLOGY == 1
+  AnyRefNode RectusFemoris1Node = {sRel = .Scale( .StdPar.RectusFemoris1Node );};
+  AnyRefNode RectusFemoris2Node = {sRel = .Scale( .StdPar.RectusFemoris2Node );};  
+  #endif
+
+  #if TLEM_MORPHOLOGY == 2
+  AnyRefNode RectusFemorisMedialis1Node = {sRel = .Scale( .StdPar.RectusFemorisMedialis1Node );};
+  AnyRefNode RectusFemorisLateralis1Node = {sRel = .Scale( .StdPar.RectusFemorisLateralis1Node );};
+  #endif
+  
+  
+  #if TLEM_MORPHOLOGY == 1
+  AnyRefNode VastusIntermedius1Node = {sRel = .Scale( .StdPar.VastusIntermedius1Node );};
+  AnyRefNode VastusIntermedius2Node = {sRel = .Scale( .StdPar.VastusIntermedius2Node );};
+  AnyRefNode VastusIntermedius3Node = {sRel = .Scale( .StdPar.VastusIntermedius3Node );};
+  AnyRefNode VastusIntermedius4Node = {sRel = .Scale( .StdPar.VastusIntermedius4Node );};
+  AnyRefNode VastusIntermedius5Node = {sRel = .Scale( .StdPar.VastusIntermedius5Node );};
+  AnyRefNode VastusIntermedius6Node = {sRel = .Scale( .StdPar.VastusIntermedius6Node );};
+  #endif
+  
+  
+  #if TLEM_MORPHOLOGY == 2
+  AnyRefNode VastusIntermedius1Node = {sRel = .Scale( .StdPar.RectusFemorisMedialis1Node );};
+  AnyRefNode VastusIntermedius2Node = {sRel = .Scale( .StdPar.RectusFemorisLateralis1Node);};
+  AnyRefNode VastusIntermedius3Node = {sRel = .Scale( .StdPar.RectusFemorisMedialis1Node );};
+  AnyRefNode VastusIntermedius4Node = {sRel = .Scale( .StdPar.RectusFemorisLateralis1Node );};
+  AnyRefNode VastusIntermedius5Node = {sRel = .Scale( .StdPar.RectusFemorisMedialis1Node );};
+  AnyRefNode VastusIntermedius6Node = {sRel = .Scale( .StdPar.RectusFemorisLateralis1Node );};
+  #endif
+  
+  
+  #if TLEM_MORPHOLOGY == 1
+  AnyRefNode VastusLateralisInferior1Node = {sRel = .Scale( .StdPar.VastusLateralisInferior1Node );};
+  AnyRefNode VastusLateralisInferior2Node = {sRel = .Scale( .StdPar.VastusLateralisInferior2Node );};
+  AnyRefNode VastusLateralisInferior3Node = {sRel = .Scale( .StdPar.VastusLateralisInferior3Node );};
+  AnyRefNode VastusLateralisInferior4Node = {sRel = .Scale( .StdPar.VastusLateralisInferior4Node );};
+  AnyRefNode VastusLateralisInferior5Node = {sRel = .Scale( .StdPar.VastusLateralisInferior5Node );};
+  AnyRefNode VastusLateralisInferior6Node = {sRel = .Scale( .StdPar.VastusLateralisInferior6Node );};
+  #endif
+  
+  
+  #if TLEM_MORPHOLOGY == 2
+  AnyRefNode VastusLateralisInferior1Node = {sRel = .Scale( .StdPar.VastusLateralisInferior1Node );};
+  AnyRefNode VastusLateralisInferior2Node = {sRel = .Scale( .StdPar.VastusLateralisInferior1Node );};
+  AnyRefNode VastusLateralisInferior3Node = {sRel = .Scale( .StdPar.VastusLateralisInferior2Node );};
+  AnyRefNode VastusLateralisInferior4Node = {sRel = .Scale( .StdPar.VastusLateralisInferior2Node );};
+  AnyRefNode VastusLateralisInferior5Node = {sRel = .Scale( .StdPar.VastusLateralisInferior3Node );};
+  AnyRefNode VastusLateralisInferior6Node = {sRel = .Scale( .StdPar.VastusLateralisInferior3Node );};
+  #endif
+
+  
+  #if TLEM_MORPHOLOGY == 1
+  AnyRefNode VastusLateralisSuperior1Node = {sRel = .Scale( .StdPar.VastusLateralisSuperior1Node );};
+  AnyRefNode VastusLateralisSuperior2Node = {sRel = .Scale( .StdPar.VastusLateralisSuperior2Node );};
+  #endif
+  
+  
+  #if TLEM_MORPHOLOGY == 2
+  AnyRefNode VastusLateralisSuperior1Node = {sRel = .Scale( .StdPar.VastusLateralisSuperior1Node );};
+  AnyRefNode VastusLateralisSuperior2Node = {sRel = .Scale( .StdPar.VastusLateralisSuperior1Node );};
+  #endif
+  
+  AnyRefNode VastusMedialisInferior1Node = {sRel = .Scale( .StdPar.VastusMedialisInferior1Node );}; 
+  AnyRefNode VastusMedialisInferior2Node = {sRel = .Scale( .StdPar.VastusMedialisInferior1Node );};
+  AnyRefNode VastusMedialisMid1Node = {sRel = .Scale( .StdPar.VastusMedialisMid1Node );};
+  AnyRefNode VastusMedialisMid2Node = {sRel = .Scale( .StdPar.VastusMedialisMid1Node );};
+
+  
+  
+  #if TLEM_MORPHOLOGY == 1
+  AnyRefNode VastusMedialisSuperior1Node = {sRel = .Scale( .StdPar.VastusMedialisSuperior1Node );};
+  AnyRefNode VastusMedialisSuperior2Node = {sRel = .Scale( .StdPar.VastusMedialisSuperior2Node );};
+  AnyRefNode VastusMedialisSuperior3Node = {sRel = .Scale( .StdPar.VastusMedialisSuperior3Node );};
+  AnyRefNode VastusMedialisSuperior4Node = {sRel = .Scale( .StdPar.VastusMedialisSuperior4Node );};
+  AnyRefNode VastusMedialisSuperior5Node = {sRel = .Scale( .StdPar.VastusMedialisSuperior5Node );};
+  AnyRefNode VastusMedialisSuperior6Node = {sRel = .Scale( .StdPar.VastusMedialisSuperior6Node );};
+  #endif
+  
+  
+  #if TLEM_MORPHOLOGY == 2
+  AnyRefNode VastusMedialisSuperior1Node = {sRel = .Scale( .StdPar.VastusMedialisSuperior1Node );};
+  AnyRefNode VastusMedialisSuperior2Node = {sRel = .Scale( .StdPar.VastusMedialisSuperior1Node );};
+  AnyRefNode VastusMedialisSuperior3Node = {sRel = .Scale( .StdPar.VastusMedialisSuperior1Node );};
+  AnyRefNode VastusMedialisSuperior4Node = {sRel = .Scale( .StdPar.VastusMedialisSuperior1Node );};
+  #endif
+
+};// end of Patella
+
+
+#if SignRef == 1  
+  AnyRefFrame &Pelvis = ...Trunk.SegmentsLumbar.PelvisSeg.Right;
+#endif
+#if SignRef == 0
+  AnyRefFrame &Pelvis = ...Trunk.SegmentsLumbar.PelvisSeg.Left;
+#endif
+
+AnyRefFrame& PelvisSeg = ...Trunk.SegmentsLumbar.PelvisSeg;
+
+Pelvis = 
+{
+// AnyRefNode DrawingSegNode = 
+// {
+//   sRel = ..PelvisSeg.PelvisAnatomicalFrame.sRel;
+//   ARel = ..PelvisSeg.PelvisAnatomicalFrame.ARel;
+//   
+////   AnyDrawSurf DrwPelvis = 
+////   {
+////     FileName = ...STL.FilenamePelvis;
+////     ScaleXYZ = {1.0, 1.0, ..Sign*1.0};
+////     Opacity =  Main.DrawSettings.BonesOpacity.Pelvis;
+////     RGB = ....ColorRef.Segments;  
+////     Visible = iffun(gtfun(..Sign, 0), 1, 0);
+////     AnyFunTransform3D &Scale = ..Scale ;      
+////   };
+//   
+////   AnyDrawSurf DrwSacrum = 
+////   {
+////     FileName = ...STL.FilenameSacrum;
+////     Opacity = Main.DrawSettings.BonesOpacity.Pelvis;
+////     RGB = ....ColorRef.Segments;  
+////     Visible = iffun(gtfun(..Sign, 0), 1, 0);
+////     AnyFunTransform3D &Scale = ..ScalePelvisGeom ;      
+////   };      
+// };
+ 
+  #if TLEM_MORPHOLOGY >= 2 
+  
+   #if BM_PELVIS_DISPLAY >=1
+    AnyDrawSurf DrwPelvis = 
+    {
+      FileName = ..STL.FilenamePelvis;
+      ScaleXYZ = {1.0, 1.0, .Sign*1.0};
+      Opacity =  Main.DrawSettings.BonesOpacity.Pelvis;
+      RGB = ...ColorRef.Segments;  
+      //Visible = iffun(gtfun(.Sign, 0), 1, 0);
+      AnyFunTransform3D &Scale = .Scale ;      
+    };
+    
+    AnyDrawSurf DrwSacrum = 
+    {
+      FileName = ..STL.FilenameSacrum;
+      Opacity = Main.DrawSettings.BonesOpacity.Pelvis;
+      RGB = ...ColorRef.Segments;  
+      //Visible = iffun(gtfun(.Sign, 0), 1, 0);
+      AnyFunTransform3D &Scale = .Scale ;      
+    };
+   #endif
+  
+  #endif
+};
+  
+Pelvis = {
+AnyRefNode HipJoint = {
+  AnyVec3 sRel0 = .Muscles.sRel0Pelvis+(.Muscles.ARel*.Muscles.StdPar.HipJoint')';
+  // The Hip Joint is positioned based on the data in the cadaver data set 
+  sRel = .Scale(sRel0);
+  ARel = .ARel';
+
+  #ifdef USE_AMMR14_HIP_ROTATIONS
+  // Setting the USE_AMMR14_HIP_ROTATIONSflag will emitate AMMR1.4 behaviour
+  ARel=.ARel'*RotMat(-24*pi/180,z);
+  #endif
+  #include "../DrawSettings/JointAxesProximal.any"
+
+ // AnyMat33 RotNode = {{1,0,0},{0,1,0},{0,0,1}};
+};
+
+AnyRefNode Muscles = {
+// All muscle attachment nodes from the leg is placed inside
+// their own node (coordinate system). The reason for using
+// this procedure instead of putting the nodes directly on the 
+// pelvis segment, is that it makes it possible to have the
+// leg as a selfcontained block. The nodes in this folder is
+// used by the LegTLEM model for muscle attachements on pelvis.
+//AnyRefNode LegAttachmentNodes= {
+  
+  /// Folder with cadaver parameters for pelvis in the LegTLEM model 
+  AnyFolder &StdPar = ...ModelParameters.Pelvis;
+
+#if TLEM_MORPHOLOGY == 1
+// Rotation of the Pelvis Anatomical Coordinate system relative to the Pelvis Segment coordinate system
+  AnyMat33 PelvisAnatomicalFrame_ARel = ...Trunk.SegmentsLumbar.PelvisSeg.PelvisAnatomicalFrame.ARelUnscaled;
+  // Position of the Pelvis Anatomical Coordinate system relative to the Pelvis Segment coordinate system
+  AnyVec3 PelvisAnatomicalFramePos =  ...Trunk.SegmentsLumbar.PelvisSeg.PelvisAnatomicalFrame.sRelUnscaled;
+  // Position of the Pelvis Anatomical Coordinate system relative to the lab  frame of the Cadaver dataset
+
+  // Rotation of the Pelvis Anatomical Frame relative to lab frame of the Cadaver dataset
+  AnyMat33 CadaverPelvisAnatomicalFrame_ARel = RotMat(0.5*(StdPar.PsisIpsilateral+StdPar.PsisColateral),
+                          0.5*(StdPar.AsisIpsilateral+StdPar.AsisColateral) ,
+                          0.5*(StdPar.PsisIpsilateral+StdPar.PsisColateral)+...Sign*(StdPar.AsisIpsilateral-StdPar.AsisColateral) )*RotMat(-pi/2,x);
+  AnyVec3 CadaverPelvisAnatomicalFrame_sRel  = 0.5*(StdPar.AsisIpsilateral+StdPar.AsisColateral);
+                          
+  // The ARel rotates the LegTLEM dataset to match the generic pelvis in the AnyBody repository. 
+  // This is done by alligning the anatomically defined coordinate systems
+  ARel = PelvisAnatomicalFrame_ARel * CadaverPelvisAnatomicalFrame_ARel';
+  //  PelvisAnatomicalFrame_ARel *CadaverPelvisAnatomicalFrame_ARel';
+  // The sRel aligns the LegTLEM dataset to match the generic pelvis in the AnyBody repository. 
+  // This is done by alligning the anatomically defined coordinate systems 
+  AnyVec3 sRel0Pelvis = PelvisAnatomicalFramePos - CadaverPelvisAnatomicalFrame_sRel*ARel';
+  sRel = .Scale(sRel0Pelvis);
+  
+  AnyFunTransform3DLin Scale = 
+  {
+    AnyFunTransform3DLin Transform_HipNode = 
+    {
+     // The -24 degree rotation is added to allign the muscles origins from the LegTLEM data set
+     // with the generic AnyBody pelvic bone. 
+     ScaleMat = ..ARel;
+     Offset = ..sRel0Pelvis*..ARel;
+    };
+  
+   PreTransforms = 
+   {
+     &Transform_HipNode,
+     &..ScalePelvisGeom
+   };
+   ScaleMat = .ARel';
+   Offset = -.sRel;
+  };
+
+//  AnyDrawRefFrame drw_test = 
+//  {
+//    RGB = {0.2, 0.3, 0.4};
+//    ScaleXYZ = 0.3 * {1, 1, 1};
+//  };
+#else
+
+//  AnyMat33 CadaverPelvisAnatomicalFrame_ARel = RotMat(0.5*(StdPar.RPSIS+StdPar.LPSIS),
+//                          0.5*(StdPar.RASIS+StdPar.LASIS) ,
+//                          0.5*(StdPar.RPSIS+StdPar.LPSIS)+...Sign*(StdPar.RASIS-StdPar.LASIS) )*RotMat(-pi/2,x);
+//  ARel = CadaverPelvisAnatomicalFrame_ARel;
+//  AnyVec3 HipjointTD_sRel0  = {StdPar.HipJointTD[0], ...Sign*StdPar.HipJointTD[1], ...Sign*StdPar.HipJointTD[2]};
+//  AnyVec3 sRel0Pelvis = HipjointTD_sRel0*ARel;
+  
+//  AnyMat33 CadaverPelvisAnatomicalFrame_ARel = RotMat(0.5*(StdPar.RPSIS+StdPar.LPSIS),
+//                          0.5*(StdPar.RASIS+StdPar.LASIS) ,
+//                          0.5*(StdPar.RPSIS+StdPar.LPSIS)+ (StdPar.RASIS-StdPar.LASIS) )*RotMat(-pi/2,x);  
+//  ARel = CadaverPelvisAnatomicalFrame_ARel';
+//
+//
+//  AnyVec3 HipjointTD_sRel0  = {StdPar.HipJointTD[0],  StdPar.HipJointTD[1], StdPar.HipJointTD[2]};
+//  AnyVec3 sRel0Pelvis = HipjointTD_sRel0 * ARel' ;  
+
+  
+  AnyMat33 CadaverPelvisAnatomicalFrame_ARel = 
+                          RotMat(
+                          0.5*(StdPar.RPSIS+StdPar.LPSIS),
+                          0.5*(StdPar.RASIS+StdPar.LASIS),
+                          0.5*(StdPar.RPSIS+StdPar.LPSIS)+ (StdPar.RASIS-StdPar.LASIS) 
+                          )
+                          *RotMat(-pi/2,x);
+  ARel = CadaverPelvisAnatomicalFrame_ARel;
+  AnyVec3 HipjointTD_sRel0  = {StdPar.HipJointTD[0],  StdPar.HipJointTD[1], StdPar.HipJointTD[2]};
+  AnyVec3 sRel0Pelvis =  HipjointTD_sRel0 * ARel' ;
+  
+  sRel = .Scale(sRel0Pelvis);
+  
+  AnyFunTransform3DLin Scale = 
+  {
+    
+    AnyFunTransform3DLin Transform_HipNode = 
+    {
+      ScaleMat = ..ARel;
+      Offset = ..sRel0Pelvis*..ARel;
+    };
+    
+    PreTransforms = 
+    {
+      &Transform_HipNode,
+      &..Scale
+      //&..ScalePelvisGeom
+    };
+    //ScaleMat = {{1,0,0}, {0,1,0}, {0,0,1}}; //.ARel;
+    ScaleMat = .ARel';
+    Offset = -.sRel;
+  };  
+
+    
+#endif
+
+
+#if TLEM_MORPHOLOGY == 1
+AnyRefNode IliacusWrapSurf = {
+  AnyFloat p = .Scale(.StdPar.IliacusWrapLandmarks);  //dn(20120614): moved scaling out of WrappingCylinder5PointFit.any
+  AnyFloat lengthscalefactor = 1.8;//1.4;
+  AnyFloat radiusscalefactor = 1;
+
+  //AnyFunTransform3DLin &Scale = .Scale;
+  AnyInt Sign = ..Sign;
+  AnyMat33 transform = RotMat(-pi * (Sign + 1) / 2, y);
+  
+  #include "../ToolBox/WrappingSurfaces/WrappingCylinder5PointFit.any"
+  cyl = {
+   // AnyDrawParamSurf drw={RGB={1,0,0};};
+  };
+};
+#endif
+
+    #if TLEM_MORPHOLOGY == 2
+   AnyRefNode GluteusMaximusWrapSurf = {
+     AnyVec3 P2 = .Scale({-0.02738,-0.06247,..Sign*-0.03611});
+     AnyVec3 P1 = .Scale({-0.04011, 0.12595,..Sign*0.013490}); 
+     sRel = P1;
+     ARel = RotMat(P1, P2, P2 + 0.1)*RotMat(pi/2,y);
+
+     AnySurfCylinder cyl = {
+       Radius = 0.025;
+       Length = 0.25;
+       //AnyDrawParamSurf drw={RGB={1,0,0};Opacity = 0.5;Visible = On;};
+       CapRatio = 0.1;
+     };
+   };
+  #endif
+  
+// Origin points on the Pelvis
+
+AnyRefNode ASIS = {sRel = .Scale( .StdPar.AsisIpsilateral); /*AnyDrawNode Node = {ScaleXYZ = {0.005, 0.005, 0.005};};*/};
+AnyRefNode PSIS = {sRel = .Scale( .StdPar.PsisIpsilateral); /*AnyDrawNode Node = {ScaleXYZ = {0.005, 0.005, 0.005};};*/};
+
+
+AnyRefNode AdductorBrevisProximal1Node = {sRel = .Scale( .StdPar.AdductorBrevisProximal1Node );};
+AnyRefNode AdductorBrevisProximal2Node = {sRel = .Scale( .StdPar.AdductorBrevisProximal2Node );};
+AnyRefNode AdductorBrevisMid1Node = {sRel = .Scale( .StdPar.AdductorBrevisMid1Node );};
+AnyRefNode AdductorBrevisMid2Node = {sRel = .Scale( .StdPar.AdductorBrevisMid2Node );};
+AnyRefNode AdductorBrevisDistal1Node = {sRel = .Scale( .StdPar.AdductorBrevisDistal1Node );};
+AnyRefNode AdductorBrevisDistal2Node = {sRel = .Scale( .StdPar.AdductorBrevisDistal2Node );};
+
+AnyRefNode AdductorLongus1Node = {sRel = .Scale( .StdPar.AdductorLongus1Node );};
+AnyRefNode AdductorLongus2Node = {sRel = .Scale( .StdPar.AdductorLongus2Node );};
+AnyRefNode AdductorLongus3Node = {sRel = .Scale( .StdPar.AdductorLongus3Node );};
+AnyRefNode AdductorLongus4Node = {sRel = .Scale( .StdPar.AdductorLongus4Node );};
+AnyRefNode AdductorLongus5Node = {sRel = .Scale( .StdPar.AdductorLongus5Node );};
+AnyRefNode AdductorLongus6Node = {sRel = .Scale( .StdPar.AdductorLongus6Node );};
+
+AnyRefNode AdductorMagnusDistal1Node = {sRel = .Scale( .StdPar.AdductorMagnusDistal1Node );};
+AnyRefNode AdductorMagnusDistal2Node = {sRel = .Scale( .StdPar.AdductorMagnusDistal2Node );};
+AnyRefNode AdductorMagnusDistal3Node = {sRel = .Scale( .StdPar.AdductorMagnusDistal3Node );};
+
+AnyRefNode AdductorMagnusMid1Node = {sRel = .Scale( .StdPar.AdductorMagnusMid1Node );};
+AnyRefNode AdductorMagnusMid2Node = {sRel = .Scale( .StdPar.AdductorMagnusMid2Node );};
+AnyRefNode AdductorMagnusMid3Node = {sRel = .Scale( .StdPar.AdductorMagnusMid3Node );};
+AnyRefNode AdductorMagnusMid4Node = {sRel = .Scale( .StdPar.AdductorMagnusMid4Node );};
+AnyRefNode AdductorMagnusMid5Node = {sRel = .Scale( .StdPar.AdductorMagnusMid5Node );};
+AnyRefNode AdductorMagnusMid6Node = {sRel = .Scale( .StdPar.AdductorMagnusMid6Node );};
+
+AnyRefNode AdductorMagnusProximal1Node = {sRel = .Scale( .StdPar.AdductorMagnusProximal1Node );};
+AnyRefNode AdductorMagnusProximal2Node = {sRel = .Scale( .StdPar.AdductorMagnusProximal2Node );};
+AnyRefNode AdductorMagnusProximal3Node = {sRel = .Scale( .StdPar.AdductorMagnusProximal3Node );};
+AnyRefNode AdductorMagnusProximal4Node = {sRel = .Scale( .StdPar.AdductorMagnusProximal4Node );};
+
+AnyRefNode BicepsFemorisCaputLongum1Node = {sRel = .Scale( .StdPar.BicepsFemorisCaputLongum1Node );};
+
+AnyRefNode GemellusInferior1Node = {sRel = .Scale( .StdPar.GemellusInferior1Node );};
+
+AnyRefNode GemellusSuperior1Node = {sRel = .Scale( .StdPar.GemellusSuperior1Node );};
+
+AnyRefNode GluteusMaximusSuperior1Node = {sRel = .Scale( .StdPar.GluteusMaximusSuperior1Node );};
+AnyRefNode GluteusMaximusSuperior2Node = {sRel = .Scale( .StdPar.GluteusMaximusSuperior2Node );};
+AnyRefNode GluteusMaximusSuperior3Node = {sRel = .Scale( .StdPar.GluteusMaximusSuperior3Node );};
+AnyRefNode GluteusMaximusSuperior4Node = {sRel = .Scale( .StdPar.GluteusMaximusSuperior4Node );};
+AnyRefNode GluteusMaximusSuperior5Node = {sRel = .Scale( .StdPar.GluteusMaximusSuperior5Node );};
+AnyRefNode GluteusMaximusSuperior6Node = {sRel = .Scale( .StdPar.GluteusMaximusSuperior6Node );};
+
+AnyRefNode GluteusMaximusInferior1Node = {sRel = .Scale( .StdPar.GluteusMaximusInferior1Node );};
+AnyRefNode GluteusMaximusInferior2Node = {sRel = .Scale( .StdPar.GluteusMaximusInferior2Node );};
+AnyRefNode GluteusMaximusInferior3Node = {sRel = .Scale( .StdPar.GluteusMaximusInferior3Node );};
+AnyRefNode GluteusMaximusInferior4Node = {sRel = .Scale( .StdPar.GluteusMaximusInferior4Node );};
+AnyRefNode GluteusMaximusInferior5Node = {sRel = .Scale( .StdPar.GluteusMaximusInferior5Node );};
+AnyRefNode GluteusMaximusInferior6Node = {sRel = .Scale( .StdPar.GluteusMaximusInferior6Node );};
+
+AnyRefNode GluteusMediusAnterior1Node = {sRel = .Scale( .StdPar.GluteusMediusAnterior1Node );};
+AnyRefNode GluteusMediusAnterior2Node = {sRel = .Scale( .StdPar.GluteusMediusAnterior2Node );};
+AnyRefNode GluteusMediusAnterior3Node = {sRel = .Scale( .StdPar.GluteusMediusAnterior3Node );};
+AnyRefNode GluteusMediusAnterior4Node = {sRel = .Scale( .StdPar.GluteusMediusAnterior4Node );};
+AnyRefNode GluteusMediusAnterior5Node = {sRel = .Scale( .StdPar.GluteusMediusAnterior5Node );};
+AnyRefNode GluteusMediusAnterior6Node = {sRel = .Scale( .StdPar.GluteusMediusAnterior6Node );};
+
+AnyRefNode GluteusMediusPosterior1Node = {sRel = .Scale( .StdPar.GluteusMediusPosterior1Node );};
+AnyRefNode GluteusMediusPosterior2Node = {sRel = .Scale( .StdPar.GluteusMediusPosterior2Node );};
+AnyRefNode GluteusMediusPosterior3Node = {sRel = .Scale( .StdPar.GluteusMediusPosterior3Node );};
+AnyRefNode GluteusMediusPosterior4Node = {sRel = .Scale( .StdPar.GluteusMediusPosterior4Node );};
+AnyRefNode GluteusMediusPosterior5Node = {sRel = .Scale( .StdPar.GluteusMediusPosterior5Node );};
+AnyRefNode GluteusMediusPosterior6Node = {sRel =.Scale( .StdPar.GluteusMediusPosterior6Node );};
+
+AnyRefNode GluteusMinimusAnterior1Node = {sRel = .Scale( .StdPar.GluteusMinimusAnterior1Node );};
+
+
+#if TLEM_MORPHOLOGY == 2
+AnyRefNode GluteusMinimusAnterior2Node = {sRel = .Scale( .StdPar.GluteusMinimusAnterior2Node );};
+#endif
+
+AnyRefNode GluteusMinimusMid1Node = {sRel = .Scale( .StdPar.GluteusMinimusMid1Node );};
+
+
+#if TLEM_MORPHOLOGY == 2
+AnyRefNode GluteusMinimusMid2Node = {sRel = .Scale( .StdPar.GluteusMinimusMid2Node );};
+#endif
+
+AnyRefNode GluteusMinimusPosterior1Node = {sRel = .Scale( .StdPar.GluteusMinimusPosterior1Node );};
+
+
+#if TLEM_MORPHOLOGY == 2
+AnyRefNode GluteusMinimusPosterior2Node = {sRel = .Scale( .StdPar.GluteusMinimusPosterior2Node );};
+#endif
+
+AnyRefNode Gracilis1Node = {sRel = .Scale( .StdPar.Gracilis1Node );};
+AnyRefNode Gracilis2Node = {sRel = .Scale( .StdPar.Gracilis2Node );};
+
+AnyRefNode IliacusLateralis1Node = {sRel = .Scale( .StdPar.IliacusLateralis1Node ); /*AnyDrawNode Node = {ScaleXYZ = {0.005, 0.005, 0.005};};*/};
+AnyRefNode IliacusLateralis2Node = {sRel = .Scale( .StdPar.IliacusLateralis2Node ); /*AnyDrawNode Node = {ScaleXYZ = {0.005, 0.005, 0.005};};*/};
+
+
+#if TLEM_MORPHOLOGY == 1
+AnyRefNode IliacusLateralis3Node = {sRel = .Scale( .StdPar.IliacusLateralis3Node );};
+AnyRefNode IliacusLateralisViaNode1 = {sRel = .Scale( .StdPar.IliacusLateralisViaNode1 );};
+#endif
+
+
+#if TLEM_MORPHOLOGY == 2
+AnyRefNode IliacusLateralisViaNode1 = {sRel = .Scale( .StdPar.IliacusVia1Node);AnyDrawNode Node = {ScaleXYZ = {0.005, 0.005, 0.005};};};
+#endif
+
+AnyRefNode IliacusMid1Node = {sRel = .Scale( .StdPar.IliacusMid1Node ); /*AnyDrawNode Node = {ScaleXYZ = {0.005, 0.005, 0.005};};*/};
+AnyRefNode IliacusMid2Node = {sRel = .Scale( .StdPar.IliacusMid2Node ); /*AnyDrawNode Node = {ScaleXYZ = {0.005, 0.005, 0.005};};*/};
+
+
+#if TLEM_MORPHOLOGY == 1
+AnyRefNode IliacusMid3Node = {sRel = .Scale( .StdPar.IliacusMid3Node );};
+AnyRefNode IliacusMidViaNode1 = {sRel = .Scale( .StdPar.IliacusMidViaNode1 );};
+#endif
+
+
+#if TLEM_MORPHOLOGY == 2
+AnyRefNode IliacusMidViaNode1 = {sRel = .Scale( .StdPar.IliacusVia1Node);AnyDrawNode Node = {ScaleXYZ = {0.005, 0.005, 0.005};};};
+#endif
+
+AnyRefNode IliacusMedialis1Node = {sRel =.Scale( .StdPar.IliacusMedialis1Node ); /*AnyDrawNode Node = {ScaleXYZ = {0.005, 0.005, 0.005};};*/};
+AnyRefNode IliacusMedialis2Node = {sRel = .Scale( .StdPar.IliacusMedialis2Node );/*AnyDrawNode Node = {ScaleXYZ = {0.005, 0.005, 0.005};};*/};
+
+
+#if TLEM_MORPHOLOGY == 1
+AnyRefNode IliacusMedialis3Node = {sRel = .Scale( .StdPar.IliacusMedialis3Node );}; 
+AnyRefNode IliacusMedialisViaNode1 = {sRel = .Scale( .StdPar.IliacusMedialisViaNode1 );};
+#endif
+
+
+#if TLEM_MORPHOLOGY == 2
+AnyRefNode IliacusMedialisViaNode1 = {sRel = .Scale( .StdPar.IliacusVia1Node);AnyDrawNode Node = {ScaleXYZ = {0.005, 0.005, 0.005};};};
+#endif
+
+AnyRefNode ObturatorExternusInferior1Node = {sRel = .Scale( .StdPar.ObturatorExternusInferior1Node );};
+AnyRefNode ObturatorExternusInferior2Node = {sRel =.Scale( .StdPar.ObturatorExternusInferior2Node );};
+
+AnyRefNode ObturatorExternusSuperior1Node = {sRel = .Scale( .StdPar.ObturatorExternusSuperior1Node );};
+AnyRefNode ObturatorExternusSuperior2Node = {sRel = .Scale( .StdPar.ObturatorExternusSuperior2Node );};
+AnyRefNode ObturatorExternusSuperior3Node = {sRel = .Scale( .StdPar.ObturatorExternusSuperior3Node );};
+
+
+#if TLEM_MORPHOLOGY == 1
+AnyRefNode ObturatorExternusSuperiorViaNode1 = {sRel = .Scale( .StdPar.ObturatorExternusSuperiorViaNode1 );};
+#endif
+
+AnyRefNode ObturatorInternus1Node = {sRel = .Scale( .StdPar.ObturatorInternus1Node );};
+AnyRefNode ObturatorInternus2Node = {sRel = .Scale( .StdPar.ObturatorInternus2Node );};
+AnyRefNode ObturatorInternus3Node = {sRel = .Scale( .StdPar.ObturatorInternus3Node );};
+
+#if TLEM_MORPHOLOGY == 1
+AnyRefNode ObturatorInternusViaNode1 = {sRel = .Scale( .StdPar.ObturatorInternusViaNode1 );};
+#endif
+
+
+#if TLEM_MORPHOLOGY == 2
+AnyRefNode ObturatorInternus4Node = {sRel = .Scale( .StdPar.ObturatorInternus4Node );};
+AnyRefNode ObturatorInternus5Node = {sRel = .Scale( .StdPar.ObturatorInternus5Node );};
+AnyRefNode ObturatorInternus6Node = {sRel = .Scale( .StdPar.ObturatorInternus6Node );};
+
+AnyRefNode ObturatorInternusViaNode1 = {sRel = .Scale( .StdPar.ObturatorInternusVia1Node );};
+
+#endif
+
+AnyRefNode Pectineus1Node = {sRel = .Scale( .StdPar.Pectineus1Node );};
+AnyRefNode Pectineus2Node = {sRel = .Scale( .StdPar.Pectineus2Node );};
+AnyRefNode Pectineus3Node = {sRel = .Scale( .StdPar.Pectineus3Node );};
+AnyRefNode Pectineus4Node = {sRel = .Scale( .StdPar.Pectineus4Node );};
+
+AnyRefNode Piriformis1Node = {sRel = .Scale( .StdPar.Piriformis1Node );};
+
+
+#if TLEM_MORPHOLOGY == 1
+AnyRefNode PsoasMinor1Node = {sRel = .Scale( .StdPar.PsoasMinor1Node );};
+AnyRefNode PsoasMinorViaNode1 = {sRel = .Scale( .StdPar.PsoasMinorViaNode1 );};
+// The PsoasMinor does not have a viapoint according to the Klein Horsman dataset. However, since it uses the
+// Psoas Major insertion point (see comments in Thigh segment) it needs this via point in order to wrap around
+// the cylinder in the right direction. 
+
+AnyRefNode PsoasMajor1Node = {sRel = .Scale( .StdPar.PsoasMajor1Node );};
+AnyRefNode PsoasMajor2Node = {sRel = .Scale( .StdPar.PsoasMajor2Node );};
+AnyRefNode PsoasMajor3Node = {sRel = .Scale( .StdPar.PsoasMajor3Node );};
+AnyRefNode PsoasMajorViaNode1 = {sRel = .Scale( .StdPar.PsoasMajorViaNode1 );};
+#endif
+
+
+AnyRefNode QuadratusFemoris1Node	= {sRel = .Scale( .StdPar.QuadratusFemoris1Node );};
+AnyRefNode QuadratusFemoris2Node	= {sRel = .Scale( .StdPar.QuadratusFemoris2Node );};
+AnyRefNode QuadratusFemoris3Node	= {sRel = .Scale( .StdPar.QuadratusFemoris3Node );};
+AnyRefNode QuadratusFemoris4Node	= {sRel = .Scale( .StdPar.QuadratusFemoris4Node );};
+
+
+#if TLEM_MORPHOLOGY == 1
+AnyRefNode RectusFemoris1Node = {sRel = .Scale( .StdPar.RectusFemoris1Node );};
+AnyRefNode RectusFemoris2Node = {sRel = .Scale( .StdPar.RectusFemoris2Node );};
+#endif
+
+
+#if TLEM_MORPHOLOGY == 2
+AnyRefNode RectusFemorisMedialis1Node = {sRel = .Scale( .StdPar.RectusFemorisMedialis1Node );};
+AnyRefNode RectusFemorisLateralis1Node = {sRel = .Scale( .StdPar.RectusFemorisLateralis1Node);};
+#endif
+
+
+#if TLEM_MORPHOLOGY == 1
+AnyRefNode SartoriusProximal1Node = {sRel = .Scale( .StdPar.SartoriusProximal1Node );};
+AnyRefNode SartoriusDistal1Node = {sRel = .Scale( .StdPar.SartoriusDistal1Node );};
+#endif
+
+
+#if TLEM_MORPHOLOGY == 2
+AnyRefNode Sartorius1Node = {sRel = .Scale( .StdPar.Sartorius1Node );};
+#endif
+
+AnyRefNode Semimembranosus1Node = {sRel = .Scale( .StdPar.Semimembranosus1Node );};
+
+
+#if TLEM_MORPHOLOGY == 2
+AnyRefNode Semimembranosus2Node = {sRel = .Scale( .StdPar.Semimembranosus2Node );};
+AnyRefNode Semimembranosus3Node = {sRel = .Scale( .StdPar.Semimembranosus3Node );};
+#endif
+
+AnyRefNode Semitendinosus1Node = {sRel = .Scale( .StdPar.Semitendinosus1Node );};
+
+AnyRefNode TensorFasciaeLatae1Node = {sRel =.Scale( .StdPar.TensorFasciaeLatae1Node );};
+AnyRefNode TensorFasciaeLatae2Node = {sRel = .Scale( .StdPar.TensorFasciaeLatae2Node );};
+
+
+#if TLEM_MORPHOLOGY == 1
+//Ligament origin nodes from Klein-Horseman
+AnyRefNode IlioFemAntOrig = {sRel = .Scale( .StdPar.IlioFemAntOrig );};
+AnyRefNode IlioFemLatOrig = {sRel = .Scale( .StdPar.IlioFemLatOrig );}; 
+AnyRefNode PuboFemOrig = {sRel = .Scale( .StdPar.PuboFemOrig );}; //updated coordinates
+AnyRefNode IschioFemOrig = {sRel = .Scale( .StdPar.IschioFemOrig );};
+//end ligament origin nodes
+#endif
+
+
+
+#ifdef GLUTEUS_MAX_WRAPPING_BETA
+
+
+//Added SC 04/05/2012 (for gluteus wrapping)
+
+//  Unscaled original cylinder for matrix p
+
+//  AnyRefNode GluteusCylSuperior = { 
+//    sRel = .Scale({-0.05, -0.06, ..Sign*-0.10}); 
+//    AnyDrawRefFrame drws = {};
+//    ARel = RotMat(..Sign*-25*pi/180,x)*RotMat(..Sign*20*pi/180,y);
+//        
+//    AnySurfCylinder cyl = {
+//      Radius = 0.065;//ScaledRadius[1];
+//      Length = ...Sign*0.3; 
+//      AnyDrawParamSurf drv = {
+//        Opacity = 0.1;
+//      }; 
+//    };
+//  }; 
+  
+//  AnyRefNode Q1 = { sRel = .Scale({-0.05, -0.06, 0.10}); AnyDrawRefFrame drws = {}; };
+//  AnyRefNode Q2 = { sRel = .Q1.sRel + {0, 0, -0.3}*.GluteusCylSuperior.ARel'; AnyDrawRefFrame drws = {}; };
+//  AnyRefNode Q3 = { sRel = .Q1.sRel + {0, 0.065, -0.3}*.GluteusCylSuperior.ARel'; AnyDrawRefFrame drws = {}; };
+//  AnyRefNode Q4 = { sRel = .Q1.sRel + {0.065, 0, -0.3}*.GluteusCylSuperior.ARel'; AnyDrawRefFrame drws = {}; };
+//  AnyRefNode Q5 = { sRel = .Q1.sRel + {0, -0.065, -0.15}*.GluteusCylSuperior.ARel'; AnyDrawRefFrame drws = {}; };
+  
+  
+  
+  AnyRefNode GluteusCylSuperior = {
+    
+    AnyMatrix p = .Scale(.StdPar.GluteusSuperiorWrapLandmarks);   //dn(20120614): moved scaling out of WrappingCylinder5PointFit.any
+    AnyFloat lengthscalefactor = 1;
+    AnyFloat radiusscalefactor = 1;
+
+    //AnyFunTransform3D &Scale = .Scale;
+    AnyMat33 transform = RotMat(pi*(1-..Sign-2)*0.5, y);
+    
+    #include "../ToolBox/WrappingSurfaces/WrappingCylinder5PointFit.any"
+    cyl = {
+      AnyDrawParamSurf draw={Opacity = 0.1;};
+    };
+  };
+  
+  
+  
+  
+//  Unscaled original cylinder for matrix p
+
+//    AnyRefNode GluteusCylInferior = { 
+//    sRel = .Scale({-0.01, -0.06, ..Sign*-0.10}); 
+//    AnyDrawRefFrame drws = {};
+//    ARel = RotMat(..Sign*-20*pi/180,x);
+//        
+//    AnySurfCylinder cyl = {
+//      Radius = 0.065;//ScaledRadius[1];
+//      Length = ...Sign*0.3; 
+//      AnyDrawParamSurf drv = {
+//        Opacity = 0.1;
+//      }; 
+//    };
+//  }; 
+  
+//  AnyRefNode Q1 = { sRel = .Scale({-0.01, -0.06, 0.10}); AnyDrawRefFrame drws = {}; };
+//  AnyRefNode Q2 = { sRel = .Q1.sRel + {0, 0, -0.3}*.GluteusCylInferior.ARel'; AnyDrawRefFrame drws = {}; };
+//  AnyRefNode Q3 = { sRel = .Q1.sRel + {0, 0.065, -0.3}*.GluteusCylInferior.ARel'; AnyDrawRefFrame drws = {}; };
+//  AnyRefNode Q4 = { sRel = .Q1.sRel + {0.065, 0, -0.3}*.GluteusCylInferior.ARel'; AnyDrawRefFrame drws = {}; };
+//  AnyRefNode Q5 = { sRel = .Q1.sRel + {0, -0.065, -0.15}*.GluteusCylInferior.ARel'; AnyDrawRefFrame drws = {}; };
+  
+  
+  
+  AnyRefNode GluteusCylInferior = {
+    
+//    AnyMatrix p = {{-0.009838699, -0.05903219, ..Sign*-0.09090909},
+//                  {-0.009838699, 0.04357385, ..Sign*0.1909987},
+//                  {-0.009838699, 0.1046539, ..Sign*0.1687674},
+//                  {0.0551613, 0.04357385, ..Sign*0.1909987},
+//                  {-0.009838699, -0.06880919, ..Sign*0.07227611}};
+    AnyMatrix p = .Scale(.StdPar.GluteusInferiorWrapLandmarks);		//dn(20120614): moved scaling out of WrappingCylinder5PointFit.any
+    AnyFloat lengthscalefactor = 1;
+    AnyFloat radiusscalefactor = 1;
+   
+    //AnyFunTransform3D &Scale = .Scale;
+    AnyMat33 transform = RotMat(pi*(1-..Sign-2)*0.5, y);
+    
+    #include "../ToolBox/WrappingSurfaces/WrappingCylinder5PointFit.any"
+    cyl = {
+      //AnyDrawParamSurf draw={Opacity = 0.1;};
+    };
+  };
+
+  #endif
+
+}; // End Muscles
+
+}; // End Pelvis
+
+

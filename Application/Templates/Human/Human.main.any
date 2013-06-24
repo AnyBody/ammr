@@ -1,0 +1,46 @@
+#include "../libdef.any"
+
+Main = {  
+  // ----------------------------------------------------------
+  // Model configuration:
+  // For more info on body model configuration options please load the model and double click on: 
+  // #include "<ANYBODY_PATH_BODY>\Documentation\BodyModel.parameters.any"
+  // ----------------------------------------------------------
+  
+  //If you want to use your own draw settings, please outcomment the next line
+  //#path BM_DRAWSETTINGS_FILE "Model\DrawSettings.any"
+  
+  // Using your own Mannequin.any file in the Model folder of your model
+  #path BM_MANNEQUIN_FILE "Model\Mannequin.any"
+  
+  // Include default human model
+  #include "<ANYBODY_PATH_BODY>\HumanModel.any"
+  
+  AnyFolder Model = {  
+    // A link to the human model
+    AnyFolder &HumanModel=.HumanModel.BodyModelWithDefaultDrivers;
+    
+    // Environment files are used to include objects surrounding human
+    #include "Model\Environment.any"   
+    
+    AnyFolder ModelEnvironmentConnection = {
+      //'JointsAndDrivers.any' file can include all kinematic constraints such as joints and drivers
+      #include "Model\JointsAndDrivers.any"
+      // Additional reactions which are required to run the inverse dynamics analysis
+      #include "Model\Reactions.any"
+    };
+  };
+  
+  AnyBodyStudy Study = {
+    AnyFolder &Model = .Model;  
+    Gravity={0.0, -9.81, 0.0};
+    nStep = 11;
+    
+    // these settings are needed for adding drivers without removing the default set 
+    Kinematics.SolverType = KinSolOverDeterminate;
+    InitialConditions.SolverType = Kinematics.SolverType ;
+  };
+  
+    #include "<ANYBODY_PATH_TOOLBOX>\Operations\RunAppSequence.any"
+}; //Main
+

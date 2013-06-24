@@ -1,0 +1,114 @@
+/*
+This is the root file for the leg model, it is using the Muscle model including
+Force-Lenght-Velocity relationships.
+
+The data for this model orginates from different sources. The model is partly based on the leg
+model of Scott Delp. But modification has been made along the way.
+
+Together with the geometry of the model, model calibration is one
+of the most critical parts within our models. In theory it is not necessary
+to calibrate the model provided that your muscle data and geometry are exactly correct,
+which is rarely the case.
+With model calibration we mean fine-tuning of the muscle properties in such
+a way that each individual muscle works in the right part of their force-length
+relationship complying as much as possible with existing literature. From the literature
+information is gathered about joint positions where muscle fibres of individual
+muscles have their optimal length (Note that those joint position are not
+necessarily the position where the muscle creates the largest moment). When
+these joint positions are known the tendon length in the model is modified
+keeping the rest of the muscle properties constant (maximum muscle force, muscle
+fibre length) in such a way that the fibres work at their optimal length in
+that position.
+
+The model contains the following files:
+"StandardParameters.any" for overall parameters on which the model is based
+"Seg.any" segments on the leg.
+"Jnt.any" joint definitions for the leg.
+"Muscle.any" muscle definitons for the leg.
+"MusPar.any" muscle parameters for the leg.
+"SegmentsTrunk.any" definition of pelvis segment.
+*/
+  
+  // Add all muscle nodes etc. to the pelvis segment
+  HipNodeRef = {
+    #include "<ANYBODY_PATH_BODY>LegTD/HipNodes.any"  
+  };
+  
+  
+/// Collection of the joints into JntDOF which are used by the applications.
+AnyKinMeasureOrg JntDOF = {
+  // This is where the DOF of the leg are assembled into one single measure, this measure has the following DOF:
+  // 0 Ankle flexion/extension
+  // 1 Subtalar abduction adduction  
+  // 2 Knee flextion/extension
+  // 3 Hip adduction/abduction 
+  // 4 Hip rotation externa/internal
+  // 5 Hip flexion/extension 
+  AnyRevoluteJoint &Ankle = .Jnt.Ankle;
+  AnyRevoluteJoint &SubTalar = .Jnt.SubTalar;
+  AnyRevoluteJoint &Knee = .Jnt.Knee;
+  AnySphericalJoint &Hip = .Jnt.Hip;
+}; 
+
+/// Definition of the leg segments
+AnyFolder Seg = {
+  #include "Seg.any"
+  #include "<ANYBODY_PATH_BODY>FootGM/Seg.any"
+  #include "<ANYBODY_PATH_BODY>FootGM/PressureContactNodes.any"
+  #include "<ANYBODY_PATH_BODY>FootGM/LigAndMusNodes.any"
+};
+
+/// Definition of the joints
+AnyFolder Jnt = {
+  #include "<ANYBODY_PATH_BODY>LegTD/Jnt.any"
+  #include "<ANYBODY_PATH_BODY>FootGM/Jnt.any"
+};
+
+/// Definition of the muscles
+AnyFolder Mus = {
+  #include "Mus.any" 
+  #include "<ANYBODY_PATH_BODY>FootGM/Mus.any"
+  #include "<ANYBODY_PATH_BODY>FootGM/MusControlSeg.any" 
+};
+
+//  #include "<ANYBODY_PATH_BODY>FootGM/JointStiffnessNeutral.any"
+//  #include "<ANYBODY_PATH_BODY>FootGM/JointStiffness.any"
+
+
+/// Definition of the muscleParameters including Force-Lenght-Velocity relationships.
+AnyFolder MusPar = {
+  AnyVar StressIndex=.StrengthRef.StrengthIndexLeg;
+  #include "<ANYBODY_PATH_BODY>LegTD/MusPar.any" 
+  #include "<ANYBODY_PATH_BODY>FootGM/MusPar.any" 
+};
+
+
+AnyFolder Ligaments = {
+  #include "<ANYBODY_PATH_BODY>FootGM/LigamentsNew.any"
+  #include "<ANYBODY_PATH_BODY>FootGM/LigamentsPhalangeal.any"
+  #include "<ANYBODY_PATH_BODY>FootGM/LigamentsTarsal.any"
+};
+
+
+///Summation of masses in the leg
+AnyFolder MassSummation={
+  AnyVar Mass=.Seg.Thigh.Mass+.Seg.Shank.Mass+.Seg.Foot.Mass;
+  
+};
+
+#ifdef DONT_USE_INITIAL_POSITION_FROM_MANNEQUIN
+#else
+#include "InitialPositions.any"
+#include "<ANYBODY_PATH_BODY>FootGM/InitialPositions.any"
+#endif
+
+InterfaceFolder ={
+  #include "<ANYBODY_PATH_BODY>LegTD/Interface.any"
+  #include "<ANYBODY_PATH_BODY>FootGM/Interface.any"
+};
+
+MannequinValuesFolder ={
+  #include "<ANYBODY_PATH_BODY>LegTD/MannequinValuesFromModel.any"
+};
+
+

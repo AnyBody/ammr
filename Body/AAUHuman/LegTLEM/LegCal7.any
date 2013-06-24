@@ -1,0 +1,84 @@
+//This is the calibration7 file it will calibrate specfic muscles on the leg
+AnyFolder LegCal7 ={
+  
+  AnyFolder &Pelvis = ...HumanFolderRef.Trunk.SegmentsLumbar.PelvisSeg; //This is a reference to the folder which holds the human part of the model
+  AnyFolder &LegSegSide = .SideHumanFolderRef.Leg.Seg; //This is a reference to the folder which holds the human part of the model
+  
+  AnyFolder &JointsCal2 =  .SideHumanFolderRef.Leg.Jnt;
+  
+  
+  
+  AnyFixedRefFrame ground = {
+    AnyRefNode node = { 
+       ARel=..Pelvis.Axes0;
+      sRel=..Pelvis.r0;
+    };
+  };
+  
+  AnyRevoluteJoint PelvisGround={
+    AnyRefFrame &Ground = .ground.node;
+    AnyRefFrame &Sacrum= ....HumanFolderRef.Trunk.SegmentsLumbar.PelvisSeg; 
+    Axis=z;
+  };
+  
+  AnyKinEqSimpleDriver PelvisGroundRot = {
+    AnyRevoluteJoint &Jnt = .PelvisGround;
+    DriverPos = {0};
+    DriverVel = {0};
+    Reaction.Type = {Off}; 
+  };
+  
+
+AnyKinEqSimpleDriver Hip = {
+    AnySphericalJoint &Spherical = .JointsCal2.Hip;
+    MeasureOrganizer = {2,0,1}; // flexion/extension, abduction/adduction, internal/external rotation
+    DriverPos = {-35,0,0}*pi/180; //50 degrees hip flexion
+    DriverVel = {0,0,0}*pi/180; 
+    Reaction.Type = {Off,Off,Off};
+  };
+  
+  
+  AnyKinEqSimpleDriver Knee = {
+    AnyRevoluteJoint &Hinge = .JointsCal2.Knee;
+    DriverPos = {  0*pi/180};
+    DriverVel = {0*pi/180};
+    Reaction.Type = {Off};
+  };
+  
+  
+  AnyKinEqSimpleDriver Ankle = {
+    AnyRevoluteJoint &Hinge = .JointsCal2.Ankle;
+    DriverPos = {10*pi/180}; //15 degrees dorsal flexion
+    DriverVel = {0*pi/180};
+    Reaction.Type = {Off};
+  };
+
+  AnyKinEqSimpleDriver SubTalar = {
+    AnyRevoluteJoint &Hinge = .JointsCal2.SubTalar;
+    DriverPos = {0*pi/180};
+    DriverVel = {0*pi/180}; 
+    Reaction.Type = {Off};
+  };
+
+
+//    AnyFolder &MuscleParCal2 =  .SideHumanFolderRef.Leg.MusPar;
+  
+  AnyFolder Mus={
+    
+  
+   AnyViaPointMuscle &Semimembranosus1 =  ..SideHumanFolderRef.Leg.Mus.Semimembranosus1 ;    
+
+
+    AnyViaPointMuscle &Semitendinosus1 =  ..SideHumanFolderRef.Leg.Mus.Semitendinosus1;    
+
+  };
+  
+};
+
+// The study: Operations to be performed on the model
+AnyBodyCalibrationStudy LegCalibrationStudy7 = {
+  AnyFolder &ref=.LegCal7; 
+  nStep = 1;
+    InitialConditions.SolverType = KinSolOverDeterminate;
+
+};

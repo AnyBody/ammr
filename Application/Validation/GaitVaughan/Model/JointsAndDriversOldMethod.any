@@ -1,0 +1,279 @@
+/* This file contains the connections between the model and makers
+//please notice that the model is driven using the local cooridnate systems on the 
+//human instead 
+Sacrum in (y) 
+Right and left ASIS in (x) 
+Right and left knee in (x) 
+Right and left malleolus in (z) 
+Right and left metatarsal in (x, z) 
+Right and left heel in (x, y, z)
+
+Right and left ASIS  and Sacrum in (y), combined as RAsisZ+LAsisZ=SacrumZ
+*/
+
+AnyFolder JointsAndDrivers = {
+  
+  //Make a visualization of the drivers
+  //#include "DriverVisualization.any"
+  AnyFixedRefFrame GlobalRef ={
+    Origin={0,0,0};
+  };
+    
+  AnyKinEqSimpleDriver PelvisThoraxDriver ={
+    AnyKinMeasureOrg &ref1= Main.HumanModel.BodyModel.Interface.Trunk.PelvisThoraxExtension;
+    AnyKinMeasureOrg &ref3=     Main.HumanModel.BodyModel.Interface.Trunk.PelvisThoraxRotation;
+    DriverPos={0,0}; 
+    DriverVel={0,0};
+  };
+  
+  //This is an etsimation of the upper body motion it will enforce that the head is kept above the pelvis medial/laterally
+  AnyKinEqSimpleDriver LateralBendDriver ={
+    AnyKinLinear lin ={
+      AnySeg &ref1=  Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg;
+      AnySeg &ref2=  Main.HumanModel.BodyModel.Trunk.SegmentsThorax.SkullSeg;
+    };
+    DriverPos={0};
+    DriverVel={0};
+    MeasureOrganizer={1};
+  };
+  
+  AnyKinEqSimpleDriver NeckDrv={
+    AnyKinMeasureOrg &ref1= Main.HumanModel.BodyModel.Interface.Trunk.NeckJoint; 
+    DriverPos={0};
+    DriverVel={0};
+    Reaction.Type={Off};
+  };
+  
+  AnyReacForce PelvisGroundReaction={
+    AnyKinLinear Lin={
+      AnyFixedRefFrame &ref1 =..GlobalRef;
+      AnySeg &ref2 = Main.Model.HumanModel.Trunk.SegmentsLumbar.PelvisSeg;
+    };
+    
+    AnyKinRotational Rot={
+      AnyFixedRefFrame &ref1 =..GlobalRef;
+      AnySeg &ref2 = Main.Model.HumanModel.Trunk.SegmentsLumbar.PelvisSeg;
+      Type=RotVector;
+    };
+  };
+  
+  
+  AnyReacForce AnkleInversionEversionReaction ={
+  
+  AnyKinMeasureOrg &ref1=  Main.HumanModel.BodyModel.Interface.Right.AnkleEversion;
+  AnyKinMeasureOrg &ref2=   Main.HumanModel.BodyModel.Interface.Left.AnkleEversion;
+
+  };
+  
+  AnyKinLinear PelvisToSacrumMarkerLin = {  
+    Ref=0;
+    AnyRefNode &ref1 = Main.Model.HumanModel.Trunk.SegmentsLumbar.PelvisSeg.SacrumMarker;
+    AnySeg &ref2 = Main.Model.Markers.p15.Seg;
+  };
+  
+  AnyKinEqSimpleDriver PelvisToSacrumMarkerLinDrv = {  
+    AnyKinLinear &ref=.PelvisToSacrumMarkerLin;
+    MeasureOrganizer={2};
+    DriverPos={0};
+    DriverVel={0};
+    Reaction.Type={Off};
+  };
+  
+  
+  
+  AnyKinEqSimpleDriver AsisRDrv  = {
+    AnyKinLinear AsisR ={
+      Ref=0;
+      AnyRefFrame &ref1=Main.Model.HumanModel.Trunk.SegmentsLumbar.PelvisSeg.RAsis;
+      AnyRefFrame &ref2=Main.Model.Markers.p7.Seg;
+    };
+    MeasureOrganizer={0};
+    DriverPos={0};
+    DriverVel={0};
+    Reaction.Type={Off};
+  };
+  
+  
+  AnyKinEqSimpleDriver AsisLDrv  = {
+    AnyKinLinear AsisL ={
+      Ref=0;
+      AnyRefFrame &ref1=Main.Model.HumanModel.Trunk.SegmentsLumbar.PelvisSeg.LAsis;
+      AnyRefFrame &ref2=Main.Model.Markers.p14.Seg;
+      
+    };
+    MeasureOrganizer={0};
+    DriverPos={0};
+    DriverVel={0};
+    Reaction.Type={Off};
+  };
+  
+  
+  
+  AnyKinMeasureOrg AsisRy={
+    AnyKinLinear lin ={
+      Ref=0;
+      AnyRefFrame &ref1=Main.Model.HumanModel.Trunk.SegmentsLumbar.PelvisSeg.RAsis;
+      AnyRefFrame &ref2=Main.Model.Markers.p7.Seg;
+      AnyDrawPLine drw={RGB={1,1,0};Thickness=0.005;    };
+      
+    };
+    MeasureOrganizer ={1};
+  };
+  
+  AnyKinMeasureOrg AsisLy ={
+    AnyKinLinear lin ={
+      Ref=0;
+      AnyRefFrame &ref1=Main.Model.HumanModel.Trunk.SegmentsLumbar.PelvisSeg.LAsis;
+      AnyRefFrame &ref2=Main.Model.Markers.p14.Seg;
+      AnyDrawPLine drw={RGB={1,1,0};Thickness=0.005;    };
+      
+    };
+    MeasureOrganizer ={1};
+  };
+  AnyKinMeasureOrg SacrumLy={
+    AnyKinLinear PelvisToSacrumMarkerLin = {  
+      Ref=0;
+      AnyRefNode &ref1 = Main.Model.HumanModel.Trunk.SegmentsLumbar.PelvisSeg.SacrumMarker;
+      AnySeg &ref2 = Main.Model.Markers.p15.Seg;
+    };
+    MeasureOrganizer ={1};
+    
+  };
+  
+  AnyKinEqSimpleDriver AsisZDrv={
+    AnyKinMeasureLinComb LinComb = {
+      AnyKinMeasure &u1 = ..AsisRy;
+      AnyKinMeasure &u2 = ..AsisLy;
+      AnyKinMeasure &u3 = ..SacrumLy;
+      OutDim=1;
+      Coef={
+        {-1,-1,1}
+      };      
+    }; 
+    DriverPos={0};
+    DriverVel={0};
+    Reaction.Type={Off};
+  };
+  
+  
+  
+  
+  
+  AnyKinEqSimpleDriver KneeRDrv  = {
+    AnyKinLinear KneeR ={
+      Ref=0;
+      AnyRefFrame &ref1=Main.Model.HumanModel.Right.Leg.Seg.Thigh.KneeMarker;
+      AnyRefFrame &ref2=Main.Model.Markers.p5.Seg;
+      AnyDrawPLine drw={RGB={1,0,0};Thickness=0.005;    };
+    };
+    MeasureOrganizer={0};
+    DriverPos={0};
+    DriverVel={0};
+    Reaction.Type={Off};
+  };
+  
+  
+  AnyKinEqSimpleDriver KneeLDrv  = {
+    AnyKinLinear KneeR ={
+      Ref=0;
+      AnyRefFrame &ref1=Main.Model.HumanModel.Left.Leg.Seg.Thigh.KneeMarker;
+      
+      AnyRefFrame &ref2=Main.Model.Markers.p12.Seg;
+      AnyDrawPLine drw={RGB={1,0,0};Thickness=0.005;    };
+    };
+    MeasureOrganizer={0};
+    DriverPos={0};
+    DriverVel={0};
+    Reaction.Type={Off};
+  };  
+  
+  
+  
+  
+  AnyKinEqSimpleDriver MalleolusRDrv  = {
+    AnyKinLinear MalleolusR ={
+      Ref=0;
+      
+      AnyRefFrame &ref1=Main.Model.HumanModel.Right.Leg.Seg.Shank.MalleolusMarker;
+      AnyRefFrame &ref2=Main.Model.Markers.p3.Seg;
+      //AnyDrawPLine drw={RGB={1,0,0};Thickness=0.005;    };
+    };
+    MeasureOrganizer={2};
+    DriverPos={0};
+    DriverVel={0};
+    Reaction.Type={Off};
+  };
+  
+  
+  AnyKinEqSimpleDriver MalleolusLDrv  = {
+    AnyKinLinear MalleolusL ={
+      Ref=0;
+      AnyRefFrame &ref1=Main.Model.HumanModel.Left.Leg.Seg.Shank.MalleolusMarker;
+      AnyRefFrame &ref2=Main.Model.Markers.p10.Seg;
+      //AnyDrawPLine drw={RGB={1,0,0};Thickness=0.005;    };
+    };
+    MeasureOrganizer={2};
+    DriverPos={0};
+    DriverVel={0};
+    Reaction.Type={Off};
+  };  
+  
+  
+  
+  
+  
+  AnyKinEqSimpleDriver MetatarsalYRDrv={
+    AnyKinLinear lin={
+      AnyRefFrame &ref1=Main.Model.HumanModel.Right.Leg.Seg.Foot.MetatarsalMarker;
+      AnyRefFrame &ref2=Main.Model.Markers.p1.Seg;
+      Ref=0;
+    };
+    MeasureOrganizer={0,2};
+    DriverPos={0,0};
+    Reaction.Type={Off,Off};
+    DriverVel={0,0};
+  };
+  
+  
+  
+  AnyKinEqSimpleDriver MetatarsalYLDrv={
+    AnyKinLinear lin={
+      AnyRefFrame &ref1=Main.Model.HumanModel.Left.Leg.Seg.Foot.MetatarsalMarker;
+      AnyRefFrame &ref2=Main.Model.Markers.p8.Seg;
+      Ref=0;
+    };
+    MeasureOrganizer={0,2};
+    DriverPos={0,0};
+    Reaction.Type={Off,Off};
+    DriverVel={0,0};
+  };
+  
+  AnyKinEqSimpleDriver HeelYRDrv={
+    AnyKinLinear lin={
+      AnyRefFrame &ref1=Main.Model.HumanModel.Right.Leg.Seg.Foot.HeelMarker;
+      AnyRefFrame &ref2=Main.Model.Markers.p2.Seg;
+    };
+    DriverPos={0,0,0};
+    Reaction.Type={Off,Off,Off};
+    DriverVel={0,0,0};
+  };
+  
+  
+  AnyKinEqSimpleDriver HeelYLDrv={
+    AnyKinLinear lin={
+      Ref=0;
+      AnyRefFrame &ref1=Main.Model.HumanModel.Left.Leg.Seg.Foot.HeelMarker;
+      AnyRefFrame &ref2=Main.Model.Markers.p9.Seg;
+    };
+    DriverPos={0,0,0};
+    Reaction.Type={Off,Off,Off};
+    DriverVel={0,0,0};
+  };
+  
+  
+  
+};
+
+
+
+

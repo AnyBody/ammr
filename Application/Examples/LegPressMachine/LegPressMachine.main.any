@@ -4,52 +4,40 @@
 
 Main =
 {
-  AnyOperationSequence RunApplication = 
-  {
+  // all relevant input parameters
+  #include "Model/InputParameters.any"
+  // ----------------------------------------------------------
+  // Path to draw settings
+  // ----------------------------------------------------------
+  #path BM_DRAWSETTINGS_FILE "Model/DrawSettings.any"
+  
+  // ----------------------------------------------------------
+  // Model configuration:
+  // For more info on body model configuration options please load the model and double click on: 
+  // #include "<ANYBODY_PATH_BODY>\Documentation\BodyModel.parameters.any"
+  // ----------------------------------------------------------
 
-    /**This operation calibrates the muscles in the model if these are of the type AnyMuscleModel3E.
-    This will just be an empty operation if the model is using a muscle type that does not require calibration.*/
-    AnyOperation &CalibrationAnal = Main.HumanModel.Calibration.CalibrationSequence;  
+  // The Mannequin file specifies load-time positions for all the segments
+  // in the HumanModel. This is important for the model's ablity to resolve
+  // all the kinematic constraints when the model is analyzed.
+  // The mannequin file also drives those degrees of freedom of the human 
+  // model that are not governed by problem-specific drivers at run time.    
+  #path BM_MANNEQUIN_FILE "Model/Mannequin.any"   
 
-    ///This operation is the inverse dynamic analysis
-    AnyOperation &InvAnal=Main.Study.InverseDynamics;
-    
-  };  
-  
-  #include "DrawSettings.any"
-  
-  AnyFolder Parameters = 
-  {
-      #include "DesignParameters.any"
-      #include "SupportParameters.any"
-      #include "TrialSpecificData.any"
-  };
-  
-  AnyFolder HumanModel=
-  {  
-    AnyFolder &Mannequin=.Model.Mannequin;
-    
-    #include  "BodyPartsSetup.any"
-    //#include  "BodyPartsSetup2.any"
-    #include  "<ANYBODY_PATH_BODY>/BodyModels/GenericBodyModel/BodyModel.any"
-    
-    AnyFolder StrengthParameters=
-    {
-      AnyVar SpecificMuscleTensionSpine= 90; //N/cm^2
-      AnyVar StrengthIndexLeg= 1; 
-      AnyVar SpecificMuscleTensionShoulderArm= 90; //N/cm^2
-    };
-    #include "<ANYBODY_PATH_BODY>Scaling/ScalingStandard.any"
-  };
- 
+  // Model of the human body to be used for the analysis  
+  #include "<ANYBODY_PATH_BODY>/HumanModel.any"
+
+  /// The actual model where all components are assembled   
   AnyFolder Model = 
   {
+    /// Body model without default drivers
     AnyFolder &HumanModel=.HumanModel.BodyModel;
+    /// Reference to the mannequin folder (used by drivers)
+    AnyFolder &Mannequin =.HumanModel.Mannequin;
     
-    #include "Mannequin.any"
-    #include "HumanRefNodes.any"
+    #include "Model/HumanRefNodes.any"
     
-    #include "SolidModelingOperations.any"
+    #include "Model/SolidModelingOperations.any"
     
     AnyFolder EnvironmentModel = 
     {
@@ -66,7 +54,7 @@ Main =
               sRel = {0, -Main.Parameters.DesignParameters.Back_Rest_Thick, 0};
               AnyDrawSurf surf =
               {
-                  FileName = "box";
+                  FileName = "Input/box";
                   RGB = Main.DrawSettings.Colors.AnyBodyPaleYellow;
                   ScaleXYZ = {1, Main.Parameters.DesignParameters.Back_Rest_Thick/2, 1}/0.15;
                   Opacity = 0.2;
@@ -79,18 +67,18 @@ Main =
        
     AnyFolder ModelEnvironmentConnection = 
     {
-      #include "JointsAndDrivers.any"
+      #include "Model/JointsAndDrivers.any"
       
       AnyFolder Support = 
       {
-          #include "BackrestSupport.any"
-          #include "LowerBodySupport.any"
-          #include "FootrestSupport.any"
+          #include "Model/BackrestSupport.any"
+          #include "Model/LowerBodySupport.any"
+          #include "Model/FootrestSupport.any"
       };
     };
    
   };
-  
+
   AnyBodyStudy Study = 
   {
       AnyFolder& Model = .Model;
@@ -105,4 +93,8 @@ Main =
       //InverseDynamics.Criterion.Type = MR_Quadratic;
       InverseDynamics.Criterion.Type = MR_Polynomial;
   };
+
+  // Include an operation sequence to run all required steps of your application (see Operations tab)
+    #include "<ANYBODY_PATH_TOOLBOX>\Operations\RunAppSequence.any"
+  
 };

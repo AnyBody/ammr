@@ -1,0 +1,135 @@
+/// This folder contains the joints between the model and the environment.
+AnyFolder Joints = {
+  
+  // Aliases for convenient referencing
+  AnyFolder &JntPos=..Mannequin.Posture;  
+  AnyFolder &JntVel=..Mannequin.PostureVel;  
+    
+  AnySphericalJoint FootPedal = {
+    AnyRefNode &Pedal = Main.Model.MyPedal.EnvironmentModel.Pedal.FootNode;
+    AnyRefNode &Foot = Main.HumanModel.BodyModel.Right.Leg.Seg.Foot.FootBall;
+  };
+  
+  AnySphericalJoint FootFloor = {
+    AnyRefNode &Floor = Main.Model.MyPedal.EnvironmentModel.GlobalRef.LeftFoot;
+    AnyRefFrame &Foot = Main.HumanModel.BodyModel.Left.Leg.Seg.Foot.GroundJoint;
+  };
+  
+  AnyKinEq LatSupport = {
+    AnyKinLinear KneePos = {
+      AnyFixedRefFrame &Ground = Main.Model.MyPedal.EnvironmentModel.GlobalRef;
+      AnyRefNode &Knee = Main.HumanModel.BodyModel.Right.Leg.Seg.Thigh.KneeJoint;
+    };
+    MeasureOrganizer = {2};  // Only the z direction
+    Reaction.Type={Off};
+  };  
+};
+
+/// Drivers between the human body and the environment.
+AnyFolder Drivers = {
+  AnyFolder &JntPos=..Mannequin.Posture;  
+  AnyFolder &JntVel=..Mannequin.PostureVel;  
+  
+  AnyKinEqSimpleDriver Pedal = {
+    AnyRevoluteJoint &Hinge = Main.Model.MyPedal.EnvironmentModel.HingeJoint;
+    DriverPos = {100*pi/180};
+    DriverVel = {45*pi/180};
+    Reaction.Type={Off};
+  };
+  
+  //Ankle driver
+  AnyKinEqSimpleDriver AnkleDriverRight={
+    AnyKinMeasureOrg &ref1=...HumanModel.Interface.Right.AnklePlantarFlexion;
+    #if BM_LEG_RIGHT == CONST_LEG_MODEL_Leg
+      AnyKinMeasureOrg &ref2=...HumanModel.Interface.Right.AnkleEversion;
+    #else
+      AnyKinMeasureOrg &ref2=...HumanModel.Interface.Right.SubTalarEversion;
+    #endif
+    DriverPos = pi/180*{.JntPos.Right.AnklePlantarFlexion,.JntPos.Right.SubTalarEversion};  
+    DriverVel=pi/180*{.JntVel.Right.AnklePlantarFlexion,.JntVel.Right.SubTalarEversion};  
+    
+    Reaction.Type={Off,Off};
+  };
+  //Ankle driver
+  AnyKinEqSimpleDriver AnkleDriverLeft={
+    AnyKinMeasureOrg &ref1=...HumanModel.Interface.Left.AnklePlantarFlexion;
+    #if BM_LEG_LEFT == CONST_LEG_MODEL_Leg
+      AnyKinMeasureOrg &ref2=...HumanModel.Interface.Left.AnkleEversion;
+    #else
+      AnyKinMeasureOrg &ref2=...HumanModel.Interface.Left.SubTalarEversion;
+    #endif    
+    DriverPos = pi/180*{.JntPos.Left.AnklePlantarFlexion,.JntPos.Left.SubTalarEversion};  
+    DriverVel=pi/180*{.JntVel.Left.AnklePlantarFlexion,.JntVel.Left.SubTalarEversion};  
+    Reaction.Type={Off, Off};
+  };
+  
+  AnyKinEqSimpleDriver LeftLatSupport = {
+    AnyKinLinear KneePos = {
+      AnyFixedRefFrame &Ground = Main.Model.MyPedal.EnvironmentModel.GlobalRef;
+      AnyRefNode &Knee = Main.HumanModel.BodyModel.Left.Leg.Seg.Thigh.KneeJoint;
+    };
+    MeasureOrganizer = {2};  // Only the z direction
+    Reaction.Type={Off};
+    DriverPos = {-0.20};
+    DriverVel = {0};
+  };
+  
+  /// Driver controlling and fixing the pelvis position wrt GlobalRef
+  AnyKinEqSimpleDriver PelvisGroundDriver ={
+    AnyKinLinear lin = {
+      AnyFixedRefFrame &ref1 =Main.Model.MyPedal.EnvironmentModel.GlobalRef;
+      AnySeg &ref2 =....HumanModel.Trunk.SegmentsLumbar.PelvisSeg;
+    };
+    AnyKinRotational rot = {
+      AnyFixedRefFrame &ref1 =Main.Model.MyPedal.EnvironmentModel.GlobalRef;
+      AnySeg &ref2 =....HumanModel.Trunk.SegmentsLumbar.PelvisSeg;
+      Type=RotAxesAngles;
+    };
+    DriverPos={
+      .JntPos.PelvisPosX,
+      .JntPos.PelvisPosY,
+      .JntPos.PelvisPosZ,
+      pi/180*.JntPos.PelvisRotZ,
+      pi/180*.JntPos.PelvisRotY,
+      pi/180*.JntPos.PelvisRotX
+    };
+    DriverVel={
+      .JntVel.PelvisPosX,
+      .JntVel.PelvisPosY,
+      .JntVel.PelvisPosZ,
+      pi/180*.JntVel.PelvisRotX,
+      pi/180*.JntVel.PelvisRotY,
+      pi/180*.JntVel.PelvisRotZ
+    };
+    Reaction.Type={On,On,On,On,On,On};
+  };  
+  
+  
+  //Neck driver 
+  AnyKinEqSimpleDriver NeckJntDriver = {
+    AnyRevoluteJoint &T12L1Joint = ....HumanModel.BodyModel.Interface.Trunk.NeckJoint;
+    DriverPos = pi/180*{.JntPos.NeckExtension};
+    DriverVel = pi/180*{.JntVel.NeckExtension};
+    Reaction.Type = {Off};
+  };
+  
+  //Thorax pelvis rotation driver
+  AnyKinEqSimpleDriver PostureDriver ={
+    AnyKinMeasureOrg &Ref2 = ...HumanModel.Interface.Trunk.PelvisThoraxLateralBending;        
+    AnyKinMeasureOrg &Ref3 = ...HumanModel.Interface.Trunk.PelvisThoraxRotation;   
+    AnyKinMeasureOrg &Ref1 = ...HumanModel.Interface.Trunk.PelvisThoraxExtension;
+   
+    DriverPos = pi/180*{
+          .JntPos.PelvisThoraxLateralBending,
+      .JntPos.PelvisThoraxRotation,
+      .JntPos.PelvisThoraxExtension
+    };
+    DriverVel = pi/180*{
+      .JntVel.PelvisThoraxLateralBending,
+      .JntVel.PelvisThoraxRotation,
+      .JntVel.PelvisThoraxExtension
+    };
+    Reaction.Type = {Off,Off,Off};  
+  };  
+  
+};

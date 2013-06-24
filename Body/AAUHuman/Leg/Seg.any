@@ -11,13 +11,44 @@
 AnySeg Foot = {
   
   r0=.Shank.AnkleJoint.sRel*.Shank.Axes0'+.Shank.r0-AnkleJoint.sRel*Axes0'; 
+
+  /// These vectors are used for consistency with legTLEM 
+  /// and crosscompatibility of application
+  AnyFolder ExtraNodes = {
+    AnyVec3 SubTalarJoint = {0.06, 0.06, ...Sign*0.0};
+    AnyVec3 LateralMalleolus = {0.065, 0.053, ...Sign*0.025};
+    AnyVec3 MedialMalleolus = {0.075, 0.029, ...Sign*(-0.035)};
+    AnyVec3 MedialTibialEpicondyle = {0.472, 0.116, ...Sign*(-0.031)};
+    AnyVec3 LateralTibialEpicondyle = {0.472, 0.116, ...Sign*(0.039)};
+  };
+  
+  AnyFloat pUnscaled = {ExtraNodes.SubTalarJoint, ExtraNodes.LateralMalleolus, ExtraNodes.MedialMalleolus};
+  AnyFloat dAxisFixed = { (ExtraNodes.MedialTibialEpicondyle + ExtraNodes.LateralTibialEpicondyle)*0.5 - ExtraNodes.SubTalarJoint, (ExtraNodes.MedialTibialEpicondyle - ExtraNodes.LateralTibialEpicondyle ) };
+  
+  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(p, SIGN) p[0]
+  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2(p, d, SIGN) RotMat(0.5*(p[1]+p[2]), 0.5*(p[1]+p[2]) + d[0], 0.5*(p[1]+p[2]) + d[1] ) * RotMat(-0.5*pi,z) * RotMat(0.5*pi,y) * RotMat(0.5*(SIGN-1)*pi,y)
+  
+  AnyRefNode ScalingNode=
+  {    
+    AnyFloat pScaled = .Scale(.pUnscaled);
+    sRel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(pScaled, ...Sign);
+    ARel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2(pScaled, .dAxisFixed, ...Sign);
+    AnyVec3 sRelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(.pUnscaled, ...Sign);///< Generic unscaled position of foot ScalingNode
+    AnyMat33 ARelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2(.pUnscaled, .dAxisFixed, ...Sign);///< Generic unscaled rotation of foot ScalingNode
+
+  };
+  AnyRefNode& AnatomicalFrame = ScalingNode;
+  #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_s
+  #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2  
+  
   
   #include "../DrawSettings/Nodes.any"
   #include "../DrawSettings/SegmentAxes.any"
   
-  AnyFunTransform3D &Scale =..Scaling.GeometricalScaling.Foot.ScaleFunction;  
+  //AnyFunTransform3D &Scale =..Scaling.GeometricalScaling.Foot.ScaleFunction;  
+  AnyFunTransform3D& Scale = ..GeoScaling.Foot.ScaleFunction;  
   
-  AnyVar MassS = ..Scaling.MassScaling.Foot.MassScale;
+  AnyVar MassS = ..MassScaling.Foot.MassScale;
   
   //AnyVar MassStandard = 0.0145*..BodyParRef.BodyMass; // Winter
   AnyVar MassStandard = ..StandardParameters.Foot.Mass;
@@ -163,9 +194,41 @@ AnySeg Shank = {
   #include "../DrawSettings/Nodes.any"
   #include "../DrawSettings/SegmentAxes.any"
   
-  AnyFunTransform3D &Scale =..Scaling.GeometricalScaling.Shank.ScaleFunction;    
+  AnyFunTransform3D& Scale = ..GeoScaling.Shank.ScaleFunction;  
+
+  /// These vectors are used for consistency with legTLEM 
+  /// and crosscompatibility of application
+  AnyFolder ExtraNodes = {
+    AnyVec3 SubTalarJoint = {0.0, -0.2608, ...Sign*0.0};
+    AnyVec3 LateralMalleolus = {0.008, -0.2408, ...Sign*(0.02)};//{0.065, 0.053, ...Sign*0.025};
+    AnyVec3 MedialMalleolus = {0.019, -0.2498, ...Sign*(-0.035)};
+    AnyVec3 MedialTibialEpicondyle = {0.01, 0.153, ...Sign*(-0.037)};
+    AnyVec3 LateralTibialEpicondyle = {0.013, 0.153, ...Sign*(0.039)};
+  };
+
+  AnyFloat pUnscaled = {ExtraNodes.SubTalarJoint, ExtraNodes.LateralMalleolus, ExtraNodes.MedialMalleolus, ExtraNodes.LateralTibialEpicondyle, ExtraNodes.MedialTibialEpicondyle};
   
-  AnyVar MassS = ..Scaling.MassScaling.Shank.MassScale;
+  AnyVar Sign = ..Sign;
+  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(p, SIGN) p[0]
+  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(p, SIGN) RotMat(0.5*(p[1]+p[2]), 0.5*(p[3]+p[4]), p[4])*RotMat(-0.5*pi,z)*RotMat(0.5*pi,y)*RotMat(0.5*(SIGN-1)*pi,y) 
+  
+  /// A special node for consistency with legTLEM and crosscompatibility of application
+  AnyRefNode ScalingNode=
+  {    
+    AnyFloat pScaled = .Scale(.pUnscaled);
+    sRel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(pScaled, .Sign);
+    ARel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(pScaled, .Sign);
+    AnyVec3 sRelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(.pUnscaled, .Sign); ///< Generic unscaled position of shank ScalingNode
+    AnyMat33 ARelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(.pUnscaled, .Sign);///< Generic unscaled rotation of shank ScalingNode    
+  };
+  /// A special node for consistency with legTLEM and crosscompatibility of application
+  AnyRefNode& AnatomicalFrame = ScalingNode;
+  #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_s
+  #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_A    
+
+  
+  
+  AnyVar MassS = ..MassScaling.Shank.MassScale;
   
   
   //AnyVar MassStandard = 0.0465*..BodyParRef.BodyMass; // Winter
@@ -268,9 +331,36 @@ AnySeg Thigh = {
   #include "../DrawSettings/Nodes.any"
   #include "../DrawSettings/SegmentAxes.any"
   
-  AnyFunTransform3D &Scale =..Scaling.GeometricalScaling.Thigh.ScaleFunction;    
+  AnyFunTransform3D& Scale = ..GeoScaling.Thigh.ScaleFunction;  
   
-  AnyVar MassS = ..Scaling.MassScaling.Thigh.MassScale;  
+  /// These vectors are used for consistency with legTLEM 
+  /// and crosscompatibility of application
+  AnyFolder ExtraNodes = {
+    AnyVec3 HipJoint = {0.0, 0.197, ...Sign*-0.038};
+    AnyVec3 EpicondylusFemorisMedialis= {-0.035, -0.255, ...Sign*-0.068};
+    AnyVec3 EpicondylusFemorisLateralis= {-0.015, -0.255, ...Sign*0.022};
+  };
+  
+  AnyFloat pUnscaled = {ExtraNodes.HipJoint, ExtraNodes.EpicondylusFemorisMedialis, ExtraNodes.EpicondylusFemorisLateralis};
+  AnyVar Sign = ..Sign;
+  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(p, SIGN) p[0]
+  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(p, SIGN) RotMat(p[0],0.5*(p[1]+p[2]), p[1]) * RotMat(pi*0.5,x) * RotMat(pi*0.5,z) * RotMat(0.5*(SIGN-1)*pi,y)
+  /// Special node consistency with legTLEM and crosscompatibility of application  
+  AnyRefNode ScalingNode=
+  {    
+    AnyFloat pScaled = .Scale(.pUnscaled);
+    sRel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(pScaled, .Sign);
+    ARel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(pScaled, .Sign);  
+    AnyVec3 sRelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(.pUnscaled, .Sign); ///< Generic unscaled position of thigh ScalingNode
+    AnyMat33 ARelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(.pUnscaled, .Sign);///< Generic unscaled rotation of thigh ScalingNode
+
+  };
+  /// Special node consistency with legTLEM and crosscompatibility of application  
+  AnyRefNode& AnatomicalFrame = ScalingNode;
+  #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_s
+  #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_A    
+  
+  AnyVar MassS = ..MassScaling.Thigh.MassScale;  
   
   //AnyVar MassStandard = 0.1*..BodyParRef.BodyMass; // Winter
   AnyVar MassStandard = ..StandardParameters.Thigh.Mass;

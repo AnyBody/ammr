@@ -1,0 +1,109 @@
+
+
+Left = {
+  
+  AnyFolder Leg = {  
+    AnyVar Sign =-1;
+    #ifdef SignRef
+      #undef SignRef
+    #endif
+    #define SignRef 0
+    
+    #include "<TLEM_PATH_VERSION>\ModelParameters.any"
+    
+    #define LEG_TD_SIMPLE_MUSCLES_LOCAL 1*((LEFT_LEG_TD)*(LEFT_LEG_TD_SIMPLE_MUSCLES))
+    #define LEG_TD_MUS_3E_LOCAL 1*((LEFT_LEG_TD)*(LEFT_LEG_TD_MUS_3E))
+    
+    #include "..\..\LegTLEM\Leg.root.any"
+    
+    #undef LEG_TD_SIMPLE_MUSCLES_LOCAL
+    #undef LEG_TD_MUS_3E_LOCAL    
+    
+     
+    AnyFolder &InterfaceFolder =..Interface.Left;
+    
+    AnyFolder &MannequinValuesFolder = ..MannequinValuesFromModel.AnyFolder_Posture.AnyFolder_Left;
+    
+    #include "../Include/SettingsLeg.any"
+    
+    AnyFolder &Scaling =...Scaling;
+    AnyFolder &StandardParameters =...Scaling.StandardParameters.Left;
+    AnyFolder &GeoScaling =...Scaling.GeometricalScaling.Left;
+    AnyFolder &MassScaling =...Scaling.MassScaling.Left;
+    AnyFolder &FiberLengthScaling =...Scaling.FiberLengthScaling.Left;
+    AnyFolder &StrengthScaling =...Scaling.StrengthScaling.Left;
+    
+    //AnyRefFrame &HipNodeRef = ..Trunk.SegmentsLumbar.PelvisSeg.Left;
+    AnyRefNode &PsoasMajor1= ..Trunk.SegmentsLumbar.L1Seg.PML1T_TMNodeL;
+    AnyRefNode &PsoasMajor2= ..Trunk.SegmentsLumbar.L2Seg.PML2T_TMNodeL;
+    AnyRefNode &PsoasMajor3= ..Trunk.SegmentsLumbar.L3Seg.PML3T_TMNodeL;
+    AnyRefNode &PsoasMajor4= ..Trunk.SegmentsLumbar.L4Seg.PML4T_TMNodeL;
+    AnyRefNode &PsoasMajor5= ..Trunk.SegmentsLumbar.L5Seg.PML5T_TMNodeL;
+    
+    AnyFolder BonesOpacity = {
+      AnyVar Foot = Main.DrawSettings.BonesOpacity.LeftFoot;
+      AnyVar Shank = Main.DrawSettings.BonesOpacity.LeftShank;
+      AnyVar Thigh = Main.DrawSettings.BonesOpacity.LeftThigh;
+      AnyVar Talus = Main.DrawSettings.BonesOpacity.LeftTalus;
+      AnyVar Patella = Main.DrawSettings.BonesOpacity.LeftPatella;
+    };
+    
+    
+    #if ((LEFT_LEG_TD_SIMPLE_MUSCLES) + (LEFT_LEG_TD_MUS_3E)) == 0
+     AnyFolder MomentMeasure=
+     {
+       #if TRUNK_SIMPLE_MUSCLES == 1
+         #define LEG_WITH_PSOAS_MUSCLES 
+         AnyFolder &TrunkMuscles = ...Trunk.MusclesSpineLeft;
+       #endif
+       
+       #define LEG_WITH_JOINT_MUSCLES
+       #include "..\..\LegTLEM\LegMoments.any"
+       #undef LEG_WITH_JOINT_MUSCLES
+       
+       #ifdef LEG_WITH_PSOAS_MUSCLES 
+         #undef LEG_WITH_PSOAS_MUSCLES 
+       #endif
+     };
+    #else
+     AnyFolder MomentMeasure=
+     {
+       AnyFolder &TrunkMuscles = ...Trunk.MusclesSpineLeft;
+       #include "..\..\LegTLEM\LegMoments.any"
+     };            
+    #endif
+    
+    
+  }; //End Leg
+  
+};
+
+
+Trunk = {
+  AnyRefFrame &PsoasMajorLeftReference=.Left.Leg.Seg.Thigh;
+};
+
+
+//#if ((LEFT_LEG_TD_SIMPLE_MUSCLES) + (LEFT_LEG_TD_MUS_3E)) == 0
+//  #include "../../LegTLEM/LeftLegNoMusclesSelectedOutput.any"
+//#else
+//  #if (LEFT_LEG_TD_SIMPLE_MUSCLES) == 1
+//    #include "../../LegTLEM/LeftLegSimpleMusclesSelectedOutput.any"  
+//  #endif
+//  
+//  #if (LEFT_LEG_TD_MUS_3E) == 1
+//    #include "../../LegTLEM/LeftLegMuscles3ESelectedOutput.any"
+//  #endif
+//#endif
+#include "../../LegTLEM/LeftLegSelectedOutput.any"
+
+#if LEFT_LEG_TD_SIMPLE_MUSCLES == 1 | LEFT_LEG_TD_MUS_3E == 1
+  #ifdef TRUNK_NO_MUSCLES
+    #include "LeftPsoas.any"
+  #else
+  #endif    
+#endif
+
+
+
+

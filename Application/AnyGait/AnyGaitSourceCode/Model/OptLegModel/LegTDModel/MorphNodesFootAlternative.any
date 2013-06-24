@@ -1,0 +1,217 @@
+
+
+AnyVar LengthScale = ...AnthroSegmentLengths.Side.FootLength / ...StandardParameters.Side.Foot.Length;    
+AnyVar ms = ...MassScaling.Side.Foot.MassScale;
+AnyVar ls = LengthScale;
+
+AnyFolder MorphSourcePoints = {
+  
+  AnyVec3 EpicondylusFemorisLateralStandard= .....BodyModel.Side.Leg.ModelParameters.Foot.LateralFemuralCondyleInNeutralConf ;                             
+  AnyVec3 EpicondylusFemorisMedialisStandard= .....BodyModel.Side.Leg.ModelParameters.Foot.MedialFemuralCondyleInNeutralConf ;                             
+  AnyVec3 MedialMalleolusStandard = .....BodyModel.Side.Leg.ModelParameters.Foot.MedialAnkleAxisMarkerInNeutralConf;
+  AnyVec3 LateralMalleolusStandard = .....BodyModel.Side.Leg.ModelParameters.Foot.LateralAnkleAxisMarkerInNeutralConf;
+  
+  AnyFolder &ScaleNodeRef = .....BodyModel.Side.Leg.Seg.Foot.ScalingNode;
+  //ScaleNodeRef = {AnyDrawRefFrame drw ={};};
+  
+  //AnyVec3 KneeJointStandard = 0.5*(EpicondylusFemorisLateralStandard+EpicondylusFemorisMedialisStandard);
+  AnyVec3 AnkleJointStandard_inFootRef = 0.5*(LateralMalleolusStandard +MedialMalleolusStandard); 
+  AnyVec3 AnkleJointStandard = (AnkleJointStandard_inFootRef-ScaleNodeRef.sRelUnscaled)*ScaleNodeRef.ARelUnscaled;
+  
+  AnyVec3 HeelNodeStandard = .....BodyModel.Side.Leg.ModelParameters.Foot.HeelNode;
+  
+  // 1. Place the markers where they should be relative to the LegTLEM model
+  // These are giving in the ScalingNode coordinate system to make them easier to move
+  AnyVec3 ToeMarker = ((ScalingNodeARelOLD * { 0.185, 0.000 +0.017, ..Sign*(0.0120+0.015) }')' + HeelNodeStandard-ScaleNodeRef.sRelUnscaled)*ScaleNodeRef.ARelUnscaled;
+  AnyVec3 HeelMarker =((ScalingNodeARelOLD * { 0.0024 -0.03, -0.003+0.007, ..Sign*0.01}')' + HeelNodeStandard-ScaleNodeRef.sRelUnscaled)*ScaleNodeRef.ARelUnscaled;
+  AnyVec3 LateralFootMarker = (LateralMalleolusStandard-ScaleNodeRef.sRelUnscaled)*ScaleNodeRef.ARelUnscaled;
+  
+  AnyMat33 ScalingNodeARelOLD =    {{0.73889, 0.4851382, ..Sign*-0.467635}, {-0.5502786, 0.8349748, ..Sign*-0.003244413}, {..Sign*0.3888895, ..Sign*0.2597268, 0.8839157}};
+  
+  
+  
+  // 2. Use these variables to rotate the foot around the ankle joint. Thus aligning the model markers with data markers.
+  AnyFloat FootPitch = 0.0;
+  AnyFloat FootRoll = 0.0;
+  AnyFloat FootYaw = 0.0;
+  
+  
+  // Scaling node rotation for the foot.
+  
+  // These rotation matrixes define the rotation of the control point box
+  // The same rotations are used in the Stick-figure model
+  
+  AnyMat33 ControlPointRotMat = RotMat(HeelMarker, ToeMarker, LateralFootMarker);
+  
+  AnyMat33 RotateBox = RotMat(FootYaw,z)*RotMat(FootRoll,x)*RotMat(FootPitch,y)*RotMat(..Sign*pi/3,x); //Rotation of the ControlBox must be the same as in the stickfigure model
+  
+  // Some values quantifing the size of the foot in the coordinate system of the control box  
+  AnyVar HeelAnkleXDist = abs( {1,0,0} * (ControlPointRotMat*RotateBox)' *(HeelMarker -AnkleJointStandard)' );
+  AnyVar AnkleToeXDist = abs( {1,0,0} * (ControlPointRotMat*RotateBox)' *(ToeMarker - AnkleJointStandard)' ) ;
+  
+  AnyVec3 FootControlPoint1 = AnkleJointStandard + (ControlPointRotMat *RotateBox * { -HeelAnkleXDist, -0.05, ..Sign*0.08}' )' ;
+  AnyVec3 FootControlPoint2 = AnkleJointStandard + (ControlPointRotMat *RotateBox * { -HeelAnkleXDist, 0.06, ..Sign*0.08}' )' ;
+  AnyVec3 FootControlPoint3 = AnkleJointStandard + (ControlPointRotMat *RotateBox * { -HeelAnkleXDist, -0.05, ..Sign*-0.01}' )' ;
+  AnyVec3 FootControlPoint4 = AnkleJointStandard + (ControlPointRotMat *RotateBox * { -HeelAnkleXDist, 0.06, ..Sign*-0.01}' )' ;
+  AnyVec3 FootControlPoint5 = AnkleJointStandard + (ControlPointRotMat *RotateBox * {AnkleToeXDist , -0.05, ..Sign*0.08}' )' ;
+  AnyVec3 FootControlPoint6 = AnkleJointStandard + (ControlPointRotMat *RotateBox * {AnkleToeXDist , 0.06, ..Sign*0.08}' )' ;
+  AnyVec3 FootControlPoint7 = AnkleJointStandard + (ControlPointRotMat *RotateBox * {AnkleToeXDist , -0.05, ..Sign*-0.01}' )' ;
+  AnyVec3 FootControlPoint8 = AnkleJointStandard + (ControlPointRotMat *RotateBox * {AnkleToeXDist , 0.06, ..Sign*-0.01}' )' ;
+  AnyVec3 FootControlPoint9 = AnkleJointStandard + (ControlPointRotMat *RotateBox * {1.5 * AnkleToeXDist , -0.05, ..Sign*0.08}' )' ;
+  AnyVec3 FootControlPoint10 = AnkleJointStandard + (ControlPointRotMat *RotateBox * {1.5 * AnkleToeXDist , 0.06, ..Sign*0.08}' )' ;
+  AnyVec3 FootControlPoint11 = AnkleJointStandard + (ControlPointRotMat *RotateBox * {1.5 * AnkleToeXDist , -0.05, ..Sign*-0.01}' )' ;
+  AnyVec3 FootControlPoint12 = AnkleJointStandard + (ControlPointRotMat *RotateBox * {1.5 * AnkleToeXDist , 0.06, ..Sign*-0.01}' )' ;
+  AnyVec3 FootControlPoint13 = AnkleJointStandard + (ControlPointRotMat *RotateBox * {AnkleToeXDist , 0.005, ..Sign*0.035}' )' ;
+  AnyVec3 FootControlPoint14 = AnkleJointStandard + (ControlPointRotMat *RotateBox * {1.5 * AnkleToeXDist , 0.005,  ..Sign*0.035}' )' ;
+  AnyVec3 FootControlPoint15 = AnkleJointStandard + (ControlPointRotMat *RotateBox * {-HeelAnkleXDist, 0.005,  ..Sign*0.035}' )' ;
+  AnyVec3 FootControlPoint16 = AnkleJointStandard + (ControlPointRotMat *RotateBox * { 0 , -0.05, ..Sign*0.08}' )' ;
+  AnyVec3 FootControlPoint17 = AnkleJointStandard + (ControlPointRotMat *RotateBox * { 0 , 0.06, ..Sign*0.08}' )' ;
+  AnyVec3 FootControlPoint18 = AnkleJointStandard + (ControlPointRotMat *RotateBox * { 0, -0.05, ..Sign*-0.01}' )' ;
+  AnyVec3 FootControlPoint19 = AnkleJointStandard + (ControlPointRotMat *RotateBox * { 0, 0.06, ..Sign*-0.01}' )' ;
+  
+  AnyVec3 CenterAnklePoint = AnkleJointStandard;  
+  
+  
+  
+  
+};
+AnyFolder MorphTargetPoints = {
+  AnyVec3 AnkleJointStandard = .MorphSourcePoints.AnkleJointStandard;
+  
+  AnyFolder &FootMorphNodes = Main.JntParameterOptModel.LegModel.Side.Seg.Foot.MorphNodesFoot;
+  
+  // These rotation matrixes define the rotation of the control point box
+  // The same rotations are used in the Stick-figure model
+  AnyMat33 ControlPointRotMat = .MorphSourcePoints.ControlPointRotMat ; 
+  
+  
+  AnyVec3 CenterAnklePoint = AnkleJointStandard;
+  
+  AnyVec3 MedialAnklePoint = AnkleJointStandard + (ControlPointRotMat * FootMorphNodes.MedialAnkleControlPoint.sRel')';
+  AnyVec3 LateralAnklePoint = AnkleJointStandard + (ControlPointRotMat * FootMorphNodes.LateralAnkleControlPoint.sRel')';
+  
+  AnyVec3 HeelPoint = AnkleJointStandard + (ControlPointRotMat * FootMorphNodes.HeelControlPoint.sRel')';
+  AnyVec3 ToePoint = AnkleJointStandard + (ControlPointRotMat * FootMorphNodes.ToeControlPoint.sRel')';
+  AnyVec3 LateralFootPoint  = AnkleJointStandard + (ControlPointRotMat * FootMorphNodes.LatAnkleRef')';
+  AnyVec3 MedialFootPoint  = AnkleJointStandard + (ControlPointRotMat * FootMorphNodes.MedAnkleRef')';
+  
+  //  AnyVec3 AnteriorSubTalarPoint = AnkleJointStandard + (ControlPointRotMat * FootMorphNodes.AnteriorSubTalarControlPoint.sRel')';
+  //  AnyVec3 PosteriorSubTalarPoint = AnkleJointStandard + (ControlPointRotMat * FootMorphNodes.PosteriorSubTalarControlPoint.sRel')';
+  AnyVec3 FootControlPoint1 = AnkleJointStandard + (ControlPointRotMat * FootMorphNodes.ControlBox1.sRel')'; 
+  AnyVec3 FootControlPoint2 = AnkleJointStandard + (ControlPointRotMat * FootMorphNodes.ControlBox2.sRel')'; 
+  AnyVec3 FootControlPoint3 = AnkleJointStandard + (ControlPointRotMat * FootMorphNodes.ControlBox3.sRel')'; 
+  AnyVec3 FootControlPoint4 = AnkleJointStandard + (ControlPointRotMat * FootMorphNodes.ControlBox4.sRel')'; 
+  AnyVec3 FootControlPoint5 = AnkleJointStandard + (ControlPointRotMat * FootMorphNodes.ControlBox5.sRel')'; 
+  AnyVec3 FootControlPoint6 = AnkleJointStandard + (ControlPointRotMat * FootMorphNodes.ControlBox6.sRel')'; 
+  AnyVec3 FootControlPoint7 = AnkleJointStandard + (ControlPointRotMat * FootMorphNodes.ControlBox7.sRel')'; 
+  AnyVec3 FootControlPoint8 = AnkleJointStandard + (ControlPointRotMat * FootMorphNodes.ControlBox8.sRel')'; 
+  AnyVec3 FootControlPoint9 = AnkleJointStandard + (ControlPointRotMat * FootMorphNodes.ControlBox9.sRel')'; 
+  AnyVec3 FootControlPoint10 = AnkleJointStandard + (ControlPointRotMat * FootMorphNodes.ControlBox10.sRel')'; 
+  AnyVec3 FootControlPoint11 = AnkleJointStandard + (ControlPointRotMat * FootMorphNodes.ControlBox11.sRel')'; 
+  AnyVec3 FootControlPoint12 = AnkleJointStandard + (ControlPointRotMat * FootMorphNodes.ControlBox12.sRel')'; 
+  AnyVec3 FootControlPoint13 = AnkleJointStandard + (ControlPointRotMat * FootMorphNodes.ControlBox13.sRel')'; 
+  AnyVec3 FootControlPoint14 = AnkleJointStandard + (ControlPointRotMat * FootMorphNodes.ControlBox14.sRel')'; 
+  AnyVec3 FootControlPoint15 = AnkleJointStandard + (ControlPointRotMat * FootMorphNodes.ControlBox15.sRel')'; 
+  AnyVec3 FootControlPoint16 = AnkleJointStandard + (ControlPointRotMat * FootMorphNodes.ControlBox16.sRel')'; 
+  AnyVec3 FootControlPoint17 = AnkleJointStandard + (ControlPointRotMat * FootMorphNodes.ControlBox17.sRel')'; 
+  AnyVec3 FootControlPoint18 = AnkleJointStandard + (ControlPointRotMat * FootMorphNodes.ControlBox18.sRel')'; 
+  AnyVec3 FootControlPoint19 = AnkleJointStandard + (ControlPointRotMat * FootMorphNodes.ControlBox19.sRel')'; 
+  
+  
+};
+
+
+
+
+AnyFolder &FootRef = Main.AnyBodyGaitAppModel.HumanModel.BodyModel.Side.Leg.Seg.Foot;
+FootRef = {
+  
+  
+  AnyRefNode MorphNodes = {
+    
+    sRel=.AnatomicalFrame.sRel;
+    ARel=.AnatomicalFrame.ARel;
+    
+    AnyFunTransform3D &Scale=.GeomScale;
+    
+    AnySwitch ShowNodes = On;
+    AnyRefNode SourceToeMarker = {
+      sRel = .Scale(...MorphSourcePoints.ToeMarker);
+      AnyDrawNode refnode = { Visible = On;  ScaleXYZ = {0.005, 0.005, 0.005};  RGB = {0.91796875, 0.36953125, 0.06640625}; };
+    };     
+    AnyRefNode SourceLateralFootMarker = {
+      sRel = .Scale(...MorphSourcePoints.LateralFootMarker);
+      AnyDrawNode refnode = { Visible = On;  ScaleXYZ = {0.005, 0.005, 0.005};  RGB = {0.91796875, 0.36953125, 0.06640625}; };
+    };       
+    
+  };
+  
+  AnyRefNode MorphNodesVisualization = {
+    AnyMatrix Points0 = .GeomScale.Points0;
+    AnyMatrix Points0InSeg =.Scale.T0_Inv(Points0);
+    AnyMatrix Points0InSegScaled =.Scale(Points0InSeg);
+    
+    AnyDrawPointCloud SourcePoints ={
+      PointStyle.Style = PointStyleSphere;
+      Points3D = On;
+      
+      ShowNames = Off;
+      RGB={0.91796875, 0.76953125, 0.06640625};
+      Points=.Points0InSeg;
+      PointStyle.Size=0.01;
+      Visible = ...ShowNodes;
+      PointNames={
+        "SourcePoints.CenterAnklePoint",  
+        "SourcePoints.FootControlPoint1", 
+        "SourcePoints.FootControlPoint2", 
+        "SourcePoints.FootControlPoint3", 
+        "SourcePoints.FootControlPoint4", 
+        "SourcePoints.FootControlPoint5", 
+        "SourcePoints.FootControlPoint6", 
+        "SourcePoints.FootControlPoint7", 
+        "SourcePoints.FootControlPoint8",
+        "SourcePoints.FootControlPoint9", 
+        "SourcePoints.FootControlPoint10", 
+        "SourcePoints.FootControlPoint11", 
+        "SourcePoints.FootControlPoint12",
+        "SourcePoints.FootControlPoint13", 
+        "SourcePoints.FootControlPoint14",
+        "SourcePoints.FootControlPoint15"          
+      };
+    };
+    
+    AnyDrawPointCloud TargetPoints ={
+      PointStyle.Style = PointStyleSphere;
+      Points3D = On;
+      ShowNames = Off;
+      RGB= {0.01796875, 0.76953125, 0.06640625};
+      PointStyle.Size=0.015;
+      Visible = ...ShowNodes;
+      
+      Points=.Points0InSegScaled ;
+      PointNames={
+        "TargetPoints.CenterAnklePoint",  
+        "TargetPoints.FootControlPoint1", 
+        "TargetPoints.FootControlPoint2", 
+        "TargetPoints.FootControlPoint3", 
+        "TargetPoints.FootControlPoint4", 
+        "TargetPoints.FootControlPoint5", 
+        "TargetPoints.FootControlPoint6", 
+        "TargetPoints.FootControlPoint7", 
+        "TargetPoints.FootControlPoint8",
+        "TargetPoints.FootControlPoint9", 
+        "TargetPoints.FootControlPoint10", 
+        "TargetPoints.FootControlPoint11", 
+        "TargetPoints.FootControlPoint12",
+        "TargetPoints.FootControlPoint13", 
+        "TargetPoints.FootControlPoint14",
+        "TargetPoints.FootControlPoint15"
+      };
+    };
+    
+  };
+};
+
+
+
+

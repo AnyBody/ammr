@@ -1,0 +1,97 @@
+  AnyOperationMacro RunMotionAndParameterOptimizationSequence  = {  FileName = "Sequence1.anymcr";   };
+    
+    AnyFolder Studies ={
+    AnyFolder &HumanModel=KinematicStudyForParameterIdentification.HumanModel;
+    
+    AnyBodyStudy KinematicStudyForParameterIdentification = {
+      AnyFolder &C3DData=..ModelSetup.C3DFileData ;
+      
+      AnyFolder &ref=HumanModel;
+      ref={ 
+        AnyFolder &Mannequin=.Mannequin;
+        #include  "BodyPartsSetup2.any"
+      };
+      #include "HumanModel.any"
+      
+      //This mannequin calculates a guess on the initial pelvis position based on ASIS and PSI markers
+      //if these markers do not exist in the markerset used this has to be changed
+      #include "Mannequin.any"  // this file controls the initial position of the model and he posture
+      
+      //Environment around the human
+      AnyFolder EnvironmentModel ={
+        //Model of the floor and force plates this is where the force plates are defined        
+        AnyFolder &HumanModelRef=.HumanModel.BodyModel;        
+        #include "Environment.any"
+        
+      };
+      
+      //Connection between environment and the human    
+      AnyFolder ModelEnvironmentConnection = {
+        AnyFolder &HumanModel=.HumanModel.BodyModel;
+        
+        AnyFolder Drivers={
+          
+          // Aliases for convenient referencing
+          AnyFolder &JntPos=..Mannequin.Posture;  
+          AnyFolder &JntVel=..Mannequin.PostureVel;
+          
+          #include "TrunkDrivers.any"
+          #include "RightFootDriversRhythm.any"
+         
+        };
+      };
+      
+            
+      #include "JointAngleOutputs.any"
+      #include "UndefineBodyPartSetup.any"
+      
+      Kinematics.PosAnalysisOnlyOnOff=On; //only run the position analysis 
+      nStep=floor(Main.ModelSetup.nStep/2); //run this analysis with a reduced step number be carefull it can be too low!
+      Gravity ={0.0, -9.81,0};
+      tStart = Main.TrialSpecificData.tStart+2*Kinematics.ApproxVelAccPerturb; 
+      tEnd = Main.TrialSpecificData.tEnd-2*Kinematics.ApproxVelAccPerturb;
+      
+      InitialConditions.SolverType = KinSolOverDeterminate;
+      Kinematics.SolverType = KinSolOverDeterminate;
+      Main.Studies.KinematicStudyForParameterIdentification.InitialConditions.KinematicTol=1e-5;
+      Main.Studies.KinematicStudyForParameterIdentification.Kinematics.KinematicTol=1e-5;
+
+    };
+    
+    AnyOptKinStudy ParameterIdentification =     {
+      AnyFolder &StudyRef = .KinematicStudyForParameterIdentification;
+      ParameterOptimization.ConvergenceTol=1e-2;
+      Analysis =   {
+        AnyOperation &ref = .StudyRef.Kinematics;
+      };
+      #include "RhythmDesignVariables.any"
+    };   
+    
+    AnyBodyStudy MotionOptimization = {
+      
+      
+      AnyFolder &C3DData=..ModelSetup.C3DFileData ;
+      
+      AnyFolder &HumanModel=.KinematicStudyForParameterIdentification.HumanModel;
+      AnyFolder &ModelOptimizationModel=.KinematicStudyForParameterIdentification;
+      AnyFolder &JointAngleOutput=.KinematicStudyForParameterIdentification.JointAngleOutputs;
+      
+      Kinematics.PosAnalysisOnlyOnOff=On;
+      nStep=Main.ModelSetup.nStep; 
+      Gravity ={0.0, -9.81,0};
+      tStart = Main.TrialSpecificData.tStart+2*Kinematics.ApproxVelAccPerturb; 
+      tEnd = Main.TrialSpecificData.tEnd-2*Kinematics.ApproxVelAccPerturb;
+      
+      InitialConditions.SolverType = KinSolOverDeterminate;
+      Kinematics.SolverType = KinSolOverDeterminate;
+   
+      InitialConditions.KinematicTol=1e-5;
+      Kinematics.KinematicTol=1e-5;
+     
+    };
+    
+  };
+  
+
+    
+    

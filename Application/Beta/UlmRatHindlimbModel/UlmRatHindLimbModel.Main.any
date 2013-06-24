@@ -1,0 +1,88 @@
+#include "../libdef.any"
+
+/*******************************************************************
+This is a simulation of the Ulm rat hindlimb model.
+The model is based on model used in the publication
+
+[1] Wehner, T. et al. (2010). "Internal forces and moments in the 
+    femur of the rat during gait." J Biomech 43(13): 2473-2479.
+
+PLEASE reference this paper if the model is used for publications.
+*******************************************************************/
+
+// Find a detailed description of the model here.
+#include "Model/Description.any"
+
+// Switch for femur model: 
+//  1 : model with proximal and distal part
+//  0 : model with complete femur.
+// For running model with FRACTUREMODEL set to 0 the model 
+// UlmRatHindlimbModel_Split.main.any can be used.
+#ifndef FRACTUREMODEL
+#define FRACTUREMODEL 0
+#endif
+
+
+Main = {
+  #include "Model/RunApplication.any"
+  
+  // Definitions of draw settings for the model
+  #include "Model/DrawSettings.any"
+  
+  /// The actual body of the RatModel goes in this folder 
+  AnyFolder RatModel = {
+    
+    // Defines the body model of the rat
+    #include "<ANYBODY_PATH_BODY>/../Beta/UlmRat/Body.any"
+    
+    // Definition of the model environment
+    #include "Model/Environment.any"
+        
+    AnyFolder ModelEnvironmentConnection = {
+
+      // Definition of joints and drivers for the rat model
+      #include "Model/JointsAndDrivers.any"
+  
+      // Definition of ground reaction forces
+      #include "Model/GroundReactions.any"
+    };
+
+    
+
+    
+    // Definition of calculation of forces in the fracture plane
+    #if FRACTUREMODEL
+    #include "Model/FractureForces_Split.any"
+    #else
+    #include "Model/FractureForces.any"
+    #endif
+    
+    /**
+    Definition of the location of the fracture relative to the femur length:
+      0.0: Fracture of the femur at the knee joint
+      1.0: fracture of the femur at the hip joint
+    */
+    AnyVar FracturRatio = 0.5;  
+
+  }; // RatModel
+  
+  
+  // The study: Operations to be performed on the RatModel
+  AnyBodyStudy Study = {
+    AnyFolder &Model = .RatModel;
+    
+    InverseDynamics.Criterion.Type = MR_MinMaxStrict;
+    //RecruitmentSolver = MinMaxSimplex;
+    Gravity = {0.0, 0.0, -9.81}; 
+    
+    tArrayOnOff = On;
+    
+    tStart = 0;
+    tEnd = 0.4;
+    tArray = tStart + iarr(0,200-1) / 200.0 * tEnd;
+    
+    nStep=200;
+  };
+
+  
+};  // Main

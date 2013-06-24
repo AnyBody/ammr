@@ -1,0 +1,96 @@
+///The scale function which will be used for all AnyRefNode objects 
+///in the corresponding AnySeg object.
+AnyFunTransform3D Scale = 
+{
+  /// T0: A transform to the unscaled anatomical frame from the segmental ref. frame
+  AnyFunTransform3DLin T0 = 
+  {
+    ///^ p0: the set of unscaled anatomical feature points which are used to construct the unscaled anatomical reference frame.
+    AnyFloat p0 = ..pUnscaled ;
+    ///^ s0: the relative location of the unscaled anatomical frame w.r.t. the segment reference frame.
+    AnyVec3 s0 = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(p0, ..Sign) ;
+    ///^ A0: the relative orientation of the unscaled anatomical frame w.r.t. the segment reference frame.
+    #ifdef MACRO_CONSTRUCT_ANATOMICAL_FRAME_A
+    AnyMat33 A0 = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(p0, ..Sign) ;
+    #endif
+    
+    #ifdef MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2
+    AnyFloat d0 = ..dAxisFixed;
+    AnyMat33 A0 = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2(p0, d0, ..Sign) ;
+    #endif    
+    
+    ScaleMat = A0' ;
+    Offset = -s0 ;
+  };
+  
+  /// T0_Inv:  A transform to the segmental ref. frame from the unscaled anatomical frame 
+  AnyFunTransform3DLin T0_Inv = 
+  {
+    ScaleMat = .T0.A0 ;
+    Offset = ( .T0.A0' * .T0.s0')' ;
+  };          
+  
+  /// Combination of three transformations: T0'(G(T0(X)))
+  AnyFunTransform3D T0GT0Inv =
+  {
+    PreTransforms = 
+    {
+      &.T0,
+      &..GeomScale, 
+      &.T0_Inv
+    };
+  };
+    
+  /// T1: A transform to the scaled anatomical frame from the segmental ref. frame  
+  AnyFunTransform3DLin T1 =
+  {
+    ///^ p1: the set of scaled anatomical feature points(by T0GT0Inv) which are used to construct the scaled anatomical reference frame.
+    AnyFloat p1 = .T0GT0Inv(.T0.p0);
+    ///^ s1: the relative location of the scaled anatomical frame w.r.t. the segment reference frame.
+    AnyVec3 s1 = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(p1, ..Sign) ;
+    ///^ A1: the relative orientation of the scaled anatomical frame w.r.t. the segment reference frame.
+    #ifdef MACRO_CONSTRUCT_ANATOMICAL_FRAME_A
+    AnyMat33 A1 = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(p1, ..Sign) ;    
+    #endif
+    
+    #ifdef MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2
+    AnyFloat d0 = .T0.d0;
+    AnyMat33 A1 = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2(p1, d0, ..Sign) ;
+    #endif 
+    
+    ScaleMat = A1' ;
+    Offset = -s1 ;
+  };
+  
+  /// T1_Inv:  A transform to the segmental ref. frame from the scaled anatomical frame
+  AnyFunTransform3DLin T1_Inv = 
+  {
+    ScaleMat = .T1.A1 ;
+    Offset = ( .T1.A1' * .T1.s1')';
+  };
+
+  
+  
+  /// This scale function will be the combination of three transformations: T1'(G(T0(X)))
+  PreTransforms = 
+  {
+    &T0, 
+    &.GeomScale,
+    &T1_Inv 
+  };
+  
+};
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+ 

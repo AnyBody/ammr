@@ -1,0 +1,240 @@
+///Environment folder 
+AnyFolder Environment={
+  
+  //This is the definition of the global ref frame where the bikes are attached too
+  AnyFixedRefFrame GlobalRef = {
+    
+    AnyDrawSurf Floor ={
+      FileName = "../Input/floor";
+      ScaleXYZ={1,1,1};
+      RGB = Main.DrawSettings.Colors.AnyBodyBlue;
+      Opacity=1.0;
+    };  
+    
+    AnyRefNode FootGroundR={
+      sRel={0,0.05,0.4};
+    };
+    
+    AnyRefNode FootGroundL={
+      sRel={0,0.05,-0.4};
+    };
+    
+    AnyRefNode RotPointR ={
+      sRel={1.4,0,0.3};
+    };
+    AnyRefNode RotPointL ={
+      sRel={1.4,0,-0.3};
+    };
+    
+    AnyRefNode logo_node =
+         {
+           sRel = {1.2, -0.07,0.60};
+           //ARel = RotMat(90*pi/180, y);
+           AnyDrawSurf Body = 
+           {
+             FileName = "../Input/Body-grey";
+             RGB = Main.DrawSettings.Colors.AnyBodyGrey;
+             Opacity = 1;
+             ScaleXYZ= 0.005 * {1,1,1};
+             AnyStyleDrawMaterial1 style = 
+             {
+               EnableCreasing = On;
+               CreasingAngle = 0.524;
+             };             
+           };                    
+           AnyDrawSurf AnyTechnology = 
+           {
+             FileName = "../Input/AnyTechnology-red";
+             RGB = Main.DrawSettings.Colors.AnyBodyRed;
+             Opacity = 1;
+             ScaleXYZ= 0.005*{1,1,1};
+             AnyStyleDrawMaterial1 style = 
+             {
+               EnableCreasing = On;
+               CreasingAngle = 0.524;
+             };               
+           };          
+         };    
+         AnyRefNode logo_node2 =
+         {
+           sRel = {1.2, -0.07 ,-0.60};
+           ARel = RotMat(180*pi/180, y);
+           AnyDrawSurf Body = 
+           {
+             FileName = "../Input/Body-grey";
+             RGB = Main.DrawSettings.Colors.AnyBodyGrey;
+             Opacity = 1;
+             ScaleXYZ= 0.005*{1,1,1};
+             AnyStyleDrawMaterial1 style = 
+             {
+               EnableCreasing = On;
+               CreasingAngle = 0.524;
+             };             
+           };                    
+           AnyDrawSurf AnyTechnology = 
+           {
+             FileName = "../Input/AnyTechnology-red";
+             RGB = Main.DrawSettings.Colors.AnyBodyRed;
+             Opacity = 1;
+             ScaleXYZ= 0.005*{1,1,1};
+             AnyStyleDrawMaterial1 style = 
+             {
+               EnableCreasing = On;
+               CreasingAngle = 0.524;
+             };             
+           };          
+         }; 
+    
+  };
+  //The following definitions controls the positions of the hands
+  AnyVar StartAngle =-80;
+  
+  AnyVar AngleVel=0;
+  AnyVar StartDist =0.55;
+  AnyVar DistVel=0.0;
+  
+  AnyFolder Left={
+    AnySeg Roter={
+      r0=..GlobalRef.RotPointL.sRel; 
+      Mass=0.0; 
+      Jii = {0,0,0};
+    }; 
+    
+    AnyKinLinear RoterLin={
+      AnyRefNode &node1 =..GlobalRef.RotPointL;
+      AnySeg &node2 =.Roter;  
+    }; 
+    
+    
+    AnyKinEqSimpleDriver RoterForBackDrv = {
+      AnyKinLinear &Ref = .RoterLin;
+      MeasureOrganizer = {0,1,2};
+      DriverPos = {0,0,0};
+      DriverVel = {0,0,0};
+      Reaction.Type = {On,On,On};
+    };
+    
+    
+    AnyKinRotational RoterRot={
+      AnyRefNode &node1 = ..GlobalRef.RotPointL;
+      AnySeg &node2 = .Roter;  
+      Type = RotVector;
+      AngVelOnOff = On;
+    }; 
+    
+    AnyKinEqSimpleDriver RoterRotDrv = {
+      AnyKinRotational &Ref = .RoterRot;
+      MeasureOrganizer = {0,1,2};
+      DriverPos = {0,..StartAngle,0}*pi/180;
+      DriverVel = {0,..AngleVel,0}*pi/180;
+      Reaction.Type = {On,On,On};
+    };
+    
+    AnySeg Handle={
+      r0={1.3,0,-0.3};
+      Mass=0.0; 
+      Jii = {0,0,0};
+    
+    };
+    
+    AnyKinLinear HandleLin={
+      AnySeg &node1 =.Roter;
+      AnySeg &node2 =.Handle;  
+      Ref=0;
+    }; 
+    
+    AnyKinEqSimpleDriver HandleDrv={
+      AnyKinLinear &Ref = .HandleLin;
+      DriverPos = {0,0,0};
+      DriverVel = {0,0,0};
+      Reaction.Type = {On,On,On};
+    };
+    
+    AnyKinRotational HandleRot={
+      AnySeg &node1 =.Roter;
+      AnySeg &node2 =.Handle;  
+      Type = RotVector;
+      AngVelOnOff = On;
+    }; 
+    
+    AnyKinEqSimpleDriver HandleRotConstraint={
+      AnyKinRotational &ref = .HandleRot;
+      DriverPos={0,0,30*pi/180}     ;
+      DriverVel={0,0.0,0};
+    };
+    
+  };
+  
+  AnyFolder Right={
+    
+    AnySeg Roter={
+      r0=..GlobalRef.RotPointR.sRel; 
+      Mass=0.0; 
+      Jii = {0,0,0};
+    }; 
+    
+    AnyKinLinear RoterLin={
+      AnyRefNode &node1 =..GlobalRef.RotPointR;
+      AnySeg &node2 =.Roter;  
+    }; 
+    
+    AnyKinEqSimpleDriver RoterForBackDrv = {
+      AnyKinLinear &Ref = .RoterLin;
+      MeasureOrganizer = {0,1,2};
+      DriverPos = {0,0,0};
+      DriverVel = {0,0,0};
+      Reaction.Type = {On,On,On};
+    };
+    
+    
+    AnyKinRotational RoterRot={
+      AnyRefNode &node1 = ..GlobalRef.RotPointR;
+      AnySeg &node2 = .Roter;  
+      Type = RotVector;
+      AngVelOnOff = On;
+    }; 
+    
+    AnyKinEqSimpleDriver RoterRotDrv = {
+      AnyKinRotational &Ref = .RoterRot;
+      MeasureOrganizer = {0,1,2};
+      DriverPos = {0,-..StartAngle,0}*pi/180;
+      DriverVel = {0,-..AngleVel,0}*pi/180;
+      Reaction.Type = {On,On,On};
+    };
+    
+    AnySeg Handle={
+      r0={1.4,0,0.4};
+      Mass=0.0; 
+      Jii = {0,0,0};
+    };
+    
+    AnyKinLinear HandleLin={
+      AnySeg &node1 =.Roter;
+      AnySeg &node2 =.Handle;  
+      Ref=0;
+    }; 
+    
+    AnyKinEqSimpleDriver HandleDrv={
+      AnyKinLinear &Ref = .HandleLin;
+      DriverPos={0,0,0}     ;
+      DriverVel = {0,0,0};
+      Reaction.Type = {On,On,On};
+    };
+    
+    AnyKinRotational HandleRot={
+      AnySeg &node1 =.Roter;
+      AnySeg &node2 =.Handle;  
+      Type = RotVector;
+      AngVelOnOff = On;
+    }; 
+    
+    AnyKinEqSimpleDriver HandleRotConstraint={
+      AnyKinRotational &ref = .HandleRot;
+      DriverPos={0,0,30*pi/180}     ;
+      DriverVel={0.0,0.0,0};
+    };
+    
+  };
+};
+
+

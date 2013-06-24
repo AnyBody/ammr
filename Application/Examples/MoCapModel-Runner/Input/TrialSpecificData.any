@@ -1,0 +1,154 @@
+
+AnyFolder TrialSpecificData={
+  
+  // ********** Input File ***********
+  //Name of the C3D file to be analysed
+  //The data used for this model was kindly provided by Prof. Y. Liu, Shanghai University of Sports, China.
+  AnyString NameOfFile ="Runner"; //Write the name of the file here
+  
+  // ********** Time ***********
+    // FrontFrameOffset is the offset value from the first frame of C3D file
+  AnyIntVar FrontFrameOffset = 10;
+  // LastFrameOffset is the offset value from the last frame of C3D file
+  AnyIntVar LastFrameOffset = 45;  //there is a marker dropping out at the end
+  // Number of steps for the analysis but can be changed is needed
+  AnyIntVar nStep = Main.ModelSetup.nStep;
+  
+  
+  // ********** Gravity ***********
+  // Gravity vector that is consistent with the laboratory setting
+  AnyVector Gravity = {0, 0, -9.81}; // Z direction is normal to the ground
+
+  
+  
+  // ********** Antrhopometrics ***********
+  //These antrhopometric data will be used as initial guess for the optimization alogorithm the optimization algoritm will allow changes to the 
+  //segment lengths
+  AnyFolder Anthropometrics={
+    AnyVar BodyMass=     74.9;  //the mass is automatically distributed to the segments
+    AnyVar BodyHeight=   1.735;  //height
+    
+    AnyVar ThighLength=  0.42;  //rigth and left side is mirrored 
+    AnyVar ShankLength=  0.41;
+    AnyVar FootLength=   0.21;
+    AnyVar PelvisWidth=  0.16; //distance between hip joints
+    
+    AnyVar HeadHeight =  0.14;//height in neutral position from  C1HatNode to top of head
+    AnyVar TrunkHeight = 0.62;//height in neautral position from  C1HatNode to L5SacrumJnt
+    AnyVar UpperArmLength = 0.34;
+    AnyVar LowerArmLength = 0.25;
+    AnyVar HandLength =  0.182;
+    AnyVar HandBreadth = 0.085;
+  };
+  
+  // Define what anthropometrics will be optimised, but be aware that inconsiderate changes
+  // might lead to model failure! Pelvis and Trunk can only be "On" if there are markers available.
+  // Upper and Lower arms can only be "On" if Upper Body is used and sufficient markers are available.
+  Main.ModelSetup = {
+    // For FullBody model    
+    #if UseUpperExtremities == 1
+    OptimizeAnthropometricsOnOff OptimizeOnOff (
+    PelvisWidthOnOff ="On", 
+    ThighLengthOnOff="On", 
+    ShankLengthOnOff="On", 
+    FootLengthOnOff="On", 
+    HeadHeightOnOff="Off", 
+    TrunkHeightOnOff="On", 
+    UpperArmLengthOnOff="On",
+    LowerArmLengthOnOff="On",
+    Model1=MotionAndParameterOptimizationModel, Model2= InverseDynamicModel
+    ) ={};
+    #endif
+    // For LowerBody model
+    #if UseUpperExtremities == 0
+    OptimizeAnthropometricsOnOff OptimizeOnOff (
+    PelvisWidthOnOff ="On", 
+    ThighLengthOnOff="On", 
+    ShankLengthOnOff="On", 
+    FootLengthOnOff="On", 
+    HeadHeightOnOff="Off", 
+    TrunkHeightOnOff="On", 
+    UpperArmLengthOnOff="Off",
+    LowerArmLengthOnOff="Off",
+    Model1=MotionAndParameterOptimizationModel, Model2= InverseDynamicModel
+    ) ={};
+    #endif    
+    //
+   };
+   
+   
+  // ********** Initial Position ***********
+  //This is the initial position of the body it should only be touched it the kinematics does not work it first timestep
+  //then these variable can be used to create a better guess, otherwise leave them unchanged
+  AnyFolder InitialPositionOfBody ={
+    
+    AnyVar PelvisRotZ = 90;
+    AnyVar PelvisRotY = 30;
+    AnyVar PelvisRotX = 90;
+    
+    AnyVar PelvisThoraxExtension=0; 
+    AnyVar PelvisThoraxLateralBending=0;  
+    AnyVar PelvisThoraxRotation=0;        
+    
+    AnyVar NeckExtension=0; 
+    
+    AnyFolder Right={
+      AnyVar HipFlexion = 50;
+      AnyVar HipAbduction = 5;
+      AnyVar HipExternalRotation = 5;
+      AnyVar KneeFlexion = 60;
+      AnyVar AnklePlantarFlexion = -20;
+      AnyVar SubTalarEversion = 0;
+      AnyVar GlenohumeralFlexion          = 50; 
+      AnyVar GlenohumeralAbduction        =  20; 
+      AnyVar GlenohumeralExternalRotation =  -1; 
+      AnyVar ElbowFlexion                 =  90; 
+      AnyVar ElbowPronation               = 30;
+      AnyVar WristFlexion                 =  0;
+      AnyVar WristAbduction               =  0;      
+    };
+    
+    AnyFolder Left ={
+      AnyVar HipFlexion = 90;
+      AnyVar HipAbduction = 5.0;
+      AnyVar HipExternalRotation = 5;
+      AnyVar KneeFlexion = 90;
+      AnyVar AnklePlantarFlexion = -50;
+      AnyVar SubTalarEversion = 20;
+      AnyVar GlenohumeralFlexion          = -25; 
+      AnyVar GlenohumeralAbduction        = 20;
+      AnyVar GlenohumeralExternalRotation =  -10;
+      AnyVar ElbowFlexion                 =  35; 
+      AnyVar ElbowPronation               = 30;       
+      AnyVar WristFlexion                 =  0;
+      AnyVar WristAbduction               =  0;      
+    };
+  };
+  
+    
+  // ********** Extra Drivers ***********
+  // Some Gait Labs protocols do not record sufficient markers to create a full body model.
+  // In particular, markers on the head, trunk and a third marker on the foot are not standard.
+  // Therefore, additioanl drivers have been added to the model fix the head, drive the trunk
+  // above the pelvis and fix subtalar eversio. You can switch them on for your own C3D files:
+  // Do you have markers on the head? If not turn on following switch:
+#ifndef HeadMarkersOnOff
+  #define HeadMarkersOnOff 1
+#endif
+
+// Do you have markers on the Trunk? If not turn on following switch:
+#ifndef TrunkMarkersOnOff
+  #define TrunkMarkersOnOff 1
+#endif
+
+// Do you have three markers on the Foot? If not turn on following switch:
+#ifndef ThreeFootMarkersOnOff
+  #define ThreeFootMarkersOnOff 0
+#endif
+
+// Do you have markers on the Scapula/Clavicle? If not turn on following switch:
+#ifndef SCMarkersOnOff 
+  #define SCMarkersOnOff 0
+#endif
+
+};

@@ -1,0 +1,61 @@
+
+
+
+  // ************************************
+  // Drivers for attaching the pelvis to the global reference system
+  // ************************************  
+  
+  AnyKinEqInterPolDriver PelvisGroundDriver ={
+    AnyKinLinear lin ={
+      AnyFixedRefFrame &ref1 =....EnvironmentModel.GlobalRef;
+      AnySeg &ref2 =....HumanModel.Trunk.SegmentsLumbar.PelvisSeg;
+    };
+    AnyKinRotational rot ={
+      AnyFixedRefFrame &ref1 =....EnvironmentModel.GlobalRef;
+      AnySeg &ref2 =....HumanModel.Trunk.SegmentsLumbar.PelvisSeg;
+      Type=RotAxesAngles;
+    };
+        Data={
+      .JntPos.PelvisPosXVec,
+      .JntPos.PelvisPosYVec,
+      .JntPos.PelvisPosZVec,
+      pi/180*.JntPos.PelvisRotZVec,
+      pi/180*.JntPos.PelvisRotYVec,
+      pi/180*.JntPos.PelvisRotXVec
+    };
+    T=.JntPos.PelvisPosTime;
+    Reaction.Type={On,On,On,On,On,On};
+      Type=PiecewiseLinear;
+
+  };
+
+
+  // ************************************
+  // Drivers for the spine
+  // ************************************
+  
+  //Neck driver 
+  AnyKinEqInterPolDriver NeckJntDriver = {
+    AnyRevoluteJoint &T12L1Joint = ....HumanModel.BodyModel.Interface.Trunk.NeckJoint;
+    Data = pi/180*{.JntPos.NeckExtensionVec};
+    Reaction.Type = {Off};
+    T=.JntPos.NeckTime;
+    Type=PiecewiseLinear;
+  };
+  
+  //Thorax pelvis rotation driver
+  AnyKinEqInterPolDriver PostureDriver ={
+    AnyKinMeasureOrg &Ref2 = ...HumanModel.Interface.Trunk.PelvisThoraxLateralBending;        
+    AnyKinMeasureOrg &Ref3 = ...HumanModel.Interface.Trunk.PelvisThoraxRotation;   
+    AnyKinMeasureOrg &Ref1 = ...HumanModel.Interface.Trunk.PelvisThoraxExtension;
+    
+    Data = pi/180*{
+      .JntPos.PelvisThoraxLateralBendingVec,
+      .JntPos.PelvisThoraxRotationVec,
+      .JntPos.PelvisThoraxExtensionVec
+    };
+    T=.JntPos.PelvisThoraxTime;
+    Type=PiecewiseLinear;
+    Reaction.Type = {Off,Off,Off};  
+    
+  };  

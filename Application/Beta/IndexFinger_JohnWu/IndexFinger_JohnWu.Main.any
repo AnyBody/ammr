@@ -1,0 +1,104 @@
+#include "../libdef.any"
+
+/** 
+ Index Finger Model
+ Developed by John Z. Wu (NIOSH, Morgantown, WV 26505, USA)
+ Last revision: September, 2008.
+
+ Detailed model information: 
+ Wu JZ, An KN, Cutlip RG, Krajnak K, Welcome D, Dong RG.
+ Analysis of musculoskeletal loading in an index finger during tapping.
+ Journal of Biomechanics.2008.41(3):668-76.
+
+
+
+ May 2010
+ Modified by AnyBody Technology (sc) to follow the standard model structure:
+ - RunApplication introduced
+ - Study syntax updated for new recruitment solver
+ The results may differ from the ones published in the paper due to the new recruitment solver.
+*/
+Main = {
+  
+  // Include an operation sequence to run all required steps of your application (see Operations tab)
+    #include "Model\RunApplication.any"
+
+ 
+  // The actual body model goes in this folder
+  AnyFolder IndexModel = {
+    
+    #include "Model/Index_parameters.any"
+    
+    #include "Model/Index_metacarpal.any"
+    
+    #include "Model/Index_segments.any"
+    
+    #include "Model/Index_joints.any"
+    
+    #include "Model/Index_muscles_2.any"
+
+    #include "Model/Index_forces.any"
+    
+  }; // IndexModel
+     
+    #include "Model/Index_drivers.any"
+
+//  
+  AnyFolder CalibrationDrivers = {    
+    //---------------------------------
+      AnyKinEqSimpleDriver MCPCali = {
+      AnyUniversalJoint &Jnts = Main.IndexModel.Jnts.MCP;
+          DriverPos = {0, -(11.5/180)*pi};
+          DriverVel = {0, 0};
+      //    (-abduction/+adduction, +flextion/-externsion)
+      Reaction.Type = {Off,Off};
+    }; // MP driver
+    //---------------------------------  
+      AnyKinEqSimpleDriver PIPCali = {
+      AnyRevoluteJoint &Jnts = Main.IndexModel.Jnts.PIP;        
+          DriverPos = {-(28.5/180)*pi};
+          DriverVel = {0};
+      Reaction.Type = {Off};
+    }; // PIP driver
+    //---------------------------------  
+      AnyKinEqSimpleDriver DIPCali = {
+      AnyRevoluteJoint &Jnts = Main.IndexModel.Jnts.DIP;
+          DriverPos = {-(13.6/180)*pi};
+          DriverVel = {0};
+      Reaction.Type = {Off};
+    }; // DIP driver
+  };  //CalibrationDrivers
+  
+  AnyBodyCalibrationStudy Calibration = 
+  {
+    AnyFolder &Model = Main.IndexModel;
+    AnyFolder &Drivers = Main.CalibrationDrivers;
+    
+    tStart = 0;
+    tEnd = 0.240;
+    nStep = 1;
+  };
+  
+  AnyBodyStudy Study = {
+    AnyFolder &Model = Main.IndexModel;
+    AnyFolder &Drivers = Main.Drivers;
+    AnyFolder &Measurements = Main.Measurements;
+    
+    InverseDynamics.Criterion.Type = MR_MinMaxStrict;
+    //    RecruitmentSolver = MinMaxSimplex;
+    //    RecruitmentSolver = MinMaxOOSolSimplex;
+    //    RecruitmentSolver = MinMaxOOSolQP;
+    //    RecruitmentLpPenalty =1000.0;
+    //    RecruitmentQpPenalty=1000.0;
+    Gravity = {0.0, -9.81, 0.0};
+    nStep = 40;
+    tStart = 0;
+    tEnd = 0.240;
+    //MuscleEliminationTol = 1e-3;
+    
+    #include "Model/Output.any"
+    
+  }; //AnyBodyStudy
+  
+};  // Main
+

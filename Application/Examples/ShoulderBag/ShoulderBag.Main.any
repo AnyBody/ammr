@@ -6,90 +6,44 @@ simulates a person carrying a bag on the shoulder and tries to predict
 the postural changes due to this.
 ---------------------------------------------------------------------------- */
 Main = {
-  
-  /**Execute this operation to run the model in the intended operation sequence.  
-  It is also possible to run operations seperately, by manual selections in the operation tree*/
-  AnyOperationSequence RunApplication = {
 
-    /**This operation calibrates the muscles in the model if these are of the type AnyMuscleModel3E.
-    This will just be an empty operation if the model is using a muscle type that does not require calibration.*/
-    AnyOperation &CalibrationAnal = Main.HumanModel.Calibration.CalibrationSequence;  
-
-    ///This operation is the inverse dynamic analysis
-    AnyOperation &InvAnal=Main.Study.InverseDynamics;
+  // ----------------------------------------------------------
+  // Path to draw settings
+  // ----------------------------------------------------------
+  #path BM_DRAWSETTINGS_FILE "Model/DrawSettings.any"
   
-  };
-
-  #include "DrawSettings.any"
+  // ----------------------------------------------------------
+  // Model configuration:
+  // For more info on body model configuration options please load the model and double click on: 
+  // #include "<ANYBODY_PATH_BODY>\Documentation\BodyModel.parameters.any"
+  // ----------------------------------------------------------
   
-  AnyFolder HumanModel = {
-    
-    AnyFolder &Mannequin=.Model.Mannequin;
-    
-    // Use only ONE of the three include fles below at any time
-    // --------------------------------------------------------
-    
-    // Selecting the include file below results in a body model without muscles.
-    // Instead, the model is equipped with joint moment providers. This version
-    // loads and run much faster than versions with anatomical muscles.
-    //#include  "BodyPartsSetupGeneric.any"
-    
-    // Selecting the include file below results in a body model with simple
-    // constant stength muscles. They are adequate for many purposes and have the
-    // advantage of not requiring calibration
-    #include  "BodyPartsSetupSimpleMuscle.any"
-    
-    #include  "<ANYBODY_PATH_BODY>/BodyModels/GenericBodyModel/BodyModel.any"
-    
-    // The include file below selects the three-element Hill-type muscles.
-    // They require calibration before they can be used, and this can be done
-    // by the HumanModel.Calibration.CalibrationSequence operation. This must 
-    // be executed every time the model is reloaded.
-    //#include  "<ANYBODY_PATH_BODY>\BodyModels\FullBodyModel\BodyModel_Mus3E.any" 
-
-    // The StrengthParameters folder allows for simple scaling of strength
-    // between the spine, the legs and the ShoulderArm body parts. The methods
-    // are slightly different to adhere to the anatomical literature on which the
-    // models are based.
-    AnyFolder StrengthParameters = {
-      AnyVar SpecificMuscleTensionSpine = 90; //N/cm^2
-      AnyVar StrengthIndexLeg = 1; 
-      AnyVar SpecificMuscleTensionShoulderArm = 90; //N/cm^2
-    };    
-    
-    // This section below offers the choice between two scaling strategies for the
-    // human model. 
-    
-    // ScalingStandard means that all the body parts will have the standard size 
-    // at which they were originally developed, i.e. with anthropometric
-    // data from the anatomical literature. This roughly corresponds to a 50th
-    // percentile European male.    
-    #include "<ANYBODY_PATH_BODY>\Scaling\ScalingStandard.any"
-    
-    // ScalingLengthMassFat will scale each segment of the body to anthropometric data
-    // specified in the selected AnyFamily include file, attempting to take the
-    // fat percentage into account in the assessment of the muscle strength.
-    // #include "<ANYBODY_PATH_BODY>\Scaling\ScalingLengthMassFat.any" 
-    // Scaling = {
-    //   #include "<ANYBODY_PATH_BODY>\Scaling\AnyFamily\AnyMan.any"
-    // };    
-  };
+  // The model was designed using old leg model: CONST_LEG_MODEL_Leg
+  #define BM_LEG_LEFT CONST_LEG_MODEL_Leg
+  #define BM_LEG_RIGHT CONST_LEG_MODEL_Leg
   
-  AnyFolder Model = {
-    
+  // The Mannequin file specifies load-time positions for all the segments
+  // in the HumanModel. This is important for the model's ablity to resolve
+  // all the kinematic constraints when the model is analyzed.
+  // The mannequin file also drives those degrees of freedom of the human 
+  // model that are not governed by problem-specific drivers at run time.    
+  #path BM_MANNEQUIN_FILE "Model/Mannequin.any" 
+  
+  // Model of the human body to be used for the analysis
+  #include "<ANYBODY_PATH_BODY>/HumanModel.any"
+
+  /// The actual model where all components are assembled
+  AnyFolder Model={
+    /// Body model without default drivers
     AnyFolder &HumanModel=.HumanModel.BodyModel;
-    #include "Environment.any"   
+    /// Reference to the mannequin folder (used by drivers)
+    AnyFolder &Mannequin =.HumanModel.Mannequin;
     
-    // The Mannequin file specifies load-time positions for all the segments
-    // in the HumanModel. This is important for the model's ablity to resolve
-    // all the kinematic constraints when the model is analyzed.
-    // The mannequin file also drives those degrees of freedom of the human 
-    // model that are not governed by problem-specific drivers at run time.    
-    #include "Mannequin.any" 
+    #include "Model/Environment.any"   
     
     AnyFolder ModelEnvironmentConnection = {
       // This file converts values in the "Mannequin.any" file to Axes matrices
-      #include "JointsAndDrivers.any"
+      #include "Model/JointsAndDrivers.any"
     };
     
   };
@@ -110,13 +64,13 @@ Main = {
 
   
   
-  // This optimization study demonstrates the use of posture prediction.
-  // The underlying assumption is that a person will attain the posture that
-  // minimizes the muscular effort. Thus, the study defines a number of postural
-  // variables and tries to find the combination that reduces the maximum
-  // muscle activity as much as possible.
+  /// This optimization study demonstrates the use of posture prediction.
+  /// The underlying assumption is that a person will attain the posture that
+  /// minimizes the muscular effort. Thus, the study defines a number of postural
+  /// variables and tries to find the combination that reduces the maximum
+  /// muscle activity as much as possible.
   AnyOptStudy PostureOptimization = {
-    LogFile = "Optimization.log";
+    LogFile = "Output/Optimization.log";
     AnyDesVar HipFlex = {
       Val = Main.Model.Mannequin.Posture.Right.HipFlexion;
       Min = Val - 10;
@@ -141,17 +95,20 @@ Main = {
       Max = Val + 0.05;
     };
     
-    // Objective function: MaxMuscleActivity = Muscular effort.
+    /// Objective function: MaxMuscleActivity = Muscular effort.
     AnyDesMeasure MaxMuscleAct = {
       Val = max(..Study.MaxAct());  /// Max of muscle activity
       Type = ObjectiveFun;
     };
     
-    // Definition of the Analysis
+    /// Definition of the Analysis
     Analysis = {
       AnyOperation &Analysis = ..Study.InverseDynamics;
     };
   };
+  
+  // Include an operation sequence to run all required steps of your application (see Operations tab)
+    #include "<ANYBODY_PATH_TOOLBOX>\Operations\RunAppSequence.any"
   
 }; //Main
 

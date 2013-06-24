@@ -1,0 +1,528 @@
+
+
+// This is to switch On or Off the MannequinDrivers. It is a quick way to drive any joint of the body 
+// with pre-existing drivers. They are based on the FreePosture drivers, 
+// so they are driving directly the joint angles and are really independent from each other. Also
+// all DOF can be driven separatly.
+// 0 switch the driver Off and 1 switch it On.
+// The input value for each driver is the joint angles and velocities defined below in the Mannequin folder.
+// Notice that even if it is possible to drive fully the model with those drivers, we originaly thinked them
+// as alternative or debug drivers.
+// *********************************************************************************************************
+
+// Global switch:
+// - if turned to 1 the drivers will be activated according to their individual statut.
+// - if turned to 0 all drivers will desactivated (regardless to their individual statut).
+#define GLOBAL_DRIVER_SWITCH 0
+
+// Drivers for attaching the pelvis to the global reference system
+#define PELVIS_POS_X_DRIVER 1
+#define PELVIS_POS_Y_DRIVER 1
+#define PELVIS_POS_Z_DRIVER 1
+
+#define PELVIS_ROT_Z_DRIVER 1
+#define PELVIS_ROT_Y_DRIVER 1
+#define PELVIS_ROT_X_DRIVER 1
+
+
+// Drivers for the spine
+#define NECK_DRIVER 1
+
+#define PELVIS_THORAX_LATERAL_BENDING_DRIVER 1
+#define PELVIS_THORAX_ROTATION_DRIVER 1
+#define PELVIS_THORAX_EXTENSION_DRIVER 1
+
+
+// Drivers for the right arm
+#define STERNO_CLAVICULAR_RIGHT_DRIVER 1
+
+#define GLENOHUMERAL_ABDUCTION_RIGHT_DRIVER 1
+#define GLENOHUMERAL_FLEXION_RIGHT_DRIVER 1
+#define GLENOHUMERAL_EXTERNAL_ROTATION_RIGHT_DRIVER 1
+
+#define ELBOW_FLEXION_RIGHT_DRIVER 1
+#define ELBOW_PRONATION_RIGHT_DRIVER 1
+
+#define WRIST_FLEXION_RIGHT_DRIVER 1
+#define WRIST_ABDUCTION_RIGHT_DRIVER 1
+
+
+// Drivers for the left arm
+#define STERNO_CLAVICULAR_LEFT_DRIVER 1
+
+#define GLENOHUMERAL_ABDUCTION_LEFT_DRIVER 1
+#define GLENOHUMERAL_FLEXION_LEFT_DRIVER 1
+#define GLENOHUMERAL_EXTERNAL_ROTATION_LEFT_DRIVER 1
+
+#define ELBOW_FLEXION_LEFT_DRIVER 1
+#define ELBOW_PRONATION_LEFT_DRIVER 1
+
+#define WRIST_FLEXION_LEFT_DRIVER 1
+#define WRIST_ABDUCTION_LEFT_DRIVER 1
+
+
+// Drivers for the right leg
+#define HIP_FLEXION_RIGHT_DRIVER 1
+#define HIP_EXTERNAL_ROTATION_RIGHT_DRIVER 1
+#define HIP_ABDUCTION_RIGHT_DRIVER 1
+
+#define KNEE_FLEXION_RIGHT_DRIVER 1
+
+#define ANKLE_FLEXION_RIGHT_DRIVER 1
+#define ANKLE_EVERSION_RIGHT_DRIVER 0
+#define ANKLE_SUBTALAR_EVERSION_RIGHT_DRIVER 1
+
+
+// Drivers for the Left leg
+#define HIP_FLEXION_LEFT_DRIVER 1
+#define HIP_EXTERNAL_ROTATION_LEFT_DRIVER 1
+#define HIP_ABDUCTION_LEFT_DRIVER 1
+
+#define KNEE_FLEXION_LEFT_DRIVER 1
+
+#define ANKLE_FLEXION_LEFT_DRIVER 1
+#define ANKLE_EVERSION_LEFT_DRIVER 0
+#define ANKLE_SUBTALAR_EVERSION_LEFT_DRIVER 1
+
+
+
+
+
+// Those variable control the initial position of the body.
+// They are also the input values for the MannequinDrivers if switched On above.
+// ****************************************************************************
+
+
+AnyFolder Mannequin = {
+  
+  AnyFolder Posture = {
+    //This controls the position of the pelvi wrt. to the global reference frame
+    AnyParamFun &RASI = Main.ModelSetup.C3DFileData.Points.Markers.RAIC.PosInterpol;
+    AnyParamFun &LASI = Main.ModelSetup.C3DFileData.Points.Markers.LAIC.PosInterpol;
+    
+    AnyParamFun &RPSI = Main.ModelSetup.C3DFileData.Points.Markers.RPSI.PosInterpol;
+    AnyParamFun &LPSI = Main.ModelSetup.C3DFileData.Points.Markers.LPSI.PosInterpol;
+    
+    
+    AnyVar PelvisPosX = 0.25* (RASI(Main.ModelSetup.tStart)[0]+LASI(Main.ModelSetup.tStart)[0]+RPSI(Main.ModelSetup.tStart)[0]+LPSI(Main.ModelSetup.tStart)[0]);
+    AnyVar PelvisPosY =  0.25* (RASI(Main.ModelSetup.tStart)[1]+LASI(Main.ModelSetup.tStart)[1]+RPSI(Main.ModelSetup.tStart)[1]+LPSI(Main.ModelSetup.tStart)[1]);
+    AnyVar PelvisPosZ = 0.25* (RASI(Main.ModelSetup.tStart)[2]+LASI(Main.ModelSetup.tStart)[2]+RPSI(Main.ModelSetup.tStart)[2]+LPSI(Main.ModelSetup.tStart)[2]);
+    
+    //This controls the rotation of the pelvis wrt. to the global reference frame
+    AnyVar PelvisRotZ = Main.TrialSpecificData.InitialPositionOfBody.PelvisRotZ;
+    AnyVar PelvisRotY = Main.TrialSpecificData.InitialPositionOfBody.PelvisRotY;
+    AnyVar PelvisRotX = Main.TrialSpecificData.InitialPositionOfBody.PelvisRotX;
+    
+    // These variables control the rotation of the thorax wrt the
+    // pelvis    
+    AnyVar PelvisThoraxExtension=0; 
+    AnyVar PelvisThoraxLateralBending=0;  
+    AnyVar PelvisThoraxRotation=0;        
+    
+    AnyVar NeckExtension=0; 
+    
+    AnyFolder Right = {
+      //Arm 
+      AnyVar SternoClavicularProtraction=-23;   //This value is not used for initial position
+      AnyVar SternoClavicularElevation=11.5;    //This value is not used for initial position
+      AnyVar SternoClavicularAxialRotation=-20; //This value is not used for initial position
+      
+      AnyVar GlenohumeralFlexion =45; 
+      AnyVar GlenohumeralAbduction = 90; 
+      AnyVar GlenohumeralExternalRotation = 00; 
+      
+      AnyVar ElbowFlexion = 5; 
+      AnyVar ElbowPronation = -60.0;
+      
+      AnyVar WristFlexion =0;
+      AnyVar WristAbduction =0;
+      
+      //Leg
+      AnyVar HipFlexion = Main.TrialSpecificData.InitialPositionOfBody.Right.HipFlexion;
+      AnyVar HipAbduction = Main.TrialSpecificData.InitialPositionOfBody.Right.HipAbduction;
+      AnyVar HipExternalRotation = Main.TrialSpecificData.InitialPositionOfBody.Right.HipExternalRotation;
+      AnyVar KneeFlexion = Main.TrialSpecificData.InitialPositionOfBody.Right.KneeFlexion;
+      AnyVar AnklePlantarFlexion = Main.TrialSpecificData.InitialPositionOfBody.Right.AnklePlantarFlexion;
+      AnyVar SubTalarEversion =Main.TrialSpecificData.InitialPositionOfBody.Right.SubTalarEversion;
+      
+      //Feet
+      AnyVar TaloNavicularDorsiFlexion = 0;
+      AnyVar TaloNavicularAbduction = 0;
+      AnyVar TaloNavicularEversion = 0;
+      
+      AnyVar CalcaneoCuboidDorsiFlexion = 0;
+      AnyVar CalcaneoCuboidAbduction = 0;
+      AnyVar CalcaneoCuboidEversion = 0;
+      
+      AnyVar NaviculoMedialCuneiformDorsiFlexion = 0;
+      AnyVar NaviculoMedialCuneiformAbduction = 0;
+      AnyVar NaviculoMedialCuneiformEversion = 0;
+      
+      AnyVar NaviculoIntermediateCuneiformDorsiFlexion = 0;
+      AnyVar NaviculoIntermediateCuneiformAbduction = 0;
+
+      AnyVar NaviculoLateralCuneiformDorsiFlexion = 0;
+      AnyVar NaviculoLateralCuneiformAbduction = 0;
+      
+      
+      AnyVar TarsoMetatarsal1DorsiFlexion = 0;
+      AnyVar TarsoMetatarsal1Abduction = 0;
+      AnyVar TarsoMetatarsal1Eversion = 0;
+      
+      AnyVar TarsoMetatarsal2DorsiFlexion = 0;
+      AnyVar TarsoMetatarsal2Abduction = 0;
+      
+      AnyVar TarsoMetatarsal3DorsiFlexion = 0;
+      AnyVar TarsoMetatarsal3Abduction = 0;
+      
+      AnyVar TarsoMetatarsal4DorsiFlexion = 0;
+      AnyVar TarsoMetatarsal4Abduction = 0;
+      
+      AnyVar TarsoMetatarsal5SkewDorsiFlexion = 0;
+      AnyVar TarsoMetatarsal5SkewEversion = 0;
+      AnyVar TarsoMetatarsal5Abduction = 0;
+      
+      
+      AnyVar MetatarsoPhalangeal1DorsiFlexion = 0;
+      AnyVar MetatarsoPhalangeal1Abduction = 0;
+      
+      AnyVar MetatarsoPhalangeal2DorsiFlexion = 0;
+      AnyVar MetatarsoPhalangeal2Abduction = 0;
+      
+      AnyVar MetatarsoPhalangeal3DorsiFlexion = 0;
+      AnyVar MetatarsoPhalangeal3Abduction = 0;
+      
+      AnyVar MetatarsoPhalangeal4DorsiFlexion = 0;
+      AnyVar MetatarsoPhalangeal4Abduction = 0;
+      
+      AnyVar MetatarsoPhalangeal5DorsiFlexion = 0;
+      AnyVar MetatarsoPhalangeal5Abduction = 0;
+      
+      
+      AnyVar ProximoDistalPhalange1DorsiFlexion = 0;
+      
+      AnyVar ProximoMedialPhalange2DorsiFlexion = 0;
+      AnyVar ProximoMedialPhalange3DorsiFlexion = 0;
+      AnyVar ProximoMedialPhalange4DorsiFlexion = 0;
+      AnyVar ProximoMedialPhalange5DorsiFlexion = 0;
+      
+      AnyVar MedioDistalPhalange2DorsiFlexion = 0;
+      AnyVar MedioDistalPhalange3DorsiFlexion = 0;
+      AnyVar MedioDistalPhalange4DorsiFlexion = 0;
+      AnyVar MedioDistalPhalange5DorsiFlexion = 0;
+
+            
+    };
+    
+    AnyFolder Left = {
+      //all values are set to be equal to the right side values 
+      //feel free to change this!
+      
+      //Arm
+      AnyVar SternoClavicularProtraction=.Right.SternoClavicularProtraction;
+      AnyVar SternoClavicularElevation=.Right.SternoClavicularElevation;
+      AnyVar SternoClavicularAxialRotation=.Right.SternoClavicularAxialRotation;
+      
+      AnyVar GlenohumeralFlexion = .Right.GlenohumeralFlexion ; 
+      AnyVar GlenohumeralAbduction =.Right.GlenohumeralAbduction ;
+      AnyVar GlenohumeralExternalRotation =.Right.GlenohumeralExternalRotation ;
+
+      AnyVar ElbowFlexion = .Right.ElbowFlexion; 
+      AnyVar ElbowPronation = .Right.ElbowPronation;       
+      AnyVar WristFlexion =.Right.WristFlexion;
+      AnyVar WristAbduction =.Right.WristAbduction;
+      
+      //Leg     
+      AnyVar HipFlexion =.Right.HipFlexion;  
+      AnyVar HipAbduction =.Right.HipAbduction;
+      AnyVar HipExternalRotation = .Right.HipExternalRotation;
+      AnyVar KneeFlexion = .Right.KneeFlexion;       
+      AnyVar AnklePlantarFlexion = .Right.AnklePlantarFlexion ;
+      AnyVar SubTalarEversion =.Right.SubTalarEversion; 
+      
+      //Feet
+      AnyVar TaloNavicularDorsiFlexion = 0;
+      AnyVar TaloNavicularAbduction = 0;
+      AnyVar TaloNavicularEversion = 0;
+      
+      AnyVar CalcaneoCuboidDorsiFlexion = 0;
+      AnyVar CalcaneoCuboidAbduction = 0;
+      AnyVar CalcaneoCuboidEversion = 0;
+      
+      AnyVar NaviculoMedialCuneiformDorsiFlexion = 0;
+      AnyVar NaviculoMedialCuneiformAbduction = 0;
+      AnyVar NaviculoMedialCuneiformEversion = 0;
+      
+      AnyVar NaviculoIntermediateCuneiformDorsiFlexion = 0;
+      AnyVar NaviculoIntermediateCuneiformAbduction = 0;
+
+      AnyVar NaviculoLateralCuneiformDorsiFlexion = 0;
+      AnyVar NaviculoLateralCuneiformAbduction = 0;
+      
+      
+      AnyVar TarsoMetatarsal1DorsiFlexion = 0;
+      AnyVar TarsoMetatarsal1Abduction = 0;
+      AnyVar TarsoMetatarsal1Eversion = 0;
+      
+      AnyVar TarsoMetatarsal2DorsiFlexion = 0;
+      AnyVar TarsoMetatarsal2Abduction = 0;
+      
+      AnyVar TarsoMetatarsal3DorsiFlexion = 0;
+      AnyVar TarsoMetatarsal3Abduction = 0;
+      
+      AnyVar TarsoMetatarsal4DorsiFlexion = 0;
+      AnyVar TarsoMetatarsal4Abduction = 0;
+      
+      AnyVar TarsoMetatarsal5SkewDorsiFlexion =0;
+      AnyVar TarsoMetatarsal5SkewEversion = 0;
+      AnyVar TarsoMetatarsal5Abduction = 0;
+      
+      
+      AnyVar MetatarsoPhalangeal1DorsiFlexion = 0;
+      AnyVar MetatarsoPhalangeal1Abduction = 0;
+      
+      AnyVar MetatarsoPhalangeal2DorsiFlexion = 0;
+      AnyVar MetatarsoPhalangeal2Abduction = 0;
+      
+      AnyVar MetatarsoPhalangeal3DorsiFlexion = 0;
+      AnyVar MetatarsoPhalangeal3Abduction = 0;
+      
+      AnyVar MetatarsoPhalangeal4DorsiFlexion = 0;
+      AnyVar MetatarsoPhalangeal4Abduction = 0;
+      
+      AnyVar MetatarsoPhalangeal5DorsiFlexion = 0;
+      AnyVar MetatarsoPhalangeal5Abduction = 0;
+      
+      
+      AnyVar ProximoDistalPhalange1DorsiFlexion = 0;
+      
+      AnyVar ProximoMedialPhalange2DorsiFlexion = 0;
+      AnyVar ProximoMedialPhalange3DorsiFlexion = 0;
+      AnyVar ProximoMedialPhalange4DorsiFlexion = 0;
+      AnyVar ProximoMedialPhalange5DorsiFlexion = 0;
+      
+      AnyVar MedioDistalPhalange2DorsiFlexion = 0;
+      AnyVar MedioDistalPhalange3DorsiFlexion = 0;
+      AnyVar MedioDistalPhalange4DorsiFlexion = 0;
+      AnyVar MedioDistalPhalange5DorsiFlexion = 0;
+
+      
+    };
+  };
+  
+  
+  
+AnyFolder PostureVel={  
+      //This controls the position of the pelvi wrt. to the global reference frame
+    AnyVar PelvisPosX=0;
+    AnyVar PelvisPosY=0;
+    AnyVar PelvisPosZ=0;
+    
+    //This controls the rotation of the pelvis wrt. to the global reference frame
+    AnyVar PelvisRotX=0;
+    AnyVar PelvisRotY=0;
+    AnyVar PelvisRotZ=0;
+    
+    // These variables control the rotation of the thorax wrt the
+    // pelvis    
+    AnyVar PelvisThoraxExtension=0; 
+    AnyVar PelvisThoraxLateralBending=0;  
+    AnyVar PelvisThoraxRotation=0;        
+    
+    AnyVar NeckExtension=0; 
+    
+    AnyFolder Right = {
+      //Arm 
+      AnyVar SternoClavicularProtraction=0;   //This value is not used for initial position
+      AnyVar SternoClavicularElevation=0;    //This value is not used for initial position
+      AnyVar SternoClavicularAxialRotation=0; //This value is not used for initial position
+      
+      AnyVar GlenohumeralFlexion =0; 
+      AnyVar GlenohumeralAbduction = 0; 
+      AnyVar GlenohumeralExternalRotation = 0; 
+      
+      AnyVar ElbowFlexion = 0.0;
+      AnyVar ElbowPronation = 0.0;
+      
+      AnyVar WristFlexion =0;
+      AnyVar WristAbduction =0;
+      
+      AnyVar HipFlexion = 0.0; 
+      AnyVar HipAbduction = 0.0; 
+      AnyVar HipExternalRotation = 0.0;
+      
+      AnyVar KneeFlexion = 0.0; 
+      
+      AnyVar AnklePlantarFlexion =0.0; 
+      AnyVar SubTalarEversion =0.0; 
+      
+      //Feet
+      AnyVar TaloNavicularDorsiFlexion = 0;
+      AnyVar TaloNavicularAbduction = 0;
+      AnyVar TaloNavicularEversion = 0;
+      
+      AnyVar CalcaneoCuboidDorsiFlexion = 0;
+      AnyVar CalcaneoCuboidAbduction = 0;
+      AnyVar CalcaneoCuboidEversion = 0;
+      
+      AnyVar NaviculoMedialCuneiformDorsiFlexion = 0;
+      AnyVar NaviculoMedialCuneiformAbduction = 0;
+      AnyVar NaviculoMedialCuneiformEversion = 0;
+      
+      AnyVar NaviculoIntermediateCuneiformDorsiFlexion = 0;
+      AnyVar NaviculoIntermediateCuneiformAbduction = 0;
+
+      AnyVar NaviculoLateralCuneiformDorsiFlexion = 0;
+      AnyVar NaviculoLateralCuneiformAbduction = 0;
+      
+      
+      AnyVar TarsoMetatarsal1DorsiFlexion = 0;
+      AnyVar TarsoMetatarsal1Abduction = 0;
+      AnyVar TarsoMetatarsal1Eversion = 0;
+      
+      AnyVar TarsoMetatarsal2DorsiFlexion = 0;
+      AnyVar TarsoMetatarsal2Abduction = 0;
+      
+      AnyVar TarsoMetatarsal3DorsiFlexion = 0;
+      AnyVar TarsoMetatarsal3Abduction = 0;
+      
+      AnyVar TarsoMetatarsal4DorsiFlexion = 0;
+      AnyVar TarsoMetatarsal4Abduction = 0;
+      
+      AnyVar TarsoMetatarsal5SkewDorsiFlexion =0;
+      AnyVar TarsoMetatarsal5SkewEversion =0;
+      AnyVar TarsoMetatarsal5Abduction = 0;
+      
+      
+      AnyVar MetatarsoPhalangeal1DorsiFlexion = 0;
+      AnyVar MetatarsoPhalangeal1Abduction = 0;
+      
+      AnyVar MetatarsoPhalangeal2DorsiFlexion = 0;
+      AnyVar MetatarsoPhalangeal2Abduction = 0;
+      
+      AnyVar MetatarsoPhalangeal3DorsiFlexion = 0;
+      AnyVar MetatarsoPhalangeal3Abduction = 0;
+      
+      AnyVar MetatarsoPhalangeal4DorsiFlexion = 0;
+      AnyVar MetatarsoPhalangeal4Abduction = 0;
+      
+      AnyVar MetatarsoPhalangeal5DorsiFlexion = 0;
+      AnyVar MetatarsoPhalangeal5Abduction = 0;
+      
+      
+      AnyVar ProximoDistalPhalange1DorsiFlexion = 0;
+      
+      AnyVar ProximoMedialPhalange2DorsiFlexion = 0;
+      AnyVar ProximoMedialPhalange3DorsiFlexion = 0;
+      AnyVar ProximoMedialPhalange4DorsiFlexion = 0;
+      AnyVar ProximoMedialPhalange5DorsiFlexion = 0;
+      
+      AnyVar MedioDistalPhalange2DorsiFlexion = 0;
+      AnyVar MedioDistalPhalange3DorsiFlexion = 0;
+      AnyVar MedioDistalPhalange4DorsiFlexion = 0;
+      AnyVar MedioDistalPhalange5DorsiFlexion = 0;
+
+      
+    };
+    
+    AnyFolder Left = {
+      //all values are set to be equal to the right side values 
+      //feel free to change this!
+      
+      //Arm
+      AnyVar SternoClavicularProtraction=.Right.SternoClavicularProtraction;
+      AnyVar SternoClavicularElevation=.Right.SternoClavicularElevation;
+      AnyVar SternoClavicularAxialRotation=.Right.SternoClavicularAxialRotation;
+      
+      AnyVar GlenohumeralFlexion = .Right.GlenohumeralFlexion ; 
+      AnyVar GlenohumeralAbduction =.Right.GlenohumeralAbduction ;
+      AnyVar GlenohumeralExternalRotation =.Right.GlenohumeralExternalRotation ;
+
+      AnyVar ElbowFlexion = .Right.ElbowFlexion; 
+      AnyVar ElbowPronation = .Right.ElbowPronation;       
+      AnyVar WristFlexion =.Right.WristFlexion;
+      AnyVar WristAbduction =.Right.WristAbduction;
+      
+      
+      
+      //Leg     
+      AnyVar HipFlexion =.Right.HipFlexion;  
+      AnyVar HipAbduction =.Right.HipAbduction;
+      AnyVar HipExternalRotation = .Right.HipExternalRotation;
+      AnyVar KneeFlexion = .Right.KneeFlexion;       
+      AnyVar AnklePlantarFlexion = .Right.AnklePlantarFlexion ;
+      AnyVar SubTalarEversion =.Right.SubTalarEversion; 
+      
+      //Feet
+      AnyVar TaloNavicularDorsiFlexion = 0;
+      AnyVar TaloNavicularAbduction = 0;
+      AnyVar TaloNavicularEversion = 0;
+      
+      AnyVar CalcaneoCuboidDorsiFlexion = 0;
+      AnyVar CalcaneoCuboidAbduction = 0;
+      AnyVar CalcaneoCuboidEversion = 0;
+      
+      AnyVar NaviculoMedialCuneiformDorsiFlexion = 0;
+      AnyVar NaviculoMedialCuneiformAbduction = 0;
+      AnyVar NaviculoMedialCuneiformEversion = 0;
+      
+      AnyVar NaviculoIntermediateCuneiformDorsiFlexion = 0;
+      AnyVar NaviculoIntermediateCuneiformAbduction = 0;
+
+      AnyVar NaviculoLateralCuneiformDorsiFlexion = 0;
+      AnyVar NaviculoLateralCuneiformAbduction = 0;
+      
+      
+      AnyVar TarsoMetatarsal1DorsiFlexion = 0;
+      AnyVar TarsoMetatarsal1Abduction = 0;
+      AnyVar TarsoMetatarsal1Eversion = 0;
+      
+      AnyVar TarsoMetatarsal2DorsiFlexion = 0;
+      AnyVar TarsoMetatarsal2Abduction = 0;
+      
+      AnyVar TarsoMetatarsal3DorsiFlexion = 0;
+      AnyVar TarsoMetatarsal3Abduction = 0;
+      
+      AnyVar TarsoMetatarsal4DorsiFlexion = 0;
+      AnyVar TarsoMetatarsal4Abduction = 0;
+      
+      AnyVar TarsoMetatarsal5SkewDorsiFlexion =0;
+      AnyVar TarsoMetatarsal5SkewEversion =0;
+      AnyVar TarsoMetatarsal5Abduction = 0;
+      
+      
+      AnyVar MetatarsoPhalangeal1DorsiFlexion = 0;
+      AnyVar MetatarsoPhalangeal1Abduction = 0;
+      
+      AnyVar MetatarsoPhalangeal2DorsiFlexion = 0;
+      AnyVar MetatarsoPhalangeal2Abduction = 0;
+      
+      AnyVar MetatarsoPhalangeal3DorsiFlexion = 0;
+      AnyVar MetatarsoPhalangeal3Abduction = 0;
+      
+      AnyVar MetatarsoPhalangeal4DorsiFlexion = 0;
+      AnyVar MetatarsoPhalangeal4Abduction = 0;
+      
+      AnyVar MetatarsoPhalangeal5DorsiFlexion = 0;
+      AnyVar MetatarsoPhalangeal5Abduction = 0;
+      
+      
+      AnyVar ProximoDistalPhalange1DorsiFlexion = 0;
+      
+      AnyVar ProximoMedialPhalange2DorsiFlexion = 0;
+      AnyVar ProximoMedialPhalange3DorsiFlexion = 0;
+      AnyVar ProximoMedialPhalange4DorsiFlexion = 0;
+      AnyVar ProximoMedialPhalange5DorsiFlexion = 0;
+      
+      AnyVar MedioDistalPhalange2DorsiFlexion = 0;
+      AnyVar MedioDistalPhalange3DorsiFlexion = 0;
+      AnyVar MedioDistalPhalange4DorsiFlexion = 0;
+      AnyVar MedioDistalPhalange5DorsiFlexion = 0;
+    };
+  };
+
+  
+  
+};
+
+

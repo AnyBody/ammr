@@ -2,68 +2,53 @@
 
 Main = 
 {
+  // ----------------------------------------------------------
+  // Path to draw settings
+  // ----------------------------------------------------------
+  #path BM_DRAWSETTINGS_FILE "Model/DrawSettings.any"
   
-   /**Execute this operation to run the model in the intended operation sequence.  
-  It is also possible to run operations seperately, by manual selections in the operation tree*/
-  AnyOperationSequence RunApplication = {
-
-    /**This operation calibrates the muscles in the model if these are of the type AnyMuscleModel3E.
-    This will just be an empty operation if the model is using a muscle type that does not require calibration.*/
-    AnyOperation &CalibrationAnal = Main.HumanModel.Calibration.CalibrationSequence;  
-
-    ///This operation is the inverse dynamic analysis
-    AnyOperation &InvAnal=Main.Study.InverseDynamics;
-   
-  };
+  // ----------------------------------------------------------
+  // Model configuration:
+  // For more info on body model configuration options please load the model and double click on: 
+  // #include "<ANYBODY_PATH_BODY>\Documentation\BodyModel.parameters.any"
+  // ----------------------------------------------------------
   
-  #include "DrawSettings.any"
+  // The Mannequin file specifies load-time positions for all the segments
+  // in the HumanModel. This is important for the model's ablity to resolve
+  // all the kinematic constraints when the model is analyzed.
+  // The mannequin file also drives those degrees of freedom of the human 
+  // model that are not governed by problem-specific drivers at run time.    
+  #path BM_MANNEQUIN_FILE "Model/Mannequin.any" 
   
-  AnyFolder HumanModel=
-  {  
-    AnyFolder &Mannequin=.Model.Mannequin;
-    #include  "BodyPartsSetup_SimpleMuscle.any"
-    
-    #include  "<ANYBODY_PATH_BODY>\BodyModels\GenericBodyModel\BodyModel.any"
-    
-    AnyFolder StrengthParameters=
-    {
-      AnyVar SpecificMuscleTensionSpine= 90; //N/cm^2
-      AnyVar StrengthIndexLeg= 1; 
-      AnyVar SpecificMuscleTensionShoulderArm= 90; //N/cm^2
-    };
-    
-    #include "<ANYBODY_PATH_BODY>\Scaling\ScalingUniform.any" 
-
-    Scaling = 
-    {
-      #include "AnyManUniform.any" 
-
-    };
-  };
+  // Model of the human body to be used for the analysis
+  #include "<ANYBODY_PATH_BODY>/HumanModel.any"
   
+  /// The actual model where all components are assembled
   AnyFolder Model = 
   {
-    AnyFolder &HumanModel = .HumanModel.BodyModel;
-    
-    // Setting for initial posture of human model
-    #include "Mannequin.any"
+    /// Body model without default drivers
+    AnyFolder &HumanModel=.HumanModel.BodyModel;
+    /// Reference to the mannequin folder (used by drivers)
+    AnyFolder &Mannequin =.HumanModel.Mannequin;
     
     // Definition for CoM(Center of Mass) of Human Model
-    #include "CoM_View.any"
+    #include "Model/CoM_View.any"
     
     // Definition of additional AnyRefNode object in the human model
-    #include "HumanRefNodes.any"
+    #include "Model/HumanRefNodes.any"
     
-    // AnyScript file for the fitness machine from SolidWorks
-    #include "FitnessMachine.any"
-    #include "LogoAdd.any"
+    // automatically generated AnyScript file for the fitness machine from SolidWorks
+    #include "Input/FitnessMachine.any"
     
-    // Definition of drivers and constraints
+    // just a logo
+    #include "Model/LogoAdd.any"
+    
+    /// Drivers and constraints
     AnyFolder ModelEnvironmentConnection = 
     {
-      #include "JointsAndDrivers.any"
-      #include "MachineOperation.any"
-    };    
+      #include "Model/JointsAndDrivers.any"
+      #include "Model/MachineOperation.any"
+    };  
   };
   
   AnyBodyStudy Study =
@@ -74,4 +59,8 @@ Main =
     nStep = 61;
     Gravity = {0, -9.81, 0};
   };
+  
+  // Include an operation sequence to run all required steps of your application (see Operations tab)
+    #include "<ANYBODY_PATH_TOOLBOX>\Operations\RunAppSequence.any"  
+
 }; 

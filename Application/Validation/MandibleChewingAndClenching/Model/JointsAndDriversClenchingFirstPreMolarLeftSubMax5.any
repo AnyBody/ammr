@@ -1,0 +1,66 @@
+//Connects the Skull with the ground with a fixed connection
+AnyStdJoint GroundSkullJnt = {
+  AnyRefNode &GroundRef = Main.GlobalRef.GroundNode;
+  AnyRefNode &SkullRef = ..HumanModel.Seg.Skull.GroundNode;
+};
+
+
+//Defines the movement of the mandible
+
+AnyKinLinear LowerIncisorDistance = {
+  AnyRefNode &SkullRef = ..HumanModel.Seg.Skull.MiddleTMJ_Nodes;
+  AnyRefNode &MandibleRef = ..HumanModel.Seg.Mandible.LowerIncisorMiddleNode;
+  Ref=0;
+};
+
+
+AnyKinEqInterPolDriver ProtrusionMovement = {
+  AnyKinMeasure &ref = .LowerIncisorDistance;
+  Type = Bspline;
+  BsplineOrder = 4;
+  //T = ;
+  //Data = ;
+  FileName = "..\Input\ClenchingFirstPreMolarLeftSubMax5.txt";
+  Reaction.Type = {Off,Off,Off};
+};
+
+
+AnyKinMeasureOrg TMJ_JntL_Y={
+  AnyKinLinear &ref = ..HumanModel.Jnt.TMJ_JntL;
+  MeasureOrganizer={1};
+};
+
+AnyKinEqSimpleDriver TMJ_JntL_Y_Driver = {
+  AnyKinMeasure &ref = .TMJ_JntL_Y;
+  DriverPos = {0.0};
+  DriverVel = {0.0};
+  Reaction.Type = {Off};
+};
+
+//**********************************************
+//Defines the measured force
+AnyForce3D BiteForce = {
+  
+  AnyRefNode &ForceNode = ..HumanModel.Seg.Mandible.FirstPreMolarNodeL ;
+  
+  AnyFunInterpol force ={
+    Type=Bspline;
+    BsplineOrder = 4;
+    FileName = "..\Input\ForceFirstPreMolarLeftSubMax5.txt";
+  };
+  
+  //F = force(t);
+  Flocal = force(t);
+  
+};
+
+
+AnyDrawVector DrawrrVector={
+  AnyRefNode &ref = ..HumanModel.Seg.Mandible.FirstPreMolarNodeL ;
+  Vec = .BiteForce.Fout/1500;
+  Line.RGB =  {0.0,0.0,1.0};
+  Line.Thickness = 0.005;
+  PointAway = On;
+  GlobalCoord = On;
+};
+

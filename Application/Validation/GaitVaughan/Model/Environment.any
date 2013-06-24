@@ -1,0 +1,208 @@
+//This file creates the environment around the human
+//It creates the force plates and add the measure load to them
+
+AnyFixedRefFrame GlobalRef ={
+  Origin={0,0,0}; 
+  AnyRefNode floornode={
+    sRel={0.5,0,0};
+    ARel={{0,0,1},{1,0,0},{0,1,0}};
+    AnyDrawSurf floor_w={
+      ScaleXYZ={0.5,1,2};
+      FileName ="../Input/floor";
+      Opacity=.2;
+    };
+  };
+};
+
+AnySeg CenterOfPressure1={
+  Mass=0;
+  Jii={0.0,0.0,0.0};
+  AnyRefNode node={
+    sRel={0,0,0};
+    AnyDrawNode drw={ScaleXYZ={0.015,.015,.005}; RGB={1,0,0};};
+  };
+};
+
+AnyKinLinear Lin1={
+  AnyRefFrame &ref1=.GlobalRef;
+  AnyRefFrame &ref2=.CenterOfPressure1;
+};
+
+AnyKinRotational Rot1={
+  AnyRefFrame &ref1=.GlobalRef;
+  AnyRefFrame &ref2=.CenterOfPressure1;
+  Type=RotVector;
+};
+
+//The center of pressure has been moved sligthly sideways to obtain realistic
+//abduction/adduction moment of the ankle
+AnyKinEqInterPolDriver LinDrv1={
+  AnyKinLinear &ref1= .Lin1;
+  Type=PiecewiseLinear;
+#include "time.any"
+#include "CenterOfPressurePlateOffset1.any"
+#include "CenterOfPressurePlate1.any"
+Data =0.35*CenterOfPressurePlateOffset1'+CenterOfPressurePlate1';
+  Reaction.Type={Off,Off,Off};
+};
+
+AnyKinEqSimpleDriver RotDrv1={
+  AnyKinRotational &ref1= .Rot1;
+  DriverPos={0,0,0};
+  DriverVel={0,0,0};
+  Reaction.Type={Off,Off,Off};
+};
+
+
+
+AnyReacForce ForcePlate1FootRContactForce={
+  
+  AnyKinLinear Lin={
+    //very very important this ensure that the reaction is between artifical segment and the foot
+    //and not between foot and globalref if Ref had been equal -1 which is default
+    Ref=0; 
+    AnySeg &ref1=..CenterOfPressure1;
+    AnySeg &ref2=Main.Model.HumanModel.Right.Leg.Seg.Foot;
+  };
+  
+  AnyKinRotational Rot= {
+    AnySeg &ref1=..CenterOfPressure1;
+    AnySeg &ref2=Main.Model.HumanModel.Right.Leg.Seg.Foot;
+    Type=RotVector;
+  };
+};
+
+
+
+AnyForce3D ForceOnForcePlate1 ={
+  
+  AnyFunInterpol force ={
+    Type=Bspline;
+    BsplineOrder = 8;
+    FileName ="../Input/ForcePlate1.txt";
+  }; 
+  AnySeg &ref1=.CenterOfPressure1;
+  F=force(t);
+  
+};
+
+AnyMoment3D MomentOnForcePlate1 ={
+  
+  AnyFunInterpol moment ={
+    Type=Bspline;
+    BsplineOrder = 8;
+    FileName = "../Input/MomentPlate1.txt";
+  }; 
+  AnySeg &ref1=.CenterOfPressure1;
+  M=moment(t);
+};
+
+AnyDrawVector DrawSupport1 = {
+  AnyRefFrame &ref = .CenterOfPressure1;
+  Vec = 0.0005*.ForceOnForcePlate1.F;
+  
+  PointAway = Off;
+  DrawCoord = Off;
+  
+  Line.RGB = {0,0,1};
+  Line.Thickness =0.0075;
+  Line.End.Thickness = 2*0.0075;
+  Line.End.Length = 4*0.0075;
+};
+
+
+AnySeg CenterOfPressure2={
+  Mass=0;
+  Jii={0.0,0.0,0.0};
+  AnyRefNode node={
+    sRel={0,0,0};
+    AnyDrawNode drw={ScaleXYZ={0.015,.015,.005}; RGB={1,0,0};};    
+  };
+};
+
+AnyKinLinear Lin2={
+  Ref=0;
+  AnyRefFrame &ref1=.GlobalRef;
+  AnyRefFrame &ref2=.CenterOfPressure2;
+};
+
+AnyKinRotational Rot2={
+  AnyRefFrame &ref1=.GlobalRef;
+  AnyRefFrame &ref2=.CenterOfPressure2;
+  Type=RotVector;
+};
+
+
+//The center of pressure has been moved sligthly sideways to obtain realistic
+//abduction/adduction moment of the ankle
+AnyKinEqInterPolDriver LinDrv2={
+  AnyKinLinear &ref1= .Lin2;
+  Type=PiecewiseLinear;
+#include "time.any"#include "CenterOfPressurePlateOffset1.any"
+#include "CenterOfPressurePlate2.any"
+
+   Data =-0.07*CenterOfPressurePlateOffset1'+CenterOfPressurePlate2';
+  Reaction.Type={Off,Off,Off};
+};
+
+AnyKinEqSimpleDriver RotDrv2={
+  AnyKinRotational &ref1= .Rot2;
+  DriverPos={0,0,0};
+  DriverVel={0,0,0};
+  Reaction.Type={Off,Off,Off};
+};
+
+
+AnyReacForce ForcePlate1FootLContactForce={
+  
+  AnyKinLinear Lin={
+    Ref=0;
+    AnySeg &ref1=..CenterOfPressure2;
+    AnySeg &ref2=Main.Model.HumanModel.Left.Leg.Seg.Foot;
+  };
+  
+  AnyKinRotational Rot= {
+
+    AnySeg &ref1=..CenterOfPressure2;
+    AnySeg &ref2=Main.Model.HumanModel.Left.Leg.Seg.Foot;
+    Type=RotVector;
+  };
+};
+
+
+AnyForce3D ForceOnForcePlate2 ={
+  
+  AnyFunInterpol force ={
+    Type=Bspline;
+    BsplineOrder = 8;
+    FileName ="../Input/ForcePlate2.txt";
+  }; 
+  AnySeg &ref1=.CenterOfPressure2;
+  F=force(t);
+};
+
+
+AnyMoment3D MomentOnForcePlate2 ={
+  
+  AnyFunInterpol moment ={
+    Type=Bspline;
+    BsplineOrder = 8;
+    FileName ="../Input/MomentPlate2.txt";
+    }; 
+  AnySeg &ref1=.CenterOfPressure2;
+  M=moment(t);
+};
+
+
+AnyDrawVector DrawSupport2 = {
+  AnyRefFrame &ref = .CenterOfPressure2;
+  Vec = 0.0005*.ForceOnForcePlate2.F;
+  
+  PointAway = Off;
+  DrawCoord = Off;
+  
+  Line.RGB = {0,0,1};
+  Line.Thickness =0.0075;
+  Line.End.Thickness = 2*0.0075;
+  Line.End.Length = 4*0.0075;
+};

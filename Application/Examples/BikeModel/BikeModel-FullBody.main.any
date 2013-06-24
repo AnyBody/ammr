@@ -1,0 +1,101 @@
+#include "../libdef.any"
+
+/** --------------------------------------------------------------------------------
+This is a bicyling model. It illustrates several important topics in model 
+construction:
+- Block building techniques
+- Include files
+- Structuring of models using directories
+- Modeling of an environment as a mechanism, in this case the bicycle
+
+The human model is included as a block from the Body (BodyRepository) directory. 
+
+The model of the bike including bike frame, crank, wheels, definition of 
+crank moment etc. can be found in the include file "BikeFrameAndWheels.any".
+
+The connections between the "human model" and the bicycle are defined in 
+BikeLegConnection.any.
+
+The model can run in two configurations FullBodyModel and LowerExtremityModel this 
+can be changed in the "Config.any" file
+
+---------------------------------------------------------------------------------- */
+Main = {
+  
+  // ----------------------------------------------------------
+  // Bike parameters 
+  // ----------------------------------------------------------
+  #include "Model/BikeParameters.any"
+
+  // ----------------------------------------------------------
+  // Path to draw settings
+  // ----------------------------------------------------------
+  #path BM_DRAWSETTINGS_FILE "Model/DrawSettings.any"
+  
+  // ----------------------------------------------------------
+  // Model configuration:
+  // For more info on body model configuration options please load the model and double click on: 
+  // #include "<ANYBODY_PATH_BODY>\Documentation\BodyModel.parameters.any"
+  // ----------------------------------------------------------
+
+  // use 3 element hill muscles for arms and legs
+  #define BM_LEG_MUSCLES_BOTH CONST_MUSCLES_3E_HILL
+  #define BM_ARM_MUSCLES_BOTH CONST_MUSCLES_3E_HILL
+  
+  // scaling 
+  #define BM_SCALING CONST_SCALING_LENGTHMASSFAT
+  #path BM_SCALING_ANTHRO_FILE "Model\AnyMan.any"
+  
+  // The Mannequin file specifies load-time positions for all the segments
+  // in the HumanModel. This is important for the model's ablity to resolve
+  // all the kinematic constraints when the model is analyzed.
+  // The mannequin file also drives those degrees of freedom of the human 
+  // model that are not governed by problem-specific drivers at run time.    
+  #path BM_MANNEQUIN_FILE "Model/Mannequin.any" 
+  
+  // Model of the human body to be used for the analysis
+  #include "<ANYBODY_PATH_BODY>/HumanModel.any"
+
+  /// This folder collects the elements of the model. It is referred by the
+  /// study section below as the target of the analyses.
+  AnyFolder Model = {
+    /// Body model without default drivers
+    AnyFolder &HumanModel=.HumanModel.BodyModel;
+    /// Reference to the mannequin folder (used by drivers)
+    AnyFolder &Mannequin =.HumanModel.Mannequin;
+    
+    #include  "Model/BikeFrameAndWheels.any"    
+    
+    AnyFolder BikeLegConnection = {
+      
+      AnyFolder &ModelFolder = .HumanModel;
+      
+      AnyFolder JointsAndDrivers = {
+        #include "Model/JointsAndDrivers.any"
+        
+      };
+    };
+    
+    #include  "Model/SeatSupport.any"
+    AnyRefNode& GroundNode = .GlobalRef.Bike3DGround;
+    
+    #include  "Model/BikeFrameGroundConnection.any"
+    
+    #include "Model/InitialPositionsBike.any"
+  };
+  
+  /// The study: Operations to be performed on the model
+  AnyBodyStudy Study = {
+    AnyFolder &Model = .Model;      
+    
+    Gravity = {0.0, -9.81, 0.0};
+    tStart = 0;
+    tEnd = .BikeParameters.T;
+    nStep = 51;
+    
+  };
+
+  // Include an operation sequence to run all required steps of your application (see Operations tab)
+    #include "<ANYBODY_PATH_TOOLBOX>\Operations\RunAppSequence.any"
+  
+}; // Main

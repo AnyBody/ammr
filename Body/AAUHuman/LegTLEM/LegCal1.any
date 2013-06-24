@@ -1,0 +1,84 @@
+//This is the calibration1 file it will calibrate all muscle in the leg in
+//a neutral position (all joint angles in the drivers are zero)
+//The subsequent calibrations 2 and 3 will overwrite some of the values
+//obtained in this study
+
+AnyFolder LegCal1 ={
+  
+  AnyFolder &Pelvis = ...HumanFolderRef.Trunk.SegmentsLumbar.PelvisSeg;//This is a reference to the folder which holds the human part of the model
+  
+  AnyFolder &LegSegSide = .SideHumanFolderRef.Leg.Seg; //This is a reference to the folder which holds the human part of the model
+  
+  AnyFolder &JointsSideCal = .SideHumanFolderRef.Leg.Jnt;
+  
+  AnyFolder &MusCalSide =  .SideHumanFolderRef.Leg.Mus;
+  
+  AnyFolder &MusParCalSide =  .SideHumanFolderRef.Leg.MusPar;
+  
+  
+  
+  AnyFixedRefFrame ground = {
+    AnyRefNode node = { 
+     ARel=..Pelvis.Axes0;
+      sRel=..Pelvis.r0;
+    };
+  };
+  
+  AnyRevoluteJoint PelvisGround={
+    AnyRefFrame &Ground = .ground.node;
+    AnyRefFrame &Sacrum= ....HumanFolderRef.Trunk.SegmentsLumbar.PelvisSeg; 
+    Axis=z;
+  };
+  
+  AnyKinEqSimpleDriver PelvisGroundRot = {
+    AnyRevoluteJoint &Jnt = .PelvisGround;
+    DriverPos = {0};
+    DriverVel = {0};
+    Reaction.Type = {Off}; 
+  };
+  
+  AnyKinEqSimpleDriver Hip = {
+    AnySphericalJoint &Spherical = .JointsSideCal.Hip;
+    MeasureOrganizer = {2,0,1}; // flexion/extension, abduction/adduction, internal/external rotation
+    DriverPos = {0,0,0}*pi/180;
+    DriverVel = {0,0,0}*pi/180;
+    Reaction.Type = {Off,Off,Off};
+  };
+  
+  
+  AnyKinEqSimpleDriver Knee = {
+    AnyRevoluteJoint &Hinge = .JointsSideCal.Knee;
+    DriverPos = {0*pi/180};
+    DriverVel = {0*pi/180};
+    Reaction.Type = {Off};
+  };
+  
+  
+  AnyKinEqSimpleDriver Ankle = {
+    AnyRevoluteJoint &Hinge = .JointsSideCal.Ankle;
+    DriverPos = {0*pi/180};
+    DriverVel = {0*pi/180};
+    Reaction.Type = {Off};
+  };
+
+  AnyKinEqSimpleDriver SubTalar = {
+    AnyRevoluteJoint &Hinge = .JointsSideCal.SubTalar;
+    DriverPos = {0*pi/180};
+    DriverVel = {0*pi/180}; 
+    Reaction.Type = {Off};
+  };
+
+
+};
+
+
+
+// The study: Operations to be performed on the model
+AnyBodyCalibrationStudy LegCalibrationStudy1 = {
+  AnyFolder &ref=.LegCal1; 
+  nStep = 1;
+    InitialConditions.SolverType = KinSolOverDeterminate;
+
+};
+
+  

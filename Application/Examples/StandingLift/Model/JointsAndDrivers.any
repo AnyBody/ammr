@@ -1,0 +1,501 @@
+/**    Drivers for a box lift model: This is like the standing model, except
+
+- There is a box present in the model (+ 6 dofs)
+- The box cannot rotate about x, y and z (- 3 dofs)
+- The box is driven in 3 spatial coords (-3 dofs)
+- The hands are now connected to the box by spherical jnts (-6 dofs)
+- GH rotation is no longer driven (+ 2 dofs)
+- GH abduction is no longer driven (+ 2 dofs)
+- GH Flextion/extension is no longer drven (+ 2 dofs)
+- Elbow flexion/extension is no longer driven (+2 dofs)
+- Elbow lateral position is driven (-2 dofs)
+
+John Rasmussen, March 10, 2005.
+*/
+AnyFolder Joints = {
+  
+  
+  AnyKinEqSimpleDriver RHBoxDriver = {
+    AnyRevoluteJoint RHBox = {
+      AnyRefNode &Box = Main.Model.EnvironmentModel.Box.Right;
+      AnySeg &Hand = ....HumanModel.Right.ShoulderArm.Seg.Glove;
+      Axis = z;
+      Constraints.Reaction.Type={Off,Off,Off,Off,Off};
+    };
+    DriverPos = {-15}*pi/180;
+    DriverVel = {0};
+    Reaction.Type = {Off};
+    
+  };
+  AnyKinEqSimpleDriver LHBoxDriver = {
+    AnyRevoluteJoint LHBox = {
+      AnyRefNode &Box = Main.Model.EnvironmentModel.Box.Left;
+      AnySeg &Hand = Main.Model.HumanModel.Left.ShoulderArm.Seg.Glove;
+      Axis = z;
+      Constraints.Reaction.Type={Off,Off,Off,Off,Off};
+    };
+    DriverPos = {-15}*pi/180;
+    DriverVel = {0};
+    Reaction.Type = {Off};
+  };
+  
+  AnyReacForce RHBoxRot ={
+    AnyKinRotational Rot = {
+      AnyRefNode &Box = Main.Model.EnvironmentModel.Box.Right;
+      AnySeg &Hand = Main.Model.HumanModel.Right.ShoulderArm.Seg.Glove;
+      Type=RotVector;  };
+  };
+  
+  AnyReacForce LHBoxRot={
+    AnyKinRotational Rot = {
+      AnyRefNode &Box = Main.Model.EnvironmentModel.Box.Left;
+      AnySeg &Hand = Main.Model.HumanModel.Left.ShoulderArm.Seg.Glove;
+      Type=RotVector;
+      
+    };
+  };
+  
+  
+  AnyVar FrictionStrength=200;
+  AnyVar Strength =4000;
+  
+  AnyFolder HandSupportLeft = {
+    AnyRefNode &StartNode = Main.Model.EnvironmentModel.Box.Left2;
+    AnySeg &EndNode = Main.Model.HumanModel.Left.ShoulderArm.Seg.Glove;    //The terms push and pull are determined wrt. the coordinate system of the StartNode!
+    
+    AnyVector StrengthOfReactionsLin = {.FrictionStrength,.FrictionStrength,.Strength,.FrictionStrength,.FrictionStrength,.FrictionStrength}; //List of strengths for the linear muscles
+    AnyFolder &DrawRef=Main.DrawSettings;
+    AnyVar ScaleFactor =0.5;
+    #include "<ANYBODY_PATH_TOOLBOX>/Reactions/XPush.any"
+    #include "<ANYBODY_PATH_TOOLBOX>/Reactions/XPull.any"
+    #include "<ANYBODY_PATH_TOOLBOX>/Reactions/YPush.any"
+    #include "<ANYBODY_PATH_TOOLBOX>/Reactions/YPull.any"
+    //#include "<ANYBODY_PATH_TOOLBOX>/Reactions/ZPush.any" 
+    #include "<ANYBODY_PATH_TOOLBOX>/Reactions/ZPull.any" 
+    
+  };
+  
+  AnyFolder HandSupportRight = {
+    AnyRefNode &StartNode = Main.Model.EnvironmentModel.Box.Right2;
+    
+    AnySeg &EndNode = Main.Model.HumanModel.Right.ShoulderArm.Seg.Glove;    //The terms push and pull are determined wrt. the coordinate system of the StartNode!
+    
+    AnyVector StrengthOfReactionsLin = {.FrictionStrength,.FrictionStrength,.Strength,.FrictionStrength,.FrictionStrength,.FrictionStrength}; //List of strengths for the linear muscles
+    AnyFolder &DrawRef=Main.DrawSettings;
+    AnyVar ScaleFactor =0.5;
+    #include "<ANYBODY_PATH_TOOLBOX>/Reactions/XPush.any"
+    #include "<ANYBODY_PATH_TOOLBOX>/Reactions/XPull.any"
+    #include "<ANYBODY_PATH_TOOLBOX>/Reactions/YPush.any"
+    #include "<ANYBODY_PATH_TOOLBOX>/Reactions/YPull.any"
+    #include "<ANYBODY_PATH_TOOLBOX>/Reactions/ZPush.any" 
+    //#include "<ANYBODY_PATH_TOOLBOX>/Reactions/ZPull.any" 
+    
+  };
+};
+
+AnyFolder Drivers = {
+  
+  // Aliases for convenient referencing
+  AnyFolder &JntPos=..Mannequin.Posture;  
+  AnyFolder &JntVel=..Mannequin.PostureVel;  
+  AnyFolder &Thorax = ..HumanModel.Trunk.SegmentsThorax.ThoraxSeg;
+  AnyFolder &LegR = ..HumanModel.Right.Leg;
+  AnyFolder &LegL = ..HumanModel.Left.Leg;
+  AnyFolder &RefHM = Main.Model.HumanModel;
+  AnyFolder &ref=Main.Model.HumanModel.Trunk;
+  
+  
+  
+  AnyKinEqSimpleDriver BoxRot = {
+    AnyKinRotational Rot = {
+      Type = RotAxesAngles;
+      AnyFixedRefFrame &ground = Main.Model.EnvironmentModel.GlobalRef;
+      AnySeg &box = Main.Model.EnvironmentModel.Box;
+    };
+    MeasureOrganizer = {0,1,2};
+    DriverPos = {0,0,0};
+    DriverVel = {0,0,0};
+    Reaction.Type = {Off,Off,Off};
+  };
+  
+  AnyKinEqInterPolDriver Box = {
+    AnyKinLinear pos = {
+      AnyFixedRefFrame &ground = Main.Model.EnvironmentModel.GlobalRef;
+      AnySeg &box = Main.Model.EnvironmentModel.Box;
+    };
+    Type = Bspline;
+    T = Main.Study.tEnd*{0,1,2,3}/2.99;
+    Data = {
+      { 0.35, 0.35, 0.35, 0.35},
+      { 1.3,  1.35, 1.35, 1.3},
+      {-0.1, -0.0, 0.0, 0.1}
+    };
+    Reaction.Type = {Off,Off,Off};
+  };
+  
+  
+  
+  // Position the Ankles right above the z axis
+  AnyKinEqSimpleDriver RAnkleX = {
+    AnyKinLinear AnklePos = {
+      AnyFixedRefFrame &Ground = Main.Model.EnvironmentModel.GlobalRef;
+      #if BM_LEG_RIGHT == CONST_LEG_MODEL_Leg
+        AnyRefNode &Ankle = ..LegR.Seg.Foot.AnkleJoint;
+      #else
+        AnyRefNode &Ankle = ..LegR.Seg.Talus.AnkleJoint;      
+      #endif
+    };
+    MeasureOrganizer = {0};  // Only the x coordinate
+    DriverPos = {0.0};
+    DriverVel = {0.0};
+    Reaction.Type = {Off};
+  };
+  
+  AnyKinEqSimpleDriver LAnkleX ={
+    AnyKinLinear AnklePos = {
+      AnyFixedRefFrame &Ground = Main.Model.EnvironmentModel.GlobalRef;
+      #if BM_LEG_LEFT == CONST_LEG_MODEL_Leg
+        AnyRefNode &Ankle = ..LegL.Seg.Foot.AnkleJoint;
+      #else
+        AnyRefNode &Ankle = ..LegL.Seg.Talus.AnkleJoint;      
+      #endif
+    };
+    MeasureOrganizer = {0};  // Only the x coordinate
+    DriverPos = {0.0};
+    DriverVel = {0.0};
+    Reaction.Type = {Off};
+  };
+  
+  //Constrain the collective CoM to be right above the GlobalRef
+  AnyKinEqSimpleDriver CoMDriver = {
+    AnyKinCoM CoM = {
+      AnyFolder &Body = Main.Model.HumanModel;
+      AnyFolder &Environment = Main.Model.EnvironmentModel;      
+    };
+    MeasureOrganizer = {0,2};  // Only the x and z directions
+    DriverPos = {0.1, -0.05};
+    DriverVel = {0.0, 0.1};
+    Reaction.Type = {Off,Off};
+  };  
+  
+  //Constrain the feet to be symmetrical about the xy plane
+  AnyKinEqSimpleDriver FeetXDriver = {
+    AnyKinCoM CoM = {
+      AnySeg &rf = Main.Model.HumanModel.Right.Leg.Seg.Foot;
+      AnySeg &ff = Main.Model.HumanModel.Left.Leg.Seg.Foot;
+    };
+    MeasureOrganizer = {2};  // Only the z direction
+    DriverPos = {0};
+    DriverVel = {0};
+    Reaction.Type = {Off};  // Carried by friction muscles.
+  };
+  
+  
+  // ************************************
+  // Drivers for the spine
+  // ************************************
+  
+  //Neck driver 
+  AnyKinEqSimpleDriver NeckJntDriver = {
+    AnyRevoluteJoint &T12L1Joint = ...HumanModel.Interface.Trunk.NeckJoint;
+    DriverPos = pi/180*{.JntPos.NeckExtension};
+    DriverVel = pi/180*{.JntVel.NeckExtension};
+    Reaction.Type = {Off};
+  };
+  
+  //Thorax pelvis rotation driver
+  AnyKinEqSimpleDriver PostureDriver ={
+    //AnyKinMeasureOrg &Ref2 = ...HumanModel.Interface.Trunk.PelvisThoraxLateralBending;        
+    AnyKinMeasureOrg &Ref3 = ...HumanModel.Interface.Trunk.PelvisThoraxRotation;   
+    AnyKinMeasureOrg &Ref1 = ...HumanModel.Interface.Trunk.PelvisThoraxExtension;
+    
+    DriverPos = pi/180*{
+      //    .JntPos.PelvisThoraxLateralBending,
+      .JntPos.PelvisThoraxRotation,
+      .JntPos.PelvisThoraxExtension
+    };
+    DriverVel = pi/180*{
+      //JntVel.PelvisThoraxLateralBending,
+      .JntVel.PelvisThoraxRotation,
+      .JntVel.PelvisThoraxExtension
+    };
+    Reaction.Type = {Off,Off};  
+  };  
+  
+  
+  // ************************************
+  // Drivers for the right arm
+  // ************************************
+  
+  
+  //Sterno clavicular joint driver
+  AnyKinEqSimpleDriver SCDriverRight ={
+    AnyKinMeasureOrg &ref1 =...HumanModel.Interface.Right.SternoClavicularProtraction;
+    AnyKinMeasureOrg &ref2 =...HumanModel.Interface.Right.SternoClavicularElevation;
+    AnyKinMeasureOrg &ref3 =...HumanModel.Interface.Right.SternoClavicularAxialRotation;
+    DriverPos = pi/180*{
+      .JntPos.Right.SternoClavicularProtraction,
+      .JntPos.Right.SternoClavicularElevation,
+      .JntPos.Right.SternoClavicularAxialRotation
+    };
+    DriverVel = {
+      .JntVel.Right.SternoClavicularProtraction,
+      .JntVel.Right.SternoClavicularElevation,
+      .JntVel.Right.SternoClavicularAxialRotation
+    };
+    Reaction.Type={Off,Off,Off};
+  };
+  
+  
+  //Wrist driver 
+  AnyKinEqSimpleDriver WristDriverRight ={
+    // AnyKinMeasureOrg &ref1 =...HumanModel.Interface.Right.WristFlexion;
+    AnyKinMeasureOrg &ref2 =...HumanModel.Interface.Right.WristAbduction;
+    DriverPos = pi/180*{         .JntPos.Right.WristAbduction       };
+    DriverVel = pi/180*{         .JntVel.Right.WristAbduction       };
+    Reaction.Type={Off};
+  };
+  
+  // ************************************
+  // Drivers for the left arm
+  // ************************************
+  
+  //Sterno clavicular joint driver
+  AnyKinEqSimpleDriver SCDriverLeft ={
+    AnyKinMeasureOrg &ref1 =...HumanModel.Interface.Left.SternoClavicularProtraction;
+    AnyKinMeasureOrg &ref2 =...HumanModel.Interface.Left.SternoClavicularElevation;
+    AnyKinMeasureOrg &ref3 =...HumanModel.Interface.Left.SternoClavicularAxialRotation;
+    
+    DriverPos = pi/180*{
+      .JntPos.Left.SternoClavicularProtraction,
+      .JntPos.Left.SternoClavicularElevation,
+      .JntPos.Left.SternoClavicularAxialRotation
+    };
+    
+    DriverVel = pi/180*{
+      .JntVel.Left.SternoClavicularProtraction,
+      .JntVel.Left.SternoClavicularElevation,
+      .JntVel.Left.SternoClavicularAxialRotation
+    };
+    
+    Reaction.Type={Off,Off,Off};
+  };
+  
+  
+  
+  
+  //Wrist driver
+  AnyKinEqSimpleDriver WristDriverLeft ={
+    //  AnyKinMeasureOrg &ref1 =...HumanModel.Interface.Left.WristFlexion;
+    AnyKinMeasureOrg &ref2 =...HumanModel.Interface.Left.WristAbduction;
+    DriverPos = pi/180*{
+      //  .JntPos.Left.WristFlexion,
+      .JntPos.Left.WristAbduction
+    };
+    
+    DriverVel = pi/180*{
+      //.JntVel.Left.WristFlexion,
+      .JntVel.Left.WristAbduction
+    };
+    Reaction.Type={Off};
+  };
+  
+  
+  
+  // ************************************
+  // Drivers for the right leg
+  // ************************************
+  
+  //Hip driver 
+  AnyKinEqSimpleDriver HipDriverRight={
+    AnyKinMeasureOrg &ref1 =...HumanModel.Interface.Right.HipFlexion;
+    AnyKinMeasureOrg &ref2 =...HumanModel.Interface.Right.HipExternalRotation;
+    AnyKinMeasureOrg &ref3 =...HumanModel.Interface.Right.HipAbduction;
+    DriverPos= pi/180*{
+      .JntPos.Right.HipFlexion,
+      .JntPos.Right.HipExternalRotation,
+      .JntPos.Right.HipAbduction
+    };    
+    DriverVel = pi/180*{
+      .JntVel.Right.HipFlexion,
+      .JntVel.Right.HipExternalRotation,
+      .JntVel.Right.HipAbduction
+    };    
+    Reaction.Type={Off,Off,Off};
+    
+  };
+  
+  //Knee driver
+  AnyKinEqSimpleDriver KneeDriverRight={
+    AnyKinMeasureOrg  &Knee = ...HumanModel.Interface.Right.KneeFlexion;
+    DriverPos=pi/180*{.JntPos.Right.KneeFlexion};  
+    DriverVel = pi/180*{.JntVel.Right.KneeFlexion};  
+    Reaction.Type={Off};
+  };
+  
+  //Ankle driver
+  AnyKinEqSimpleDriver AnkleDriverRight={
+    #if BM_LEG_RIGHT == CONST_LEG_MODEL_Leg
+      AnyKinMeasureOrg &ref2=...HumanModel.Interface.Right.AnkleEversion;
+    #else
+      AnyKinMeasureOrg &ref2=...HumanModel.Interface.Right.SubTalarEversion;
+    #endif
+    DriverPos = pi/180*{      .JntPos.Right.SubTalarEversion    };  
+    DriverVel=pi/180*{      .JntVel.Right.SubTalarEversion    };  
+    Reaction.Type={Off};
+  };
+  
+  
+  
+  
+  // ************************************
+  // Drivers for the left leg
+  // ************************************
+  
+  //Hip driver 
+  AnyKinEqSimpleDriver HipDriverLeft={
+    AnyKinMeasureOrg &ref1 =...HumanModel.Interface.Left.HipFlexion;
+    AnyKinMeasureOrg &ref2 =...HumanModel.Interface.Left.HipExternalRotation;
+    AnyKinMeasureOrg &ref3 =...HumanModel.Interface.Left.HipAbduction;
+    DriverPos= pi/180*{
+      .JntPos.Left.HipFlexion,
+      .JntPos.Left.HipExternalRotation,
+      .JntPos.Left.HipAbduction
+    };    
+    DriverVel = pi/180*{
+      .JntVel.Left.HipFlexion,
+      .JntVel.Left.HipExternalRotation,
+      .JntVel.Left.HipAbduction
+    };    
+    Reaction.Type={Off,Off,Off};
+    
+  };
+  
+  //Knee driver
+  AnyKinEqSimpleDriver KneeDriverLeft={
+    AnyKinMeasureOrg  &Knee = ...HumanModel.Interface.Left.KneeFlexion;
+    DriverPos=pi/180*{.JntPos.Left.KneeFlexion};  
+    DriverVel = pi/180*{.JntVel.Left.KneeFlexion};  
+    Reaction.Type={Off};
+  };
+  
+  //Ankle driver
+  AnyKinEqSimpleDriver AnkleDriverLeft={
+    #if BM_LEG_LEFT == CONST_LEG_MODEL_Leg
+      AnyKinMeasureOrg &ref2=...HumanModel.Interface.Left.AnkleEversion;
+    #else
+      AnyKinMeasureOrg &ref2=...HumanModel.Interface.Left.SubTalarEversion;
+    #endif
+    
+    DriverPos = pi/180*{      .JntPos.Left.SubTalarEversion    };  
+    DriverVel=pi/180*{      .JntVel.Left.SubTalarEversion    };  
+    Reaction.Type={Off};
+  };
+  
+  
+  
+  // Place the right toe and heel on the ground
+  AnyKinEq RToeGroundConstraint ={
+    AnyKinLinear ToePos = {
+      AnyFixedRefFrame &Ground = Main.Model.EnvironmentModel.GlobalRef;
+      AnyRefNode &Ball = Main.Model.HumanModel.Right.Leg.Seg.Foot.ToeJoint;
+    };
+    MeasureOrganizer = {1};  // Only the y coordinate
+    Reaction.Type={Off};
+  };
+  
+  AnyKinEqSimpleDriver RHeelGroundConstraint ={
+    AnyKinLinear HeelPos = {
+      AnyFixedRefFrame &Ground = Main.Model.EnvironmentModel.GlobalRef;
+      AnyRefNode &Ball = Main.Model.HumanModel.Right.Leg.Seg.Foot.HeelJoint;
+    };
+    MeasureOrganizer = {1};  // Only the y coordinate
+    DriverPos = {0.0};
+    DriverVel = {0.0};
+    Reaction.Type = {Off};   // Provide ground reaction forces
+  };
+  
+  // Place the left toe and heel on the ground
+  AnyKinEq LToeGroundConstraint ={
+    AnyKinLinear ToePos = {
+      AnyFixedRefFrame &Ground = Main.Model.EnvironmentModel.GlobalRef;
+      AnyRefNode &Ball = Main.Model.HumanModel.Left.Leg.Seg.Foot.ToeJoint;
+    };
+    MeasureOrganizer = {1};  // Only the y coordinate
+    Reaction.Type={Off};
+  };
+  
+  AnyKinEqSimpleDriver LHeelGroundConstraint ={
+    AnyKinLinear HeelPos = {
+      AnyFixedRefFrame &Ground = Main.Model.EnvironmentModel.GlobalRef;
+      AnyRefNode &Ball = Main.Model.HumanModel.Left.Leg.Seg.Foot.HeelJoint;
+    };
+    MeasureOrganizer = {1};  // Only the y coordinate
+    DriverPos = {0.0};
+    DriverVel =  {0.0};
+    Reaction.Type = {Off};  // Do not Provide ground reaction
+  };  
+  
+  
+  
+  AnyFolder ConditionalContact={
+    
+    /*
+    ConditionalContactFootPlaneClass (
+    BaseObject = //Object which delivers the forces
+    Foot = //Reference to the foot segment where 3 forces are applied 
+    DisplayTriggerVolume = //Draw the cylinder around the Base node where the contact is active
+    DisplayTargetNode = //Draw the Target node
+    ) = {
+    UserDefinedLimitLow = //low limit for the strength measure function, if the distance measured along Direction[0] is below this val. the strength will be zero (negative)
+    UserDefinedLimitHigh = //high limit for the strength measure function, if the distance measured along Direction[0] is above this val. the strength will be zero
+    UserDefinedRadiusLimit = //high limit for the strength measure function, if the radius measured along the plane with Direction[0] as normal is above this val. the strength will be zero
+    Strength = //strength of muscles
+    StaticFrictionCoefficient = //Friction coefficient
+    NormalDirection = //The axis (X, Y or Z) corresponding to the normal direction
+    FrictionDirection1 = //The axis (X, Y or Z) corresponding to the first friction direction
+    FrictionDirection2 = //The axis (X, Y or Z) corresponding to the second friction direction
+    };
+    */
+    
+    ConditionalContactFootPlaneClass LeftFootSupport (
+    BaseObject = Main.Model.EnvironmentModel.GlobalRef,
+    Foot = ..LegL.Seg.Foot,
+    DisplayTriggerVolume = 1,
+    DisplayTargetNode =1
+    ) = {
+      UserDefinedLimitLow = -0.05;
+      UserDefinedLimitHigh = 0.05;
+      UserDefinedRadiusLimit = 0.4;
+      Strength = 2000;
+      StaticFrictionCoefficient = 0.8;
+      NormalDirection = Y;
+      FrictionDirection1 = X;
+      FrictionDirection2 = Z;
+    };
+    
+    
+    ConditionalContactFootPlaneClass RightFootSupport (
+    BaseObject = Main.Model.EnvironmentModel.GlobalRef,
+    Foot = ..LegR.Seg.Foot,
+    DisplayTriggerVolume = 0,
+    DisplayTargetNode =1
+    ) = {
+      UserDefinedLimitLow = -0.05;
+      UserDefinedLimitHigh = 0.05;
+      UserDefinedRadiusLimit = 0.4;
+      Strength = 2000;
+      StaticFrictionCoefficient = 0.8;
+      NormalDirection = Y;
+      FrictionDirection1 = X;
+      FrictionDirection2 = Z;
+    };
+    
+  };   
+  
+  
+  
+  
+  
+};//Drivers
+

@@ -9,97 +9,65 @@ how to model the following objects/anatomical features:
 */
 Main = {
   
-  //--------------------------------------------------------------------------------
-  // MODEL SETUP:  modify the following values to change model parameters
-  // 1. ImplantStiffnessCoefficient   - changes stiffness of the implant 
-  // (ImplantStiffnessCoefficient = 1 - equivalent to the stiffness of 5 N/mm, 0 - no implant) 
-  // 2. InitialFlexionExtension       - defines starting posture (flexion/extension angle)
-  // 3. InitialLateralBending         - defines starting posture (lateral bending angle)
-  // 4. InitialTorsion                - defines starting posture (axial torsion angle)
-  // 5. FinalFlexionExtension         - defines end posture (flexion/extension angle)
-  // 6. FinalLateralBending           - defines end posture (lateral bending angle)
-  // 7. FinalTorsion                  - defines end posture (axial torsion angle)
-  // 8. SimTime                       - defines simulation time
-  //--------------------------------------------------------------------------------
+  // All relevant input parameters, motion/time/etc.
+  #include "Model/InputParameters.any"
   
-  AnyVar ImplantStiffnessCoefficient = 1;
+  // this file controls default view and project (Projects Tab) settings 
+  // and switches off visualization of the muscles in the model
+  #include "Model/SpineDeviceProject.any"
   
-  AnyVar InitialFlexionExtension = -10;    // Degrees
-  AnyVar InitialLateralBending = -10;        // Degrees
-  AnyVar InitialTorsion = 0;               // Degrees
+  // ----------------------------------------------------------
+  // Path to draw settings
+  // ----------------------------------------------------------
+  #path BM_DRAWSETTINGS_FILE "Model/DrawSettings.any"
   
-  AnyVar FinalFlexionExtension = 25;       // Degrees
-  AnyVar FinalLateralBending = 10;          // Degrees
-  AnyVar FinalTorsion = 0;                 // Degrees
+  // ----------------------------------------------------------
+  // Model configuration:
+  // For more info on body model configuration options please load the model and double click on: 
+  // #include "<ANYBODY_PATH_BODY>\Documentation\BodyModel.parameters.any"
+  // ----------------------------------------------------------
+
+  // Switch off arms and legs
+  #define BM_LEG_RIGHT CONST_LEG_MODEL_OFF
+  #define BM_LEG_LEFT CONST_LEG_MODEL_OFF
+  #define BM_ARM_RIGHT OFF
+  #define BM_ARM_LEFT OFF
   
-  AnyVar SimTime = 10;                     // Seconds
+  // Configure spine 
+  #define BM_TRUNK_DISC_STIFFNESS_NORMAL ON
+  #define BM_TRUNK_LUMBAR_LIGAMENTS ON
+  #define BM_SPINE_RHYTHM OFF
   
-  //--------------------------------------------------------------------------------
-  // MODEL DEFINITION
-  //--------------------------------------------------------------------------------   
+  // Define scaling law as ScalingLengthMassFat and provide anthropometric measurements
+  #define BM_SCALING CONST_SCALING_LENGTHMASSFAT
+  #path BM_SCALING_ANTHRO_FILE "Model/AnyManUniform.any"
   
-  // this definition excludes previously used prescribed spine rhythm
-  #define norhythm
-  
-  // this file controls default view and project settings
-  // !!! NB: muscle visualization is SWITCHED OFF
-  #include "SpineDeviceProject.any"
-  
-  /**Execute this operation to run the model in the intended operation sequence.  
-  It is also possible to run operations seperately, by manual selections in the operation tree*/
-  AnyOperationSequence RunApplication = {
-    /**This operation calibrates the muscles in the model if these are of the type AnyMuscleModel3E.
-    This will just be an empty operation if the model is using a muscle type that does not require calibration.*/
-    AnyOperation &CalibrationAnal = Main.HumanModel.Calibration.CalibrationSequence;  
-    ///This operation is the inverse dynamic analysis
-    AnyOperation &InvAnal=Main.Study.InverseDynamics;
-    
-  };  
-  
-  #include "DrawSettings.any"
-  
-  AnyFolder HumanModel = {
-    //-----------------------------------------------
-    // DEFINE BODY PARTS TO TAKE PART IN THE ANALYSIS
-    //-----------------------------------------------
-    #include "BodyPartsSetup.any"
-    
-    //Create a link to trunk folder
-    AnyFolder &TrunkFolder =   Main.HumanModel.BodyModel.Trunk;
-    TrunkFolder = {
-      //----------------------------------------
-      // ADD FACET JOINTS
-      //----------------------------------------
-      #include "FacetJoints.new/FacetJointsLumbar.any"
-    };
-    
-    AnyFolder &Mannequin=.Model.Mannequin;
-    #include  "<ANYBODY_PATH_BODY>\BodyModels\GenericBodyModel\BodyModel.any"
-    //-----------------------------------------------
-    // DEFINE MUSCULAR STRENGTH
-    //-----------------------------------------------
-    AnyFolder StrengthParameters = {
-      AnyVar SpecificMuscleTensionSpine = 90; //N/cm^2
-      AnyVar StrengthIndexLeg = 1; 
-      AnyVar SpecificMuscleTensionShoulderArm = 90; //N/cm^2
-    };    
-    //-----------------------------------------------
-    // DEFINE SCALING LAW
-    //-----------------------------------------------    
-    #include "<ANYBODY_PATH_BODY>\Scaling\ScalingLengthMassFat.any" 
-    Scaling = {
-      #include "AnyManUniform.any"
-    };
-    AnyFolder &ScalingTrunk = Scaling.GeometricalScaling;
-    AnyFolder &StandardParameters = Scaling.StandardParameters;
-    AnyFolder &ColorRef = Main.DrawSettings.Colors;
-  };
-  
-  // This folder collects the elements of the model. It is referred by the
-  // study section below as the target of the analyses.  
-  AnyFolder Model = {
+  // The Mannequin file specifies load-time positions for all the segments
+  // in the HumanModel. This is important for the model's ablity to resolve
+  // all the kinematic constraints when the model is analyzed.
+  // The mannequin file also drives those degrees of freedom of the human 
+  // model that are not governed by problem-specific drivers at run time.    
+  #path BM_MANNEQUIN_FILE "Model/Mannequin.any" 
+
+  // Model of the human body to be used for the analysis  
+  #include "<ANYBODY_PATH_BODY>/HumanModel.any"
+
+  /// The actual model where all components are assembled  
+  AnyFolder Model ={
+    /// Body model without default drivers
     AnyFolder &HumanModel=.HumanModel.BodyModel;
-    #include "Mannequin.any" 
+    /// Reference to the mannequin folder (used by drivers)
+    AnyFolder &Mannequin =.HumanModel.Mannequin;  
+
+    //----------------------------------------
+    // ADD FACET JOINTS
+    //----------------------------------------
+    HumanModel.Trunk = {
+      #include "Model/FacetJoints.new/FacetJointsLumbar.any"
+    };
+    
+    #include "Model/Environment.any"
+
     AnyFolder ModelEnvironmentConnection = {
       //--------------------------------------------------------------------------------
       // DEFINE MOTION OF THE MODEL:
@@ -108,13 +76,12 @@ Main = {
       // pelvis. All joint angles of the lumbar spine are computed using force-dependent 
       // kinematics solver.
       //--------------------------------------------------------------------------------
-      #include "Drivers.any"
-      AnyFixedRefFrame GlobalRef = {Origin ={0.0,0.0,0.0};};
+      #include "Model/Drivers.any"
     };
     //--------------------------------------------------------------------------------
     // ADD SPINE FIXATION DEVICE
     //--------------------------------------------------------------------------------
-    #include "SpineFixation.any"
+    #include "Model/SpineFixation.any"
   };  
   
   
@@ -145,7 +112,7 @@ Main = {
     //--------------------------------------------------------------------------------  
     AnyOutputFile f_flexext = 
     {  // flexion/extension angles of all joints in the lumbar spine
-      FileName = "LumbarSpineFlexExt.txt";
+      FileName = "Output/LumbarSpineFlexExt.txt";
       AnyVar FE_t12l1 = Main.HumanModel.BodyModel.Trunk.JointsLumbar.T12L1Jnt.Pos[0]*180/pi;
       AnyVar FE_l1l2 = Main.HumanModel.BodyModel.Trunk.JointsLumbar.L1L2Jnt.Pos[0]*180/pi;
       AnyVar FE_l2l3 = Main.HumanModel.BodyModel.Trunk.JointsLumbar.L2L3Jnt.Pos[0]*180/pi;
@@ -155,7 +122,7 @@ Main = {
     };
     AnyOutputFile f_torsion = 
     { // axial torsion angles of all joints in the lumbar spine
-      FileName = "LumbarSpineAxialTorsion.txt";
+      FileName = "Output/LumbarSpineAxialTorsion.txt";
       AnyVar AT_t12l1 = Main.HumanModel.BodyModel.Trunk.JointsLumbar.T12L1Jnt.Pos[1]*180/pi;
       AnyVar AT_l1l2 = Main.HumanModel.BodyModel.Trunk.JointsLumbar.L1L2Jnt.Pos[1]*180/pi;
       AnyVar AT_l2l3 = Main.HumanModel.BodyModel.Trunk.JointsLumbar.L2L3Jnt.Pos[1]*180/pi;
@@ -165,7 +132,7 @@ Main = {
     };
     AnyOutputFile f_latbend = 
     { // lateral bending angles of all joints in the lumbar spine
-      FileName = "LumbarSpineLatBend.txt";
+      FileName = "Output/LumbarSpineLatBend.txt";
       AnyVar LB_t12l1 = Main.HumanModel.BodyModel.Trunk.JointsLumbar.T12L1Jnt.Pos[2]*180/pi;
       AnyVar LB_l1l2 = Main.HumanModel.BodyModel.Trunk.JointsLumbar.L1L2Jnt.Pos[2]*180/pi;
       AnyVar LB_l2l3 = Main.HumanModel.BodyModel.Trunk.JointsLumbar.L2L3Jnt.Pos[2]*180/pi;
@@ -176,11 +143,14 @@ Main = {
     AnyOutputFile f_thoraxpelvis = {
       // describes motion of the lumbar spine by showing all the angles between thorax and pelvis
       // please note that the order of rotation axes is different
-      FileName = "motion.txt";
+      FileName = "Output/motion.txt";
       AnyVar LB_thpelvis = Main.HumanModel.BodyModel.Trunk.JointsLumbar.PelvisThoraxRotMeasure.Pos[0]*180/pi;
       AnyVar AT_thpelvis_at = Main.HumanModel.BodyModel.Trunk.JointsLumbar.PelvisThoraxRotMeasure.Pos[1]*180/pi;
       AnyVar FE_thpelvis = Main.HumanModel.BodyModel.Trunk.JointsLumbar.PelvisThoraxRotMeasure.Pos[2]*180/pi;
     };
   };
+  
+  // Include an operation sequence to run all required steps of your application (see Operations tab)
+    #include "<ANYBODY_PATH_TOOLBOX>\Operations\RunAppSequence.any"    
   
 };  // Main

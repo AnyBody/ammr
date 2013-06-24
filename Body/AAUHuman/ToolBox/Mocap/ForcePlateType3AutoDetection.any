@@ -67,7 +67,7 @@
       AnyVec3 p3=0.5*(.c01.sRel+.c02.sRel);
       ARel =RotMat(p1,p2,p3);
       
-      //      AnyDrawRefFrame drw={ScaleXYZ=..CoordinateSystemSize*{1,1,1};RGB={0,1,0};};
+      //AnyDrawRefFrame drw={ScaleXYZ=..CoordinateSystemSize*{1,1,1};RGB={0,1,0};};
       
     };
     
@@ -87,11 +87,19 @@
     AnyVec3 p3=0.5*(.Corners.c01.sRel+.Corners.c02.sRel);
     Axes0 =RotMat(p1,p2,p3);
     
+    AnyInt plnr=No;
+    AnyVar z_check = iffun(gtfun(Origins[plnr][2], 0), 1, -1);
+    AnyMessage Origin_Z_value_message= 
+    {
+      TriggerConst = iffun(gteqfun(.z_check,0), 1, 0);
+      Type = MSG_Message ;
+      Message = "The Origin of this force plate is written as positive. So this value will be converted as negative automatically. Please refer to www.c3d.org/HTML/type31.htm ";
+    };    
     
     AnyFloat Origins= Folder.Groups.FORCE_PLATFORM.ORIGIN.Data;
-    AnyVar ydist=Origins[0][0]; //distance from y axis on transducer to y axis of center of plate
-    AnyVar xdist=Origins[0][1];//distance from x axis on transducer to x axis of center of plate
-    AnyVar zdist=-Origins[0][2];//distance from z axis on transducer to z surface of plate
+    AnyVar ydist=Origins[plnr][0]; //distance from y axis on transducer to y axis of center of plate
+    AnyVar xdist=Origins[plnr][1];//distance from x axis on transducer to x axis of center of plate
+    AnyVar zdist=z_check*Origins[plnr][2];//distance from z axis on transducer to z surface of plate
     
     AnyRefNode P1={
       sRel=0.001*{.ydist,.xdist,.zdist};
@@ -426,8 +434,8 @@
 
      AnyVar fzz =iffun(gtfun(  (fz^2)^0.5,0),fz,fz+1000000);
      
-     AnyVar Vx= my/fzz;
-     AnyVar Vy= -mx/fzz;
+     AnyVar Vx= -my/fzz;
+     AnyVar Vy= mx/fzz;
      AnyVar Vz= 0;     
       
      AnyVar OnOff=iffun(gtfun(fz,-10.0),0.0,1.0);
@@ -440,13 +448,13 @@
             RGB = {0,1,0};
             ScaleXYZ = 0.015 *{1,1,1};
             Opacity = iffun(gtfun(..fz, -10.0), 0.0, 1.0);
-            Position = -{..Vx, ..Vy, ..Vz};
+            Position = {..Vx, ..Vy, ..Vz};
         };       
      };
      
      AnyDrawLine Line = 
      {
-       p0 = -{.Vx, .Vy, .Vz};
+       p0 = {.Vx, .Vy, .Vz};
        p1 = p0+0.004*.OnOff*{.fx, .fy, .fz};
        Visible = ..Switch_DrawForceVectorFromCOP ;
        AnyRefFrame &ref = ..ForcePlate;

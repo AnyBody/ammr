@@ -1,117 +1,41 @@
 #include "../libdef.any"
 
-/**
-This application is a model of a human standing on a floor and capable of
-attaining different postures. The model is fully supported under both feet 
-regardless of their positions.
+// Find a detailed description here
+#include "Model/Description.any"
 
-The model also allows the user to specify loads at predefined key points 
-in a simple way, and the posture as well as the external loads are 
-controlled by means of the mannequin.any file.
-
-The model can be a good starting point for new applications involving 
-the entire body.
-*/
 Main = {
+  // ----------------------------------------------------------
+  // Path to draw settings
+  // ----------------------------------------------------------
+  #path BM_DRAWSETTINGS_FILE "Model/DrawSettings.any"
 
-  /**Execute this operation to run the model in the intended operation sequence.  
-  It is also possible to run operations seperately, by manual selections in the operation tree*/
-  AnyOperationSequence RunApplication = {
+  // ----------------------------------------------------------
+  // Model configuration:
+  // For more info on body model configuration options please load the model and double click on: 
+  // #include "<ANYBODY_PATH_BODY>\Documentation\BodyModel.parameters.any"
+  // ----------------------------------------------------------
 
-    /**This operation calibrates the muscles in the model if these are of the type AnyMuscleModel3E.
-    This will just be an empty operation if the model is using a muscle type that does not require calibration.*/
-    AnyOperation &CalibrationAnal = Main.HumanModel.Calibration.CalibrationSequence;  
+  // The Mannequin file specifies load-time positions for all the segments
+  // in the HumanModel. This is important for the model's ablity to resolve
+  // all the kinematic constraints when the model is analyzed.
+  // The mannequin file also drives those degrees of freedom of the human 
+  // model that are not governed by problem-specific drivers at run time.    
+  #path BM_MANNEQUIN_FILE "Model/Mannequin.any" 
 
-    ///This operation is the inverse dynamic analysis
-    AnyOperation &InvAnal=Main.Study.InverseDynamics;
-  
-  };
+  // Model of the human body to be used for the analysis  
+  #include "<ANYBODY_PATH_BODY>/HumanModel.any"
 
-
-
-  #include "DrawSettings.any"
-  
-  AnyFolder HumanModel = {
-    
-    AnyFolder &Mannequin=.Model.Mannequin;
-    
-    
-    // Select the body model:
-    // ----------------------
-    // This file contains a list of all body parts, select them to create
-    // the body model wanted.
-    #include  "BodyPartsSetup.any"
-    
-    // This file creates the body model from the selected list.
-    #include  "<ANYBODY_PATH_BODY>\BodyModels\GenericBodyModel\BodyModel.any"
-    
-    
-
-    // The StrengthParameters folder allows for simple scaling of strength
-    // between the spine, the legs and the ShoulderArm body parts. The methods
-    // are slightly different to adhere to the anatomical literature on which the
-    // models are based.
-    AnyFolder StrengthParameters = {
-      AnyVar SpecificMuscleTensionSpine = 90; //N/cm^2
-      AnyVar StrengthIndexLeg = 1; 
-      AnyVar SpecificMuscleTensionShoulderArm = 90; //N/cm^2
-    };    
-    
-    // This section below offers the choice between two scaling strategies for the
-    // human model. 
-    
-    // ScalingStandard means that all the body parts will have the standard size 
-    // at which they were originally developed, i.e. with anthropometric
-    // data from the anatomical literature. This roughly corresponds to a 50th
-    // percentile European male.    
-    #include "<ANYBODY_PATH_BODY>\Scaling\ScalingStandard.any"
-    
-    // ScalingLengthMassFat will scale each segment of the body to anthropometric data
-    // specified in the selected AnyFamily include file, attempting to take the
-    // fat percentage into account in the assessment of the muscle strength.
-    // #include "<ANYBODY_PATH_BODY>\Scaling\ScalingLengthMassFat.any" 
-    // Scaling = {
-    //   #include "<ANYBODY_PATH_BODY>\Scaling\AnyFamily\AnyMan.any"
-    // };
-    
-  };
-  
-  // This folder collects the elements of the model. It is referred by the
-  // study section below as the target of the analyses.  
-  AnyFolder Model = {
-    
+  /// The actual model where all components are assembled  
+  AnyFolder Model ={
+    /// Body model without default drivers
     AnyFolder &HumanModel=.HumanModel.BodyModel;
-    #include "Environment.any"   
-    
-    // The Mannequin file specifies load-time positions for all the segments
-    // in the HumanModel. This is important for the model's ablity to resolve
-    // all the kinematic constraints when the model is analyzed.
-    // The mannequin file also drives those degrees of freedom of the human 
-    // model that are not governed by problem-specific drivers at run time.    
-    #include "Mannequin.any" 
-    
-    // The include file below, MannequinValuesFromModel, is not strictly
-    // necessary but can be helpful when developing new applications
-    // based on this application, particularly when the new application
-    // involves an environment that somehow governs the kinematics of
-    // the human body.
-    
-    // When included, MannequinValuesFromModel creates a folder named
-    // Main.HumanModel.BodyModel.MannequinValuesFromModel that contains 
-    // variables with the human model's joint angles as they are defined
-    // in the mennequin model. When the model has been loaded and the
-    // SetInitialConditions operation has been executed successfully once,
-    // you can look up 
-    // Main.HumanModel.BodyModel.MannequinValuesFromModel in the model
-    // tree and dump its values. The output is very similar to the content
-    // of the mannequin file, so the output can be saved and edited slightly
-    // and then replace the existing mannequin.any file. The new file will
-    // cause the model to have the exactly correct load-time positions.
-    // #include "MannequinValuesFromModel.any"
+    /// Reference to the mannequin folder (used by drivers)
+    AnyFolder &Mannequin =.HumanModel.Mannequin;    
+
+    #include "Model/Environment.any"   
     
     AnyFolder ModelEnvironmentConnection = {
-      AnyFolder &HumanModel=.HumanModel;
-      #include "JointsAndDrivers.any"
+      #include "Model/JointsAndDrivers.any"
     };
   };
   
@@ -122,9 +46,14 @@ Main = {
     Gravity = {0.0, -9.81, 0.0};
     nStep = 1;
     
+    //include the next line to have a camera in the model
+    //#include "Model/MovingCamera.any"
+    
   }; // End of study
 
- 
+  // Include an operation sequence to run all required steps of your application (see Operations tab)
+    #include "<ANYBODY_PATH_TOOLBOX>\Operations\RunAppSequence.any"  
   
 }; //Main
+
 

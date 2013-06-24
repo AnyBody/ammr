@@ -1,0 +1,586 @@
+//This file creates the environment around the human
+//It creates the force plates and add the measure load to them
+
+AnyFixedRefFrame GlobalRef ={
+  Origin={0,0,0};
+  AnyDrawRefFrame drw={ScaleXYZ=0.2*{1,1,1};};
+};  
+
+
+
+
+
+ForcePlateType3Pressure Plate1 (
+PlateName = Plate1,
+Folder =Main.ModelSetup.C3DFileData,
+No=0,
+Fx_12=Main.ModelSetup.C3DFileData.Analog.DataFiltered.Channel_01,
+Fx_34=Main.ModelSetup.C3DFileData.Analog.DataFiltered.Channel_02,
+Fy_14=Main.ModelSetup.C3DFileData.Analog.DataFiltered.Channel_03,
+Fy_23=Main.ModelSetup.C3DFileData.Analog.DataFiltered.Channel_04,
+Fz_1=Main.ModelSetup.C3DFileData.Analog.DataFiltered.Channel_05,
+Fz_2=Main.ModelSetup.C3DFileData.Analog.DataFiltered.Channel_06,
+Fz_3=Main.ModelSetup.C3DFileData.Analog.DataFiltered.Channel_07,
+Fz_4=Main.ModelSetup.C3DFileData.Analog.DataFiltered.Channel_08)
+={};
+
+
+
+#if InverseDynamicModel == 1
+
+  
+  AnyFolder FootLocation = {
+    
+    AnyFunEx FootLocationFun = 
+    {
+      AnyVector Return = {0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+      AnyFunExMonoPy LocationFunction =
+      {
+        ModuleFile = "FootLocation4.py";
+        ArgList = 
+        {
+          AnyString path = " ";
+        };
+      };
+    };
+    
+    AnyVector FootLocationCooVec =  FootLocationFun(Main.FootPrintFolderPath + "/Input/" +Main.TrialSpecificData.NameOfFile+ "-PressureData.txt");
+    
+    
+    AnyFolder &GlobalRef = .GlobalRef;
+    GlobalRef = {
+      AnyRefNode StrikeFootRef = {
+        sRel = {..FootLocationCooVec[0], ..FootLocationCooVec[1], 0};
+        AnyDrawNode Draw = {ScaleXYZ=0.005*{1,1,1}; RGB={0,0,0};};
+      };
+      AnyRefNode PosteriorFootRef = {
+        sRel = {..FootLocationCooVec[2], ..FootLocationCooVec[3], 0};
+        AnyDrawNode Draw = {ScaleXYZ=0.005*{1,1,1}; RGB={0,0,0};};
+      };
+      AnyRefNode AnteriorMedialFootRef = {
+        sRel = {..FootLocationCooVec[4], ..FootLocationCooVec[5], 0};
+        AnyDrawNode Draw = {ScaleXYZ=0.005*{1,1,1}; RGB={0,0,0};};
+      };
+      AnyRefNode AnteriorLateralFootRef = {
+        sRel = {..FootLocationCooVec[6], ..FootLocationCooVec[7], 0};
+        AnyDrawNode Draw = {ScaleXYZ=0.005*{1,1,1}; RGB={0,0,0};};
+      };
+      AnyRefNode DistalFootRef = {
+        sRel = {..FootLocationCooVec[8], ..FootLocationCooVec[9] - 0.0, 0};
+        AnyDrawNode Draw = {ScaleXYZ=0.005*{1,1,1}; RGB={0,0,0};};
+      };
+      AnyRefNode DistalPhal1Ref = {
+        sRel = {..FootLocationCooVec[10], ..FootLocationCooVec[11], 0};
+        AnyDrawNode Draw = {ScaleXYZ=0.005*{1,1,1}; RGB={0,0,0};};
+      };
+      AnyRefNode DistalPhal2Ref = {
+        sRel = {..FootLocationCooVec[12], ..FootLocationCooVec[13], 0};
+        AnyDrawNode Draw = {ScaleXYZ=0.005*{1,1,1}; RGB={0,0,0};};
+      };
+    };
+    
+    
+    AnySeg FootPressurePrintFrame = 
+    {
+      r0 = .GlobalRef.PosteriorFootRef.sRel;
+      Axes0 = RotMat(.GlobalRef.PosteriorFootRef.sRel, .GlobalRef.AnteriorMedialFootRef.sRel, {0,0,10.0})*RotMat(-pi/2,y)*RotMat(-pi/2,x);
+      Mass = 0;
+      Jii = {0, 0, 0};
+      AnyDrawRefFrame drw = {ScaleXYZ=0.1*{1,1,1};};
+    };
+    
+    
+    AnyRevoluteJoint FrameJoint = 
+    {
+      Axis = z;
+      AnyRefFrame &ref1 = .GlobalRef.PosteriorFootRef;
+      AnyRefFrame &ref2 = .FootPressurePrintFrame;
+    };
+
+    AnyKinEq FrameDriver = {
+      AnyKinMeasureOrg Organizer = {
+        MeasureOrganizer = {0};
+        AnyKinLinear Lin = 
+        {
+          Ref=0;
+          AnyRefFrame &ref1 = ...FootPressurePrintFrame;
+          AnyRefFrame &ref2 = ...GlobalRef.AnteriorMedialFootRef;
+        };
+      };
+    };
+    
+    
+    
+  };//FootLocation
+
+  
+  
+  AnyMatrix FootPressureNodeMat = {
+    HumanModelRef.Right.Leg.Seg.Calcaneus.PressureNode1.r,
+    HumanModelRef.Right.Leg.Seg.Calcaneus.PressureNode2.r,
+    HumanModelRef.Right.Leg.Seg.Calcaneus.PressureNode3.r,
+    HumanModelRef.Right.Leg.Seg.Calcaneus.PressureNode4.r,
+    HumanModelRef.Right.Leg.Seg.Calcaneus.PressureNode5.r,
+    HumanModelRef.Right.Leg.Seg.Calcaneus.PressureNode6.r,
+    HumanModelRef.Right.Leg.Seg.Calcaneus.PressureNode7.r,
+    HumanModelRef.Right.Leg.Seg.Calcaneus.PressureNode8.r,
+    HumanModelRef.Right.Leg.Seg.Calcaneus.PressureNode9.r,
+    HumanModelRef.Right.Leg.Seg.Calcaneus.PressureNode10.r,
+    HumanModelRef.Right.Leg.Seg.Calcaneus.PressureNode11.r,
+    HumanModelRef.Right.Leg.Seg.Calcaneus.PressureNode12.r,
+    HumanModelRef.Right.Leg.Seg.Calcaneus.PressureNode13.r,
+    HumanModelRef.Right.Leg.Seg.Calcaneus.PressureNode14.r,
+    HumanModelRef.Right.Leg.Seg.Calcaneus.PressureNode15.r,
+    HumanModelRef.Right.Leg.Seg.Calcaneus.PressureNode16.r,
+    HumanModelRef.Right.Leg.Seg.Calcaneus.PressureNode17.r,
+    HumanModelRef.Right.Leg.Seg.Calcaneus.PressureNode18.r,
+    HumanModelRef.Right.Leg.Seg.Calcaneus.PressureNode19.r,
+    HumanModelRef.Right.Leg.Seg.Calcaneus.PressureNode20.r,
+    HumanModelRef.Right.Leg.Seg.Calcaneus.PressureNode21.r,
+    HumanModelRef.Right.Leg.Seg.Calcaneus.PressureNode22.r,
+    HumanModelRef.Right.Leg.Seg.Calcaneus.PressureNode23.r,
+    HumanModelRef.Right.Leg.Seg.Calcaneus.PressureNode24.r,
+    HumanModelRef.Right.Leg.Seg.Calcaneus.PressureNode25.r,
+    HumanModelRef.Right.Leg.Seg.Calcaneus.PressureNode26.r,
+    HumanModelRef.Right.Leg.Seg.Calcaneus.PressureNode27.r,
+    HumanModelRef.Right.Leg.Seg.Calcaneus.PressureNode28.r,
+    HumanModelRef.Right.Leg.Seg.Calcaneus.PressureNode29.r,
+    HumanModelRef.Right.Leg.Seg.Calcaneus.PressureNode30.r,
+    HumanModelRef.Right.Leg.Seg.Calcaneus.PressureNode31.r,
+    
+    HumanModelRef.Right.Leg.Seg.Navicular.PressureNode1.r,
+    HumanModelRef.Right.Leg.Seg.Navicular.PressureNode2.r,
+    HumanModelRef.Right.Leg.Seg.Navicular.PressureNode3.r,
+    HumanModelRef.Right.Leg.Seg.Navicular.PressureNode4.r,
+    HumanModelRef.Right.Leg.Seg.Navicular.PressureNode5.r,
+    HumanModelRef.Right.Leg.Seg.Navicular.PressureNode6.r,
+    
+    HumanModelRef.Right.Leg.Seg.Cuboid.PressureNode1.r,
+    HumanModelRef.Right.Leg.Seg.Cuboid.PressureNode2.r,
+    HumanModelRef.Right.Leg.Seg.Cuboid.PressureNode3.r,
+    HumanModelRef.Right.Leg.Seg.Cuboid.PressureNode4.r,
+    HumanModelRef.Right.Leg.Seg.Cuboid.PressureNode5.r,
+    HumanModelRef.Right.Leg.Seg.Cuboid.PressureNode6.r,
+    HumanModelRef.Right.Leg.Seg.Cuboid.PressureNode7.r,
+    HumanModelRef.Right.Leg.Seg.Cuboid.PressureNode8.r,
+    HumanModelRef.Right.Leg.Seg.Cuboid.PressureNode9.r,
+    HumanModelRef.Right.Leg.Seg.Cuboid.PressureNode10.r,
+    HumanModelRef.Right.Leg.Seg.Cuboid.PressureNode11.r,
+    HumanModelRef.Right.Leg.Seg.Cuboid.PressureNode12.r,
+    HumanModelRef.Right.Leg.Seg.Cuboid.PressureNode13.r,
+    HumanModelRef.Right.Leg.Seg.Cuboid.PressureNode14.r,
+    
+    HumanModelRef.Right.Leg.Seg.LateralCuneiform.PressureNode1.r,
+    HumanModelRef.Right.Leg.Seg.LateralCuneiform.PressureNode2.r,
+    HumanModelRef.Right.Leg.Seg.LateralCuneiform.PressureNode3.r,
+    HumanModelRef.Right.Leg.Seg.IntermediateCuneiform.PressureNode1.r,
+    HumanModelRef.Right.Leg.Seg.IntermediateCuneiform.PressureNode2.r,
+    HumanModelRef.Right.Leg.Seg.IntermediateCuneiform.PressureNode3.r,
+    HumanModelRef.Right.Leg.Seg.MedialCuneiform.PressureNode1.r,
+    HumanModelRef.Right.Leg.Seg.MedialCuneiform.PressureNode2.r,
+    HumanModelRef.Right.Leg.Seg.MedialCuneiform.PressureNode3.r,
+    HumanModelRef.Right.Leg.Seg.MedialCuneiform.PressureNode4.r,
+    HumanModelRef.Right.Leg.Seg.MedialCuneiform.PressureNode5.r,
+    HumanModelRef.Right.Leg.Seg.MedialCuneiform.PressureNode6.r,
+    HumanModelRef.Right.Leg.Seg.MedialCuneiform.PressureNode7.r,
+    HumanModelRef.Right.Leg.Seg.MedialCuneiform.PressureNode8.r,
+    HumanModelRef.Right.Leg.Seg.MedialCuneiform.PressureNode9.r,
+    HumanModelRef.Right.Leg.Seg.MedialCuneiform.PressureNode10.r,
+    
+    HumanModelRef.Right.Leg.Seg.Metatarsal1.PressureNode1.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal1.PressureNode2.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal1.PressureNode3.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal1.PressureNode4.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal1.PressureNode5.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal1.PressureNode6.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal1.PressureNode7.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal1.PressureNode8.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal1.PressureNode9.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal1.PressureNode10.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal1.PressureNode11.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal1.PressureNode12.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal1.PressureNode13.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal1.PressureNode14.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal1.PressureNode15.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal1.PressureNode16.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal1.PressureNode17.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal1.PressureNode18.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal1.PressureNode19.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal1.PressureNode20.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal1.PressureNode21.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal1.PressureNode22.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal1.PressureNode23.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal1.PressureNode24.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal1.PressureNode25.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal1.PressureNode26.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal1.PressureNode27.r,
+    
+    HumanModelRef.Right.Leg.Seg.Metatarsal2.PressureNode1.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal2.PressureNode2.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal2.PressureNode3.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal2.PressureNode4.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal2.PressureNode5.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal2.PressureNode6.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal2.PressureNode7.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal2.PressureNode8.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal2.PressureNode9.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal2.PressureNode10.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal2.PressureNode11.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal2.PressureNode12.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal2.PressureNode13.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal2.PressureNode14.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal2.PressureNode15.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal2.PressureNode16.r,
+    
+    HumanModelRef.Right.Leg.Seg.Metatarsal3.PressureNode1.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal3.PressureNode2.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal3.PressureNode3.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal3.PressureNode4.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal3.PressureNode5.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal3.PressureNode6.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal3.PressureNode7.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal3.PressureNode8.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal3.PressureNode9.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal3.PressureNode10.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal3.PressureNode11.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal3.PressureNode12.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal3.PressureNode13.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal3.PressureNode14.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal3.PressureNode15.r,
+    
+    HumanModelRef.Right.Leg.Seg.Metatarsal4.PressureNode1.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal4.PressureNode2.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal4.PressureNode3.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal4.PressureNode4.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal4.PressureNode5.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal4.PressureNode6.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal4.PressureNode7.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal4.PressureNode8.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal4.PressureNode9.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal4.PressureNode10.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal4.PressureNode11.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal4.PressureNode12.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal4.PressureNode13.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal4.PressureNode14.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal4.PressureNode15.r,
+    
+    HumanModelRef.Right.Leg.Seg.Metatarsal5.PressureNode1.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal5.PressureNode2.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal5.PressureNode3.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal5.PressureNode4.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal5.PressureNode5.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal5.PressureNode6.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal5.PressureNode7.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal5.PressureNode8.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal5.PressureNode9.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal5.PressureNode10.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal5.PressureNode11.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal5.PressureNode12.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal5.PressureNode13.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal5.PressureNode14.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal5.PressureNode15.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal5.PressureNode16.r,
+    HumanModelRef.Right.Leg.Seg.Metatarsal5.PressureNode17.r,
+    
+    HumanModelRef.Right.Leg.Seg.ProximalPhalange1.PressureNode1.r,
+    HumanModelRef.Right.Leg.Seg.ProximalPhalange1.PressureNode2.r,
+    HumanModelRef.Right.Leg.Seg.ProximalPhalange1.PressureNode3.r,
+    
+    HumanModelRef.Right.Leg.Seg.DistalPhalange1.PressureNode1.r,
+    HumanModelRef.Right.Leg.Seg.DistalPhalange1.PressureNode2.r,
+    HumanModelRef.Right.Leg.Seg.DistalPhalange1.PressureNode3.r,
+    HumanModelRef.Right.Leg.Seg.DistalPhalange1.PressureNode4.r,
+    HumanModelRef.Right.Leg.Seg.DistalPhalange1.PressureNode5.r,
+    HumanModelRef.Right.Leg.Seg.DistalPhalange1.PressureNode6.r,
+    HumanModelRef.Right.Leg.Seg.DistalPhalange2.PressureNode1.r,
+    HumanModelRef.Right.Leg.Seg.DistalPhalange3.PressureNode1.r,
+    HumanModelRef.Right.Leg.Seg.DistalPhalange4.PressureNode1.r,
+    HumanModelRef.Right.Leg.Seg.DistalPhalange5.PressureNode1.r
+  };
+  
+  
+  AnyMatrix FootPressureNodeMatInitial = {
+    {0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},
+    {0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},
+    {0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},
+    {0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},
+    {0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},
+    {0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},
+    {0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},
+    {0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},
+    {0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},
+    {0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},
+    {0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},
+    {0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},
+    {0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},
+    {0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},
+    {0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},
+    {0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},
+    {0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}
+  };
+      
+  
+  AnyVector FootPressureNodeCoeffVecInitial = {
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0
+  };
+    
+  
+  AnyVector PressureDataVecInitial = {
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+  };
+  
+
+  #if FirstRun == 1
+    AnyFunEx PressureFun = 
+    {
+      AnyVector Return = .FootPressureNodeCoeffVecInitial;
+      AnyFunExMonoPy PressureFunction =
+      {
+        ModuleFile = "Final2.py";
+        ArgList = 
+        {
+          AnyMatrix Mat = ...FootPressureNodeMatInitial;
+          AnyFloat Time = 0.0;
+          AnyString path = " ";
+        };
+      };
+    };
+  
+    AnyVector FootPressureNodeCoeffVec =  PressureFun(FootPressureNodeMat, Main.Studies.InverseDynamicStudy.t - Main.Studies.InverseDynamicStudy.tStart, Main.FootPrintFolderPath + "/Input/" + Main.TrialSpecificData.NameOfFile + "-PressureData.txt");
+    
+    
+  
+    AnyOutputFile CoeffVecOutput = 
+    {
+      FileName = "../Input/" + Main.TrialSpecificData.NameOfFile + "-CoeffVec.txt";
+      SepSign = " ";
+      AnyVector Ref1 = .FootPressureNodeCoeffVec;
+    };
+  
+  #else
+  
+  //Replaces the python hook for speed gain.
+  //***************************************
+  AnyFunInterpol CoeffVecFun = 
+  {
+    Type = Bspline;
+    BsplineOrder = 4;
+    FileName = "../Input/" + Main.TrialSpecificData.NameOfFile + "-CoeffVec.txt"; //2cm wide bell fun + time sync
+  };
+  
+  AnyVector FootPressureNodeCoeffVec = CoeffVecFun(Main.Studies.InverseDynamicStudy.t);
+  //****************************************
+  #endif
+
+  
+  
+  AnyFolder ForceOnFoot = {
+    
+    AnyFolder &Seg = .HumanModelRef.Right.Leg.Seg;
+
+    AnyVec3 ForcePlateResultantGlobal = (.Plate1.Fz1.Flocal+.Plate1.Fz2.Flocal+.Plate1.Fz3.Flocal+.Plate1.Fz4.Flocal+.Plate1.Fx12.Flocal+.Plate1.Fx34.Flocal+.Plate1.Fy14.Flocal+.Plate1.Fy23.Flocal)*.Plate1.ForcePlate.Axes';
+    AnyVar ForceTestSum = sum(.FootPressureNodeCoeffVec); //should be equal to 1
+
+    
+    AnyForce3D CalcaneusForce1 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[0]; AnyRefFrame &ref = .Seg.Calcaneus.PressureNode1;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CalcaneusForce2 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[1]; AnyRefFrame &ref = .Seg.Calcaneus.PressureNode2;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CalcaneusForce3 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[2]; AnyRefFrame &ref = .Seg.Calcaneus.PressureNode3;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CalcaneusForce4 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[3]; AnyRefFrame &ref = .Seg.Calcaneus.PressureNode4;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CalcaneusForce5 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[4]; AnyRefFrame &ref = .Seg.Calcaneus.PressureNode5;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CalcaneusForce6 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[5]; AnyRefFrame &ref = .Seg.Calcaneus.PressureNode6;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CalcaneusForce7 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[6]; AnyRefFrame &ref = .Seg.Calcaneus.PressureNode7;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CalcaneusForce8 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[7]; AnyRefFrame &ref = .Seg.Calcaneus.PressureNode8;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CalcaneusForce9 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[8]; AnyRefFrame &ref = .Seg.Calcaneus.PressureNode9;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CalcaneusForce10 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[9]; AnyRefFrame &ref = .Seg.Calcaneus.PressureNode10;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CalcaneusForce11 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[10]; AnyRefFrame &ref = .Seg.Calcaneus.PressureNode11;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CalcaneusForce12 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[11]; AnyRefFrame &ref = .Seg.Calcaneus.PressureNode12;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CalcaneusForce13 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[12]; AnyRefFrame &ref = .Seg.Calcaneus.PressureNode13;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CalcaneusForce14 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[13]; AnyRefFrame &ref = .Seg.Calcaneus.PressureNode14;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CalcaneusForce15 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[14]; AnyRefFrame &ref = .Seg.Calcaneus.PressureNode15;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CalcaneusForce16 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[15]; AnyRefFrame &ref = .Seg.Calcaneus.PressureNode16;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CalcaneusForce17 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[16]; AnyRefFrame &ref = .Seg.Calcaneus.PressureNode17;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CalcaneusForce18 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[17]; AnyRefFrame &ref = .Seg.Calcaneus.PressureNode18;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CalcaneusForce19 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[18]; AnyRefFrame &ref = .Seg.Calcaneus.PressureNode19;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CalcaneusForce20 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[19]; AnyRefFrame &ref = .Seg.Calcaneus.PressureNode20;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CalcaneusForce21 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[20]; AnyRefFrame &ref = .Seg.Calcaneus.PressureNode21;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CalcaneusForce22 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[21]; AnyRefFrame &ref = .Seg.Calcaneus.PressureNode22;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CalcaneusForce23 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[22]; AnyRefFrame &ref = .Seg.Calcaneus.PressureNode23;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CalcaneusForce24 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[23]; AnyRefFrame &ref = .Seg.Calcaneus.PressureNode24;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CalcaneusForce25 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[24]; AnyRefFrame &ref = .Seg.Calcaneus.PressureNode25;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CalcaneusForce26 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[25]; AnyRefFrame &ref = .Seg.Calcaneus.PressureNode26;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CalcaneusForce27 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[26]; AnyRefFrame &ref = .Seg.Calcaneus.PressureNode27;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CalcaneusForce28 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[27]; AnyRefFrame &ref = .Seg.Calcaneus.PressureNode28;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CalcaneusForce29 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[28]; AnyRefFrame &ref = .Seg.Calcaneus.PressureNode29;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CalcaneusForce30 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[29]; AnyRefFrame &ref = .Seg.Calcaneus.PressureNode30;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CalcaneusForce31 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[30]; AnyRefFrame &ref = .Seg.Calcaneus.PressureNode31;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    
+    AnyForce3D NavicularForce1 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[31]; AnyRefFrame &ref = .Seg.Navicular.PressureNode1;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D NavicularForce2 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[32]; AnyRefFrame &ref = .Seg.Navicular.PressureNode2;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D NavicularForce3 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[33]; AnyRefFrame &ref = .Seg.Navicular.PressureNode3;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D NavicularForce4 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[34]; AnyRefFrame &ref = .Seg.Navicular.PressureNode4;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D NavicularForce5 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[35]; AnyRefFrame &ref = .Seg.Navicular.PressureNode5;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D NavicularForce6 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[36]; AnyRefFrame &ref = .Seg.Navicular.PressureNode6;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    
+    AnyForce3D CuboidForce1 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[37]; AnyRefFrame &ref = .Seg.Cuboid.PressureNode1;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CuboidForce2 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[38]; AnyRefFrame &ref = .Seg.Cuboid.PressureNode2;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CuboidForce3 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[39]; AnyRefFrame &ref = .Seg.Cuboid.PressureNode3;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CuboidForce4 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[40]; AnyRefFrame &ref = .Seg.Cuboid.PressureNode4;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CuboidForce5 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[41]; AnyRefFrame &ref = .Seg.Cuboid.PressureNode5;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CuboidForce6 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[42]; AnyRefFrame &ref = .Seg.Cuboid.PressureNode6;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CuboidForce7 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[43]; AnyRefFrame &ref = .Seg.Cuboid.PressureNode7;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CuboidForce8 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[44]; AnyRefFrame &ref = .Seg.Cuboid.PressureNode8;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CuboidForce9 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[45]; AnyRefFrame &ref = .Seg.Cuboid.PressureNode9;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CuboidForce10 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[46]; AnyRefFrame &ref = .Seg.Cuboid.PressureNode10;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CuboidForce11 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[47]; AnyRefFrame &ref = .Seg.Cuboid.PressureNode11;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CuboidForce12 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[48]; AnyRefFrame &ref = .Seg.Cuboid.PressureNode12;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CuboidForce13 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[49]; AnyRefFrame &ref = .Seg.Cuboid.PressureNode13;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D CuboidForce14 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[50]; AnyRefFrame &ref = .Seg.Cuboid.PressureNode14;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    
+    AnyForce3D LateralCuneiformForce1 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[51]; AnyRefFrame &ref = .Seg.LateralCuneiform.PressureNode1;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D LateralCuneiformForce2 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[52]; AnyRefFrame &ref = .Seg.LateralCuneiform.PressureNode2;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D LateralCuneiformForce3 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[53]; AnyRefFrame &ref = .Seg.LateralCuneiform.PressureNode3;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D IntermediateCuneiformForce1 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[54]; AnyRefFrame &ref = .Seg.IntermediateCuneiform.PressureNode1;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D IntermediateCuneiformForce2 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[55]; AnyRefFrame &ref = .Seg.IntermediateCuneiform.PressureNode2;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D IntermediateCuneiformForce3 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[56]; AnyRefFrame &ref = .Seg.IntermediateCuneiform.PressureNode3;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D MedialCuneiformForce1 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[57]; AnyRefFrame &ref = .Seg.MedialCuneiform.PressureNode1;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D MedialCuneiformForce2 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[58]; AnyRefFrame &ref = .Seg.MedialCuneiform.PressureNode2;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D MedialCuneiformForce3 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[59]; AnyRefFrame &ref = .Seg.MedialCuneiform.PressureNode3;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D MedialCuneiformForce4 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[60]; AnyRefFrame &ref = .Seg.MedialCuneiform.PressureNode4;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D MedialCuneiformForce5 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[61]; AnyRefFrame &ref = .Seg.MedialCuneiform.PressureNode5;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D MedialCuneiformForce6 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[62]; AnyRefFrame &ref = .Seg.MedialCuneiform.PressureNode6;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D MedialCuneiformForce7 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[63]; AnyRefFrame &ref = .Seg.MedialCuneiform.PressureNode7;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D MedialCuneiformForce8 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[64]; AnyRefFrame &ref = .Seg.MedialCuneiform.PressureNode8;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D MedialCuneiformForce9 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[65]; AnyRefFrame &ref = .Seg.MedialCuneiform.PressureNode9;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D MedialCuneiformForce10 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[66]; AnyRefFrame &ref = .Seg.MedialCuneiform.PressureNode10;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    
+    AnyForce3D Metatarsal1Force1 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[67]; AnyRefFrame &ref = .Seg.Metatarsal1.PressureNode1;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal1Force2 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[68]; AnyRefFrame &ref = .Seg.Metatarsal1.PressureNode2;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal1Force3 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[69]; AnyRefFrame &ref = .Seg.Metatarsal1.PressureNode3;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal1Force4 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[70]; AnyRefFrame &ref = .Seg.Metatarsal1.PressureNode4;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal1Force5 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[71]; AnyRefFrame &ref = .Seg.Metatarsal1.PressureNode5;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal1Force6 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[72]; AnyRefFrame &ref = .Seg.Metatarsal1.PressureNode6;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal1Force7 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[73]; AnyRefFrame &ref = .Seg.Metatarsal1.PressureNode7;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal1Force8 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[74]; AnyRefFrame &ref = .Seg.Metatarsal1.PressureNode8;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal1Force9 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[75]; AnyRefFrame &ref = .Seg.Metatarsal1.PressureNode9;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal1Force10 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[76]; AnyRefFrame &ref = .Seg.Metatarsal1.PressureNode10;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal1Force11 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[77]; AnyRefFrame &ref = .Seg.Metatarsal1.PressureNode11;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal1Force12 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[78]; AnyRefFrame &ref = .Seg.Metatarsal1.PressureNode12;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal1Force13 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[79]; AnyRefFrame &ref = .Seg.Metatarsal1.PressureNode13;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal1Force14 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[80]; AnyRefFrame &ref = .Seg.Metatarsal1.PressureNode14;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal1Force15 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[81]; AnyRefFrame &ref = .Seg.Metatarsal1.PressureNode15;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal1Force16 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[82]; AnyRefFrame &ref = .Seg.Metatarsal1.PressureNode16;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal1Force17 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[83]; AnyRefFrame &ref = .Seg.Metatarsal1.PressureNode17;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal1Force18 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[84]; AnyRefFrame &ref = .Seg.Metatarsal1.PressureNode18;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal1Force19 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[85]; AnyRefFrame &ref = .Seg.Metatarsal1.PressureNode19;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal1Force20 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[86]; AnyRefFrame &ref = .Seg.Metatarsal1.PressureNode20;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal1Force21 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[87]; AnyRefFrame &ref = .Seg.Metatarsal1.PressureNode21;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal1Force22 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[88]; AnyRefFrame &ref = .Seg.Metatarsal1.PressureNode22;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal1Force23 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[89]; AnyRefFrame &ref = .Seg.Metatarsal1.PressureNode23;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal1Force24 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[90]; AnyRefFrame &ref = .Seg.Metatarsal1.PressureNode24;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal1Force25 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[91]; AnyRefFrame &ref = .Seg.Metatarsal1.PressureNode25;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal1Force26 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[92]; AnyRefFrame &ref = .Seg.Metatarsal1.PressureNode26;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal1Force27 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[93]; AnyRefFrame &ref = .Seg.Metatarsal1.PressureNode27;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    
+    AnyForce3D Metatarsal2Force1 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[94]; AnyRefFrame &ref = .Seg.Metatarsal2.PressureNode1;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal2Force2 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[95]; AnyRefFrame &ref = .Seg.Metatarsal2.PressureNode2;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal2Force3 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[96]; AnyRefFrame &ref = .Seg.Metatarsal2.PressureNode3;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal2Force4 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[97]; AnyRefFrame &ref = .Seg.Metatarsal2.PressureNode4;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal2Force5 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[98]; AnyRefFrame &ref = .Seg.Metatarsal2.PressureNode5;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal2Force6 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[99]; AnyRefFrame &ref = .Seg.Metatarsal2.PressureNode6;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal2Force7 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[100]; AnyRefFrame &ref = .Seg.Metatarsal2.PressureNode7;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal2Force8 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[101]; AnyRefFrame &ref = .Seg.Metatarsal2.PressureNode8;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal2Force9 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[102]; AnyRefFrame &ref = .Seg.Metatarsal2.PressureNode9;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal2Force10 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[103]; AnyRefFrame &ref = .Seg.Metatarsal2.PressureNode10;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal2Force11 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[104]; AnyRefFrame &ref = .Seg.Metatarsal2.PressureNode11;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal2Force12 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[105]; AnyRefFrame &ref = .Seg.Metatarsal2.PressureNode12;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal2Force13 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[106]; AnyRefFrame &ref = .Seg.Metatarsal2.PressureNode13;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal2Force14 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[107]; AnyRefFrame &ref = .Seg.Metatarsal2.PressureNode14;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal2Force15 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[108]; AnyRefFrame &ref = .Seg.Metatarsal2.PressureNode15;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal2Force16 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[109]; AnyRefFrame &ref = .Seg.Metatarsal2.PressureNode16;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    
+    AnyForce3D Metatarsal3Force1 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[110]; AnyRefFrame &ref = .Seg.Metatarsal3.PressureNode1;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal3Force2 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[111]; AnyRefFrame &ref = .Seg.Metatarsal3.PressureNode2;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal3Force3 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[112]; AnyRefFrame &ref = .Seg.Metatarsal3.PressureNode3;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal3Force4 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[113]; AnyRefFrame &ref = .Seg.Metatarsal3.PressureNode4;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal3Force5 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[114]; AnyRefFrame &ref = .Seg.Metatarsal3.PressureNode5;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal3Force6 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[115]; AnyRefFrame &ref = .Seg.Metatarsal3.PressureNode6;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal3Force7 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[116]; AnyRefFrame &ref = .Seg.Metatarsal3.PressureNode7;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal3Force8 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[117]; AnyRefFrame &ref = .Seg.Metatarsal3.PressureNode8;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal3Force9 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[118]; AnyRefFrame &ref = .Seg.Metatarsal3.PressureNode9;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal3Force10 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[119]; AnyRefFrame &ref = .Seg.Metatarsal3.PressureNode10;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal3Force11 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[120]; AnyRefFrame &ref = .Seg.Metatarsal3.PressureNode11;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal3Force12 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[121]; AnyRefFrame &ref = .Seg.Metatarsal3.PressureNode12;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal3Force13 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[122]; AnyRefFrame &ref = .Seg.Metatarsal3.PressureNode13;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal3Force14 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[123]; AnyRefFrame &ref = .Seg.Metatarsal3.PressureNode14;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal3Force15 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[124]; AnyRefFrame &ref = .Seg.Metatarsal3.PressureNode15;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    
+    AnyForce3D Metatarsal4Force1 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[125]; AnyRefFrame &ref = .Seg.Metatarsal4.PressureNode1;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal4Force2 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[126]; AnyRefFrame &ref = .Seg.Metatarsal4.PressureNode2;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal4Force3 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[127]; AnyRefFrame &ref = .Seg.Metatarsal4.PressureNode3;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal4Force4 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[128]; AnyRefFrame &ref = .Seg.Metatarsal4.PressureNode4;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal4Force5 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[129]; AnyRefFrame &ref = .Seg.Metatarsal4.PressureNode5;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal4Force6 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[130]; AnyRefFrame &ref = .Seg.Metatarsal4.PressureNode6;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal4Force7 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[131]; AnyRefFrame &ref = .Seg.Metatarsal4.PressureNode7;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal4Force8 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[132]; AnyRefFrame &ref = .Seg.Metatarsal4.PressureNode8;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal4Force9 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[133]; AnyRefFrame &ref = .Seg.Metatarsal4.PressureNode9;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal4Force10 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[134]; AnyRefFrame &ref = .Seg.Metatarsal4.PressureNode10;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal4Force11 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[135]; AnyRefFrame &ref = .Seg.Metatarsal4.PressureNode11;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal4Force12 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[136]; AnyRefFrame &ref = .Seg.Metatarsal4.PressureNode12;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal4Force13 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[137]; AnyRefFrame &ref = .Seg.Metatarsal4.PressureNode13;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal4Force14 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[138]; AnyRefFrame &ref = .Seg.Metatarsal4.PressureNode14;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal4Force15 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[139]; AnyRefFrame &ref = .Seg.Metatarsal4.PressureNode15;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    
+    AnyForce3D Metatarsal5Force1 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[140]; AnyRefFrame &ref = .Seg.Metatarsal5.PressureNode1;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal5Force2 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[141]; AnyRefFrame &ref = .Seg.Metatarsal5.PressureNode2;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal5Force3 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[142]; AnyRefFrame &ref = .Seg.Metatarsal5.PressureNode3;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal5Force4 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[143]; AnyRefFrame &ref = .Seg.Metatarsal5.PressureNode4;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal5Force5 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[144]; AnyRefFrame &ref = .Seg.Metatarsal5.PressureNode5;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal5Force6 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[145]; AnyRefFrame &ref = .Seg.Metatarsal5.PressureNode6;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal5Force7 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[146]; AnyRefFrame &ref = .Seg.Metatarsal5.PressureNode7;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal5Force8 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[147]; AnyRefFrame &ref = .Seg.Metatarsal5.PressureNode8;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal5Force9 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[148]; AnyRefFrame &ref = .Seg.Metatarsal5.PressureNode9;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal5Force10 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[149]; AnyRefFrame &ref = .Seg.Metatarsal5.PressureNode10;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal5Force11 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[150]; AnyRefFrame &ref = .Seg.Metatarsal5.PressureNode11;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal5Force12 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[151]; AnyRefFrame &ref = .Seg.Metatarsal5.PressureNode12;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal5Force13 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[152]; AnyRefFrame &ref = .Seg.Metatarsal5.PressureNode13;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal5Force14 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[153]; AnyRefFrame &ref = .Seg.Metatarsal5.PressureNode14;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal5Force15 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[154]; AnyRefFrame &ref = .Seg.Metatarsal5.PressureNode15;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal5Force16 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[155]; AnyRefFrame &ref = .Seg.Metatarsal5.PressureNode16;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D Metatarsal5Force17 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[156]; AnyRefFrame &ref = .Seg.Metatarsal5.PressureNode17;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    
+    AnyForce3D ProximalPhalange1Force1 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[157]; AnyRefFrame &ref = .Seg.ProximalPhalange1.PressureNode1;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D ProximalPhalange1Force2 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[158]; AnyRefFrame &ref = .Seg.ProximalPhalange1.PressureNode2;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D ProximalPhalange1Force3 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[159]; AnyRefFrame &ref = .Seg.ProximalPhalange1.PressureNode3;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    
+    AnyForce3D DistalPhalange1Force1 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[160]; AnyRefFrame &ref = .Seg.DistalPhalange1.PressureNode1;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D DistalPhalange1Force2 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[161]; AnyRefFrame &ref = .Seg.DistalPhalange1.PressureNode2;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D DistalPhalange1Force3 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[162]; AnyRefFrame &ref = .Seg.DistalPhalange1.PressureNode3;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D DistalPhalange1Force4 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[163]; AnyRefFrame &ref = .Seg.DistalPhalange1.PressureNode4;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D DistalPhalange1Force5 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[164]; AnyRefFrame &ref = .Seg.DistalPhalange1.PressureNode5;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D DistalPhalange1Force6 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[165]; AnyRefFrame &ref = .Seg.DistalPhalange1.PressureNode6;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D DistalPhalange2Force1 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[166]; AnyRefFrame &ref = .Seg.DistalPhalange2.PressureNode1;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D DistalPhalange3Force1 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[167]; AnyRefFrame &ref = .Seg.DistalPhalange3.PressureNode1;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D DistalPhalange4Force1 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[168]; AnyRefFrame &ref = .Seg.DistalPhalange4.PressureNode1;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    AnyForce3D DistalPhalange5Force1 = { F = .ForcePlateResultantGlobal*..FootPressureNodeCoeffVec[169]; AnyRefFrame &ref = .Seg.DistalPhalange5.PressureNode1;  AnyDrawVector Resultant = { Vec = -.F/1000; Line.Style=Line3DStyleFull; Line.RGB = {0,0,1}; Line.Thickness = 0.002; AnyRefFrame &ref = .ref; }; };
+    
+  };//ForceOnFoot
+  
+  
+  
+  #endif
+  
+  

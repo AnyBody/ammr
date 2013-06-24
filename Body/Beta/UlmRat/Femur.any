@@ -1,0 +1,686 @@
+AnySeg Femur = {
+  
+      
+  
+  AnyVar LengthFemur = Main.RatModel.Seg.Femur.v_Knee[0]-Main.RatModel.Seg.Femur.v_Hip[0];
+  
+  AnyVar LengthDistal = Main.RatModel.FracturRatio*LengthFemur;  //Length of distal segment
+  AnyVar LengthProximal = LengthFemur - LengthDistal;    //Length of proximal segment
+  
+  AnyVar Ld = LengthDistal;  //Length of distal segment
+  AnyVar Lp = LengthProximal;  //Length of proximal segment
+  
+  //Local position vectors in CS F (old local CS of Femur), CS A (new local CS of new distal Femur Segment) or CS B (new local CS of new proximal Femur Segment)
+  AnyVector f_r_H = {-0.00865241480000,   0.00498824800000,  0.00246587170000};  //Hipjoint in CS F
+  AnyVector f_r_K = {0.02010306200000,  0.00010467243000,   -0.00096203734000}; //Anklejoint in CS F
+  
+  AnyVector a_r_K = {Ld/2, f_r_K[1], f_r_K[2]};  //Kneejoint in CS A
+  AnyVector a_r_S = {-Ld/2, 0.0, 0.0}; //Cuttingplane in CS A
+  AnyVector a_r_f = -f_r_K+a_r_K;	    //old CoM of Femursegment in CS A
+  
+  AnyVector b_r_H = {-Lp/2, f_r_H[1], f_r_H[2]}; //Hipjoint in CS B		
+  AnyVector b_r_S = {Lp/2, 0.0, 0.0};  //Cuttingplane in CS B
+  AnyVector b_r_f = -f_r_H+b_r_H;	    //old CoM of Femursegment in CS B
+  
+  AnyVar betr_a_r_f= (a_r_f[0]^2+a_r_f[1]^2+a_r_f[2]^2)^0.5; //length of position vector a_r_t
+  AnyVar betr_b_r_f= (b_r_f[0]^2+b_r_f[1]^2+b_r_f[2]^2)^0.5; //length of position vector b_r_t
+  
+  //      //Kinetic parameters of old femur segment
+  AnyVar MassS = 0.009238579;
+  AnyVector inertia =   {1.1245034e+003,1.2166950e+003,4.0551146e+002,5.5697794e+001,-1.5093965e+002,-3.1721455e+001}; //ohne rot
+  AnyVar Ixx = inertia[2]/1000000000;
+  AnyVar Iyy = inertia[0]/1000000000;
+  AnyVar Izz = inertia[1]/1000000000; 
+  //      
+  AnyVar MassS_d = MassS*betr_b_r_f/(betr_a_r_f+betr_b_r_f); // Mass of segment
+  AnyVar MassS_p = MassS*betr_a_r_f/(betr_a_r_f+betr_b_r_f); // Mass of segment
+  //      
+  //      WICHTIG: AENDERUNG DER AUSRICHTUNG DER KS:  
+  //      Originalumrechnung aus Wehner et al., 2009:
+  //      AnyMat33 Jred = {{Ixx-MassS_p*betr_b_r_f^2-MassS_d*betr_a_r_f^2,0,0},{0,Iyy,0},{0,0,Izz-MassS_p*betr_b_r_f^2-MassS_d*betr_a_r_f^2}};
+  //      AnyMat33 J_p = {{MassS_p*Lp^2/(MassS_d*Ld^2+MassS_p*Lp^2),0,0},{0,MassS_p^2*Ld/(MassS_d^2*Lp+MassS_p^2*Ld),0},{0,0,MassS_p*Lp^2/(MassS_d*Ld^2+MassS_p*Lp^2)}}*Jred;
+  //      AnyMat33 J_d = {{MassS_d*Ld^2/(MassS_d*Ld^2+MassS_p*Lp^2),0,0},{0,MassS_d^2*Lp/(MassS_d^2*Lp+MassS_p^2*Ld),0},{0,0,MassS_d*Ld^2/(MassS_d*Ld^2+MassS_p*Lp^2)}}*Jred;
+  
+  //neue Umrechnung mit x-achse als longitudinalachse
+  AnyMat33 Jred = {{Ixx,0,0},{0,Iyy-MassS_p*betr_b_r_f^2-MassS_d*betr_a_r_f^2,0},{0,0,Izz-MassS_p*betr_b_r_f^2-MassS_d*betr_a_r_f^2}};
+  AnyMat33 J_p = {{MassS_p^2*Ld/(MassS_d^2*Lp+MassS_p^2*Ld),0,0},{0,MassS_p*Lp^2/(MassS_d*Ld^2+MassS_p*Lp^2),0},{0,0,MassS_p*Lp^2/(MassS_d*Ld^2+MassS_p*Lp^2)}}*Jred;
+  AnyMat33 J_d = {{MassS_d^2*Lp/(MassS_d^2*Lp+MassS_p^2*Ld),0,0},{0,MassS_d*Ld^2/(MassS_d*Ld^2+MassS_p*Lp^2),0},{0,0,MassS_d*Ld^2/(MassS_d*Ld^2+MassS_p*Lp^2)}}*Jred;
+  //                                                                                           
+  
+  Jii = {inertia[2]/1000000000,inertia[0]/1000000000,inertia[1]/1000000000};
+  Jij = {inertia[4]/1000000000,inertia[3]/1000000000,inertia[5]/1000000000};  
+  
+  r0 = {-0.05, -0.05, -0.05};  
+  Axes0 = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
+  
+  
+  Mass=.Femur.MassS;
+  //Jii = {Jred[0][0],Jred[1][1],Jred[2][2]};
+  
+  AnyRefNode PalmNode = {
+    sRel = .Hip.sRel - {-0.00865241480000,   0.00498824800000,  0.00246587170000
+    };
+    ARel = {{0, 0, 1}, {1, 0, 0}, {0, 1, 0}};
+    AnyDrawSurf Drw = {
+      FileName = "Femur";
+      ScaleXYZ = {0.001, 0.001, 0.001};
+      Opacity = 1;
+      RGB = .....DrawSettings.Colors.Segments;
+    };
+  };
+  
+//  AnyDrawSeg DrwBeam =      {
+//    RGB = {1, 0, 0};
+//    Opacity = 1;
+//    InertiaScale = 0.25;
+//  };
+  
+  #include "AttachmentLocation.any"
+  
+  
+  AnyRefNode Hip 			  = {
+    sRel = .v_Hip 	 	   ; 
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Knee 		  = {
+    sRel = .v_Knee 	         ;
+    #include "NodeLoc.any"
+  };	
+  AnyRefNode Pat 			  = {
+    sRel = .v_Pat 		   ;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_extensor_digitorum_longus_1Node0  = {
+    sRel = .v_Femur_mus_extensor_digitorum_longus_1Node0 ;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_extensor_digitorum_longus_2Node0  = {
+    sRel = .v_Femur_mus_extensor_digitorum_longus_2Node0 ;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_extensor_digitorum_longus_3Node0  = {
+    sRel = .v_Femur_mus_extensor_digitorum_longus_3Node0 ;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_extensor_digitorum_longus_4Node0  = {
+    sRel = .v_Femur_mus_extensor_digitorum_longus_4Node0 ;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_popliteus_1Node0  = {
+    sRel = .v_Femur_mus_popliteus_1Node0 ;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_popliteus_1Node1  = {
+    sRel = .v_Femur_mus_popliteus_1Node1 ;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_popliteus_2Node0  = {
+    sRel = .v_Femur_mus_popliteus_2Node0 ;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_popliteus_2Node1  = {
+    sRel = .v_Femur_mus_popliteus_2Node1 ;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_tibialis_anteriorNode0 = {
+    sRel = .v_Femur_mus_tibialis_anteriorNode0;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_gastrocnemius_soleus_1Node0 = {
+    sRel = .v_Femur_mus_gastrocnemius_soleus_1Node0;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_gastrocnemius_soleus_2Node0 = {
+    sRel = .v_Femur_mus_gastrocnemius_soleus_2Node0;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_tensor_fasciae_latae_1Node3 = {
+    sRel = .v_Femur_mus_tensor_fasciae_latae_1Node3;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_tensor_fasciae_latae_1Node4 = {
+    sRel = .v_Femur_mus_tensor_fasciae_latae_1Node4;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_tensor_fasciae_latae_1Node5 = {
+    sRel = .v_Femur_mus_tensor_fasciae_latae_1Node5;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_tensor_fasciae_latae_2Node3 = {
+    sRel = .v_Femur_mus_tensor_fasciae_latae_2Node3;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_tensor_fasciae_latae_2Node4 = {
+    sRel = .v_Femur_mus_tensor_fasciae_latae_2Node4;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_tensor_fasciae_latae_2Node5 = {
+    sRel = .v_Femur_mus_tensor_fasciae_latae_2Node5;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_fasciae_latae_3Node3 = {
+    sRel = .v_Femur_mus_fasciae_latae_3Node3;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_fasciae_latae_3Node4 = {
+    sRel = .v_Femur_mus_fasciae_latae_3Node4;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_fasciae_latae_3Node5 = {
+    sRel = .v_Femur_mus_fasciae_latae_3Node5;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_semitendinosusNode1 = {
+    sRel = .v_Femur_mus_semitendinosusNode1;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_semitendinosusNode2 = {
+    sRel = .v_Femur_mus_semitendinosusNode2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_semimembranosusNode1 = {
+    sRel = .v_Femur_mus_semimembranosusNode1;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_semimembranosusNode2 = {
+    sRel = .v_Femur_mus_semimembranosusNode2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_quadratus_femorisNode2 = {
+    sRel = .v_Femur_mus_quadratus_femorisNode2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_psoas_minor_1Node1 = {
+    sRel = .v_Femur_mus_psoas_minor_1Node1;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_psoas_minor_1Node2 = {
+    sRel = .v_Femur_mus_psoas_minor_1Node2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_psoas_minor_2Node1 = {
+    sRel = .v_Femur_mus_psoas_minor_2Node1;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_psoas_minor_2Node2 = {
+    sRel = .v_Femur_mus_psoas_minor_2Node2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_psoas_minor_3Node1 = {
+    sRel = .v_Femur_mus_psoas_minor_3Node1;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_psoas_minor_3Node2 = {
+    sRel = .v_Femur_mus_psoas_minor_3Node2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_psoas_minor_4Node1 = {
+    sRel = .v_Femur_mus_psoas_minor_4Node1;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_psoas_minor_4Node2 = {
+    sRel = .v_Femur_mus_psoas_minor_4Node2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_psoas_major_1Node1 = {
+    sRel = .v_Femur_mus_psoas_major_1Node1;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_psoas_major_1Node2 = {
+    sRel = .v_Femur_mus_psoas_major_1Node2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_psoas_major_2Node1 = {
+    sRel = .v_Femur_mus_psoas_major_2Node1;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_psoas_major_2Node2 = {
+    sRel = .v_Femur_mus_psoas_major_2Node2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_psoas_major_3Node1 = {
+    sRel = .v_Femur_mus_psoas_major_3Node1;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_psoas_major_3Node2 = {
+    sRel = .v_Femur_mus_psoas_major_3Node2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_psoas_major_4Node1 = {
+    sRel = .v_Femur_mus_psoas_major_4Node1;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_psoas_major_4Node2 = {
+    sRel = .v_Femur_mus_psoas_major_4Node2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_pectineusNode1 = {
+    sRel = .v_Femur_mus_pectineusNode1;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_obturatorius_internus_1Node2 = {
+    sRel = .v_Femur_mus_obturatorius_internus_1Node2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_obturatorius_internus_2Node2 = {
+    sRel = .v_Femur_mus_obturatorius_internus_2Node2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_obturatorius_externus_1Node2 = {
+    sRel = .v_Femur_mus_obturatorius_externus_1Node2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_obturatorius_externus_2Node2 = {
+    sRel = .v_Femur_mus_obturatorius_externus_2Node2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_extensor_digitorum_brevis_11Node2 = {
+    sRel = .v_Femur_mus_extensor_digitorum_brevis_11Node2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_extensor_digitorum_brevis_12Node2 = {
+    sRel = .v_Femur_mus_extensor_digitorum_brevis_12Node2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_extensor_digitorum_brevis_13Node2 = {
+    sRel = .v_Femur_mus_extensor_digitorum_brevis_13Node2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_extensor_digitorum_brevis_14Node2 = {
+    sRel = .v_Femur_mus_extensor_digitorum_brevis_14Node2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_extensor_digitorum_brevis_15Node2 = {sRel = .v_Femur_mus_extensor_digitorum_brevis_15Node2;#include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_iliacusNode3 = {
+    sRel = .v_Femur_mus_iliacusNode3;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_iliacusNode4 = {
+    sRel = .v_Femur_mus_iliacusNode4;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_gracilis_posticusNode2 = {
+    sRel = .v_Femur_mus_gracilis_posticusNode2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_gracilis_posticusNode3 = {
+    sRel = .v_Femur_mus_gracilis_posticusNode3;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_gracilis_posticusNode4 = {
+    sRel = .v_Femur_mus_gracilis_posticusNode4;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_gracilis_anticusNode2 = {
+    sRel = .v_Femur_mus_gracilis_anticusNode2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_gracilis_anticusNode3 = {
+    sRel = .v_Femur_mus_gracilis_anticusNode3;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_gracilis_anticusNode4 = {
+    sRel = .v_Femur_mus_gracilis_anticusNode4;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_gluteus_minimus_1Node3 = {
+    sRel = .v_Femur_mus_gluteus_minimus_1Node3;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_gluteus_minimus_2Node2 = {
+    sRel = .v_Femur_mus_gluteus_minimus_2Node2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_gluteus_mediusNode3 = {
+    sRel = .v_Femur_mus_gluteus_mediusNode3;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_gluteus_mediusNode4 = {
+    sRel = .v_Femur_mus_gluteus_mediusNode4;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_gluteus_maximus_1Node3 = {
+    sRel = .v_Femur_mus_gluteus_maximus_1Node3;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_gluteus_maximus_1Node4 = {
+    sRel = .v_Femur_mus_gluteus_maximus_1Node4;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_gluteus_maximus_1Node5 = {
+    sRel = .v_Femur_mus_gluteus_maximus_1Node5;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_gluteus_maximus_2Node3 = {
+    sRel = .v_Femur_mus_gluteus_maximus_2Node3;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_gluteus_maximus_2Node4 = {
+    sRel = .v_Femur_mus_gluteus_maximus_2Node4;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_gluteus_maximus_2Node5 = {
+    sRel = .v_Femur_mus_gluteus_maximus_2Node5;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_gluteus_maximus_2Node6 = {
+    sRel = .v_Femur_mus_gluteus_maximus_2Node6;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_gluteus_maximus_3Node3 = {
+    sRel = .v_Femur_mus_gluteus_maximus_3Node3;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_gluteus_maximus_3Node4 = {
+    sRel = .v_Femur_mus_gluteus_maximus_3Node4;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_gluteus_maximus_3Node5 = {
+    sRel = .v_Femur_mus_gluteus_maximus_3Node5;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_gluteus_maximus_3Node6 = {
+    sRel = .v_Femur_mus_gluteus_maximus_3Node6;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_gluteus_maximus_4Node3 = {
+    sRel = .v_Femur_mus_gluteus_maximus_4Node3;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_gluteus_maximus_4Node4 = {
+    sRel = .v_Femur_mus_gluteus_maximus_4Node4;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_gluteus_maximus_4Node5 = {
+    sRel = .v_Femur_mus_gluteus_maximus_4Node5;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_gluteus_maximus_5Node3 = {
+    sRel = .v_Femur_mus_gluteus_maximus_5Node3;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_gluteus_maximus_5Node4 = {
+    sRel = .v_Femur_mus_gluteus_maximus_5Node4;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_gluteus_maximus_5Node5 = {
+    sRel = .v_Femur_mus_gluteus_maximus_5Node5;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_gluteus_maximus_5Node6 = {
+    sRel = .v_Femur_mus_gluteus_maximus_5Node6;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_gemellus_inferiorNode2 = {
+    sRel = .v_Femur_mus_gemellus_inferiorNode2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_gemellus_inferiorNode3 = {
+    sRel = .v_Femur_mus_gemellus_inferiorNode3;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_gemellus_superiorNode3 = {
+    sRel = .v_Femur_mus_gemellus_superiorNode3;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_gemellus_superiorNode4 = {
+    sRel = .v_Femur_mus_gemellus_superiorNode4;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_rectus_femoris_1Node1 = {
+    sRel = .v_Femur_mus_rectus_femoris_1Node1;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_rectus_femoris_1Node2 = {
+    sRel = .v_Femur_mus_rectus_femoris_1Node2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_rectus_femoris_1Node3 = {
+    sRel = .v_Femur_mus_rectus_femoris_1Node3;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_rectus_femoris_2Node1 = {
+    sRel = .v_Femur_mus_rectus_femoris_2Node1;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_rectus_femoris_2Node2 = {
+    sRel = .v_Femur_mus_rectus_femoris_2Node2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_rectus_femoris_2Node3 = {
+    sRel = .v_Femur_mus_rectus_femoris_2Node3;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_rectus_femoris_3Node1 = {
+    sRel = .v_Femur_mus_rectus_femoris_3Node1;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_rectus_femoris_3Node2 = {
+    sRel = .v_Femur_mus_rectus_femoris_3Node2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_rectus_femoris_3Node3 = {
+    sRel = .v_Femur_mus_rectus_femoris_3Node3;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_rectus_femoris_4Node1 = {
+    sRel = .v_Femur_mus_rectus_femoris_4Node1;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_rectus_femoris_4Node2 = {
+    sRel = .v_Femur_mus_rectus_femoris_4Node2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_rectus_femoris_5Node1 = {
+    sRel = .v_Femur_mus_rectus_femoris_5Node1;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_rectus_femoris_5Node2 = {
+    sRel = .v_Femur_mus_rectus_femoris_5Node2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_vastus_lateralis_1Node0 = {
+    sRel = .v_Femur_mus_vastus_lateralis_1Node0;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_vastus_lateralis_1Node1 = {
+    sRel = .v_Femur_mus_vastus_lateralis_1Node1;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_vastus_lateralis_2Node0 = {
+    sRel = .v_Femur_mus_vastus_lateralis_2Node0;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_vastus_lateralis_2Node1 = {
+    sRel = .v_Femur_mus_vastus_lateralis_2Node1;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_vastus_lateralis_2Node2 = {
+    sRel = .v_Femur_mus_vastus_lateralis_2Node2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_vastus_lateralis_3Node0 = {
+    sRel = .v_Femur_mus_vastus_lateralis_3Node0;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_vastus_lateralis_3Node1 = {
+    sRel = .v_Femur_mus_vastus_lateralis_3Node1;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_vastus_lateralis_3Node2 = {
+    sRel = .v_Femur_mus_vastus_lateralis_3Node2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_vastus_lateralis_4Node0 = {
+    sRel = .v_Femur_mus_vastus_lateralis_4Node0;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_vastus_lateralis_4Node1 = {
+    sRel = .v_Femur_mus_vastus_lateralis_4Node1;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_vastus_medialisNode0 = {
+    sRel = .v_Femur_mus_vastus_medialisNode0;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_vastus_medialisNode1 = {
+    sRel = .v_Femur_mus_vastus_medialisNode1;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_vastus_intermediusNode0 = {
+    sRel = .v_Femur_mus_vastus_intermediusNode0;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_vastus_intermediusNode1 = {
+    sRel = .v_Femur_mus_vastus_intermediusNode1;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_caudofemoralisNode3 = {
+    sRel = .v_Femur_mus_caudofemoralisNode3;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_caudofemoralisNode4 = {
+    sRel = .v_Femur_mus_caudofemoralisNode4;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_caudofemoralisNode5 = {
+    sRel = .v_Femur_mus_caudofemoralisNode5;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_caudofemoralisNode6 = {
+    sRel = .v_Femur_mus_caudofemoralisNode6;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_biceps_femoris_1Node2 = {
+    sRel = .v_Femur_mus_biceps_femoris_1Node2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_biceps_femoris_1Node3 = {
+    sRel = .v_Femur_mus_biceps_femoris_1Node3;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_biceps_femoris_1Node4 = {
+    sRel = .v_Femur_mus_biceps_femoris_1Node4;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_popliteus_12Node3 = {
+    sRel = .v_Femur_mus_popliteus_12Node3;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_biceps_femoris_3Node2 = {
+    sRel = .v_Femur_mus_biceps_femoris_3Node2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_adductor_brevis_1Node2 = {
+    sRel = .v_Femur_mus_adductor_brevis_1Node2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_adductor_brevis_1Node3 = {
+    sRel = .v_Femur_mus_adductor_brevis_1Node3;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_adductor_brevis_1Node4 = {
+    sRel = .v_Femur_mus_adductor_brevis_1Node4;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_adductor_brevis_2Node2 = {
+    sRel = .v_Femur_mus_adductor_brevis_2Node2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_adductor_brevis_2Node3 = {
+    sRel = .v_Femur_mus_adductor_brevis_2Node3;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_adductor_brevis_2Node4 = {
+    sRel = .v_Femur_mus_adductor_brevis_2Node4;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_adductor_brevis_3Node2 = {
+    sRel = .v_Femur_mus_adductor_brevis_3Node2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_adductor_brevis_3Node3 = {
+    sRel = .v_Femur_mus_adductor_brevis_3Node3;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_adductor_brevis_4Node2 = {
+    sRel = .v_Femur_mus_adductor_brevis_4Node2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_adductor_brevis_4Node3 = {
+    sRel = .v_Femur_mus_adductor_brevis_4Node3;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_adductor_brevis_4Node4 = {
+    sRel = .v_Femur_mus_adductor_brevis_4Node4;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_adductor_longus_1Node2 = {
+    sRel = .v_Femur_mus_adductor_longus_1Node2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_adductor_longus_1Node3 = {
+    sRel = .v_Femur_mus_adductor_longus_1Node3;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_adductor_longus_2Node2 = {
+    sRel = .v_Femur_mus_adductor_longus_2Node2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_adductor_longus_2Node3 = {
+    sRel = .v_Femur_mus_adductor_longus_2Node3;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_adductor_longus_3Node2 = {
+    sRel = .v_Femur_mus_adductor_longus_3Node2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_adductor_longus_3Node3 = {
+    sRel = .v_Femur_mus_adductor_longus_3Node3;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_adductor_magnusNode2 = {
+    sRel = .v_Femur_mus_adductor_magnusNode2;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_adductor_magnusNode3 = {
+    sRel = .v_Femur_mus_adductor_magnusNode3;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_adductor_magnusNode4 = {
+    sRel = .v_Femur_mus_adductor_magnusNode4;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Femur_mus_adductor_magnusNode5 = {
+    sRel = .v_Femur_mus_adductor_magnusNode5;
+    #include "NodeLoc.any"
+  };
+  AnyRefNode Cut_Node           = {
+    sRel = .v_Cut_Node;
+    #include "NodeLoc.any"
+    AnyRefNode surfnode = {
+      ARel = RotMat(pi/2, y);
+      AnySurfCylinder cuttingplane = 
+      {
+        Radius = 0.01;
+        Length = 0.00001;
+        CapRatio = 0.001;
+        AnyDrawParamSurf drw = 
+        {
+        };
+        
+      };
+    };
+    
+    
+  };
+  
+  AnyRefNode COM 			  = {
+    sRel = .sCoM  ; 
+    #include "NodeLoc.any"
+  };
+};  // AnySeg Femur_p
+
+
+
