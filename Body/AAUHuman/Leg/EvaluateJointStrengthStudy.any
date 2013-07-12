@@ -1,0 +1,82 @@
+
+AnyFolder Model = {
+  // Model parts included in the moment arm study
+  AnyFolder &PelvisRef = ....BodyModelRef.Trunk.SegmentsLumbar.PelvisSeg; //This is a reference to the folder which holds the human part of the model
+  AnyFolder &LegSegSideRef = .SideBodyModelRef.Leg.Seg; //This is a reference to the folder which holds the human part of the model
+  AnyFolder &LegJntsRef =  .SideBodyModelRef.Leg.Jnt;
+  AnyFolder &MusRef = .SideBodyModelRef.Leg.EvaluateJointStrengthMusRef ;
+  
+ AnyFixedRefFrame ground = {
+   AnyRefNode node = { 
+      ARel=..PelvisRef.Axes0;
+     sRel=..PelvisRef.r0;
+   };
+ };
+ 
+
+AnyFolder Drivers = {
+   AnyVar AngularVelocity = (..RangeOfMotion[1]-..RangeOfMotion[0])*pi/180;
+ 
+ AnyKinMeasureOrg LegMeasure = {
+  AnyKinMeasure &HipFlexion= ...SideBodyInterfaceRef.HipFlexion;
+  AnyKinMeasure &HipAbduction= ...SideBodyInterfaceRef.HipAbduction;
+  AnyKinMeasure &HipExternalRotation= ...SideBodyInterfaceRef.HipExternalRotation;
+  AnyKinMeasure &KneeFlexion= ...SideBodyInterfaceRef.KneeFlexion;
+  AnyKinMeasure &AnklePlantarFlexion= ...SideBodyInterfaceRef.AnklePlantarFlexion;
+  AnyKinMeasure &AnkleEversion= ...SideBodyInterfaceRef.AnkleEversion;  
+ };
+   
+ AnyStdJoint PelvisGround={
+    AnyRefFrame &Ground = ..ground.node;
+    AnyRefFrame &Sacrum= ..PelvisRef; 
+ };
+    
+};// Drivers
+  AnyForce JointLoad = {
+      AnyKinMeasure &ref = .Drivers.LegMeasure;
+      AnyInt Sign = -round(.Drivers.AngularVelocity/abs(.Drivers.AngularVelocity));
+      F = 50*Sign*not(not(.Drivers.LegDriver.DriverVel));
+  };
+
+};
+ 
+ 
+AnyBodyStudy Study = {
+  Gravity = {0,0,0};
+  tStart = 0;
+  tEnd = 1;
+  nStep = 40;
+  InitialConditions.SolverType = KinSolDeterminate;
+  Kinematics.SolverType = KinSolDeterminate;
+  Kinematics.PosAnalysisOnlyOnOff = On;
+  InitialConditions.PosAnalysisOnlyOnOff = On;
+
+  InverseDynamics.Criterion.Type = MR_MinMaxStrict;
+
+  
+  AnyFolder &Model = .Model;
+  
+  AnyFolder JointStrength = {
+     AnyFolder Abcissa  ={
+        AnyVar JointAngle = not(not(..Model.Drivers.LegDriver.DriverVel))*..Model.Drivers.LegMeasure.Pos'*180/pi;     
+     };
+     AnyVar JointStrength = max(abs(.Model.JointLoad.F))/(.MaxMuscleActivity+0.00000001);
+     
+     //AnyVar PsoasMajorT12I = -1*.Model.SpineMusRef.PsoasMajor.PMT12I_TM.LmtDot/.Model.Drivers.AngularVelocity;
+  };
+
+};
+
+AnyOperationMacro MacroCmd = 
+{
+
+  MacroStr = {"operation " + CompleteNameOf(&.Study.InverseDynamics),
+    "run"
+#ifdef OUTPUT_SAVE_PATH
+    ,
+    "classoperation " + CompleteNameOf(&.Study.Output) + strquote("Save data") 
+     + " --type=" + strquote("Deep") +" --file=" + strquote(
+     OUTPUT_SAVE_PATH + .OutputFileName + ".anydata.h5")
+#endif
+   };
+ };
