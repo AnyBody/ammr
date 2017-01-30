@@ -142,14 +142,32 @@ Wrist joint: created as two revolute joints where the axis of rotations are not 
 */
 AnyFolder ARM ={};
 
+// TODO: REMOVE FROM HERE, INITIALIZE THROUGH BuildTools
+#ifndef BM_ARM_DATASET
+  // default dataset
+  #define BM_ARM_DATASET "ArmData1.1"
+#endif
+
+#ifndef BM_ARM_DATASET_PATH
+  #path BM_ARM_DATASET_PATH "../ARM/"+BM_ARM_DATASET
+#endif
+
+
+AnyFolder ModelParameters = {
+  #include "<BM_ARM_DATASET_PATH>/ArmModelParameters.any"
+};
+
+AnyFolder STL = {
+  #include "<BM_ARM_DATASET_PATH>/STL/STL.any"    
+};
 
 
 #include "AddOnOutsideBlockForKinematics.any"
 AnyFolder MusPar = {};
 AnyFolder Mus = {};
 
-#if ((RIGHT_DETAILLED_HAND*RIGHT_ARM) + (LEFT_DETAILLED_HAND*LEFT_ARM)) == 0
-  AnyRefNode &GloveInsertationNode=Seg.Hand.PalmJoint;
+  #if (!(RIGHT_DETAILLED_HAND & RIGHT_ARM)) & (!(LEFT_DETAILLED_HAND & LEFT_ARM))
+  AnyRefNode &GloveInsertationNode=Seg.Hand.HandRef.PalmJoint;
   #include "Glove.any"
   
   #if ARM_SIMPLE_MUSCLE_LOCAL == 1 | ARM_MUS_3E_LOCAL == 1
@@ -161,8 +179,8 @@ AnyFolder Mus = {};
 ///Folder with segment for the arm
 AnyFolder Seg={
   #include "Seg.any"
-  
-  #if ((RIGHT_DETAILLED_HAND*RIGHT_ARM) + (LEFT_DETAILLED_HAND*LEFT_ARM)) == 0
+  #if (!(RIGHT_DETAILLED_HAND & RIGHT_ARM)) & (!(LEFT_DETAILLED_HAND & LEFT_ARM))
+
   #include "HandSeg.any"
   Hand={
     AnyRefFrame &CarpalsRef = Ref;
@@ -177,6 +195,11 @@ AnyFolder Seg={
   #else
   
   AnyFolder Hand = {
+    // temporarily needed references for detailed hand
+    AnyFolder &GScaling = ..Scaling;
+    AnyFolder &MassScaling = ..MassScaling;
+    AnyFolder &StrengthScaling = ..StrengthScaling;
+    
     #include "../Hand/HandSeg.any"
     AnyRefFrame &CarpalsRef = Carpals.CarpalsRef;
     AnyRefFrame &HandRef = Carpals;
@@ -198,11 +221,7 @@ AnyFolder Seg={
 
 ///Joints for the arm
 AnyFolder Jnt ={
-  #if ((RIGHT_SHOULDER_RHYTHM*RIGHT_ARM) + (LEFT_SHOULDER_RHYTHM*LEFT_ARM)) == 0
-    #include "Jnt.any"
-    #else
-    #include "JntSR.any"
-  #endif
+  #include "Jnt.any"
   
   #if ARM_SIMPLE_MUSCLE_LOCAL == 0 & ARM_MUS_3E_LOCAL == 0
     #include "GHReactionsNoMuscles.any"  //This is needed when there is no muscles in the model
@@ -261,20 +280,16 @@ AnyFolder MassSummation={
 
 InterfaceFolder={
    #include "Interface.any"
-   #if ((RIGHT_DETAILLED_HAND*RIGHT_ARM) + (LEFT_DETAILLED_HAND*LEFT_ARM)) == 0
+   #if (!(RIGHT_DETAILLED_HAND & RIGHT_ARM)) & (!(LEFT_DETAILLED_HAND & LEFT_ARM))
    #else
    #include "../Hand/Interface.any"
    #endif
 };
 
 #ifdef DONT_USE_INITIAL_POSITION_FROM_MANNEQUIN
+  //
 #else
-#include "InitialPositions.any"
-  #if ((RIGHT_DETAILLED_HAND*RIGHT_ARM) + (LEFT_DETAILLED_HAND*LEFT_ARM)) == 0
-  #include "InitialPositionsHand.any"
-  #else
-  #include "../Hand/InitialPositionsHand.any"
-  #endif
+  #include "InitialPositions.any"
 #endif
 
 MannequinValuesFolder ={

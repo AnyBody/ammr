@@ -1,0 +1,429 @@
+#define Macro_DrawRedBall(_TARGETNODENAME_, _DRAWOBJECTNAME_) _TARGETNODENAME_ = { AnyDrawNode _DRAWOBJECTNAME_ = { RGB = {1, 0, 0}; Opacity = 0.5; ScaleXYZ = 0.015*{1, 1, 1}; }; };
+#define Macro_DrawGreenBall(_TARGETNODENAME_, _DRAWOBJECTNAME_) _TARGETNODENAME_ = { AnyDrawNode _DRAWOBJECTNAME_ = { RGB = {0, 1, 0}; Opacity = 0.5; ScaleXYZ = 0.015*{1, 1, 1}; }; };
+#define Macro_DrawBlueBall(_TARGETNODENAME_, _DRAWOBJECTNAME_) _TARGETNODENAME_ = { AnyDrawNode _DRAWOBJECTNAME_ = { RGB = {0, 0, 1}; Opacity = 0.5; ScaleXYZ = 0.015*{1, 1, 1}; }; };
+
+
+#class_template ClassDefineHumanEnvironmentConnection(
+UserInputConnectionType, 
+UserInputHumanSegType, AnyFolder& UserInputRefHumanSeg, UserInputHumanSegSingleConnectiontNodeName, 
+AnyRefFrame& UserInputTargetName, UserInputTargetNormalDir, 
+UserInputApplyingForceOnOff, UserInputApplyingForceNodeName, UserInputUseGlobalApplyingForceOnOff, 
+UserInputCalcReacOnOff, UserInputCalcReacNodesNumber)
+{  
+  #var AnyVec3 UserInputConnectNodeInHumanSeg_Offset_sRel = {0, 0, 0};
+  #var AnyMat33 UserInputConnectNodeInHumanSeg_Offset_ARel = {{1,0,0},{0,1,0},{0,0,1}};
+  
+  #var AnyVec3 sRel_ConnectNodeInHumanSeg = UserInputRefHumanSeg.UserInputHumanSegSingleConnectiontNodeName.sRel + UserInputConnectNodeInHumanSeg_Offset_sRel ;
+  #var AnyMat33 ARel_ConnectNodeInHumanSeg = UserInputRefHumanSeg.UserInputHumanSegSingleConnectiontNodeName.ARel * UserInputConnectNodeInHumanSeg_Offset_ARel ;
+  
+  #if UserInputApplyingForceOnOff == 1
+    #var AnyVec3 sRel_ApplyingForceNodeInHumanSeg =  UserInputRefHumanSeg.UserInputApplyingForceNodeName.sRel ;
+    #var AnyMat33 ARel_ApplyingForceNodeInHumanSeg = UserInputRefHumanSeg.UserInputApplyingForceNodeName.ARel ; 
+  #endif
+  
+  AnyFolder &DrawRef=Main.DrawSettings;
+  
+  #var AnyVec3 UserInputApplyingForce = {0, 0, 0};
+  #var AnyVec3 UserInputApplyingMoment = {0, 0, 0};
+  
+  #var AnyVar UserInputReacVolumeHeightLimitLow = -0.05 ;
+  #var AnyVar UserInputReacVolumeHeightLimitHigh = 0.05 ;
+  #var AnyVar UserInputReacVolumeRadiusLimit = 0.1 ;
+  #var AnyVar UserInputReacForceFrictionCoeff = 0.5;  
+  #var AnyVar UserInputReacForceMaxStrength = 3000;
+  #var AnyVar UserInputReacForceVisualScaleFactor = 1;  
+  
+  //-->Definitions of the single connection node(which position can be adjustable) and the applying force node inside the human segment
+  UserInputRefHumanSeg = 
+  {
+    #if UserInputConnectionType != "None"
+     AnyRefNode ITF_ConnectNode =
+     {
+       sRel = ..sRel_ConnectNodeInHumanSeg ;
+       ARel = ..ARel_ConnectNodeInHumanSeg ;
+       AnyDrawRefFrame drw = 
+       {
+         ScaleXYZ = 0.05*{1, 1, 1};
+         RGB = {0, 1, 0};
+       };
+     };
+    #endif
+    #if UserInputApplyingForceOnOff == 1
+     AnyRefNode ITF_ApplyingForceNode =
+     {
+       sRel = ..sRel_ApplyingForceNodeInHumanSeg ;
+       ARel = ..ARel_ApplyingForceNodeInHumanSeg ;
+     };
+     Macro_DrawRedBall(ITF_ApplyingForceNode, DrwRedBall)
+    #endif
+  };
+  //<--
+  
+  //-->Definitions of the human segment connection nodes(predefined anatomical nodes) according to different connection types and human segment types
+  //-->Hand
+  #if UserInputHumanSegType == "Hand"
+   #if UserInputConnectionType == "BallJoint"
+     AnyRefFrame& HumanSegConnectNode1 = UserInputRefHumanSeg.ITF_ConnectNode;
+   #endif
+   #if UserInputConnectionType == "RevoluteJoint"
+     AnyRefFrame& HumanSegConnectNode1 = UserInputRefHumanSeg.ITF_ConnectNode;
+   #endif
+   #if UserInputConnectionType == "FixJoint"
+     AnyRefFrame& HumanSegConnectNode1 = UserInputRefHumanSeg.ITF_ConnectNode;
+   #endif   
+   #if UserInputConnectionType == "2PointsOnLine"
+     AnyRefFrame& HumanSegConnectNode1 = UserInputRefHumanSeg.PalmLateralContactNode;
+     AnyRefFrame& HumanSegConnectNode2 = UserInputRefHumanSeg.PalmMedialContactNode;   
+   #endif   
+   #if UserInputConnectionType == "3PointsOnPlane"
+     AnyRefFrame& HumanSegConnectNode1 = UserInputRefHumanSeg.PalmLateralContactNode;
+     AnyRefFrame& HumanSegConnectNode2 = UserInputRefHumanSeg.PalmMedialContactNode;
+     AnyRefFrame& HumanSegConnectNode3 = UserInputRefHumanSeg.WristContactNode;
+   #endif
+  #endif
+  //<--Hand
+  //-->Foot
+  #if UserInputHumanSegType == "Foot"
+   #if UserInputConnectionType == "BallJoint"
+     //AnyRefFrame& HumanSegConnectNode1 = UserInputRefHumanSeg.ITF_ConnectNode;
+   #endif
+   #if UserInputConnectionType == "RevoluteJoint"
+     //AnyRefFrame& HumanSegConnectNode1 = UserInputRefHumanSeg.ITF_ConnectNode;
+   #endif
+   #if UserInputConnectionType == "FixJoint"
+     //AnyRefFrame& HumanSegConnectNode1 = UserInputRefHumanSeg.ITF_ConnectNode;
+   #endif   
+   #if UserInputConnectionType == "2PointsOnLine"
+     //AnyRefFrame& HumanSegConnectNode1 = UserInputRefHumanSeg.PalmLateralContactNode;
+     //AnyRefFrame& HumanSegConnectNode2 = UserInputRefHumanSeg.PalmMedialContactNode;   
+   #endif   
+   #if UserInputConnectionType == "3PointsOnPlane"
+     //AnyRefFrame& HumanSegConnectNode1 = UserInputRefHumanSeg.PalmLateralContactNode;
+     //AnyRefFrame& HumanSegConnectNode2 = UserInputRefHumanSeg.PalmMedialContactNode;
+     //AnyRefFrame& HumanSegConnectNode3 = UserInputRefHumanSeg.WristContactNode;
+   #endif
+  #endif
+  //<--Foot
+  //-->Pelvis
+  #if UserInputHumanSegType == "Pelvis"
+  
+  #endif
+  //<--Pelvis
+  //<--
+  
+  //-->Definitions of the human segment contact nodes accroding to different human segment types  
+  #if UserInputCalcReacOnOff == 1
+   //-->Hand
+   #if UserInputHumanSegType == "Hand"
+    #if UserInputCalcReacNodesNumber == 1
+      AnyRefFrame& HumanSegContactNode1 = UserInputRefHumanSeg.ITF_ConnectNode;
+    #endif
+    #if UserInputCalcReacNodesNumber == 2
+      AnyRefFrame& HumanSegContactNode1 = UserInputRefHumanSeg.PalmLateralContactNode;
+      AnyRefFrame& HumanSegContactNode2 = UserInputRefHumanSeg.PalmMedialContactNode;
+    #endif   
+    #if UserInputCalcReacNodesNumber == 3
+      AnyRefFrame& HumanSegContactNode1 = UserInputRefHumanSeg.PalmLateralContactNode;
+      AnyRefFrame& HumanSegContactNode2 = UserInputRefHumanSeg.PalmMedialContactNode;
+      AnyRefFrame& HumanSegContactNode3 = UserInputRefHumanSeg.WristContactNode;
+    #endif
+   #endif  
+   //<--Hand
+   //-->Foot
+   #if UserInputHumanSegType == "Foot"
+    #if UserInputCalcReacNodesNumber == 1
+      //AnyRefFrame& HumanSegContactNode1 = UserInputRefHumanSeg.ITF_ConnectNode;
+    #endif
+    #if UserInputCalcReacNodesNumber == 2
+      //AnyRefFrame& HumanSegContactNode1 = UserInputRefHumanSeg.PalmLateralContactNode;
+      //AnyRefFrame& HumanSegContactNode2 = UserInputRefHumanSeg.PalmMedialContactNode;
+    #endif   
+    #if UserInputCalcReacNodesNumber == 3
+      //AnyRefFrame& HumanSegContactNode1 = UserInputRefHumanSeg.PalmLateralContactNode;
+      //AnyRefFrame& HumanSegContactNode2 = UserInputRefHumanSeg.PalmMedialContactNode;
+      //AnyRefFrame& HumanSegContactNode3 = UserInputRefHumanSeg.WristContactNode;
+    #endif   
+   #endif
+   //<--Foot
+  #endif
+  //<--
+  
+  //-->Definitions of the conditional contact nodes according to the number of the contact nodes defined by users
+  #if UserInputCalcReacOnOff == 1
+   #if UserInputCalcReacNodesNumber >= 1   
+    ConditionalContactClass Contact1(BaseObject = .UserInputTargetName, TargetObject = .HumanSegContactNode1,
+    DisplayTriggerVolume = 1, DisplayTargetNode = 0) = 
+    {
+      UserDefinedLimitLow = .UserInputReacVolumeHeightLimitLow ;
+      UserDefinedLimitHigh = .UserInputReacVolumeHeightLimitHigh ;
+      UserDefinedRadiusLimit = .UserInputReacVolumeRadiusLimit ;
+      Strength = .UserInputReacForceMaxStrength ;
+      StaticFrictionCoefficient = .UserInputReacForceFrictionCoeff ;
+      ScaleFactor = .UserInputReacForceVisualScaleFactor ;
+      #if UserInputTargetNormalDir == "X"
+        NormalDirection = 0;
+        FrictionDirection1 = 1;
+        FrictionDirection2 = 2;
+      #endif
+      #if UserInputTargetNormalDir == "Y"
+        NormalDirection = 1;
+        FrictionDirection1 = 2;
+        FrictionDirection2 = 0;
+      #endif    
+      #if UserInputTargetNormalDir == "Z"
+        NormalDirection = 2;
+        FrictionDirection1 = 0;
+        FrictionDirection2 = 1;
+      #endif    
+    };
+    Macro_DrawBlueBall(HumanSegContactNode1, DrwBlueBall)
+   #endif
+   #if UserInputCalcReacNodesNumber >= 2
+    ConditionalContactClass Contact2(BaseObject = .UserInputTargetName, TargetObject = .HumanSegContactNode2,
+    DisplayTriggerVolume = 0, DisplayTargetNode = 0) = 
+    {
+      UserDefinedLimitLow = .UserInputReacVolumeHeightLimitLow ;
+      UserDefinedLimitHigh = .UserInputReacVolumeHeightLimitHigh ;
+      UserDefinedRadiusLimit = .UserInputReacVolumeRadiusLimit ;
+      Strength = .UserInputReacForceMaxStrength ;
+      StaticFrictionCoefficient = .UserInputReacForceFrictionCoeff ;
+      ScaleFactor = .UserInputReacForceVisualScaleFactor ;
+      #if UserInputTargetNormalDir == "X"
+        NormalDirection = 0;
+        FrictionDirection1 = 1;
+        FrictionDirection2 = 2;
+      #endif
+      #if UserInputTargetNormalDir == "Y"
+        NormalDirection = 1;
+        FrictionDirection1 = 2;
+        FrictionDirection2 = 0;
+      #endif    
+      #if UserInputTargetNormalDir == "Z"
+        NormalDirection = 2;
+        FrictionDirection1 = 0;
+        FrictionDirection2 = 1;
+      #endif    
+    };
+    Macro_DrawBlueBall(HumanSegContactNode2, DrwBlueBall)
+   #endif
+   #if UserInputCalcReacNodesNumber >= 3
+    ConditionalContactClass Contact3(BaseObject = .UserInputTargetName, TargetObject = .HumanSegContactNode3,
+    DisplayTriggerVolume = 0, DisplayTargetNode = 0) = 
+    {
+      UserDefinedLimitLow = .UserInputReacVolumeHeightLimitLow ;
+      UserDefinedLimitHigh = .UserInputReacVolumeHeightLimitHigh ;
+      UserDefinedRadiusLimit = .UserInputReacVolumeRadiusLimit ;
+      Strength = .UserInputReacForceMaxStrength ;
+      StaticFrictionCoefficient = .UserInputReacForceFrictionCoeff ;
+      ScaleFactor = .UserInputReacForceVisualScaleFactor ;
+      #if UserInputTargetNormalDir == "X"
+        NormalDirection = 0;
+        FrictionDirection1 = 1;
+        FrictionDirection2 = 2;
+      #endif
+      #if UserInputTargetNormalDir == "Y"
+        NormalDirection = 1;
+        FrictionDirection1 = 2;
+        FrictionDirection2 = 0;
+      #endif    
+      #if UserInputTargetNormalDir == "Z"
+        NormalDirection = 2;
+        FrictionDirection1 = 0;
+        FrictionDirection2 = 1;
+      #endif    
+    };
+    Macro_DrawBlueBall(HumanSegContactNode3, DrwBlueBall)
+   #endif
+  #endif
+  //<--
+  
+  //-->Definition of the external applied force on the force node defined in the human segment
+  #if UserInputApplyingForceOnOff == 1
+   AnyForce3D AppliedForce = 
+   {
+     AnyRefFrame& ref = .UserInputRefHumanSeg.ITF_ApplyingForceNode;
+     #if UserInputUseGlobalApplyingForceOnOff == 1
+       F = .UserInputApplyingForce ;
+     #else
+       Flocal = .ApplyingForce;
+     #endif
+     
+     AnyDrawForce drw = 
+     {
+       ShowTotalForces = On;
+       //ShowComponentForces = On;
+       ForceScale = ..DrawRef.DrawSettingsSupport.Lin.ScaleFactor;
+       AppliedForceColor = {1, 0, 0};
+       ScaleToView = Off;
+     };
+   };
+   AnyMoment3D AppliedMoment = 
+   {
+     AnyRefFrame& ref = .UserInputRefHumanSeg.ITF_ApplyingForceNode;
+     #if UserInputUseGlobalApplyingForceOnOff == 1      
+       M = .UserInputApplyingMoment ;
+     #else
+       Mlocal = .UserInputApplyingMoment ;
+     #endif
+   };    
+  #endif
+  //<--
+  
+  //-->Definition of the kinematic constrains according the different kinemtic interface types defined by users
+  #if UserInputConnectionType == "BallJoint"
+   AnyKinEq KinEqs = 
+   {
+     AnyKinLinear lin = 
+     {
+       AnyRefFrame& ref0 = ..UserInputTargetName ;
+       AnyRefFrame& ref1 = ..HumanSegConnectNode1;
+       Ref = 0;
+       Macro_DrawGreenBall(ref1, DrwGreenBall)
+     };    
+     Reaction.Type = {Off, Off, Off};
+   };  
+  #endif
+  
+  #if UserInputConnectionType == "RevoluteJoint"
+   AnyRevoluteJoint KinEqs = 
+   {
+     AnyRefFrame& ref0 = .UserInputTargetName ;
+     AnyRefFrame& ref1 = .HumanSegConnectNode1;
+     #if UserInputTargetNormalDir == "X"
+       Axis = x;
+     #endif
+     #if UserInputTargetNormalDir == "Y"
+       Axis = y;
+     #endif  
+     #if UserInputTargetNormalDir == "Z"
+       Axis = z;
+     #endif
+     Constraints.Reaction.Type = {Off, Off, Off, Off, Off};
+     Macro_DrawGreenBall(ref1, DrwGreenBall)
+   };
+  #endif
+  
+  #if UserInputConnectionType == "FixJoint"
+   AnyStdJoint KinEqs = 
+   {
+     AnyRefFrame& ref0 = .UserInputTargetName ;
+     AnyRefFrame& ref1 = .HumanSegConnectNode1;
+     #if UserInputCalcReacOnOff == 1
+       Constraints.Reaction.Type = {On, On, On, On, On, On};
+     #else
+       Constraints.Reaction.Type = {Off, Off, Off, Off, Off, Off};
+     #endif
+     Macro_DrawGreenBall(ref1, DrwGreenBall)
+   };
+  #endif  
+  
+  #if UserInputConnectionType == "2PointsOnLine"
+   AnyKinEq KinEqs = 
+   {
+     AnyKinLinear lin1 = 
+     {
+       AnyRefFrame& ref0 = ..UserInputTargetName ;
+       AnyRefFrame& ref1 = ..HumanSegConnectNode1 ;
+       Ref = 0;
+       Macro_DrawGreenBall(ref1, DrwGreenBall)
+     };
+     AnyKinLinear lin2 = 
+     {
+       AnyRefFrame& ref0 = ..UserInputTargetName ;
+       AnyRefFrame& ref1 = ..HumanSegConnectNode2 ;
+       Ref = 0;
+       Macro_DrawGreenBall(ref1, DrwGreenBall)
+     };
+     #if UserInputTargetNormalDir == "X"
+       MeasureOrganizer = {0, 3};
+     #endif
+     #if UserInputTargetNormalDir == "Y"
+       MeasureOrganizer = {1, 4};
+     #endif  
+     #if UserInputTargetNormalDir == "Z"
+       MeasureOrganizer = {2, 5};
+     #endif    
+     Reaction.Type = {Off, Off};
+   };
+  #endif    
+  
+  #if UserInputConnectionType == "3PointsOnPlane"
+   AnyKinEq KinEqs = 
+   {
+     AnyKinLinear lin1 = 
+     {
+       AnyRefFrame& ref0 = ..UserInputTargetName ;
+       AnyRefFrame& ref1 = ..HumanSegConnectNode1 ;
+       Ref = 0;
+       Macro_DrawGreenBall(ref1, DrwGreenBall)       
+     };
+     AnyKinLinear lin2 = 
+     {
+       AnyRefFrame& ref0 = ..UserInputTargetName ;
+       AnyRefFrame& ref1 = ..HumanSegConnectNode2 ;
+       Ref = 0;
+       Macro_DrawGreenBall(ref1, DrwGreenBall)       
+     };
+     AnyKinLinear lin3 = 
+     {
+       AnyRefFrame& ref0 = ..UserInputTargetName ;
+       AnyRefFrame& ref1 = ..HumanSegConnectNode3 ;
+       Ref = 0;
+       Macro_DrawGreenBall(ref1, DrwGreenBall)       
+     };
+     #if UserInputTargetNormalDir == "X"
+       MeasureOrganizer = {0, 3, 6};
+     #endif
+     #if UserInputTargetNormalDir == "Y"
+       MeasureOrganizer = {1, 4, 7};
+     #endif  
+     #if UserInputTargetNormalDir == "Z"
+       MeasureOrganizer = {2, 5, 8};
+     #endif    
+     Reaction.Type = {Off, Off, Off};
+   };
+  #endif
+  //<--
+  
+  
+  //  //-->Summary for input variables
+  //  #if UserInputCalcReacOnOff == 1
+  //    AnyMessage Reac_Friction_Coeff = 
+  //    {
+  //      TriggerConst = On ;
+  //      Type = MSG_Message ;
+  //      Message = strformat("Friction coefficient for reaction force = ") + strval(.UserInputReacForceFrictionCoeff, "%10.3E");
+  //    };
+  //  #endif
+  //  #if UserInputApplyingForceOnOff == 1
+  //    AnyMessage Applying_Force_Vector = 
+  //    {
+  //      TriggerConst = On ;
+  //      Type = MSG_Message ;
+  //      Message = strformat("Applying force vector = (") 
+  //              + strval(.ApplyingForce[0], "%10.3E") 
+  //              + strformat(", ")
+  //              + strval(.ApplyingForce[1], "%10.3E")
+  //              + strformat(", ")
+  //              + strval(.ApplyingForce[2], "%10.3E")
+  //              + strformat(") ");
+  //              
+  //    };
+  //    AnyMessage Applying_Moment_Vector = 
+  //    {
+  //      TriggerConst = On ;
+  //      Type = MSG_Message ;
+  //      Message = strformat("Applying moment vector = (") 
+  //              + strval(.ApplyingMoment[0], "%10.3E") 
+  //              + strformat(", ")
+  //              + strval(.ApplyingMoment[1], "%10.3E")
+  //              + strformat(", ")
+  //              + strval(.ApplyingMoment[2], "%10.3E")
+  //              + strformat(") ");
+  //              
+  //    };     
+  //  #endif
+  //  //<--Summary for input variables
+  
+};
+

@@ -43,35 +43,106 @@ This root file contains the following include files:
 AnyFolder &PsoasMajorRightRef=PsoasMajorRightReference;
 AnyFolder &PsoasMajorLeftRef=PsoasMajorLeftReference;
 
-#if TRUNK_SIMPLE_MUSCLES == 0
-  #define TRUNK_NO_MUSCLES
+#ifndef BM_TRUNK_DATASET
+  // default dataset
+  #define BM_TRUNK_DATASET "TrunkData1.1"
 #endif
 
+#ifndef BM_TRUNK_DATASET_PATH
+  #path BM_TRUNK_DATASET_PATH "../Trunk/"+BM_TRUNK_DATASET
+#endif
+
+AnyFolder ModelParameters = {
+  #include "<BM_TRUNK_DATASET_PATH>/ModelParameters.any"
+};
+AnyFolder STL = {
+  #include "<BM_TRUNK_DATASET_PATH>/STL/STL.any"
+};
+
+//AnyFolder DumpingData = {
+//  AnyFolder Lumbar = {
+//    #include "<BM_TRUNK_DATASET_PATH>/DumpLumbarNodes.any"
+//  };
+//  AnyFolder Thorax = {
+//    #include "<BM_TRUNK_DATASET_PATH>/DumpThoracicNodes.any"
+//  };
+//  AnyFolder CervicalSpine = {
+//    #include "<BM_TRUNK_DATASET_PATH>/DumpCervicalSpineNodes.any"
+//  };
+//};
+
+// Including all spinal segments
 #include "SegmentsLumbar.any"
 #include "SegmentsThorax.any"
+#include "SegmentsCervicalSpine.any"
+
+AnyFolder JointMuscles = {};
+
+
+#if BM_TRUNK_CERVICAL_MUSCLES == CONST_MUSCLES_NONE
+  #include "JointMusclesCervical.any" //Adds muscles to the joints in the cervical spine
+#endif
+
+#if BM_TRUNK_THORACIC_MUSCLES == CONST_MUSCLES_NONE
+  //#include "JointMusclesThoracic.any" //Adds muscles to the joints in the cervical spine  // PLACEHOLDER
+#endif
+
+#if BM_TRUNK_LUMBAR_MUSCLES == CONST_MUSCLES_NONE
+  // if no muscles are defined at all - we will use the leg muscles for PsoasMajor
+  #define TRUNK_NO_MUSCLES
+  #include "JointMusclesLumbar.any"     //Adds muscles to the joints in the lumbar spine
+#endif
+
+
 #include "JointsLumbar.any"
+#include "JointsCervical.any"
+//#include "JointsThoracic.any"  // PLACEHOLDER for the thorax integration
+
 #include "ContactPoints.any"
 //#include "NodeForScalingExt.any"
 
-#if TRUNK_SIMPLE_MUSCLES == 1
-  #include "LumbarLigamentNodes.any"
-  #include "LigamentsLumbar.any"
+// switch cervical muscles on if flags provided
+#if BM_TRUNK_CERVICAL_MUSCLES != CONST_MUSCLES_NONE
+  #include "MusclesCervicalSpineRight.any"
+  #include "MusclesCervicalSpineLeft.any"
+  #include "MuscleParametersCervicalSpineSimpleRight.any"
+  #include "MuscleParametersCervicalSpineSimpleLeft.any"
+#endif
+
+
+// switch thoracic muscles on if flags provided
+#if BM_TRUNK_THORACIC_MUSCLES != CONST_MUSCLES_NONE
+ // PLACEHOLDER FOR THE THORAX
+#endif
+
+// switch lumbar muscles on if flags provided (NEEDS A REVISIT WHEN THORAX IS ADDED)
+#if BM_TRUNK_LUMBAR_MUSCLES != CONST_MUSCLES_NONE
   #include "NodesForThoracicMuscles.any"
-  
   #include "Buckle.any"
-  
   #include "MusclesSpineRight.any"
   #include "MusclesSpineLeft.any"
   #include "RectusAbdominis.any"
   #include "Spinalis.any"
-  
+
   #include "Transversus.any"
   
   #include "MuscleParametersSpineSimpleRight.any"
-  #include "MuscleParametersSpineSimpleLeft.any" 
-#else
-  #include "JointMuscles.any"
+  #include "MuscleParametersSpineSimpleLeft.any"     
 #endif
+
+#if BM_TRUNK_LUMBAR_LIGAMENTS == ON
+   #include "LumbarLigamentNodes.any"
+   #include "LigamentsLumbar.any"
+#endif
+
+#if BM_TRUNK_THORACIC_LIGAMENTS == ON
+   // PLACEHOLDER FOR THE THORACIC SPINE LIGAMENTS
+#endif
+
+#if BM_TRUNK_CERVICAL_LIGAMENTS == ON
+   // PLACEHOLDER FOR THE CERVICAL SPINE LIGAMENTS
+#endif
+
 
 
 
@@ -90,8 +161,15 @@ AnyFolder MassSummation=
               .SegmentsLumbar.L4Seg.Mass+
               .SegmentsLumbar.L5Seg.Mass+
               .SegmentsLumbar.SacrumSeg.Mass+
-              .SegmentsLumbar.PelvisSeg.Mass
-              #if TRUNK_SIMPLE_MUSCLES == 1
+              .SegmentsLumbar.PelvisSeg.Mass+
+              .SegmentsCervicalSpine.C1Seg.Mass+
+              .SegmentsCervicalSpine.C2Seg.Mass+
+              .SegmentsCervicalSpine.C3Seg.Mass+
+              .SegmentsCervicalSpine.C4Seg.Mass+
+              .SegmentsCervicalSpine.C5Seg.Mass+
+              .SegmentsCervicalSpine.C6Seg.Mass+
+              .SegmentsCervicalSpine.C7Seg.Mass
+              #if BM_TRUNK_LUMBAR_MUSCLES != CONST_MUSCLES_NONE
               +
               .Buckle.Segments.BuckleSeg.Mass+
               .Buckle.Slider1.Seg.Mass+ 

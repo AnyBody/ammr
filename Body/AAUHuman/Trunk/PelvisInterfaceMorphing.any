@@ -1,0 +1,158 @@
+AnyFolder InterfaceMorphingDef =
+{
+#if !(RIGHT_LEG_TD | LEFT_LEG_TD)
+   AnyFunTransform3DIdentity IM_Leg_To_Trunk_Unscaled= {};
+   AnyFunTransform3DIdentity IM_Trunk_To_Leg_Unscaled= {};     
+#else
+   AnyMatrix points_RBF_TrunkPelvis_Unscaled = .Data.points_RBF_unscaled;
+   #if (RIGHT_LEG_TD | LEFT_LEG_TD)
+   AnyMatrix points_RBF_LegPelvis_Unscaled = ....LEG_MODEL_PARAM_DIRECTION.Leg.ModelParameters.Pelvis.points_RBF_unscaled;
+   #endif
+
+   #ifndef BM_LEG_TRUNK_INTERFACE
+    #define BM_LEG_TRUNK_INTERFACE CONST_MORPH_NONE
+   #endif
+
+   #if BM_LEG_TRUNK_INTERFACE == CONST_MORPH_NONE
+    AnyFunTransform3DIdentity IM_Trunk_To_Leg_Unscaled = {};
+
+    #if (RIGHT_LEG_TD | LEFT_LEG_TD)
+     AnyFunTransform3D IM_Leg_To_Trunk_Unscaled =
+     {
+
+       AnyFloat Trunk_Pelvis_AnatomicalFrame_s = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(..pUnscaled_Trunk_Pelvis, 1) ;
+       AnyFloat Trunk_Pelvis_AnatomicalFrame_A = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(..pUnscaled_Trunk_Pelvis, 1) ;
+       AnyFloat Leg_Pelvis_AnatomicalFrame_s = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(..pUnscaled_Leg_Pelvis, 1) ;
+       AnyFloat Leg_Pelvis_AnatomicalFrame_A = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(..pUnscaled_Leg_Pelvis, 1) ;
+
+       AnyFunTransform3DLin tr1 =
+       {
+         ScaleMat = (.Leg_Pelvis_AnatomicalFrame_A)' ;
+         Offset = -.Leg_Pelvis_AnatomicalFrame_s ;
+       };
+
+       AnyFunTransform3DLin tr2 =
+       {
+         ScaleMat = (.Trunk_Pelvis_AnatomicalFrame_A);
+         Offset = .Trunk_Pelvis_AnatomicalFrame_s * .Trunk_Pelvis_AnatomicalFrame_A ;
+       };
+
+       PreTransforms =
+       {
+         &tr1, &tr2
+       };
+
+     };
+    #else
+      AnyFunTransform3DIdentity IM_Leg_To_Trunk_Unscaled = {};
+    #endif
+   #endif
+
+   #if BM_LEG_TRUNK_INTERFACE == CONST_MORPH_TRUNK_TO_LEG
+    AnyFunTransform3DLin2 IM_Trunk_To_Leg_Affine =
+    {
+      Points0 = .points_RBF_TrunkPelvis_Unscaled;
+      Points1 = .points_RBF_LegPelvis_Unscaled;
+      Mode = VTK_LANDMARK_AFFINE ;
+    };
+
+    AnyFunTransform3DRBF IM_Trunk_To_Leg_RBF =
+    {
+      PreTransforms =
+      {
+        &.IM_Trunk_To_Leg_Affine
+      };
+      Points0 = .points_RBF_TrunkPelvis_Unscaled;
+      Points1 = .points_RBF_LegPelvis_Unscaled;
+
+      RBFDef.Type = RBF_MultiQuadratic;
+      RBFDef.Param = 0.4;
+
+      BoundingBox.ScaleXYZ = 5*{1, 1, 1};
+      BoundingBox.DivisionFactorXYZ = 2*{1, 1, 1};
+      BoundingBoxOnOff = On;
+      BoundingBox.Type = BB_Cartesian ;
+    };
+
+    AnyFunTransform3DLin2 IM_Leg_To_Trunk_Affine =
+    {
+      Points0 = .points_RBF_LegPelvis_Unscaled;
+      Points1 = .points_RBF_TrunkPelvis_Unscaled;
+      Mode = VTK_LANDMARK_RIGIDBODY;
+    };
+
+    AnyFunTransform3D IM_Trunk_To_Leg_Unscaled =
+    {
+      PreTransforms =
+      {
+        &.IM_Trunk_To_Leg_RBF ,
+        &.IM_Leg_To_Trunk_Affine
+      };
+    };
+
+    AnyFunTransform3DLin2 IM_Leg_To_Trunk_Unscaled =
+    {
+      Points0 = .points_RBF_LegPelvis_Unscaled;
+      Points1 = .IM_Trunk_To_Leg_Unscaled(.points_RBF_TrunkPelvis_Unscaled);
+      Mode = VTK_LANDMARK_RIGIDBODY;
+    };
+
+   #endif
+
+   #if BM_LEG_TRUNK_INTERFACE == CONST_MORPH_LEG_TO_TRUNK
+    AnyFunTransform3DLin2 IM_Leg_To_Trunk_Affine =
+    {
+      Points0 = .points_RBF_LegPelvis_Unscaled;
+      Points1 = .points_RBF_TrunkPelvis_Unscaled;
+      Mode = VTK_LANDMARK_AFFINE ;
+    };
+
+    AnyFunTransform3DRBF IM_Leg_To_Trunk_RBF =
+    {
+      PreTransforms =
+      {
+        &.IM_Leg_To_Trunk_Affine
+      };
+      Points0 = .points_RBF_LegPelvis_Unscaled;
+      Points1 = .points_RBF_TrunkPelvis_Unscaled;
+
+      RBFDef.Type = RBF_MultiQuadratic;
+      RBFDef.Param = 0.4;
+
+      BoundingBox.ScaleXYZ = 5*{1, 1, 1};
+      BoundingBox.DivisionFactorXYZ = 2*{1, 1, 1};
+      BoundingBoxOnOff = On;
+      BoundingBox.Type = BB_Cartesian ;
+    };
+
+    AnyFunTransform3D IM_Leg_To_Trunk_Unscaled =
+    {
+      PreTransforms =
+      {
+        &.IM_Leg_To_Trunk_RBF
+      };
+    };
+
+    AnyFunTransform3DIdentity IM_Trunk_To_Leg_Unscaled = {};
+   #endif
+#endif
+
+  AnyFunTransform3DIdentity IM_Trunk_To_Leg =
+  {
+    PreTransforms =
+    {
+      &.IM_Trunk_To_Leg_Unscaled
+      ,
+      &..GeomScale
+    };
+  };
+  AnyFunTransform3DIdentity IM_Leg_To_Trunk =
+  {
+    PreTransforms =
+    {
+      &.IM_Leg_To_Trunk_Unscaled
+      ,
+      &..GeomScale
+    };
+  };
+};

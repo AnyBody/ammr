@@ -4,7 +4,7 @@ AnyFolder Model = {
   AnyFolder &PelvisRef = ....BodyModelRef.Trunk.SegmentsLumbar.PelvisSeg; //This is a reference to the folder which holds the human part of the model
   AnyFolder &LegSegSideRef = .SideBodyModelRef.Leg.Seg; //This is a reference to the folder which holds the human part of the model
   AnyFolder &LegJntsRef =  .SideBodyModelRef.Leg.Jnt;
-  AnyFolder &MusRef = .SideBodyModelRef.Leg.EvaluateJointStrengthMusRef ;
+  AnyFolder &LegMusRef = .SideBodyModelRef.Leg.Mus;
   
  AnyFixedRefFrame ground = {
    AnyRefNode node = { 
@@ -35,7 +35,7 @@ AnyFolder Drivers = {
   AnyForce JointLoad = {
       AnyKinMeasure &ref = .Drivers.LegMeasure;
       AnyInt Sign = -round(.Drivers.AngularVelocity/abs(.Drivers.AngularVelocity));
-      F = 50*Sign*not(not(.Drivers.LegDriver.DriverVel));
+      F = 30*Sign*not(not(.Drivers.LegDriver.DriverVel));
   };
 
 };
@@ -45,9 +45,12 @@ AnyBodyStudy Study = {
   Gravity = {0,0,0};
   tStart = 0;
   tEnd = 1;
+  #ifdef EVALUATE_JOINT_STRENGTH_NSTEP
+  nStep = EVALUATE_JOINT_STRENGTH_NSTEP;
+  #else
   nStep = 40;
-  InitialConditions.SolverType = KinSolDeterminate;
-  Kinematics.SolverType = KinSolDeterminate;
+  #endif
+    
   Kinematics.PosAnalysisOnlyOnOff = On;
   InitialConditions.PosAnalysisOnlyOnOff = On;
 
@@ -57,26 +60,75 @@ AnyBodyStudy Study = {
   AnyFolder &Model = .Model;
   
   AnyFolder JointStrength = {
-     AnyFolder Abcissa  ={
+     AnyFolder Abscissa  = {
         AnyVar JointAngle = not(not(..Model.Drivers.LegDriver.DriverVel))*..Model.Drivers.LegMeasure.Pos'*180/pi;     
      };
      AnyVar JointStrength = max(abs(.Model.JointLoad.F))/(.MaxMuscleActivity+0.00000001);
      
      //AnyVar PsoasMajorT12I = -1*.Model.SpineMusRef.PsoasMajor.PMT12I_TM.LmtDot/.Model.Drivers.AngularVelocity;
   };
+#if (LEFT_LEG_SIMPLE_MUSCLES & RIGHT_LEG_SIMPLE_MUSCLES & (BM_TRUNK_LUMBAR_MUSCLES != CONST_MUSCLES_NONE)) | (LEFT_LEG_MUS_3E & RIGHT_LEG_MUS_3E & (BM_TRUNK_LUMBAR_MUSCLES != CONST_MUSCLES_NONE)) 
+  
+  AnyFolder MuscleEffectiveStrengthCalculations = {
+    AnyFolder Abscissa = {
+      AnyVar JointAngle =  not(not(..Model.Drivers.LegDriver.DriverVel))*..Model.Drivers.LegMeasure.Pos'*180/pi  ;    
+    };
 
+#define _CODE_MACRO_(name) AnyVar name = ( .Model.LegMusRef.name.Strength *  .Model.LegMusRef.name.Activity);    
+    #include "legmuscles_for_output.any"
+#undef _CODE_MACRO_
+  };
+#endif
 };
 
-AnyOperationMacro MacroCmd = 
-{
 
-  MacroStr = {"operation " + CompleteNameOf(&.Study.InverseDynamics),
-    "run"
-#ifdef OUTPUT_SAVE_PATH
-    ,
-    "classoperation " + CompleteNameOf(&.Study.Output) + strquote("Save data") 
-     + " --type=" + strquote("Deep") +" --file=" + strquote(
-     OUTPUT_SAVE_PATH + .OutputFileName + ".anydata.h5")
+
+
+
+
+
+
+
+
+
+#if (ANYBODY_V1 >= 6) & (ANYBODY_V2 >= 1)
+AnyFolder ModelViews = { AnyFolder Views =  {}; };
+#else
+AnyProject ModelViews = {};
 #endif
-   };
- };
+
+ModelViews = {
+  AnyDrawGroup Selection = {
+    Objects = arrcat(arrcat(
+                            ObjSearchRecursive(CompleteNameOf(&..Model.PelvisRef ), "*", "AnyDrawObject"), 
+                            ObjSearchRecursive(CompleteNameOf(&..Model.LegSegSideRef ), "*", "AnyDrawObject")),
+                            ObjSearchRecursive(CompleteNameOf(&..Model.LegMusRef), "*", "AnyDrawObject")) ;
+  };
+  Views = {
+    AnyProjectModelViewDefinition SelectedView = {
+      DrawGroupSequence = {&..Selection};
+      Reset = {On};
+    };
+  };
+};
+
+
+
+
+AnyOperationSequence Run = 
+{
+    AnyOperationMacro SetView = 
+    {
+      MacroStr = { "classoperation " + CompleteNameOf(&..ModelViews.Views.SelectedView) + strquote("Set View") };
+    };
+    AnyOperation &Study = .Study.InverseDynamics;
+//    #ifdef ANYBODY_PATH_OUTPUT
+//    AnyOperationMacro Save = 
+//    {
+//      MacroStr = {
+//           "classoperation " + CompleteNameOf(&.Study.Output) + strquote("Save data") 
+//           + " --type=" + strquote("Deep") +" --file=" + strquote(
+//           ANYBODY_PATH_OUTPUT + .OutputFileName + ".anydata.h5")
+//      };
+//    #endif
+};

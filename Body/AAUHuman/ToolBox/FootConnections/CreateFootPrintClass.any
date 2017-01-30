@@ -1,0 +1,165 @@
+//First 3 points will be used for the construction of the new coordinate system.
+#ifndef FOOTPRINT_NODE_NAME_1
+  #define FOOTPRINT_NODE_NAME_1 ToeMedialContactNode
+#endif
+#ifndef FOOTPRINT_NODE_NAME_2
+  #define FOOTPRINT_NODE_NAME_2 ToeLateralContactNode
+#endif
+#ifndef FOOTPRINT_NODE_NAME_3
+  #define FOOTPRINT_NODE_NAME_3 HeelContactNodeLow
+#endif
+#ifndef FOOTPRINT_NODE_NAME_4
+  #define FOOTPRINT_NODE_NAME_4 BigToeNode
+#endif
+
+#class_template FootPrint(AnyRefFrame& BaseNode, FootPrintSubNodeName, AnyRefFrame& Limb)
+{
+  #var AnySwitch FootPrintVisible = On;
+  #var AnyVar FootPrintDrawingSize = 0.005;
+  #var AnyVec3 FootPrintDrawingColor = {1, 1, 1};
+     
+  AnyRefFrame& FootPrintSubNode = BaseNode.FootPrintSubNodeName;
+  
+  AnyRefNode& FOOTPRINT_NODE_NAME_1 = BaseNode.FootPrintSubNodeName.FOOTPRINT_NODE_NAME_1;
+  AnyRefNode& FOOTPRINT_NODE_NAME_2 = BaseNode.FootPrintSubNodeName.FOOTPRINT_NODE_NAME_2;
+  AnyRefNode& FOOTPRINT_NODE_NAME_3 = BaseNode.FootPrintSubNodeName.FOOTPRINT_NODE_NAME_3;
+  AnyRefNode& FOOTPRINT_NODE_NAME_4 = BaseNode.FootPrintSubNodeName.FOOTPRINT_NODE_NAME_4;
+    
+  AnyFolder InternalInfo = 
+  {
+    AnyRefNode& RefSource1 = .Limb.FOOTPRINT_NODE_NAME_1;
+    AnyRefNode& RefSource2 = .Limb.FOOTPRINT_NODE_NAME_2;
+    AnyRefNode& RefSource3 = .Limb.FOOTPRINT_NODE_NAME_3;
+    AnyRefNode& RefSource4 = .Limb.FOOTPRINT_NODE_NAME_4;    
+    
+    //AnyRefNode& CoordSysPoint1 = Limb.BigToeNode;  
+    AnyRefNode& CoordSysPoint1 = RefSource1;
+    AnyRefNode& CoordSysPoint2 = RefSource2;
+    AnyRefNode& CoordSysPoint3 = RefSource3;
+    
+    //AnyVec3 NewPoint_sRel = (refPoint1.sRel + refPoint2.sRel + refPoint3.sRel)/3;
+    //AnyVec3 NewCoordSys_sRel  = CoordSysPoint3.sRel;
+    AnyVec3 NewCoordSys_sRel  = CoordSysPoint1.sRel;
+    AnyMat33 NewCoordSys_ARel = RotMat(CoordSysPoint3.sRel, CoordSysPoint1.sRel, CoordSysPoint2.sRel) * RotMat(.Limb.Sign*(-pi/2), x);
+    
+    //  Limb = 
+    //  {
+    //    AnyRefNode TestNode = 
+    //    {
+    //      sRel = ..NewCoordSys_sRel;
+    //      ARel = ..NewCoordSys_ARel;
+    //      
+    //      AnyDrawRefFrame DrwFrame = 
+    //      {
+    //        RGB = {1, 0, 1};
+    //        ScaleXYZ = 0.2*{1, 1, 1};
+    //      };
+    //    };
+    //  };  
+    
+    AnyMat33 ProjectionMat = {{1, 0, 0}, {0, 0, 0}, {0, 0, 1}}; // Projection to XZ plane!
+        
+    //  AnyVec3 PlanePoint = NewCoordSys_sRel;
+    //  AnyVec3 PlaneNormalVec = {0, 1, 0} * NewCoordSys_ARel';
+    //  AnyVar PlaneConstantTerm = (-1)*PlaneNormalVec*NewCoordSys_sRel' ;  
+    //  
+    //  AnyVar refSource1_Dis = (-1)*(PlaneNormalVec*refSource1.sRel'+PlaneConstantTerm)/(PlaneNormalVec*PlaneNormalVec');
+    //  AnyVec3 refTarget1_sRel_FootCoordSys = refSource1.sRel + PlaneNormalVec * refSource1_Dis;
+    //  AnyVec3 retTarget1_sRel_NewCoordSys = (refTarget1_sRel_FootCoordSys - PlanePoint) * NewCoordSys_ARel;
+    //  
+    //  AnyVar refSource2_Dis = (-1)*(PlaneNormalVec*refSource2.sRel'+PlaneConstantTerm)/(PlaneNormalVec*PlaneNormalVec');
+    //  AnyVec3 refTarget2_sRel_FootCoordSys = refSource2.sRel + PlaneNormalVec * refSource2_Dis;  
+    //  AnyVec3 retTarget2_sRel_NewCoordSys = (refTarget2_sRel_FootCoordSys - PlanePoint) * NewCoordSys_ARel;
+    //  
+    //  AnyVar refSource3_Dis = (-1)*(PlaneNormalVec*refSource3.sRel'+PlaneConstantTerm)/(PlaneNormalVec*PlaneNormalVec');
+    //  AnyVec3 refTarget3_sRel_FootCoordSys = refSource3.sRel + PlaneNormalVec * refSource3_Dis;  
+    //  AnyVec3 retTarget3_sRel_NewCoordSys = (refTarget3_sRel_FootCoordSys - PlanePoint) * NewCoordSys_ARel;  
+    //  
+    //  AnyVar refSource4_Dis = (-1)*(PlaneNor  malVec*refSource4.sRel'+PlaneConstantTerm)/(PlaneNormalVec*PlaneNormalVec');
+    //  AnyVec3 refTarget4_sRel_FootCoordSys = refSource4.sRel + PlaneNormalVec * refSource4_Dis;  
+    //  AnyVec3 retTarget4_sRel_NewCoordSys = (refTarget4_sRel_FootCoordSys - PlanePoint) * NewCoordSys_ARel;  
+    
+    AnyVec3 Target1_sRel_NewCoordSys = ((RefSource1.sRel - NewCoordSys_sRel) * NewCoordSys_ARel) * ProjectionMat;
+    AnyVec3 Target2_sRel_NewCoordSys = ((RefSource2.sRel - NewCoordSys_sRel) * NewCoordSys_ARel) * ProjectionMat;
+    AnyVec3 Target3_sRel_NewCoordSys = ((RefSource3.sRel - NewCoordSys_sRel) * NewCoordSys_ARel) * ProjectionMat;  
+    AnyVec3 Target4_sRel_NewCoordSys = ((RefSource4.sRel - NewCoordSys_sRel) * NewCoordSys_ARel) * ProjectionMat;  
+    
+    AnyRefFrame& RefBaseNode = .BaseNode;
+    RefBaseNode = 
+    {
+      AnyRefNode FootPrintSubNodeName = 
+      {
+        AnyRefNode FOOTPRINT_NODE_NAME_1 = 
+        {
+          sRel = ...Target1_sRel_NewCoordSys ;
+          AnyDrawNode DrwNode = 
+          {
+            Visible = .....FootPrintVisible ;
+            RGB = .....FootPrintDrawingColor;
+            ScaleXYZ = .....FootPrintDrawingSize *{1, 1, 1};
+          };
+        };
+        
+        AnyRefNode FOOTPRINT_NODE_NAME_2 = 
+        {
+          sRel = ...Target2_sRel_NewCoordSys ;
+          AnyDrawNode DrwNode = 
+          {
+            Visible = .....FootPrintVisible ;
+            RGB = .....FootPrintDrawingColor;
+            ScaleXYZ = .....FootPrintDrawingSize *{1, 1, 1};
+          };
+        };
+        
+        AnyRefNode FOOTPRINT_NODE_NAME_3 = 
+        {
+          sRel = ...Target3_sRel_NewCoordSys ;
+          AnyDrawNode DrwNode = 
+          {
+            Visible = .....FootPrintVisible ;
+            RGB = .....FootPrintDrawingColor;
+            ScaleXYZ = .....FootPrintDrawingSize *{1, 1, 1};
+          };
+        }; 
+        
+        AnyRefNode FOOTPRINT_NODE_NAME_4 = 
+        {
+          sRel = ...Target4_sRel_NewCoordSys ;
+          AnyDrawNode DrwNode = 
+          {
+            Visible = .....FootPrintVisible ;
+            RGB = .....FootPrintDrawingColor;
+            ScaleXYZ = .....FootPrintDrawingSize *{1, 1, 1};
+          };
+        };      
+      };//FootPrintSubNodeName 
+    };//BaseNode
+    
+    AnyRefNode& RefTarget1 = .BaseNode.FootPrintSubNodeName.FOOTPRINT_NODE_NAME_1;
+    AnyRefNode& RefTarget2 = .BaseNode.FootPrintSubNodeName.FOOTPRINT_NODE_NAME_2;
+    AnyRefNode& RefTarget3 = .BaseNode.FootPrintSubNodeName.FOOTPRINT_NODE_NAME_3;
+    AnyRefNode& RefTarget4 = .BaseNode.FootPrintSubNodeName.FOOTPRINT_NODE_NAME_4;
+    
+    AnyFolder Source = 
+    {
+      AnyRefNode& FOOTPRINT_NODE_NAME_1 = ..Limb.FOOTPRINT_NODE_NAME_1;
+      AnyRefNode& FOOTPRINT_NODE_NAME_2 = ..Limb.FOOTPRINT_NODE_NAME_2;
+      AnyRefNode& FOOTPRINT_NODE_NAME_3 = ..Limb.FOOTPRINT_NODE_NAME_3;
+      AnyRefNode& FOOTPRINT_NODE_NAME_4 = ..Limb.FOOTPRINT_NODE_NAME_4;      
+    };
+    
+    AnyFolder Target = 
+    {
+      AnyRefNode& FOOTPRINT_NODE_NAME_1 = ..BaseNode.FootPrintSubNodeName.FOOTPRINT_NODE_NAME_1;
+      AnyRefNode& FOOTPRINT_NODE_NAME_2 = ..BaseNode.FootPrintSubNodeName.FOOTPRINT_NODE_NAME_2;
+      AnyRefNode& FOOTPRINT_NODE_NAME_3 = ..BaseNode.FootPrintSubNodeName.FOOTPRINT_NODE_NAME_3;
+      AnyRefNode& FOOTPRINT_NODE_NAME_4 = ..BaseNode.FootPrintSubNodeName.FOOTPRINT_NODE_NAME_4;
+    };
+  };
+  
+};
+
+//#undef FOOTPRINT_NODE_NAME_1
+//#undef FOOTPRINT_NODE_NAME_2
+//#undef FOOTPRINT_NODE_NAME_3
+//#undef FOOTPRINT_NODE_NAME_4

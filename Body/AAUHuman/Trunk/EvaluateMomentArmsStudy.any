@@ -1,8 +1,8 @@
 
 AnyFolder Model = {
   // Model parts included in the moment arm study
-  AnyFolder &PelvisRef = .TrunkHumanFolderRef.SegmentsLumbar.PelvisSeg; //This is a reference to the folder which holds the human part of the model
-  AnyFolder &TrunkRef = .TrunkHumanFolderRef; //This is a reference to the folder which holds the human part of the model
+  AnyFolder &PelvisRef = .TrunkHumanFolderRef.SegmentsLumbar.PelvisSeg; 
+  AnyFolder &TrunkRef = .TrunkHumanFolderRef; 
   AnyFolder &SpineMusRef = .TrunkHumanFolderRef.MusclesSpine;
   AnyFolder &SpineMusRightRef =. TrunkHumanFolderRef.MusclesSpineRight;
   AnyFolder &SpineMusLeftRef = .TrunkHumanFolderRef.MusclesSpineLeft;
@@ -25,7 +25,9 @@ AnyFolder Drivers = {
   AnyKinMeasure &PelvisThoraxExtension= ...TrunkHumanInterfaceRef.PelvisThoraxExtension;
   AnyKinMeasure &PelvisThoraxLateralBending= ...TrunkHumanInterfaceRef.PelvisThoraxLateralBending;
   AnyKinMeasure &PelvisThoraxRotation= ...TrunkHumanInterfaceRef.PelvisThoraxRotation;
-  AnyKinMeasure &NeckJoint = ...TrunkHumanInterfaceRef.NeckJoint;
+  AnyKinMeasure &SkullThoraxFlexion= ...TrunkHumanInterfaceRef.SkullThoraxFlexion;
+  AnyKinMeasure &SkullThoraxLateralBending= ...TrunkHumanInterfaceRef.SkullThoraxLateralBending;
+  AnyKinMeasure &SkullThoraxRotation= ...TrunkHumanInterfaceRef.SkullThoraxRotation;
  };
    
  
@@ -65,8 +67,15 @@ AnyFolder Drivers = {
  
 AnyKinStudy Study = {
   Gravity = {0,0,0};
+  #ifdef EVALUATE_MOMENT_ARMS_NSTEP
+  nStep = EVALUATE_MOMENT_ARMS_NSTEP;
+  #else
   nStep = 40;
-  InitialConditions.SolverType = KinSolOverDeterminate;
+  #endif  
+  
+  InitialConditions.SolverType = Kinematics.SolverType ;
+  Kinematics.SolverType = KinSolDeterminate2;
+  
   AnyFolder &Model = .Model;
     
   AnyFolder MomentArmCalculations = {
@@ -75,7 +84,7 @@ AnyKinStudy Study = {
       AnyVar JointAngle =  not(not(..Model.Drivers.TrunkDriver.DriverVel))*..Model.Drivers.TrunkMeasure.Pos'*180/pi  ;    
       };      
       
-      AnyFolder Center = {
+      AnyFolder Mid = {
         AnyFolder RectusAbdominis = {
            AnyVar RA = -1*...Model.SpineMusRef.RectusAbdominis.RA.LmtDot/...Model.Drivers.AngularVelocity;
         };
@@ -329,15 +338,43 @@ AnyKinStudy Study = {
  };
 };
 
-AnyOperationMacro MacroCmd = 
-{
-  MacroStr = {"operation " + CompleteNameOf(&.Study.Kinematics),
-    "run"
-#ifdef OUTPUT_SAVE_PATH
-    ,
-    "classoperation " + CompleteNameOf(&.Study.Output) + strquote("Save data") 
-     + " --type=" + strquote("Deep") +" --file=" + strquote(
-     OUTPUT_SAVE_PATH+ .OutputFileName + ".anydata.h5")
+#if (ANYBODY_V1 >= 6) & (ANYBODY_V2 >= 1)
+AnyFolder ModelViews = { AnyFolder Views =  {}; };
+#else
+AnyProject ModelViews = {};
 #endif
-   };
- };
+
+ModelViews = {
+  AnyDrawGroup Selection = {
+    Objects = arrcat(arrcat(arrcat(arrcat(
+                     ObjSearchRecursive(CompleteNameOf(&..Model.PelvisRef ), "*", "AnyDrawObject"), 
+                     ObjSearchRecursive(CompleteNameOf(&..Model.TrunkRef ), "*", "AnyDrawObject")),
+                     ObjSearchRecursive(CompleteNameOf(&..Model.SpineMusRef ), "*", "AnyDrawObject")),
+                     ObjSearchRecursive(CompleteNameOf(&..Model.SpineMusRightRef ), "*", "AnyDrawObject")),
+                     ObjSearchRecursive(CompleteNameOf(&..Model.SpineMusLeftRef ), "*", "AnyDrawObject"));
+  };
+  Views = {
+    AnyProjectModelViewDefinition SelectedView = {
+      DrawGroupSequence = {&..Selection};
+      Reset = {On};
+    };
+  };
+};
+
+AnyOperationSequence Run = 
+{
+    AnyOperationMacro SetView = 
+    {
+      MacroStr = { "classoperation " + CompleteNameOf(&..ModelViews.Views.SelectedView) + strquote("Set View") };
+    };
+    AnyOperation &Study = .Study.Kinematics;
+//    #ifdef ANYBODY_PATH_OUTPUT
+//    AnyOperationMacro Save = 
+//    {
+//      MacroStr = {
+//           "classoperation " + CompleteNameOf(&.Study.Output) + strquote("Save data") 
+//           + " --type=" + strquote("Deep") +" --file=" + strquote(
+//           ANYBODY_PATH_OUTPUT + .OutputFileName + ".anydata.h5")
+//      };
+//    #endif
+};

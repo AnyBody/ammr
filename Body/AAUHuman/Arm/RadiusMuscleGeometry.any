@@ -4,432 +4,135 @@ Radius = {
   
   
   AnyRefNode BicepsCyl = {
-    /*
-    AnyVec3 p1=.Scale({0.04,...Sign*0,-0.003}); // Starting point of the vector.
-    AnyVec3 p2= 0.5*(.rs.sRel+.wj.sRel); // End point of the vector.
-    AnyVec3 v ={0,0,1}; // Arbitary vector for cross product.
+
+    sRel = .Scale(.Data.BicepsCyl_pos*.Mirror);
+    AnyVec3 P2 = .Scale(.Data.BicepsCyl_P2_pos*.Mirror);										// TODO: ask MEL about the value, correction missing sRel
+    AnyVec3 P3 = .Scale(.Data.BicepsCyl_P3_pos*.Mirror);        
     
-    AnyVec3 VecZ={(p1[0]-p2[0]),(p1[1]-p2[1]),(p1[2]-p2[2])}; // Direction of the cylinder.
-    AnyVec3 VecY={(v[1]*VecZ[2]-v[2]*VecZ[1]),(v[2]*VecZ[0]-v[0]*VecZ[2]),(v[0]*VecZ[1]-v[1]*VecZ[0])};
-    AnyVec3 VecX={(VecY[1]*VecZ[2]-VecY[2]*VecZ[1]),(VecY[2]*VecZ[0]-VecY[0]*VecZ[2]),(VecY[0]*VecZ[1]-VecY[1]*VecZ[0])};
-    AnyVec3 p3 = {0,0,-.06}*ARel';
-    sRel = p1+p3;
-    
-    //Length calculation
-    AnyVar LengthX=sqrt((VecX[0])^2+(VecX[1])^2+(VecX[2])^2);
-    AnyVar LengthZ=sqrt((VecZ[0])^2+(VecZ[1])^2+(VecZ[2])^2);
-    AnyVar LengthY=sqrt((VecY[0])^2+(VecY[1])^2+(VecY[2])^2);
-    
-    //Normalizing
-    AnyVec3 VX=VecX/LengthX;
-    AnyVec3 VY=VecY/LengthY;
-    AnyVec3 VZ=VecZ/LengthZ;
-    //Note stc issue for scaling
-    ARel = {
-    {VX[0],VY[0],VZ[0]},
-    {VX[1],VY[1],VZ[1]},
-    {VX[2],VY[2],VZ[2]}};
-    
-    AnySurfCylinder cyl= { 
-    Radius=0.009;
-    Length=0.06; 
-    AnyDrawParamSurf drw={};
-    
-    };*/
-    
-    
-    AnyVec3 P1 = sRel;
-    AnyVec3 P2 = .Scale({0.040000, 0.000000, 0.007000})*.Mirror;//sRel+VZ*Length;
-    AnyVec3 P3 =sRel+.Scale({0,0,0.01})*.Mirror;//sRel-VX*Radius;        
-    sRel = .Scale({-0.019648-0.05, -0.006444-0.002, -0.002267+0.00})*.Mirror;
-    //Calculate rot matrix for cylinder using three points
-    //p2-p1 used to find x axis
-    //p3-p1 used to find the y axis
-    //z axis found as cross product
-    AnyMat33  Mat = RotMat(sRel,P3,P2);
-    
-    //Switch around the on the columns to compensate that the cylinder has 
-    //main axis along the zaxis
-    ARel={
-      {Mat[0][2],Mat[0][0],Mat[0][1]},
-      {Mat[1][2],Mat[1][0],Mat[1][1]},
-      {Mat[2][2],Mat[2][0],Mat[2][1]}};          
+    //Calculate rot matrix for cylinder using three points and switch axes
+    ARel=RotMat(sRel,P3,P2)*RotMat(-90/180*pi, z)*RotMat(-90/180*pi, y);          
     
     AnySurfCylinder cyl = { 
-      Radius=((.sRel[0]-.P3[0])^2+(.sRel[1]-.P3[1])^2+(.sRel[2]-.P3[2])^2)^0.5;
-      Length= ((.sRel[0]-.P2[0])^2+(.sRel[1]-.P2[1])^2+(.sRel[2]-.P2[2])^2)^0.5;
-      //AnyDrawParamSurf drw={RGB={1,0,0};};
+      Radius=vnorm(.sRel-.P3);
+      Length= vnorm(.sRel-.P2);
     };
   }; 
   
   // Cylinder fitted to the radius bone for wrapping of pronator teres, not from literature.
   AnyRefNode PronatorTeresCyl = {
-    
-    /*
-    AnyVec3 p1=.I_Pronator_teres_caput_humeral_1.sRel +.Scale({0.05,...Sign*0.02,-0.006}); // Starting point on the vector.
-    
-    AnyVec3 p2=p1+.Scale({-0.02,...Sign*-0.005,0.001}); // End point of the vector.
-    AnyVec3 v ={0,0,1}; // Arbitary vector used for cross product.
-    
-    AnyVec3 VecZ=-{(p1[0]-p2[0]),(p1[1]-p2[1]),(p1[2]-p2[2])}; // Direction of the cylinder.
-    AnyVec3 VecY={(v[1]*VecZ[2]-v[2]*VecZ[1]),(v[2]*VecZ[0]-v[0]*VecZ[2]),(v[0]*VecZ[1]-v[1]*VecZ[0])};
-    AnyVec3 VecX={(VecY[1]*VecZ[2]-VecY[2]*VecZ[1]),(VecY[2]*VecZ[0]-VecY[0]*VecZ[2]),(VecY[0]*VecZ[1]-VecY[1]*VecZ[0])};
-    
-    //Length calculation
-    AnyVar LengthX=sqrt((VecX[0])^2+(VecX[1])^2+(VecX[2])^2);
-    AnyVar LengthZ=sqrt((VecZ[0])^2+(VecZ[1])^2+(VecZ[2])^2);
-    AnyVar LengthY=sqrt((VecY[0])^2+(VecY[1])^2+(VecY[2])^2);
-    
-    //Normalizing
-    AnyVec3 VX=VecX/LengthX;
-    AnyVec3 VY=VecY/LengthY;
-    AnyVec3 VZ=VecZ/LengthZ;
-    //Note stc issue for scaling
-    ARel = {
-    {VX[0],VY[0],VZ[0]},
-    {VX[1],VY[1],VZ[1]},
-    {VX[2],VY[2],VZ[2]}};
-    AnyVec3 p3 ={0,...Sign*(-0.002),-.05}*ARel';
-    
-    sRel= (p1+p3);
-    
-    AnySurfCylinder cyl= { 
-    //AnyDrawParamSurf test={};
-    Radius=0.007;
-    Length=0.15; 
-    };    
-    */
-    
-    AnyVec3  P1= sRel;
-    AnyVec3  P2= .Scale({-0.137880, -0.028696, -0.000219})*.Mirror; // sRel+VZ*Length;
-    AnyVec3  P3= .Scale({0.007141, 0.007560, -0.014478})*.Mirror; //sRel+VX*Radius;    
-    
-    sRel= .Scale({0.007470,0.007642, -0.007487})*.Mirror;
-    
-    //Calculate rot matrix for cylinder using three points
-    //p2-p1 used to find x axis
-    //p3-p1 used to find the y axis
-    //z axis found as cross product
-    AnyMat33  Mat = RotMat(sRel,P3,P2);
-    
-    //Switch around the on the columns to compensate that the cylinder has 
-    //main axis along the zaxis
-    ARel={
-      {Mat[0][2],Mat[0][0],Mat[0][1]},
-      {Mat[1][2],Mat[1][0],Mat[1][1]},
-      {Mat[2][2],Mat[2][0],Mat[2][1]}};          
+
+    AnyVec3  P2= .Scale(.Data.PronatorTeresCyl_P2_pos*.Mirror);								// TODO: check with MEL if known why sRel was not used for data
+    AnyVec3  P3= .Scale(.Data.PronatorTeresCyl_P3_pos*.Mirror);        
+    sRel = .Scale(.Data.PronatorTeresCyl_pos*.Mirror);
+
+    //Calculate orientation of the cylinder
+    ARel=RotMat(sRel,P3,P2)*RotMat(-90/180*pi, z)*RotMat(-90/180*pi, y);          
     
     AnySurfCylinder cyl = { 
-      Radius=((.sRel[0]-.P3[0])^2+(.sRel[1]-.P3[1])^2+(.sRel[2]-.P3[2])^2)^0.5;
-      Length= ((.sRel[0]-.P2[0])^2+(.sRel[1]-.P2[1])^2+(.sRel[2]-.P2[2])^2)^0.5;
-      //AnyDrawParamSurf drw={RGB={1,0,0};};
+      Radius= vnorm(.sRel-.P3);
+      Length= vnorm(.sRel-.P2);
     };
   }; 
   
   
   // Cylinder fitted to the radius bone for wrapping of supinator, not from literature.
-  AnyRefNode SupinatorCyl = {
-    /*
-    AnyVec3 p1=.I_Supinator_humerus_part_1.sRel+.Scale({0.035,...Sign*0.005,0.01}); // Starting point on the vector.
-    AnyVec3 p2=.I_Supinator_humerus_part_2.sRel+.Scale({0.005,...Sign*0.005,0.0045}); // End point of the vector.
-    AnyVec3 v ={0,0,1}; // Arbitary vector used for cross product.
+  AnyRefNode SupinatorCyl = {																							// TODO: to be deleted
     
-    AnyVec3 VecZ={(p1[0]-p2[0]),(p1[1]-p2[1]),(p1[2]-p2[2])}; // Direction of the cylinder.
-    AnyVec3 VecY={(v[1]*VecZ[2]-v[2]*VecZ[1]),(v[2]*VecZ[0]-v[0]*VecZ[2]),(v[0]*VecZ[1]-v[1]*VecZ[0])};
-    AnyVec3 VecX={(VecY[1]*VecZ[2]-VecY[2]*VecZ[1]),(VecY[2]*VecZ[0]-VecY[0]*VecZ[2]),(VecY[0]*VecZ[1]-VecY[1]*VecZ[0])};
+    AnyVec3 P2 =.Scale(.Data.SupinatorCyl_P2_pos*.Mirror);
+    AnyVec3 P3 =.Scale(.Data.SupinatorCyl_P3_pos*.Mirror);
+    sRel = .Scale(.Data.SupinatorCyl_pos*.Mirror);
     
-    AnyVec3 p3={0,0,-0.14}*ARel';
-    
-    sRel = p1+p3;
-    
-    //Length calculation
-    AnyVar LengthX=sqrt((VecX[0])^2+(VecX[1])^2+(VecX[2])^2);
-    AnyVar LengthZ=sqrt((VecZ[0])^2+(VecZ[1])^2+(VecZ[2])^2);
-    AnyVar LengthY=sqrt((VecY[0])^2+(VecY[1])^2+(VecY[2])^2);
-    
-    //Normalizing
-    AnyVec3 VX=VecX/LengthX;
-    AnyVec3 VY=VecY/LengthY;
-    AnyVec3 VZ=VecZ/LengthZ;
-    
-    //Note stc issue for scaling
-    ARel = {
-    {VX[0],VY[0],VZ[0]},
-    {VX[1],VY[1],VZ[1]},
-    {VX[2],VY[2],VZ[2]}};
-    
-    
-    AnySurfCylinder cyl= { 
-    Radius=0.006;
-    Length=0.14; 
-    CapRatio=1;
-    AnyDrawParamSurf drw={RGB={1,0,1};};
-    };
-    */
-    
-    AnyVec3 P1 =sRel;
-    AnyVec3 P2 =.Scale( {0.0406227,-0.000, 0.008321})*.Mirror;//sRel+VZ*Length;
-    AnyVec3 P3 =.Scale({-0.182219,-0.027245, -0.002})*.Mirror;//sRel+VX*Radius;
-    //     AnyVec3 P1 =sRel;
-    //    AnyVec3 P2 =.Scale( {0.006227,-0.001842, 0.002321})*.Mirror;//sRel+VZ*Length;
-    //    AnyVec3 P3 =.Scale({-0.132219,-0.023245, -0.000939})*.Mirror;//sRel+VX*Radius;
-    //    
-    sRel = .Scale({-0.182103, -0.027227, 0.0050})*.Mirror;
-    //Calculate rot matrix for cylinder using three points
-    //p2-p1 used to find x axis
-    //p3-p1 used to find the y axis
-    //z axis found as cross product
-    AnyMat33  Mat = RotMat(sRel,P3,P2);
-    
-    //Switch around the on the columns to compensate that the cylinder has 
-    //main axis along the zaxis
-    ARel={
-      {Mat[0][2],Mat[0][0],Mat[0][1]},
-      {Mat[1][2],Mat[1][0],Mat[1][1]},
-      {Mat[2][2],Mat[2][0],Mat[2][1]}};          
+    //Calculate orientation of the cylinder
+    ARel=RotMat(sRel,P3,P2)*RotMat(-90/180*pi, z)*RotMat(-90/180*pi, y);          
     
     AnySurfCylinder cyl = { 
-      Radius=((.sRel[0]-.P3[0])^2+(.sRel[1]-.P3[1])^2+(.sRel[2]-.P3[2])^2)^0.5;
-      Length= ((.sRel[0]-.P2[0])^2+(.sRel[1]-.P2[1])^2+(.sRel[2]-.P2[2])^2)^0.5;
-      //AnyDrawParamSurf drw={RGB={1,0,0};};
+      Radius= vnorm(.sRel-.P3);
+      Length= vnorm(.sRel-.P2);
       CapRatio=1;
     };    
   };
   
-  #include "../DrawSettings/SegmentAxes.any"
-  
-  AnyRefNode I_Biceps_LH = {
-    sRel = .Scale({-0.004634, 0.010566, -0.006213})*.Mirror;
-  };
-  
-  
-  AnyRefNode I_Biceps_SH = {sRel = .Scale({-0.004634, 0.010566, -0.006213})*.Mirror;};
-  
-  AnyRefNode I_Brach_rad_1 = {sRel = .Scale({-0.219389, -0.038590, -0.002705})*.Mirror;};
-  AnyRefNode I_Brach_rad_2 = {sRel = .Scale({-0.219389, -0.038590, -0.002705})*.Mirror;};
-  
-  
-  
-  AnyRefNode I_Pronator_teres_caput_humeral_1 = {sRel = .Scale({-0.090495, -0.026411, 0.000936})*.Mirror;};
-  AnyRefNode I_Pronator_teres_caput_humeral_2 = {sRel = .Scale({-0.090495, -0.026411, 0.000936})*.Mirror;};
-  
-  AnyRefNode I_Pronator_teres_caput_ulnare_1 = {sRel = .Scale({-0.090495, -0.026411, 0.000936})*.Mirror;};
-  
-  AnyVec3 correction ={0,-0.005,0.00};
-  AnyRefNode I_Supinator_humerus_part_1 = { sRel = .Scale({-0.028773, -0.006842, -0.007679}+.correction)*.Mirror;};
-  AnyRefNode I_Supinator_humerus_part_2 = {sRel = .Scale({-0.070989, -0.018006, -0.000749}+.correction)*.Mirror;};
-  AnyRefNode I_Supinator_ulna_part_1 = {sRel = .Scale({-0.028773, -0.006842, -0.007679}+.correction)*.Mirror;};
-  AnyRefNode I_Supinator_ulna_part_2 = {sRel = .Scale({-0.070989, -0.018006, -0.000749}+.correction)*.Mirror;};
-  
-  
-  AnyRefNode I_Pron_quadr_1 = {
-    sRel = .Scale({-0.192639, -0.029538, -0.005120})*.Mirror;//Corrected value
-  };
-  
-  AnyRefNode I_Pron_quadr_2 = {
-    sRel = .Scale({-0.214384, -0.024414, -0.006305})*.Mirror;//Corrected value
-  };
-  
-  AnyRefNode O_Extensor_Pollicis_Brevis= {
-    //    AnyDrawRefFrame drw={RGB={0,0,1};};
-    sRel = .Scale({-0.18, -0.02, 0.015})*.Mirror; //guesstimate
-  };
-  
-  AnyRefNode   Via_Extensor_Indicis={
-    sRel = .Scale({-0.22, -0.012, 0.017})*.Mirror;
-    // AnyDrawRefFrame drw={RGB={0,1,0};};
-  };
-  
-  AnyRefNode   Via_Extensor_Pollicis_Longus  ={
-    sRel = .Scale({-0.223, -0.03, 0.025})*.Mirror;
-    // AnyDrawRefFrame drw={RGB={0,1,0};};
-  };
-  
-  AnyRefNode   Via_Extensor_Pollicis_Brevis  ={
-    sRel = .Scale({-0.223, -0.03, 0.025})*.Mirror;
-    // AnyDrawRefFrame drw={RGB={0,1,0};};
-  };
- 
-  AnyRefNode   Via_Abductor_Pollicis_Longus   ={
-    sRel = .Scale({-0.223, -0.03, 0.025})*.Mirror;
-    // AnyDrawRefFrame drw={RGB={1,0,0};};
-  };
-  
-  AnyRefNode Via_Flexor_Carpi_Ulnaris = {
-    //        AnyDrawRefFrame drw={RGB={1,0,1};};
-    sRel = .Scale({-0.225, -0.01, -0.015})*.Mirror;
-  };
-  
-  AnyRefNode Via_Flexor_Carpi_Radialis = {
-    //        AnyDrawRefFrame drw={RGB={1,0,1};};
-    sRel = .Scale({-0.223, -0.02, -0.005})*.Mirror;
-  };
-  
-  AnyRefNode O_Flexor_Pollicis_Longus = {
-    //    AnyDrawRefFrame drw={RGB={1,0,1};};
-    sRel = .Scale({-0.1, -0.015, -0.01})*.Mirror; //guesstimate
-  };
-  
-  AnyRefNode p1={sRel=.RadiusMuscleCyl.P1;
-    //  AnyDrawRefFrame drw={};
-  };  
-  AnyRefNode p2={sRel=.RadiusMuscleCyl.P2;
-    //    AnyDrawRefFrame drw={};
-  };  
-  AnyRefNode p3={sRel=.RadiusMuscleCyl.P3;
-    //  AnyDrawRefFrame drw={};
-  };  
   AnyRefNode RadiusMuscleCyl = { 
-    sRel = .Scale({0.0, 0.0 , 0.0})*.Mirror;
-    AnyVec3 P1= sRel;
-    AnyVec3 P3 =P1+ .Scale({0.0,0.0,0.014})*.Mirror;
-    AnyVec3 P2 =P1+ .Scale({-0.2, -0.03,0.011})*.Mirror;
-    //Calculate rot matrix for cylinder using three points
-    //p2-p1 used to find x axis
-    //p3-p1 used to find the y axis
-    //z axis found as cross product
-    AnyMat33  Mat = RotMat(sRel,P2,P3);
+    sRel = .Scale(.Data.RadiusMuscleCyl_pos*.Mirror);
+    AnyVec3 P3 =.Scale(.Data.RadiusMuscleCyl_P3_pos*.Mirror); 
+    AnyVec3 P2 =.Scale(.Data.RadiusMuscleCyl_P2_pos*.Mirror); 
+
+    //Calculate orientation of the cylinder
+    ARel=RotMat(sRel,P3,P2)*RotMat(-90/180*pi, z)*RotMat(-90/180*pi, y);          
     
-    //Switch around the on the columns to compensate that the cylinder has 
-    //main axis along the zaxis
-    ARel={
-      {Mat[0][1],Mat[0][2],Mat[0][0]},
-      {Mat[1][1],Mat[1][2],Mat[1][0]},
-      {Mat[2][1],Mat[2][2],Mat[2][0]}};          
     
     AnySurfCylinder cyl = { 
-      Radius=((.sRel[0]-.P3[0])^2+(.sRel[1]-.P3[1])^2+(.sRel[2]-.P3[2])^2)^0.5;
-      Length= ((.sRel[0]-.P2[0])^2+(.sRel[1]-.P2[1])^2+(.sRel[2]-.P2[2])^2)^0.5;
-      //      AnyDrawParamSurf drw={};
+      Radius= vnorm(.sRel-.P3);
+      Length= vnorm(.sRel-.P2);
       CapRatio=1;
     };
   };
-  
-  AnyRefNode O_Flexor_Digitorum_Superficialis = {
-    sRel = .Scale({-0.07, -0.026411, -0.005})*.Mirror;
-    //  AnyDrawRefFrame drw={RGB={0,1,0};};
-  };
-  
-  AnyRefNode Via_Extensor_Carpi_Radialis_Brevis ={
-    sRel = .Scale({-0.218, -0.03, 0.02})*.Mirror;
-    //       AnyDrawRefFrame drw={RGB={0,0,1};};
-  };
-  
-  AnyRefNode Via_Extensor_Carpi_Radialis_Longus ={
-    sRel = .Scale({-0.223, -0.03, 0.025})*.Mirror;
-    //       AnyDrawRefFrame drw={RGB={0,0,1};};
-  };
-  
-  AnyRefNode Via_Flexor_Digitorum_Superficialis_Digit2 ={
-    sRel = .Scale({-0.227, -0.028, -0.005})*.Mirror;
-    //AnyDrawRefFrame drw={RGB={0,0,1};};
-  };
-  
-  AnyRefNode Via_Flexor_Digitorum_Superficialis_Digit3 ={
-    sRel = .Scale({-0.227, -0.024, -0.005})*.Mirror;
-    //AnyDrawRefFrame drw={RGB={0,0,1};};
-  };
-  
-  AnyRefNode Via_Flexor_Digitorum_Superficialis_Digit4 ={
-    sRel = .Scale({-0.227, -0.02, -0.006})*.Mirror;
-    //AnyDrawRefFrame drw={RGB={0,0,1};};
-  };
-  
-  AnyRefNode Via_Flexor_Digitorum_Superficialis_Digit5 ={
-    sRel = .Scale({-0.227, -0.016, -0.006})*.Mirror;
-    //AnyDrawRefFrame drw={RGB={0,0,1};};
-  };
-  
-  AnyRefNode Via_Flexor_Digitorum_Profundus_Digit2 ={
-    sRel = .Scale({-0.22, -0.02, -0.005})*.Mirror;
-    // AnyDrawRefFrame drw={RGB={0,0,1};};
-  };
-  
-  AnyRefNode Via_Flexor_Digitorum_Profundus_Digit3 ={
-    sRel = .Scale({-0.22, -0.018, -0.005})*.Mirror;
-    //AnyDrawRefFrame drw={RGB={0,0,1};};
-  };
-  
-  AnyRefNode Via_Flexor_Digitorum_Profundus_Digit4 ={
-    sRel = .Scale({-0.22, -0.016, -0.005})*.Mirror;
-    //AnyDrawRefFrame drw={RGB={0,0,1};};
-  };
-  
-  AnyRefNode Via_Flexor_Digitorum_Profundus_Digit5 ={
-    sRel = .Scale({-0.22, -0.014, -0.005})*.Mirror;
-    // AnyDrawRefFrame drw={RGB={0,0,1};};
-  };
- 
-  AnyRefNode Via_Extensor_Digitorum_Digit2 ={
-    sRel = .Scale({-0.216, -0.03, 0.025})*.Mirror;
-    //   AnyDrawRefFrame drw={RGB={0,0,1};};
-  };
-  
-  AnyRefNode Via_Extensor_Digitorum_Digit3 ={
-    sRel = .Scale({-0.216, -0.028, 0.025})*.Mirror;
-    //   AnyDrawRefFrame drw={RGB={0,0,1};};
-  };
-  
-  AnyRefNode Via_Extensor_Digitorum_Digit4 ={
-    sRel = .Scale({-0.216, -0.026, 0.025})*.Mirror;
-    //   AnyDrawRefFrame drw={RGB={0,0,1};};
-  };
-  
-  AnyRefNode Via_Extensor_Digitorum_Digit5 ={
-    sRel = .Scale({-0.216, -0.024, 0.025})*.Mirror;
-    //   AnyDrawRefFrame drw={RGB={0,0,1};};
-  };
-  
-  
-  AnyRefNode Via_Extensor_Digiti_Minimi={
-    sRel = .Scale({-0.216, -0.015, 0.025})*.Mirror; //guesstimate
-    //   AnyDrawRefFrame drw={RGB={0,1,0};};
-  };
-  
-  AnyRefNode Via_Flexor_Pollicis_Longus={
-    sRel = .Scale({-0.216, -0.025, -0.01})*.Mirror; //guesstimate
-    //   AnyDrawRefFrame drw={RGB={0,1,0};};
-  };
 
-  
-  AnyRefNode Via_Palmaris_Longus={
-    sRel = .Scale({-0.225, -0.01, -0.006})*.Mirror; //guesstimate
-    //  AnyDrawRefFrame drw={RGB={0,1,0};};
-  };
-  
-  //It is used for wrapping of the flexor muscles.
   AnyRefNode MedialExtensorCyl= { 
     
-    sRel = .wj.sRel+.Scale({0,0.05,0})*.Mirror;
+    AnyVec3 AxisScaled = -(.wj.sRel-P1_scaled)/vnorm(.wj.sRel-P1_scaled);
+    sRel = .wj.sRel + AxisScaled *0.05;  // 5 cm offset from WJ along scaled axis
+    AnyVec3 P2 = sRel - AxisScaled *0.14;  // 9 cm offset from WJ along scaled axis
+   
+    AnyVec3 P1_scaled= .Scale(.Data.MedialExtensorCyl_pos*.Mirror);
+    AnyVec3 P3_scaled =.Scale(.Data.MedialExtensorCyl_P3_pos*.Mirror);
+    AnyVec3 P2_scaled =.Scale(.Data.MedialExtensorCyl_P2_pos*.Mirror);
     
-    AnyVec3 P1= sRel;
-    AnyVec3 P3 =P1+ .Scale({0.0,0.0,0.0115})*.Mirror;
-    AnyVec3 P2 =P1+ .Scale({0.0, -0.14,0.0})*.Mirror;
-    
-    //Calculate rot matrix for cylinder using three points
-    //p2-p1 used to find x axis
-    //p3-p1 used to find the y axis
-    //z axis found as cross product
-    AnyMat33  Mat = RotMat(sRel,P3,P2);
-    
-    //Switch around the on the columns to compensate that the cylinder has 
-    //main axis along the zaxis
-    ARel={
-      {Mat[0][2],Mat[0][0],Mat[0][1]},
-      {Mat[1][2],Mat[1][0],Mat[1][1]},
-      {Mat[2][2],Mat[2][0],Mat[2][1]}};          
+    //Calculate orientation of the cylinder
+    ARel=RotMat(P1_scaled,P3_scaled,P2_scaled)*RotMat(-90/180*pi, z)*RotMat(-90/180*pi, y);          
     
     AnySurfCylinder cyl = { 
-      Radius=((.sRel[0]-.P3[0])^2+(.sRel[1]-.P3[1])^2+(.sRel[2]-.P3[2])^2)^0.5;
-      Length= ((.sRel[0]-.P2[0])^2+(.sRel[1]-.P2[1])^2+(.sRel[2]-.P2[2])^2)^0.5;
-      //AnyDrawParamSurf drw={Opacity = 0.6;};
+      Radius = vnorm(.P1_scaled-.P3_scaled);
+      Length = vnorm(.sRel-.P2);
     };
   };
   
   
+  #include "../DrawSettings/SegmentAxes.any"
   
+  AnyRefNode I_Biceps_LH                      = {sRel = .Scale(.Data.I_Biceps_LH_pos*.Mirror);};
+  AnyRefNode I_Biceps_SH                      = {sRel = .Scale(.Data.I_Biceps_SH_pos*.Mirror);};
+  AnyRefNode I_Brach_rad_1                    = {sRel = .Scale(.Data.I_Brach_rad_1_pos*.Mirror);};
+  AnyRefNode I_Brach_rad_2                    = {sRel = .Scale(.Data.I_Brach_rad_2_pos*.Mirror);};
+  AnyRefNode I_Pronator_teres_caput_humeral_1 = {sRel = .Scale(.Data.I_Pronator_teres_caput_humeral_1_pos*.Mirror);};
+  AnyRefNode I_Pronator_teres_caput_humeral_2 = {sRel = .Scale(.Data.I_Pronator_teres_caput_humeral_2_pos*.Mirror);};
+  AnyRefNode I_Pronator_teres_caput_ulnare_1  = {sRel = .Scale(.Data.I_Pronator_teres_caput_ulnare_1_pos*.Mirror);};  
+  AnyRefNode I_Supinator_humerus_part_1       = {sRel = .Scale(.Data.I_Supinator_humerus_part_1_pos*.Mirror);};
+  AnyRefNode I_Supinator_humerus_part_2       = {sRel = .Scale(.Data.I_Supinator_humerus_part_2_pos*.Mirror);};
+  AnyRefNode I_Supinator_ulna_part_1          = {sRel = .Scale(.Data.I_Supinator_ulna_part_1_pos*.Mirror);};
+  AnyRefNode I_Supinator_ulna_part_2          = {sRel = .Scale(.Data.I_Supinator_ulna_part_2_pos*.Mirror);};
+  AnyRefNode I_Pron_quadr_1                   = {sRel = .Scale(.Data.I_Pron_quadr_1_pos*.Mirror);};  
+  AnyRefNode I_Pron_quadr_2                   = {sRel = .Scale(.Data.I_Pron_quadr_2_pos*.Mirror);};  
+  AnyRefNode O_Extensor_Pollicis_Brevis       = {sRel = .Scale(.Data.O_Extensor_Pollicis_Brevis_pos*.Mirror);};  
+  AnyRefNode Via_Extensor_Indicis             = {sRel = .Scale(.Data.Via_Extensor_Indicis_pos*.Mirror);};  
+  AnyRefNode Via_Extensor_Pollicis_Longus     = {sRel = .Scale(.Data.Via_Extensor_Pollicis_Longus_pos*.Mirror);};  
+  AnyRefNode Via_Extensor_Pollicis_Brevis     = {sRel = .Scale(.Data.Via_Extensor_Pollicis_Brevis_pos*.Mirror);};
+  AnyRefNode Via_Abductor_Pollicis_Longus     = {sRel = .Scale(.Data.Via_Abductor_Pollicis_Longus_pos*.Mirror);};  
+  AnyRefNode Via_Flexor_Carpi_Ulnaris         = {sRel = .Scale(.Data.Via_Flexor_Carpi_Ulnaris_pos*.Mirror);};  
+  AnyRefNode Via_Flexor_Carpi_Radialis        = {sRel = .Scale(.Data.Via_Flexor_Carpi_Radialis_pos*.Mirror);};  
+  AnyRefNode O_Flexor_Pollicis_Longus         = {sRel = .Scale(.Data.O_Flexor_Pollicis_Longus_pos*.Mirror);};  
+  AnyRefNode O_Flexor_Digitorum_Superficialis          = {sRel = .Scale(.Data.O_Flexor_Digitorum_Superficialis_pos*.Mirror);};  
+  AnyRefNode Via_Extensor_Carpi_Radialis_Brevis        = {sRel = .Scale(.Data.Via_Extensor_Carpi_Radialis_Brevis_pos*.Mirror);};  
+  AnyRefNode Via_Extensor_Carpi_Radialis_Longus        = {sRel = .Scale(.Data.Via_Extensor_Carpi_Radialis_Longus_pos*.Mirror);};  
+  AnyRefNode Via_Flexor_Digitorum_Superficialis_Digit2 = {sRel = .Scale(.Data.Via_Flexor_Digitorum_Superficialis_Digit2_pos*.Mirror);};  
+  AnyRefNode Via_Flexor_Digitorum_Superficialis_Digit3 = {sRel = .Scale(.Data.Via_Flexor_Digitorum_Superficialis_Digit3_pos*.Mirror);};  
+  AnyRefNode Via_Flexor_Digitorum_Superficialis_Digit4 = {sRel = .Scale(.Data.Via_Flexor_Digitorum_Superficialis_Digit4_pos*.Mirror);};  
+  AnyRefNode Via_Flexor_Digitorum_Superficialis_Digit5 = {sRel = .Scale(.Data.Via_Flexor_Digitorum_Superficialis_Digit5_pos*.Mirror);};
+  AnyRefNode Via_Flexor_Digitorum_Profundus_Digit2     = {sRel = .Scale(.Data.Via_Flexor_Digitorum_Profundus_Digit2_pos*.Mirror);};  
+  AnyRefNode Via_Flexor_Digitorum_Profundus_Digit3     = {sRel = .Scale(.Data.Via_Flexor_Digitorum_Profundus_Digit3_pos*.Mirror);};  
+  AnyRefNode Via_Flexor_Digitorum_Profundus_Digit4     = {sRel = .Scale(.Data.Via_Flexor_Digitorum_Profundus_Digit4_pos*.Mirror);};  
+  AnyRefNode Via_Flexor_Digitorum_Profundus_Digit5     = {sRel = .Scale(.Data.Via_Flexor_Digitorum_Profundus_Digit5_pos*.Mirror);}; 
+  AnyRefNode Via_Extensor_Digitorum_Digit2             = {sRel = .Scale(.Data.Via_Extensor_Digitorum_Digit2_pos*.Mirror);};  
+  AnyRefNode Via_Extensor_Digitorum_Digit3             = {sRel = .Scale(.Data.Via_Extensor_Digitorum_Digit3_pos*.Mirror);};  
+  AnyRefNode Via_Extensor_Digitorum_Digit4             = {sRel = .Scale(.Data.Via_Extensor_Digitorum_Digit4_pos*.Mirror);};  
+  AnyRefNode Via_Extensor_Digitorum_Digit5             = {sRel = .Scale(.Data.Via_Extensor_Digitorum_Digit5_pos*.Mirror);};  
+  AnyRefNode Via_Extensor_Digiti_Minimi                = {sRel = .Scale(.Data.Via_Extensor_Digiti_Minimi_pos*.Mirror);};  
+  AnyRefNode Via_Flexor_Pollicis_Longus                = {sRel = .Scale(.Data.Via_Flexor_Pollicis_Longus_pos*.Mirror);};
+  AnyRefNode Via_Palmaris_Longus                       = {sRel = .Scale(.Data.Via_Palmaris_Longus_pos*.Mirror);};
   
 }; 
+
+
 
 
 

@@ -1,10 +1,14 @@
-
-//This is the calibration4 file it will calibrate specfic muscles on the leg
+//This is the calibration4 file, it will calibrate specific muscles of the leg
 AnyFolder LegCal6={
   
-  AnyFolder &Pelvis = ...HumanFolderRef.Trunk.SegmentsLumbar.PelvisSeg; //This is a reference to the folder which holds the human part of the model
-  AnyFolder &LegSegSide = .SideHumanFolderRef.Leg.Seg; //This is a reference to the folder which holds the human part of the model
-  AnyFolder &JointsCal6 = .SideHumanFolderRef.Leg.Jnt; 
+  AnyFolder &Pelvis = ...HumanFolderRef.Trunk.SegmentsLumbar.PelvisSeg;
+  AnyFolder &Sacrum = ...HumanFolderRef.Trunk.SegmentsLumbar.SacrumSeg;
+  
+  AnyFolder &LegSegSide = .SideHumanFolderRef.Leg.Seg;
+  
+  AnyFolder &LegJointsSide = .SideHumanFolderRef.Leg.Jnt;
+  AnyFolder &SacrumPelvisJnt = ...HumanFolderRef.Trunk.JointsLumbar.SacrumPelvisJnt;
+
   
   AnyFixedRefFrame ground = {
     AnyRefNode node = { 
@@ -13,34 +17,67 @@ AnyFolder LegCal6={
     };
   };
   
-  
-  AnyKinEq PelvisGround ={
-    
-    AnyKinLinear Lin ={    
-      AnyRefFrame &Ground = ..ground.node;
-      AnySeg &Sacrum= .....HumanFolderRef.Trunk.SegmentsLumbar.PelvisSeg; 
-    };
-    
-    AnyKinRotational rot ={    
-      AnyRefFrame &Ground = ..ground.node;
-      AnySeg &Sacrum= .....HumanFolderRef.Trunk.SegmentsLumbar.PelvisSeg; 
-      Type=RotAxesAngles;
-    };
-    Reaction.Type = {Off,Off,Off,Off,Off,Off}; 
-
+  AnyRevoluteJoint PelvisGround={
+    AnyRefFrame &Ground = .ground.node;
+    AnyRefFrame &Sacrum= ....HumanFolderRef.Trunk.SegmentsLumbar.PelvisSeg; 
+    Axis=z;
   };
   
+  AnyKinEqSimpleDriver PelvisGroundRot = {
+    AnyRevoluteJoint &Jnt = .PelvisGround;
+    DriverPos = {0};
+    DriverVel = {0};
+    Reaction.Type = {Off}; 
+  };
   
+  AnyKinEqSimpleDriver PelvisSacrumFix = {
+    AnyKinMeasure &Jnt = .SacrumPelvisJnt;
+    DriverPos = {0,0,0};
+    DriverVel = {0,0,0};
+    Reaction.Type = {Off,Off,Off}; 
+  }; 
+
+#if TLEM_MORPHOLOGY == 1 
   AnyKinEqSimpleDriver JntDOFDriver = {
     AnyKinMeasure &Joint = ..SideHumanFolderRef.Leg.JntDOF;
     DriverPos = {-5*pi/180,0,-80*pi/180,..Sign*-10*pi/180,0,-50*pi/180}; //10 degrees plantar flexion  
-    //    DriverPos = {1.,0.0,0,0,0,-1};
+    //DriverPos = {1.,0.0,0,0,0,-1};
     DriverVel = {0.0,0,0,0,0,0};
     Reaction.Type = {Off,Off,Off,Off,Off,Off};
   };//JntDOFDriver
-  
-  
-  
+#endif
+
+#if TLEM_MORPHOLOGY == 2  
+    AnyKinEqSimpleDriver Hip = {
+    AnySphericalJoint &Spherical = .LegJointsSide.Hip;
+    MeasureOrganizer = {2,0,1}; // flexion/extension, abduction/adduction, internal/external rotation
+    DriverPos = {0,..Sign*-5,..Sign*5}*pi/180;
+    DriverVel = {0,0,0}*pi/180;
+    Reaction.Type = {Off,Off,Off};
+  };
+    
+  AnyKinEqSimpleDriver Knee = {
+    AnyRevoluteJoint &Hinge = .LegJointsSide.Knee;
+    DriverPos = {0*pi/180};
+    DriverVel = {0*pi/180};
+    Reaction.Type = {Off};
+  };
+    
+  AnyKinEqSimpleDriver Ankle = {
+    AnyRevoluteJoint &Hinge = .LegJointsSide.Ankle;
+    DriverPos = {0*pi/180}; 
+    DriverVel = {0*pi/180};
+    Reaction.Type = {Off};
+  };
+
+  AnyKinEqSimpleDriver SubTalar = {
+    AnyRevoluteJoint &Hinge = .LegJointsSide.SubTalar;
+    DriverPos = {0*pi/180};
+    DriverVel = {0*pi/180}; 
+    Reaction.Type = {Off};
+  };
+//
+#endif
   
   //AnyFolder &MuscleParCal6 =.SideHumanFolderRef.Leg.MusPar;
   
@@ -49,6 +86,11 @@ AnyFolder LegCal6={
     AnyViaPointMuscle &GluteusMinimusAnterior1 =  ..SideHumanFolderRef.Leg.Mus.GluteusMinimusAnterior1;
     AnyViaPointMuscle &GluteusMinimusMid1 =  ..SideHumanFolderRef.Leg.Mus.GluteusMinimusMid1;
     AnyViaPointMuscle &GluteusMinimusPosterior1 =  ..SideHumanFolderRef.Leg.Mus.GluteusMinimusPosterior1;
+#if TLEM_MORPHOLOGY == 2
+    AnyViaPointMuscle &GluteusMinimusAnterior2 =  ..SideHumanFolderRef.Leg.Mus.GluteusMinimusAnterior2;
+    AnyViaPointMuscle &GluteusMinimusMid2 =  ..SideHumanFolderRef.Leg.Mus.GluteusMinimusMid2;
+    AnyViaPointMuscle &GluteusMinimusPosterior2 =  ..SideHumanFolderRef.Leg.Mus.GluteusMinimusPosterior2;
+#endif  
     AnyViaPointMuscle &GluteusMediusAnterior1 =  ..SideHumanFolderRef.Leg.Mus.GluteusMediusAnterior1;
     AnyViaPointMuscle &GluteusMediusAnterior2 =  ..SideHumanFolderRef.Leg.Mus.GluteusMediusAnterior2;
     AnyViaPointMuscle &GluteusMediusAnterior3 =  ..SideHumanFolderRef.Leg.Mus.GluteusMediusAnterior3;
@@ -62,6 +104,7 @@ AnyFolder LegCal6={
     AnyViaPointMuscle &GluteusMediusPosterior5 =  ..SideHumanFolderRef.Leg.Mus.GluteusMediusPosterior5;
     AnyViaPointMuscle &GluteusMediusPosterior6 =  ..SideHumanFolderRef.Leg.Mus.GluteusMediusPosterior6;
     
+#if TLEM_MORPHOLOGY == 1 
     
     AnyViaPointMuscle &SoleusMedialis1 =  ..SideHumanFolderRef.Leg.Mus.SoleusMedialis1;
     AnyViaPointMuscle &SoleusMedialis2 =  ..SideHumanFolderRef.Leg.Mus.SoleusMedialis2;
@@ -97,12 +140,17 @@ AnyFolder LegCal6={
     
     AnyViaPointMuscle &GemellusInferior1 = ..SideHumanFolderRef.Leg.Mus.GemellusInferior1;
     AnyViaPointMuscle &GemellusSuperior1 = ..SideHumanFolderRef.Leg.Mus.GemellusSuperior1;
+#endif
+#if TLEM_MORPHOLOGY == 2
+    AnyViaPointMuscle &TensorFasciaeLatae1 =  ..SideHumanFolderRef.Leg.Mus.TensorFasciaeLatae1;
+
+    AnyViaPointMuscle &TensorFasciaeLatae2 =  ..SideHumanFolderRef.Leg.Mus.TensorFasciaeLatae2;
+
     
+#endif    
   };
   
 };
-
-
 
 // The study: Operations to be performed on the model
 AnyBodyCalibrationStudy LegCalibrationStudy6 = {
@@ -110,5 +158,3 @@ AnyBodyCalibrationStudy LegCalibrationStudy6 = {
   nStep = 1;
   InitialConditions.SolverType = KinSolOverDeterminate;
 };
-
-

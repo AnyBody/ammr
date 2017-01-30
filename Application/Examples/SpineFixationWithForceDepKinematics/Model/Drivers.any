@@ -5,7 +5,7 @@ AnyFolder Drivers = {
   AnyFolder &JntVel=..Mannequin.PostureVel;  
   
   // this definition switches on the force-dependent constraints, otherwise the original spine rhythm is used
-  #if BM_SPINE_RHYTHM == OFF
+  #if BM_TRUNK_LUMBAR_RHYTHM == OFF
   
   // the following section is used to control the order of rotational axes
   refJoints.T12L1Jnt.Orientation.Type = RotAxesAngles;
@@ -66,23 +66,26 @@ AnyFolder Drivers = {
       //Off,Off,Off                                                // commented joint
       };
   };
+   // negligible motion between sacrum and pelvis
+   AnyKinEqSimpleDriver SacrumPelvisDriver = {
+     AnySphericalJoint &Jnt = Main.HumanModel.BodyModel.Trunk.JointsLumbar.SacrumPelvisJnt;
+     DriverPos = pi/180*{0.0, 0.0, 0.0};
+     DriverVel = pi/180*{0.0, 0.0, 0.0};
+     Reaction.Type = {Off, Off, Off};
+   };    
   #endif
   
   // NECK JOINT DRIVER 
   // controls flexion/extension of the neck
   AnyKinEqSimpleDriver NeckJntDriver = {
-    AnyRevoluteJoint &T12L1Joint = ...HumanModel.Interface.Trunk.NeckJoint;
-    DriverPos = pi/180*{.JntPos.NeckExtension};
-    DriverVel = pi/180*{.JntVel.NeckExtension};
-    Reaction.Type = {Off};
-  };
-  // negligible motion between sacrum and pelvis
-  AnyKinEqSimpleDriver SacrumPelvisDriver = {
-    AnySphericalJoint &Jnt = Main.HumanModel.BodyModel.Trunk.JointsLumbar.SacrumPelvisJnt;
-    DriverPos = pi/180*{0.0, 0.0, 0.0};
-    DriverVel = pi/180*{0.0, 0.0, 0.0};
+    AnyKinMeasure &lb = ...HumanModel.Interface.Trunk.SkullThoraxLateralBending;
+    AnyKinMeasure &ar = ...HumanModel.Interface.Trunk.SkullThoraxRotation;
+    AnyKinMeasure &fe = ...HumanModel.Interface.Trunk.SkullThoraxFlexion;
+    DriverPos = pi/180*{.JntPos.NeckLateralBending, .JntPos.NeckRotation, .JntPos.NeckExtension};
+    DriverVel = pi/180*{.JntVel.NeckLateralBending, .JntVel.NeckRotation, .JntVel.NeckExtension};
     Reaction.Type = {Off, Off, Off};
-  };  
+  };
+
   // THORAX PELVIS ROTATION DRIVER 
   // controls posture of the human 
   AnyKinEqSimpleDriver PostureDriver ={

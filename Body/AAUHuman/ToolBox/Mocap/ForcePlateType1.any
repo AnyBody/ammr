@@ -1,0 +1,306 @@
+
+#class_template ForcePlateType1 (PlateName, Folder,AnySeg &Limb, No, Fx, Fy, Fz, Px, Py, Mz )
+{
+  
+  #var AnySwitch Switch_DrawForceVectorFromCOP = On;
+  
+  AnyFixedRefFrame Corners ={
+    AnyVar CoordinateSystemSize= 0.1;
+    
+    AnyRefNode c01={
+      AnyInt i=0;
+      AnyInt plnr=No;
+      sRel=0.001*{Folder.Groups.FORCE_PLATFORM.CORNERS.Data[plnr][i][0],Folder.Groups.FORCE_PLATFORM.CORNERS.Data[No][i][1],Folder.Groups.FORCE_PLATFORM.CORNERS.Data[No][i][2]};
+      AnyDrawNode drw={ScaleXYZ=0.01*{1,1,1};RGB={1,0,0};};
+      AnyDrawVector  DrawName = {
+        Vec = {0.0,0,0};  //use zero length
+        Line.Thickness = 0.025; //arbitary value
+        Text = "1"; //make reference to name
+        Line.RGB={1,0,0};//make reference to color
+      };
+    };
+    
+    AnyRefNode c02={
+      AnyInt i=1;
+      AnyInt plnr=No;
+      sRel=0.001*{Folder.Groups.FORCE_PLATFORM.CORNERS.Data[plnr][i][0],Folder.Groups.FORCE_PLATFORM.CORNERS.Data[No][i][1],Folder.Groups.FORCE_PLATFORM.CORNERS.Data[No][i][2]};
+      AnyDrawNode drw={ScaleXYZ=0.01*{1,1,1};RGB={1,0,0};};
+      AnyDrawVector  DrawName = {
+        Vec = {0.0,0,0};  //use zero length
+        Line.Thickness = 0.025; //arbitary value
+        Text = "2"; //make reference to name
+        Line.RGB={1,0,0};//make reference to color
+      };
+    };
+    
+    AnyRefNode c03={
+      AnyInt i=2;
+      AnyInt plnr=No;
+      sRel=0.001*{Folder.Groups.FORCE_PLATFORM.CORNERS.Data[plnr][i][0],Folder.Groups.FORCE_PLATFORM.CORNERS.Data[No][i][1],Folder.Groups.FORCE_PLATFORM.CORNERS.Data[No][i][2]};
+      AnyDrawNode drw={ScaleXYZ=0.01*{1,1,1};RGB={1,0,0};};
+      
+      AnyDrawVector  DrawName = {
+        Vec = {0.0,0,0};  //use zero length
+        Line.Thickness = 0.025; //arbitary value
+        Text = "3"; //make reference to name
+        Line.RGB={1,0,0};//make reference to color
+      };
+    };
+    
+    AnyRefNode c04={
+      AnyInt i=3;
+      AnyInt plnr=No;
+      sRel=0.001*{Folder.Groups.FORCE_PLATFORM.CORNERS.Data[plnr][i][0],Folder.Groups.FORCE_PLATFORM.CORNERS.Data[No][i][1],Folder.Groups.FORCE_PLATFORM.CORNERS.Data[No][i][2]};
+      AnyDrawNode drw={ScaleXYZ=0.01*{1,1,1};RGB={1,0,0};};
+      AnyDrawVector  DrawName = {
+        Vec = {0.0,0,0};  //use zero length
+        Line.Thickness = 0.025; //arbitary value
+        Text = "4"; //make reference to name
+        Line.RGB={1,0,0};//make reference to color
+      };
+      
+    };
+    
+    
+    AnyRefNode PlateCenter={
+      sRel=0.25*(.c01.sRel+.c02.sRel+.c03.sRel+.c04.sRel);
+      AnyVec3 p1=sRel;
+      AnyVec3 p2=0.5*(.c01.sRel+.c04.sRel);
+      AnyVec3 p3=0.5*(.c01.sRel+.c02.sRel);
+      ARel =RotMat(p1,p2,p3);
+      
+      //      AnyDrawRefFrame drw={ScaleXYZ=..CoordinateSystemSize*{1,1,1};RGB={0,1,0};};
+      
+    };
+    
+  };
+  
+  
+  
+  
+  AnySeg ForcePlate={
+    Mass=0.0;
+    Jii={0,0,0};
+    r0=.Corners.PlateCenter.sRel;
+    
+    //Rotational tranformation matrix for a coordinate system defined by three points. The first point is the origin of the system; the second gives the direction of the first (x) axis. Together all three points must span a plane which will be the plane of the first (x) and the second (y) axes, having the third (z) axis as normal. 
+    AnyVec3 p1=.Corners.PlateCenter.sRel;
+    AnyVec3 p2=0.5*(.Corners.c01.sRel+.Corners.c04.sRel);
+    AnyVec3 p3=0.5*(.Corners.c01.sRel+.Corners.c02.sRel);
+    Axes0 =RotMat(p1,p2,p3);
+    
+    AnyInt plnr=No;
+    AnyVar z_check = iffun(gtfun(Origins[plnr][2], 0), 1, -1);
+    AnyFloat Origins= Folder.Groups.FORCE_PLATFORM.ORIGIN.Data;
+    AnyMessage Origin_Z_value_message= 
+    {
+      TriggerConst = iffun(gteqfun(.z_check,0), 1, 0);
+      Type = MSG_Message ;
+      Message = "The older AMTI origin has its Z value as positive. So this value is converted automatically. Please refer to www.c3d.org/HTML/type21.htm.";
+    };
+    //Transducer location      
+    AnyRefNode TransducerLocation =
+    {
+      AnyFloat Origins= Folder.Groups.FORCE_PLATFORM.ORIGIN.Data;
+      AnyVar xdist=.z_check*Origins[.plnr][0]*Folder.PointsScaleFactor;//distance from x axis on transducer to x axis of center of plate
+      AnyVar ydist=.z_check*Origins[.plnr][1]*Folder.PointsScaleFactor; //distance from y axis on transducer to y axis of center of plate
+      AnyVar zdist=.z_check*Origins[.plnr][2]*Folder.PointsScaleFactor;//distance from z axis on transducer to z surface of plate
+      
+      sRel={xdist,ydist,zdist};
+      AnyDrawRefFrame drw={ScaleXYZ=0.4*{1,1,1};RGB={1,0,0};};
+    };
+    
+    
+    AnyRefNode PlateGraphics ={
+      sRel={0,0,0.05};
+      
+      AnyVec3 Size={vnorm(..Corners.c01.sRel-..Corners.c02.sRel,2),vnorm(..Corners.c02.sRel-..Corners.c03.sRel,2),0.1};
+      
+      AnyDrawSurf DrwBox = {
+        FileName = "box";
+        RGB = 0.45*{1,1,1};
+        ScaleXYZ=.Size/0.30;
+        Opacity =0.4;
+        Face=-1;
+      };
+      
+    };
+    
+  };  
+  
+  AnyKinEqSimpleDriver ForcePlateDriver =
+  {
+    AnyKinLinear ForcePlateLin={
+      AnyRefNode &ref1=..Corners.PlateCenter;
+      AnySeg &ref2=..ForcePlate;
+      Ref=0;
+    };
+    
+    AnyKinRotational ForcePlateRot={
+      AnyRefNode &ref1=..Corners.PlateCenter;
+      AnySeg &ref2=..ForcePlate;
+      Type=RotAxesAngles;
+    };
+    DriverPos={0,0,0,0,0,0}; 
+    DriverVel={0,0,0,0,0,0};
+    Reaction.Type = {On,On,On,On,On,On};
+  };
+ 
+  AnyReacForce PlateFootReaction =
+  {
+    AnyKinLinear Lin=
+    {
+      Ref=0;
+      AnySeg &ref2=..CenterOfPressure.CP_Seg;
+      AnySeg &ref1=..Limb;
+    };
+    
+    AnyKinRotational Rot=
+    {
+      AnySeg &ref2=..CenterOfPressure.CP_Seg;
+      AnySeg &ref1=..Limb;
+      Type=RotAxesAngles;
+    };
+  };   
+  
+  AnyInt   EndFrame =Folder.Header.FirstFrameNo-1+(Folder.Header.LastFrameNo-Folder.Header.FirstFrameNo+1)* Folder.Header.NoAnalogSamplesPer3DFrame;
+  AnyFloatVar  tStart = Folder.Header.FirstFrameNo/Folder.Header.VideoFrameRate;
+  AnyFloatVar   tEnd =  Folder.Header.LastFrameNo/Folder.Header.VideoFrameRate;
+  
+  AnyInt AnalogData=EndFrame-Folder.Header.FirstFrameNo;
+  AnyFloat Time=tStart+(iarr(0,AnalogData)*(tEnd-tStart)/AnalogData);
+  
+  
+  /// A lowpass butterworth filter
+  AnyFunButterworthFilter LowPassFilter = 
+  {
+    FilterForwardBackwardOnOff = On;
+    AutomaticInitialConditionOnOff = On;
+    N = 2;
+    AnyVar CutOffFrequency=15;
+    AnyVar SampleFreq=Folder.Header.VideoFrameRate* Folder.Header.NoAnalogSamplesPer3DFrame   ;
+    W = {1/(SampleFreq*0.5)*CutOffFrequency};
+    Type = LowPass;
+  };
+  
+  AnyFunInterpol input_force =
+  {
+    Type=PiecewiseLinear;
+    T=.Time;
+    Data={Fx,Fy,Fz};
+    //  Data=.Cal'*{.LowPassFilter(Fx),.LowPassFilter(Fy),.LowPassFilter(Fz),.LowPassFilter(Mx),.LowPassFilter(My),.LowPassFilter(Mz)};
+  }; 
+  
+  AnyFunInterpol input_moment = 
+  {
+    Type=PiecewiseLinear;
+    T=.Time;
+    Data={Mz}*Folder.PointsScaleFactor;
+  };
+  
+  AnyFunInterpol input_cp =
+  {
+    Type=PiecewiseLinear;
+    T=.Time;
+    Data={Px, Py}*Folder.PointsScaleFactor;
+  };
+  
+  AnyVar FzTotal=input_force(ForcePlateDriver.t)[2];
+  AnyVar OnOff=iffun(gtfun(-FzTotal,10.0),1.0,0.0);
+  
+  AnyForce3D Force =
+  {
+    AnyRefFrame  &ref = .CenterOfPressure.CP_Seg ;
+    Flocal=.OnOff*{.input_force(.ForcePlateDriver.t)[0],.input_force(.ForcePlateDriver.t)[1],.input_force(.ForcePlateDriver.t)[2]};
+    AnyDrawVector DrawForce =     
+    {
+      AnyRefFrame &ref=.ref;
+      Vec=.Flocal*Folder.PointsScaleFactor;
+      PointAway = Off;
+      DrawCoord = Off;
+      
+      Line.RGB ={0,0,1};
+      Line.Thickness = 0.01;
+      Line.End.Thickness = 2*0.01;
+      Line.End.Length = 4*0.01;
+      GlobalCoord=Off;
+    };
+  };  
+  
+  
+  AnyMoment3D Moment =
+  {
+    AnyRefFrame  &ref = .CenterOfPressure.CP_Seg ;
+    Mlocal=.OnOff*{0.0, 0.0, .input_moment(.ForcePlateDriver.t)[0]};
+    AnyDrawVector DrawMoment =     
+    {
+      AnyRefFrame &ref=.ref;
+      Vec=.Mlocal*Folder.PointsScaleFactor;
+      PointAway = Off;
+      DrawCoord = Off;
+      
+      Line.RGB ={0,1,1};
+      Line.Thickness = 0.01;
+      Line.End.Thickness = 2*0.01;
+      Line.End.Length = 4*0.01;
+      GlobalCoord=Off;
+    };
+  };   
+  
+  AnyFolder CenterOfPressure = 
+  {
+    AnySeg CP_Seg =
+    {
+      Mass = 0;
+      Jii = {0, 0, 0};
+      r0 = ..ForcePlate.r0 ;
+      Axes0 = ..ForcePlate.Axes0;
+      AnyDrawSphere Drw = 
+      {
+        Opacity = ...OnOff ;
+        RGB = {0,1,0};
+        ScaleXYZ = 0.015 *{1,1,1};
+      };
+    };
+    
+    AnyKinEq CP_On_ForcePlate = 
+    {
+      AnyKinLinear lin = 
+      {
+        AnyRefFrame& ref0 = ...ForcePlate;
+        AnyRefFrame& ref1 = ..CP_Seg;
+        Ref = 0;
+      };
+      AnyKinRotational rot = 
+      {
+        AnyRefFrame& ref0 = ...ForcePlate;
+        AnyRefFrame& ref1 = ..CP_Seg;
+        Type = PlanarAngles;      
+      };
+      MeasureOrganizer = {2, 3, 4, 5};
+      //Reaction.Type = {On, On, On, On};
+      Reaction.Type = {Off, Off, Off, Off};
+    };
+    
+    AnyKinEqInterPolDriver CP_Driver =
+    {
+      AnyKinLinear lin = 
+      {
+        AnyRefFrame& ref0 = ...ForcePlate;
+        AnyRefFrame& ref1 = ..CP_Seg;
+        Ref = 0;
+      };
+      MeasureOrganizer = {0, 1};
+      Type=PiecewiseLinear;
+      T=..Time;
+      Data=..input_cp.Data;
+      //Reaction.Type = {On, On};
+      Reaction.Type = {Off, Off};
+    };    
+  };
+  
+};
+
+
+
+

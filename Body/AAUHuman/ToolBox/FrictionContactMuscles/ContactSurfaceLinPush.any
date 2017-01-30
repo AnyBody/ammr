@@ -1,4 +1,3 @@
-
 AnyFolder Push ={
   
   AnyKinLinear LinS={
@@ -12,17 +11,17 @@ AnyFolder Push ={
     AnyKinLinear &ref=.LinS;
     MeasureOrganizer={..Direction[0]};
   };
-
-    AnyKinMeasureOrg LinMeasureOrg1 ={
+  
+  AnyKinMeasureOrg LinMeasureOrg1 ={
     AnyKinLinear &ref=.LinS;
     MeasureOrganizer={..Direction[1]};
   };
-
-    AnyKinMeasureOrg LinMeasureOrg2 ={
+  
+  AnyKinMeasureOrg LinMeasureOrg2 ={
     AnyKinLinear &ref=.LinS;
     MeasureOrganizer={..Direction[2]};
   };
-
+  
   
   AnyVar UserDefinedMeasure=LinMeasureOrg0.Pos[0];
   AnyVar RadiusMeasure=sqrt(LinMeasureOrg1.Pos[0]^2+LinMeasureOrg2.Pos[0]^2);
@@ -31,12 +30,11 @@ AnyFolder Push ={
   AnyIntVar LowerThanHighLimit = ltfun(UserDefinedMeasure,.UserDefinedLimitHigh);
   AnyIntVar GreaterThanLowLimit = gtfun(UserDefinedMeasure,.UserDefinedLimitLow);
   AnyIntVar LowerThanRadiusLimit = ltfun(RadiusMeasure,.UserDefinedRadiusLimit);
-
+  
   AnyVar UserDefinedStrengthFunction= iffun( andfun(andfun(LowerThanHighLimit,GreaterThanLowLimit),LowerThanRadiusLimit),.Strength,0.0);
-
+  
   
   //create the directions vectors 
-  
   AnyVec3 NormalVector={ 
     iffun(.Direction[0]-0,0,1),
     iffun(.Direction[0]-1,0,1),
@@ -51,9 +49,6 @@ AnyFolder Push ={
     iffun(.Direction[2]-0,0,1),
     iffun(.Direction[2]-1,0,1),
     iffun(.Direction[2]-2,0,1)};
-  
-  
-  
   
   AnyMuscleModelUsr1 ContactMuscleModel=   {
     F0 = 0.000000;
@@ -88,9 +83,15 @@ AnyFolder Push ={
       AnyMuscleModelUsr1 &ref1=..ContactMuscleModel2;
       ForceDirection=1;
     };
+    
+    AnyForceMomentMeasure NetMuscleEffect =
+    {
+      AnyForceBase& mus = .NormalDirectionMuscle;
+      AnyRefFrame& TargetObject = ...TargetObject;
+    };
+    AnyVec3 NetMuscleEffect_Force_Local = NetMuscleEffect.F * ..BaseObject.Axes;
+    
   };
-  
-  
   
   AnyFolder Direction01Muscle={
     AnyFolder Push={
@@ -118,6 +119,13 @@ AnyFolder Push ={
         ForceDirection=1;
       };
       
+      AnyForceMomentMeasure NetMuscleEffect =
+      {
+        AnyForceBase& mus = .FrictionMuscle;
+        AnyRefFrame& TargetObject = ....TargetObject;
+      };      
+      AnyVec3 NetMuscleEffect_Force_Local = NetMuscleEffect.F * ...BaseObject.Axes;
+      
     };//Push
     
     AnyFolder Pull={
@@ -136,7 +144,6 @@ AnyFolder Push ={
         Coef={
           {-1,....StaticFrictionCoefficient}
         };     
-        
       };
       
       AnyGeneralMuscle FrictionMuscle={
@@ -146,11 +153,14 @@ AnyFolder Push ={
         ForceDirection=-1;
       };
       
+      AnyForceMomentMeasure NetMuscleEffect =
+      {
+        AnyForceBase& mus = .FrictionMuscle;
+        AnyRefFrame& TargetObject = ....TargetObject;
+      };
+      AnyVec3 NetMuscleEffect_Force_Local = NetMuscleEffect.F * ...BaseObject.Axes;
     };//Pull
-    
   };
-  
-  
   
   AnyFolder Direction02Muscle={
     AnyFolder Push={
@@ -169,16 +179,22 @@ AnyFolder Push ={
         Coef={
           {1,....StaticFrictionCoefficient}
         };     
-        
       };
       
       AnyGeneralMuscle FrictionMuscle={
         AnyKinMeasureLinComb &ref1=.LinCombinationMeasure;
-        //        AnyKinMeasureOrg &ref1=.FrictionDir;
+        //AnyKinMeasureOrg &ref1=.FrictionDir;
         
         AnyMuscleModelUsr1 &ref2=...ContactMuscleModel2;
         ForceDirection=1;
       };
+      
+      AnyForceMomentMeasure NetMuscleEffect =
+      {
+        AnyForceBase& mus = .FrictionMuscle;
+        AnyRefFrame& TargetObject = ....TargetObject;
+      };
+      AnyVec3 NetMuscleEffect_Force_Local = NetMuscleEffect.F * ...BaseObject.Axes;
       
     };//Push
     
@@ -197,8 +213,7 @@ AnyFolder Push ={
         OutDim = 1;
         Coef={
           {-1,....StaticFrictionCoefficient}
-        };     
-        
+        };
       };
       
       AnyGeneralMuscle FrictionMuscle={
@@ -208,24 +223,25 @@ AnyFolder Push ={
         ForceDirection=-1;
       };
       
+      AnyForceMomentMeasure NetMuscleEffect =
+      {
+        AnyForceBase& mus = .FrictionMuscle;
+        AnyRefFrame& TargetObject = ....TargetObject;
+      };
+      AnyVec3 NetMuscleEffect_Force_Local = NetMuscleEffect.F * ...BaseObject.Axes;
+      
     };//Pull
     
   };
   
-  
-  AnyDrawVector DrawNormalForce =     {
+  AnyDrawVector DrawNormalForce =     
+  {
     AnyRefFrame &ref=..TargetObject;
-    AnyVar Strength=   iffun(.ContactMuscleModel.S,.ContactMuscleModel.S,0.00001);
-    Vec =..ScaleFactor*..DrawRef.DrawSettingsSupport.Lin.ScaleFactor*(
-    .NormalVector*.Direction0Muscle.NormalDirectionMuscle.Ft*..BaseObject.Axes'
-    +.NormalVector*.Direction01Muscle.Push.FrictionMuscle.Ft*..BaseObject.Axes'
-    +.NormalVector*.Direction02Muscle.Push.FrictionMuscle.Ft*..BaseObject.Axes'
-    +.NormalVector*.Direction01Muscle.Pull.FrictionMuscle.Ft*..BaseObject.Axes'
-    +.NormalVector*.Direction02Muscle.Pull.FrictionMuscle.Ft*..BaseObject.Axes');
-    AnyVar lenght=Strength*(2-(1-Strength/sqrt(Strength^2)));
+    Vec =..ScaleFactor*..DrawRef.DrawSettingsSupport.Lin.ScaleFactor*.NormalForceVec_Global;
     
     PointAway = Off;
     DrawCoord = Off;
+    GlobalCoord = On;
     
     Line.RGB = ..DrawRef.DrawSettingsSupport.Lin.RGB;
     Line.Thickness = ..DrawRef.DrawSettingsSupport.Lin.Thickness;
@@ -234,32 +250,14 @@ AnyFolder Push ={
     
   };
   
-  AnyFolder NormalForceValue =     {
+  AnyDrawVector DrawFrictionForce =     
+  {  
     AnyRefFrame &ref=..TargetObject;
-    AnyVar Strength=   iffun(.ContactMuscleModel.S,.ContactMuscleModel.S,0.00001);
-    AnyVec3 NormalForceVector =..ScaleFactor*..DrawRef.DrawSettingsSupport.Lin.ScaleFactor*(
-    .NormalVector*.Direction0Muscle.NormalDirectionMuscle.Ft*..BaseObject.Axes'
-    +.NormalVector*.Direction01Muscle.Push.FrictionMuscle.Ft*..BaseObject.Axes'
-    +.NormalVector*.Direction02Muscle.Push.FrictionMuscle.Ft*..BaseObject.Axes'
-    +.NormalVector*.Direction01Muscle.Pull.FrictionMuscle.Ft*..BaseObject.Axes'
-    +.NormalVector*.Direction02Muscle.Pull.FrictionMuscle.Ft*..BaseObject.Axes');
-    AnyVar lenght=Strength*(2-(1-Strength/sqrt(Strength^2)));
-    
-    
-  };
-
-  AnyDrawVector DrawFrictionForce =     {
-    
-    AnyRefFrame &ref=..TargetObject;
-    
-    Vec =..ScaleFactor*..DrawRef.DrawSettingsSupport.Lin.ScaleFactor*..StaticFrictionCoefficient*(
-    .FrictionVector1*.Direction01Muscle.Push.FrictionMuscle.Ft
-    -.FrictionVector1*.Direction01Muscle.Pull.FrictionMuscle.Ft
-    +.FrictionVector2*.Direction02Muscle.Push.FrictionMuscle.Ft
-    -.FrictionVector2*.Direction02Muscle.Pull.FrictionMuscle.Ft)*..BaseObject.Axes';
+    Vec =..ScaleFactor*..DrawRef.DrawSettingsSupport.Lin.ScaleFactor*.FrictionForceVec_Global;
     
     PointAway = Off;
     DrawCoord = Off;
+    GlobalCoord = On;
     
     Line.RGB = ..DrawRef.DrawSettingsSupport.Lin.RGB;
     Line.Thickness = ..DrawRef.DrawSettingsSupport.Lin.Thickness;
@@ -267,60 +265,89 @@ AnyFolder Push ={
     Line.End.Length = 4*..DrawRef.DrawSettingsSupport.Lin.Thickness;
   };
   
+  //Resultant force calculation w.r.t either local or global reference systems
+  AnyVec3 TotalForceVec_Global = 
+  Direction0Muscle.NetMuscleEffect.F + 
+  Direction01Muscle.Push.NetMuscleEffect.F + 
+  Direction01Muscle.Pull.NetMuscleEffect.F +
+  Direction02Muscle.Push.NetMuscleEffect.F +
+  Direction02Muscle.Pull.NetMuscleEffect.F ;
   
-  //resultann force given in global ref system
-  AnyVec3 NormalForceVec = DrawNormalForce.Vec/(.ScaleFactor*.DrawRef.DrawSettingsSupport.Lin.ScaleFactor);
-    AnyVar NormalForceScalar = (NormalForceVec[0]^2+NormalForceVec[1]^2+NormalForceVec[2]^2)^0.5;
-
-       AnyVec3 NormalForceVec2 = NormalForceValue.NormalForceVector/(.ScaleFactor*.DrawRef.DrawSettingsSupport.Lin.ScaleFactor);
-    AnyVar NormalForceScalar2 = (NormalForceVec2[0]^2+NormalForceVec2[1]^2+NormalForceVec2[2]^2)^0.5;
-
-
-    
-  AnyVec3 FrictionForceVec = DrawFrictionForce.Vec/(.ScaleFactor*.DrawRef.DrawSettingsSupport.Lin.ScaleFactor);
-    AnyVar FrictionForceScalar = (FrictionForceVec[0]^2+FrictionForceVec[1]^2+FrictionForceVec[2]^2)^0.5;
-   
-//    AnyVar TotalForceScalar = (TotalForceVec[0]^2+TotalForceVec[1]^2+TotalForceVec[2]^2)^0.5;
-
-
-
-  /*
-  AnyDrawVector DrawFrictionForce1 =     {
+  AnyVec3 TotalForceVec_Local = TotalForceVec_Global * .BaseObject.Axes;
   
-  AnyRefFrame &ref=..TargetObject;
+  AnyVec3 NormalForceVec_Local = (TotalForceVec_Local* NormalVector') * NormalVector ;
+  AnyVec3 FrictionForceVec1_Local = (TotalForceVec_Local* FrictionVector1') * FrictionVector1;
+  AnyVec3 FrictionForceVec2_Local = (TotalForceVec_Local* FrictionVector2') * FrictionVector2;
+  AnyVec3 FrictionForceVec_Local = FrictionForceVec1_Local + FrictionForceVec2_Local;
+  AnyVec3 NormalForceVec_Global = NormalForceVec_Local * .BaseObject.Axes';
+  AnyVec3 FrictionForceVec_Global = FrictionForceVec_Local * .BaseObject.Axes';
   
-  Vec =0.001*..StaticFrictionCoefficient*(
-  .FrictionVector1*.Direction01Muscle.Push.FrictionMuscle.Ft*..BaseObject.Axes'+
-  -.FrictionVector1*.Direction01Muscle.Pull.FrictionMuscle.Ft*..BaseObject.Axes');
+  AnyVec3 NormalForceVec = NormalForceVec_Global;
+  AnyVar NormalForceScalar = vnorm(NormalForceVec);
+  AnyVec3 NormalForceVec2 = NormalForceVec;
+  AnyVar NormalForceScalar2 = NormalForceScalar ;
+  AnyVec3 FrictionForceVec = FrictionForceVec_Global ;
+  AnyVar FrictionForceScalar = vnorm(FrictionForceVec) ;
   
-  PointAway = Off;
-  DrawCoord = Off;
-  Line.RGB = {0,1,0};
-  Line.Thickness = 0.015;
-  Line.End.Thickness = 2*0.015; 
-  Line.End.Length = 4*0.015;
-  };
-  
-  
-  
-  
-  
-  AnyDrawVector DrawFrictionForce2 =     {
-  
-  AnyRefFrame &ref=..TargetObject;
-  
-  Vec =0.001*..StaticFrictionCoefficient*(
-  .FrictionVector2*.Direction02Muscle.Push.FrictionMuscle.Ft*..BaseObject.Axes'+
-  -.FrictionVector2*.Direction02Muscle.Pull.FrictionMuscle.Ft*..BaseObject.Axes');
-  
-  PointAway = Off;
-  DrawCoord = Off;
-  Line.RGB = {1,0,0};
-  Line.Thickness = 0.015;
-  Line.End.Thickness = 2*0.015; 
-  Line.End.Length = 4*0.015;
-  };
-  */
-  
-  
+  //--> Old code for calculating the normal and the friction forces. Let's keep these for a while.
+  //  AnyVec3 NormalForceVec = DrawNormalForce.Vec/(.ScaleFactor*.DrawRef.DrawSettingsSupport.Lin.ScaleFactor);
+  //  AnyVar NormalForceScalar = (NormalForceVec[0]^2+NormalForceVec[1]^2+NormalForceVec[2]^2)^0.5;
+  //  AnyVec3 NormalForceVec2 = NormalForceValue.NormalForceVector/(.ScaleFactor*.DrawRef.DrawSettingsSupport.Lin.ScaleFactor);
+  //  AnyVar NormalForceScalar2 = (NormalForceVec2[0]^2+NormalForceVec2[1]^2+NormalForceVec2[2]^2)^0.5;
+  //  AnyVec3 FrictionForceVec = DrawFrictionForce.Vec/(.ScaleFactor*.DrawRef.DrawSettingsSupport.Lin.ScaleFactor);
+  //  AnyVar FrictionForceScalar = (FrictionForceVec[0]^2+FrictionForceVec[1]^2+FrictionForceVec[2]^2)^0.5;  
+  //  AnyDrawVector DrawNormalForce =     {
+  //    AnyRefFrame &ref=..TargetObject;
+  //    AnyVar Strength=   iffun(.ContactMuscleModel.S,.ContactMuscleModel.S,0.00001);
+  //    Vec =..ScaleFactor*..DrawRef.DrawSettingsSupport.Lin.ScaleFactor*(
+  //    .NormalVector*.Direction0Muscle.NormalDirectionMuscle.Ft*..BaseObject.Axes'
+  //    +.NormalVector*.Direction01Muscle.Push.FrictionMuscle.Ft*..BaseObject.Axes'
+  //    +.NormalVector*.Direction02Muscle.Push.FrictionMuscle.Ft*..BaseObject.Axes'
+  //    +.NormalVector*.Direction01Muscle.Pull.FrictionMuscle.Ft*..BaseObject.Axes'
+  //    +.NormalVector*.Direction02Muscle.Pull.FrictionMuscle.Ft*..BaseObject.Axes');
+  //    AnyVar lenght=Strength*(2-(1-Strength/sqrt(Strength^2)));
+  //    
+  //    PointAway = Off;
+  //    DrawCoord = Off;
+  //    
+  //    Line.RGB = ..DrawRef.DrawSettingsSupport.Lin.RGB;
+  //    Line.Thickness = ..DrawRef.DrawSettingsSupport.Lin.Thickness;
+  //    Line.End.Thickness = 2*..DrawRef.DrawSettingsSupport.Lin.Thickness;  
+  //    Line.End.Length = 4*..DrawRef.DrawSettingsSupport.Lin.Thickness;
+  //    
+  //  };
+  //  
+  //  AnyFolder NormalForceValue =     {
+  //    AnyRefFrame &ref=..TargetObject;
+  //    AnyVar Strength=   iffun(.ContactMuscleModel.S,.ContactMuscleModel.S,0.00001);
+  //    AnyVec3 NormalForceVector =..ScaleFactor*..DrawRef.DrawSettingsSupport.Lin.ScaleFactor*(
+  //    .NormalVector*.Direction0Muscle.NormalDirectionMuscle.Ft*..BaseObject.Axes'
+  //    +.NormalVector*.Direction01Muscle.Push.FrictionMuscle.Ft*..BaseObject.Axes'
+  //    +.NormalVector*.Direction02Muscle.Push.FrictionMuscle.Ft*..BaseObject.Axes'
+  //    +.NormalVector*.Direction01Muscle.Pull.FrictionMuscle.Ft*..BaseObject.Axes'
+  //    +.NormalVector*.Direction02Muscle.Pull.FrictionMuscle.Ft*..BaseObject.Axes');
+  //    AnyVar lenght=Strength*(2-(1-Strength/sqrt(Strength^2)));
+  //    
+  //    
+  //  };
+  //
+  //  AnyDrawVector DrawFrictionForce =     
+  //  {  
+  //    AnyRefFrame &ref=..TargetObject;
+  //    
+  //    Vec =..ScaleFactor*..DrawRef.DrawSettingsSupport.Lin.ScaleFactor*..StaticFrictionCoefficient*(
+  //    .FrictionVector1*.Direction01Muscle.Push.FrictionMuscle.Ft
+  //    -.FrictionVector1*.Direction01Muscle.Pull.FrictionMuscle.Ft
+  //    +.FrictionVector2*.Direction02Muscle.Push.FrictionMuscle.Ft
+  //    -.FrictionVector2*.Direction02Muscle.Pull.FrictionMuscle.Ft)*..BaseObject.Axes';
+  //    
+  //    PointAway = Off;
+  //    DrawCoord = Off;
+  //    
+  //    Line.RGB = ..DrawRef.DrawSettingsSupport.Lin.RGB;
+  //    Line.Thickness = ..DrawRef.DrawSettingsSupport.Lin.Thickness;
+  //    Line.End.Thickness = 2*..DrawRef.DrawSettingsSupport.Lin.Thickness;  
+  //    Line.End.Length = 4*..DrawRef.DrawSettingsSupport.Lin.Thickness;
+  //  };
+  //<-- Old code  
 };

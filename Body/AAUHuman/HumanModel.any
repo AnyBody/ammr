@@ -3,18 +3,23 @@
 #endif
 
 AnyFolder HumanModel={
-
-  AnyFolder BodyModelWithDefaultDrivers = {
-    AnyFolder &BodyModel = .BodyModel;
-    AnyFolder &Drivers = .DefaultMannequinDrivers;
-  };
-  
   #include "<ANYBODY_PATH_BODY_GENERICBODYMODEL>\BodyModel.defaults.preprocess.any"
   #include "<ANYBODY_PATH_BODY_GENERICBODYMODEL>\BodyModel.defaults.any"
   #include "<ANYBODY_PATH_BODY_GENERICBODYMODEL>\BodyModel.BodyPartsSetup.any"
   #include "<ANYBODY_PATH_BODY_GENERICBODYMODEL>\BodyModel.config_info.any"
- 
   
+  #ifdef BM_SCALING
+   #if BM_SCALING != CONST_SCALING_STANDARD
+    AnyFolder AnthroDataSubject = { #include "<BM_SCALING_ANTHRO_FILE>" };
+    Scaling.Scaling = {AnyFolder& AnthroDataSubjectRef = ..AnthroDataSubject;};
+   #endif  
+  #endif
+  
+  AnyFolder BodyModelWithDefaultDrivers = {
+    AnyFolder &BodyModel = .BodyModel;
+    AnyFolder &Drivers = .DefaultMannequinDrivers;
+  };
+
   #ifdef BM_MANNEQUIN_FILE
     #include "<BM_MANNEQUIN_FILE>"
   #endif
@@ -31,7 +36,7 @@ AnyFolder HumanModel={
   
   AnyFolder StrengthParameters={
     AnyVar SpecificMuscleTensionSpine= BM_TRUNK_STRENGTH_INDEX*90; //N/cm^2
-    AnyVar StrengthIndexLeg= BM_LEG_STRENGTH_INDEX; 
+    AnyVar StrengthIndexLeg= DesignVar(BM_LEG_STRENGTH_INDEX); 
     AnyVar SpecificMuscleTensionShoulderArm= BM_ARM_STRENGTH_INDEX*90; //N/cm^2
   };
   
@@ -41,68 +46,50 @@ AnyFolder HumanModel={
   Scaling={
    //Base scaling laws according to the configuration file
    
-   #if BM_SCALING == CONST_SCALING_CUSTOM
-     // include your custom scaling law, which needs an 'AnyMan.any' file
-     #include "<BM_SCALING_MY_FILE>"
-     // undefine BM_SCALING_ANTHRO_FILE if an 'AnyMan.any' file is not used
-     #ifdef BM_SCALING_ANTHRO_FILE
-      Scaling = { //This is the file which set the segments lengths
-         AnyMessage anthrofile_message = {
-           Message = "Undefine BM_SCALING_ANTHRO_FILE in case it will not be used by your custom scaling law!";
-           TriggerPreProcess = On;
-           Type = MSG_Message;
-         };
-        #include "<BM_SCALING_ANTHRO_FILE>"       
-      };
+   Scaling.StandardParameters = {
+     AnyFolder& Trunk_ModelParameters = ...BodyModel.Trunk.ModelParameters;
+     #if (RIGHT_LEG_TD | LEFT_LEG_TD | RIGHT_LEG | LEFT_LEG)
+       AnyFolder& Leg_ModelParameters = ...BodyModel.Trunk.SegmentsLumbar.PelvisSeg.Leg_ModelParameters;
      #endif
+   };
+   
+   #if BM_SCALING == CONST_SCALING_CUSTOM
+     // include your own custom scaling law, please refer to existing ones for reference
+     #include "<BM_SCALING_MY_FILE>"
    #endif
    
+  
+   #if (BM_SCALING == CONST_SCALING_UNIFORM_EXTMEASUREMENTS) | (BM_SCALING == CONST_SCALING_LENGTHMASS_EXTMEASUREMENTS) | (BM_SCALING == CONST_SCALING_LENGTHMASSFAT_EXTMEASUREMENTS)
+     #ifndef STANDARDPARAM_EXTERIOR
+       #define STANDARDPARAM_EXTERIOR
+     #endif
+   #endif
+  
    //Base scaling laws according to the configuration file
    #if BM_SCALING == CONST_SCALING_STANDARD
      #include "<ANYBODY_PATH_BODY>\Scaling\ScalingStandard.any"
    #endif
    
-   #if BM_SCALING == CONST_SCALING_UNIFORM
+   #if (BM_SCALING == CONST_SCALING_UNIFORM) | (BM_SCALING == CONST_SCALING_UNIFORM_EXTMEASUREMENTS)
      #include "<ANYBODY_PATH_BODY>\Scaling\ScalingUniform.any"
-     Scaling = { //This is the file which set the segments lenghts
-       #include "<BM_SCALING_ANTHRO_FILE>"       
-     };
    #endif
    
-   #if BM_SCALING == CONST_SCALING_LENGTHMASS
+   #if (BM_SCALING == CONST_SCALING_LENGTHMASS) | (BM_SCALING == CONST_SCALING_LENGTHMASS_EXTMEASUREMENTS)
      #include "<ANYBODY_PATH_BODY>\Scaling\ScalingLengthMass.any" 
-     Scaling = { //This is the file which set the segments lenghts
-       #include "<BM_SCALING_ANTHRO_FILE>"       
-     };
    #endif   
    
-   #if BM_SCALING == CONST_SCALING_LENGTHMASSFAT
+   #if (BM_SCALING == CONST_SCALING_LENGTHMASSFAT) | (BM_SCALING == CONST_SCALING_LENGTHMASSFAT_EXTMEASUREMENTS)
      #include "<ANYBODY_PATH_BODY>\Scaling\ScalingLengthMassFat.any" 
-     Scaling = { //This is the file which set the segments lenghts
-       #include "<BM_SCALING_ANTHRO_FILE>"       
-     };
    #endif   
    
-   #if BM_SCALING == CONST_SCALING_UNIFORM_EXTMEASUREMENTS   
-     #include "<ANYBODY_PATH_BODY>\Scaling\ScalingUniformExt.any"
-     Scaling = { //This is the file which set the segments lenghts
-       #include "<BM_SCALING_ANTHRO_FILE>"       
-     };
-   #endif
+   #ifdef STANDARDPARAM_EXTERIOR
+     #undef STANDARDPARAM_EXTERIOR
+   #endif   
    
-   #if BM_SCALING == CONST_SCALING_LENGTHMASS_EXTMEASUREMENTS
-     #include "<ANYBODY_PATH_BODY>\Scaling\ScalingLengthMassExt.any" 
-     Scaling = { //This is the file which set the segments lenghts
-       #include "<BM_SCALING_ANTHRO_FILE>"       
-     };
-   #endif
-   
-   #if BM_SCALING == CONST_SCALING_LENGTHMASSFAT_EXTMEASUREMENTS
-     #include "<ANYBODY_PATH_BODY>\Scaling\ScalingLengthMassFatExt.any" 
-     Scaling = { //This is the file which set the segments lenghts
-       #include "<BM_SCALING_ANTHRO_FILE>"       
-     };
-   #endif
+   #if BM_SCALING == CONST_SCALING_LENGTHMASSFAT_MULTIDOFS
+     #include "<ANYBODY_PATH_BODY>\Scaling\ScalingLengthMassFatModified.any"
+     //#include "<ANYBODY_PATH_BODY>\Scaling\ScalingLengthMassFatMultiDofs.any" 
+   #endif   
  };
  
  AnyFolder DefaultMannequinDrivers = {
