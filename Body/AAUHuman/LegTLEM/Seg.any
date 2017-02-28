@@ -108,8 +108,7 @@ AnySeg Talus =
 
   AnyFloat pUnscaled = {StdPar.LateralMalleolus, StdPar.MedialMalleolus};
   AnyFloat dAxisFixed = { (StdPar.MedialTibialEpicondyle + StdPar.LateralTibialEpicondyle)*0.5 - StdPar.SubTalarJoint, (StdPar.MedialTibialEpicondyle - StdPar.LateralTibialEpicondyle ) };
-  //AnyFunTransform3D& GeomScale = ..GeoScaling.Talus.ScaleFunction;
-  AnyFunTransform3D& GeomScale = ..GeoScaling.Foot.ScaleFunction;
+  AnyFunTransform3D& GeomScale = ..GeoScaling.Talus.ScaleFunction;
   AnyVar Sign = ..Sign;
   #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(p, SIGN) 0.5*(p[0]+p[1])
   #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2(p, d, SIGN) RotMat(0.5*(p[0]+p[1]), 0.5*(p[0]+p[1]) + d[0], 0.5*(p[0]+p[1]) + d[1] ) * RotMat(-0.5*pi,z) * RotMat(0.5*pi,y) * RotMat(0.5*(SIGN-1)*pi,y)
@@ -1697,8 +1696,14 @@ AnySeg Patella =
   JaboutCoMOnOff = On;
 
   r0=.Thigh.PatellaFemurJoint.sRel*.Thigh.Axes0'+.Thigh.r0-PatellaFemurJoint.sRel*Axes0';
-  AnyFunTransform3D &Scale = .Thigh.Scale;
-
+  
+  AnyFloat pUnscaled = {StdPar.HipJoint, StdPar.EpicondylusFemorisMedialis, StdPar.EpicondylusFemorisLateralis};
+  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(p, SIGN) p[0]
+  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(p, SIGN) RotMat(p[0],0.5*(p[1]+p[2]), p[1]) * RotMat(pi*0.5,x) * RotMat(pi*0.5,z) * RotMat(0.5*(SIGN-1)*pi,y)
+  #include "..\Scaling\SegScaleFunWrtAnatomicalFrame.any"
+  #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_s
+  #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_A
+  
   AnyVar MassS = ..MassScaling.Shank.MassScale;
   Mass = MassS*StdPar.MassStandard;
   Jii = StdPar.Jii;
@@ -1706,12 +1711,12 @@ AnySeg Patella =
 
   AnyVar Sign = ..Sign;
 
-  AnyFunTransform3D &GeomScale = .Thigh.GeomScale;
+  AnyFunTransform3D &GeomScale = ..GeoScaling.Patella.ScaleFunction;
 
   AnyRefNode AnatomicalFrame=
   {
-    ARel =..Thigh.AnatomicalFrame.ARel;
-    sRel = .Scale(.StdPar.PatellaFemurJoint);
+    ARel = ..Thigh.AnatomicalFrame.ARel;
+    sRel = .PatellaFemurJoint.sRel;
   };
   AnyRefNode& ScalingNode=AnatomicalFrame ;
 
@@ -1746,15 +1751,9 @@ AnySeg Patella =
 
   // Patella insertion points
 
-#if TLEM_MORPHOLOGY == 1
   AnyRefNode RectusFemoris1Node = {sRel = .Scale( .StdPar.RectusFemoris1Node );};
   AnyRefNode RectusFemoris2Node = {sRel = .Scale( .StdPar.RectusFemoris2Node );};
-#endif
 
-#if TLEM_MORPHOLOGY == 2
-  AnyRefNode RectusFemorisMedialis1Node = {sRel = .Scale( .StdPar.RectusFemorisMedialis1Node );};
-  AnyRefNode RectusFemorisLateralis1Node = {sRel = .Scale( .StdPar.RectusFemorisLateralis1Node );};
-#endif
 
 #if TLEM_MORPHOLOGY == 1
   AnyRefNode VastusIntermedius1Node = {sRel = .Scale( .StdPar.VastusIntermedius1Node );};
@@ -1766,12 +1765,12 @@ AnySeg Patella =
   #endif
 
 #if TLEM_MORPHOLOGY == 2
-  AnyRefNode VastusIntermedius1Node = {sRel = .Scale( .StdPar.RectusFemorisMedialis1Node );};
-  AnyRefNode VastusIntermedius2Node = {sRel = .Scale( .StdPar.RectusFemorisLateralis1Node);};
-  AnyRefNode VastusIntermedius3Node = {sRel = .Scale( .StdPar.RectusFemorisMedialis1Node );};
-  AnyRefNode VastusIntermedius4Node = {sRel = .Scale( .StdPar.RectusFemorisLateralis1Node );};
-  AnyRefNode VastusIntermedius5Node = {sRel = .Scale( .StdPar.RectusFemorisMedialis1Node );};
-  AnyRefNode VastusIntermedius6Node = {sRel = .Scale( .StdPar.RectusFemorisLateralis1Node );};
+  AnyRefNode VastusIntermedius1Node = {sRel = .Scale( .StdPar.RectusFemoris1Node );};
+  AnyRefNode VastusIntermedius2Node = {sRel = .Scale( .StdPar.RectusFemoris2Node);};
+  AnyRefNode VastusIntermedius3Node = {sRel = .Scale( .StdPar.RectusFemoris1Node );};
+  AnyRefNode VastusIntermedius4Node = {sRel = .Scale( .StdPar.RectusFemoris2Node );};
+  AnyRefNode VastusIntermedius5Node = {sRel = .Scale( .StdPar.RectusFemoris1Node );};
+  AnyRefNode VastusIntermedius6Node = {sRel = .Scale( .StdPar.RectusFemoris2Node );};
 #endif
 
 
@@ -2149,16 +2148,8 @@ PelvisSeg =
       AnyRefNode QuadratusFemoris4Node	= {sRel = .Scale( .StdPar.QuadratusFemoris4Node );};
 
 
-#if TLEM_MORPHOLOGY == 1
       AnyRefNode RectusFemoris1Node = {sRel = .Scale( .StdPar.RectusFemoris1Node );};
       AnyRefNode RectusFemoris2Node = {sRel = .Scale( .StdPar.RectusFemoris2Node );};
-#endif
-
-
-#if TLEM_MORPHOLOGY == 2
-      AnyRefNode RectusFemorisMedialis1Node = {sRel = .Scale( .StdPar.RectusFemorisMedialis1Node );};
-      AnyRefNode RectusFemorisLateralis1Node = {sRel = .Scale( .StdPar.RectusFemorisLateralis1Node);};
-#endif
 
 
 #if TLEM_MORPHOLOGY == 1
