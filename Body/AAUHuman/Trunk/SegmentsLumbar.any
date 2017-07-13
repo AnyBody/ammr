@@ -42,15 +42,7 @@ AnyFolder SegmentsLumbar = {
 
     AnyFolder &Data=..ModelParameters.SacrumSeg;    
     
-    AnyFunTransform3DIdentity Scale = {
-      PreTransforms = {
-          &..PelvisSeg.InterfaceMorphingDef.IM_Trunk_To_Leg_Unscaled,
-          &..PelvisSeg.Scale_Trunk_Pelvis.ScaleAfterInterfaceMorphingDef.Scale.T0,
-          &...ScalingTrunk.SacrumSeg.ScaleFunction,
-          &..PelvisSeg.Scale_Trunk_Pelvis.ScaleAfterInterfaceMorphingDef.Scale.T1_Inv
-      };
-    
-    };
+    AnyFunTransform3D &Scale = .PelvisSeg.Scale;
 
     //initial position found as a function of pelvis pos and orientation
     r0=.PelvisSeg.PelvisSacrumJntNode.sRel*.PelvisSeg.Axes0'+.PelvisSeg.r0-SacrumPelvisJntNode.sRel*Axes0'; 
@@ -65,16 +57,6 @@ AnyFolder SegmentsLumbar = {
     // Joint nodes
     AnyRefNode SacrumL5JntNode = {sRel = .Scale(.Data.SacrumL5JntNode_pos);};    
     AnyRefNode SacrumPelvisJntNode = {sRel = .Scale(.Data.SacrumPelvisJntNode_pos);};   
-    
-    #if TLEM_MORPHOLOGY == 1
-    AnyDrawSurf DrwSacrum = {
-      FileName = ...STL.FilenameSacrumSeg;
-      RGB = ...ColorRef.Segments;
-      Opacity = Main.DrawSettings.BonesOpacity.Sacrum;
-      AnyFunTransform3D &Scale =.Scale;   
-    };
-    #endif
-    
     
   /// The Right node is used by different body part for adding mirrored nodes
   /// (muscle origins/insertions etc) to the sacrum segment
@@ -91,9 +73,48 @@ AnyFolder SegmentsLumbar = {
   };    
     
     
-  }; // SacrumSeg   
-  
-  
+   }; // SacrumSeg   
+   
+   
+   // -------- Drawing object section (pelvis&sacrum)-------- 
+   #if ( (!(RIGHT_LEG_TD | LEFT_LEG_TD | RIGHT_LEG | LEFT_LEG)) | (BM_PELVIS_DISPLAY == CONST_PELVIS_DISPLAY_LEGANDTRUNKPELVIS) )
+   
+   PelvisSeg = {
+     
+     #if (BM_PELVIS_DISPLAY == CONST_PELVIS_DISPLAY_LEGANDTRUNKPELVIS)
+     DrwPelvisForTrunk.Opacity = Main.DrawSettings.BonesOpacity.Pelvis*0.5;
+     AnyDrawSurf DrwPelvisForTrunk = 
+     #else
+     DrwPelvis.Opacity = Main.DrawSettings.BonesOpacity.Pelvis;
+     AnyDrawSurf DrwPelvis = 
+     #endif
+     { 
+       FileName = ...STL.FilenamePelvisWOS; 
+       RGB = ...ColorRef.Segments;
+       AnyFunTransform3D &Scale = .Scale;
+     };
+     
+   }; // PelvisSeg
+   
+   
+   SacrumSeg = {
+     #if (BM_PELVIS_DISPLAY == CONST_PELVIS_DISPLAY_LEGANDTRUNKPELVIS)
+     DrwSacrumForTrunk.Opacity = Main.DrawSettings.BonesOpacity.Sacrum*0.5;
+     AnyDrawSurf DrwSacrumForTrunk = 
+     #else
+     DrwSacrum.Opacity = Main.DrawSettings.BonesOpacity.Sacrum;
+     AnyDrawSurf DrwSacrum =         
+     #endif
+     {
+       FileName = ...STL.FilenameSacrumSeg;
+       RGB = ...ColorRef.Segments;
+       AnyFunTransform3D &Scale =.Scale;   
+     };
+     
+   }; // SacrumSeg
+   #endif
+   // -------- End of drawing section (pelvis&sacrum)-------- 
+
   
   AnySeg L5Seg = {
    
