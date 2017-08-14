@@ -1,0 +1,93 @@
+#include "helper_macros.any"
+
+#class_template KinLimitsDriver(AnyKinMeasure &KinMeasure, _DEBUG=0) {
+
+  
+#var AnyVar LowerLimit; 
+#var AnyVar HighLimit;
+  
+#var AnyVar DriverPhaseIn = 0.01*(HighLimit - LowerLimit) ;
+#var AnyVar LowerLimitHard= LowerLimit - DriverPhaseIn ;
+#var AnyVar HighLimitHard= HighLimit + DriverPhaseIn ;
+
+#var AnyVar ErrorAtHardLimit = 0.05;
+#var AnyVar ErrorAtLowerHardLimit = ErrorAtHardLimit;
+#var AnyVar ErrorAtHighHardLimit = ErrorAtHardLimit;
+
+#var AnyVar MeasureConversion = 1;
+
+/// Generates an non-equisample abscissa axis for the data. 
+/// Most points are clustered around the transition zones.
+AnyFunInterpol AbscissaFunction = 
+{
+  AnyFloat LowPhaseIn = abs(.LowerLimit-.LowerLimitHard);
+  AnyFloat HighPhaseIn = abs(.HighLimit-.HighLimitHard);
+  AnyFloat TotalRange = abs(.LowerLimitHard-.HighLimitHard);
+
+  #var Type = Bspline;
+  #var BsplineOrder = 8;
+       
+  #var AnyMatrix M = {
+                      {0, .LowerLimitHard-1e1*LowPhaseIn-1e1*TotalRange},
+                      {80, .LowerLimitHard-1e1*LowPhaseIn},
+                      {160,  .LowerLimitHard},
+                      {490, .LowerLimit},
+                      {510, .HighLimit},
+                      {840, .HighLimitHard},
+                      {920, .HighLimitHard+1e1*HighPhaseIn},
+                      {999, .HighLimitHard+1e1*HighPhaseIn+1e1*TotalRange}                    
+                    };  
+
+                    
+  T    = M'[0];
+  Data = {M'[1]};
+};
+
+
+
+AnyFunInterpol JointLimitErrorFunction= 
+{  
+  Type = Bspline;
+  T = .AbscissaFunction(1.0*iarr(0,999))' ;
+  Data = {.ErrorAtLowerHardLimit*SMOOTHRAMP(.LowerLimit, .LowerLimitHard, T) + 
+          .ErrorAtHighHardLimit*SMOOTHRAMP(.HighLimit, .HighLimitHard, T)} ;
+};
+
+#if _DEBUG
+AnyFunInterpol &FT = JointLimitErrorFunction;
+AnyFloat Test = {FT (-10.0), FT( -5.0), FT (0.0), FT (5.0), FT (10.0)}; 
+AnyFloat test_fullrange = JointLimitErrorFunction(1.0*iarr(ceil(min(AbscissaFunction.M'[1])),floor(max(AbscissaFunction.M'[1]))))';
+AnyFloat range = LINSPACE(LowerLimitHard, HighLimitHard,1000);
+AnyFloat test_range = JointLimitErrorFunction(range)';
+#endif
+
+
+AnyKinMeasureFunComb1 JointLimitMeasure = {
+  AnyKinMeasureLinComb ConvertedMeasure = {
+    AnyKinMeasure &ref = ..KinMeasure;
+    Coef  = {{..MeasureConversion }};
+    OutDim = 1;
+  };
+  Functions = {&.JointLimitErrorFunction};
+};
+
+AnyKinEqSimpleDriver JointLimitDriver = 
+{
+  AnyKinMeasureFunComb1 & ref = .JointLimitMeasure;
+  #var DriverPos = {0};
+  #var DriverVel = {0};
+  Reaction.Type = {Off};
+  CType = {Soft};
+  AnyFunConst ConstFun = 
+  { 
+    #var Value = {1};
+  };
+  #var WeightFun = {&ConstFun};      
+};
+
+
+};
+
+
+
+

@@ -1,0 +1,173 @@
+
+//#include "../../libdef.any"
+//#include "<ANYBODY_PATH_BODY>/ToolBox/Widgets/WidgetMarkerDriver.any"
+
+Main ={
+  
+  
+  
+  AnyBodyStudy Study ={
+    Kinematics.KinematicTol=3e-8;
+    InitialConditions.KinematicTol=3e-8;
+    //include the next line to have a camera in the model
+    //#include "Model/MovingCamera.any"
+    InitialConditions.SolverType = KinSolOverDeterminate;
+    InitialConditions.PosAnalysisOnlyOnOff=On;
+    Kinematics.SolverType = KinSolOverDeterminate;
+    InitialConditions.SmallStepAssumptionOnOff=Off;
+//    Kinematics.UseStartGuessOnOff=Off;
+//    InitialConditions.UseStartGuessOnOff=Off;
+    Kinematics.PosAnalysisOnlyOnOff=On;
+    nStep=400;
+    Gravity  ={0,0,0};
+   
+    AnySeg Mass ={
+      Mass=10;
+      Jii ={0,0,0};
+      AnyDrawNode drw2 ={ScaleXYZ={1,1,1}*0.05;RGB ={0,0,1};};
+       r0={0,0,.drv2.DriverPos[0]*0.5};
+
+    };
+    
+    AnyFixedRefFrame Global ={
+      
+      AnyDrawRefFrame drw2 ={RGB={0,0,1};};
+      
+    };
+    AnyFixedRefFrame frm ={};
+    
+    AnyPrismaticJoint S1 ={
+      AnyFixedRefFrame &ref=.Global;
+      AnySeg &ref2=.Mass;
+      Axis=z;
+    };
+    
+    
+    
+     
+    //    AnyKinEqSimpleDriver driver_On_Jnt_hard ={
+    //      AnyPrismaticJoint &ref=.S1;
+    //      DriverPos ={0};
+    //      DriverVel ={0.2};
+    //     
+    //      
+    //    };
+    
+    AnySeg Slider ={
+      Mass=10;
+      Jii ={0,0,0};
+      AnyDrawNode drw2 ={ScaleXYZ={1,1,1}*0.05;};
+      r0={0,0,.drv2.DriverPos[0]};
+    };
+    
+    
+    AnyPrismaticJoint jnt2 ={
+      AnyFixedRefFrame &ref=.Global;
+      AnySeg &ref2=.Slider;
+      Axis=z;
+    };
+    
+    AnyKinEqSimpleDriver drv2 ={
+      AnyPrismaticJoint &ref=.jnt2;
+      DriverPos ={0.2};
+      DriverVel ={0.0};
+      
+    };
+    
+    AnyKinLinear Lin  ={
+      Ref=0;
+      AnyRefFrame  &ref1=.Mass;
+      AnyRefFrame  &ref2=.Slider;
+    };
+    
+    
+    AnyKinMeasureOrg S2 ={
+      AnyKinLinear &lin= .Lin; 
+      MeasureOrganizer = {2};
+    };
+    
+    
+    
+    
+    AnyVar Stiffness1=10;
+    AnyVar Stiffness2=20;
+
+    AnyFunPolynomial FunSpring1 = {
+      PolyCoef = {
+        {
+          0,
+          0,
+         0,
+          (1.0/3.0)*.Stiffness1
+        }
+      };
+    };
+    AnyFunPolynomial FunSpring2 = {
+      PolyCoef = {
+        {
+          0,
+          0,
+          (1.0/2.0)*.Stiffness2
+          
+        }
+      };
+    };
+    
+    AnyForce SpringS1 = {
+      AnyPrismaticJoint &ref=.S1;
+       F=-{.Stiffness1*(.S1.Pos[0])^2};
+    };
+    
+    AnyForce SpringS2 = {
+      AnyKinMeasureOrg  &ref=.S2;
+      F=-{.Stiffness2*(.S2.Pos[0])};
+    };
+    
+    AnyFunInterpol funPotSpring1Sqrt = {
+      Type = Bspline; 
+      T=farr(-2.0, 0.0001, 10000001);  // does not work for ligaments stretching over 0.5 meters :)
+      Data={sqrt(.FunSpring1 (T))'};
+    };
+    
+    AnyFunInterpol funPotSpring2Sqrt = {
+      Type = Bspline; 
+      T=farr(-2.0, 0.0001, 10000001);  // does not work for ligaments stretching over 0.5 meters :)
+      Data={sqrt(.FunSpring2 (T))'};
+    };
+    
+    AnyKinMeasureFunComb1 PotSpringS1= {
+      AnyKinMeasure &org = .S1 ;
+      Functions = {&.funPotSpring1Sqrt };
+    };
+    AnyKinMeasureFunComb1 PotSpringS2= {
+      AnyKinMeasure &org = .S2 ;
+      Functions = {&.funPotSpring2Sqrt };
+    };
+    
+    AnyKinEqSimpleDriver PotDriverSpring1= {
+      AnyKinMeasureFunComb1 &ref=.PotSpringS1;
+      DriverPos={0}; DriverVel={0};Reaction.Type={Off};
+      CType = {Soft};
+      AnyFunConst wf ={Value = {1};};
+      WeightFun = {&wf};
+    };
+    
+    AnyKinEqSimpleDriver PotDriverSpring2= {
+      AnyKinMeasureFunComb1 &ref=.PotSpringS2;
+      DriverPos={0}; DriverVel={0};Reaction.Type={Off};
+      CType = {Soft};
+      AnyFunConst wf ={Value = {1};};
+      WeightFun = {&wf};
+    };
+    
+    AnyReacForce testeq={
+      AnyKinMeasure &ref1=.S1;
+      
+    };
+    
+    
+  };
+  
+  
+  
+};

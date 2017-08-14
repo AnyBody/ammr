@@ -1,0 +1,148 @@
+// This file contains usefull macro functions for the AnyBody Modeling system. 
+#ifndef _HELPER_MACORS_ANY_
+#define _HELPER_MACORS_ANY_
+
+// Running number to compare file versions.
+#define _HELPER_MACORS_ANY_VERSION 3
+
+
+// Inline implemention of an MxN zero matrix
+#define ZEROS(M,N) reshape(0.0*iarr(0,(M)*(N)-1),{M,N})
+
+// Inline implemention of an MxN ones matrix
+#define ONES(M,N) (1+reshape(0.0*iarr(0,(M)*(N)-1),{M,N}))
+
+// Inline implemention of an square identity matrix
+#define EYE(M) eqfun(floor(div(1.0*reshape(iarr(0,round((M)^2-1)),{M,M}),(M)+1)),div(1.0*reshape(iarr(0,round((M)^2-1)),{M,M}),(M)+1))
+
+// Repeats a vector or matrix along the second dimension
+// REPVEC({1,2,3},2)  : {{1,2,3},{1,2,3}}
+// REPVEC({1,2,3},2)' : {{1,1},{2,2},{3,3}}
+#define REPVEC(V,N) (ONES(N,1)*{flatten(V)})
+
+// Inline implementation of matrix with ones in j'th coloumn and zero else where 
+#define ONES_J(M,N,J)  eqfun((1+0.0*iarr(0, M)')*{iarr(0,N)},J) 
+
+// Inline implementation of matrix with ones in i'th row and zeros else where 
+#define ONES_I(M,N,I)  (eqfun((1+0.0*iarr(0, N)')*{iarr(0,M)},I)') //'
+
+// Inline implementation of matrix with a one in the i,j element zeros else where 
+#define ONES_IJ(M,N,I,J) eqfun(reshape(iarr(0,floor((M)*(N)-1.0)),{floor(1.0*M),floor(1.0*N)}),floor(1.0*(I*(N))+(J)))
+
+// Simple linspace implementatation
+#define _LINSPACE(START, STOP, NUM) iarr(0, floor(1.0*(NUM-1)))*(1.0*(STOP)-1.0*(START))/(floor(1.0*(NUM))-1)+START
+
+// Linspace which ensures that the last point is exactly STOP.
+#define LINSPACE(START, STOP, NUM ) mult(not(ONES_IJ(1, NUM, 0, NUM-1)[0]), _LINSPACE(START, STOP, NUM))+ ONES_IJ(1, NUM, 0, NUM-1)[0]*STOP
+
+
+/*
+// Inline AnyScript implementation of the following C++ function: 
+// https://en.wikipedia.org/wiki/Smoothstep
+float smootherstep(float edge0, float edge1, float x)
+{
+    // Scale, and clamp x to 0..1 range
+    x = clamp((x - edge0)/(edge1 - edge0), 0.0, 1.0);
+    // Evaluate polynomial
+    return x*x*x*(x*(x*6 - 15) + 10);
+}
+*/
+// 1st and 2nd order derivatives at edge0 and edge1 are 0
+#define SMOOTHERSTEP(edge0, edge1, val) mult(iffun(ltfun(((val)-(edge0))/((edge1)-(edge0)),0.0), 0*(val), iffun(gtfun(((val)-(edge0))/((edge1)-(edge0)),1.0),0*(val)+1.0, ((val)-(edge0))/((edge1)-(edge0))))\
+                                       ,mult(iffun(ltfun(((val)-(edge0))/((edge1)-(edge0)),0.0), 0*(val), iffun(gtfun(((val)-(edge0))/((edge1)-(edge0)),1.0),0*(val)+1.0, ((val)-(edge0))/((edge1)-(edge0))))\
+                                       ,mult(iffun(ltfun(((val)-(edge0))/((edge1)-(edge0)),0.0), 0*(val), iffun(gtfun(((val)-(edge0))/((edge1)-(edge0)),1.0),0*(val)+1.0, ((val)-(edge0))/((edge1)-(edge0))))\
+                                       ,(mult(iffun(ltfun(((val)-(edge0))/((edge1)-(edge0)),0.0), 0*(val), iffun(gtfun(((val)-(edge0))/((edge1)-(edge0)),1.0),0*(val)+1.0, ((val)-(edge0))/((edge1)-(edge0))))\
+                                       ,(iffun(ltfun(((val)-(edge0))/((edge1)-(edge0)),0.0), 0*(val), iffun(gtfun(((val)-(edge0))/((edge1)-(edge0)),1.0),0*(val)+1.0, ((val)-(edge0))/((edge1)-(edge0))))\
+                                        *6 - 15)) + 10)  )))
+
+     
+                                        
+                                     
+
+/*
+// Inline AnyScript implementation of the following c++ function. 
+This is just half a smoother step function which continues liniearly when it
+reaches it steepest value.
+float smoothramp(float edge0, float edge1, float x)
+{
+    // Scale, and clamp x to 0..1 range
+    x = clamp((x - edge0)/(2*(edge1 - edge0)), 0.0, 0.5);
+    // Evaluate polynomial
+    if (x < 0.5) {
+      return x*x*x*(x*(x*6 - 15) + 10)
+    }
+    else {
+      return 2*x - 0.5
+    };
+};
+*/
+
+// 1st and 2nd order derivatives at edge0 are 0
+#define SMOOTHRAMP(edge0, edge1, val) 2*iffun(gtfun(((val)-(edge0))/(2*((edge1)-(edge0))), 0.5), -0.5+2*(((val)-(edge0))/(2*((edge1)-(edge0)))),\
+                                        mult(iffun(ltfun(((val)-(edge0))/(2*((edge1)-(edge0))),0.0), 0*(val), iffun(gtfun(((val)-(edge0))/(2*((edge1)-(edge0))),0.5),0*(val)+0.5, ((val)-(edge0))/(2*((edge1)-(edge0)))))\
+                                       ,mult(iffun(ltfun(((val)-(edge0))/(2*((edge1)-(edge0))),0.0), 0*(val), iffun(gtfun(((val)-(edge0))/(2*((edge1)-(edge0))),0.5),0*(val)+0.5, ((val)-(edge0))/(2*((edge1)-(edge0)))))\
+                                       ,mult(iffun(ltfun(((val)-(edge0))/(2*((edge1)-(edge0))),0.0), 0*(val), iffun(gtfun(((val)-(edge0))/(2*((edge1)-(edge0))),0.5),0*(val)+0.5, ((val)-(edge0))/(2*((edge1)-(edge0)))))\
+                                       ,(mult(iffun(ltfun(((val)-(edge0))/(2*((edge1)-(edge0))),0.0), 0*(val), iffun(gtfun(((val)-(edge0))/(2*((edge1)-(edge0))),0.5),0*(val)+0.5, ((val)-(edge0))/(2*((edge1)-(edge0)))))\
+                                       ,(iffun(ltfun(((val)-(edge0))/(2*((edge1)-(edge0))),0.0), 0*(val), iffun(gtfun(((val)-(edge0))/(2*((edge1)-(edge0))),0.5),0*(val)+0.5, ((val)-(edge0))/(2*((edge1)-(edge0)))))\
+                                        *6 - 15)) + 10) )))\
+                                       )
+
+
+                                         
+#if ANYBODY_FILENAME_MAINFILE == "helper_macros.any"
+//  Test code. Only active if the file is loaded as main
+Main = 
+{
+  
+  AnyFolder StepFunctions = {
+    // Run the function on a vector input
+    AnyVector x_test = farr(-1.0, 0.1, 100);
+    AnyVector y_test = SMOOTHERSTEP(0, 3, x_test);
+    
+    AnyBodyStudy test_study = 
+    {
+      Gravity = {0,0,0};
+      // Run the function on single values as part of a study.
+      AnyVar SmootherStep = SMOOTHERSTEP(0.25, 0.75, t);
+      
+
+      AnyVar SmootherRamp= 100*SMOOTHRAMP(0.25, 0.5,t);
+
+    };
+  };
+  
+  AnyFolder MatrixCreation = 
+  {
+    // Identity matrix MxM
+    AnyMatrix eye = EYE(10);
+    // Matrix MxN of ones
+    AnyMatrix ones = ONES(6,3);
+    // Matrix MxN of ones
+    AnyMatrix zeros = ZEROS(2,7);
+   
+    // Matrix with column j set to ones
+    AnyMatrix ones_j = ONES_J(5,6,2);
+    
+    // Matrix with row i set to ones
+    AnyMatrix ones_i = ONES_I(4,3,1);
+    
+    // Matrix with element i,j set to one
+    AnyMatrix ones_ij = ONES_IJ(4,5,2,2);
+    
+    // Repeat vector into a matrix
+    AnyVector a = {1,2,3};
+    AnyMatrix repvec = REPVEC(a,2);
+    
+    AnyVector linspace1 = LINSPACE(1, 2, 100);
+    AnyVector linspace2 = LINSPACE(1.0, 9.999, 111);
+        
+  };
+};
+#endif
+ 
+#else
+
+
+#endif
+// -*- mode: cpp;-*-
+// vim: syntax=cpp

@@ -1,0 +1,83 @@
+#class_template KinLimitsDriver(AnyKinMeasure &KinMeasure ) {
+
+  
+#var AnyVar LowerLimit; 
+#var AnyVar HighLimit;
+#var AnyVar MeasureConversion;
+  
+#var AnyVar DriverPhaseIn = 0.05*(HighLimit - LowerLimit) ;
+#var AnyVar LowerLimitHard= -1.99*pi;//LowerLimit - DriverPhaseIn ;
+#var AnyVar HighLimitHard= 1.99*pi;//HighLimit + DriverPhaseIn ;
+
+#var AnyVar CoeffFactor = 8;
+#var AnyInt PowerIndex = 6;
+
+AnyFunInterpol JointLimitErrorFunction= 
+{
+ 
+  //convert units...
+  AnyVar LowerLimitCon=.LowerLimit/.MeasureConversion;
+  AnyVar HighLimitCon=.HighLimit/.MeasureConversion;
+  AnyVar LowerLimitHardCon=.LowerLimitHard;
+  AnyVar HighLimitHardCon=.HighLimitHard;
+  
+  #var AnyIntVar T_left_steps = 100;
+  AnyVar T_left_delta = (LowerLimitCon - LowerLimitHardCon)/T_left_steps;
+  AnyVector T_left_base = farr(LowerLimitHardCon, abs(T_left_delta), T_left_steps+1);
+  AnyVector T_left = T_left_base ;
+  AnyVector T_left_offset = T_left_base - LowerLimitCon;
+  AnyVector Data_left = pow(-1, .PowerIndex)*.CoeffFactor*pow(T_left_offset, .PowerIndex) ;
+  
+  #var AnyIntVar T_mid_steps = 100;
+  AnyVar T_mid_delta = (HighLimitCon - LowerLimitCon)/T_mid_steps;
+  AnyVector T_mid = arrcat(
+  arrcat( 
+  (LowerLimitCon + T_mid_delta) - {3/4*T_mid_delta, 2/4*T_mid_delta, 1/4*T_mid_delta},
+  farr(LowerLimitCon + T_mid_delta , T_mid_delta, T_mid_steps-1)
+  ),
+  (HighLimitCon - T_mid_delta) + {1/4*T_mid_delta, 2/4*T_mid_delta, 3/4*T_mid_delta}
+  );
+  AnyVector Data_mid = arrcat(arrcat({0.0, 0.0, 0.0}, 0.0*farr(0.0, 1.0, T_mid_steps-1)), {0.0, 0.0, 0.0});
+  
+  #var AnyIntVar T_right_steps = 100;
+  AnyVar T_right_delta = (HighLimitHardCon - HighLimitCon)/T_right_steps;
+  AnyVector T_right_base = farr(HighLimitCon, abs(T_right_delta), T_right_steps+1);  
+  AnyVector T_right = T_right_base;
+  AnyVector T_right_offset = T_right_base - HighLimitCon;
+  AnyVector Data_right = pow(1, .PowerIndex)*.CoeffFactor*pow(T_right_offset, .PowerIndex);
+  
+  AnyVector T_total = arrcat(arrcat(T_left, T_mid), T_right);
+  AnyVector Data_total = arrcat(arrcat(Data_left, Data_mid), Data_right);
+  
+  Type = Bspline;
+  T = T_total ;
+  Data = {Data_total} ;
+
+//  Type = Bspline;
+//  T = {0,1,2,3,4,5,6,7,8,9};
+//  Data = {T} ;
+  
+  //
+};
+
+
+AnyKinMeasureFunComb1 JointLimitMeasure = {
+  Functions = {&.JointLimitErrorFunction};
+  AnyKinMeasure &ref = .KinMeasure;
+};
+
+AnyKinEqSimpleDriver JointLimitDriver = 
+{
+  AnyKinMeasureFunComb1 & ref = .JointLimitMeasure;
+  DriverPos = {0};
+  DriverVel = {0};
+  Reaction.Type = {Off};
+  CType = {Soft};
+  AnyFunConst ConstFun = { Value = {1}; };
+  WeightFun = {&ConstFun};      
+};
+
+
+};
+
+
