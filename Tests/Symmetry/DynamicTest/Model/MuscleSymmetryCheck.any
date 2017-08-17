@@ -1,0 +1,96 @@
+AnyFolder SymmetryCheck= {
+  
+  AnyFolder Arm ={
+    
+    
+    AnyFolder Kinematics ={
+      
+      //this is a trick to make the ouput of the search posvar not const
+      AnyFolder DummyModel ={
+        AnyFixedRefFrame GlobalRef ={};
+        AnySeg mass={Mass=0; Jii={0,0,0};};
+        AnyStdJoint jnt={      AnyFixedRefFrame &ref1=.GlobalRef;  AnySeg &ref2=.mass;};
+        
+      };
+      
+      AnyFolder Right ={
+      
+        AnyObjectPtrArray RefFrames = ObjSearchRecursive("Main.HumanModel.BodyModel.Right.ShoulderArm", "r","AnyFloat", 10);
+
+        //this is a trick to make the ouput of the search posvar not const
+        AnyFloat PointsXY = (Obj2Num(RefFrames)+.DummyModel.mass.r[0])* {{1,0,0},{0,1,0},{0,0,0}};
+
+        //look at the Comparison.Max_ListComparison to detect which point no is causing non zero values...
+        //use the line below to find out which point is the trouble maker by typing in the number...
+        //AnyString PointName = CompleteNameOf(RefFrames[422]);
+      };
+      
+      AnyFolder Left ={
+        //this is the way it is supposed to be... but the Obj2Num returns consts... for the moment
+
+        AnyObjectPtrArray RefFrames = ObjSearchRecursive("Main.HumanModel.BodyModel.Left.ShoulderArm", "r","AnyFloat", 10);
+        //the model is symmetric on Z this trick allows us to check all nodes regardless if they are place on thorax or pelvis
+        AnyFloat PointsXY= (Obj2Num(RefFrames)+.DummyModel.mass.r[0])* {{1,0,0},{0,1,0},{0,0,0}};  
+      };
+      
+      AnyFolder Comparison ={
+        AnyFloat ListComparison =.Right.PointsXY-.Left.PointsXY;
+        AnyFloat Max_ListComparison = max(ListComparison);
+      };  
+      
+    };
+    
+    AnyFolder Muscle ={
+      AnyFolder Right ={
+        AnyObjectPtrArray Muscles = ObjSearchRecursive("Main.HumanModel.BodyModel.Right.ShoulderArm", "LmtDot","AnyValue", 10);
+        AnyFloat List = Obj2Num(Muscles);
+      
+      };      
+      AnyFolder Left ={
+         AnyObjectPtrArray Muscles = ObjSearchRecursive("Main.HumanModel.BodyModel.Left.ShoulderArm", "LmtDot","AnyValue", 10);
+         AnyFloat List = Obj2Num(Muscles);
+
+         //Instructions:
+        //1 run the model 
+        //2 Look at the Max_listComparison
+        //3 indentify if a muscle is sticking out... ie has larger values than kin tolerance ...
+        //4 if so use the two lines below to identify the name of it... (replace 55)
+        //5 This can be used to find a name of a specific item in sf
+ 
+        
+
+        AnyObjectPtrArray MusclesNames = ObjSearchRecursive("Main.HumanModel.BodyModel.Left.ShoulderArm","*", "AnyMuscle",10);
+       AnyString MusclesName = NameOf(MusclesNames[55]);
+
+      
+      };
+      
+      AnyFolder Comparison ={
+        AnyFloat ListComparison =.Right.List-.Left.List;
+        AnyVar Max_ListComparison = max(ListComparison);
+      };  
+    };  
+  };
+  
+  AnyFolder Leg ={
+    AnyFolder Muscle ={
+      
+      AnyFolder Right ={
+        AnySearchFun sf= {      Search="Main.HumanModel.BodyModel.Right.Leg.Mus.*.LmtDot";   };    
+        AnyFloat List = sf();
+      };
+      
+      AnyFolder Left ={
+        AnySearchFun sf= {   Search="Main.HumanModel.BodyModel.Left.Leg.Mus.*.LmtDot";      };
+        AnyFloat List = sf();
+      };
+      
+      AnyFolder Comparison ={
+        AnyFloat ListComparison =.Right.List-.Left.List;
+        AnyVar Max_ListComparison = max(ListComparison);
+      };  
+      
+    };
+  };
+};
+
