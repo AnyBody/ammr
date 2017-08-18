@@ -1,0 +1,89 @@
+AnyFolder LegCal5={
+  
+  AnyFolder &Pelvis = ...HumanFolderRef.Trunk.SegmentsLumbar.PelvisSeg;
+  AnyFolder &Sacrum = ...HumanFolderRef.Trunk.SegmentsLumbar.SacrumSeg;
+  
+  AnyFolder &LegSegSide = .SideHumanFolderRef.Leg.Seg;
+  
+  AnyFolder &LegJointsSide = .SideHumanFolderRef.Leg.Jnt;
+  AnyFolder &SacrumPelvisJnt = ...HumanFolderRef.Trunk.JointsLumbar.SacrumPelvisJnt;
+  
+  
+  AnyFixedRefFrame ground = {
+    AnyRefNode node = { 
+      ARel=..Pelvis.Axes0;
+      sRel=..Pelvis.r0;
+    };
+  };
+  
+  AnyKinEqDriver PelvisFix = {
+    AnyKinLinear PelvisSacrumLinFix = {
+      AnyRefFrame &ground = ..ground.node;
+      AnyRefFrame &Pelvis = .....HumanFolderRef.Trunk.SegmentsLumbar.PelvisSeg;
+    };
+    AnyKinRotational PelvisSacrumRotFix = {
+      Type = RotAxesAngles;
+      AnyRefFrame &ground = ..ground.node;
+      AnyRefFrame &Pelvis = .....HumanFolderRef.Trunk.SegmentsLumbar.PelvisSeg;
+    };
+  };
+  
+  AnyKinEqSimpleDriver PelvisSacrumFix = {
+    AnyKinMeasure &Jnt = .SacrumPelvisJnt;
+    DriverPos = {0,0,0};
+    DriverVel = {0,0,0};
+    Reaction.Type = {Off,Off,Off}; 
+  }; 
+  
+  AnyKinEqSimpleDriver Hip = {
+    AnyKinRotational &Spherical = ..SideInterfaceFolderRef.HipFlexion.HipMeasure;
+    DriverPos = {60,0,10}*pi/180; // Flexion - Abduction - external rotatio
+    DriverVel = {0,0,0}*pi/180;
+    Reaction.Type = {Off,Off,Off};
+  };
+    
+  AnyKinEqSimpleDriver Knee = {
+    AnyKinMeasure &Hinge = ..SideInterfaceFolderRef.KneeFlexion;
+    DriverPos = {50*pi/180};
+    DriverVel = {0*pi/180};
+    Reaction.Type = {Off};
+  };
+    
+  AnyKinEqSimpleDriver Ankle = {
+    AnyKinMeasure &Hinge = ..SideInterfaceFolderRef.AnklePlantarFlexion;
+    DriverPos = {-10*pi/180}; // 10 degrees dorsi flexion
+    DriverVel = {0*pi/180};
+    Reaction.Type = {Off};
+  };
+
+  AnyKinEqSimpleDriver SubTalar = {
+    AnyKinMeasure &Hinge = ..SideInterfaceFolderRef.SubTalarEversion;
+    DriverPos = {20*pi/180};
+    DriverVel = {0*pi/180}; 
+    Reaction.Type = {Off};
+  };
+  
+  AnyString MusPrefix = CompleteNameOf(&.SideHumanFolderRef.Leg.Mus);
+  
+  AnyObjectPtrArray VastusLateralisMuscles = ObjSearch(MusPrefix+".VastusLateralis*", "AnyMuscle");  
+  AnyObjectPtrArray VastusMedialisMuscles = ObjSearch(MusPrefix+".VastusMedialis*", "AnyMuscle");
+  AnyObjectPtrArray VastusIntermediusMuscles = ObjSearch(MusPrefix+".VastusIntermedius*", "AnyMuscle");
+  AnyObjectPtrArray RectusFemoris1Muscles = ObjSearch(MusPrefix+".RectusFemoris1*", "AnyMuscle");
+  AnyObjectPtrArray ObturatorMuscles = ObjSearch(MusPrefix+".Obturator*", "AnyMuscle");
+  AnyObjectPtrArray PeroneusLongus = ObjSearch(MusPrefix+".PeroneusLongus*", "AnyMuscle");
+};
+
+// The study: Operations to be performed on the model
+AnyBodyCalibrationStudy LegCalibrationStudy5 = {
+  AnyFolder &ref=.LegCal5; 
+  nStep = 1;
+  MuscleArr = arrcat(
+                ref.VastusLateralisMuscles,
+                ref.VastusMedialisMuscles,
+                ref.VastusIntermediusMuscles,
+                ref.RectusFemoris1Muscles,
+                ref.ObturatorMuscles,
+                ref.PeroneusLongus
+             );
+  InitialConditions.SolverType = KinSolOverDeterminate;
+};
