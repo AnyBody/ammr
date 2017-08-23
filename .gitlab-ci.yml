@@ -2,34 +2,112 @@
 variables:
   GIT_STRATEGY: fetch
 
-cache:
-    paths:
-    - .cache/
 
 BM_combination_tests:
   stage: test
   script:
-    - pytest --ff "Tests/BM combinations" -n 2
+    - pytest "Tests/BM combinations" -n 2
+  except:
+    -  /^docs.*$/
   tags:
     - ams
-    - python
 
 other_tests:
   stage: test
   script:
-    - pytest "--ignore=Tests/BM combinations" --ignore=Tests/Applications --ff Tests
+    - pytest "--ignore=Tests/BM combinations" "--ignore=Tests/Application Tests"
+  except:
+    -  /^docs.*$/
   tags:
     - ams
-    - python
 
 Application_tests:
   stage: test
   script:
     - pytest --ff Tests/Applications -n 4
+  except:
+    -  /^docs.*$/
   tags:
     - ams
-    - python
 
     
+.job_template: &setup_docs_build_env
+  before_script:
+    - export CONDA_PKGS_DIRS="conda-cache"
+    - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+    - bash miniconda.sh -b -p $HOME/miniconda
+    - export PATH="$HOME/miniconda/bin:$PATH"
+    - hash -r
+    - conda config --set always_yes yes --set changeps1 no
+    - conda config --add channels conda-forge # For sphinxcontrib.autoprogram
+    - conda update -q conda 
+    - conda info -a
+    - conda create -q -n doc-build-environment python=3.6 sphinx cloud_sptheme pygments_anyscript
+    - source activate doc-build-environment
+    - pip install sphinxcontrib-fulltoc
+  cache:
+    paths:
+      - conda-cache
+  tags:
+    - docker
+    - linux
+  allow_failure: false
 
-    
+
+
+test_docs:
+  <<: *setup_docs_build_env
+  script:
+    - set -e
+    - cd Docs
+    - make html
+    - cd ..
+    - mkdir -p ./public
+    - cp -r ./Docs/_build/html/* ./public/
+  only:
+    - branches
+
+  artifacts:
+    paths:
+    - public
+    expire_in: 1 hour
+
+
+pages:
+  stage: deploy
+  environment:
+    name: staging
+    #url: https://docs.gitlab.com
+  script:
+    - cd public 
+    - ls
+  artifacts:
+    paths:
+    - master
+    expire_in: 1 hour
+  only: 
+    - branches
+    #- master
+    #- triggers
+  tags:
+    - docker
+
+#  git remote add https://{TOKEN}@github.com/AnyBody/ammr-doc.git
+# git pull -s  recursive -X ours doctr_remote master
+
+
+
+
+# deploy_docs:
+#   stage: deploy
+#   script:
+#     - cd Docs/_build/html
+#     - ls
+#   only: 
+#     - tags
+#   except:
+#     - branches
+#   tags:
+#     - docker
+#     - linux
+
