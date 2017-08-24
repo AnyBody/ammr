@@ -2,25 +2,20 @@
 variables:
   GIT_STRATEGY: fetch
 
-cache:
-    paths:
-    - .cache/
 
 BM_combination_tests:
   stage: test
   script:
-    - pytest --ff "Tests/BM combinations" -n 2
+    - pytest "Tests/BM combinations" -n 2
   tags:
     - ams
-    - python
 
 other_tests:
   stage: test
   script:
-    - pytest "--ignore=Tests/BM combinations" --ignore=Tests/Applications --ff Tests
+    - pytest "--ignore=Tests/BM combinations" --ignore=Tests/Application Tests
   tags:
     - ams
-    - python
 
 Application_tests:
   stage: test
@@ -28,8 +23,101 @@ Application_tests:
     - pytest --ff Tests/Applications -n 4
   tags:
     - ams
-    - python
 
     
+test_docs:
+  before_script:
+    - apt-get update -qy
+    - apt-get install -y python-dev python-pip
+    - pip install -r Docs/requirements.txt
+
+  script:
+    - set -e
+    - cd Docs
+    - make html
+
+only:
+    - branches
+
+  tags:
+    - docker
+    - linux
+
+  allow_failure: false
+
+
+stage_docs:
+  before_script:
+    - apt-get update -qy
+    - apt-get install -y python-dev python-pip
+    - pip install -r Docs/requirements.txt
+
+  stage: deploy
+
+  script:
+    - set -e
+    - cd Docs
+    - make html
+  
+  only: 
+    - master
+    - triggers
+
+  tags:
+    - docker
+    - linux
+
+  allow_failure: false
+
+
+
+deploy_docs:
+  before_script:
+    - apt-get update -qy
+    - apt-get install -y python-dev python-pip
+    - pip install -r Docs/requirements.txt
+
+  stage: deploy
+
+  script:
+    - set -e
+    - cd Docs
+    - make html
+  
+  only: 
+    - tags
+
+  except:
+    - branches
+
+  tags:
+    - docker
+    - linux
+
+  allow_failure: false
+
+
+
+# stage_docs:
+#   before_script:
+#     - apt-get update -qy
+#     - apt-get install -y python-dev python-pip
+#     - pip install -r Docs/requirements.txt
+
+#   script:
+#     - set -e
+#     - make html
+#     # deploy to staged docs
+
+#   type: deploy
+
+#   only:
+#     - master
+
+#   tags:
+#     - docker
+#     - linux
+
+#   allow_failure: false
 
     
