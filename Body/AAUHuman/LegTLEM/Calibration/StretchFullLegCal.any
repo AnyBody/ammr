@@ -1,0 +1,118 @@
+//This is the calibration1 file, it will calibrate all muscle in the leg in
+//a neutral position (all joint angles in the drivers are zero)
+//The subsequent calibrations 2 and 3 will overwrite some of the values
+//obtained in this study
+
+AnyFolder LegCal1 ={
+  
+  AnyFolder &Pelvis = ...HumanFolderRef.Trunk.SegmentsLumbar.PelvisSeg;
+  AnyFolder &Sacrum = ...HumanFolderRef.Trunk.SegmentsLumbar.SacrumSeg;
+  
+  AnyFolder &LegSegSide = .SideHumanFolderRef.Leg.Seg;
+  
+  AnyFolder &LegJointsSide = .SideHumanFolderRef.Leg.Jnt;
+  AnyFolder &SacrumPelvisJnt = ...HumanFolderRef.Trunk.JointsLumbar.SacrumPelvisJnt;
+  
+  AnyFolder &MusCalSide =  .SideHumanFolderRef.Leg.Mus;
+  
+  AnyFolder &MusParCalSide =  .SideHumanFolderRef.Leg.MusPar;
+  
+  
+  
+  AnyFixedRefFrame ground = {
+    AnyRefNode node = { 
+      ARel=..Pelvis.Axes0;
+      sRel=..Pelvis.r0;
+    };
+  };
+  
+  AnyKinEqDriver PelvisFix = {
+    AnyKinLinear PelvisSacrumLinFix = {
+      AnyRefFrame &ground = ..ground.node;
+      AnyRefFrame &Pelvis = .....HumanFolderRef.Trunk.SegmentsLumbar.PelvisSeg;
+    };
+    AnyKinRotational PelvisSacrumRotFix = {
+      Type = RotAxesAngles;
+      AnyRefFrame &ground = ..ground.node;
+      AnyRefFrame &Pelvis = .....HumanFolderRef.Trunk.SegmentsLumbar.PelvisSeg;
+    };
+  };
+  
+  AnyKinEqSimpleDriver PelvisSacrumFix = {
+    AnyKinMeasure &Jnt = .SacrumPelvisJnt;
+    DriverPos = {0,0,0};
+    DriverVel = {0,0,0};
+    Reaction.Type = {Off,Off,Off}; 
+  }; 
+  
+  AnyKinEqInterPolDriver Hip = {
+    AnyKinRotational &Spherical = ..SideInterfaceFolderRef.HipFlexion.HipMeasure;
+    Type = PiecewiseLinear;
+    T =      {0.0,  0.03030303,  0.06060606,  0.09090909,  0.12121212,
+        0.15151515,  0.18181818,  0.21212121,  0.24242424,  0.27272727,
+        0.3030303 ,  0.33333333,  0.36363636,  0.39393939,  0.42424242,
+        0.45454545,  0.48484848,  0.51515152,  0.54545455,  0.57575758,
+        0.60606061,  0.63636364,  0.66666667,  0.6969697 ,  0.72727273,
+        0.75757576,  0.78787879,  0.81818182,  0.84848485,  0.87878788,
+        0.90909091,  0.93939394,  0.96969697,  1.0};
+    Data = { {110,130,-20,-20,0,0,0,0,0,0,130,-20,-20,110,-20,130,5,-7,32,32,0,0,-5,35,110,-20,5,107,0,0,-10,90,8,110},
+             {0,0,0,0,0,0,40,-25,0,0,-25,40,0,0,10,-15,0,0,2.5,2.5,-25,83,0,0,0,0,35,31,0,0,40,-25,-25,52},
+             {0,0,0,0,0,0,0,0,35,45,0,-6,0,0,45,0,0,0,4,4.5,0,169,0,0,0,0,35,92,0,0,30,0,0,-20}
+           }*pi/180; // Flexion - Abduction - internal rotation 
+    
+    Reaction.Type = {Off, Off, Off};
+  };
+  
+  AnyKinEqInterPolDriver Knee = {
+    AnyKinMeasure &Hinge = ..SideInterfaceFolderRef.KneeFlexion;
+    Type = PiecewiseLinear;
+    T =      {0.0,  0.03030303,  0.06060606,  0.09090909,  0.12121212,
+        0.15151515,  0.18181818,  0.21212121,  0.24242424,  0.27272727,
+        0.3030303 ,  0.33333333,  0.36363636,  0.39393939,  0.42424242,
+        0.45454545,  0.48484848,  0.51515152,  0.54545455,  0.57575758,
+        0.60606061,  0.63636364,  0.66666667,  0.6969697 ,  0.72727273,
+        0.75757576,  0.78787879,  0.81818182,  0.84848485,  0.87878788,
+        0.90909091,  0.93939394,  0.96969697,  1.0};
+    Data = {{0,150,0,150,0,0,0,0,0,0,140,90,150,0,5,150,150,0,0,30,70,150,0,145,-5,150,5,115,0,0,10,140,145,0}}*pi/180; // ? degrees knee flexion
+    Reaction.Type = {Off};
+  };
+  
+  
+  AnyKinEqInterPolDriver Ankle = {
+    AnyKinMeasure &Hinge = ..SideInterfaceFolderRef.AnklePlantarFlexion;
+    Type = PiecewiseLinear;
+    T =      {0.0,  0.03030303,  0.06060606,  0.09090909,  0.12121212,
+        0.15151515,  0.18181818,  0.21212121,  0.24242424,  0.27272727,
+        0.3030303 ,  0.33333333,  0.36363636,  0.39393939,  0.42424242,
+        0.45454545,  0.48484848,  0.51515152,  0.54545455,  0.57575758,
+        0.60606061,  0.63636364,  0.66666667,  0.6969697 ,  0.72727273,
+        0.75757576,  0.78787879,  0.81818182,  0.84848485,  0.87878788,
+        0.90909091,  0.93939394,  0.96969697,  1.0};
+    Data = {{0,0,0,0,-20,45,0,0,0,0,0,-10,45,45,0,45,45,-20,45,-20,0,0,-20,45,0,45,0,20,-20,45,0,45,0,20}}*pi/180;
+    Reaction.Type = {Off};
+  };
+  
+  AnyKinEqInterPolDriver SubTalar = {
+    AnyKinMeasure &Hinge = ..SideInterfaceFolderRef.SubTalarEversion;
+    Type = PiecewiseLinear;
+    T =      {0.0,  0.03030303,  0.06060606,  0.09090909,  0.12121212,
+        0.15151515,  0.18181818,  0.21212121,  0.24242424,  0.27272727,
+        0.3030303 ,  0.33333333,  0.36363636,  0.39393939,  0.42424242,
+        0.45454545,  0.48484848,  0.51515152,  0.54545455,  0.57575758,
+        0.60606061,  0.63636364,  0.66666667,  0.6969697 ,  0.72727273,
+        0.75757576,  0.78787879,  0.81818182,  0.84848485,  0.87878788,
+        0.90909091,  0.93939394,  0.96969697,  1.0};
+    Data = {{0,0,0,0,0,0,0,0,10,-20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,10,-20,0,0,0,0}}*pi/180;
+    Reaction.Type = {Off};
+  };
+};
+
+// The study: Operations to be performed on the model
+AnyBodyCalibrationStudy LegCalibrationStudyStretchFull = {
+  AnyFolder &ref=.LegCal1; 
+  nStep = 100;
+  InitialConditions.SolverType = KinSolOverDeterminate;
+  Kinematics.PosAnalysisOnlyOnOff = On;
+  
+};
+
