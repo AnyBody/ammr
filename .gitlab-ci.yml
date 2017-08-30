@@ -30,39 +30,19 @@ Application_tests:
   tags:
     - ams
 
-    
-.job_template: &setup_docs_build_env
-  before_script:
-    - export CONDA_PKGS_DIRS="conda-cache"
-    #- wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-    #- bash miniconda.sh -b -p $HOME/miniconda
-    #- export PATH="$HOME/miniconda/bin:$PATH"
-    #- hash -r
-    - conda config --set always_yes yes --set changeps1 no
-    - conda config --add channels conda-forge # For sphinxcontrib.autoprogram
-    #- conda update -q conda
-    - conda update conda 
-    - conda info -a
-    - conda create -n doc-build-environment python=3.6 sphinx cloud_sptheme pygments_anyscript make
-    #- conda create -q -n doc-build-environment python=3.6 sphinx cloud_sptheme pygments_anyscript
-    - source activate doc-build-environment
-    - pip install sphinxcontrib-fulltoc
-  cache:
-    paths:
-      - conda-cache
-  tags:
-    - docker
-    - linux
-  allow_failure: false
-
 
 
 test_docs:
   image:
     name: continuumio/miniconda3
-    #entrypoint: ["/bin/bash", "-c"]
-
-  <<: *setup_docs_build_env
+  before_script:
+    - export CONDA_PKGS_DIRS="conda-cache"
+    - conda config --set always_yes yes --set changeps1 no
+    - conda config --add channels conda-forge # For sphinxcontrib.autoprogram
+    - conda update -q conda 
+    - conda info -a
+    - conda install -q sphinx cloud_sptheme pygments_anyscript make
+    - pip install sphinxcontrib-fulltoc
   script:
     - set -e
     - cd Docs
@@ -73,7 +53,9 @@ test_docs:
     - mv .public public
   only:
     - branches
-
+  cache:
+    paths:
+      - conda-cache
   artifacts:
     paths:
     - public
@@ -84,7 +66,7 @@ deploy_docs:
   stage: deploy
   environment:
     name: staging
-    #url: https://docs.gitlab.com
+    url: https://anyscript.org/ammr-doc/dev
   before_script:
     - gem install dpl
   script:
@@ -94,9 +76,6 @@ deploy_docs:
   tags:
     - docker
     - ruby
-
-#  git remote add https://{TOKEN}@github.com/AnyBody/ammr-doc.git
-# git pull -s  recursive -X ours doctr_remote master
 
 
 
