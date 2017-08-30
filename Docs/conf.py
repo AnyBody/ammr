@@ -44,7 +44,7 @@ extensions = [
 
     
     # 3rd party extensions
-    
+
     'cloud_sptheme.ext.index_styling',
     'cloud_sptheme.ext.relbar_toc',
     'cloud_sptheme.ext.escaped_samp_literals',
@@ -69,6 +69,9 @@ master_doc = 'index'
 project = 'AMMR'
 copyright = '2017, AnyBody Technology'
 author = 'AnyBody Technology'
+
+github_doc_root = 'https://github.com/anybody-research-group/anypytools/tree/master/docs/'
+
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -110,6 +113,7 @@ todo_include_todos = True
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
+html_theme = "cloud"
 
 html_theme_path = [cloud_sptheme.get_theme_dir()]
 
@@ -136,7 +140,6 @@ html_title = "%s v%s Documentation" % (project, release)
 #     'headlinkcolor': '#953337',
 # }
 
-html_theme = "cloud"
 html_theme_options = {
     'roottarget': master_doc,
     'max_width': '1100px',
@@ -154,7 +157,7 @@ html_theme_options = {
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
-#html_favicon = '_static/favicon.ico'
+html_favicon = '_static/favicon.ico'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -162,7 +165,7 @@ html_theme_options = {
 html_static_path = ['_static']
 
 # Custom sidebar templates, maps document names to template names.
-html_sidebars = {'**': ['searchbox.html', 'globaltoc.html']}
+#html_sidebars = {'**': ['searchbox.html', 'globaltoc.html']}
 
 
 # -- Options for HTMLHelp output ------------------------------------------
