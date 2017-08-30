@@ -44,8 +44,7 @@ extensions = [
 
     
     # 3rd party extensions
-    'sphinxcontrib.fulltoc',
-
+    
     'cloud_sptheme.ext.index_styling',
     'cloud_sptheme.ext.relbar_toc',
     'cloud_sptheme.ext.escaped_samp_literals',
