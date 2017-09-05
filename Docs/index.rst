@@ -6,36 +6,72 @@
 Welcome to AMMR's documentation!
 =======================================
 
-The AnyBody Model Repository (AMMR [#f1]_), is an open library of musculoskeletal models and examples ready to be used with the `AnyBody Modeling System`_, and maintained in a colaboration between AnyBody Technology and different Academic Institutions.
+The AnyBody Model Repository (AMMR [#f1]_ ), is an open library of
+musculoskeletal models and examples ready to be used with the `AnyBody Modeling
+System`_. 
 
+.. figure:: _static/ammr_bodyparts.png
+   :align: center
+   :figwidth: 85 %
+   :width: 70 %
+   :alt: The AnyBody Model Repository
 
-The models are typically originally developed by research projects at academic institutions or by AnyBody Technology in collaboration with academic institutions.
+   The AnyBody Model Repository is a unique open collection of human body parts.
 
-
-
-
-The repository is curated and maintained by AnyBody Technology academic research groups. 
-
+The models are developed in research projects at academic institutions or by
+AnyBody Technology in collaboration with academic institutions. The models are
+maintained by AnyBody Technology who ensures various body part models can
+be used together as full body scalable musculosketeal model.
 
 .. _AnyBody Modeling System: https://www.anybodytech.com/software/ams/
 
+Installation
+------------
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+    :maxdepth: 2
+
+    Installation
 
 
+Using the AMMR
+--------------
+.. toctree::
+    :maxdepth: 1
+
+    Creating_model_from_scratch
+    HumanBody_configurations
 
 
+Model Overview
+--------------
+
+.. toctree::
+    :maxdepth: 2
+
+    Examples_and_applications
+    BodyModels/BodyParts_and_models
+
+
+Development
+-----------
+
+.. toctree::
+    :maxdepth: 2
+
+    Contribute
 
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`search`
 
+.. rubric:: Footnotes
 
-.. [#f1]_ The double M in the AMMR comes from the repository sometimes
+
+.. [#f1] The double *M* in the *AMMR* comes from the repository sometimes
     beeing refered to as the "AnyBody Managed Model Repository". 
-    You can call it what you like. 
+    You may call it what you like. 
+
