@@ -25,7 +25,16 @@
 # -- General configuration ------------------------------------------------
 
 
+
+
+import os
+import sys
+import subprocess
 import cloud_sptheme
+
+
+sys.path.insert(0, os.path.abspath('exts'))
+
 
 try: 
     import pygments_anyscript
@@ -50,6 +59,7 @@ extensions = [
     'cloud_sptheme.ext.escaped_samp_literals',
     'cloud_sptheme.ext.issue_tracker',
     'cloud_sptheme.ext.table_styling',
+    'ammr-directives',
     
 ]
 
@@ -101,10 +111,26 @@ pygments_style = 'AnyScript'
 rst_prolog = """
 .. role:: anyscript(code)
    :language: AnyScriptDoc
+
+.. include:: /bm_tables/Substitutions.txt
 """
 
-# If true, `todo` and `todoList` produce output, else they produce nothing.
-todo_include_todos = True
+replacements = {
+    'AMS_VERSION_X': 'AMS 7.1.x',
+    'AMS_VERSION_FULL': 'AMS 7.1.0',
+}
+
+for org, rep in replacements.items():
+    rst_prolog = rst_prolog + f'.. |{org}| replace:: {rep}\n\n'
+
+
+try: 
+    subprocess.check_call(['git', 'describe', '--exact-match', 'HEAD'])
+except subprocess.CalledProcessError:
+    # If true, `todo` and `todoList` produce output, else they produce nothing.
+    todo_include_todos = True
+else:
+    todo_include_todos = False
 
 
 # -- Options for HTML output ----------------------------------------------
