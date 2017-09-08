@@ -22,24 +22,50 @@
   The TLEM muscle parameters are essentially a mixture of parematers which could be obtained by
   Klein Horsman himself as well as data obtained by Scott L. Delp. 
   (see http://isbweb.org/data/delp) 
-     
+  
+  This script implements the Handsfield et. al (2014) muscle volumes, which can be calculated
+  using regrssion equations based on body anthropometrics or total muscle volume.
+  
 */ 
 
+#define VOLUME_FORMULA_TOTAL_MUSCLE_VOLUME .TotalMuscleVolume*TotalMuscleVolumeRegression.b1 + TotalMuscleVolumeRegression.b2
+#define VOLUME_FORMULA_MASS .BodyMass*BodyMassRegression.b1 + BodyMassRegression.b2
+#define VOLUME_FORMULA_HEIGHT_MASS .BodyMass*.BodyHeight*BodyHeightMassRegression.b1 + BodyHeightMassRegression.b2
+
+#ifndef VOLUME_FORMULA
+  #define VOLUME_FORMULA VOLUME_FORMULA_HEIGHT_MASS
+#endif
+
 #if BM_SCALING == CONST_SCALING_STANDARD
-  // with the unscaled cadaver model, it makes sense to use unscaled cadaver muscle volumes
-  AnyString WhichMuscleVolumes = "Volumes_Standard";
-  #include "<ANYBODY_PATH_BODY>LegTLEM/TLEM2.0/ModelMuscleParameters.any"
+  AnyFloatVar BodyMass = .....Scaling.Scaling.StandardParameters.BodyParameters.BodyMass;
+  AnyFloatVar BodyHeight = (.....Scaling.Scaling.StandardParameters.BodyParameters.BodyMass/.....Scaling.Scaling.StandardParameters.BodyParameters.BMI)^0.5;
 #else
-  // formula to calculate individual muscle volumes using regression equation from Handsfield et al. (2014) dataset
-  #define VOLUME_FORMULA ......AnthroDataSubject.AnthroData.Body_Mass*......AnthroDataSubject.AnthroData.body_height*b1 + b2
-  AnyString WhichMuscleVolumes = "Volumes_Handsfield";
+  AnyFloatVar BodyMass = ......AnthroDataSubject.AnthroData.Body_Mass;
+  AnyFloatVar BodyHeight = ......AnthroDataSubject.AnthroData.body_height;
+#endif
+AnyFloatVar TotalMuscleVolume = DesignVar(47*BodyMass*BodyHeight + 1285); ///< Total muscle volume estimated based on Handsfield (cm^3)
+
+
 
 AnyFolder AdductorBrevisProximal = {
     AnyString Muscle = "Add. brev. (prox.)"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(0.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(36.30); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 9.53; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 0.00; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.33333; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.01370; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = 6.20; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 1.13000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 22.90; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 0.62200; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 27.10; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(9.53); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(0.00); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -48,9 +74,22 @@ AnyFolder AdductorBrevisProximal = {
 AnyFolder AdductorBrevisMid = {
     AnyString Muscle = "Add. brev. (mid.)"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(0.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(36.30); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 10.38; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 0.00; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.33333; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.01370; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = 6.20; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 1.13000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 22.90; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 0.62200; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 27.10; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(10.38); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(0.00); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -59,9 +98,22 @@ AnyFolder AdductorBrevisMid = {
 AnyFolder AdductorBrevisDistal = {
     AnyString Muscle = "Add. brev. (dist.)"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(0.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(36.30); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 11.22; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 0.00; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.33333; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.01370; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = 6.20; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 1.13000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 22.90; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 0.62200; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 27.10; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(11.22); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(0.00); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -70,9 +122,22 @@ AnyFolder AdductorBrevisDistal = {
 AnyFolder AdductorLongus = {
     AnyString Muscle = "Add. long."; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(0.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(159.56); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 10.57; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 0.00; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 1.00000; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.02590; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = -21.90; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 2.27000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = -0.48; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 1.19000; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 14.30; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(10.57); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(0.00); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -81,9 +146,22 @@ AnyFolder AdductorLongus = {
 AnyFolder AdductorMagnusDistal = {
     AnyString Muscle = "Add. magn. (dist.)"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(0.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(285.98); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 10.78; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 4.20; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.33333; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.07930; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = -4.70; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 6.93000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 62.30; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 3.64000; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 109.00; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(10.78); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(4.20); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -92,9 +170,22 @@ AnyFolder AdductorMagnusDistal = {
 AnyFolder AdductorMagnusMid = {
     AnyString Muscle = "Add. magn. (mid.) "; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(0.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(230.11); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 10.43; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 0.00; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.33333; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.07930; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = -4.70; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 6.93000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 62.30; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 3.64000; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 109.00; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(10.43); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(0.00); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -104,9 +195,22 @@ AnyFolder AdductorMagnusMid = {
 AnyFolder AdductorMagnusProximal = {
     AnyString Muscle = "Add. magn. (prox.)"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(0.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(43.16); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 8.70; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 0.00; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.33333; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.07930; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = -4.70; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 6.93000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 62.30; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 3.64000; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 109.00; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(8.70); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(0.00); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -115,9 +219,22 @@ AnyFolder AdductorMagnusProximal = {
 AnyFolder BicepsFemorisCaputLongum = {
     AnyString Muscle = "Bic. fem. CL"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(29.9); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(232.01); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 8.54; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 13.00; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 1.00000; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.02560; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = 24.30; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 2.31000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 40.80; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 1.24000; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 53.00; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(8.54); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(13.00); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -126,9 +243,22 @@ AnyFolder BicepsFemorisCaputLongum = {
 AnyFolder BicepsFemorisCaputBreve = {
     AnyString Muscle = "Bic. fem. CB"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(0.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(107.95); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 9.14; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 3.10; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 1.00000; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.01600; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = -13.80; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 1.38000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 1.02; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 0.73800; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 8.64; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(9.14); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(3.10); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -137,9 +267,22 @@ AnyFolder BicepsFemorisCaputBreve = {
 AnyFolder ExtensorDigitorumLongus = {
     AnyString Muscle = "Ext. dig. long."; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(8.3); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(32.29); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 5.99; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 30.10; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.47000; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.01320; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = 8.70; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 1.21000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 15.50; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 0.61900; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 25.60; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(5.99); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(30.10); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -148,9 +291,22 @@ AnyFolder ExtensorDigitorumLongus = {
 AnyFolder ExtensorHallucisLongus = {
     AnyString Muscle = "Ext. hal. long."; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(14.4); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(36.27); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 5.98; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 17.80; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.53000; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.01320; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = 8.70; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 1.21000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 15.50; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 0.61900; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 25.60; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(5.98); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(17.80); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -159,9 +315,22 @@ AnyFolder ExtensorHallucisLongus = {
 AnyFolder FlexorDigitorumLongus = {
     AnyString Muscle = "Flex. dig. long."; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(28.4); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(25.28); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 3.84; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 16.60; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 1.00000; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.00259; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = 11.60; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 0.24500; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 12.40; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 0.13000; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 13.90; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(3.84); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(16.60); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -171,9 +340,22 @@ AnyFolder FlexorDigitorumLongus = {
 AnyFolder FlexorHallucisLongus = {
     AnyString Muscle = "Flex. hal. long."; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(30.1); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(161.50); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 5.20; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 23.40; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 1.00000; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.01370; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = -18.90; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 1.14000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = -2.95; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 0.62200; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 1.85; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(5.20); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(23.40); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -182,9 +364,22 @@ AnyFolder FlexorHallucisLongus = {
 AnyFolder GastrocnemiusLateralis = {
     AnyString Muscle = "Gastrocn. (lat.)"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(25.4); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(136.36); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 5.69; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 23.40; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 1.00000; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.01990; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = 8.21; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 2.19000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = -7.59; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 1.08000; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 15.70; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(5.69); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(23.40); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -193,9 +388,22 @@ AnyFolder GastrocnemiusLateralis = {
 AnyFolder GastrocnemiusMedialis = {
     AnyString Muscle = "Gastrocn. (med.)"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(10.8); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(263.26); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 6.01; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 21.20; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 1.00000; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.03480; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = 9.42; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 3.41000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 12.60; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 1.71000; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 46.20; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(6.01); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(21.20); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -204,9 +412,22 @@ AnyFolder GastrocnemiusMedialis = {
 AnyFolder GemellusInferior = {
     AnyString Muscle = "Gemellus (inf.)"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(0.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(14.20); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 3.43; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 0.00; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.50000; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.00172; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = 3.85; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 0.13900; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 6.11; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 0.06880; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 7.56; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(3.43); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(0.00); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -215,9 +436,22 @@ AnyFolder GemellusInferior = {
 AnyFolder GemellusSuperior = {
     AnyString Muscle = "Gemellus (sup.)"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(0.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(14.20); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 3.43; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 0.00; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.50000; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.00172; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = 3.85; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 0.13900; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 6.11; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 0.06880; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 7.56; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(3.43); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(0.00); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -227,9 +461,22 @@ AnyFolder GemellusSuperior = {
 AnyFolder GluteusMaximusSuperior = {
     AnyString Muscle = "Glut. max. (sup.)"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(0.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(258.52); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 12.00; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 0.00; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.27603; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.12300; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = -25.40; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 11.90000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = -3.91; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 6.01000; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 105.00; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(12.00); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(0.00); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -239,9 +486,22 @@ AnyFolder GluteusMaximusSuperior = {
 AnyFolder GluteusMaximusInferior = {
     AnyString Muscle = "Glut. max. (inf.)"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(0.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(678.03); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 15.14; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 0.00; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.72397; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.12300; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = -25.40; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 11.90000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = -3.91; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 6.01000; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 105.00; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(15.14); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(0.00); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -250,9 +510,22 @@ AnyFolder GluteusMaximusInferior = {
 AnyFolder GluteusMediusAnterior = {
     AnyString Muscle = "Glut. med. (ant.)"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(0.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(144.41); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 3.81; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 0.00; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.34698; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.04780; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = -16.90; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 4.14000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 26.30; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 2.17000; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 54.80; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(3.81); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(0.00); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -261,9 +534,22 @@ AnyFolder GluteusMediusAnterior = {
 AnyFolder GluteusMediusPosterior = {
     AnyString Muscle = "Glut. med. (post.)"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(15.9); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(271.78); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 4.47; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 3.00; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.65302; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.04780; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = -16.90; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 4.14000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 26.30; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 2.17000; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 54.80; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(4.47); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(3.00); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -272,9 +558,22 @@ AnyFolder GluteusMediusPosterior = {
 AnyFolder GluteusMinimusAnterior = {
     AnyString Muscle = "Glut. min. (ant.)"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(0.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(27.53); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 2.76; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 7.28; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.33333; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.01290; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = 12.60; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 1.08000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 27.00; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 0.57600; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 33.10; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(2.76); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(7.28); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -283,9 +582,22 @@ AnyFolder GluteusMinimusAnterior = {
 AnyFolder GluteusMinimusMid = {
     AnyString Muscle = "Glut. min. (mid.)"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(0.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(27.53); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 3.38; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 7.28; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.33333; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.01290; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = 12.60; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 1.08000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 27.00; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 0.57600; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 33.10; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(3.38); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(7.28); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -294,9 +606,22 @@ AnyFolder GluteusMinimusMid = {
 AnyFolder GluteusMinimusPosterior = {
     AnyString Muscle = "Glut. min. (post.)"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(0.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(27.53); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 3.70; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 7.28; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.33333; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.01290; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = 12.60; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 1.08000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 27.00; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 0.57600; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 33.10; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(3.70); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(7.28); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -305,9 +630,22 @@ AnyFolder GluteusMinimusPosterior = {
 AnyFolder Gracilis = {
     AnyString Muscle = "Gracilis"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(0.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(87.97); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 18.11; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 14.00; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 1.00000; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.01380; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = 6.07; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 1.08000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 26.50; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 0.58000; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 32.10; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(18.11); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(14.00); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -316,9 +654,22 @@ AnyFolder Gracilis = {
 AnyFolder IliacusLateralis = {
     AnyString Muscle = "Iliacus (lat.) "; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(26.5); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(67.71); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 10.31; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 11.30; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.33333; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.02480; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = 0.38; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 2.08000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 27.60; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 1.11000; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 39.40; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(10.31); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(11.30); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -327,9 +678,22 @@ AnyFolder IliacusLateralis = {
 AnyFolder IliacusMid = {
     AnyString Muscle = "Iliacus (mid.)"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(0.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(67.71); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 5.23; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 11.30; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.33333; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.02480; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = 0.38; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 2.08000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 27.60; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 1.11000; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 39.40; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(5.23); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(11.30); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -338,9 +702,22 @@ AnyFolder IliacusMid = {
 AnyFolder IliacusMedialis = {
     AnyString Muscle = "Iliacus (med.)"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(0.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(67.71); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 8.93; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 15.50; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.33333; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.02480; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = 0.38; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 2.08000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 27.60; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 1.11000; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 39.40; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(8.93); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(15.50); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -349,9 +726,22 @@ AnyFolder IliacusMedialis = {
 AnyFolder ObturatorExternusInferior = {
     AnyString Muscle = "Obt. ext. (inf.)"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(0.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(37.88); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 6.88; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 3.50; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.35716; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.00349; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = 28.30; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 0.27900; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 33.10; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 0.14600; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 35.10; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(6.88); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(3.50); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -360,9 +750,22 @@ AnyFolder ObturatorExternusInferior = {
 AnyFolder ObturatorExternusSuperior = {
     AnyString Muscle = "Obt. ext. (sup.)"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(0.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(68.18); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 2.77; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 3.00; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.64284; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.00349; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = 28.30; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 0.27900; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 33.10; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 0.14600; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 35.10; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(2.77); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(3.00); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -371,9 +774,22 @@ AnyFolder ObturatorExternusSuperior = {
 AnyFolder ObturatorInternus = {
     AnyString Muscle = "Obturator int."; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(0.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(52.08); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 2.05; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 8.20; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 1.00000; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.00252; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = 8.68; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 0.22800; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 10.30; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 0.12000; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 11.70; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(2.05); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(8.20); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -383,9 +799,22 @@ AnyFolder ObturatorInternus = {
 AnyFolder Pectineus = {
     AnyString Muscle = "Pectineus"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(0.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(64.58); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 9.50; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 0.00; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 1.00000; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.01070; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = -9.94; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 0.94600; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = -1.59; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 0.48100; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 6.70; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(9.50); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(0.00); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -395,9 +824,22 @@ AnyFolder Pectineus = {
 AnyFolder PeroneusBrevis = {
     AnyString Muscle = "Peroneus brev."; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(23.1); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(86.09); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 4.54; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 6.40; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.41467; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.01940; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = -7.43; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 1.91000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = -6.58; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 0.95600; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 12.50; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(4.54); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(6.40); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -407,20 +849,47 @@ AnyFolder PeroneusBrevis = {
 AnyFolder PeroneusLongus = {
     AnyString Muscle = "Peroneus long."; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(15.8); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(121.52); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 5.08; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 15.90; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.58533; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.01940; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = -7.43; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 1.91000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = -6.58; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 0.95600; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 12.50; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(5.08); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(15.90); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
 };
 
+/// volume calculated using 'extensors' volume from Handsfield, applying correction factor based on TLEM2.0
 AnyFolder PeroneusTertius = {
     AnyString Muscle = "Peroneus tert."; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(19.1); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(26.52); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 4.27; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 10.00; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.27892; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.01320; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = 8.70; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 1.21000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 15.50; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 0.61900; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 25.60; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(4.27); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(10.00); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -429,20 +898,47 @@ AnyFolder PeroneusTertius = {
 AnyFolder Piriformis = {
     AnyString Muscle = "Piriformis"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(0.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(31.25); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 3.88; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 1.60; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 1.00000; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.00372; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = 16.20; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 0.20300; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 28.10; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 0.13700; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 25.70; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(3.88); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(1.60); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
 };
 
+/// volume not in the Handsfield dataset, using coefficients of Popliteus instead, with a correction factor based on TLEM2.0
 AnyFolder Plantaris = {
     AnyString Muscle = "Plantaris"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(0.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(11.36); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 4.77; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 35.00; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.44427; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.00298; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = 2.11; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 0.24500; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 5.75; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 0.13300; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 6.84; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(4.77); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(35.00); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -451,9 +947,22 @@ AnyFolder Plantaris = {
 AnyFolder Popliteus = {
     AnyString Muscle = "Popliteus"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(0.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(25.57); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 2.40; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 1.00; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 1.00000; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.00298; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = 2.11; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 0.24500; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 5.75; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 0.13300; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 6.84; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(2.40); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(1.00); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -462,9 +971,22 @@ AnyFolder Popliteus = {
 AnyFolder PsoasMinor = {
     AnyString Muscle = "Psoas minor"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(0.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(6.63); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 5.91; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 15.20; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.03318; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.05500; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = -117.00; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 4.45000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = -44.70; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 2.43000; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = -26.30; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(5.91); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(15.20); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -473,9 +995,22 @@ AnyFolder PsoasMinor = {
 AnyFolder PsoasMajor = {
     AnyString Muscle = "Psoas major"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(13.4); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(193.18); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 9.92; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 11.30; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.96682; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.05500; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = -117.00; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 4.45000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = -44.70; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 2.43000; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = -26.30; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(9.92); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(11.30); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -484,9 +1019,22 @@ AnyFolder PsoasMajor = {
 AnyFolder QuadratusFemoris = {
     AnyString Muscle = "Quadratis fem."; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(0.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(49.24); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 3.37; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 0.00; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 1.00000; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.00475; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = -1.45; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 0.40900; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 3.01; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 0.22800; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 4.20; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(3.37); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(0.00); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -495,9 +1043,22 @@ AnyFolder QuadratusFemoris = {
 AnyFolder RectusFemoris = {
     AnyString Muscle = "Rectus fem."; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(21.9); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(226.33); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 7.84; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 9.60; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 1.00000; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.03710; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = 4.97; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 3.15000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 43.20; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 1.71000; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 56.90; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(7.84); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(9.60); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -507,9 +1068,22 @@ AnyFolder RectusFemoris = {
 AnyFolder Sartorius = {
     AnyString Muscle = "Sartorius"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(0.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(410.98); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 34.71; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 7.90; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 1.00000; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.02560; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = -18.20; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 2.34000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = -4.47; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 1.19000; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 15.90; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(34.71); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(7.90); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -518,9 +1092,22 @@ AnyFolder Sartorius = {
 AnyFolder Semimembranosus = {
     AnyString Muscle = "Semimembr."; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(25.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(138.26); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 8.09; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 15.70; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 1.00000; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.03190; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = 18.20; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 2.96000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 33.30; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 1.54000; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 54.50; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(8.09); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(15.70); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -529,9 +1116,22 @@ AnyFolder Semimembranosus = {
 AnyFolder Semitendinosus = {
     AnyString Muscle = "Semitend."; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(0.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(208.33); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 14.16; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 23.70; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 1.00000; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.02850; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = -16.80; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 2.37000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 15.90; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 1.27000; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 29.10; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(14.16); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(23.70); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -541,9 +1141,22 @@ AnyFolder Semitendinosus = {
 AnyFolder SoleusMedialis = {
     AnyString Muscle = "Soleus (med.)"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(64.5); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(414.86); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 4.40; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 8.50; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.52321; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.05070; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = 78.20; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 5.26000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 61.10; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 2.57000; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 120.00; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(4.40); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(8.50); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -553,9 +1166,22 @@ AnyFolder SoleusMedialis = {
 AnyFolder SoleusLateralis = {
     AnyString Muscle = "Soleus (lat.)"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(58.7); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(378.05); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 4.40; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 8.50; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.47679; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.05070; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = 78.20; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 5.26000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 61.10; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 2.57000; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 120.00; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(4.40); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(8.50); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -564,9 +1190,22 @@ AnyFolder SoleusLateralis = {
 AnyFolder TensorFasciaeLatae = {
     AnyString Muscle = "Tensor fasc. l."; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(0.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(83.33); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 9.49; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 0.00; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 1.00000; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.01360; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = -31.50; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 1.12000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = -15.60; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 0.62000; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = -11.80; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(9.49); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(0.00); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -576,9 +1215,22 @@ AnyFolder TensorFasciaeLatae = {
 AnyFolder TibialisAnterior = {
     AnyString Muscle = "Tibialis ant."; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(9.6); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(181.49); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 6.83; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 23.50; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 1.00000; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.01610; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = 20.30; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 1.56000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 22.90; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 0.79600; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 36.70; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(6.83); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(23.50); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -588,9 +1240,22 @@ AnyFolder TibialisAnterior = {
 AnyFolder TibialisPosteriorMedialis = {
     AnyString Muscle = "Tibial post. (med.)"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(25.2); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(81.68); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 3.78; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 11.00; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.50000; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.01040; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = 30.80; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 0.83500; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 44.80; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 0.45100; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 48.90; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(3.78); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(11.00); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -600,9 +1265,22 @@ AnyFolder TibialisPosteriorMedialis = {
 AnyFolder TibialisPosteriorLateralis = {
     AnyString Muscle = "Tibial post. (lat.)"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(43.1); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(81.68); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 3.78; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 11.00; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.50000; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.01040; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = 30.80; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 0.83500; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 44.80; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 0.45100; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 48.90; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(3.78); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(11.00); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -611,9 +1289,22 @@ AnyFolder TibialisPosteriorLateralis = {
 AnyFolder VastusIntermedius = {
     AnyString Muscle = "Vastus interm."; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(11.8); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(292.61); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 7.68; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 12.60; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 1.00000; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.02730; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = 76.50; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 2.49000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 91.50; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 1.29000; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 111.00; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(7.68); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(12.60); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -622,9 +1313,22 @@ AnyFolder VastusIntermedius = {
 AnyFolder VastusLateralisInferior = {
     AnyString Muscle = "Vastus lat. (inf.)"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(0.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(45.45); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 4.25; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 9.60; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.07791; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.12500; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = -55.70; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 11.50000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 6.15; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 5.89000; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 102.00; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(4.25); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(9.60); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -633,9 +1337,22 @@ AnyFolder VastusLateralisInferior = {
 AnyFolder VastusLateralisSuperior = {
     AnyString Muscle = "Vastus lat. (sup.)"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(0.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(537.88); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 9.12; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 9.60; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.92209; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.12500; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = -55.70; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 11.50000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = 6.15; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 5.89000; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 102.00; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(9.12); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(9.60); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -645,9 +1362,22 @@ AnyFolder VastusLateralisSuperior = {
 AnyFolder VastusMedialisInferior = {
     AnyString Muscle = "Vastus med. (inf.)"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(0.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(54.65); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 5.60; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 9.60; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.12030; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.06310; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = -16.30; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 6.12000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = -6.22; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 3.03000; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 57.60; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(5.60); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(9.60); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -656,9 +1386,22 @@ AnyFolder VastusMedialisInferior = {
 AnyFolder VastusMedialisMid = {
     AnyString Muscle = "Vastus med. (mid.)"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(0.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(176.14); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 7.58; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 9.60; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.38774; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.06310; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = -16.30; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 6.12000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = -6.22; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 3.03000; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 57.60; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(7.58); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(9.60); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -667,11 +1410,28 @@ AnyFolder VastusMedialisMid = {
 AnyFolder VastusMedialisSuperior = {
     AnyString Muscle = "Vastus med. (sup.)"; ///< Descriptive name for the muscle, e.g. for plotting
     AnyFloat Pennationangle = DesignVar(0.0); ///< Pennation angle of the muscle fibers (degres)
-    AnyFloat VolumeMuscleBelly = DesignVar(223.48); ///< Volume of the muscle  (ml) 
-    AnyFloat OptimalFiberlength = 8.30; ///< Optimal working length of the muscle fiber (cm)
-    AnyFloat TotalTendonLength = 9.60; ///< The total tendon length (cm)
+    AnyFloatVar VolumeRatio = 0.49195; ///< factor to be multiplied to obtain the final volume
+    AnyFolder TotalMuscleVolumeRegression = {
+      AnyFloatVar b1 = 0.06310; ///< b1 (cm3/cm3)
+      AnyFloatVar b2 = -16.30; ///< b2 (cm3)
+    };
+    AnyFolder BodyMassRegression = {
+      AnyFloatVar b1 = 6.12000; ///< b1 (cm3/kg)
+      AnyFloatVar b2 = -6.22; ///< b2 (cm3)
+    };
+    AnyFolder BodyHeightMassRegression = {
+      AnyFloatVar b1 = 3.03000; ///< b1 (cm3/m*kg)
+      AnyFloatVar b2 = 57.60; ///< b2 (cm3)
+    };
+    AnyFloatVar VolumeMuscleBelly = DesignVar((VOLUME_FORMULA)*VolumeRatio); ///< Volume of the muscle using Handsfield regression on total muscle volume (cm^3)
+    AnyFloat OptimalFiberlength = DesignVar(8.30); ///< Optimal working length of the muscle fiber (cm)
+    AnyFloat TotalTendonLength = DesignVar(9.60); ///< The total tendon length (cm)
     AnyFloat K1 = DesignVar(10.00); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar(0.00); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat EpsilonBar = DesignVar(0.0530); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
 };
-#endif
+
+#undef VOLUME_FORMULA_TOTAL_MUSCLE_VOLUME
+#undef VOLUME_FORMULA_MASS
+#undef VOLUME_FORMULA_HEIGHT_MASS
+#undef VOLUME_FORMULA
