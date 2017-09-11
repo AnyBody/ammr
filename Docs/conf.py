@@ -112,25 +112,25 @@ rst_prolog = """
 .. role:: anyscript(code)
    :language: AnyScriptDoc
 
-.. include:: /bm_tables/Substitutions.txt
+.. include:: /BM_Config/Substitutions.txt
+
+.. |AMS_VERSION_X| replace:: 7.1.x
+.. |AMS_VERSION_FULL| replace:: 7.1.0
+.. |AMS_VERSION_SHORT| replace:: 7.1
+
 """
 
-replacements = {
-    'AMS_VERSION_X': 'AMS 7.1.x',
-    'AMS_VERSION_FULL': 'AMS 7.1.0',
-}
 
-for org, rep in replacements.items():
-    rst_prolog = rst_prolog + f'.. |{org}| replace:: {rep}\n\n'
-
-
+# If true, `todo` and `todoList` produce output, else they produce nothing.
 try: 
-    subprocess.check_call(['git', 'describe', '--exact-match', 'HEAD'])
+    subprocess.check_call(['git', 'describe', '--exact-match', 'HEAD'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL )
 except subprocess.CalledProcessError:
-    # If true, `todo` and `todoList` produce output, else they produce nothing.
+    # We are not a on a tagged commit
     todo_include_todos = True
 else:
+    # Tagged commit, e.g. release version. Hide todos.
     todo_include_todos = False
+
 
 
 # -- Options for HTML output ----------------------------------------------

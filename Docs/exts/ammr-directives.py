@@ -66,6 +66,7 @@ class AMMR_BMStatement(std.Target):
         'deprecated' : rst.directives.flag,
         'default' : rst.directives.unchanged,
         'type' : rst.directives.unchanged,
+        'noindex': rst.directives.flag,
     }
 
     required_arguments = 1
@@ -135,11 +136,15 @@ class AMMR_BMStatement(std.Target):
             ('single', _('%s') % var_name, nodes.make_id(var_name), '', None)
         )
 
+        rtn = []
+        if 'noindex' not in self.options:
+            rtn.append(indexnode)
+        rtn.append(node)
         if len(fl):
-            return [ indexnode, node, fl, nn ]
-        else:
-            return [ indexnode, node, nn ]
+            rtn.append(fl)
+        rtn.append(nn)
 
+        return rtn
 
 class AMMR_BMStatementRef(XRefRole):
     def process_link(self, env, ref_node, explicit_title_p, title, target):
@@ -163,6 +168,7 @@ class AMMR_BMConstant(std.Target):
     option_spec = {
         'deprecated' : rst.directives.flag,
         'value' : rst.directives.unchanged,
+        'noindex': rst.directives.flag,
     }
 
     required_arguments = 1
@@ -233,7 +239,12 @@ class AMMR_BMConstant(std.Target):
             ('single', _('%s') % var_name, nodes.make_id(var_name), '', None)
         )
 
-        return [ indexnode, node, fl, nn ]
+        rtn = []
+        if 'noindex' not in self.options:
+            rtn.append(indexnode)
+        rtn.extend([node, fl, nn])
+
+        return rtn
 
 
 class AMMR_BMConstantRef(XRefRole):

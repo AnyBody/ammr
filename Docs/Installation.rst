@@ -1,10 +1,15 @@
 How to get the AMMR
 -------------------
 
+The newest version of the *AnyBody Model Repository* (AMMR) comes bundled with the 
+AnyBody Modeling System. 
 
-The newest version of the AnyBody Model Repository (AMMR) comes bundled with the 
-AnyBody Modeling System. To get a fresh copy of the AMMR select the "Demo" tab in the 
-AnyBody Assistent window that pops up when AnyBody starts: 
+.. note:: The Repository files are not installed during the AnyBody installation
+    because they must be available independently (not shared) for every user
+    of the computer
+
+To get a fresh copy of the AMMR select the "Demo" tab in the AnyBody Assistent
+window that opens when AnyBody starts: 
 
 .. image:: _static/Installation-anybodyassistent.png
 
@@ -25,14 +30,10 @@ these files before you start working.
 
 .. todo::
 
-    Best practice for working with the AMMR
+    Add Best practice for working with the AMMR. Eg. using Git for version control etc.
 
 
 .. rubric:: Footnotes
 
 
 .. [#f1] The preinstalled and (read only) AMMR is located in: ``C:/Program files/AnyBody Technology/AnyBody_X.X/AMMR`` 
-
-
-
-

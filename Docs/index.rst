@@ -40,7 +40,7 @@ Using the AMMR
     :maxdepth: 1
 
     Creating_model_from_scratch
-    HumanBody_configurations
+    BM_Config/HumanBody_configurations
 
 
 Model Overview
@@ -74,4 +74,3 @@ Indices and tables
 .. [#f1] The double *M* in the *AMMR* comes from the repository sometimes
     beeing refered to as the "AnyBody Managed Model Repository". 
     You may call it what you like. 
-
