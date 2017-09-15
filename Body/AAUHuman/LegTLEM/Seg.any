@@ -78,7 +78,7 @@ Apr.  Restructure scaling for more accurate definition of anatomical
   #define DRAWAXES 0
 #endif
 
-#ifdef BONY_LANDMARK_DEFINED_JOINTAXIS
+#if (BM_BONY_LANDMARK_DEFINED_JOINTAXIS== ON)
   #ifndef BONY_LANDMARK_DEFINED_HIPJOINT
   #define BONY_LANDMARK_DEFINED_HIPJOINT
   #endif
@@ -1223,20 +1223,24 @@ AnySeg Thigh =
 
 
 #if TLEM_MORPHOLOGY == 2
-   AnyRefNode IliacusWrapSurf =
-   {
-     AnyVec3 P2 = .Scale({0.016083961136943 ,  0.311718500853209 , ...Sign*0.063290693129396});
-     AnyVec3 P1 = .Scale({ -0.014918624554361 ,  0.388966513443324 , ...Sign* -0.035039316948254});
-     sRel = P1;
-     ARel = RotMat(P1, P2, P2 + 0.1)*RotMat(pi/2,y);
-     AnySurfCylinder cyl =
-     {
-       Radius = 0.0225+0.005;
-       Length = 0.15;
-  //     AnyDrawParamSurf drw={RGB={1,0,0};Opacity = 0.5;Visible = On;};
-       CapRatio = 0.1;
-     };
-   };
+  AnyRefNode IliacusWrapSurf =
+  {
+    AnyMatrix p = .Scale(.StdPar.IliacusWrapLandmarks);
+    
+    AnyFloat lengthscalefactor = 1.2;
+    AnyFloat radiusscalefactor = 1.15;
+
+    AnyMat33 transform = RotMat(pi*(1-...Sign)*0.5, y);
+
+    #include "../ToolBox/WrappingSurfaces/WrappingCylinder5PointFit.any"
+    
+    cyl = 
+    {
+      CapRatio = 1;
+      CapRatio2 = 2;
+    };
+  };
+
     AnyRefNode RectusWrapSurf =
     {
      sRel = .Scale({-0.3, 0.2, 0});
@@ -1880,7 +1884,7 @@ SacrumSeg =
   };// Sacrum.Left/Right
   
   // Find drawing in the end of the file
-}; // SacrumSeg
+};// SacrumSeg
 
 AnyRefFrame &Pelvis = ...Trunk.SegmentsLumbar.PelvisSeg._RIGHT_LEFT_;
 AnyRefFrame& PelvisSeg = ...Trunk.SegmentsLumbar.PelvisSeg;
@@ -1927,10 +1931,6 @@ PelvisSeg =
         AnyMat33 transform = RotMat(-pi * (Sign + 1) / 2, y);
 
         #include "../ToolBox/WrappingSurfaces/WrappingCylinder5PointFit.any"
-        cyl =
-        {
-         // AnyDrawParamSurf drw={RGB={1,0,0};};
-        };
       };
 #endif
 
@@ -2047,48 +2047,50 @@ PelvisSeg =
       AnyRefNode Gracilis1Node = {sRel = .Scale( .StdPar.Gracilis1Node );};
       AnyRefNode Gracilis2Node = {sRel = .Scale( .StdPar.Gracilis2Node );};
 
-      AnyRefNode IliacusLateralis1Node = {sRel = .Scale( .StdPar.IliacusLateralis1Node ); /*AnyDrawNode Node = {ScaleXYZ = {0.005, 0.005, 0.005};};*/};
-      AnyRefNode IliacusLateralis2Node = {sRel = .Scale( .StdPar.IliacusLateralis2Node ); /*AnyDrawNode Node = {ScaleXYZ = {0.005, 0.005, 0.005};};*/};
+      AnyRefNode IliacusLateralis1Node = {sRel = .Scale( .StdPar.IliacusLateralis1Node ); };
+      AnyRefNode IliacusLateralis2Node = {sRel = .Scale( .StdPar.IliacusLateralis2Node ); };
 
 
 #if TLEM_MORPHOLOGY == 1
       AnyRefNode IliacusLateralis3Node = {sRel = .Scale( .StdPar.IliacusLateralis3Node );};
+#endif
+
       AnyRefNode IliacusLateralisViaNode1 = {sRel = .Scale( .StdPar.IliacusLateralisViaNode1 );};
-#endif
-
-
 #if TLEM_MORPHOLOGY == 2
-      AnyRefNode IliacusLateralisViaNode1 = {sRel = .Scale( .StdPar.IliacusVia1Node);};
+      AnyRefNode IliacusLateralisViaNode2 = {sRel = 0.5*.Scale(.StdPar.IliacusLateralisViaNode1) + 0.5*.Scale(.StdPar.IliacusMidViaNode1);};
 #endif
-
-      AnyRefNode IliacusMid1Node = {sRel = .Scale( .StdPar.IliacusMid1Node ); /*AnyDrawNode Node = {ScaleXYZ = {0.005, 0.005, 0.005};};*/};
-      AnyRefNode IliacusMid2Node = {sRel = .Scale( .StdPar.IliacusMid2Node ); /*AnyDrawNode Node = {ScaleXYZ = {0.005, 0.005, 0.005};};*/};
+      
+      AnyRefNode IliacusMid1Node = {sRel = .Scale( .StdPar.IliacusMid1Node );};
+      AnyRefNode IliacusMid2Node = {sRel = .Scale( .StdPar.IliacusMid2Node );};
 
 
 #if TLEM_MORPHOLOGY == 1
       AnyRefNode IliacusMid3Node = {sRel = .Scale( .StdPar.IliacusMid3Node );};
-      AnyRefNode IliacusMidViaNode1 = {sRel = .Scale( .StdPar.IliacusMidViaNode1 );};
 #endif
 
+      AnyRefNode IliacusMidViaNode1 = {sRel = .Scale( .StdPar.IliacusMidViaNode1 );};
 
 #if TLEM_MORPHOLOGY == 2
-      AnyRefNode IliacusMidViaNode1 = {sRel = .Scale( .StdPar.IliacusVia1Node);};
+      AnyRefNode IliacusMidViaNode2 = {sRel = (2/3)*.Scale(.StdPar.IliacusMidViaNode1 ) + (1/3)* .Scale(.StdPar.IliacusMedialisViaNode1); };
 #endif
 
-      AnyRefNode IliacusMedialis1Node = {sRel =.Scale( .StdPar.IliacusMedialis1Node ); /*AnyDrawNode Node = {ScaleXYZ = {0.005, 0.005, 0.005};};*/};
-      AnyRefNode IliacusMedialis2Node = {sRel = .Scale( .StdPar.IliacusMedialis2Node );/*AnyDrawNode Node = {ScaleXYZ = {0.005, 0.005, 0.005};};*/};
+
+      AnyRefNode IliacusMedialis1Node = {sRel =.Scale( .StdPar.IliacusMedialis1Node ); };
+      AnyRefNode IliacusMedialis2Node = {sRel = .Scale( .StdPar.IliacusMedialis2Node );};
 
 
 #if TLEM_MORPHOLOGY == 1
       AnyRefNode IliacusMedialis3Node = {sRel = .Scale( .StdPar.IliacusMedialis3Node );};
+#endif
+
+
       AnyRefNode IliacusMedialisViaNode1 = {sRel = .Scale( .StdPar.IliacusMedialisViaNode1 );};
-#endif
-
-
 #if TLEM_MORPHOLOGY == 2
-      AnyRefNode IliacusMedialisViaNode1 = {sRel = .Scale( .StdPar.IliacusVia1Node);};
+      AnyRefNode IliacusMedialisViaNode2 = {sRel = (1/3)*.Scale(.StdPar.IliacusMidViaNode1 ) + (2/3)* .Scale(.StdPar.IliacusMedialisViaNode1); };
 #endif
-
+      
+      
+      
       AnyRefNode ObturatorExternusInferior1Node = {sRel = .Scale( .StdPar.ObturatorExternusInferior1Node );};
       AnyRefNode ObturatorExternusInferior2Node = {sRel =.Scale( .StdPar.ObturatorExternusInferior2Node );};
 
@@ -2221,39 +2223,13 @@ PelvisSeg =
     }; // End Muscles
 
   }; // End Pelvis.Left/Right
-}; // End Pelvis
-
-// -------- Drawing object section -------- 
-
-#if BM_PELVIS_DISPLAY != OFF
-
-SacrumSeg =
-{  
   
-      #ifndef _LEGTLEM_SEG_ANY_SACRUM_DISPLAY_ 
-         #define _LEGTLEM_SEG_ANY_SACRUM_DISPLAY_ 
-         #if (BM_PELVIS_DISPLAY == CONST_PELVIS_DISPLAY_LEGANDTRUNKPELVIS)
-         AnyDrawSurf DrwSacrumForLeg =
-         #else
-         AnyDrawSurf DrwSacrum =
-         #endif         
-         {
-           FileName = ..STL.FilenameSacrum;
-           Opacity = Main.DrawSettings.BonesOpacity.Pelvis;
-           RGB = ...ColorRef.Segments;
-           AnyFunTransform3D &Scale = ..PelvisSeg.Scale_Leg_Pelvis;
-         };
-      #endif
-  
-};// SacrumSeg
-
-PelvisSeg = {
-  
-      #ifndef _LEGTLEM_SEG_ANY_PELVIS_DISPLAY_ 
-      #define _LEGTLEM_SEG_ANY_PELVIS_DISPLAY_ 
-      
-      #if (BM_PELVIS_DISPLAY == CONST_PELVIS_DISPLAY_LEGANDTRUNKPELVIS)
-      AnyDrawSurf DrwPelvisForLeg = 
+#if ((TLEM_MORPHOLOGY >= 2) | (BM_PELVIS_DISPLAY == _PELVIS_DISPLAY_LEGANDTRUNKPELVIS_))
+      #if BM_PELVIS_DISPLAY >=1
+      #ifndef _BM_PELVIS_DISPLAY_ 
+      #define _BM_PELVIS_DISPLAY_ 
+      #if (BM_PELVIS_DISPLAY == _PELVIS_DISPLAY_LEGANDTRUNKPELVIS_)
+      AnyDrawSurf Drw_LegPelvis =
       #else
       AnyDrawSurf DrwPelvis =
       #endif
@@ -2264,10 +2240,23 @@ PelvisSeg = {
         AnyFunTransform3D &Scale = .Scale_Leg_Pelvis ;
       };
       
+      #if (BM_PELVIS_DISPLAY == _PELVIS_DISPLAY_LEGANDTRUNKPELVIS_)
+      AnyDrawSurf Drw_LegSacrum =
+      #else
+      AnyDrawSurf DrwSacrum =
       #endif
+      {
+        FileName = ..STL.FilenameSacrum;
+        Opacity =  Main.DrawSettings.BonesOpacity.Pelvis;
+        RGB = ...ColorRef.Segments;
+        AnyFunTransform3D &Scale = .Scale_Leg_Pelvis ;
+      };
+      
+      #endif
+      #endif
+#endif
   
   
 }; // End Pelvis
-#endif
 
 
