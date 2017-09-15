@@ -166,11 +166,11 @@ AnyFolder STL = {
 AnyFolder MusPar = {};
 AnyFolder Mus = {};
 
-  #if (!(RIGHT_DETAILLED_HAND & RIGHT_ARM)) & (!(LEFT_DETAILLED_HAND & LEFT_ARM))
+#if (!(BM_ARM_DETAIL_HAND_RIGHT==ON & BM_ARM_RIGHT == ON)) & (!(BM_ARM_DETAIL_HAND_LEFT==ON & BM_ARM_LEFT == ON))
   AnyRefNode &GloveInsertationNode=Seg.Hand.HandRef.PalmJoint;
   #include "Glove.any"
   
-  #if ARM_SIMPLE_MUSCLE_LOCAL == 1 | ARM_MUS_3E_LOCAL == 1
+  #if (_LEFT_RIGHT_ == "RIGHT" & BM_ARM_RIGHT == ON & (BM_ARM_MUSCLES_RIGHT > _MUSCLES_NONE_ )) | (_LEFT_RIGHT_ == "LEFT" & BM_ARM_LEFT == ON & (BM_ARM_MUSCLES_LEFT > _MUSCLES_NONE_)) 
     #include "GloveMuscle.any"
   #endif
 #endif
@@ -179,7 +179,7 @@ AnyFolder Mus = {};
 ///Folder with segment for the arm
 AnyFolder Seg={
   #include "Seg.any"
-  #if (!(RIGHT_DETAILLED_HAND & RIGHT_ARM)) & (!(LEFT_DETAILLED_HAND & LEFT_ARM))
+  #if (!(BM_ARM_DETAIL_HAND_RIGHT==ON & BM_ARM_RIGHT == ON)) & (!(BM_ARM_DETAIL_HAND_LEFT==ON & BM_ARM_LEFT == ON))
 
   #include "HandSeg.any"
   Hand={
@@ -214,7 +214,7 @@ AnyFolder Seg={
 //  #include "NodeForScalingExt.any"
 };
 
-#if ARM_SIMPLE_MUSCLE_LOCAL == 0 & ARM_MUS_3E_LOCAL == 0
+#if (((_LEFT_RIGHT_ == "RIGHT") & (BM_ARM_RIGHT == ON) & (BM_ARM_MUSCLES_RIGHT == _MUSCLES_NONE_ )) | ((_LEFT_RIGHT_ == "LEFT") & (BM_ARM_LEFT == ON & (BM_ARM_MUSCLES_LEFT == _MUSCLES_NONE_))))
   #include "JointMuscles.any"
 #endif
 
@@ -223,36 +223,38 @@ AnyFolder Seg={
 AnyFolder Jnt ={
   #include "Jnt.any"
   
-  #if ARM_SIMPLE_MUSCLE_LOCAL == 0 & ARM_MUS_3E_LOCAL == 0
+  #if (((_LEFT_RIGHT_ == "RIGHT") & ((BM_ARM_RIGHT == ON) & (BM_ARM_MUSCLES_RIGHT == _MUSCLES_NONE_ ))) | ((_LEFT_RIGHT_ == "LEFT") & (BM_ARM_LEFT == ON & (BM_ARM_MUSCLES_LEFT == _MUSCLES_NONE_))))
     #include "GHReactionsNoMuscles.any"  //This is needed when there is no muscles in the model
   #endif
 }; //End Jnt
 
 
-//Muscles for the arm
-Mus ={ 
-  #if ARM_SIMPLE_MUSCLE_LOCAL == 1 | ARM_MUS_3E_LOCAL == 1
-    #include "Muscle.any"
-  #else
+Mus = 
+{
+    //These files contains wrapping geometries and attachement nodes for the muscles
+    //This way of structuring makes it possible to have models using the same kinematics but 
+    //using different muscle configurations, since all muscle nodes and geometry has been 
+    //separated in the included files below
     #include "ScapulaMuscleGeometry.any"
     #include "ClavicleMuscleGeometry.any"
     #include "HumerusMuscleGeometry.any"
     #include "RadiusMuscleGeometry.any"
     #include "UlnaMuscleGeometry.any"
+    
     #include "AddOnOutSideBlockForMuscles.any"
     #include "ArtificialRakeForDeltoidMuscle.any"
     
-    #if ARM_SIMPLE_MUSCLE_ONLY_ON_NECK_LOCAL == 1
-      #include "levator_scapulae.any"
-      #include "trapezius_clavicular.any"
-      #include "sternocleidomastoid.any"    
-    #endif    
-  #endif
+
+};
+
+
+//Muscles for the arm
+#if (_LEFT_RIGHT_ == "RIGHT" & BM_ARM_RIGHT == ON & (BM_ARM_MUSCLES_RIGHT > _MUSCLES_NONE_ )) | (_LEFT_RIGHT_ == "LEFT" & BM_ARM_LEFT == ON & (BM_ARM_MUSCLES_LEFT > _MUSCLES_NONE_)) 
+Mus ={ 
+    #include "Muscle.any"
 }; //End Mus
 
 //Muscle strength paramters
-#if ((ARM_SIMPLE_MUSCLE_LOCAL) + (ARM_SIMPLE_MUSCLE_ONLY_ON_NECK_LOCAL) + (ARM_MUS_3E_LOCAL)) > 0
-
 MusPar = {
   AnyFolder ConstParam ={
     AnyVar MusStress =..StrengthRef.SpecificMuscleTensionShoulderArm*0.01; //0.9;             // N/mm^2 
@@ -260,7 +262,7 @@ MusPar = {
     AnyVar MusDensity =1060;             //kg/m^3
   };
   
-  #if ARM_SIMPLE_MUSCLE_LOCAL == 1 | ARM_SIMPLE_MUSCLE_ONLY_ON_NECK_LOCAL == 1
+  #if (_LEFT_RIGHT_ == "RIGHT" & BM_ARM_RIGHT == ON & (BM_ARM_MUSCLES_RIGHT == _MUSCLES_SIMPLE_ )) | (_LEFT_RIGHT_ == "LEFT" & BM_ARM_LEFT == ON & (BM_ARM_MUSCLES_LEFT == _MUSCLES_SIMPLE_)) 
     //This the parameters if a simple muscle model are being used, contains only F0
     #include "Muscle-parameters-shoulder-simple.any"
   #else
@@ -280,7 +282,7 @@ AnyFolder MassSummation={
 
 InterfaceFolder={
    #include "Interface.any"
-   #if (!(RIGHT_DETAILLED_HAND & RIGHT_ARM)) & (!(LEFT_DETAILLED_HAND & LEFT_ARM))
+   #if (!(BM_ARM_DETAIL_HAND_RIGHT==ON & BM_ARM_RIGHT == ON)) & (!(BM_ARM_DETAIL_HAND_LEFT==ON & BM_ARM_LEFT == ON))
    #else
    #include "../Hand/Interface.any"
    #endif
