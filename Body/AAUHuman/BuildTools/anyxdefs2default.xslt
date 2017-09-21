@@ -6,7 +6,7 @@
 
   <xsl:template match="/">
     <xsl:text>//&#10;// !!! THIS IS AN AUTOMATICALLY GENERATED FILE. DO NOT MODIFY IT !!! &#10;//&#10;&#10;</xsl:text>
-    <xsl:for-each select="anyxdefs/parameter">
+    <xsl:for-each select="anyxdefs/parameter[@default]">
       <xsl:text>// </xsl:text><xsl:value-of select="@descr"/><xsl:text>&#10;</xsl:text>
       <xsl:text>#ifndef </xsl:text><xsl:value-of select="@name"/><xsl:text>&#10;</xsl:text>
       <xsl:choose>
