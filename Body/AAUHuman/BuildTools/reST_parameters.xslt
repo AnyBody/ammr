@@ -41,10 +41,12 @@ All BodyModel parameters
 .. ammr:bm_statement:: <xsl:value-of select="@name"/><xsl:text>
 
     </xsl:text><xsl:value-of select="@descr"/>
-
+<xsl:text>
+</xsl:text>
+<xsl:if test="@default">
     :Default: <xsl:value-of select="$default_ref"/>
     :Example: :anyscript:`<xsl:value-of select="$type"/><xsl:value-of select="@name"/><xsl:text> </xsl:text><xsl:value-of select="@default"/><xsl:text>`</xsl:text>
-
+</xsl:if>
 
 </xsl:template>
 
