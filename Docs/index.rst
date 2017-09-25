@@ -3,10 +3,10 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to AMMR's documentation!
+Welcome to the AMMR documentation!
 =======================================
 
-The AnyBody Model Repository (AMMR [#f1]_ ), is an open library of
+The AnyBody Model Repository (AMMR[#f1]_), is an open library of
 musculoskeletal models and examples ready to be used with the `AnyBody Modeling
 System`_. 
 
@@ -18,6 +18,7 @@ System`_.
 
    The AnyBody Model Repository is a unique open collection of human body parts.
 
+
 The models are developed in research projects at academic institutions or by
 AnyBody Technology in collaboration with academic institutions. The models are
 maintained by AnyBody Technology who ensures various body part models can
@@ -25,13 +26,23 @@ be used together as full body scalable musculosketeal model.
 
 .. _AnyBody Modeling System: https://www.anybodytech.com/software/ams/
 
-Installation
-------------
+
+Model Overview
+--------------
+
+The Model repository consist of two parts. 1) The Body Models which can
+customized and scaled to build any subject specific musculoskeletal model. 2) A
+set of application examples in which the body models are a applied to specific
+applications. 
+
+The following provides a overview of both.
 
 .. toctree::
     :maxdepth: 2
 
-    Installation
+    BodyModels/BodyParts_and_models
+    Examples_and_applications
+
 
 
 Using the AMMR
@@ -39,18 +50,10 @@ Using the AMMR
 .. toctree::
     :maxdepth: 1
 
+    Installation
     Creating_model_from_scratch
     BM_Config/HumanBody_configurations
 
-
-Model Overview
---------------
-
-.. toctree::
-    :maxdepth: 2
-
-    Examples_and_applications
-    BodyModels/BodyParts_and_models
 
 
 Development

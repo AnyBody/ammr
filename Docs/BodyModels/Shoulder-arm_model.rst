@@ -1,12 +1,13 @@
 
 The Shoulder Arm Model
-----------------------
+======================
 
 This model contains data from two different persons. Most of the data
-that has been used in this model comes from the Dutch Shoulder Group and
-can be found on the following webpage
-http://homepage.tudelft.nl/g6u61/repository/shoulder/overview.htm . The
-model is built using data from subject 2 from the VU study and subject 2
+that has been used in this model comes from the Dutch Shoulder Group and their 
+`should model available online 
+<http://homepage.tudelft.nl/g6u61/repository/shoulder/overview.htm>`_
+
+The model is built using data from subject 2 from the VU study and subject 2
 from the MAYO study. The files, which contains the name "forearm", are
 built on data from the MAYO study
 
@@ -15,38 +16,79 @@ and off, for full details on its implementation please see this report
 `Shoulder Rhythm
 Report <https://www.anybodytech.com/download.html?did=publications.files&fname=ShoulderRhythmReport.pdf>`__.
 
-*The model consists of the following joints:*
+The model consists of the following joints:
 
--  SC SternoClavicular: spherical joint
+.. table:: Joints and kinematic contraints
+    :widths: 1 2 4
+    :column-alignment: center left left
+    :column-wrapping: false true true
+    :column-dividers: none none none none
 
--  AC AcromioClavicular: spherical joint
+    ================= ==================== =======================================================
+    Name              Description          Joint typeType
+    ================= ==================== =======================================================
+    SC                SternoClavicular     Spherical joint
+    AC                AcromioClavicular    Spherical joint
+    GH                Glenohumeral joint   Spherical joint (Normal reactions of the spherical 
+                                           joint is not used instead they are created so that 
+                                           they fall within the glenoid cavity the file,
+                                           please see the file GHReactions.any for details
+    AI                                     One dimensional constraint between
+                                           the scapula and the thorax at
+                                           the bonylandmark AI om scapula
+    AA                                     One dimensional constraint between 
+                                           the scapula and the thorax at
+                                           the bonylandmark AA om scapula
+    ConoideumLigament                      The length of this segment is driven
+                                           to a constant length
+    FE                Flexion-extension    Revolute joint
+                      of the elbow    
+    PS                Pronation-supination 
+                      joint or the forearm Combination of joints in distal and
+                                           proximal end of the radius bone that
+                                           leaves one dof free which is 
+                                           pronation/supination of the forearm
+    Wrist joint                            created as two revolute joints where 
+                                           the axis of rotations are not coincident
+    ================= ==================== =======================================================
 
--  GH Glenohumeral joint: spherical (normal reactions of the spherical
-   joint is not used instead they are created so that they fall within
-   the glenoid cavity the file, please see the file GHReactions.any for
-   details)
+.. Image:arm.png
 
--  AI One dimensional constraint between the scapula and the thorax at
-   the bonylandmark AI om scapula
 
--  AA One dimensional constraint between the scapula and the thorax at
-   the bonylandmark AA om scapula
+Summery
+---------------
 
--  ConoideumLigament : the length of this segment is driven to a
-   constant length
 
--  FE Flexion-extension of the elbow: revolute joint
+.. table:: Body part summery
+    :widths: 1 2 4
+    :column-alignment: center left left
+    :column-wrapping: false true true
+    :column-dividers: none none none none
 
--  PS pronation-supination joint or the forearm: combination of joints
-   in distal and proximal end of the radius bone that leaves one dof
-   free which is pronation/supination of the forearm
+    ================= ==================== =================================
+    Name              Description          Joint typeType
+    SC                SternoClavicular     spherical joint
+    AC      
+    ================= ==================== =================================
 
--  Wrist joint: created as two revolute joints where the axis of
-   rotations are not coincident
+Configurations
+----------------
 
-|Image:arm.png|
 
-*Anatomy references:*
+
+
+
+
+
+
+
+
+
+
+
+
+Anatomy references:
+----------------------
 
 -  F.C.T. van der Helm and R. Veenbaas, Modeling the mechanical efect of
    muscles with large attachment sites: aplication to the shoulder
@@ -89,7 +131,8 @@ Report <https://www.anybodytech.com/download.html?did=publications.files&fname=S
    musculoskeletal modelling of the shoulder mechanism. Journal of
    Biomechanics, vol. 24, no. 7, pp. 615-629, 1991
 
-*Muscle references:*
+Muscle references:
+----------------------
 
 -  Jacobson, M. D., R. Raab, B. M. Fazeli, R. A. Abrams, M. J. Botte,
    and R. L. Lieber. Architectural design of the human intrinsic hand
@@ -107,3 +150,5 @@ Report <https://www.anybodytech.com/download.html?did=publications.files&fname=S
 -  Muray, W.M.,T.S. Buchanan, and S.L. Delp. Scaling of peak moment arms
    with the elbow and forearm position J. Biomech. Vol. 28, pp. 513-525,
    1995
+
+
