@@ -58,8 +58,6 @@ All BodyModel parameters
 
     A file with draw settings
 
-    :Default: ``"<ANYBODY_PATH_BODY>\DrawSettings\DrawSettings.any"``
-    :Example: :anyscript:`#path BM_DRAWSETTINGS_FILE "<ANYBODY_PATH_BODY>\DrawSettings\DrawSettings.any"`
 
 .. ammr:bm_statement:: BM_DRAWSETTINGS_SKIP
 
@@ -432,10 +430,8 @@ All BodyModel parameters
 
 .. ammr:bm_statement:: BM_MANNEQUIN_FILE
 
-    File name of the mannequin definition file. Default is a file in the body model, but this can be copied to and modified in your model directory.
+    File name of the mannequin definition file. By default this is no longer used, since the values in ``HumanModel.Mannequin`` can be assigned directly in your applicaiton ( E.g. ``Main.HumanModel.Mannequin.Posture.NeckExtension = 30;``). However, the parameter can still be used to set your own mannequin file. Just define your own mannequin file in your applicaiton like this: ``#path BM_MANNEQUIN_FILE "<ANYBODY_PATH_BODY>\BodyModels\GenericBodyModel\BodyModel.mannequin.any"
 
-    :Default: ``"<ANYBODY_PATH_BODY>\BodyModels\GenericBodyModel\BodyModel.mannequin.any"``
-    :Example: :anyscript:`#path BM_MANNEQUIN_FILE "<ANYBODY_PATH_BODY>\BodyModels\GenericBodyModel\BodyModel.mannequin.any"`
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_DEFAULT
 
