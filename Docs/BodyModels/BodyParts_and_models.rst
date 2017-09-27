@@ -37,7 +37,7 @@ connected, so they together form a quite complete full body model.
 
 
 Upper body models
-----------.-------
+------------------
 
 .. toctree::
     :maxdepth: 1

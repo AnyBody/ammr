@@ -18,14 +18,9 @@
 
 </xsl:template>
 
-<xsl:template match="parameter">
 
 
-
-</xsl:template>
-
-
-<xsl:template match="parameter">
+<xsl:template match="parameter[not(@deprecated='true')]">
 <xsl:variable name="up" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZ'"/>
 <xsl:variable name="lo" select="'abcdefghijklmnopqrstuvwxyz'"/>
 

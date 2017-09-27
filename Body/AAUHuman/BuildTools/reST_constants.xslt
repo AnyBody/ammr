@@ -16,8 +16,10 @@ All BodyModel constants
 
 <xsl:template match="constant">
 .. ammr:bm_constant:: <xsl:value-of select="@name"/>
-    :value: <xsl:value-of select="@default"/> <xsl:text>
-    
+    :value: <xsl:value-of select="@default"/> 
+<xsl:if test="@deprecated='true'">
+    :deprecated:</xsl:if><xsl:text>
+
     </xsl:text><xsl:value-of select="@descr"/><xsl:text>
 </xsl:text>
                 

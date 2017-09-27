@@ -2,7 +2,7 @@
 The Shoulder Arm Model
 ======================
 
-This model contains data from two different persons. Most of the data
+The ShoulderArm model contains data from two different persons. Most of the data
 that has been used in this model comes from the Dutch Shoulder Group and their 
 `should model available online 
 <http://homepage.tudelft.nl/g6u61/repository/shoulder/overview.htm>`_
@@ -11,10 +11,41 @@ The model is built using data from subject 2 from the VU study and subject 2
 from the MAYO study. The files, which contains the name "forearm", are
 built on data from the MAYO study
 
-A shoulder rhythm is available in the repository it can be switched on
+A shoulder rhythm is also available in the repository it can be switched on
 and off, for full details on its implementation please see this report
 `Shoulder Rhythm
 Report <https://www.anybodytech.com/download.html?did=publications.files&fname=ShoulderRhythmReport.pdf>`__.
+
+
+.. image:: images/ShoulderArm_rotating_model.gif
+   :width: 45%
+.. image:: images/ShoulderCloseupFront_Preview.png
+   :width: 45%
+
+
+.. centered:: *Figure shoulder model*
+
+
+Example Configuration
+-----------------------
+
+Short example of how to configure the Shoulder Arm model: 
+
+.. code-block:: AnyScriptDoc
+
+    #define BM_ARM_RIGHT ON 
+    #define BM_ARM_LEFT ON 
+    #
+
+
+.. seealso:: 
+   
+   The :doc:`HumanModel configuration section <../BM_Config/HumanBody_configurations>` for more information how to configure your model using BM parameters.
+
+
+
+
+
 
 The model consists of the following joints:
 
@@ -70,13 +101,6 @@ Summery
     SC                SternoClavicular     spherical joint
     AC      
     ================= ==================== =================================
-
-Configurations
-----------------
-
-
-
-
 
 
 

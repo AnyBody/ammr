@@ -7,280 +7,308 @@ All BodyModel constants
 
 .. ammr:bm_constant:: ON
     :value: 1
-    
+
     
 
 .. ammr:bm_constant:: OFF
     :value: 0
-    
+
     
 
 .. ammr:bm_constant:: _MUSCLES_NONE_
     :value: 0
-    
+
     Constant to switch off muscles
 
 .. ammr:bm_constant:: _MUSCLES_SIMPLE_
     :value: 1
-    
+
     Constant to use simple muscles
 
 .. ammr:bm_constant:: _MUSCLES_3E_HILL_
     :value: 2
-    
+
     Constant to use 3 element Hill-type muscle
 
 .. ammr:bm_constant:: _LEG_MODEL_OFF_
     :value: 0
-    
+
     Switch off a leg
 
 .. ammr:bm_constant:: _LEG_MODEL_TLEM_
     :value: 1
-    
+
     Switch to use leg model: "TLEM 1"
 
 .. ammr:bm_constant:: _LEG_MODEL_TLEM1_
     :value: 1
-    
+
     Switch to use leg model: "TLEM 1"
 
 .. ammr:bm_constant:: _LEG_MODEL_TLEM2_
     :value: 2
-    
+
     Switch to use leg model: "TLEM 2"
 
 .. ammr:bm_constant:: _LEG_MODEL_Leg_
     :value: 3
-    
+    :deprecated:
+
     Switch to use leg model: "Leg"
 
 .. ammr:bm_constant:: _LEG_MODEL_LEG_
     :value: 3
-    
+
     Switch to use leg model: "Leg"
 
 .. ammr:bm_constant:: _MORPH_NONE_
     :value: 0
-    
+
     Constant for no-morphing between the upper and lower bodies.
 
 .. ammr:bm_constant:: _MORPH_TRUNK_TO_LEG_
     :value: 1
-    
+
     Constant for the trunk-to-leg morphing
 
 .. ammr:bm_constant:: _MORPH_LEG_TO_TRUNK_
     :value: 2
-    
+
     Constant for the leg-to-trunk morhping
 
 .. ammr:bm_constant:: _PELVIS_DISPLAY_NONE_
     :value: 0
-    
+
     Constant to switch off pelvis visualization
 
 .. ammr:bm_constant:: _PELVIS_DISPLAY_LEGPELVIS_ONLY_
     :value: 1
-    
+
     Constant to display leg-dependent pevlis only
 
 .. ammr:bm_constant:: _PELVIS_DISPLAY_LEGANDTRUNKPELVIS_
     :value: 2
-    
+
     Constant to display both trunk and leg pelvises
 
 .. ammr:bm_constant:: _DISC_STIFFNESS_NONE_
     :value: 0
-    
+
     Constant to switch off disc spring in the spine
 
 .. ammr:bm_constant:: _DISC_STIFFNESS_LINEAR_
     :value: 1
-    
+
     Constant to switch linear disc spring on in the spine
 
 .. ammr:bm_constant:: _DISC_STIFFNESS_NONLINEAR_
     :value: 2
-    
+
     Constant to switch nonlinear disc spring on in the spine
 
 .. ammr:bm_constant:: _SCALING_CUSTOM_
     :value: -1
-    
+
     Custom anthropometric scaling law for the entire model
 
 .. ammr:bm_constant:: _SCALING_STANDARD_
     :value: 0
-    
+
     Standard scaling law to be used by the entire model.
 
 .. ammr:bm_constant:: _SCALING_UNIFORM_
     :value: 1
-    
+
     Uniform anthropometric scaling law to be used by the entire model.
 
 .. ammr:bm_constant:: _SCALING_LENGTHMASS_
     :value: 2
-    
+
     Length/mass anthropometric scaling law to be used by the entire model.
 
 .. ammr:bm_constant:: _SCALING_LENGTHMASSFAT_
     :value: 3
-    
+
     Length/mass/fat anthropometric scaling law to be used by the entire model.
 
 .. ammr:bm_constant:: _SCALING_UNIFORM_EXTMEASUREMENTS_
     :value: 4
-    
+
     Uniform anthropometric scaling law  with external measurements to be used by the entire model.
 
 .. ammr:bm_constant:: _SCALING_LENGTHMASS_EXTMEASUREMENTS_
     :value: 5
-    
+
     Length/mass anthropometric with external measurements scaling law to be used by the entire model.
 
 .. ammr:bm_constant:: _SCALING_LENGTHMASSFAT_EXTMEASUREMENTS_
     :value: 6
-    
+
     Length/mass/fat anthropometric with external measurements scaling law to be used by the entire model.
 
 .. ammr:bm_constant:: _SCALING_LENGTHMASSFAT_MULTIDOFS_
     :value: 7
-    
+
     Length/mass/fat anthropometric with for multiple degree of freedom.
 
 .. ammr:bm_constant:: CONST_MUSCLES_NONE
     :value: 0
-    
+    :deprecated:
+
     Constant to switch off muscles
 
 .. ammr:bm_constant:: CONST_MUSCLES_SIMPLE
     :value: 1
-    
+    :deprecated:
+
     Constant to use simple muscles
 
 .. ammr:bm_constant:: CONST_MUSCLES_3E_HILL
     :value: 2
-    
+    :deprecated:
+
     Constant to use 3 element Hill-type muscle
 
 .. ammr:bm_constant:: CONST_HAND_SIMPLE
     :value: 0
-    
+    :deprecated:
+
     Constant to use simplified hand model
 
 .. ammr:bm_constant:: CONST_HAND_DETAILED
     :value: 1
-    
+    :deprecated:
+
     Constant to use detailed hand model
 
 .. ammr:bm_constant:: CONST_LEG_MODEL_OFF
     :value: 0
-    
+    :deprecated:
+
     Switch off a leg
 
 .. ammr:bm_constant:: CONST_LEG_MODEL_TLEM
     :value: 1
-    
+    :deprecated:
+
     Switch to use leg model: "TLEM 1"
 
 .. ammr:bm_constant:: CONST_LEG_MODEL_TLEM2
     :value: 2
-    
+    :deprecated:
+
     Switch to use leg model: "TLEM 2"
 
 .. ammr:bm_constant:: CONST_LEG_MODEL_Leg
     :value: 3
-    
+    :deprecated:
+
     Switch to use leg model: "Leg"
 
 .. ammr:bm_constant:: CONST_MORPH_NONE
     :value: 0
-    
+    :deprecated:
+
     Constant for no-morphing between the upper and lower bodies.
 
 .. ammr:bm_constant:: CONST_MORPH_TRUNK_TO_LEG
     :value: 1
-    
+    :deprecated:
+
     Constant for the trunk-to-leg morphing
 
 .. ammr:bm_constant:: CONST_MORPH_LEG_TO_TRUNK
     :value: 2
-    
+    :deprecated:
+
     Constant for the leg-to-trunk morhping
 
 .. ammr:bm_constant:: CONST_PELVIS_DISPLAY_NONE
     :value: 0
-    
+    :deprecated:
+
     Constant to switch off pelvis visualization
 
 .. ammr:bm_constant:: CONST_PELVIS_DISPLAY_LEGPELVIS_ONLY
     :value: 1
-    
+    :deprecated:
+
     Constant to display leg-dependent pevlis only
 
 .. ammr:bm_constant:: CONST_PELVIS_DISPLAY_LEGANDTRUNKPELVIS
     :value: 2
-    
+    :deprecated:
+
     Constant to display both trunk and leg pelvises
 
 .. ammr:bm_constant:: CONST_DISC_STIFFNESS_NONE
     :value: 0
-    
+    :deprecated:
+
     Constant to switch off disc spring in the spine
 
 .. ammr:bm_constant:: CONST_DISC_STIFFNESS_LINEAR
     :value: 1
-    
+    :deprecated:
+
     Constant to switch linear disc spring on in the spine
 
 .. ammr:bm_constant:: CONST_DISC_STIFFNESS_NONLINEAR 
     :value: 2
-    
+    :deprecated:
+
     Constant to switch nonlinear disc spring on in the spine
 
 .. ammr:bm_constant:: CONST_SCALING_CUSTOM
     :value: -1
-    
+    :deprecated:
+
     Custom anthropometric scaling law for the entire model
 
 .. ammr:bm_constant:: CONST_SCALING_STANDARD
     :value: 0
-    
+    :deprecated:
+
     Standard scaling law to be used by the entire model.
 
 .. ammr:bm_constant:: CONST_SCALING_UNIFORM
     :value: 1
-    
+    :deprecated:
+
     Uniform anthropometric scaling law to be used by the entire model.
 
 .. ammr:bm_constant:: CONST_SCALING_LENGTHMASS
     :value: 2
-    
+    :deprecated:
+
     Length/mass anthropometric scaling law to be used by the entire model.
 
 .. ammr:bm_constant:: CONST_SCALING_LENGTHMASSFAT
     :value: 3
-    
+    :deprecated:
+
     Length/mass/fat anthropometric scaling law to be used by the entire model.
 
 .. ammr:bm_constant:: CONST_SCALING_UNIFORM_EXTMEASUREMENTS
     :value: 4
-    
+    :deprecated:
+
     Uniform anthropometric scaling law  with external measurements to be used by the entire model.
 
 .. ammr:bm_constant:: CONST_SCALING_LENGTHMASS_EXTMEASUREMENTS
     :value: 5
-    
+    :deprecated:
+
     Length/mass anthropometric with external measurements scaling law to be used by the entire model.
 
 .. ammr:bm_constant:: CONST_SCALING_LENGTHMASSFAT_EXTMEASUREMENTS
     :value: 6
-    
+    :deprecated:
+
     Length/mass/fat anthropometric with external measurements scaling law to be used by the entire model.
 
 .. ammr:bm_constant:: CONST_SCALING_LENGTHMASSFAT_MULTIDOFS
     :value: 7
-    
+    :deprecated:
+
     Length/mass/fat anthropometric with for multiple degree of freedom.
