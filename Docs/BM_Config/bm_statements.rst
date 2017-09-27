@@ -377,6 +377,15 @@ All BodyModel parameters
     :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
 
 
+.. ammr:bm_statement:: BM_ARM_SHOULDER_RHYTHM
+
+    Switch for the shoulder rhythm constraints.
+
+    :Default: ``OFF``
+    :Example: :anyscript:`#define BM_ARM_SHOULDER_RHYTHM OFF`
+    :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
+
+
 .. ammr:bm_statement:: BM_ARM_MUSCLES_BOTH
 
     Keyword for the muscle model type for both left and right arms.

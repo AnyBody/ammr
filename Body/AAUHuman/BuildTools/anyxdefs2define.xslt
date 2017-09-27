@@ -13,7 +13,7 @@
 // !!! PLEASE NOTE THAT SOME OBVIOUS OPTIONS (ON, OFF, etc) ARE NOT SHOWN HERE !!! 
 //
 
-<xsl:apply-templates select="anyxdefs/parameter" />
+<xsl:apply-templates select="anyxdefs/parameter[not(@deprecated='true')]" />
 </xsl:template>
 
 
