@@ -6,7 +6,7 @@
 Welcome to the AMMR documentation!
 =======================================
 
-The AnyBody Model Repository (AMMR[#f1]_), is an open library of
+The AnyBody Model Repository (AMMR) [#f1]_, is an open library of
 musculoskeletal models and examples ready to be used with the `AnyBody Modeling
 System`_. 
 

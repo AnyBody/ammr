@@ -35,15 +35,19 @@ Short example of how to configure the Shoulder Arm model:
 
     #define BM_ARM_RIGHT ON 
     #define BM_ARM_LEFT ON 
-    #
+    #define BM_ARM_SHOULDER_RHYTHM ON
+
+    #define BM_ARM_MUSCLE _MUSCLES_3E_HILL_
+    
 
 
-.. seealso:: 
+.. rst-class:: float-right
+
+.. seealso::
    
-   The :doc:`HumanModel configuration section <../BM_Config/HumanBody_configurations>` for more information how to configure your model using BM parameters.
-
-
-
+   The :doc:`Arm configuration parameters <../BM_Config/Arm_configurations>` for a
+   full list of Arm parmaeters or :doc:`configuration section <../BM_Config/HumanBody_configurations>`
+   for more information how to configure your model using BM parameters.
 
 
 
