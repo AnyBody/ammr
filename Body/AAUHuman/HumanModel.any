@@ -3,10 +3,13 @@
 #endif
 
 AnyFolder HumanModel={
+  AnyFolder Config = 
+  {
   #include "<ANYBODY_PATH_BODY_GENERICBODYMODEL>\BodyModel.defaults.preprocess.any"
   #include "<ANYBODY_PATH_BODY_GENERICBODYMODEL>\BodyModel.defaults.any"
   #include "<ANYBODY_PATH_BODY_GENERICBODYMODEL>\BodyModel.BodyPartsSetup.any"
   #include "<ANYBODY_PATH_BODY_GENERICBODYMODEL>\BodyModel.config_info.any"
+  };
   
   #ifdef BM_SCALING
    #if BM_SCALING != _SCALING_STANDARD_
@@ -20,19 +23,46 @@ AnyFolder HumanModel={
     AnyFolder &Drivers = .DefaultMannequinDrivers;
   };
 
-  #ifdef BM_MANNEQUIN_FILE
+  
+  #ifndef BM_MANNEQUIN_FILE
+    /// This is the Mannequin folder implemented as a class template. 
+    /// It behaves as a class with default values which can be overridden
+    /// in your applicaiton: 
+    ///
+    /// .. code_block:: AnyScript
+    ///
+    ///    Main.HumanModel.Mannequin.Posture = 
+    ///    {
+    ///      ElbowPronation = -70;
+    ///    };
+    ///
+    /// It is still possible to define your own Mannequin file in your application:
+    ///
+    /// .. code_block:: AnyScript
+    /// 
+    ///     #path BM_MANNEQUIN_FILE "MyMannequinFile.any"
+    ///
+    Template_Mannequin Mannequin = {};
+    //Template defined in in #paths"BodyModels/GenericBodyModel/BodyModel.ClassTemplates.any"
+  #else
+    // Include user defined Mannequin file
     #include "<BM_MANNEQUIN_FILE>"
   #endif
   
-  #if BM_DRAWSETTINGS_SKIP == OFF
-  Main = {
+  
+  
+#if BM_DRAWSETTINGS_SKIP == OFF
+  Main = 
+  {
+  #ifndef BM_DRAWSETTINGS_FILE
+    Template_DrawSettings DrawSettings = {};
+  #else
     #include "<BM_DRAWSETTINGS_FILE>"
+  #endif    
   };
-  #endif
-  // actual body model
+#endif
   
-  
-  #include  "<ANYBODY_PATH_BODY_GENERICBODYMODEL>\BodyModel.NEW.any"
+  #include  "<ANYBODY_PATH_BODY_GENERICBODYMODEL>\BodyModel.any"
   
   AnyFolder StrengthParameters={
     AnyVar SpecificMuscleTensionSpine= BM_TRUNK_STRENGTH_INDEX*90; //N/cm^2
