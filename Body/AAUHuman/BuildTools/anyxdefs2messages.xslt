@@ -6,11 +6,11 @@
 
   <xsl:template match="/">
     <xsl:text>//&#10;// !!! THIS IS AN AUTOMATICALLY GENERATED FILE. DO NOT MODIFY IT !!! &#10;//&#10;&#10;</xsl:text>
-    <xsl:text>//&#10;AnyFolder Config = {&#10;&#10;</xsl:text>
+    <xsl:text>//&#10;</xsl:text>
 
     <xsl:text>&#10;#if BM_CONFIG_MESSAGES == ON&#10;AnyFolder Messages = {&#10;</xsl:text>
 
-    <xsl:for-each select="anyxdefs/parameter">
+    <xsl:for-each select="anyxdefs/parameter[not(@deprecated)]">
       <xsl:if test="@valuetype!='reference'">
 
         <xsl:text>// </xsl:text><xsl:value-of select="@descr"/><xsl:text>&#10;</xsl:text>
@@ -45,7 +45,7 @@
 
     <xsl:text>&#10;}; // AnyFolder Messages&#10;#endif&#10;&#10;#if BM_CONFIG_VALUES == ON&#10;AnyFolder Values = {&#10;&#10;</xsl:text>
 
-    <xsl:for-each select="anyxdefs/parameter">
+    <xsl:for-each select="anyxdefs/parameter[not(@deprecated)]">
       <xsl:if test="@valuetype!='reference'">
         <xsl:text>// </xsl:text><xsl:value-of select="@descr"/><xsl:text>&#10;</xsl:text>
 
@@ -66,7 +66,7 @@
       </xsl:if>
     </xsl:for-each>
     <xsl:text>&#10;};// AnyFolder Values&#10;#endif&#10;&#10;</xsl:text>
-    <xsl:text>&#10;};// AnyFolder Config&#10;&#10;</xsl:text>
+    <xsl:text>&#10;&#10;</xsl:text>
   </xsl:template>
 
 </xsl:stylesheet>
