@@ -13,7 +13,7 @@ All BodyModel parameters
 
     :Default: :ammr:bm_constant:`_SCALING_STANDARD_`
     :Example: :anyscript:`#define BM_SCALING _SCALING_STANDARD_`
-    :Options: - :any:`_SCALING_CUSTOM_`: Custom anthropometric scaling law for the entire model
+    :Options: - :any:`_SCALING_USERDEFINED_`: Don't use a builtin scaling law. A user-defined law must be specified with ``BM_SCALING_FILE``.
               - :any:`_SCALING_STANDARD_`: Standard scaling law to be used by the entire model.
               - :any:`_SCALING_UNIFORM_`: Uniform anthropometric scaling law to be used by the entire model.
               - :any:`_SCALING_LENGTHMASS_`: Length/mass anthropometric scaling law to be used by the entire model.
@@ -21,23 +21,34 @@ All BodyModel parameters
               - :any:`_SCALING_UNIFORM_EXTMEASUREMENTS_`: Uniform anthropometric scaling law  with external measurements to be used by the entire model.
               - :any:`_SCALING_LENGTHMASS_EXTMEASUREMENTS_`: Length/mass anthropometric with external measurements scaling law to be used by the entire model.
               - :any:`_SCALING_LENGTHMASSFAT_EXTMEASUREMENTS_`: Length/mass/fat anthropometric with external measurements scaling law to be used by the entire model.
+              - :any:`_SCALING_XYZ_`: Scaling using xyz factors for all Segments.
 
 
 .. ammr:bm_statement:: BM_SCALING_ANTHRO_FILE
 
-    File with all anthropometric measurements
+    Custom file with all anthropometric measurements used by the scaling law. This is some times called the AnyMan file.
 
-
-    :Default: ``"<ANYBODY_PATH_BODY>\BodyModels\GenericBodyModel\BodyModel.AnyMan.any"``
-    :Example: :anyscript:`#path BM_SCALING_ANTHRO_FILE "<ANYBODY_PATH_BODY>\BodyModels\GenericBodyModel\BodyModel.AnyMan.any"`
 
 .. ammr:bm_statement:: BM_SCALING_MY_FILE
+    :deprecated:
 
-    Custom anthopometric scaling law, used when BM_SCALING is _SCALING_CUSTOM_.
+    Path with the ScalingLaw used. Can be set to override the BM_SCALING parameter and select a custom scaling law.
 
 
-    :Default: ``"<ANYBODY_PATH_BODY>\Scaling\MyScalingLaw.any"``
-    :Example: :anyscript:`#path BM_SCALING_MY_FILE "<ANYBODY_PATH_BODY>\Scaling\MyScalingLaw.any"`
+.. ammr:bm_statement:: BM_SCALING_FILE
+
+    Path with the ScalingLaw used. Can be set to override the BM_SCALING parameter and select a user defined scaling law.
+
+
+.. ammr:bm_statement:: BM_SCALING_STANDARDPARAM_EXTERIOR
+
+    Specifies if the standard parameters and anthropometrics parameters are given as external measurements. This defaults to OFF, which means that all segment length are joint-joint distances. This is set automatically based on the ``BM_SCALING`` parameter, but can be overridden if you implement your own scaling law and need to use external mesaurements.
+
+
+    :Default: ``OFF``
+    :Example: :anyscript:`#define BM_SCALING_STANDARDPARAM_EXTERIOR OFF`
+    :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
+
 
 .. ammr:bm_statement:: BM_CONFIG_MESSAGES
 
@@ -420,6 +431,7 @@ All BodyModel parameters
 .. ammr:bm_statement:: BM_ARM_SHOULDER_RHYTHM
 
     Switch for the shoulder rhythm constraints.
+
 
     :Default: ``OFF``
     :Example: :anyscript:`#define BM_ARM_SHOULDER_RHYTHM OFF`

@@ -111,6 +111,11 @@ All BodyModel constants
 
     Custom anthropometric scaling law for the entire model
 
+.. ammr:bm_constant:: _SCALING_USERDEFINED_
+    :value: -1
+
+    Don't use a builtin scaling law. A user-defined law must be specified with ``BM_SCALING_FILE``.
+
 .. ammr:bm_constant:: _SCALING_STANDARD_
     :value: 0
 
@@ -148,8 +153,14 @@ All BodyModel constants
 
 .. ammr:bm_constant:: _SCALING_LENGTHMASSFAT_MULTIDOFS_
     :value: 7
+    :deprecated:
 
     Length/mass/fat anthropometric with for multiple degree of freedom.
+
+.. ammr:bm_constant:: _SCALING_XYZ_
+    :value: 8
+
+    Scaling using xyz factors for all Segments.
 
 .. ammr:bm_constant:: CONST_MUSCLES_NONE
     :value: 0
