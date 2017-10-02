@@ -12,7 +12,7 @@
 
     <xsl:for-each select="anyxdefs/parameter[not(@deprecated)]">
       <xsl:if test="@valuetype!='reference'">
-
+        <xsl:text>#ifdef </xsl:text><xsl:value-of select="@name"/><xsl:text>&#10;</xsl:text>
         <xsl:text>// </xsl:text><xsl:value-of select="@descr"/><xsl:text>&#10;</xsl:text>
         <xsl:text>AnyMessage msg_</xsl:text>
         <xsl:value-of select="@name"/>
@@ -39,6 +39,7 @@
         </xsl:choose>
 
         <xsl:text>;};&#10;</xsl:text>
+        <xsl:text>#endif&#10;</xsl:text>
         <xsl:text>&#10;</xsl:text>
       </xsl:if>
     </xsl:for-each>
@@ -47,8 +48,8 @@
 
     <xsl:for-each select="anyxdefs/parameter[not(@deprecated)]">
       <xsl:if test="@valuetype!='reference'">
+        <xsl:text>#ifdef </xsl:text><xsl:value-of select="@name"/><xsl:text>&#10;</xsl:text>
         <xsl:text>// </xsl:text><xsl:value-of select="@descr"/><xsl:text>&#10;</xsl:text>
-
         <xsl:choose>
           <xsl:when test="@valuetype='string'">
             <xsl:text>AnyStringVar value_</xsl:text>
@@ -62,7 +63,7 @@
         </xsl:choose>
         <xsl:value-of select="@name"/><xsl:text>=</xsl:text>
         <xsl:value-of select="@name"/>
-        <xsl:text>;&#10;&#10;</xsl:text>
+        <xsl:text>;&#10;#endif&#10;&#10;</xsl:text>
       </xsl:if>
     </xsl:for-each>
     <xsl:text>&#10;};// AnyFolder Values&#10;#endif&#10;&#10;</xsl:text>

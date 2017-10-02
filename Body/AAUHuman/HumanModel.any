@@ -10,19 +10,31 @@ AnyFolder HumanModel={
   #include "<ANYBODY_PATH_BODY_GENERICBODYMODEL>\BodyModel.BodyPartsSetup.any"
   #include "<ANYBODY_PATH_BODY_GENERICBODYMODEL>\BodyModel.config_info.any"
   };
+ 
   
-  #ifdef BM_SCALING
-   #if BM_SCALING != _SCALING_STANDARD_
-    AnyFolder AnthroDataSubject = { #include "<BM_SCALING_ANTHRO_FILE>" };
-    Scaling.Scaling = {AnyFolder& AnthroDataSubjectRef = ..AnthroDataSubject;};
-   #endif  
-  #endif
   
-  AnyFolder BodyModelWithDefaultDrivers = {
-    AnyFolder &BodyModel = .BodyModel;
-    AnyFolder &Drivers = .DefaultMannequinDrivers;
-  };
-
+  /// This folder holds the Anthropometric data for the HumanModel.
+  /// This often refered to as the "AnyMan" file. 
+  Anthropometrics = { };
+  #ifdef BM_SCALING_ANTHRO_FILE
+    // Include the user define AnyMan file
+    AnyFolder Anthropometrics = { #include "<BM_SCALING_ANTHRO_FILE>" };
+  #else #if BM_SCALING == _SCALING_XYZ_
+    // Create the XYZ scaling AnyMan folder
+    Template_Anthropometrics_XYZ Anthropometrics = {};
+  #else #if BM_SCALING_STANDARDPARAM_EXTERIOR == ON 
+    // Create the external parameter AnyMan folder
+    Template_Anthropometrics_exterior Anthropometrics = {};  
+  #else
+    // Create the Normal AnyMan folder 
+    Template_Anthropometrics Anthropometrics(
+       T_BM_SCALING = BM_SCALING,
+       T_SCALING_LENGTHMASSFAT_MULTIDOFS_ = _SCALING_LENGTHMASSFAT_MULTIDOFS_
+     ) = {};
+  #endif#endif#endif
+  
+  
+  
   
   #ifndef BM_MANNEQUIN_FILE
     /// This is the Mannequin folder implemented as a class template. 
@@ -70,60 +82,47 @@ AnyFolder HumanModel={
     AnyVar SpecificMuscleTensionShoulderArm= BM_ARM_STRENGTH_INDEX*90; //N/cm^2
   };
   
-  // By default there is an option to define a custom scaling law
-  #include "<ANYBODY_PATH_BODY>\Scaling\ScalingCustom.any"
+
+
   
-  Scaling={
-   //Base scaling laws according to the configuration file
-   
-   Scaling.StandardParameters = {
-     AnyFolder& Trunk_ModelParameters = ...BodyModel.Trunk.ModelParameters;
-     #if BM_LEG_MODEL != OFF
-       AnyFolder& Leg_ModelParameters = ...BodyModel.Trunk.SegmentsLumbar.PelvisSeg.Leg_ModelParameters;
-     #endif
-   };
-   
-   #if BM_SCALING == _SCALING_CUSTOM_
-     // include your own custom scaling law, please refer to existing ones for reference
-     #include "<BM_SCALING_MY_FILE>"
-   #endif
-   
   
-   #if (BM_SCALING == _SCALING_UNIFORM_EXTMEASUREMENTS_) | (BM_SCALING == _SCALING_LENGTHMASS_EXTMEASUREMENTS_) | (BM_SCALING == _SCALING_LENGTHMASSFAT_EXTMEASUREMENTS_)
-     #ifndef STANDARDPARAM_EXTERIOR
-       #define STANDARDPARAM_EXTERIOR
-     #endif
-   #endif
+  #include "<ANYBODY_PATH_BODY_GENERICBODYMODEL>\CheckCustomScalingEnabled.any"
   
-   //Base scaling laws according to the configuration file
-   #if BM_SCALING == _SCALING_STANDARD_
-     #include "<ANYBODY_PATH_BODY>\Scaling\ScalingStandard.any"
-   #endif
-   
-   #if (BM_SCALING == _SCALING_UNIFORM_) | (BM_SCALING == _SCALING_UNIFORM_EXTMEASUREMENTS_)
-     #include "<ANYBODY_PATH_BODY>\Scaling\ScalingUniform.any"
-   #endif
-   
-   #if (BM_SCALING == _SCALING_LENGTHMASS_) | (BM_SCALING == _SCALING_LENGTHMASS_EXTMEASUREMENTS_)
-     #include "<ANYBODY_PATH_BODY>\Scaling\ScalingLengthMass.any" 
-   #endif   
-   
-   #if (BM_SCALING == _SCALING_LENGTHMASSFAT_) | (BM_SCALING == _SCALING_LENGTHMASSFAT_EXTMEASUREMENTS_)
-     #include "<ANYBODY_PATH_BODY>\Scaling\ScalingLengthMassFat.any" 
-   #endif   
-   
-   #ifdef STANDARDPARAM_EXTERIOR
-     #undef STANDARDPARAM_EXTERIOR
-   #endif   
-   
-   #if BM_SCALING == _SCALING_LENGTHMASSFAT_MULTIDOFS_
-     #include "<ANYBODY_PATH_BODY>\Scaling\ScalingLengthMassFatModified.any"
-     //#include "<ANYBODY_PATH_BODY>\Scaling\ScalingLengthMassFatMultiDofs.any" 
-   #endif   
- };
+  #if __CUSTOM_SCALING == OFF
+      // Custom scaling is not enabled; include the scaling law in the traditional way.
+      #include "<ANYBODY_PATH_BODY_GENERICBODYMODEL>\Scaling.any"
+      Scaling = 
+      {
+        AnyFolder& AnyManRef = .Anthropometrics;
+      };
+  
+  #else
+  // Include the Default Scaling law in separate folder parallel to 
+  // Main.HumanModel
+  Main = 
+  {
+    // Include the Custom Scaling file, which allow the user to overide all the 
+    // scaling functions individually.
+    #include "<ANYBODY_PATH_BODY>\Scaling\ScalingCustom.any"
+    Scaling = 
+    {
+       // The overall scaling function is included one level down.
+       #include "<ANYBODY_PATH_BODY_GENERICBODYMODEL>\Scaling.any"
+       Scaling = {AnyFolder& AnyManRef = ..Anthropometrics;};
+    };
+  };
+  #endif
  
- AnyFolder DefaultMannequinDrivers = {
-   #include "<ANYBODY_PATH_BODY_GENERICBODYMODEL>\BodyModel.MannequinDrivers.any"
- };
+      
+  AnyFolder DefaultMannequinDrivers = 
+  {
+    #include "<ANYBODY_PATH_BODY_GENERICBODYMODEL>\BodyModel.MannequinDrivers.any"
+  };
+ 
+  AnyFolder BodyModelWithDefaultDrivers = {
+    AnyFolder &BodyModel = .BodyModel;
+    AnyFolder &Drivers = .DefaultMannequinDrivers;
+  }; 
+  
 };
 
