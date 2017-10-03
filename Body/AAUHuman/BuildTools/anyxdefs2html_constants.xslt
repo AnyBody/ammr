@@ -15,7 +15,7 @@
             <th>Value</th>
             <th>Type</th>
           </tr>
-          <xsl:for-each select="anyxdefs/constant">
+          <xsl:for-each select="anyxdefs/constant[not(@deprecated='true')]">
             <tr>
               <td><i>
                 <xsl:value-of select="@name"/>
