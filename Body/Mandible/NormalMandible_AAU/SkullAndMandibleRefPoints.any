@@ -1,0 +1,48 @@
+AnyFolder SkullRefPoints = {
+
+  AnyVec3 LeftEar = {142.055,134.89,-54.7368}/1000;
+  AnyVec3 LeftEye = {128.203, 61.8469,-57.8488}/1000;
+  
+  AnyVec3 RightEar = {35.762,133.938,-51.3871}/1000;
+  
+//  <point x="142.055" y="134.89" z="-54.7368" active="1" name="LeftEar"/>
+//<point x="128.203" y="61.8469" z="-57.8488" active="1" name="LeftEye"/>
+// <point x="35.762" y="133.938" z="-51.3871" active="1" name="RightEar"/>  
+  
+};
+
+AnyFolder MandibleRefPoints = {
+  AnyVec3 LeftCondyle = {141.549,122.872,-57.6456};  
+  AnyVec3 RightCondyle = {42.4612,119.636,-55.1903};    
+
+// <point x="141.549" y="122.872" z="-57.6456" active="1" name="LeftCondyle"/>
+  //  <point x="42.4612" y="119.636" z="-55.1903" active="1" name="RightCondyle"/>
+
+};
+
+AnyFolder ReferenceFrame = {
+
+ AnyFolder FrankfurtHorizontalPlane = {
+   // x and y is in the plane and z is normal to the plane.
+   AnyMat33 Axes = RotMat(..SkullRefPoints.LeftEar,..SkullRefPoints.RightEar,..SkullRefPoints.LeftEye); 
+ };
+
+ 
+ AnyVec3 Origin = 0.5*(.MandibleRefPoints.LeftCondyle+.MandibleRefPoints.RightCondyle);
+ 
+ 
+ // Project the vector between the left and right concyle onto the Frankfurt horizontal plane
+ AnyVec3 FHP_N = FrankfurtHorizontalPlane.Axes[2];
+
+ AnyVec3 LC_RC = (.MandibleRefPoints.LeftCondyle-.MandibleRefPoints.RightCondyle)/vnorm(.MandibleRefPoints.LeftCondyle-.MandibleRefPoints.RightCondyle);
+ AnyVec3 e2 = LC_RC-(LC_RC*FHP_N')*FHP_N;
+ 
+ // First vector is orthoginal to e2 and pointing forward
+ AnyVec3 tmp = (.SkullRefPoints.LeftEye-.SkullRefPoints.LeftEar )*e2'* e2 + .SkullRefPoints.LeftEar;
+ AnyVec3 e1 = (.SkullRefPoints.LeftEye-tmp) / vnorm(.SkullRefPoints.LeftEye-tmp);
+ 
+ AnyVec3 e3 = cross(e1,e2); 
+ 
+ AnyMat33 Axes = {e1,e2,e3}'; 
+ 
+};

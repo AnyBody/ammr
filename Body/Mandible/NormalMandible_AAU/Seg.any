@@ -1,0 +1,248 @@
+
+AnyVar AngleY_R = .AngleConstrainingPlane.AngleYaxisR;
+AnyVar AngleY_L = .AngleConstrainingPlane.AngleYaxisL;
+
+AnyVar AngleX_R = .AngleConstrainingPlane.AngleXaxisR;
+AnyVar AngleX_L = .AngleConstrainingPlane.AngleXaxisL;
+
+
+AnyMat33 TransY_R = RotMat(AngleY_R,y);
+AnyMat33 TransY_L = RotMat(AngleY_L,y);
+
+AnyMat33 TransX_R = RotMat(AngleX_R,x);
+AnyMat33 TransX_L = RotMat(AngleX_L,x);
+
+#include "SkullAndMandibleRefPoints.any"
+
+#ifndef DEFINE_LOCAL_COORDINATE
+#define DEFINE_LOCAL_COORDINATE(x,y,z) sRel = .Scale(({x,y,z}/1000-.rOffset)*.AOffset);
+#endif
+
+#ifndef DEFINE_LOCAL_COORDINATE_PLUS_OFFSET
+#define DEFINE_LOCAL_COORDINATE_PLUS_OFFSET(x,y,z,xO,yO,zO) sRel = .Scale(({x,y,z}/1000-.rOffset)*.AOffset+{xO,yO,zO});
+#endif
+
+//#define SHOW_SKIN
+
+AnySeg Skull = {
+  AnyDrawRefFrame drw ={ScaleXYZ=0.09*{1,1,1};};
+  AnyFunTransform3D &Scale =..Scaling.GeometricalScaling.Skull.ScaleFunction;  
+  
+  #include "MuscleNodesSkull.any" //This include file contains the coordinates of the muscles
+  #include "LigamentNodesSkull.any"
+  #include "MarkerNodesSkull.any"
+  r0 = {-0.3,0.0,0.5};
+  
+  Mass = 2.5; //Just a number, not very important
+  Jii = {0.001 , 0.001 , 0.001}; //Just a number, not very important
+  //sCom = {x,x,x};
+  
+  AnyRefNode GroundNode = { sRel = .Scale({0.0,0.0,0.0}); };
+    
+  //The coordinates of the temporo mandibular joints (TMJ) on the left and right side
+  AnyRefNode TMJ_NodeL = {
+    DEFINE_LOCAL_COORDINATE(140.825, 122.956, -57.6016)
+    ARel = ..TransY_L*..TransX_L;
+    AnyDrawRefFrame DrwNodeFrame = {ScaleXYZ = {0.06,0.06,0.06}; RGB = {0,1,0};    Opacity = 1.0;};
+  };
+  AnyRefNode TMJ_NodeR = {
+    DEFINE_LOCAL_COORDINATE(43.676, 121.029, -55.3217)
+    ARel = ..TransY_R*..TransX_R;
+    AnyDrawRefFrame DrwNodeFrame = {ScaleXYZ = {0.06,0.06,0.06}; RGB = {0,1,0};};
+  };
+  
+  AnyRefNode MiddleTMJ_Nodes = {
+    sRel = .Scale({0.0,0.0,0.0});
+  };
+  
+  AnyRefNode DriveNode ={sRel = .Scale({-0.002,0.0,-0.018});}; // Estimated using the ProtrusionMovement1 movement
+  
+  
+  AnyRefNode SkullSurfNode = {  
+    AnyDrawRefFrame drw={};
+    sRel = -..ReferenceFrame.Origin/1000*..ReferenceFrame.Axes;
+    ARel = ..ReferenceFrame.Axes';
+    AnyDrawSurf DrwSurfSkull = {
+      FileName = "Skull_lowqual";
+      RGB = ......DrawSettings.Colors.AnyBodyPaleYellow;
+      Opacity = 0.5;
+      ScaleXYZ = {1.0,1.0,1.0}/1000;
+      AnyFunTransform3D &Scale =..Scale;  
+    };    
+  
+  #ifdef SHOW_SKIN
+  AnyDrawSurf DrwSurfSkin = {
+      FileName = "Skin_cleaned_lowqual.stl";
+      RGB = ......DrawSettings.Colors.AnyBodyPaleYellow;
+      Opacity = 0.5;
+      ScaleXYZ = {1.0,1.0,1.0}/1000;
+      AnyFunTransform3D &Scale =..Scale;  
+    };  
+  #endif
+    
+    AnySurfSTL SurfContactRight = {
+      FileName = "Smoothed_ThickHead_High_RightContact2";
+      AnyFunTransform3D &Scale =..Scale;  
+       ScaleXYZ = {1.0,1.0,1.0}/1000;
+
+      
+      AnyDrawSurf DrwSurf = {
+        FileName = .FileName;
+        RGB = .......DrawSettings.Colors.AnyBodyPaleYellow;
+        Opacity = 0.9;
+        ScaleXYZ = {1.0,1.0,1.0}/1000;
+        AnyFunTransform3D &Scale =...Scale;  
+      };
+    };      
+        
+    AnySurfSTL SurfContactLeft = {
+      FileName = "Smoothed_ThickHead_High_LeftContact2";
+      ScaleXYZ = {1.0,1.0,1.0}/1000;
+      AnyFunTransform3D &Scale =..Scale; 
+      
+     AnyDrawSurf DrwSurf = {
+        FileName = .FileName;
+        RGB = .......DrawSettings.Colors.AnyBodyPaleYellow;
+        Opacity = 0.9;
+        ScaleXYZ = {1.0,1.0,1.0}/1000;
+        AnyFunTransform3D &Scale =...Scale;  
+      };
+      
+    };  
+  };
+  
+};
+
+AnySeg Mandible = {
+ r0 = {-0.3,0.0,0.5};
+  
+  AnyFunTransform3D &Scale =..Scaling.GeometricalScaling.Mandible.ScaleFunction;
+  
+  Mass = 0.44; //Taken from Koolstra and Van Eijden (J.Biomech. in press)
+  Jii = {0.00086, 0.00029 , 0.00061 }; //Taken from Koolstra and Van Eijden (J.Biomech. in press)
+  sCoM = Scale({0.050,0.0,-0.080});
+  
+  //The coordinates of the temporo mandibular joints (TMJ) on the left and right side
+  AnyRefNode TMJ_NodeL = {
+    DEFINE_LOCAL_COORDINATE(140.825, 122.956, -57.6016)
+    ARel = ..TransY_L*..TransX_L;
+    AnyDrawRefFrame DrwNodeFrame = {
+      ScaleXYZ = {0.03,0.03,0.03};
+      RGB = {1,0,0};
+      Opacity = 1.0;
+    };
+  };
+  
+  AnyRefNode GroundNode = { sRel = .Scale({0.0,0.0,0.0}); };
+  
+  AnyRefNode TMJ_NodeR = {
+    DEFINE_LOCAL_COORDINATE(43.676, 121.029, -55.3217)
+    ARel = ..TransY_R*..TransX_R;
+    AnyDrawRefFrame DrwNodeFrame = {
+      ScaleXYZ = {0.03,0.03,0.03};
+      RGB = {1,0,0};
+    };
+  };
+  
+  AnyRefNode LowerIncisorMiddleNode = { 
+    DEFINE_LOCAL_COORDINATE(93.5305, 36.4146, -114.727)
+      AnyDrawNode DrwNodeFrame = {
+        ScaleXYZ = 0.001*{1,1,1};
+      };    
+  }; 
+  
+   
+    AnyRefNode FirstPreMolarNodeR = {
+      DEFINE_LOCAL_COORDINATE(73.9909, 49.0415, -108.157)
+
+      AnyDrawNode DrwNodeFrame = {
+        ScaleXYZ = 0.001*{1,1,1};
+      };    
+    }; 
+
+    AnyRefNode FirstPreMolarNodeL = {      
+      DEFINE_LOCAL_COORDINATE(107.898, 50.966, -109.117)
+
+      AnyDrawNode DrwNodeFrame = {
+        ScaleXYZ = 0.001*{1,1,1};
+      };    
+    }; 
+    
+    AnyRefNode FirstMolarNodeR = {
+      DEFINE_LOCAL_COORDINATE(71.4342, 67.1876, -109.881)
+      AnyDrawNode DrwNodeFrame = {
+        ScaleXYZ = 0.001*{1,1,1};
+      };    
+    }; 
+    
+    AnyRefNode FirstMolarNodeL = {
+      DEFINE_LOCAL_COORDINATE(111.766, 67.7027, -110.605)
+      AnyDrawNode DrwNodeFrame = {
+        ScaleXYZ = 0.001*{1,1,1};
+      };    
+    }; 
+  
+  #include "MuscleNodesMandible.any" //This include file contains the coordinates of the muscles
+  #include "LigamentNodesMandible.any"
+  #include "MarkerNodesMandible.any"
+
+  
+  AnyRefNode MandibleSurfNode = {  
+    sRel = -..ReferenceFrame.Origin/1000*..ReferenceFrame.Axes;
+    ARel = ..ReferenceFrame.Axes';
+    
+    AnyDrawSurf DrwSurfMandible = {
+      FileName = "Mandible_lowqual";
+      RGB = ......DrawSettings.Colors.AnyBodyPaleYellow;
+      Opacity = 0.5;
+      ScaleXYZ = {1.000000, 1.000000, 1.000000}/1000;
+      AnyFunTransform3D &Scale =..Scale;  
+    };
+      
+    
+   AnySurfSTL SurfContactLeft = {
+      FileName = "Smoothed_Mandible_LeftContact";
+      ScaleXYZ = {1.0,1.0,1.0}/1000;
+      AnyFunTransform3D &Scale =..Scale; 
+      
+     AnyDrawSurf DrwSurf = {
+        FileName = .FileName;
+        RGB = .......DrawSettings.Colors.AnyBodyPaleYellow;
+        Opacity = 0.9;
+        ScaleXYZ = {1.0,1.0,1.0}/1000;
+        AnyFunTransform3D &Scale =...Scale;  
+      };
+      
+    };  
+
+   AnySurfSTL SurfContactRight = {
+      FileName = "Smoothed_Mandible_RightContact2";
+      ScaleXYZ = {1.0,1.0,1.0}/1000;
+      AnyFunTransform3D &Scale =..Scale; 
+      
+     AnyDrawSurf DrwSurf = {
+        FileName = .FileName;
+        RGB = .......DrawSettings.Colors.AnyBodyPaleYellow;
+        Opacity = 0.9;
+        ScaleXYZ = {1.0,1.0,1.0}/1000;
+        AnyFunTransform3D &Scale =...Scale;  
+      };
+      
+    };  
+    
+  };
+  
+};
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,164 @@
+AnyVar AngleY = .AngleConstrainingPlane.AngleYaxis;
+AnyVar AngleX = .AngleConstrainingPlane.AngleXaxis;
+
+AnyMat33 TransY = {{ cos(AngleY), 0.0, -sin(AngleY) }, { 0.0, 1.0, 0.0 }, { sin(AngleY), 0.000000, cos(AngleY)}};
+AnyMat33 TransX_R = {{ 1.0, 0.0, 0.0 }, { 0.0, cos(AngleX), sin(AngleX) }, { 0.0 , -sin(AngleX), cos(AngleX)}};
+AnyMat33 TransX_L = {{ 1.0, 0.0, 0.0 }, { 0.0, cos(-AngleX), sin(-AngleX) }, { 0.0 , -sin(-AngleX), cos(-AngleX)}};
+
+AnyVar RamusS = Main.Model.HumanModel.NonSymmetricCase.RamusShortening/1000;
+
+AnySeg Skull = {
+  
+  AnyFunTransform3D &Scale =..Scaling.GeometricalScaling.Skull.ScaleFunction;  
+  
+  Mass = 2.5; //Just a number, not very important
+  Jii = {0.001 , 0.001 , 0.001}; //Just a number, not very important
+  //sCom = {x,x,x};
+  
+  AnyRefNode GroundNode = { sRel = .Scale({-0.037,-0.014,0.0}); };
+  
+  //The coordinates of the temporo mandibular joints (TMJ) on the left and right side
+  AnyRefNode TMJ_NodeL = {
+    sRel = .Scale({0.0,0.050,0.0});
+    ARel = ..TransY*..TransX_L;
+    AnyDrawRefFrame DrwNodeFrame = {ScaleXYZ = {0.03,0.03,0.03}; RGB = {0,1,0};    Opacity = 1.0;};
+  };
+  AnyRefNode TMJ_NodeR = {
+    sRel = {.TMJ_NodeL.sRel[0],-.TMJ_NodeL.sRel[1],.TMJ_NodeL.sRel[2]};
+    ARel = ..TransY*..TransX_R;
+    AnyDrawRefFrame DrwNodeFrame = {ScaleXYZ = {0.03,0.03,0.03}; RGB = {0,1,0};};
+  };
+  
+  AnyRefNode MiddleTMJ_Nodes = {sRel = .Scale({0.0,0.0,0.0});};
+  
+  #include "MuscleNodesSkull.any" //This include file contains the coordinates of the muscles
+  
+  AnyDrawSurf DrwSurfSkull = {
+    FileName = "Skull";
+    RGB = .....DrawSettings.Colors.AnyBodyPaleYellow;
+    Opacity = 1.0;
+    AnyFunTransform3D &Scale =.Scale;  
+  }; 
+  
+  AnyDrawSurf DrwSurfTeethSkull = {
+    FileName = "TeethSkull";
+    RGB = {1.0, 1.0, 1.0};
+    Opacity = 1.0;
+    AnyFunTransform3D &Scale =.Scale;  
+  };
+  
+};
+
+AnySeg Mandible = {
+  
+  AnyFunTransform3D &Scale =..Scaling.GeometricalScaling.Mandible.ScaleFunction;
+  
+  Mass = 0.44; //Taken from Koolstra and Van Eijden (J.Biomech. in press)
+  Jii = {0.00086, 0.00029 , 0.00061 }; //Taken from Koolstra and Van Eijden (J.Biomech. in press)
+  sCoM = Scale({0.050,0.0,-0.080});
+  
+  //The coordinates of the temporo mandibular joints (TMJ) on the left and right side
+  AnyRefNode TMJ_NodeL = {
+    sRel = .Scale({0.0,0.050,0.0-..RamusS});
+    ARel = ..TransY*..TransX_L;
+    AnyDrawRefFrame DrwNodeFrame = {
+      ScaleXYZ = {0.03,0.03,0.03};
+      RGB = {1,0,0};
+      Opacity = 1.0;
+    };
+  };
+  AnyRefNode TMJ_NodeR = {
+    //sRel = {.TMJ_NodeL.sRel[0],-.TMJ_NodeL.sRel[1],.TMJ_NodeL.sRel[2]};
+    sRel = .Scale({0.0,-0.050,0.0});  
+    ARel = ..TransY*..TransX_R;
+    AnyDrawRefFrame DrwNodeFrame = {
+      ScaleXYZ = {0.03,0.03,0.03};
+      RGB = {1,0,0};
+    };
+  };
+  
+  AnyRefNode LowerIncisorMiddleNode = {
+    sRel = .Scale({0.091,0.0,-0.037});
+    //AnyVar angle = 18*pi/180;
+    //ARel = {{cos(angle), sin(angle), 0.000000}, {-sin(angle), cos(angle), 0.000000}, {0.000000, 0.000000, 1.0}};
+    AnyDrawRefFrame DrwNodeFrame = {
+      ScaleXYZ = {0.03,0.03,0.03};
+      RGB = {1,0,0};
+      Opacity = 0.000000;
+    };
+  }; //Adding a node on the mandible segment
+  
+  AnyRefNode FirstPreMolarNodeR = {
+    sRel = .Scale({0.080,-0.021,-0.044});
+    //AnyVar angle = 18*pi/180;
+    //ARel = {{cos(angle), sin(angle), 0.000000}, {-sin(angle), cos(angle), 0.000000}, {0.000000, 0.000000, 1.0}};
+    AnyDrawRefFrame DrwNodeFrame = {
+      ScaleXYZ = {0.03,0.03,0.03};
+      RGB = {1,0,0};
+      Opacity = 0.000000;
+    };  
+  }; //Adding a node on the mandible segment  
+  
+  AnyRefNode FirstPreMolarNodeL = {
+    sRel = .Scale({0.080,0.021,-0.044});
+    //AnyVar angle = 18*pi/180;
+    //ARel = {{cos(angle), sin(angle), 0.000000}, {-sin(angle), cos(angle), 0.000000}, {0.000000, 0.000000, 1.0}};
+    AnyDrawRefFrame DrwNodeFrame = {
+      ScaleXYZ = {0.03,0.03,0.03};
+      RGB = {1,0,0};
+      Opacity = 0.000000;
+    };  
+  }; //Adding a node on the mandible segment
+  
+  AnyRefNode FirstMolarNodeR = {
+    sRel = .Scale({0.062,-0.020,-0.043});
+    //AnyVar angle = 18*pi/180;
+    //ARel = {{cos(angle), sin(angle), 0.000000}, {-sin(angle), cos(angle), 0.000000}, {0.000000, 0.000000, 1.0}};
+    AnyDrawRefFrame DrwNodeFrame = {
+      ScaleXYZ = {0.03,0.03,0.03};
+      RGB = {1,0,0};
+      Opacity = 0.000000;
+    };    
+  }; //Adding a node on the mandible segment  
+  
+  AnyRefNode FirstMolarNodeL = {
+    sRel = .Scale({0.062,0.020,-0.043});
+    //AnyVar angle = 18*pi/180;
+    //ARel = {{cos(angle), sin(angle), 0.000000}, {-sin(angle), cos(angle), 0.000000}, {0.000000, 0.000000, 1.0}};
+    AnyDrawRefFrame DrwNodeFrame = {
+      ScaleXYZ = {0.03,0.03,0.03};
+      RGB = {1,0,0};
+      Opacity = 0.000000;
+    };    
+  }; //Adding a node on the mandible segment  
+  
+  #include "MuscleNodesMandible.any" //This include file contains the coordinates of the muscles
+  
+  AnyDrawSurf DrwSurfMandible = {
+    FileName = "Mandible";
+    //FileName = "MandibleAffected";
+    RGB = .....DrawSettings.Colors.AnyBodyPaleYellow;
+    Opacity = 1.00;
+    ScaleXYZ = {1.000000, -1.000000, 1.000000};
+    AnyFunTransform3D &Scale =.Scale;  
+  };
+  
+  AnyDrawSurf DrwSurfTeethMandible = {
+    FileName = "TeethMandible";
+    RGB = {1.0, 1.0, 1.0};
+    Opacity = 1.00;    
+    AnyFunTransform3D &Scale =.Scale;  
+  };
+  
+};
+
+
+
+
+
+
+
+
+
+
+
