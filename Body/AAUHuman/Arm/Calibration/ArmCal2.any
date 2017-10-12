@@ -1,264 +1,3 @@
-<<<<<<< HEAD:Body/AAUHuman/Arm/Calibration/ArmCal2.any
-///This is the calibratiion file it will calibrate the anterrio part of the deltoid muscle 10 deg abduction 35 flexion
-AnyFolder ArmCal2 ={
-  
-  AnyFolder &ThoraxSegs =  ...HumanFolderRef.Trunk.SegmentsThorax;
-  AnyFolder &LumbarSegs =  ...HumanFolderRef.Trunk.SegmentsLumbar;
-  AnyFolder &CervicalSegs =  ...HumanFolderRef.Trunk.SegmentsCervicalSpine;
-  AnyFolder &LumbarSpineJoints =  ...HumanFolderRef.Trunk.JointsLumbar;
-  AnyFolder &LumbarCervicalJoints =  ...HumanFolderRef.Trunk.JointsCervicalSpine;
-
-  
-  AnyFolder &SegSideCal = .SideHumanFolderRef.ShoulderArm.Seg;
-  AnyFolder &JointsSideCal = .SideHumanFolderRef.ShoulderArm.Jnt;
-  AnyFolder &DeltoidRakeRef = .SideHumanFolderRef.ShoulderArm.Mus.ArtificialRake;
-
-  AnyShortestPathMuscle &del1 =  .SideHumanFolderRef.ShoulderArm.Mus.deltoideus_clavicular_part_1;
-  AnyShortestPathMuscle &del2 =  .SideHumanFolderRef.ShoulderArm.Mus.deltoideus_clavicular_part_2;
-  AnyShortestPathMuscle &del3 =  .SideHumanFolderRef.ShoulderArm.Mus.deltoideus_clavicular_part_3;
-  AnyShortestPathMuscle &del4 =  .SideHumanFolderRef.ShoulderArm.Mus.deltoideus_clavicular_part_4;
-  AnyShortestPathMuscle &del5 =  .SideHumanFolderRef.ShoulderArm.Mus.deltoideus_clavicular_part_5;
-  AnyShortestPathMuscle &del6 =  .SideHumanFolderRef.ShoulderArm.Mus.deltoideus_clavicular_part_6;
-  
-  AnyFolder &MusParCalSide =  .SideHumanFolderRef.ShoulderArm.MusPar;
-  
-  AnyFixedRefFrame ground = {
-    AnyRefNode node = { 
-      ARel=.....HumanFolderRef.Trunk.SegmentsThorax.ThoraxSeg.Axes0; 
-      sRel=.....HumanFolderRef.Trunk.SegmentsThorax.ThoraxSeg.r0;
-    };
-  };
-  
-  AnySphericalJoint ThoraxGround={
-    AnyRefFrame &Ground = .ground.node;
-    AnyRefFrame &Sacrum= ....HumanFolderRef.Trunk.SegmentsThorax.ThoraxSeg;
-  };
-  
-  AnyKinEqSimpleDriver  ThoraxGroundDriver = {
-    AnySphericalJoint &Jnt = .ThoraxGround;
-    DriverPos = {0,0,0};
-    DriverVel = {0,0,0};
-    Reaction.Type = {Off,Off,Off}; 
-  };
-  
-  
-  AnyKinEqSimpleDriver NeckJntDriver = {
-    AnyKinMeasure &lb = ....HumanFolderRef.Interface.Trunk.SkullThoraxLateralBending;
-    AnyKinMeasure &ar = ....HumanFolderRef.Interface.Trunk.SkullThoraxRotation;
-    AnyKinMeasure &fe = ....HumanFolderRef.Interface.Trunk.SkullThoraxFlexion;
-    DriverPos = {0,0,0};
-    DriverVel = {0,0,0};
-    Reaction.Type = {On,On,On};
-  };
-  
-  AnyKinMeasureOrg Posture = {
-    AnyKinMeasureOrg &Ref2 = ....HumanFolderRef.Interface.Trunk.PelvisThoraxLateralBending;        
-    AnyKinMeasureOrg &Ref3 = ....HumanFolderRef.Interface.Trunk.PelvisThoraxRotation;   
-    AnyKinMeasureOrg &Ref1 = ....HumanFolderRef.Interface.Trunk.PelvisThoraxExtension;
-    MeasureOrganizer={0,1,2};
-  };
-  
-  AnyKinEqSimpleDriver PostureDriver ={
-    AnyKinMeasureOrg &AllDofs = .Posture;
-    DriverPos = pi/180*{0,0,0};
-    DriverVel = pi/180*{  0.0,0.0,0.0};
-    Reaction.Type = {On,On,On};  
-  };
-  
-  #if !((BM_ARM_RIGHT & BM_ARM_SHOULDER_RHYTHM_RIGHT) | (BM_ARM_LEFT & BM_ARM_SHOULDER_RHYTHM_LEFT))
-  AnyKinEqSimpleDriver SCDriver ={
-    AnyKinRotational &SC =  ..SideHumanFolderRef.ShoulderArm.Jnt.SCRot;  
-        DriverPos = {..Sign*-0.66, -0.5*(..Sign-1)*pi+..Sign*0.258228, ..Sign*-0.25}; 
-    DriverVel = {-0.0,-0.0,-0.0};
-    Reaction.Type={Off,Off,Off};
-  };
-  #endif
-  
-  //This joint is not used in the  mannequin as the is set to a default pos.
-  AnyKinEqSimpleDriver WristDriver ={
-    AnyKinMeasureOrg &Wrist1 =..SideHumanFolderRef.ShoulderArm.Jnt.WristJointFlexion;
-    AnyKinMeasureOrg &Wrist2 =..SideHumanFolderRef.ShoulderArm.Jnt.WristJointDeviation;
-    DriverPos = {0,0};
-    DriverVel = {0,0};
-    Reaction.Type={On,On};
-  };
-  
-  AnyKinEqSimpleDriver FEDriver ={
-    AnyKinMeasureOrg &ref = ..SideHumanFolderRef.ShoulderArm.Jnt.FE;
-    AnyVar pos = iffun(ltfun(..Sign,0), 65*pi/180, pi-65*pi/180);
-    DriverPos = {pos};  
-    
-    DriverVel = {0};
-    Reaction.Type = {Off};  
-  };
-  
-  AnyKinEqSimpleDriver PSDriver ={
-    AnyKinMeasureOrg &ref = ..SideHumanFolderRef.ShoulderArm.Jnt.PS;
-    DriverPos = {0.50*pi};  
-    DriverVel = pi/180*{ 0.0 };
-    Reaction.Type = {Off};  
-  };
-  
-  AnyKinEqSimpleDriver GHDriver ={
-    AnyKinRotational GHRotR = { 
-      AnyRefNode &scapula_gh = .....HumanFolderRef.Trunk.SegmentsThorax.ThoraxSeg.ij;
-      AnyRefNode &humerus_gh = ...SideHumanFolderRef.ShoulderArm.Seg.Humerus.gh;
-      Type = RotAxesAngles;
-      Axis1 = z;
-      Axis2 = x;
-      Axis3 = y;
-    };
-    MeasureOrganizer={0,1,2};
-    DriverPos = pi/180*{..Sign*10.0,35,0.0 };  
-    DriverVel = {0,0,0};
-    Reaction.Type = {Off,Off,Off};  
-  };
-  
-  //---------------------------------------------------------------------
-  //Finger drivers
-  #if !((BM_ARM_RIGHT & BM_ARM_DETAIL_HAND_RIGHT) | (BM_ARM_LEFT & BM_ARM_DETAIL_HAND_LEFT))
-  #else
-  //finger1
-  AnyKinEqSimpleDriver CMC1Flexion={
-    AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger1.Jnt.CMCFlexion;
-    DriverPos={0}*pi/180;  
-    DriverVel={0};
-  };
-  
-  AnyKinEqSimpleDriver CMC1Abduction={
-    AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger1.Jnt.CMCAbduction;
-    DriverPos={0}*pi/180;  
-    DriverVel={0};
-  };
-  
-
-  
-  AnyKinEqSimpleDriver MCP1Flexion={
-    
-    AnyRevoluteJoint &ref=..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger1.Jnt.MCPFlexion;
-    DriverPos={0}*pi/180;
-    DriverVel={0};
-    
-  };
-  AnyKinEqSimpleDriver MCP1Abduction={
-    
-    AnyRevoluteJoint &ref=..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger1.Jnt.MCPAbduction;
-    DriverPos={0}*pi/180;
-    DriverVel={0};
-    
-  };
-  
-  AnyKinEqSimpleDriver DIP1={
-    AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger1.Jnt.DIP;
-    DriverPos={0}*pi/180;  
-    DriverVel={0};
-  };
-  
-  
- // finger2
-//    AnyKinEqSimpleDriver CMC2={
-//      AnyUniversalJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger2.Jnt.CMC;
-//      DriverPos={0,0};  
-//      DriverVel={0,0};
-//    };
-  AnyKinEqSimpleDriver MCP2={
-    AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger2.Jnt.MCP;
-    DriverPos={0}*pi/180;  
-    DriverVel={0};
-  };  
-  AnyKinEqSimpleDriver PIP2={
-    AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger2.Jnt.PIP;
-    DriverPos={0}*pi/180;  
-    DriverVel={0};
-  };
-    AnyKinEqSimpleDriver DIP2={
-      AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger2.Jnt.DIP;
-      DriverPos={0};  
-      DriverVel={0};
-    };
-  
-  
-  
- // finger3
-//    AnyKinEqSimpleDriver CMC3={
-//      AnyUniversalJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger3.Jnt.CMC;
-//      DriverPos={0,0};  
-//      DriverVel={0,0};
-//    };
-  AnyKinEqSimpleDriver MCP3={
-    AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger3.Jnt.MCP;
-    DriverPos={0}*pi/180;  
-    DriverVel={0};
-  };  
-  AnyKinEqSimpleDriver PIP3={
-    AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger3.Jnt.PIP;
-    DriverPos={0}*pi/180;  
-    DriverVel={0};
-  };
-    AnyKinEqSimpleDriver DIP3={
-      AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger3.Jnt.DIP;
-      DriverPos={0};  
-      DriverVel={0};
-    };
-  
-  
-  //finger4
-//    AnyKinEqSimpleDriver CMC4={
-//      AnyUniversalJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger4.Jnt.CMC;
-//      DriverPos={0,0}*pi/180;  
-//      DriverVel={0,0};
-//    };
-  AnyKinEqSimpleDriver MCP4={
-    AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger4.Jnt.MCP;
-    DriverPos={0}*pi/180;  
-    DriverVel={0};
-  };  
-  AnyKinEqSimpleDriver PIP4={
-    AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger4.Jnt.PIP;
-    DriverPos={0}*pi/180;  
-    DriverVel={0};
-  };
-    AnyKinEqSimpleDriver DIP4={
-      AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger4.Jnt.DIP;
-      DriverPos={0}*pi/180;  
-      DriverVel={0};
-    };
-  
-  
- // finger5
-//    AnyKinEqSimpleDriver CMC5={
-//      AnyUniversalJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger5.Jnt.CMC;
-//      DriverPos={0,0};  
-//      DriverVel={0,0};
-//    };
-  AnyKinEqSimpleDriver MCP5={
-    AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger5.Jnt.MCP;
-    DriverPos={0}*pi/180;  
-    DriverVel={0};
-  };  
-  AnyKinEqSimpleDriver PIP5={
-    AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger5.Jnt.PIP;
-    DriverPos={0}*pi/180;  
-    DriverVel={0};
-  };
-    AnyKinEqSimpleDriver DIP5={
-      AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger5.Jnt.DIP;
-      DriverPos={0};  
-      DriverVel={0};
-    };
-  #endif
-
-};
-
-
-// The study: Operations to be performed on the model
-AnyBodyCalibrationStudy ArmCalibrationStudy2 = {
-  AnyFolder &ref=.ArmCal2; 
-  nStep = 1;
-  Kinematics.KinematicTol = 1e-07;
-};
-
-=======
 ///This is the calibratiion file it will calibrate the anterrio part of the deltoid muscle 10 deg abduction 35 flexion
 AnyFolder ArmCal2 ={
   
@@ -273,14 +12,8 @@ AnyFolder ArmCal2 ={
   AnyFolder &JointsSideCal = .SideHumanFolderRef.ShoulderArm.Jnt;
   AnyFolder &DeltoidRakeRef = .SideHumanFolderRef.ShoulderArm.Mus.ArtificialRake;
 
-  AnyShortestPathMuscle &del1 =  .SideHumanFolderRef.ShoulderArm.Mus.deltoideus_clavicular_part_1;
-  AnyShortestPathMuscle &del2 =  .SideHumanFolderRef.ShoulderArm.Mus.deltoideus_clavicular_part_2;
-  AnyShortestPathMuscle &del3 =  .SideHumanFolderRef.ShoulderArm.Mus.deltoideus_clavicular_part_3;
-  AnyShortestPathMuscle &del4 =  .SideHumanFolderRef.ShoulderArm.Mus.deltoideus_clavicular_part_4;
-  AnyShortestPathMuscle &del5 =  .SideHumanFolderRef.ShoulderArm.Mus.deltoideus_clavicular_part_5;
-  AnyShortestPathMuscle &del6 =  .SideHumanFolderRef.ShoulderArm.Mus.deltoideus_clavicular_part_6;
-  
   AnyFolder &MusParCalSide =  .SideHumanFolderRef.ShoulderArm.MusPar;
+  
   
   AnyFixedRefFrame ground = {
     AnyRefNode node = { 
@@ -298,7 +31,7 @@ AnyFolder ArmCal2 ={
     AnySphericalJoint &Jnt = .ThoraxGround;
     DriverPos = {0,0,0};
     DriverVel = {0,0,0};
-    Reaction.Type = {Off,Off,Off}; 
+    Reaction.Type = {Off,Off,Off};
   };
   
   
@@ -311,67 +44,51 @@ AnyFolder ArmCal2 ={
     Reaction.Type = {On,On,On};
   };
   
-  AnyKinMeasureOrg Posture = {
-    AnyKinMeasureOrg &Ref2 = ....BodyModel.Interface.Trunk.PelvisThoraxLateralBending;        
-    AnyKinMeasureOrg &Ref3 = ....BodyModel.Interface.Trunk.PelvisThoraxRotation;   
+  AnyKinEqSimpleDriver ThoraxDriver ={
+    AnyKinMeasureOrg &Ref2 = ....BodyModel.Interface.Trunk.PelvisThoraxLateralBending;
+    AnyKinMeasureOrg &Ref3 = ....BodyModel.Interface.Trunk.PelvisThoraxRotation;
     AnyKinMeasureOrg &Ref1 = ....BodyModel.Interface.Trunk.PelvisThoraxExtension;
-    MeasureOrganizer={0,1,2};
-  };
-  
-  AnyKinEqSimpleDriver PostureDriver ={
-    AnyKinMeasureOrg &AllDofs = .Posture;
     DriverPos = pi/180*{0,0,0};
-    DriverVel = pi/180*{  0.0,0.0,0.0};
-    Reaction.Type = {On,On,On};  
+    DriverVel = pi/180*{0,0,0};
+    Reaction.Type = {On,On,On};
   };
   
   #if !((BM_ARM_RIGHT & BM_ARM_SHOULDER_RHYTHM) | (BM_ARM_LEFT & BM_ARM_SHOULDER_RHYTHM))
   AnyKinEqSimpleDriver SCDriver ={
-    AnyKinRotational &SC =  ..SideHumanFolderRef.ShoulderArm.Jnt.SCRot;  
-        DriverPos = {..Sign*-0.66, -0.5*(..Sign-1)*pi+..Sign*0.258228, ..Sign*-0.25}; 
-    DriverVel = {-0.0,-0.0,-0.0};
+    AnyKinRotational &SC =  ..SideInterfaceFolderRef.SternoClavicularProtraction.SCRot;
+    DriverPos = {-0.66, 0.258228, -0.25};
+    DriverVel = {0.0,0.0,0.0};
     Reaction.Type={Off,Off,Off};
   };
   #endif
   
-  //This joint is not used in the  mannequin as the is set to a default pos.
   AnyKinEqSimpleDriver WristDriver ={
-    AnyKinMeasureOrg &Wrist1 =..SideHumanFolderRef.ShoulderArm.Jnt.WristJointFlexion;
-    AnyKinMeasureOrg &Wrist2 =..SideHumanFolderRef.ShoulderArm.Jnt.WristJointDeviation;
+    AnyKinMeasure &WF = ..SideInterfaceFolderRef.WristFlexion;
+    AnyKinMeasure &WA = ..SideInterfaceFolderRef.WristAbduction;
     DriverPos = {0,0};
     DriverVel = {0,0};
     Reaction.Type={On,On};
   };
   
   AnyKinEqSimpleDriver FEDriver ={
-    AnyKinMeasureOrg &ref = ..SideHumanFolderRef.ShoulderArm.Jnt.FE;
-    AnyVar pos = iffun(ltfun(..Sign,0), 65*pi/180, pi-65*pi/180);
-    DriverPos = {pos};  
-    
+    AnyKinMeasure &FE = ..SideInterfaceFolderRef.ElbowFlexion;
+    DriverPos = {65*pi/180};
     DriverVel = {0};
-    Reaction.Type = {Off};  
+    Reaction.Type = {Off};
   };
   
   AnyKinEqSimpleDriver PSDriver ={
-    AnyKinMeasureOrg &ref = ..SideHumanFolderRef.ShoulderArm.Jnt.PS;
-    DriverPos = {0.50*pi};  
+    AnyKinMeasure &FE = ..SideInterfaceFolderRef.ElbowPronation;
+    DriverPos = {0*pi/180};
     DriverVel = pi/180*{ 0.0 };
-    Reaction.Type = {Off};  
+    Reaction.Type = {Off};
   };
   
   AnyKinEqSimpleDriver GHDriver ={
-    AnyKinRotational GHRotR = { 
-      AnyRefNode &scapula_gh = .....BodyModel.Trunk.SegmentsThorax.ThoraxSeg.ij;
-      AnyRefNode &humerus_gh = ...SideHumanFolderRef.ShoulderArm.Seg.Humerus.gh;
-      Type = RotAxesAngles;
-      Axis1 = z;
-      Axis2 = x;
-      Axis3 = y;
-    };
-    MeasureOrganizer={0,1,2};
-    DriverPos = pi/180*{..Sign*10.0,35,0.0 };  
+    AnyKinRotational &GHRotR = ..SideInterfaceFolderRef.GlenohumeralFlexion.GHMeasure;
+    DriverPos = pi/180*{10.0,35,0.0 };
     DriverVel = {0,0,0};
-    Reaction.Type = {Off,Off,Off};  
+    Reaction.Type = {Off,Off,Off};
   };
   
   //---------------------------------------------------------------------
@@ -381,13 +98,13 @@ AnyFolder ArmCal2 ={
   //finger1
   AnyKinEqSimpleDriver CMC1Flexion={
     AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger1.Jnt.CMCFlexion;
-    DriverPos={0}*pi/180;  
+    DriverPos={0}*pi/180;
     DriverVel={0};
   };
   
   AnyKinEqSimpleDriver CMC1Abduction={
     AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger1.Jnt.CMCAbduction;
-    DriverPos={0}*pi/180;  
+    DriverPos={0}*pi/180;
     DriverVel={0};
   };
   
@@ -410,7 +127,7 @@ AnyFolder ArmCal2 ={
   
   AnyKinEqSimpleDriver DIP1={
     AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger1.Jnt.DIP;
-    DriverPos={0}*pi/180;  
+    DriverPos={0}*pi/180;
     DriverVel={0};
   };
   
@@ -418,22 +135,22 @@ AnyFolder ArmCal2 ={
  // finger2
 //    AnyKinEqSimpleDriver CMC2={
 //      AnyUniversalJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger2.Jnt.CMC;
-//      DriverPos={0,0};  
+//      DriverPos={0,0};
 //      DriverVel={0,0};
 //    };
   AnyKinEqSimpleDriver MCP2={
     AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger2.Jnt.MCP;
-    DriverPos={0}*pi/180;  
+    DriverPos={0}*pi/180;
     DriverVel={0};
-  };  
+  };
   AnyKinEqSimpleDriver PIP2={
     AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger2.Jnt.PIP;
-    DriverPos={0}*pi/180;  
+    DriverPos={0}*pi/180;
     DriverVel={0};
   };
     AnyKinEqSimpleDriver DIP2={
       AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger2.Jnt.DIP;
-      DriverPos={0};  
+      DriverPos={0};
       DriverVel={0};
     };
   
@@ -442,22 +159,22 @@ AnyFolder ArmCal2 ={
  // finger3
 //    AnyKinEqSimpleDriver CMC3={
 //      AnyUniversalJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger3.Jnt.CMC;
-//      DriverPos={0,0};  
+//      DriverPos={0,0};
 //      DriverVel={0,0};
 //    };
   AnyKinEqSimpleDriver MCP3={
     AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger3.Jnt.MCP;
-    DriverPos={0}*pi/180;  
+    DriverPos={0}*pi/180;
     DriverVel={0};
-  };  
+  };
   AnyKinEqSimpleDriver PIP3={
     AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger3.Jnt.PIP;
-    DriverPos={0}*pi/180;  
+    DriverPos={0}*pi/180;
     DriverVel={0};
   };
     AnyKinEqSimpleDriver DIP3={
       AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger3.Jnt.DIP;
-      DriverPos={0};  
+      DriverPos={0};
       DriverVel={0};
     };
   
@@ -465,22 +182,22 @@ AnyFolder ArmCal2 ={
   //finger4
 //    AnyKinEqSimpleDriver CMC4={
 //      AnyUniversalJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger4.Jnt.CMC;
-//      DriverPos={0,0}*pi/180;  
+//      DriverPos={0,0}*pi/180;
 //      DriverVel={0,0};
 //    };
   AnyKinEqSimpleDriver MCP4={
     AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger4.Jnt.MCP;
-    DriverPos={0}*pi/180;  
+    DriverPos={0}*pi/180;
     DriverVel={0};
-  };  
+  };
   AnyKinEqSimpleDriver PIP4={
     AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger4.Jnt.PIP;
-    DriverPos={0}*pi/180;  
+    DriverPos={0}*pi/180;
     DriverVel={0};
   };
     AnyKinEqSimpleDriver DIP4={
       AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger4.Jnt.DIP;
-      DriverPos={0}*pi/180;  
+      DriverPos={0}*pi/180;
       DriverVel={0};
     };
   
@@ -488,26 +205,29 @@ AnyFolder ArmCal2 ={
  // finger5
 //    AnyKinEqSimpleDriver CMC5={
 //      AnyUniversalJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger5.Jnt.CMC;
-//      DriverPos={0,0};  
+//      DriverPos={0,0};
 //      DriverVel={0,0};
 //    };
   AnyKinEqSimpleDriver MCP5={
     AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger5.Jnt.MCP;
-    DriverPos={0}*pi/180;  
+    DriverPos={0}*pi/180;
     DriverVel={0};
-  };  
+  };
   AnyKinEqSimpleDriver PIP5={
     AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger5.Jnt.PIP;
-    DriverPos={0}*pi/180;  
+    DriverPos={0}*pi/180;
     DriverVel={0};
   };
     AnyKinEqSimpleDriver DIP5={
       AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger5.Jnt.DIP;
-      DriverPos={0};  
+      DriverPos={0};
       DriverVel={0};
     };
   #endif
 
+  AnyString MusPrefix = CompleteNameOf(&.SideHumanFolderRef.ShoulderArm.Mus);
+  AnyObjectPtrArray deltoideus_clavicularMuscles = ObjSearch(MusPrefix+".deltoideus_clavicular*", "AnyMuscle");
+  
 };
 
 
@@ -515,7 +235,9 @@ AnyFolder ArmCal2 ={
 AnyBodyCalibrationStudy ArmCalibrationStudy2 = {
   AnyFolder &ref=.ArmCal2; 
   nStep = 1;
+  MuscleArr = arrcat(
+      ref.deltoideus_clavicularMuscles
+  );
   Kinematics.KinematicTol = 1e-07;
 };
 
->>>>>>> remotes/origin/master:Body/AAUHuman/Arm/ArmCal2.any
