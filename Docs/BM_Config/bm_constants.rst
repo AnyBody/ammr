@@ -106,61 +106,82 @@ All BodyModel constants
 
     Constant to switch nonlinear disc spring on in the spine
 
-.. ammr:bm_constant:: _SCALING_CUSTOM_
-    :value: -1
-
-    Custom anthropometric scaling law for the entire model
-
-.. ammr:bm_constant:: _SCALING_USERDEFINED_
-    :value: -1
-
-    Don't use a builtin scaling law. A user-defined law must be specified with ``BM_SCALING_FILE``.
-
-.. ammr:bm_constant:: _SCALING_STANDARD_
+.. ammr:bm_constant:: _SCALING_NONE_
     :value: 0
 
-    Standard scaling law to be used by the entire model.
+    A scaling law to use body part datasets as is without any scaling.
+
+.. ammr:bm_constant:: _SCALING_STANDARD_
+    :value: 1
+
+    A default scaling law that corresponds to the 50th percentile European male.
 
 .. ammr:bm_constant:: _SCALING_UNIFORM_
-    :value: 1
+    :value: 2
 
     Uniform anthropometric scaling law to be used by the entire model.
 
 .. ammr:bm_constant:: _SCALING_LENGTHMASS_
-    :value: 2
+    :value: 3
 
     Length/mass anthropometric scaling law to be used by the entire model.
 
 .. ammr:bm_constant:: _SCALING_LENGTHMASSFAT_
-    :value: 3
+    :value: 4
 
     Length/mass/fat anthropometric scaling law to be used by the entire model.
 
 .. ammr:bm_constant:: _SCALING_UNIFORM_EXTMEASUREMENTS_
-    :value: 4
+    :value: 5
 
     Uniform anthropometric scaling law  with external measurements to be used by the entire model.
 
 .. ammr:bm_constant:: _SCALING_LENGTHMASS_EXTMEASUREMENTS_
-    :value: 5
+    :value: 6
 
     Length/mass anthropometric with external measurements scaling law to be used by the entire model.
 
 .. ammr:bm_constant:: _SCALING_LENGTHMASSFAT_EXTMEASUREMENTS_
-    :value: 6
+    :value: 7
 
     Length/mass/fat anthropometric with external measurements scaling law to be used by the entire model.
 
 .. ammr:bm_constant:: _SCALING_LENGTHMASSFAT_MULTIDOFS_
-    :value: 7
+    :value: 8
     :deprecated:
 
     Length/mass/fat anthropometric with for multiple degree of freedom.
 
 .. ammr:bm_constant:: _SCALING_XYZ_
-    :value: 8
+    :value: 9
 
     Scaling using xyz factors for all Segments.
+
+.. ammr:bm_constant:: _SCALING_CUSTOM_
+    :value: 10
+    :deprecated:
+
+    Custom anthropometric scaling law for the entire model
+
+.. ammr:bm_constant:: _SCALING_USERDEFINED_
+    :value: 10
+
+    Don't use a builtin scaling law. A user-defined law must be specified with ``BM_SCALING_FILE``.
+
+.. ammr:bm_constant:: _JOINT_TYPE_USERDEFINED_
+    :value: 0
+
+    User-defined joint. This will exclude the joint and which nodes.
+
+.. ammr:bm_constant:: _JOINT_TYPE_DEFAULT_
+    :value: 1
+
+    Default joint definition.
+
+.. ammr:bm_constant:: _JOINT_TYPE_BONY_LANDMARK_
+    :value: 2
+
+    Joint definition based on bony landmarks. This will create a joint which resembles what is often used in traditional gait analysis. (E.g. revolute knee joint along the femoral condyles).
 
 .. ammr:bm_constant:: CONST_MUSCLES_NONE
     :value: 0
@@ -270,56 +291,56 @@ All BodyModel constants
 
     Constant to switch nonlinear disc spring on in the spine
 
-.. ammr:bm_constant:: CONST_SCALING_CUSTOM
-    :value: -1
-    :deprecated:
-
-    Custom anthropometric scaling law for the entire model
-
 .. ammr:bm_constant:: CONST_SCALING_STANDARD
-    :value: 0
+    :value: 1
     :deprecated:
 
     Standard scaling law to be used by the entire model.
 
 .. ammr:bm_constant:: CONST_SCALING_UNIFORM
-    :value: 1
+    :value: 2
     :deprecated:
 
     Uniform anthropometric scaling law to be used by the entire model.
 
 .. ammr:bm_constant:: CONST_SCALING_LENGTHMASS
-    :value: 2
+    :value: 3
     :deprecated:
 
     Length/mass anthropometric scaling law to be used by the entire model.
 
 .. ammr:bm_constant:: CONST_SCALING_LENGTHMASSFAT
-    :value: 3
+    :value: 4
     :deprecated:
 
     Length/mass/fat anthropometric scaling law to be used by the entire model.
 
 .. ammr:bm_constant:: CONST_SCALING_UNIFORM_EXTMEASUREMENTS
-    :value: 4
+    :value: 5
     :deprecated:
 
     Uniform anthropometric scaling law  with external measurements to be used by the entire model.
 
 .. ammr:bm_constant:: CONST_SCALING_LENGTHMASS_EXTMEASUREMENTS
-    :value: 5
+    :value: 6
     :deprecated:
 
     Length/mass anthropometric with external measurements scaling law to be used by the entire model.
 
 .. ammr:bm_constant:: CONST_SCALING_LENGTHMASSFAT_EXTMEASUREMENTS
-    :value: 6
+    :value: 7
     :deprecated:
 
     Length/mass/fat anthropometric with external measurements scaling law to be used by the entire model.
 
 .. ammr:bm_constant:: CONST_SCALING_LENGTHMASSFAT_MULTIDOFS
-    :value: 7
+    :value: 8
     :deprecated:
 
     Length/mass/fat anthropometric with for multiple degree of freedom.
+
+.. ammr:bm_constant:: CONST_SCALING_CUSTOM
+    :value: 10
+    :deprecated:
+
+    Custom anthropometric scaling law for the entire model

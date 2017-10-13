@@ -13,8 +13,8 @@ All BodyModel parameters
 
     :Default: :ammr:bm_constant:`_SCALING_STANDARD_`
     :Example: :anyscript:`#define BM_SCALING _SCALING_STANDARD_`
-    :Options: - :any:`_SCALING_USERDEFINED_`: Don't use a builtin scaling law. A user-defined law must be specified with ``BM_SCALING_FILE``.
-              - :any:`_SCALING_STANDARD_`: Standard scaling law to be used by the entire model.
+    :Options: - :any:`_SCALING_NONE_`: A scaling law to use body part datasets as is without any scaling.
+              - :any:`_SCALING_STANDARD_`: A default scaling law that corresponds to the 50th percentile European male.
               - :any:`_SCALING_UNIFORM_`: Uniform anthropometric scaling law to be used by the entire model.
               - :any:`_SCALING_LENGTHMASS_`: Length/mass anthropometric scaling law to be used by the entire model.
               - :any:`_SCALING_LENGTHMASSFAT_`: Length/mass/fat anthropometric scaling law to be used by the entire model.
@@ -22,6 +22,7 @@ All BodyModel parameters
               - :any:`_SCALING_LENGTHMASS_EXTMEASUREMENTS_`: Length/mass anthropometric with external measurements scaling law to be used by the entire model.
               - :any:`_SCALING_LENGTHMASSFAT_EXTMEASUREMENTS_`: Length/mass/fat anthropometric with external measurements scaling law to be used by the entire model.
               - :any:`_SCALING_XYZ_`: Scaling using xyz factors for all Segments.
+              - :any:`_SCALING_USERDEFINED_`: Don't use a builtin scaling law. A user-defined law must be specified with ``BM_SCALING_FILE``.
 
 
 .. ammr:bm_statement:: BM_SCALING_ANTHRO_FILE
@@ -1019,6 +1020,150 @@ All BodyModel parameters
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+
+.. ammr:bm_statement:: BM_JOINT_TYPE_HIP_RIGHT
+
+    Parameter for switching between different joint types. Can also be used to completely exclude the joint, which then must be re-implemented manually.
+
+
+    :Default: :ammr:bm_constant:`_JOINT_TYPE_DEFAULT_`
+    :Example: :anyscript:`#define BM_JOINT_TYPE_HIP_RIGHT _JOINT_TYPE_DEFAULT_`
+    :Options: - :any:`_JOINT_TYPE_DEFAULT_`: Default joint definition.
+              - :any:`_JOINT_TYPE_BONY_LANDMARK_`: Joint definition based on bony landmarks. This will create a joint which resembles what is often used in traditional gait analysis. (E.g. revolute knee joint along the femoral condyles).
+              - :any:`_JOINT_TYPE_USERDEFINED_`: User-defined joint. This will exclude the joint and which nodes.
+
+
+.. ammr:bm_statement:: BM_JOINT_TYPE_HIP_LEFT
+
+    Parameter for switching between different joint types. Can also be used to completely exclude the joint, which then must be re-implemented manually.
+
+
+    :Default: :ammr:bm_constant:`_JOINT_TYPE_DEFAULT_`
+    :Example: :anyscript:`#define BM_JOINT_TYPE_HIP_LEFT _JOINT_TYPE_DEFAULT_`
+    :Options: - :any:`_JOINT_TYPE_DEFAULT_`: Default joint definition.
+              - :any:`_JOINT_TYPE_BONY_LANDMARK_`: Joint definition based on bony landmarks. This will create a joint which resembles what is often used in traditional gait analysis. (E.g. revolute knee joint along the femoral condyles).
+              - :any:`_JOINT_TYPE_USERDEFINED_`: User-defined joint. This will exclude the joint and which nodes.
+
+
+.. ammr:bm_statement:: BM_JOINT_TYPE_KNEE_RIGHT
+
+    Parameter for switching between different joint types. Can also be used to completely exclude the joint, which then must be re-implemented manually.
+
+
+    :Default: :ammr:bm_constant:`_JOINT_TYPE_DEFAULT_`
+    :Example: :anyscript:`#define BM_JOINT_TYPE_KNEE_RIGHT _JOINT_TYPE_DEFAULT_`
+    :Options: - :any:`_JOINT_TYPE_DEFAULT_`: Default joint definition.
+              - :any:`_JOINT_TYPE_BONY_LANDMARK_`: Joint definition based on bony landmarks. This will create a joint which resembles what is often used in traditional gait analysis. (E.g. revolute knee joint along the femoral condyles).
+              - :any:`_JOINT_TYPE_USERDEFINED_`: User-defined joint. This will exclude the joint and which nodes.
+
+
+.. ammr:bm_statement:: BM_JOINT_TYPE_KNEE_LEFT
+
+    Parameter for switching between different joint types. Can also be used to completely exclude the joint, which then must be re-implemented manually.
+
+
+    :Default: :ammr:bm_constant:`_JOINT_TYPE_DEFAULT_`
+    :Example: :anyscript:`#define BM_JOINT_TYPE_KNEE_LEFT _JOINT_TYPE_DEFAULT_`
+    :Options: - :any:`_JOINT_TYPE_DEFAULT_`: Default joint definition.
+              - :any:`_JOINT_TYPE_BONY_LANDMARK_`: Joint definition based on bony landmarks. This will create a joint which resembles what is often used in traditional gait analysis. (E.g. revolute knee joint along the femoral condyles).
+              - :any:`_JOINT_TYPE_USERDEFINED_`: User-defined joint. This will exclude the joint and which nodes.
+
+
+.. ammr:bm_statement:: BM_JOINT_TYPE_PATELLOFEMORAL_RIGHT
+
+    Parameter for switching between different joint types. Can also be used to completely exclude the joint, which then must be re-implemented manually.
+
+
+    :Default: :ammr:bm_constant:`_JOINT_TYPE_DEFAULT_`
+    :Example: :anyscript:`#define BM_JOINT_TYPE_PATELLOFEMORAL_RIGHT _JOINT_TYPE_DEFAULT_`
+    :Options: - :any:`_JOINT_TYPE_DEFAULT_`: Default joint definition.
+              - :any:`_JOINT_TYPE_BONY_LANDMARK_`: Joint definition based on bony landmarks. This will create a joint which resembles what is often used in traditional gait analysis. (E.g. revolute knee joint along the femoral condyles).
+              - :any:`_JOINT_TYPE_USERDEFINED_`: User-defined joint. This will exclude the joint and which nodes.
+
+
+.. ammr:bm_statement:: BM_JOINT_TYPE_PATELLOFEMORAL_LEFT
+
+    Parameter for switching between different joint types. Can also be used to completely exclude the joint, which then must be re-implemented manually.
+
+
+    :Default: :ammr:bm_constant:`_JOINT_TYPE_DEFAULT_`
+    :Example: :anyscript:`#define BM_JOINT_TYPE_PATELLOFEMORAL_LEFT _JOINT_TYPE_DEFAULT_`
+    :Options: - :any:`_JOINT_TYPE_DEFAULT_`: Default joint definition.
+              - :any:`_JOINT_TYPE_BONY_LANDMARK_`: Joint definition based on bony landmarks. This will create a joint which resembles what is often used in traditional gait analysis. (E.g. revolute knee joint along the femoral condyles).
+              - :any:`_JOINT_TYPE_USERDEFINED_`: User-defined joint. This will exclude the joint and which nodes.
+
+
+.. ammr:bm_statement:: BM_JOINT_TYPE_ANKLE_RIGHT
+
+    Parameter for switching between different joint types. Can also be used to completely exclude the joint, which then must be re-implemented manually.
+
+
+    :Default: :ammr:bm_constant:`_JOINT_TYPE_DEFAULT_`
+    :Example: :anyscript:`#define BM_JOINT_TYPE_ANKLE_RIGHT _JOINT_TYPE_DEFAULT_`
+    :Options: - :any:`_JOINT_TYPE_DEFAULT_`: Default joint definition.
+              - :any:`_JOINT_TYPE_BONY_LANDMARK_`: Joint definition based on bony landmarks. This will create a joint which resembles what is often used in traditional gait analysis. (E.g. revolute knee joint along the femoral condyles).
+              - :any:`_JOINT_TYPE_USERDEFINED_`: User-defined joint. This will exclude the joint and which nodes.
+
+
+.. ammr:bm_statement:: BM_JOINT_TYPE_ANKLE_LEFT
+
+    Parameter for switching between different joint types. Can also be used to completely exclude the joint, which then must be re-implemented manually.
+
+
+    :Default: :ammr:bm_constant:`_JOINT_TYPE_DEFAULT_`
+    :Example: :anyscript:`#define BM_JOINT_TYPE_ANKLE_LEFT _JOINT_TYPE_DEFAULT_`
+    :Options: - :any:`_JOINT_TYPE_DEFAULT_`: Default joint definition.
+              - :any:`_JOINT_TYPE_BONY_LANDMARK_`: Joint definition based on bony landmarks. This will create a joint which resembles what is often used in traditional gait analysis. (E.g. revolute knee joint along the femoral condyles).
+              - :any:`_JOINT_TYPE_USERDEFINED_`: User-defined joint. This will exclude the joint and which nodes.
+
+
+.. ammr:bm_statement:: BM_JOINT_TYPE_SUBTALAR_RIGHT
+
+    Parameter for switching between different joint types. Can also be used to completely exclude the joint, which then must be re-implemented manually.
+
+
+    :Default: :ammr:bm_constant:`_JOINT_TYPE_DEFAULT_`
+    :Example: :anyscript:`#define BM_JOINT_TYPE_SUBTALAR_RIGHT _JOINT_TYPE_DEFAULT_`
+    :Options: - :any:`_JOINT_TYPE_DEFAULT_`: Default joint definition.
+              - :any:`_JOINT_TYPE_BONY_LANDMARK_`: Joint definition based on bony landmarks. This will create a joint which resembles what is often used in traditional gait analysis. (E.g. revolute knee joint along the femoral condyles).
+              - :any:`_JOINT_TYPE_USERDEFINED_`: User-defined joint. This will exclude the joint and which nodes.
+
+
+.. ammr:bm_statement:: BM_JOINT_TYPE_SUBTALAR_LEFT
+
+    Parameter for switching between different joint types. Can also be used to completely exclude the joint, which then must be re-implemented manually.
+
+
+    :Default: :ammr:bm_constant:`_JOINT_TYPE_DEFAULT_`
+    :Example: :anyscript:`#define BM_JOINT_TYPE_SUBTALAR_LEFT _JOINT_TYPE_DEFAULT_`
+    :Options: - :any:`_JOINT_TYPE_DEFAULT_`: Default joint definition.
+              - :any:`_JOINT_TYPE_BONY_LANDMARK_`: Joint definition based on bony landmarks. This will create a joint which resembles what is often used in traditional gait analysis. (E.g. revolute knee joint along the femoral condyles).
+              - :any:`_JOINT_TYPE_USERDEFINED_`: User-defined joint. This will exclude the joint and which nodes.
+
+
+.. ammr:bm_statement:: BM_JOINT_TYPE_PATELLATENDON_RIGHT
+
+    Parameter for switching between different joint types. Can also be used to completely exclude the joint, which then must be re-implemented manually.
+
+
+    :Default: :ammr:bm_constant:`_JOINT_TYPE_DEFAULT_`
+    :Example: :anyscript:`#define BM_JOINT_TYPE_PATELLATENDON_RIGHT _JOINT_TYPE_DEFAULT_`
+    :Options: - :any:`_JOINT_TYPE_DEFAULT_`: Default joint definition.
+              - :any:`_JOINT_TYPE_BONY_LANDMARK_`: Joint definition based on bony landmarks. This will create a joint which resembles what is often used in traditional gait analysis. (E.g. revolute knee joint along the femoral condyles).
+              - :any:`_JOINT_TYPE_USERDEFINED_`: User-defined joint. This will exclude the joint and which nodes.
+
+
+.. ammr:bm_statement:: BM_JOINT_TYPE_PATELLATENDON_LEFT
+
+    Parameter for switching between different joint types. Can also be used to completely exclude the joint, which then must be re-implemented manually.
+
+
+    :Default: :ammr:bm_constant:`_JOINT_TYPE_DEFAULT_`
+    :Example: :anyscript:`#define BM_JOINT_TYPE_PATELLATENDON_LEFT _JOINT_TYPE_DEFAULT_`
+    :Options: - :any:`_JOINT_TYPE_DEFAULT_`: Default joint definition.
+              - :any:`_JOINT_TYPE_BONY_LANDMARK_`: Joint definition based on bony landmarks. This will create a joint which resembles what is often used in traditional gait analysis. (E.g. revolute knee joint along the femoral condyles).
+              - :any:`_JOINT_TYPE_USERDEFINED_`: User-defined joint. This will exclude the joint and which nodes.
 
 
 .. ammr:bm_statement:: BM_GLOBAL_REFERENCE_FRAME_SWITCH
