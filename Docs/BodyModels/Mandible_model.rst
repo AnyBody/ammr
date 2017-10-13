@@ -1,5 +1,5 @@
-The Mandible Model
-------------------
+The Symmetric Mandible Model
+------------------------------
 
 .. 
     Are there more stuff we can write about the mandle model. 

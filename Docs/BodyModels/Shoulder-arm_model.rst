@@ -17,9 +17,15 @@ and off, for full details on its implementation please see this report
 Report <https://www.anybodytech.com/download.html?did=publications.files&fname=ShoulderRhythmReport.pdf>`__.
 
 
-.. image:: images/ShoulderArm_rotating_model.gif
-   :width: 45%
-.. image:: images/ShoulderCloseupFront_Preview.png
+
+.. raw:: html 
+
+    <video width="45%" style="display:block; margin: 0 auto;" controls>
+        <source src="images/ShoulderArm_rotating_model.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+    </video>
+
+.. image:: images/ShoulderCloseupFront.jpg
    :width: 45%
 
 
@@ -55,6 +61,7 @@ The model consists of the following joints:
 
 .. table:: Joints and kinematic contraints
     :widths: 1 2 4
+    :align: center
     :column-alignment: center left left
     :column-wrapping: false true true
     :column-dividers: none none none none
@@ -96,6 +103,7 @@ Summery
 
 .. table:: Body part summery
     :widths: 1 2 4
+    :align: center
     :column-alignment: center left left
     :column-wrapping: false true true
     :column-dividers: none none none none

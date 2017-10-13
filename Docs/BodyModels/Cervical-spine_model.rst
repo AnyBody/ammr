@@ -1,13 +1,77 @@
 
 
 The Cervical Spine Model
-------------------------
+=========================
+
+The cervical spine model is the neck of the human model. It is always present
+when the human model is used.  
 
 The cervical spine model contains 7 vertebrae with 3 DoF spherical
 joints from T1 to C2, a 1 DoF joint between C2 and skull and 136 muscle
 fascicles. The center of rotations is based on Amevo et al. 1991.
 
-|Image:cervical.png|
+The cervical spine model is part of the Trunk mode q l, and the segmentes,
+joints and kinematica is therefoore included by default.
+
+The segments of the cervical spine model are always present, but the muscles are
+not enabled by default. Some of the neck muscles are defined by the shoulder
+model, so the muscles of the cervical spine model can only be enbled when both
+arms with muscles are present.
+
+
+.. raw:: html 
+
+    <video width="49%" style="display:block; margin: 0 auto;" controls>
+        <source src="images/CervicalSpine_rotating_model.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+    </video>
+
+.. image:: images/CervicalSpineCloseupBack.jpg
+   :width: 49%
+
+
+.. centered::  *Cervical spine model*.
+
+
+.. table:: Body part summery
+    :widths: 1 2 4
+    :align: center
+    :column-alignment: left center
+    :column-wrapping: false true 
+    :column-dividers: none none none
+
+    ================= ====================
+    Muscle fasciles   136    
+    Segments          7     
+    ================= ==================== 
+
+
+
+Example Configuration
+-----------------------
+
+Enabling muscles from the cervical spine model, requires that the arms 
+also enabled.
+
+.. code-block:: AnyScriptDoc
+    :emphasize-lines: 4
+
+    #define BM_ARM_RIGHT ON 
+    #define BM_ARM_LEFT ON 
+    #define BM_ARM_MUSCLE_BOTH ON
+    #define BM_TRUNK_CERVICAL_MUSCLES ON
+    
+
+
+.. rst-class:: float-right
+
+.. seealso::
+   
+   The :doc:`Trunk configuration parameters <../BM_Config/Trunk_configurations>` for a
+   full list of Trunk parmaeters.
+
+More details
+----------------
 
 More details can be found online at:
 
@@ -25,43 +89,19 @@ More details can be found online at:
    pain using the cervical spine model. (The webcast is available for
    playback.)
 
+
+
+
+
+
+
+
+
+
+
+
 References:
 
 -  de Zee, M., Falla, D., Farina, D. & Rasmussen, J. (2007), "A detailed
    rigid-body cervical spine model based on inverse dynamics", Journal
    of Biomechanics, vol. 40 (2), pp. S284.
-
-The “LegTLEM” Model
--------------------
-
-Implementation of a new lower extremity model labeled the Twente Lower
-Extremity Model (TLEM) consisting of 159 muscles, and 6 joint degrees of
-freedom is almost completed. It has been validated against ‘state of the
-art’ literature with respect to its biomechanical performance and first
-applications in gait and cycling deliver very convincing results.
-
-The model is based on published morphological consistent anatomical
-dataset on muscle and joint parameters by Martijn Klein-Horsman from the
-University of Twente, The Netherlands. The implementation of the model
-was started by Karin Gorter, a Master Student, also from the University
-of Twente, during a three-month stay at Aalborg University and has been
-finished by the AnyBody Technology.
-
-The current version has been updated several times and is still being
-maintained in collaboration with The AnyBody Research Group at Aalborg
-University (DK) (www.anybody.aau.dk) and University of Twente (NL) under
-the TLEMsafe project (`www.tlemsafe.eu <http://www.tlemsafe.eu>`__).
-Currently, new cadaver datasets are recorded within the TLEMsafe
-project.
-
-|Image:tlem.png|
-
-More details can be found online:
-
--  Report containing moment arm validation for `ESA:
-   report <http://www.anybodytech.com/fileadmin/downloads/Final_Report.pdf>`__
-
--  Link to publication of the dataset: `Klein-Horsman et al.
-   Morphological muscle and joint parameters for musculoskeletal
-   modelling of the lower extremity. Clin Biomech, 2007, 22,
-   239-247 <http://linkinghub.elsevier.com/retrieve/pii/S0268003306001896>`__

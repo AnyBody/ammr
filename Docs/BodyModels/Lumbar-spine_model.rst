@@ -1,27 +1,44 @@
 The Lumbar Spine Model
-----------------------
+=========================
 
 The Lumbar spine contains 5 vertebrae with 3 DoF spherical joints in
 between, 188 muscle fascicles and intra-abdominal pressure.
 
-|Image:spine.png|
+.. image:: images/LumbarSpineBack.jpg
+   :width: 32%
+.. image:: images/LumbarSpineFront.jpg
+   :width: 32%
+   
+.. raw:: html 
+
+    <video width="32%" style="display:block; margin: 0 auto;" controls>
+        <source src="images/LumbarSpine_rotating_model.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+    </video>
+
 
 The functional spinal units (FSU) are driven using a prescribed
 kinematic rhythm, and by default, facet joints are not employed due to
 the fact that most of the application do not focus on the lumbar spine
 section. However, several examples demonstrate possible mechanisms of
-facet joint incorporation and detailed modeling of the lumbar spine. The
+facet joint incorporation and detailed modeling of the lumbar spine.
+
+The
 spinal muscles do not include the force-length-velocity relations (i.e.
 we use the so-called simple muscle model). The only input parameter in
 the muscle model is the cross-sectional area multiplied by a factor.
 Daggfeldt and Thorstensson (J.Biomech. 2003, 36: 815-825) didn't include
-the force-length-velocity relations either. The inclusion of the lumbar
+the force-length-velocity relations either. 
+
+The inclusion of the lumbar
 spine ligaments is optional and can be done as cumulative stiffness of
 FSU or as separate elastic elements. Similarly, the intervertebral disc
 (IVD) stiffness can be used as a single cumulative value for a FSU or as
 linear and nonlinear functions for the disc only. This, however, is
 mostly utilized for the spine specific applications, where the level of
-detail is important. In other cases, it has been shown that the torque
+detail is important. 
+
+In other cases, it has been shown that the torque
 production from ligaments might not be very important (Cholewicki and
 McGill, J.Biomech. 1992, 25: 17-28). The data of vertebrae dimensions
 and whole body parameters is taken from: Nissan and Gilad (J.Biomech.
@@ -31,7 +48,9 @@ from: Pintar et al. (J.Biomech. 25(11): 1351-1356, 1992).
 The spine model contains a preliminary model of the Intra Abdominal
 pressure (IAP). In short the IAP is modeled as constant volume, which,
 when squeezed from the side by the transversus muscles extends the spine
-by pushing on the rib thorax and the pelvic floor. From the mathematical
+by pushing on the rib thorax and the pelvic floor.
+
+From the mathematical
 point-of-view, this lets the abdominal muscles function as spine
 extensors, and they become part of the whole recruitment problem. The
 limit of the IAP was set to 26600 Pa, which was based on measurements on
@@ -41,6 +60,31 @@ National Institute of Occupational Health, Denmark.) and using
 geometric/anatomic estimates of pressure surface area and area
 centroids, which in turn determines the effective moment arm of the
 pressure.
+
+Example Configuration
+-----------------------
+
+The lumbar spine model is always part of the AnyBody Human model. The muscle can
+be enabled/disabled, and the lumbar disc stiffness can be controlled.
+
+.. code-block:: AnyScriptDoc
+
+    #define BM_TRUNK_MUSCLES ON
+    #define BM_TRUNK_DISC_STIFNESS _DISC_STIFFNESS_LINEAR_    
+
+
+.. rst-class:: float-right
+
+.. seealso::
+   
+   The :doc:`Trunk configuration parameters <../BM_Config/Trunk_configurations>` for a
+   full list of Trunk parmaeters.
+
+
+
+
+Resources
+------------
 
 More details on the lumbar spine model can be found online:
 
@@ -105,7 +149,10 @@ validation in the following article:
    generic detailed rigid-body lumbar spine model. J.Biomech. 40:
    1219-1227, 2007.
 
-*References:*
+
+
+References
+-------------------
 
 -  Andersson,E., Oddsson,L., Grundstrom,H.,Thorstensson,A., The role of
    the psoas and iliacus muscles for stability and movement of the

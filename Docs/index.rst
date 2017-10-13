@@ -16,7 +16,7 @@ System`_.
    :width: 70 %
    :alt: The AnyBody Model Repository
 
-   The AnyBody Model Repository is a unique open collection of human body parts.
+   *The AnyBody Model Repository is a unique open collection of human body parts*.
 
 
 The models are developed in research projects at academic institutions or by
@@ -30,9 +30,9 @@ be used together as full body scalable musculosketeal model.
 Model Overview
 --------------
 
-The Model repository consist of two parts. 1) The Body Models which can
-customized and scaled to build any subject specific musculoskeletal model. 2) A
-set of application examples in which the body models are a applied to specific
+The Model repository consist of two parts. The *Body Models* which can
+customized and scaled to build any subject specific musculoskeletal model. And a
+of *Application examples* in which the body models are a applied to specific
 applications. 
 
 The following provides a overview of both.
@@ -53,6 +53,7 @@ Using the AMMR
     Installation
     Creating_model_from_scratch
     BM_Config/HumanBody_configurations
+    Scaling/intro
 
 
 
