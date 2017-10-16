@@ -685,7 +685,7 @@ AnySeg Shank =
        AnyVec3 sRelUnscaled =  0.5*(.StdPar.LateralAnkleAxisMarker+ .StdPar.MedialAnkleAxisMarker);
        AnyMat33 ARelUnscaled = RotMat({0.0, 0, 0 } , .Sign*(.StdPar.LateralAnkleAxisMarker - .StdPar.MedialAnkleAxisMarker ), .AnatomicalFrame.ARelUnscaled'[1])*RotMat(pi/2,y);
        sRel = 0.5*(.Scale(.StdPar.LateralAnkleAxisMarker) + .Scale(.StdPar.MedialAnkleAxisMarker));
-       ARel = RotMat(sRel, sRel+ .Sign*(.Scale(.StdPar.LateralAnkleAxisMarker) - .Scale(.StdPar.MedialAnkleAxisMarker) ),  .AnatomicalFrame.ARel'[1])*RotMat(pi/2,y)*RotMat(TibialTorsionOffset,y);;
+       ARel = RotMat(sRel, sRel+ .Sign*(.Scale(.StdPar.LateralAnkleAxisMarker) - .Scale(.StdPar.MedialAnkleAxisMarker) ),  .AnatomicalFrame.ARel'[1])*RotMat(pi/2,y)*RotMat(TibialTorsionOffset,y);
      #else
        AnyVec3 sRelUnscaled =  .StdPar.AnkleJoint;
        AnyMat33 ARelUnscaled =   RotMat({0, 0, 0.0}, .Sign*(AnkleLateralControlPoint-AnkleMedialControlPoint ), .AnatomicalFrame.ARelUnscaled'[1])*RotMat(pi/2,y);
@@ -1708,9 +1708,17 @@ AnySeg Patella =
   AnyRefNode PatellaFemurJoint =
   {
     AnyVec3 sRelUnscaled = .StdPar.PatellaFemurJoint;
-    AnyMat33 ARelUnscaled = ..Thigh.PatellaFemurJoint.ARelUnscaled ;
+    
+    /// Control point for the PatellaFemurJoint. Found by projecting the EpicondylusFemoris bony landmarks onto the
+    /// PatellaFemurJoint axis from the cadaver data set. Thus, scaling which moves the control points will also scale the PatellaFemurJointjoint axis
+    AnyVec3 PFLateralControlPoint = .Scale(.StdPar.PatellaFemurJoint + (.StdPar.EpicondylusFemorisLateralis - .StdPar.PatellaFemurJoint)*.StdPar.PatellaFemurJointAxis'*.StdPar.PatellaFemurJointAxis);
+    /// Control point for the PatellaFemurJoint. Found by projecting the EpicondylusFemoris bony landmarks onto the
+    /// PatellaFemurJoint axis from the cadaver data set. Thus, scaling which moves the control points will also scale the PatellaFemurJointjoint axis
+    AnyVec3 PFMedialControlPoint = .Scale(.StdPar.PatellaFemurJoint + (.StdPar.EpicondylusFemorisMedialis - .StdPar.PatellaFemurJoint)*.StdPar.PatellaFemurJointAxis'*.StdPar.PatellaFemurJointAxis);
     sRel = .Scale(.StdPar.PatellaFemurJoint);
-    ARel = ..Thigh.PatellaFemurJoint.ARel;
+    // / PatellaFemurJoint Joint orientation is calculated based on the direction between the two control points.
+    ARel = RotMat({0.0,0,0}, .Sign*(PFMedialControlPoint-PFLateralControlPoint ), 
+    .Sign*(0.5*(.RectusFemoris1Node.sRel+.RectusFemoris2Node.sRel) - .Origin_patella_tendon.sRel))*RotMat(pi/2,y);
   };
   #endif
   
