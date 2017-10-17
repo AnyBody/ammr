@@ -1,0 +1,206 @@
+//    This file contains two templates. One which only measures anatomical joint angles 
+//    and one which measures both joint angles and projects the external joint moment 
+//    vectors onto the rotation axis. 
+// 
+//    The CreateJointMeasures template creates a folder with measures of 
+//    the anatomical joint angles. Angles are measured based on the 
+//    Grood&Suntay convention also recommended by ISB. 
+//    
+//    Inputs are AnyRefFrame derived classes which represent the antomical
+//    coordinate system for the segments. In the example below; all *StaticMarkerFrame 
+//    variables represent embedded cordinate-systems (AnyRefNodes) between which the
+//    joint angles are measured. 
+//
+//    NOTE: The reference coordinate system needs to be defined in the model. Otherwise
+//    the code will not work. If this template should produce joint angles as 
+//    recommended by ISB, then the coordinate systems (StaticMarkerFrame's) must be 
+//    alligned as recommended by ISB. 
+//
+//    EXAMPLE:
+//    CreateJointMeasures Right (
+//    PELVIS_FRAME= BodyModelRef.Trunk.SegmentsLumbar.PelvisSeg.StaticMarkerFrame,
+//    THIGH_HIP_FRAME = BodyModelRef.Right.Leg.Seg.Thigh.HipStaticMarkerFrame,
+//    THIGH_KNEE_FRAME = BodyModelRef.Right.Leg.Seg.Thigh.KneeStaticMarkerFrame,
+//    SHANK_KNEE_FRAME = BodyModelRef.Right.Leg.Seg.Shank.KneeStaticMarkerFrame,
+//    SHANK_ANKLE_FRAME = BodyModelRef.Right.Leg.Seg.Shank.AnkleStaticMarkerFrame,
+//    FOOT_ANKLE_FRAME = BodyModelRef.Right.Leg.Seg.Foot.AnkleStaticMarkerFrame,
+//    ) = { Sign = 1;};
+//
+//
+//    The CreateJointAnglesAndMomentMeasures does the same CreateJointMeasures 
+//    template. Additionally it also takes the three moment vectors as input, and  
+//    calculate the moment vector projection onto the rotation axis. Note that the 
+//    first and last rotation axis is not necessaryly perpendicular with Grood&Suntay 
+//    convention so the projected moments may not make sense in physical way. However, 
+//    they are often used in littereature so they are worth knowing. 
+//
+//    EXAMPLE:
+//    CreateJointAnglesAndMomentMeasures Left (
+//    PELVIS_FRAME= BodyModelRef.Trunk.SegmentsLumbar.PelvisSeg.StaticMarkerFrame,
+//    THIGH_HIP_FRAME = BodyModelRef.Left.Leg.Seg.Thigh.HipStaticMarkerFrame,
+//    THIGH_KNEE_FRAME = BodyModelRef.Left.Leg.Seg.Thigh.KneeStaticMarkerFrame,
+//    SHANK_KNEE_FRAME = BodyModelRef.Left.Leg.Seg.Shank.KneeStaticMarkerFrame,
+//    SHANK_ANKLE_FRAME = BodyModelRef.Left.Leg.Seg.Shank.AnkleStaticMarkerFrame,
+//    FOOT_ANKLE_FRAME = BodyModelRef.Left.Leg.Seg.Foot.AnkleStaticMarkerFrame,
+//    HIPMOMENT = BodyModelRef.Left.Leg.MomentMeasure.HipNetMoment.M,
+//    KNEEMOMENT = BodyModelRef.Left.Leg.MomentMeasure.KneeNetMoment.M,
+//    ANKLEMOMENT = BodyModelRef.Left.Leg.MomentMeasure.AnklePlantarFlexionNetMoment.M
+//   ) = { Sign = -1;};
+//
+//
+
+
+
+#class_template CreateJointMeasures (PELVIS_FRAME,THIGH_HIP_FRAME,THIGH_KNEE_FRAME,SHANK_KNEE_FRAME,SHANK_ANKLE_FRAME,FOOT_ANKLE_FRAME){
+
+  #var AnyInt Sign = 1;
+  
+  AnyKinMeasureLinComb HipFlexion = {
+    AnyKinRotational HipMeasure ={
+      AnyRefFrame &PelvisRef = ...PELVIS_FRAME ;
+      AnyRefFrame &ThighRef = ...THIGH_HIP_FRAME ;
+      Type=RotAxesAngles;
+      Axis1 = z; Axis2 = x; Axis3 = y;
+    };
+    OutDim = 1;
+    Coef = {{1,0,0}}*180/pi;
+  };
+  AnyKinMeasureLinComb HipAdduction = {
+    AnyKinRotational &HipJoint =.HipFlexion.HipMeasure; 
+    Coef = .Sign *{{0,1,0}}*180/pi;
+    OutDim = 1;
+  };
+  AnyKinMeasureLinComb HipInternalRotation ={
+    AnyKinRotational &HipJoint =.HipFlexion.HipMeasure; 
+    Coef =.Sign *{{0,0,1}}*180/pi;
+    OutDim = 1;
+  };
+
+  AnyKinMeasureLinComb KneeFlexion = {
+    AnyKinRotational KinRot ={
+      AnyRefFrame &ThighRef = ...THIGH_KNEE_FRAME;
+      AnyRefFrame &ShankRef = ...SHANK_KNEE_FRAME;
+      Type=RotAxesAngles;
+      Axis1 = z; Axis2 = x; Axis3 = y;
+    };
+    Coef =-1*{{1,0,0}}*180/pi;
+    OutDim = 1;
+  };
+  AnyKinMeasureLinComb KneeAdduction = {
+    AnyKinRotational &KinRot = .KneeFlexion.KinRot;
+    Coef =.Sign *{{0,1,0}}*180/pi;
+    OutDim = 1;
+  };
+  AnyKinMeasureLinComb KneeInternalRotation = {
+    AnyKinRotational &KinRot = .KneeFlexion.KinRot;
+    Coef =.Sign *{{0,0,1}}*180/pi;
+    OutDim = 1;
+  };
+  
+  
+  AnyKinMeasureLinComb AnkleDorsiFlexion = {  
+    AnyKinRotational KinRot ={
+      AnyRefFrame &ShankRef = ...SHANK_ANKLE_FRAME;
+      AnyRefFrame &FootRef = ...FOOT_ANKLE_FRAME;
+      Type=RotAxesAngles;
+      Axis1 = z; Axis2 = x; Axis3 = y;
+    };
+    Coef ={{1,0,0}}*180/pi;
+    OutDim = 1;
+  };
+  AnyKinMeasureLinComb AnkleInversion ={
+    AnyKinRotational &KinRot =.AnkleDorsiFlexion.KinRot; 
+    Coef  =.Sign*{{0,1,0}}*180/pi;
+    OutDim = 1;
+  };    
+  AnyKinMeasureLinComb AnkleInternalRotation = {
+    AnyKinRotational &KinRot =.AnkleDorsiFlexion.KinRot; 
+    Coef  = .Sign*{{0,0,1}}*180/pi;
+    OutDim = 1;
+  };
+  
+
+    
+  
+}; 
+
+#class_template CreateJointAnglesAndMomentMeasures (PELVIS_FRAME,THIGH_HIP_FRAME,THIGH_KNEE_FRAME,SHANK_KNEE_FRAME,SHANK_ANKLE_FRAME,FOOT_ANKLE_FRAME, HIPMOMENT, KNEEMOMENT, ANKLEMOMENT  ){
+
+  #var AnyInt Sign = 1;
+  AnyKinMeasureLinComb HipFlexion = {
+    AnyVar M_Projected = -..PELVIS_FRAME.Axes'[2]*..HIPMOMENT';
+    AnyKinRotational HipMeasure ={
+      AnyRefFrame &PelvisRef = ...PELVIS_FRAME ;
+      AnyRefFrame &ThighRef = ...THIGH_HIP_FRAME ;
+      Type=RotAxesAngles;
+      Axis1 = z; Axis2 = x; Axis3 = y;
+    };
+    Coef = {{1,0,0}}*180/pi;
+    OutDim = 1;
+  };
+  AnyKinMeasureLinComb HipAdduction = {
+    AnyVar M_Projected = .Sign*cross(..PELVIS_FRAME.Axes'[2],..THIGH_HIP_FRAME.Axes'[1])*..HIPMOMENT';
+    AnyKinRotational &HipJoint =.HipFlexion.HipMeasure; 
+    Coef =.Sign *{{0,1,0}}*180/pi;
+    OutDim = 1;
+  };
+  AnyKinMeasureLinComb HipInternalRotation ={
+    AnyVar M_Projected = -1*.Sign*..THIGH_HIP_FRAME.Axes'[1]*..HIPMOMENT';
+    AnyKinRotational &HipJoint =.HipFlexion.HipMeasure; 
+    Coef =.Sign *{{0,0,1}}*180/pi;
+    OutDim = 1;
+  };
+
+  AnyKinMeasureLinComb KneeFlexion = {
+    AnyVar M_Projected = ..THIGH_KNEE_FRAME.Axes'[2]*..KNEEMOMENT';
+    AnyKinRotational KinRot ={
+      AnyRefFrame &ThighRef = ...THIGH_KNEE_FRAME;
+      AnyRefFrame &ShankRef = ...SHANK_KNEE_FRAME;
+      Type=RotAxesAngles;
+      Axis1 = z; Axis2 = x; Axis3 = y;
+    };
+    Coef =-1*{{1,0,0}}*180/pi;
+    OutDim = 1;
+  };
+  AnyKinMeasureLinComb KneeAdduction = {
+    AnyVar M_Projected = .Sign*cross(..THIGH_KNEE_FRAME.Axes'[2], ..SHANK_KNEE_FRAME.Axes'[1])*..KNEEMOMENT';
+    AnyKinRotational &KinRot = .KneeFlexion.KinRot;
+    Coef  =.Sign *{{0,1,0}}*180/pi;
+    OutDim = 1;
+  };
+  AnyKinMeasureLinComb KneeInternalRotation = {
+    AnyVar M_Projected = -1*.Sign*..SHANK_KNEE_FRAME.Axes'[1]*..KNEEMOMENT';
+    AnyKinRotational &KinRot = .KneeFlexion.KinRot;
+    Coef  =.Sign *{{0,0,1}}*180/pi;
+    OutDim = 1;
+  };
+  
+  
+  AnyKinMeasureLinComb AnkleDorsiFlexion = {  
+    AnyVar M_Projected = -1*..SHANK_ANKLE_FRAME.Axes'[2]*..ANKLEMOMENT';
+    AnyKinRotational KinRot ={
+      AnyRefFrame &ShankRef = ...SHANK_ANKLE_FRAME;
+      AnyRefFrame &FootRef = ...FOOT_ANKLE_FRAME;
+      Type=RotAxesAngles;
+      Axis1 = z; Axis2 = x; Axis3 = y;
+    };
+    Coef  ={{1,0,0}}*180/pi;
+    OutDim = 1;
+  };
+  AnyKinMeasureLinComb AnkleInversion ={
+    AnyVar M_Projected = .Sign*cross(..SHANK_ANKLE_FRAME.Axes'[2],..FOOT_ANKLE_FRAME.Axes'[1])*..ANKLEMOMENT';
+    AnyKinRotational &KinRot =.AnkleDorsiFlexion.KinRot; 
+    Coef  =.Sign*{{0,1,0}}*180/pi;
+    OutDim = 1;
+  };    
+  AnyKinMeasureLinComb AnkleInternalRotation = {
+    AnyVar M_Projected = -1*.Sign*..FOOT_ANKLE_FRAME.Axes'[1]*..ANKLEMOMENT';
+    AnyKinRotational &KinRot =.AnkleDorsiFlexion.KinRot; 
+    Coef  = .Sign*{{0,0,1}}*180/pi;
+    OutDim = 1;
+  };
+  
+
+    
+  
+}; 

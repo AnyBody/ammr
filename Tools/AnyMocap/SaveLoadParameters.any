@@ -1,0 +1,73 @@
+  Main.ModelSetup.Macros = {        
+   AnyOperationSequence Save_parameters= {
+     // This operation uses `AnyOperationSetValue` to mark all values that must be saved 
+      AnyOperationSetValue TouchMarkers = {
+        Source = ObjSearch("Main.ModelSetup.MocapDrivers.*.sRelOptEdit"     );
+        Target = Source;
+      };     
+      AnyOperationSetValue TouchSegLength =  {
+        Source = arrcat(
+          ObjSearch(CompleteNameOf(&Main.HumanModel.Anthropometrics.SegmentDimensions)+".*","AnyValue"),
+          ObjSearch(CompleteNameOf(&Main.HumanModel.Anthropometrics.SegmentDimensions.Right)+".*","AnyValue"),
+          ObjSearch(CompleteNameOf(&Main.HumanModel.Anthropometrics.SegmentDimensions.Left)+".*","AnyValue")
+        );
+        Target = Source;
+      };   
+      AnyOperationSetValue TouchOtherValues =  {
+        Source = arrcat(
+           ObjSearch(CompleteNameOf(&Main.HumanModel.BodyModel.Right.Leg.Seg.Thigh.KneeJoint.VarusValgusRotation), "AnyValue"), 
+           ObjSearch(CompleteNameOf(&Main.HumanModel.BodyModel.Left.Leg.Seg.Thigh.KneeJoint.VarusValgusRotation), "AnyValue")
+//           ObjSearch(CompleteNameOf(&Main.HumanModel.BodyModel.Right.Leg.Seg.Thigh.KneeJoint.TibialTorsionOffset), "AnyValue"), 
+//           ObjSearch(CompleteNameOf(&Main.HumanModel.BodyModel.Left.Leg.Seg.Thigh.KneeJoint.TibialTorsionOffset), "AnyValue")
+        );
+        Target = Source;
+      };   
+      
+      AnyOperationMacro SaveToFile = {
+        AnyFileVar SavePath = TEMP_PATH;
+        MacroStr  = {"classoperation Main" + strquote("Save Values") +"--file=" + 
+          strquote(FilePathCompleteOf(SavePath) +"/"+  MOCAP_TEST_FILENAME_PREFIX +MOCAP_OUTPUT_FILENAME_PREFIX + Main.ModelSetup.TrialSpecificData.TrialFileName +".anyset" )
+        };
+        
+      };
+    };
+    #if MOCAP_CREATE_PARAMETER_ID_SHORTCUT
+    Main.RunParameterIdentification.SaveParameters = {
+      AnyOperation &Save_parameters_to_anyset = Main.ModelSetup.Macros.Save_parameters;
+    };
+    #endif
+  };
+ 
+ 
+Main.ModelSetup.Macros = {
+  
+  #define _GET_VALID_INDEX(X) iffun(gtfun(NumElemOf(Main.ModelSetup.TrialSpecificData.LoadParametersFrom), X), X, 0)
+  #define _LOAD_MACRO(X) iffun( gtfun(NumElemOf(Main.ModelSetup.TrialSpecificData.LoadParametersFrom), X) ,\
+                                  "classoperation Main " + strquote("Load Values") +" --file=" + strquote( FilePathCompleteOf(LoadPath)+ "/" + MOCAP_TEST_FILENAME_PREFIX + MOCAP_OUTPUT_FILENAME_PREFIX + Main.ModelSetup.TrialSpecificData.LoadParametersFrom[ _GET_VALID_INDEX(X)]+".anyset") ,\
+                                  "")
+ 
+  AnyOperationMacro Load_parameters = {
+    AnyFileVar LoadPath = TEMP_PATH;
+    MacroStr  = { _LOAD_MACRO(0),
+                  _LOAD_MACRO(1),
+                  _LOAD_MACRO(2),
+                  _LOAD_MACRO(3),
+                  _LOAD_MACRO(4),
+                  _LOAD_MACRO(5),
+                  _LOAD_MACRO(6),
+                  _LOAD_MACRO(7),
+                  _LOAD_MACRO(8),
+                  "classoperation Main " + strquote("Update Values")};   
+  };
+  #undef _LOAD_MACRO
+  #undef _GET_VALID_INDEX
+  
+  #if MOCAP_CREATE_PARAMETER_ID_SHORTCUT
+  Main.RunAnalysis.LoadParameters = {
+    AnyOperation &Load_parameters_from_anyset = Main.ModelSetup.Macros.Load_parameters;
+  };
+  #endif
+  
+};
+
+
