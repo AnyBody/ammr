@@ -6,12 +6,6 @@ Some text about the model
 
 
 
-.. image:: images/ShoulderCloseupFront_Preview.png
-   :width: 100%
-
-
-
-
 Example Configuration
 -----------------------
 
