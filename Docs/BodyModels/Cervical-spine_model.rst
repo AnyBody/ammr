@@ -21,14 +21,11 @@ arms with muscles are present.
 
 .. raw:: html 
 
-    <video width="49%" style="display:block; margin: 0 auto;" controls>
-        <source src="images/CervicalSpine_rotating_model.mp4" type="video/mp4">
+    <video width="49%" style="display:inline; margin: 0 auto;" controls autoplay loop>
+        <source src="../_static/CervicalSpine_rotating_model.mp4" type="video/mp4">
     Your browser does not support the video tag.
     </video>
-
-.. image:: images/CervicalSpineCloseupBack.jpg
-   :width: 49%
-
+    <img src="../_static/CervicalSpineCloseupBack.jpg" alt="Smiley face" width="49%">
 
 .. centered::  *Cervical spine model*.
 

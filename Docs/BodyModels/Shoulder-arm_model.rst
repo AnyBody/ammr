@@ -20,13 +20,11 @@ Report <https://www.anybodytech.com/download.html?did=publications.files&fname=S
 
 .. raw:: html 
 
-    <video width="45%" style="display:block; margin: 0 auto;" controls>
-        <source src="images/ShoulderArm_rotating_model.mp4" type="video/mp4">
+    <video width="45%" style="display:inline; margin: 0 auto;" controls autoplay loop>
+        <source src="../_static/ShoulderArm_rotating_model.mp4" type="video/mp4">
     Your browser does not support the video tag.
     </video>
-
-.. image:: images/ShoulderCloseupFront.jpg
-   :width: 45%
+    <img src="../_static/ShoulderCloseupBack.jpg" alt="Smiley face" width="45%">
 
 
 .. centered:: *Figure shoulder model*
