@@ -21,8 +21,8 @@ System`_.
 
 The models are developed in research projects at academic institutions or by
 AnyBody Technology in collaboration with academic institutions. The models are
-maintained by AnyBody Technology who ensures various body part models can
-be used together as full body scalable musculosketeal model.
+maintained by AnyBody Technology who ensure that various body part models can
+be used together as full body, scalable musculosketeal model.
 
 .. _AnyBody Modeling System: https://www.anybodytech.com/software/ams/
 
@@ -30,12 +30,11 @@ be used together as full body scalable musculosketeal model.
 Model Overview
 --------------
 
-The Model repository consist of two parts. The *Body Models* which can
-customized and scaled to build any subject specific musculoskeletal model. And a
-of *Application examples* in which the body models are a applied to specific
+The Model Repository consist of two parts. The *Body Models* which can be
+customized and scaled to build a subject specific musculoskeletal model, and *Application examples* in which the body models are utlizied in specific
 applications. 
 
-The following provides a overview of both.
+The following provides an overview of both.
 
 .. toctree::
     :maxdepth: 2

@@ -1,42 +1,40 @@
 The Body Models
 ===============
 
-Each body part is implemented utilizing data from detailed cadaveric/anatomic
-studies ensuring high accuracy and anatomical fidelity. 
+Each body part is implemented utilizing data from detailed cadaver/anatomy
+studies, thus ensuring high accuracy and anatomical fidelity. 
 
-See the section below for a more detailed description of the models and the data behind.
+See the section below for a more detailed description of the models and the underlying anatomical data.
 
 
 .. rst-class:: html-toggle
 
-Background (tl;dr)
+Background
 ----------------------
 
-The body model live in the ``Body/`` subfolder. Here you find body model
-collections. The folder names and organization here is historical depending on
+The body models live in the ``Body/`` subfolder within your AMMR directory. The folder names and organization here depend on
 the origin of the models. 
 
-By far the more important is the AAUHuman, which
+By far the most important folder is the ``Body/AAUHuman``, which
 contains the AnyBody full body model. It was originally developed at Aalborg
-University, Denmark (with the acronym AAU) but it consists of body-parts (trunk
-and extremities), which are either developed elsewhere or based on data sets
+University, Denmark (with the acronym AAU) but also consists of body-parts (trunk
+and extremities) that were either developed elsewhere or based on data sets
 from elsewhere. 
 
-Two mandible models have also been developed but has so far never assembled with
+Two mandible models have also been developed but are yet to be assembled with
 the AAUHuman. These two mandible models can be found in ``Body/Mandible`` 
 
-The Beta section contains less developed and tested models.
+The ``Body/Beta`` folder contains less developed and tested models.
 
 The different body parts included in the full body model are derived from
 various anatomical databases from literature. The full body model
-contains shoulder/arm, different leg, trunk and foot models
-that can run in several possible combinations. 
+contains shoulder/arm, trunk, foot and multiple leg models
+which can be assembled into the full human in many combinations. 
 
-Please notice that all parts of the AAUHuman (i.e., all parts except the
-mandible) are connected, so they together form a quite complete full body model.
-See the :doc:`/BM_Config/HumanBody_configurations` for how to configure the the
-different body parts into a complte model. 
-
+.. note:: Parts of the AAUHuman (except the
+    mandible) are by default assembled together into a full body model.
+    See :doc:`/BM_Config/HumanBody_configurations` for re-configuring the model to for example, only represent the trunk, or use a different leg/muscle model.
+    
 
 .. warning:: In most cases, it is not necessary (and not
     recommended) to edit the files in the ``Body/`` subfolder in the AMMR.
@@ -63,7 +61,7 @@ Upper extremity models
     Shoulder-arm_model
     Detailed-hand_model
 
-Lower extremity Models 
+Lower extremity models 
 -----------------------
 .. toctree::
     :maxdepth: 1
