@@ -378,6 +378,7 @@ All BodyModel parameters
 
 
 .. ammr:bm_statement:: BM_ARM_DETAIL_HAND_LEFT
+    :deprecated:
 
     Keyword for the type of left hand.
 
@@ -409,6 +410,7 @@ All BodyModel parameters
 
 
 .. ammr:bm_statement:: BM_ARM_DETAIL_HAND_RIGHT
+    :deprecated:
 
     Keyword for the type of right hand.
 
@@ -436,6 +438,17 @@ All BodyModel parameters
 
     :Default: ``OFF``
     :Example: :anyscript:`#define BM_ARM_SHOULDER_RHYTHM OFF`
+    :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
+
+
+.. ammr:bm_statement:: BM_ARM_DETAILED_HAND
+    :deprecated:
+
+    Switch for enabling the detailed hand.
+
+
+    :Default: ``OFF``
+    :Example: :anyscript:`#define BM_ARM_DETAILED_HAND OFF`
     :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
 
 
@@ -664,7 +677,7 @@ All BodyModel parameters
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_RIGHT
 
-    Switch for the mannequin driver being active or not
+    Switch for all the mannequin drivers for the sterno clavicular degrees of freedom.
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
@@ -672,6 +685,42 @@ All BodyModel parameters
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+
+.. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_PROTRACTION_RIGHT
+
+    Switch for the mannequin driver being active or not.
+
+
+    :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_PROTRACTION_RIGHT BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Options: - :any:`ON`: 
+              - :any:`OFF`: 
+              - :any:`BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_RIGHT`: 
+
+
+.. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_ELEVATION_RIGHT
+
+    Switch for the mannequin driver being active or not.
+
+
+    :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_ELEVATION_RIGHT BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Options: - :any:`ON`: 
+              - :any:`OFF`: 
+              - :any:`BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_RIGHT`: 
+
+
+.. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_AXIAL_ROTATION_RIGHT
+
+    Switch for the mannequin driver being active or not.
+
+
+    :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_AXIAL_ROTATION_RIGHT BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Options: - :any:`ON`: 
+              - :any:`OFF`: 
+              - :any:`BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_RIGHT`: 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_GLENOHUMERAL_ABDUCTION_RIGHT
@@ -760,7 +809,7 @@ All BodyModel parameters
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_LEFT
 
-    Switch for the mannequin driver being active or not
+    Switch for all the mannequin drivers for the sterno clavicular degrees of freedom.
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
@@ -768,6 +817,42 @@ All BodyModel parameters
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+
+.. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_PROTRACTION_LEFT
+
+    Switch for the mannequin driver being active or not.
+
+
+    :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_PROTRACTION_LEFT BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Options: - :any:`ON`: 
+              - :any:`OFF`: 
+              - :any:`BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_LEFT`: 
+
+
+.. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_ELEVATION_LEFT
+
+    Switch for the mannequin driver being active or not.
+
+
+    :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_ELEVATION_LEFT BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Options: - :any:`ON`: 
+              - :any:`OFF`: 
+              - :any:`BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_LEFT`: 
+
+
+.. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_AXIAL_ROTATION_LEFT
+
+    Switch for the mannequin driver being active or not.
+
+
+    :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_AXIAL_ROTATION_LEFT BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Options: - :any:`ON`: 
+              - :any:`OFF`: 
+              - :any:`BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_LEFT`: 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_GLENOHUMERAL_ABDUCTION_LEFT
