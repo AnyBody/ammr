@@ -1,0 +1,559 @@
+#include "ForcePlateTypes.any"
+
+
+#class_template ForcePlateAutoDetection (
+    PLATE_NO,
+    C3D_OBJECT = Main.ModelSetup.C3DFileData,
+    LIMB1 = Main.HumanModel.BodyModel.Right.Leg.Seg.Foot,
+    LIMB2 = Main.HumanModel.BodyModel.Left.Leg.Seg.Foot,
+    VerticalDirection = "Automatic",
+    HeightTolerance = 0.07,
+    VelThreshold = 2.2, 
+    FORCEPLATE_TYPE,
+    CREATE_KIN_GRF = 0,
+    KIN_GRF_LIMB1_FUN = GlobalCopFun,
+    KIN_GRF_LIMB2_FUN = GlobalCopFun,
+    DRAW_RAW_FORCES = On
+    )
+{
+  
+  AnyInt ForcePlateType = C3D_OBJECT.Groups.FORCE_PLATFORM.TYPE.Data[PLATE_NO-1];
+  
+  
+  #var AnyVar ColorScale = max({min({InContactOnOff *ForcePlate.OnOff*(1* ForcePlate.LoadRatio),1}),0});
+  
+      
+  /// Checks that the FORCEPLATE_TYPE match the specification in the C3D file.   
+  AnyMessage PlateTypeCheck  = {
+      AnyInt test = neqfun(.ForcePlateType, FORCEPLATE_TYPE);
+      TriggerPreProcess = test;
+      Type = MSG_ErrorFatal ;
+      Message = strformat("AnyMOCAP: Wrong force plate type:\n"+
+	            "C3D file reports force plate as beeing type " +
+				strval(C3D_OBJECT.Groups.FORCE_PLATFORM.TYPE.Data[PLATE_NO-1]) + 
+				" not type: " + strval(FORCEPLATE_TYPE));
+   };  
+   
+    
+// Include code specifc for the different force plates. 
+// The classes provide the following:
+   // ForcePlate.LoadRatio: A ratio with which the force plate is loaded.
+   // ForcePlate.OnOff: A tresshold variable that specifies when the there is force on the force plate
+   // ForcePlate.NetEffectMeasure: A momentmeasure that sums up forces on the forceplate
+   // ForcePlate.ForcePlateSeg:  A segment with all measured forces aplied to it.  
+  
+  #if FORCEPLATE_TYPE == 1
+    type_1_class ForcePlate(
+       C3D_OBJECT=C3D_OBJECT,
+       PLATEIDX=PLATE_NO-1,
+       DRAW_RAW_FORCES=DRAW_RAW_FORCES) = 
+    {
+      Time = .Time;
+    };
+  #endif    
+  
+  #if FORCEPLATE_TYPE == 4 | FORCEPLATE_TYPE == 2
+    type_2_4_class ForcePlate(
+      C3D_OBJECT=C3D_OBJECT,
+      PLATEIDX=PLATE_NO-1,
+      FORCEPLATE_TYPE=FORCEPLATE_TYPE,
+      DRAW_RAW_FORCES=DRAW_RAW_FORCES) = 
+    {
+      Time = .Time;
+    };
+  #endif
+  
+  #if FORCEPLATE_TYPE == 3 
+    type_3_class ForcePlate(
+       C3D_OBJECT=C3D_OBJECT,
+       PLATEIDX=PLATE_NO-1,
+       DRAW_RAW_FORCES=DRAW_RAW_FORCES) = 
+    {
+      Time = .Time;
+    };
+  #endif
+  
+  
+  AnyRefFrame &Limb1 = LIMB1;
+  AnyRefFrame &Limb2 = LIMB2;
+  
+  
+  #var AnySwitch Switch_DrawForceVectorFromCOP = On;
+
+  #var AnyVec3 SurfaceOffset = {0,0,0};
+  
+  #var AnyVec3 SurfaceCorner_c01 = Corners.Origin + Corners.c01.sRel * Corners.Axes' + SurfaceOffset;
+  #var AnyVec3 SurfaceCorner_c02 = Corners.Origin + Corners.c02.sRel * Corners.Axes' + SurfaceOffset;
+  #var AnyVec3 SurfaceCorner_c03 = Corners.Origin + Corners.c03.sRel * Corners.Axes' + SurfaceOffset;
+  #var AnyVec3 SurfaceCorner_c04 = Corners.Origin + Corners.c04.sRel * Corners.Axes' + SurfaceOffset;
+  
+  AnyFixedRefFrame Corners ={
+    AnyVar CoordinateSystemSize= 0.1;
+    #var AnyFloat Data = C3D_OBJECT.Groups.FORCE_PLATFORM.CORNERS.Data;
+    #var AnyInt plate_idx=PLATE_NO-1;
+    AnyRefNode c01={
+      #var AnyInt i=0;
+      #var sRel=C3D_OBJECT.PointsScaleFactor*{
+          .Data[.plate_idx][i][0],
+          .Data[.plate_idx][i][1],
+          .Data[.plate_idx][i][2]
+      };
+      AnyDrawNode drw={ScaleXYZ=0.01*{1,1,1};RGB={1,0,0};};
+      AnyDrawVector  DrawName = {
+        Vec = {0.0,0,0};  //use zero length
+        Line.Thickness = 0.025; //arbitary value
+        Text = "1"; //make reference to name
+        Line.RGB={1,0,0};//make reference to color
+        #var Visible = Off;
+      };
+    };
+    
+    AnyRefNode c02={
+      #var AnyInt i=1;
+      #var sRel=C3D_OBJECT.PointsScaleFactor*{
+          .Data[.plate_idx][i][0],
+          .Data[.plate_idx][i][1],
+          .Data[.plate_idx][i][2]
+      };
+      AnyDrawNode drw={ScaleXYZ=0.01*{1,1,1};RGB={1,0,0};};
+      AnyDrawVector  DrawName = {
+        Vec = {0.0,0,0};  //use zero length
+        Line.Thickness = 0.025; //arbitary value
+        Text = "2"; //make reference to name
+        Line.RGB={1,0,0};//make reference to color
+        #var Visible = Off;
+      };
+    };
+    
+    AnyRefNode c03={
+      #var AnyInt i=2;
+      #var sRel=C3D_OBJECT.PointsScaleFactor*{
+          .Data[.plate_idx][i][0],
+          .Data[.plate_idx][i][1],
+          .Data[.plate_idx][i][2]
+      };
+      AnyDrawNode drw={ScaleXYZ=0.01*{1,1,1};RGB={1,0,0};};
+      
+      AnyDrawVector  DrawName = {
+        Vec = {0.0,0,0};  //use zero length
+        Line.Thickness = 0.025; //arbitary value
+        Text = "3"; //make reference to name
+        Line.RGB={1,0,0};//make reference to color 
+        #var Visible = Off;
+      };
+    };
+    
+    AnyRefNode c04={
+      #var AnyInt i=3;
+      #var sRel=C3D_OBJECT.PointsScaleFactor*{
+          .Data[.plate_idx][i][0],
+          .Data[.plate_idx][i][1],
+          .Data[.plate_idx][i][2]
+      };
+      AnyDrawNode drw={ScaleXYZ=0.01*{1,1,1};RGB={1,0,0};};
+      AnyDrawVector  DrawName = {
+        Vec = {0.0,0,0};  //use zero length
+        Line.Thickness = 0.025; //arbitary value
+        Text = "4"; //make reference to name
+        Line.RGB={1,0,0};//make reference to color
+        #var Visible = Off;
+      };
+    };
+    
+    AnyRefNode PlateCenter={
+      sRel=0.25*(.c01.sRel+.c02.sRel+.c03.sRel+.c04.sRel);
+      AnyVec3 p1=sRel;
+      AnyVec3 p2=0.5*(.c01.sRel+.c04.sRel);
+      AnyVec3 p3=0.5*(.c01.sRel+.c02.sRel);
+      ARel =RotMat(p1,p2,p3);
+      //AnyRefNode PlateNumber = 
+      //{        
+      //  sRel = {-0.08 ,0.1,-0.001};
+      //  AnyDrawVector  DrawName =
+      //  {  
+      //    TextFont.FontName ="Arial";
+      //    GlobalCoord = Off;
+      //    TextFont.RGB = {0.9,0.9,0.9};
+      //    Vec = {0.0, 0.0, 0.0};  //use zero length
+      //    Line.Thickness = 1; //arbitary value
+      //    Text = #PLATE_NO; //make reference to name
+      //    Line.RGB={1,0,0};//make reference to color
+      //    #var Visible = On;
+      //    TextRelPos = 0;
+      //    TextFont.ModelSized = On;
+      //    TextFont.BillBoardView = Off;
+      //    TextFont.ModelScaleHeight = 0.2;
+      //    TextFont.ModelScaleWidth = 0.2;
+      //   DrawCoord =On;
+      //  };
+      //};
+    };
+  };
+  
+
+  ForcePlate.ForcePlateSeg = {
+    AnyRefNode PlateSurface = {
+      sRel = ( 0.25*(
+               ...SurfaceCorner_c01 +
+               ...SurfaceCorner_c02 +
+               ...SurfaceCorner_c03 +
+               ...SurfaceCorner_c04 ) - .r0)*.Axes0;
+        
+        
+      AnyRefNode SurfaceGraphics = {
+        #var AnyVar VisualPlateHeight = C3D_OBJECT.PointsScaleFactor*abs(C3D_OBJECT.Groups.FORCE_PLATFORM.ORIGIN.Data[PLATE_NO-1][2]);
+        sRel={0,0,VisualPlateHeight/2};
+        AnyVec3 Size={
+          vnorm( ....SurfaceCorner_c01 - ....SurfaceCorner_c02 ,2),
+          vnorm( ....SurfaceCorner_c02 - ....SurfaceCorner_c03 ,2),
+          VisualPlateHeight
+        };
+        
+        AnyDrawSurf DrwSurfaceBox = 
+        {
+          AnyStyleDrawMaterial1 material = 
+          {
+            EnableCreasing = Off;
+            EnableSmoothing = Off;
+            Opacity = 0.8;//;
+            EmissionRGB = {0.1,0.1,0.1};
+            SpecularRGB = {0.00,0.00,0.00};
+            Shininess = 0.1;
+            RGB = {1, 1, 1}*(1 - 0.7*......ColorScale);
+          };
+          FileName = "box";
+          ScaleXYZ= .Size/0.30;
+          Face=-1;
+          Visible = On;
+        };    
+      };
+    };  
+  
+  };
+  
+
+  
+  AnyKinEqSimpleDriver ForcePlateDriver ={
+    AnyKinLinear ForcePlateLin={
+      AnyRefNode &ref1=..Corners.PlateCenter;
+      AnySeg &ref2=..ForcePlate.ForcePlateSeg;
+      Ref=0;
+    };
+    
+    AnyKinRotational ForcePlateRot={
+      AnyRefNode &ref1=..Corners.PlateCenter;
+      AnySeg &ref2=..ForcePlate.ForcePlateSeg;
+      Type=RotAxesAngles;
+    };
+    DriverPos={0,0,0,0,0,0}; 
+    DriverVel={0,0,0,0,0,0};
+    Reaction.Type = {Off,Off,Off,Off,Off,Off};
+  };
+  
+  AnyFloatVar tStart = C3D_OBJECT.Header.FirstFrameNo/C3D_OBJECT.Header.VideoFrameRate;
+  AnyFloatVar tEnd =  (C3D_OBJECT.Header.LastFrameNo+1)/C3D_OBJECT.Header.VideoFrameRate;
+  AnyInt NoAnalogData= (C3D_OBJECT.Header.LastFrameNo - C3D_OBJECT.Header.FirstFrameNo +1)*C3D_OBJECT.Header.NoAnalogSamplesPer3DFrame;
+  AnyFloat Time= farr( tStart, (tEnd-tStart)/( NoAnalogData - 1) ,  NoAnalogData);
+  
+  
+  AnyVar InContactOnOff = iffun( eqfun(0, ContactDetectionLimb2.NodeWithInBox.WithinBoxAndVelBelowThreshold +
+                                          ContactDetectionLimb1.NodeWithInBox.WithinBoxAndVelBelowThreshold)
+                                   , 0, 1);
+
+
+  
+  AnyFolder CenterOfPressure =
+  {
+     AnyForceMomentMeasure2& NetEffectMeasure = .ForcePlate.NetEffectMeasure;
+     
+     AnyVar fx = NetEffectMeasure.Flocal[0]; 
+     AnyVar fy = NetEffectMeasure.Flocal[1]; 
+     AnyVar fz = NetEffectMeasure.Flocal[2];
+     AnyVar mx = NetEffectMeasure.Mlocal[0]; 
+     AnyVar my = NetEffectMeasure.Mlocal[1]; 
+     AnyVar mz = NetEffectMeasure.Mlocal[2]; 
+
+     AnyVar fzz =iffun(gtfun(abs(fz),0),fz,fz+1000000);
+
+     AnyVar Vx= -my/fzz;
+     AnyVar Vy= mx/fzz;
+     AnyVar Vz= 0;     
+
+     AnyVar OnOff=.ForcePlate.OnOff*.InContactOnOff ;
+
+     AnyRefFrame& ref_ForcePlate = .ForcePlate.ForcePlateSeg.PlateSurface;
+     ref_ForcePlate  = 
+     {
+        AnyDrawSphere COP_ball = 
+        {
+            RGB = {0,1,0};
+            ScaleXYZ = 0.015 *{1,1,1};
+            //Opacity = iffun(gtfun(..fz, -10.0), 0.0, 1.0);
+            Opacity = ..OnOff;
+            Position = {..Vx, ..Vy, ..Vz};
+        };
+     };
+     
+     AnyDrawLine Line = 
+     {
+       p0 = {.Vx, .Vy, .Vz};
+       p1 = p0+0.004*.OnOff*{.fx, .fy, .fz};
+       Visible = ..Switch_DrawForceVectorFromCOP ;
+       AnyRefFrame &ref = ..ForcePlate.ForcePlateSeg.PlateSurface;
+
+       Line.RGB ={0,0,1};
+       Line.Thickness = 0.01;
+       Line.End.Thickness = 2*0.01;
+       Line.End.Length = 4*0.01;
+       GlobalCoord=Off;
+     };
+     
+  };  
+   
+  #if VerticalDirection=="X"
+  AnyIntArray Index={1,2,0};
+  #endif
+  
+  #if VerticalDirection=="Y" 
+  AnyIntArray Index={0,2,1};
+  #endif
+  
+  #if VerticalDirection=="Z" 
+  AnyIntArray Index={0,1,2};
+  #endif
+  
+  #if (VerticalDirection!="X") & (VerticalDirection!="Y") & (VerticalDirection!="Z") 
+  AnyIntArray Index = {{1,2,0},{0,2,1},{0,1,2}}[argmax(round(abs(ForcePlate.ForcePlateSeg.Axes0'[2])))];
+  #endif
+  
+  
+  AnyFolder ContactDetectionLimb1 ={
+    AnyVec3 P1= .Limb1.HeelContactNodeLow.r;
+    AnyVar P1Vel= vnorm(.Limb1.HeelContactNodeLow.rDot,2);
+    
+    AnyVec3 P2= .Limb1.ToeLateralContactNode.r;
+    AnyVar P2Vel= vnorm(.Limb1.HeelContactNodeLow.rDot,2);
+    
+    #include "ContactDetection.any"
+    
+    AnyMuscleModelUsr1 InContactMuscle = {
+      F0 = 0;
+      S = .NodeWithInBox.WithinBoxAndVelBelowThreshold *10000;
+    };
+    
+    AnyMuscleModelUsr1 NoContactMuscle = {
+      AnyVar Limb2NoContact=iffun(eqfun(..ContactDetectionLimb2.NodeWithInBox.WithinBoxAndVelBelowThreshold ,1.0),0.0,1.0); //equal 0 if limb2 in contact
+      S =Limb2NoContact*.NodeWithInBox.OutsideBoxOrVelHigherThanThreshold*10000;
+      F0 = 0;
+    };
+    
+    
+    AnyFolder PlateFootReactions = {
+      AnyRefFrame& ref1=..ForcePlate.ForcePlateSeg;
+      AnyRefFrame&ref2=..Limb1;
+      AnyMuscleModel &MusMdl=.InContactMuscle;
+      #include "<ANYBODY_PATH_TOOLBOX>/Mocap/ArtificialMuscleConnection.any"
+    };
+    
+    AnyFolder PlateGroundReactions={
+      AnyRefFrame& ref1=..Corners.PlateCenter;
+      AnyRefFrame& ref2=..ForcePlate.ForcePlateSeg;
+      AnyMuscleModel &MusMdl=.NoContactMuscle;
+      #include "<ANYBODY_PATH_TOOLBOX>/Mocap/ArtificialMuscleConnection.any"
+    };
+  };
+ 
+  AnyFolder ContactDetectionLimb2 = {
+    AnyVec3 P1= .Limb2.HeelContactNodeLow.r;
+    AnyVar P1Vel= vnorm(.Limb2.HeelContactNodeLow.rDot,2);
+    
+    AnyVec3 P2= .Limb2.ToeLateralContactNode.r;
+    AnyVar P2Vel= vnorm(.Limb2.HeelContactNodeLow.rDot,2);
+    
+    #include "ContactDetection.any"
+    
+    AnyMuscleModelUsr1 InContactMuscle = {
+      F0 = 0;
+      S = .NodeWithInBox.WithinBoxAndVelBelowThreshold *10000;
+    };
+    
+    AnyMuscleModelUsr1 NoContactMuscle = {
+      AnyVar Limb1NoContact=iffun(eqfun(..ContactDetectionLimb1.NodeWithInBox.WithinBoxAndVelBelowThreshold ,1.0),0.0,1.0); //equal 0 if limb1 in contact
+      S =Limb1NoContact*.NodeWithInBox.OutsideBoxOrVelHigherThanThreshold*10000;
+      F0 = 0;
+    };
+    
+    
+    AnyFolder PlateFootReactions={
+      AnyRefFrame& ref1=..ForcePlate.ForcePlateSeg;
+      AnyRefFrame& ref2=..Limb2;
+      AnyMuscleModel &MusMdl=.InContactMuscle;
+      #include "<ANYBODY_PATH_TOOLBOX>/Mocap/ArtificialMuscleConnection.any"
+    };
+    
+    
+    AnyFolder PlateGroundReactions={
+      AnyRefFrame &ref1=..Corners.PlateCenter;
+      AnyRefFrame& ref2=..ForcePlate.ForcePlateSeg;
+      AnyMuscleModel &MusMdl=.NoContactMuscle;
+      #include "<ANYBODY_PATH_TOOLBOX>/Mocap/ArtificialMuscleConnection.any"
+    };
+  };
+  
+#if (CREATE_KIN_GRF == 1) & ((FORCEPLATE_TYPE == 4) | (FORCEPLATE_TYPE == 2))
+  
+  ForcePlate.ForcePlateSeg =
+  {
+    AnyRefNode KinGRF_rotnode = { ARel = RotMat(pi,y); };
+  };
+  
+  AnyFolder Kinematic_GRF = 
+  {
+    
+    AnyFloat weightdata = sqrt(Calculations.norm);
+    AnyVar max_val = max({ max(weightdata),0.000001});
+    AnyVar Th = 0.05*max_val;
+    
+    // Thresshold the weight data
+    AnyVector ThresHolded = iffun(gtfun(weightdata, Th ),
+                             (weightdata-Th )/(max_val-Th),
+                             0*farr(0.0,1.0,NumElemOf(weightdata)));
+
+    AnyFunInterpol GlobalCopFun = 
+    {
+      Type = Bspline;
+      T = ..Time;
+      Data = ((1+0*farr(0.0,1.0,..NoAnalogData))'*{..ForcePlate.ForcePlateSeg.r0}+ (..ForcePlate.ForcePlateSeg.Axes0*.Calculations.GRF_start.Data)')';
+    };    
+
+    
+    
+    // Alternative Time array which starts from tStart and ends at tEnd  
+    AnyInt NoAnalogData2= max({C3D_OBJECT.Header.NoAnalogSamplesPer3DFrame,
+                               (C3D_OBJECT.Header.LastFrameNo - C3D_OBJECT.Header.FirstFrameNo)*C3D_OBJECT.Header.NoAnalogSamplesPer3DFrame});
+    AnyFloat tStart2 = .tStart+1e-7;
+    AnyFloat tEnd2 = max({tStart2+1/C3D_OBJECT.Header.VideoFrameRate,.tEnd-1/C3D_OBJECT.Header.VideoFrameRate})-1e-7;
+    AnyFloat Time2 = farr( tStart2, (tEnd2-tStart2)/( max({1,NoAnalogData2 - 1})) ,  NoAnalogData2);
+
+    AnyFloat limb1_COP_dist = vnorm(KIN_GRF_LIMB1_FUN(Time2) - 
+                                    GlobalCopFun(Time2));
+    AnyFloat limb2_COP_dist = vnorm(KIN_GRF_LIMB2_FUN(Time2)- 
+                                    GlobalCopFun(Time2));
+
+    AnyFunInterpol Weight_limb1 = 
+    {
+       Type = Bspline;
+       T = .Time2;
+       Data = {iffun(lteqfun(.limb1_COP_dist,.limb2_COP_dist ), .ThresHolded, 0.0*.ThresHolded)};
+    };
+
+    AnyFunInterpol Weight_limb2 = 
+    {
+       Type = Bspline;
+       T = .Time2;
+       Data = {iffun(lteqfun(.limb2_COP_dist,.limb1_COP_dist ), .ThresHolded, 0.0*.ThresHolded)};
+    };
+
+
+    
+    
+    AnySeg Frame = 
+    {
+      Mass = 0.0;
+      Jii = {0.0, 0.0, 0.0};
+      AnyDrawVector arrow = {Vec ={0,0,..Calculations.GRF_normalized(.t)[0]};GlobalCoord = Off;Line.Thickness = 0.01;};
+      AnyDrawRefFrame drw = { ScaleXYZ = 0.2*{1,1,1};};
+      AnyRefNode vector= {sRel = {0,0,1};};
+    };
+    
+    AnyKinEq lock_z_rot= {
+      AnyKinMeasureOrg zrot = {
+        AnyKinRotational rot = {
+          Type= RotVector;
+          AnyRefFrame &ref0 = ....ForcePlate.ForcePlateSeg.KinGRF_rotnode;
+          AnyRefFrame &ref1 = ...Frame;
+        };
+        MeasureOrganizer = {2};
+      };
+    };
+    
+    AnyFolder Calculations = {
+      
+      AnyVector T =  ..Time;
+      AnyVector fx = ..ForcePlate.load.Data[0]; 
+      AnyVector fy = ..ForcePlate.load.Data[1]; 
+      AnyVector fz = ..ForcePlate.load.Data[2];
+      AnyVector mx =  (1/1000)*..ForcePlate.load.Data[3]; 
+      AnyVector my =  (1/1000)*..ForcePlate.load.Data[4]; 
+      AnyVector mz =  (1/1000)*..ForcePlate.load.Data[5]; 
+      
+      AnyVector norm = vnorm({fx,fy,fz}');
+      
+      // Values used when dividing. To avoid deviding by zero. 
+      AnyVar force_thresshold = 0.05*max(abs(fz));
+      AnyVector _fz = iffun(gtfun(abs(fz),force_thresshold ),fz, fz+10^10);
+      AnyVector _norm = iffun(gtfun(abs(norm),force_thresshold ),norm, norm+10^10) ;
+
+      
+      AnyVar originz = -1*..ForcePlate.ForcePlateSeg.TransducerLocation.zdist;
+      
+      
+      AnyVector Vx= (originz*fx-my)/( _fz ) ;
+      AnyVector Vy= (mx+originz*fy)/( _fz );
+      AnyVector Vz= 0*Vy;
+      
+      AnyFunInterpol GRF_normalized = 
+      {
+        Type = PiecewiseLinear;
+        T = .T;
+        Data = {.norm/( iffun(gtfun(max(.norm),0),max(.norm), 10^10) )};
+      };
+      
+      AnyFunInterpol GRF_start = 
+      { 
+        Type = PiecewiseLinear;
+        T = .T;
+        Data = {.Vx, .Vy, .Vz};
+      };    
+      AnyFunInterpol GRF_end = 
+      { 
+        Type = PiecewiseLinear;
+        T = .T;
+        
+        Data = {.Vx + .fx/(._norm),
+          .Vy + .fy/(._norm)
+          //.COP_cal.Vz + .COP_cal.fz/ (.COP_cal.norm)
+        };      
+      };
+      
+      
+    };//KinGRF_Calculations 
+    
+    
+    AnyKinDriver COPDriver = {
+      AnyKinLinear start_lin = {
+        AnyRefFrame &ref0 = ...ForcePlate.ForcePlateSeg.PlateSurface;
+        AnyRefFrame &ref1 = ..Frame;
+        Ref = 0;
+      };
+      AnyParamFun &fun = .Calculations.GRF_start;
+      CType = {Hard,Hard,Hard};
+    };
+    
+    AnyKinDriver DirectionDriver = {
+      AnyKinMeasureOrg end_lin_xy = {
+        AnyKinLinear lin = 
+        {
+          AnyRefFrame &ref0 = ....ForcePlate.ForcePlateSeg.PlateSurface;
+          AnyRefFrame &ref1 = ...Frame.vector;
+          Ref = 0;
+        };
+        MeasureOrganizer = {0,1};
+      };
+      AnyParamFun &fun = .Calculations.GRF_end ;
+      CType = {Hard, Hard};
+    };  
+  } ;
+  #endif
+  
+};
