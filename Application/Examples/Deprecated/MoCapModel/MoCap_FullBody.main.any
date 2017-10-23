@@ -1,0 +1,70 @@
+#include "../../libdef.any"
+// Switch to use the detail neck model
+#define BM_TRUNK_NECK OFF
+// Switch to include Arms
+#define BM_ARM_LEFT ON
+#define BM_ARM_RIGHT ON
+// Select the TLEM version
+#define BM_LEG_MODEL _LEG_MODEL_TLEM2_
+
+#define BM_LEG_TRUNK_INTERFACE 1
+#define BM_PELVIS_DISPLAY 2  
+// Prefix for the output file names 
+// to distinguish the full body and the lower body models
+#ifndef OutputFileNamePrefix 
+#define OutputFileNamePrefix "FullBody-"
+#endif
+// Switch to save all results in output folder
+#ifndef AutoSaveOption
+#define AutoSaveOption 0
+#endif
+
+// Detailed description can be found at:
+#include "Model/Description.any"
+
+//Set this to 1 if you want to run the motion and Parameter Optimization identification
+//**************************************************
+#ifndef MotionAndParameterOptimizationModel
+#define MotionAndParameterOptimizationModel 0
+#endif
+
+//Set this to 1 if you want to run the inverse dynamic analysis
+#ifndef InverseDynamicModel
+#define InverseDynamicModel 1
+#endif
+//Usually only have one of the two switches active so set the inactive analysis to 0
+//**************************************************
+
+// Following will include several predefined classes to generate markers and environments
+// Usually, there is no need to make changes in this file:
+#include "Model/Classes.any"
+  
+Main = {
+  // This file controls most of the Trial Specific setup, the following items are defined here:
+  // 1. C3D file Name
+  // 2. Start and End Frame
+  // 3. Subject Anthropometric data
+  // 4. Initial guess on position
+  //  If you want to run the model on your own data this is the place to start:
+  #include "Input/TrialSpecificData.any"
+  
+  // This file controls most of the Settings of your Model, the following items are defined here:
+  //  1. Marker Names
+  //  2. Marker locations
+  #include "Model/ModelSetup.any" 
+  
+  // Define the Environment around the human
+  #include "Model/Environment.any"
+  
+  AnyFolder Studies ={
+  // Usually, there is no need to make changes in the following files. PLease be aware. that
+  // changes in the Kinematics and InverseDynamics may lead to model failure and/or unrealistic results:
+    #if  MotionAndParameterOptimizationModel
+    #include "Model/Kinematics.any"  
+    #endif    
+    
+    #if InverseDynamicModel
+    #include "Model/InverseDynamics.any"  
+    #endif
+  };
+}; //Main

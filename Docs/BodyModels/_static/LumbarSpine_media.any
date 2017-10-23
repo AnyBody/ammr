@@ -1,0 +1,110 @@
+#path ANYBODY_PATH_OUTPUT "."
+#include "../../../libdef.any"
+
+#define BM_ARM_LEFT OFF
+#define BM_ARM_RIGHT OFF
+#define BM_TRUNK_MUSCLES ON
+#define BM_LEG_MODEL OFF
+
+
+#include "C:\Users\mel\Documents\anyscript videomaker/CameraClassTemplate.any"
+
+Main = {
+  
+//  VideoLookAtCamera CervicalSpineCloseUpFront(UP_DIRECTION=y, _AUTO_OPEN_PREVIEW_=0) =
+//  {
+//    VideoName = "CervicalSpineCloseUpFront";
+//    Analysis = {
+//      AnyOperation &ref = Main.study.InitialConditions;
+//    };
+//    VideoInputScale = 5;
+//    VideoResolution = {600,600};
+//    CameraLookAtPoint = Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C2Seg.r;
+//    CameraFieldOfView = DesignVar(0.4);
+//    CameraDirection  = {1,0,0};
+//    BackgroundColor = DesignVar({1,1,1});
+//  };
+
+  VideoLookAtCamera Static_image(UP_DIRECTION=y, _AUTO_OPEN_PREVIEW_=OFF) =
+  {
+    VideoName = "LumbarSpineBack";
+    Analysis = {
+      AnyOperation &ref = Main.study.InitialConditions;
+    };
+    VideoInputScale = 5;
+    VideoResolution = {300,500};
+    CameraLookAtPoint = Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.L1Seg.T12L1JntNode.r + {0,-0.01,0};
+    CameraFieldOfView = DesignVar(0.7);
+    CameraDirection  = {-1,0.0,-0.2};
+    BackgroundColor = DesignVar({1,1,1});
+    
+    Preview.FileName = VideoName + ".jpg";
+
+    
+  };
+  VideoLookAtCamera Static_image2(UP_DIRECTION=y, _AUTO_OPEN_PREVIEW_=OFF) =
+  {
+    VideoName = "LumbarSpineFront";
+    Analysis = {
+      AnyOperation &ref = Main.study.InitialConditions;
+    };
+    VideoInputScale = 5;
+    VideoResolution = {300,500};
+    CameraLookAtPoint = Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.L1Seg.T12L1JntNode.r + {0,0.0,0};
+    CameraFieldOfView = DesignVar(0.7);
+    CameraDirection  = {1,0.0,0.2};
+    BackgroundColor = DesignVar({1,1,1});
+    
+    Preview.FileName = VideoName + ".jpg";
+
+  };
+  VideoLookAtCamera RotatingGif(UP_DIRECTION=y , _AUTO_PLAY_VIDEOS=OFF) =
+  {
+    VideoName = "LumbarSpine_rotating_model";
+    
+    Analysis = {
+      AnyOperation &ref = Main.study.Kinematics;
+    };
+    VideoInputScale = 5;
+    VideoResolution = {300,500};
+    VideoCodec = "libx264";
+    VideoInputFrameRate = 30; 
+    VideoOutputFrameRate = 30;
+    CameraLookAtPoint = Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.L1Seg.T12L1JntNode.r + {0,-0.01,0};
+    CameraFieldOfView = DesignVar(0.7);
+    CameraDirection  = {cos(2*pi*Main.study.t), 0, sin(2*pi*Main.study.t)};
+    BackgroundColor = DesignVar({1,1,1});
+    Counter = Main.study.iStep;
+  }; 
+   
+  
+  #include "<ANYBODY_PATH_BODY>\HumanModel.any"
+    
+  HumanModel.Mannequin.Posture.Right = {
+    ElbowPronation = -70;
+    WristAbduction = 15;
+  };
+ 
+  AnyBodyStudy study = 
+  {
+    AnyFolder& CameraRef1 = Main.Static_image;
+    AnyFolder& CameraRef2 = Main.RotatingGif;
+    AnyFolder& Model = Main.HumanModel.BodyModelWithDefaultDrivers;
+    Gravity = {0, -9.81, 0};
+    nStep = 150;
+  };
+  
+  
+  AnyOperationSequence RunApplication = 
+  {
+     AnyOperation&  init = Main.study.InitialConditions;
+     //AnyOperation& CreateFrontImage = Main.CervicalSpineCloseUpFront.Preview;
+     AnyOperation& CreateBack = Main.Static_image.Preview;
+     AnyOperation& CreateFront = Main.Static_image2.Preview;
+     AnyOperation& CreateRotatingGif = Main.RotatingGif.Create_Video;
+  
+  
+  
+  };
+  
+};
