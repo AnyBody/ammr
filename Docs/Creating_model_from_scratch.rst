@@ -26,10 +26,9 @@ the main model file, and all its contents (e.g, model objects, simulation object
 **STEP 2** 
 
 Link a ``libdef.any`` file to specify the AMMR directories that you wish to import the human model from. 
-If instructions from the `previous chapter <Installation.html>`__ were exactly followed, the file path typed below should work. Otherwise, make the necessary changes.
+If instructions for installing the Demo AMMR in the `previous chapter <Installation.html>`__ were exactly followed, the file path typed below should work. 
+Otherwise, make the necessary changes.
 
-
-.. todo:: I cannot pinpoint any tutorial which says that you need to include your human model, either directly or indirectly in a study. - AG
 
 .. code-block:: AnyScriptDoc
     :emphasize-lines: 1
@@ -214,7 +213,65 @@ constraints enforced by soft drivers. The alternative would have been to create 
 
 **STEP 8**
 
+Add the highlighted code to create generalized reaction forces at the pelvis which support the model's weight. 
+
+It consists of 6 generalized forces applied on the human model by the Ground frame and is composed of 3 linear forces and 3 moments. 
+The reaction force is constructed by an **AnyReacForce** class containing references to the kinematic measures (see tutorial XYZ) 
+of the Pelvis w.r.t ground. 
+
+.. code-block:: AnyScriptDoc
+    :emphasize-lines: 11-19
+
+    #include "<ANYBODY_PATH_MYFILES>/AnyBody.7.1.x/AMMR.v2.0.0-Demo/libdef.any"
+    Main =
+    {
+        #include "<ANYBODY_PATH_BODY>/HumanModel.any"
+
+        AnyFolder Model =
+        {
+            AnyFolder &Human = .HumanModel.BodyModel; 
+            AnyFolder &MotionDrivers = .HumanModel.DefaultMannequinDrivers;      
+            
+            AnyReacForce HumanGroundResiduals = 
+            {
+            AnyKinMeasure &PelvisPosX = .Human.Interface.Trunk.PelvisPosX;
+            AnyKinMeasure &PelvisPosY = .Human.Interface.Trunk.PelvisPosY;
+            AnyKinMeasure &PelvisPosZ = .Human.Interface.Trunk.PelvisPosZ;
+            AnyKinMeasure &PelvisRotX = .Human.Interface.Trunk.PelvisRotX;
+            AnyKinMeasure &PelvisRotY = .Human.Interface.Trunk.PelvisRotY;
+            AnyKinMeasure &PelvisRotZ = .Human.Interface.Trunk.PelvisRotZ;
+            };
+ 
+        };
+
+        
+        AnyBodyStudy Study =
+        {
+            AnyFolder &ModelForSim = .Model; // '&' creates a local reference to existing folder
+            Gravity = {0,-9.81,1}; // Gravity Vector
+            tStart = 0; // Start time
+            tEnd = 1; // End time
+
+            InitialConditions.SolverType = KinSolOverDeterminate;
+            Kinematics.SolverType = KinSolOverDeterminate;
+        };
+    };
+
+
+
+.. rst-class:: centered
+
+**STEP 9**
+
 Load the model and run the **InverseDynamics** analysis contained within **Study**. Refer to tutorial XYZ on how to view/plot the simulation outputs.
 
 We encourage you to experiment further by adding more complex model components such as motion drivers, external forces etc. to the current model. Refer 
 the AnyBody tutorials link XYZ to understand these features better. 
+
+.. raw:: html 
+
+    <video width="45%" style="display:block; margin: 0 auto;" controls autoplay loop>
+        <source src="_static/Human_rotating_model.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+    </video>
+    
