@@ -442,7 +442,6 @@ All BodyModel parameters
 
 
 .. ammr:bm_statement:: BM_ARM_DETAILED_HAND
-    :deprecated:
 
     Switch for enabling the detailed hand.
 
