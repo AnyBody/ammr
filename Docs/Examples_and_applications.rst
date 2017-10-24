@@ -10,7 +10,7 @@ all demonstrate features from the AnyBody Modeling System.
       results may occur that cannot be interpreted by anatomical or physiological considerations.
 
 
-Motion Caputure and gait analsysis
+Motion Caputure and gait analysis
 ----------------------------------
 
 
@@ -65,8 +65,8 @@ Sports
       A full-body model doing push-ups with   assumed drivers.
 
 
-Dayly activties and ergonomics
-------------------------------
+Daily activities and ergonomics
+-------------------------------
 
 - **Free Posture Model:**
       A full-body model that is easy to put

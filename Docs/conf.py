@@ -117,6 +117,9 @@ rst_prolog = """
 .. |AMS_VERSION_X| replace:: 7.1.x
 .. |AMS_VERSION_FULL| replace:: 7.1.0
 .. |AMS_VERSION_SHORT| replace:: 7.1
+.. |AMMR_VERSION_FULL| replace:: 2.0.0
+.. |AMMR_VERSION_SHORT| replace:: 2.0
+.. |AMMR_DEMO_INST_DIR| replace:: ``~/Documents/AnyBody.7.1.x/AMMR.v2.0.0-Demo``
 
 """
 
