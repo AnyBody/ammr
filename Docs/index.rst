@@ -26,6 +26,16 @@ be used together as full body, scalable musculosketeal model.
 
 .. _AnyBody Modeling System: https://www.anybodytech.com/software/ams/
 
+Using the AMMR
+--------------
+.. toctree::
+    :maxdepth: 1
+
+    Installation
+    Creating_model_from_scratch
+    BM_Config/HumanBody_configurations
+    Scaling/intro
+
 
 Model Overview
 --------------
@@ -41,19 +51,6 @@ The following provides an overview of both.
 
     BodyModels/BodyParts_and_models
     Examples_and_applications
-
-
-
-Using the AMMR
---------------
-.. toctree::
-    :maxdepth: 1
-
-    Installation
-    Creating_model_from_scratch
-    BM_Config/HumanBody_configurations
-    Scaling/intro
-
 
 
 Development

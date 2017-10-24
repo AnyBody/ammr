@@ -66,7 +66,7 @@ Sports
 
 
 Daily activities and ergonomics
-------------------------------
+-------------------------------
 
 - **Free Posture Model:**
       A full-body model that is easy to put
