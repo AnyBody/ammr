@@ -86,6 +86,7 @@ extensions = [
     'cloud_sptheme.ext.issue_tracker',
     'cloud_sptheme.ext.table_styling',
     'ammr-directives',
+    'inline_highlight',
     
 ]
 
