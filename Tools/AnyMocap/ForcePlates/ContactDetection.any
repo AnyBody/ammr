@@ -1,0 +1,57 @@
+ 
+    AnyFolder NodeWithInBox = {
+            
+      // Corners of a two-dimensional quadrangle on the floor
+      AnyVar x1 = ..SurfaceCorner_c01[..Index[0]];
+      AnyVar y1 = ..SurfaceCorner_c01[..Index[1]];
+      AnyVar x2 = ..SurfaceCorner_c02[..Index[0]];
+      AnyVar y2 = ..SurfaceCorner_c02[..Index[1]];
+      AnyVar x3 = ..SurfaceCorner_c03[..Index[0]];
+      AnyVar y3 = ..SurfaceCorner_c03[..Index[1]];
+      AnyVar x4 = ..SurfaceCorner_c04[..Index[0]];
+      AnyVar y4 = ..SurfaceCorner_c04[..Index[1]];
+
+      // Mean height of the corners
+      AnyVar Hm = (..SurfaceCorner_c01[..Index[2]] + ..SurfaceCorner_c02[..Index[2]] + ..SurfaceCorner_c03[..Index[2]] + ..SurfaceCorner_c04[..Index[2]])/4;
+      
+      // Create a working copy of the firt foot point, P1
+      AnyVar xt1 = .P1[..Index[0]];
+      AnyVar yt1 = .P1[..Index[1]];
+      AnyVar zt1 = .P1[..Index[2]];
+      
+      // Check whether P1 is inside the quadrangle
+      AnyVar a1 = (x1 - xt1) * (y2 - yt1) - (x2 - xt1) * (y1 - yt1);
+      AnyVar b1 = (x2 - xt1) * (y3 - yt1) - (x3 - xt1) * (y2 - yt1);
+      AnyVar c1 = (x3 - xt1) * (y4 - yt1) - (x4 - xt1) * (y3 - yt1);
+      AnyVar d1 = (x4 - xt1) * (y1 - yt1) - (x1 - xt1) * (y4 - yt1);
+      
+      AnyVar P1WithinQuad = andfun(andfun(gtfun(a1*b1, 0.0),gtfun(b1*c1, 0.0)),gtfun(c1*d1, 0.0));
+      AnyVar P1WithinHeight = andfun(gtfun(zt1,Hm-HeightTolerance),ltfun(zt1,Hm+HeightTolerance));
+      
+      AnyVar P1WithinBox=  andfun(P1WithinQuad,P1WithinHeight);
+      AnyVar P1OutsideBox=  iffun(P1WithinBox,0,1);
+
+      // Create a working copy of the second foot point, P2
+      AnyVar xt2 = .P2[..Index[0]];
+      AnyVar yt2 = .P2[..Index[1]];
+      AnyVar zt2 = .P2[..Index[2]];
+      
+      // Check whether P2 is inside the quadrangle
+      AnyVar a2 = (x1 - xt2) * (y2 - yt2) - (x2 - xt2) * (y1 - yt2);
+      AnyVar b2 = (x2 - xt2) * (y3 - yt2) - (x3 - xt2) * (y2 - yt2);
+      AnyVar c2 = (x3 - xt2) * (y4 - yt2) - (x4 - xt2) * (y3 - yt2);
+      AnyVar d2 = (x4 - xt2) * (y1 - yt2) - (x1 - xt2) * (y4 - yt2);
+      
+      AnyVar P2WithinQuad = andfun(andfun(gtfun(a2*b2,0.0),gtfun(b2*c2,0.0)),gtfun(c2*d2, 0.0));            
+      AnyVar P2WithinHeight = andfun(gtfun(zt2,Hm-HeightTolerance),ltfun(zt2,Hm+HeightTolerance));
+      
+      AnyVar P2WithinBox=  andfun(P2WithinQuad,P2WithinHeight);
+      AnyVar P2OutsideBox=  iffun(P2WithinBox,0,1);
+      
+      AnyVar WithinBox =orfun(P1WithinBox,P2WithinBox);
+      AnyVar OutsideBox=  iffun(WithinBox,0,1);
+      
+      AnyVar WithinBoxAndVelBelowThreshold =WithinBox*iffun(ltfun(.P1Vel,VelThreshold),1,0);
+      AnyVar OutsideBoxOrVelHigherThanThreshold=  iffun(WithinBoxAndVelBelowThreshold ,0,1);
+    };  
+    

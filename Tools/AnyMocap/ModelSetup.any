@@ -1,0 +1,101 @@
+ModelSetup = {
+  // The folder Lab/Subject/TrialSpecificData folders are
+  // created using class templates. This ensures that any required 
+  // variables get a default value if they are not specified
+  // by the user.
+
+ CreateTrialFolder TrialSpecificData = {
+     #include "<MOCAP_TRIAL_SPECIFIC_DATA>"
+ };
+
+ CreateSubjectFolder SubjectSpecificData = {
+   #include "<MOCAP_SUBJECT_SPECIFIC_DATA>"
+ };
+ 
+ CreateLabFolder LabSpecificData = {
+   #include "<MOCAP_LAB_SPECIFIC_DATA>"
+ };
+ 
+ // This file checks if all the defines statements 
+ // are made correctly.
+ #include "CheckAnyMocapConfiguration.any"
+ 
+ 
+ Main = {
+    #include "<BODY_MODEL_CONFIG_FILE>"
+ };
+ 
+ #if MOCAP_INPUT_DATA_TYPE == "C3D"
+ AnyInputC3D C3DFileData =  {};
+ #include "<MOCAP_C3DSETTINGS>"
+ #endif
+ 
+ #if MOCAP_INPUT_DATA_TYPE == "BVH"
+ AnyFolder C3DFileData = { #include "BVH_C3dEmulation.any" };
+ AnyInputBVH BVHFileData = {}; 
+ #include "<MOCAP_BVHSETTINGS>" 
+ #endif
+ 
+ 
+ AnyFolder MocapExtraDrivers = {
+   #include "<MOCAP_EXTRA_DRIVERS_FILE>" 
+ };
+ 
+ AnyFolder MocapDrivers = {
+   #include "<MOCAP_MARKER_PROTOCOL_FILE>"
+ };
+
+
+ 
+ 
+ // Study for saving a loading the parameters from calibration trials 
+ //(dynamic or standing refereces)
+ #include "SaveLoadParameters.any"
+ 
+
+ AnyFolder ParameterIdentification = { };
+
+ #include "ModelViews.any"  
+  
+  
+  //markers adds macros automatically into this folder
+ AnyFolder Macros =  {
+    AnyOperationMacro SaveOutputToHDF = {
+       MacroStr = { "classoperation Main.Studies.KinematicStudy.Output" + strquote("Save data") +
+                    "--type= " + strquote("Deep") + 
+                    "--file= " + strquote(ANYBODY_PATH_OUTPUT + "/" + MOCAP_TEST_FILENAME_PREFIX +  MOCAP_OUTPUT_FILENAME_PREFIX +
+                    Main.ModelSetup.TrialSpecificData.TrialFileName + "_KinematicStudy.anydata.h5"),
+                    
+                    "classoperation Main.Studies.InverseDynamicStudy.Output" + strquote("Save data") +
+                    "--type= " + strquote("Deep") + 
+                    "--file= " + strquote(ANYBODY_PATH_OUTPUT + "/" + MOCAP_TEST_FILENAME_PREFIX  +  MOCAP_OUTPUT_FILENAME_PREFIX +
+                    Main.ModelSetup.TrialSpecificData.TrialFileName + "_InverseDynamicStudy.anydata.h5")};
+    };
+    AnyOperationMacro LoadOutputFromHDF = {
+       MacroStr = { "classoperation Main.Studies.KinematicStudy.Output" + strquote("Load data") +
+                    "--file= " + strquote(ANYBODY_PATH_OUTPUT + "/" + MOCAP_TEST_FILENAME_PREFIX +  MOCAP_OUTPUT_FILENAME_PREFIX +
+                    Main.ModelSetup.TrialSpecificData.TrialFileName + "_KinematicStudy.anydata.h5"),
+                    
+                    "classoperation Main.Studies.InverseDynamicStudy.Output" + strquote("Load data") +
+                    "--file= " + strquote(ANYBODY_PATH_OUTPUT + "/" + MOCAP_TEST_FILENAME_PREFIX +  MOCAP_OUTPUT_FILENAME_PREFIX +
+                    Main.ModelSetup.TrialSpecificData.TrialFileName + "_InverseDynamicStudy.anydata.h5")};
+    };
+ 
+};
+  
+};
+
+
+AnyFolder ModelSetup = {};
+ModelSetup = 
+{
+  AnyFolder Views = {};
+};
+
+
+#ifdef BM_DRAWSETTINGS_FILE
+// Ensure that HumanModel does not 
+// include DrawSettings as well. 
+#define BM_DRAWSETTINGS_SKIP ON
+#include "<BM_DRAWSETTINGS_FILE>"
+#endif
