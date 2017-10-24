@@ -29,7 +29,6 @@
 
 import os
 import sys
-import enum
 import subprocess
 import cloud_sptheme
 
@@ -54,22 +53,18 @@ def tagged_commit():
         return True
 
 
-class BuildType:
-    web = enum.auto()
-    web_dev = enum.auto()
-    ams = enum.auto()
+
+if tags.has('offline'):
+    # building offline version
+    pass
 
 
-if tags.has('AMS_BUILD'):
-    BUILD_TYPE = BuildType.ams
-elif tags.has('DEV_BUILD') or not tagged_commit():
-    BUILD_TYPE = BuildType.web_dev
-else:
-    BUILD_TYPE = BuildType.web
+if not tagged_commit():
+    tags.add('draft')
 
 
 # `todo` and `todoList` produce output, else they produce nothing.
-todo_include_todos = (BUILD_TYPE == BuildType.web_dev)
+todo_include_todos = tags.has('draft')
 
 
 
@@ -139,10 +134,9 @@ exclude_patterns = ['_build', 'README.rst', 'Thumbs.db', '.DS_Store']
 highlight_language = 'none'
 pygments_style = 'AnyScript'
 
-rst_prolog = """
-.. role:: anyscript(code)
-   :language: AnyScriptDoc
+rst_prolog = """ """
 
+rst_epilog = """
 .. include:: /BM_Config/Substitutions.txt
 
 .. |AMS_VERSION_X| replace:: 7.1.x
@@ -151,20 +145,7 @@ rst_prolog = """
 .. |AMMR_VERSION_FULL| replace:: 2.0.0
 .. |AMMR_VERSION_SHORT| replace:: 2.0
 .. |AMMR_DEMO_INST_DIR| replace:: ``~/Documents/AnyBody.7.1.x/AMMR.v2.0.0-Demo``
-
 """
-
-
-# If true, `todo` and `todoList` produce output, else they produce nothing.
-try: 
-    subprocess.check_call(['git', 'describe', '--exact-match', 'HEAD'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL )
-except subprocess.CalledProcessError:
-    # We are not a on a tagged commit
-    todo_include_todos = True
-else:
-    # Tagged commit, e.g. release version. Hide todos.
-    todo_include_todos = False
-
 
 
 # -- Options for HTML output ----------------------------------------------
@@ -284,9 +265,12 @@ texinfo_documents = [
 ]
 
 
-
-
-if BUILD_TYPE == BuildType.web_dev:
-    intersphinx_mapping = {'tutorials': ('https://anyscript.org/tutorials/dev/', None)}
+intersphinx_mapping = {}
+if tags.has('offline'):
+    # Todo. Find a way to link to offline html versions. 
+    intersphinx_mapping['tutorials'] = ('https://anyscript.org/tutorials/', None)
 else:
-    intersphinx_mapping = {'tutorials': ('https://anyscript.org/tutorials/', None)}
+    if tags.has('draft'):
+        intersphinx_mapping['tutorials'] = ('https://anyscript.org/tutorials/dev/', None)
+    else:
+        intersphinx_mapping['tutorials'] = ('https://anyscript.org/tutorials/', None)
