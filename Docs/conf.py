@@ -29,8 +29,10 @@
 
 import os
 import sys
+import enum
 import subprocess
 import cloud_sptheme
+
 
 
 sys.path.insert(0, os.path.abspath('exts'))
@@ -40,6 +42,35 @@ try:
     import pygments_anyscript
 except ImportError:
     raise ImportError('Please install pygments_anyscript to get AnyScript highlighting')
+
+
+def tagged_commit():
+    """Check if we are on a tagged commit"""
+    try: 
+        subprocess.check_call(['git', 'describe', '--exact-match', 'HEAD'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except subprocess.CalledProcessError:
+        return False
+    else:
+        return True
+
+
+class BuildType:
+    web = enum.auto()
+    web_dev = enum.auto()
+    ams = enum.auto()
+
+
+if tags.has('AMS_BUILD'):
+    BUILD_TYPE = BuildType.ams
+elif tags.has('DEV_BUILD') or not tagged_commit():
+    BUILD_TYPE = BuildType.web_dev
+else:
+    BUILD_TYPE = BuildType.web
+
+
+# `todo` and `todoList` produce output, else they produce nothing.
+todo_include_todos = (BUILD_TYPE == BuildType.web_dev)
+
 
 
 # Add any Sphinx extension module names here, as strings. They can be
@@ -255,5 +286,7 @@ texinfo_documents = [
 
 
 
-# Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/': None}
+if BUILD_TYPE == BuildType.web_dev:
+    intersphinx_mapping = {'tutorials': ('https://anyscript.org/tutorials/dev/', None)}
+else:
+    intersphinx_mapping = {'tutorials': ('https://anyscript.org/tutorials/', None)}
