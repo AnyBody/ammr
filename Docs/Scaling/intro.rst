@@ -24,32 +24,38 @@ parts makes it possible for the user to choose between the laws that are
 supplied with the models or perhaps define a new law, without making any
 changes in the body models.
 
-Currently there are seven scaling laws available in AnyBody
+Currently there are nine pre-defined scaling laws available in AnyBody
 
--  ScalingStandard  (do not scale; i.e. use standard model size)
+*  ScalingStandard  (scale to a standard size; i.e. use 50th percentile sizes for a European male)
 
--  ScalingUniform  (scale equally in all directions; input is joint to
+*  ScalingNone  (do not scale; i.e. use underlying cadaveric dataset as is)
+
+*  ScalingUniform  (scale segments equally in all directions; input is joint to
    joint distances)
 
--  ScalingLengthMass (scale taking mass into account; input is joint to
+*  ScalingLengthMass (scale taking mass into account; input is joint to
    joint distances and mass)
 
--  ScalingLengthMassFat (scale taking mass and fat into account; input
+*  ScalingLengthMassFat (scale taking mass and fat into account; input
    is joint to joint distances)
 
--  ScalingUniformExt (scale equally in all directions; input is external
+*  ScalingUniformExt (scale equally in all directions; input is external
    measurements)
 
--  ScalingLengthMassExt (scale taking mass into account; input is
+*  ScalingLengthMassExt (scale taking mass into account; input is
    external measurement)
 
--  ScalingLengthMassFatExt (scale taking mass and fat into account;
+*  ScalingLengthMassFatExt (scale taking mass and fat into account;
    input is external measurements).
 
-The parameters of the scaling laws are controlled by the mean of the
-AnyMan.any file. Several versions of this file are available the choice
-depending on the scaling strategy chosen.  More details about how to use
-this file are given along the tutorial.
+*  ScalingXYZ (scale taking mass and fat into account; scale segments along X, Y, Z axes;
+   input is scale factors along X, Y, Z axes).
+
+   
+The parameters of the scaling laws can be controlled by the means of an
+AnyMan.any file. Several versions of such file are available depending 
+on the chosen scaling strategy.  More details about how to use this file 
+are given along the tutorial.
 
 Please also notice that each scaling law scales the strength of the
 muscles, in addition to the size and mass of the bone. This strength
@@ -59,9 +65,11 @@ this recorded previous webcast entitled `“Anthropometrical Scaling of
 Musculoskeletal
 Models” <http://www.anybodytech.com/downloads/documentation/#20090319>`__.
 
-The first four scaling methods are covered in Lesson 1. They are often
+The first five scaling methods are covered in Lesson 1. They are often
 referred to as Joint to joint scaling methods. Lesson 2 covers the
-latter three which are based on external body measurement. 
+next three which are based on external body measurement. And Lesson 3 covers
+the ScalingXYZ scaling law, since the usage logic slightly differs from 
+the rest of the laws.
 
 With the AnyBody Modeling System you already have a repository of models
 available, for details please see the AnyBody Assistant available from
@@ -75,14 +83,11 @@ Applications/Examples.
 
     lesson1
     lesson2
-
+	lesson3
 
 .. rst-class:: without-title
 .. seealso::
     **Next lesson:** Now head for :doc:`lesson1`.
 
-
-|http://www.anybodytech.com/fileadmin/images/AnyFamily.JPG|
-
-.. |http://www.anybodytech.com/fileadmin/images/AnyFamily.JPG| image:: _static/intro/image1.jpeg
-   :width: 4.15625in
+..  image:: _static/intro/image1.jpeg
+   :width: 80%
