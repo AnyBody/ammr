@@ -32,9 +32,8 @@ Using the AMMR
     :maxdepth: 1
 
     Installation
-    Creating_model_from_scratch
+    Quick_start
     BM_Config/HumanBody_configurations
-    Scaling/intro
 
 
 Model Overview
@@ -51,6 +50,16 @@ The following provides an overview of both.
 
     BodyModels/BodyParts_and_models
     Examples_and_applications
+
+
+Guides
+---------------
+.. toctree::
+    :maxdepth: 1
+
+    Creating_model_from_scratch
+    Scaling/intro
+
 
 
 Development
