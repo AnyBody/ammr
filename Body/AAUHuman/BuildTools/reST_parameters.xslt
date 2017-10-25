@@ -61,6 +61,12 @@ All BodyModel parameters
 <xsl:template match="parameter[opt]">
 <xsl:call-template name="parameter_header"/>
     :Options: <xsl:apply-templates select="opt"/>
+<xsl:text>
+|  
+|   
+| 
+| 
+</xsl:text>	
 </xsl:template>
 
 
