@@ -59,7 +59,7 @@ options, while others have more options. Here is an example for the :ammr:bm_sta
         Parameter to define muscle behavior of both right and left leg
 
         :Default: :ammr:bm_constant:`CONST_MUSCLES_SIMPLE`
-        :Example: :anyscript:`#define BM_LEG_MUSCLES_BOTH CONST_MUSCLES_SIMPLE`
+        :Example: ``#define BM_LEG_MUSCLES_BOTH CONST_MUSCLES_SIMPLE``
         :Options: - :any:`CONST_MUSCLES_NONE`: Constant to switch off muscles
                 - :any:`CONST_MUSCLES_SIMPLE`: Constant to use simple muscles
                 - :any:`CONST_MUSCLES_3E_HILL`: Constant to use 3 element Hill-type muscle

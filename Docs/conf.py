@@ -28,9 +28,11 @@
 
 
 import os
+import re
 import sys
 import subprocess
 import cloud_sptheme
+
 
 
 sys.path.insert(0, os.path.abspath('exts'))
@@ -40,6 +42,31 @@ try:
     import pygments_anyscript
 except ImportError:
     raise ImportError('Please install pygments_anyscript to get AnyScript highlighting')
+
+
+def tagged_commit():
+    """Check if we are on a tagged commit"""
+    try: 
+        subprocess.check_call(['git', 'describe', '--exact-match', 'HEAD'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except subprocess.CalledProcessError:
+        return False
+    else:
+        return True
+
+
+
+if tags.has('offline'):
+    # building offline version
+    pass
+
+
+if not tagged_commit():
+    tags.add('draft')
+
+
+# `todo` and `todoList` produce output, else they produce nothing.
+todo_include_todos = tags.has('draft')
+
 
 
 # Add any Sphinx extension module names here, as strings. They can be
@@ -60,6 +87,7 @@ extensions = [
     'cloud_sptheme.ext.issue_tracker',
     'cloud_sptheme.ext.table_styling',
     'ammr-directives',
+    'inline_highlight',
     
 ]
 
@@ -108,32 +136,31 @@ exclude_patterns = ['_build', 'README.rst', 'Thumbs.db', '.DS_Store']
 highlight_language = 'none'
 pygments_style = 'AnyScript'
 
-rst_prolog = """
-.. role:: anyscript(code)
-   :language: AnyScriptDoc
 
+
+ams_version = os.environ.get('AMS_VERSION', '7.1.0')
+if not re.match('^\d\.\d\.\d$',ams_version):
+    raise ValueError('Wrong format for AMS version, environment variable')
+ams_version_short = ams_version.rpartition('.')[0]
+ams_version_x = ams_version_short + '.x'
+
+
+ammr_version = os.environ.get('AMMR_VERSION', '2.0.0')
+if not re.match('^\d\.\d\.\d$',ammr_version):
+    raise ValueError('Wrong format for AMMR version, environment variable')
+ammr_version_short = ammr_version.rpartition('.')[0]
+
+
+rst_epilog = f"""
 .. include:: /BM_Config/Substitutions.txt
 
-.. |AMS_VERSION_X| replace:: 7.1.x
-.. |AMS_VERSION_FULL| replace:: 7.1.0
-.. |AMS_VERSION_SHORT| replace:: 7.1
-.. |AMMR_VERSION_FULL| replace:: 2.0.0
-.. |AMMR_VERSION_SHORT| replace:: 2.0
+.. |AMS_VERSION_X| replace:: {ams_version_x}
+.. |AMS_VERSION| replace:: {ams_version}
+.. |AMS_VERSION_SHORT| replace:: {ams_version_short}
+.. |AMMR_VERSION_SHORT| replace:: {ammr_version_short}
+.. |AMMR_VERSION| replace:: {ammr_version}
 .. |AMMR_DEMO_INST_DIR| replace:: ``~/Documents/AnyBody.7.1.x/AMMR.v2.0.0-Demo``
-
 """
-
-
-# If true, `todo` and `todoList` produce output, else they produce nothing.
-try: 
-    subprocess.check_call(['git', 'describe', '--exact-match', 'HEAD'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL )
-except subprocess.CalledProcessError:
-    # We are not a on a tagged commit
-    todo_include_todos = True
-else:
-    # Tagged commit, e.g. release version. Hide todos.
-    todo_include_todos = False
-
 
 
 # -- Options for HTML output ----------------------------------------------
@@ -253,7 +280,12 @@ texinfo_documents = [
 ]
 
 
-
-
-# Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/': None}
+intersphinx_mapping = {}
+if tags.has('offline'):
+    # Todo. Find a way to link to offline html versions. 
+    intersphinx_mapping['tutorials'] = ('https://anyscript.org/tutorials/', None)
+else:
+    if tags.has('draft'):
+        intersphinx_mapping['tutorials'] = ('https://anyscript.org/tutorials/dev/', None)
+    else:
+        intersphinx_mapping['tutorials'] = ('https://anyscript.org/tutorials/', None)
