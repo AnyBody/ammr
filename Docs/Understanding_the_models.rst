@@ -1,7 +1,7 @@
-Quick start
+Understanding the AnyScript Models
 ##########################################
 
-Common model structure
+Strucuture
 ===========================
 
 Most examples and application you will encounter in the *AnyBody Model Repository* use the Human Model in one way or another. 
@@ -48,16 +48,33 @@ You can place your models anywhere on your computer, as long as you include the 
 
 
 
-Configure and include the Human Model
+Including the Human Model
 ---------------------------------------------
 
-The AnyBody Human Model is included using the ``#include "<ANYBODY_PATH_BODY>/HumanModel.any"```. 
+The AnyBody Human Model is included using the ``#include
+"<ANYBODY_PATH_BODY>/HumanModel.any"``. See
+:doc:`/BodyModels/BodyParts_and_models` for a list of the possible body parts
+which can be included. 
 
 Before that happens the model must be configured using ``BM_*`` configuration statements. 
 These configurations are all ``#define`` or ``#path`` statements prefixed with ``BM_``. 
+
+.. seealso:: :doc:`The documentation on BM configuration </BM_Config/HumanBody_configurations>`
 
 
 Composing the model
 -----------------------------
 
-After the Human Model is including. 
+The model section is where we compose the model. It can consist of the body from
+the human, drivers, constraints and models of the environment. 
+
+
+The Study
+------------------------------
+
+The ``AnyBodyStudy`` is where you configure and define your simulation. It
+specificies start and end times of the simulation, and number of steps. It also
+configures which solvers are used. 
+
+Only the model elements which are referenced from within the Study, will be included in
+the simulation. In this case everything in ``Main.Model`` folder is part of the simulation.

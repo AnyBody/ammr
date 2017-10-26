@@ -32,7 +32,7 @@ Using the AMMR
     :maxdepth: 1
 
     Installation
-    Quick_start
+    Understanding_the_models
     BM_Config/HumanBody_configurations
 
 
