@@ -133,7 +133,7 @@ language = 'en'
 exclude_patterns = ['_build', 'README.rst', 'Thumbs.db', '.DS_Store']
 
 # The name of the Pygments (syntax highlighting) style to use.
-highlight_language = 'none'
+highlight_language = 'AnyScriptDoc'
 pygments_style = 'AnyScript'
 
 
@@ -159,7 +159,7 @@ rst_epilog = f"""
 .. |AMS_VERSION_SHORT| replace:: {ams_version_short}
 .. |AMMR_VERSION_SHORT| replace:: {ammr_version_short}
 .. |AMMR_VERSION| replace:: {ammr_version}
-.. |AMMR_DEMO_INST_DIR| replace:: ``~/Documents/AnyBody.7.1.x/AMMR.v2.0.0-Demo``
+.. |AMMR_DEMO_INST_DIR| replace:: :literal:`~/Documents/{ams_version_x}/AMMR.v{ammr_version}-Demo`
 """
 
 
