@@ -1,0 +1,614 @@
+AnyFolder Push ={
+  
+  AnyKinLinear LinS={
+    Ref=0;
+    AnyRefFrame &BaseObject=..BaseObject;
+    AnyRefFrame &StrengthObject=..StrengthObject;
+  };
+  
+  LinS.StrengthObject ={
+    AnyDrawSphere DrwSphere ={
+      ScaleXYZ =0.01*{1,1,1};
+      Opacity =...ContactStrengthSmoothed/....Strength;
+    };
+  };
+  
+  AnyKinMeasureOrg LinMeasureOrg0 ={
+    AnyKinLinear &ref=.LinS;
+    MeasureOrganizer={..Direction[0]};
+  };
+  
+  AnyKinMeasureOrg LinMeasureOrg1 ={
+    AnyKinLinear &ref=.LinS;
+    MeasureOrganizer={..Direction[1]};
+  };
+  
+  AnyKinMeasureOrg LinMeasureOrg2 ={
+    AnyKinLinear &ref=.LinS;
+    MeasureOrganizer={..Direction[2]};
+  };
+  
+  
+  AnyVar UserDefinedDistMeasure=LinMeasureOrg0.Pos[0];
+  AnyVar RadiusMeasure=sqrt(LinMeasureOrg1.Pos[0]^2+LinMeasureOrg2.Pos[0]^2);
+  AnyVar UserDefinedVelMeasure = vnorm(LinS.Vel-.UserDefinedGroundVel,2);
+  
+  AnyFloatVar LowerThanHighDistLimit = ltfun(UserDefinedDistMeasure,.UserDefinedDistLimitHigh);
+  AnyFloatVar GreaterThanLowDistLimit = gtfun(UserDefinedDistMeasure,.UserDefinedDistLimitLow);
+  AnyFloatVar LowerThanRadiusLimit = ltfun(RadiusMeasure,.UserDefinedRadiusLimit);
+  AnyFloatVar LowerThanHighVelLimit = ltfun(UserDefinedVelMeasure,.UserDefinedVelLimitHigh);
+  AnyVar UserDefinedStrengthFunction= .Strength;
+  
+  AnyVar VelSize = vnorm(LinS.Vel, 2);
+  AnyVar VelRatio = VelSize /.UserDefinedVelLimitHigh ;  
+  
+  AnyFloatVar ContactDisCheck = andfun(andfun(LowerThanHighDistLimit,GreaterThanLowDistLimit),LowerThanRadiusLimit);
+  AnyFloatVar HeightRatio = iffun(gteqfun(UserDefinedDistMeasure, 0.0), 
+                                  UserDefinedDistMeasure/.UserDefinedDistLimitHigh,
+                                  iffun(lteqfun(abs(UserDefinedDistMeasure/.UserDefinedDistLimitLow), 1.0), 0.0, 1.0));
+  AnyFloatVar RadiusRatio = RadiusMeasure/.UserDefinedRadiusLimit;
+
+  AnyFloatVar FirstControlVel = .UserDefinedVelLimitHigh * FirstControlVelRatio ;
+  AnyFloatVar SecondControlVel = .UserDefinedVelLimitHigh * SecondControlVelRatio ;
+  
+  AnyIntVar FirstControlVelCheck = lteqfun(VelRatio, FirstControlVelRatio );
+  AnyIntVar SecondControlVelCheck = lteqfun(VelRatio, SecondControlVelRatio );  
+    
+  AnyIntVar FirstControlHeightCheck = lteqfun(HeightRatio, FirstControlHeightRatio);
+  AnyIntVar SecondControlHeightCheck = lteqfun(HeightRatio, SecondControlHeightRatio);
+  
+  AnyIntVar FirstControlRadiusCheck = lteqfun(RadiusRatio, FirstControlRadiusRatio);
+  AnyIntVar SecondControlRadiusCheck = lteqfun(RadiusRatio, SecondControlRadiusRatio);  
+  
+  AnyFunPolynomial VelFactorFun_Lin = 
+  {
+    AnyVar v1 = .FirstControlVelRatio;
+    AnyVar v2 = .SecondControlVelRatio ;
+    PolyCoef = (1.0/(v2-v1))*{-v1, 1.0};
+  };
+  
+  AnyFunPolynomial HeightFactorFun_Lin = 
+  {
+    AnyVar h1 = .FirstControlHeightRatio;
+    AnyVar h2 = .SecondControlHeightRatio ;
+    PolyCoef = (1.0/(h2-h1))*{-h1, 1.0};
+  };
+  
+  AnyFunPolynomial RadiusFactorFun_Lin = 
+  {
+    AnyVar r1 = .FirstControlRadiusRatio;
+    AnyVar r2 = .SecondControlRadiusRatio ;
+    PolyCoef = (1.0/(r2-r1))*{-r1, 1.0};
+  };  
+  
+  AnyFunSquareWave VelFactorFun_SW = 
+  {
+    AnyVar v1 = .FirstControlVelRatio;
+    AnyVar v2 = .SecondControlVelRatio ;
+    InitialValues = {1.0};
+    Ts = {v1};
+    Values = {{0.0}};
+    dT = {abs(v1-v2)};    
+  };
+  
+  AnyFunSquareWave HeightFactorFun_SW = 
+  {
+    AnyVar h1 = .FirstControlHeightRatio;
+    AnyVar h2 = .SecondControlHeightRatio ;
+    InitialValues = {1.0};
+    Ts = {h1};
+    Values = {{0.0}};
+    dT = {abs(h1-h2)};        
+  };
+  
+  AnyFunSquareWave RadiusFactorFun_SW = 
+  {
+    AnyVar r1 = .FirstControlRadiusRatio;
+    AnyVar r2 = .SecondControlRadiusRatio ;
+    InitialValues = {1.0};
+    Ts = {r1};
+    Values = {{0.0}};
+    dT = {abs(r1-r2)};        
+  };  
+  
+  AnyFunInterpol VelFactorFun_BSpline4 = 
+  {
+    AnyVar v1 = .FirstControlVelRatio;    
+    AnyVar v2 = .SecondControlVelRatio;
+    AnyVar delta = abs(v1-v2);
+    
+    AnyVar SlopeControl = 25/100;
+    
+    Type = Bspline;
+    BsplineOrder = 4;
+    T = { v2-delta*100/100, v2-delta*50/100, v2-delta*SlopeControl, 
+      v2,  
+      v2+delta*SlopeControl,
+      (v2+v1)*50/100, 
+      v1-delta*SlopeControl, 
+      v1, 
+      v1+delta*SlopeControl, v1+delta*50/100, v1+delta*100/100};
+    Data = {{1.0, 1.0, 1.0, 
+        1.0, //v2
+        1.0,
+        0.5, // average of v2 and v1
+        0.0, 
+        0.0, //v1
+        0.0, 0.0, 0.0}};
+  };
+  
+  AnyFunInterpol HeightFactorFun_BSpline4 = 
+  {
+    AnyVar h1 = .FirstControlHeightRatio;
+    AnyVar h2 = .SecondControlHeightRatio ;
+    AnyVar delta = abs(h1-h2);
+    
+    AnyVar SlopeControl = 25/100;
+    
+    Type = Bspline;
+    BsplineOrder = 4;
+    T = { h2-delta*100/100, h2-delta*50/100, h2-delta*SlopeControl, 
+      h2,  
+      h2+delta*SlopeControl,
+      (h2+h1)*50/100, 
+      h1-delta*SlopeControl, 
+      h1, 
+      h1+delta*SlopeControl, h1+delta*50/100, h1+delta*100/100};
+    Data = {{1.0, 1.0, 1.0, 
+        1.0, //h2
+        1.0,
+        0.5, // average of h2 and h1
+        0.0, 
+        0.0, //h1
+        0.0, 0.0, 0.0}};
+  };
+  
+  AnyFunInterpol RadiusFactorFun_BSpline4 = 
+  {
+    AnyVar r1 = .FirstControlRadiusRatio;
+    AnyVar r2 = .SecondControlRadiusRatio ;
+    AnyVar delta = abs(r1-r2);
+    
+    AnyVar SlopeControl = 25/100;
+    
+    Type = Bspline;
+    BsplineOrder = 4;
+    T = { r2-delta*100/100*10, r2-delta*50/100, r2-delta*SlopeControl, 
+      r2,  
+      r2+delta*SlopeControl,
+      (r2+r1)*50/100, 
+      r1-delta*SlopeControl, 
+      r1, 
+      r1+delta*SlopeControl, r1+delta*50/100, r1+delta*100/100*10};
+    Data = {{1.0, 1.0, 1.0, 
+        1.0, //r2
+        1.0,
+        0.5, // average of r2 and r1
+        0.0, 
+        0.0, //r1
+        0.0, 0.0, 0.0}};
+  };     
+  
+  
+  #ifdef _SMOOTHING_FUNCTION_PROFILE_
+  #undef _SMOOTHING_FUNCTION_PROFILE_
+  #endif
+  
+  //#define _SMOOTHING_FUNCTION_PROFILE_ "FUNC_PROFILE_SW"
+  //#define _SMOOTHING_FUNCTION_PROFILE_ "FUNC_PROFILE_BSPLINE"
+  //#define _SMOOTHING_FUNCTION_PROFILE_ "FUNC_PROFILE_COSINE"
+  #define _SMOOTHING_FUNCTION_PROFILE_ "FUNC_PROFILE_LINEAR"
+  //#define _SMOOTHING_FUNCTION_PROFILE_ "FUNC_PROFILE_TEST"
+  
+  #if _SMOOTHING_FUNCTION_PROFILE_ == "FUNC_PROFILE_SW"
+  AnyVar FirstControlHeightRatio = 1.0;
+  AnyVar SecondControlHeightRatio = 0.1;    
+  AnyVar FirstControlRadiusRatio = 1.0;
+  AnyVar SecondControlRadiusRatio = 0.9;  
+  AnyVar FirstControlVelRatio = 1.0;
+  AnyVar SecondControlVelRatio = 0.1;
+  
+  AnyVar HeightFactorFun = iffun(FirstControlHeightCheck, HeightFactorFun_SW(HeightRatio)[0], 0.0);
+  AnyVar RadiusFactorFun = iffun(FirstControlRadiusCheck, RadiusFactorFun_SW(RadiusRatio)[0], 0.0);
+  AnyVar VelFactorFun    = iffun(FirstControlVelCheck, VelFactorFun_SW(VelRatio)[0], 0.0);
+  #endif 
+  
+  #if _SMOOTHING_FUNCTION_PROFILE_ == "FUNC_PROFILE_BSPLINE"
+  AnyVar FirstControlHeightRatio = 1.0;
+  AnyVar SecondControlHeightRatio = 0.1;    
+  AnyVar FirstControlRadiusRatio = 1.0;
+  AnyVar SecondControlRadiusRatio = 0.9;  
+  AnyVar FirstControlVelRatio = 1.0;
+  AnyVar SecondControlVelRatio = 0.1;
+  
+  AnyVar HeightFactorFun = iffun(lteqfun(HeightRatio, FirstControlHeightRatio),
+  iffun(ltfun(HeightRatio, SecondControlHeightRatio), 1.0, HeightFactorFun_BSpline4(HeightRatio)[0]),
+  0.0);
+  AnyVar RadiusFactorFun = iffun(lteqfun(RadiusRatio, FirstControlRadiusRatio),
+  iffun(ltfun(RadiusRatio, SecondControlRadiusRatio), 1.0, RadiusFactorFun_BSpline4(RadiusRatio)[0]),
+  0.0);
+  AnyVar VelFactorFun    = iffun(lteqfun(VelRatio, FirstControlVelRatio),
+  iffun(ltfun(VelRatio, SecondControlVelRatio), 1.0, VelFactorFun_BSpline4(VelRatio)[0]),
+  0.0);
+  #endif  
+  
+  #if _SMOOTHING_FUNCTION_PROFILE_ == "FUNC_PROFILE_COSINE"
+  AnyVar FirstControlHeightRatio = 1.0;
+  AnyVar SecondControlHeightRatio = 0.8;    
+  AnyVar FirstControlRadiusRatio = 1.0;
+  AnyVar SecondControlRadiusRatio = 0.9;  
+  AnyVar FirstControlVelRatio = 1.0;
+  AnyVar SecondControlVelRatio = 0.15;
+  
+  AnyVar HeightFactorFun = iffun(lteqfun(HeightRatio, FirstControlHeightRatio),
+                                 iffun(ltfun(HeightRatio, SecondControlHeightRatio), 1.0,
+                                 (cos((HeightRatio-SecondControlHeightRatio)/(FirstControlHeightRatio-SecondControlHeightRatio)*pi)+1)*0.5),
+                                 0.0);  
+  AnyVar RadiusFactorFun = iffun(lteqfun(RadiusRatio, FirstControlRadiusRatio),
+                                 iffun(ltfun(RadiusRatio, SecondControlRadiusRatio), 1.0,
+                                 (cos((RadiusRatio-SecondControlRadiusRatio)/(FirstControlRadiusRatio-SecondControlRadiusRatio)*pi)+1)*0.5),
+                                 0.0);
+  AnyVar VelFactorFun    = iffun(lteqfun(VelRatio, FirstControlVelRatio),
+                                 iffun(ltfun(VelRatio, SecondControlVelRatio), 1.0,
+                                 (cos((VelRatio-SecondControlVelRatio)/(FirstControlVelRatio-SecondControlVelRatio)*pi)+1)*0.5),
+                                 0.0);
+  #endif   
+  
+  #if _SMOOTHING_FUNCTION_PROFILE_ == "FUNC_PROFILE_LINEAR"
+  AnyVar FirstControlHeightRatio = 1.0;
+  AnyVar SecondControlHeightRatio = 0.8;    
+  AnyVar FirstControlRadiusRatio = 1.0;
+  AnyVar SecondControlRadiusRatio = 0.9;  
+  AnyVar FirstControlVelRatio = 1.0;
+  AnyVar SecondControlVelRatio = 0.15;
+  
+  AnyVar HeightFactorFun = iffun(lteqfun(HeightRatio, FirstControlHeightRatio),
+                                 iffun(ltfun(HeightRatio, SecondControlHeightRatio), 1.0, HeightFactorFun_Lin(HeightRatio)),
+                                 0.0);
+  AnyVar RadiusFactorFun = iffun(lteqfun(RadiusRatio, FirstControlRadiusRatio),
+                                 iffun(ltfun(RadiusRatio, SecondControlRadiusRatio), 1.0, RadiusFactorFun_Lin(RadiusRatio)),
+                                 0.0);
+  AnyVar VelFactorFun    = iffun(lteqfun(VelRatio, FirstControlVelRatio),
+                                 iffun(ltfun(VelRatio, SecondControlVelRatio), 1.0, VelFactorFun_Lin(VelRatio)),
+                                 0.0);
+  #endif     
+  
+  #if _SMOOTHING_FUNCTION_PROFILE_ == "FUNC_PROFILE_TEST"
+  AnyVar FirstControlHeightRatio = 1.0;
+  AnyVar SecondControlHeightRatio = 0.8;    
+  AnyVar FirstControlRadiusRatio = 1.0;
+  AnyVar SecondControlRadiusRatio = 0.9;  
+  AnyVar FirstControlVelRatio = 1.0;
+  AnyVar SecondControlVelRatio = 0.15;
+  
+  AnyVar HeightFactorFun = iffun(FirstControlHeightCheck,
+                                 iffun(SecondControlHeightCheck, 1.0, HeightFactorFun_Lin(HeightRatio)),
+                                 0.0);
+  AnyVar RadiusFactorFun = iffun(FirstControlRadiusCheck,
+                                 iffun(SecondControlRadiusCheck, 1.0, RadiusFactorFun_Lin(RadiusRatio)),
+                                 0.0);
+//  AnyVar VelFactorFun    = iffun(FirstControlVelCheck,
+//                                 iffun(SecondControlVelCheck, 1.0, VelFactorFun_BSpline4(VelRatio)[0]),
+//                                 0.0);
+//  AnyVar VelFactorFun    = iffun(FirstControlVelCheck, 
+//                                 VelFactorFun_SW(VelRatio)[0], 
+//                                 0.0);
+  
+  AnyVar VelFactorFun    = iffun(FirstControlVelCheck,
+                                 iffun(SecondControlVelCheck , 1.0,
+                                 (cos((VelRatio-SecondControlVelRatio)/(FirstControlVelRatio-SecondControlVelRatio)*pi)+1)*0.5),
+                                 0.0);
+  #endif    
+  
+  #undef _SMOOTHING_FUNCTION_PROFILE_
+  
+  AnyVar DisFactorFun    = HeightFactorFun * RadiusFactorFun;  
+  AnyVar SmoothingFunction = DisFactorFun * VelFactorFun;
+  
+  AnyVar ContactStrengthSmoothed = SmoothingFunction * .Strength;
+  AnyVar ContactStrengthDisAndVel = iffun(andfun(andfun(andfun(LowerThanHighDistLimit,GreaterThanLowDistLimit),LowerThanRadiusLimit),LowerThanHighVelLimit), .Strength, 0.0);
+  AnyVar ContactStrengthOriginal = iffun( andfun(andfun(LowerThanHighDistLimit,GreaterThanLowDistLimit),LowerThanRadiusLimit),.Strength,0.0);
+  //<--Test
+  
+  AnyVec3 NormalVector={ 
+    iffun(.Direction[0]-0,0,1),
+    iffun(.Direction[0]-1,0,1),
+    iffun(.Direction[0]-2,0,1)};
+  
+  AnyVec3 FrictionVector1={ 
+    iffun(.Direction[1]-0,0,1),
+    iffun(.Direction[1]-1,0,1),
+    iffun(.Direction[1]-2,0,1)};
+  
+  AnyVec3 FrictionVector2={ 
+    iffun(.Direction[2]-0,0,1),
+    iffun(.Direction[2]-1,0,1),
+    iffun(.Direction[2]-2,0,1)};
+  
+  
+  AnyMuscleModelUsr1 ContactMuscleModel=   
+  {
+    F0 = 0.000000;
+    //S = .UserDefinedStrengthFunction;
+    S = .ContactStrengthSmoothed;
+  };        
+  
+  AnyMuscleModelUsr1 ContactMuscleModel1=   
+  {
+    F0 = 0.000000;
+    //S = .UserDefinedStrengthFunction;
+    S = .ContactStrengthSmoothed;
+  };        
+  
+  AnyMuscleModelUsr1 ContactMuscleModel2=   
+  {
+    F0 = 0.000000;
+    //S = .UserDefinedStrengthFunction;
+    S = .ContactStrengthSmoothed;
+  };        
+  
+  
+  AnyKinLinear Lin={
+    AnyRefFrame &Box =..BaseObject;
+    AnyRefFrame &Hand = ..TargetObject;
+    Ref=0;
+  };
+  
+  
+  
+  AnyFolder Direction0Muscle ={
+    AnyGeneralMuscle NormalDirectionMuscle={
+      AnyKinMeasureOrg NormalDir={
+        AnyKinLinear &ref=...Lin;
+        MeasureOrganizer={....Direction[0]}; //always pick first element
+      };
+      AnyMuscleModelUsr1 &ref1=..ContactMuscleModel2;
+      ForceDirection=1;
+      //AnyVar StrengthTestVal = 
+    };
+  };
+  
+  
+  
+  AnyFolder Direction01Muscle={
+    AnyFolder Push={
+      AnyKinMeasureOrg NormalDir={
+        AnyKinLinear &ref=...Lin;
+        MeasureOrganizer={....Direction[0]}; //always pick first element
+      };
+      AnyKinMeasureOrg FrictionDir={
+        AnyKinLinear &ref=...Lin;
+        MeasureOrganizer={....Direction[1]}; // pick second element
+      };
+      AnyKinMeasureLinComb LinCombinationMeasure ={
+        AnyKinMeasureOrg &u1=.NormalDir;
+        AnyKinMeasureOrg &u2=.FrictionDir;    
+        Coef={
+          {1,....StaticFrictionCoefficient}
+        };     
+        OutDim = 1;
+      };
+      
+      AnyGeneralMuscle FrictionMuscle={
+        //       AnyKinMeasureOrg &ref1=.FrictionDir;
+        AnyKinMeasureLinComb &ref1=.LinCombinationMeasure;
+        AnyMuscleModelUsr1 &ref2=...ContactMuscleModel1;
+        ForceDirection=1;
+      };
+      
+    };//Push
+    
+    AnyFolder Pull={
+      AnyKinMeasureOrg NormalDir={
+        AnyKinLinear &ref=...Lin;
+        MeasureOrganizer={....Direction[0]}; //always pick first element
+      };
+      AnyKinMeasureOrg FrictionDir={
+        AnyKinLinear &ref=...Lin;
+        MeasureOrganizer={....Direction[1]}; // pick second element
+      };
+      AnyKinMeasureLinComb LinCombinationMeasure ={
+        AnyKinMeasureOrg &u1=.NormalDir;
+        AnyKinMeasureOrg &u2=.FrictionDir;    
+        Coef={
+          {-1,....StaticFrictionCoefficient}
+        };     
+        OutDim = 1;
+      };
+      
+      AnyGeneralMuscle FrictionMuscle={
+        AnyKinMeasureLinComb &ref1=.LinCombinationMeasure;
+        //        AnyKinMeasureOrg &ref1=.FrictionDir;
+        AnyMuscleModelUsr1 &ref2=...ContactMuscleModel1;
+        ForceDirection=-1;
+      };
+      
+    };//Pull
+    
+  };
+  
+  
+  
+  AnyFolder Direction02Muscle={
+    AnyFolder Push={
+      AnyKinMeasureOrg NormalDir={
+        AnyKinLinear &ref=...Lin;
+        MeasureOrganizer={....Direction[0]}; //always pick first element
+      };
+      AnyKinMeasureOrg FrictionDir={
+        AnyKinLinear &ref=...Lin;
+        MeasureOrganizer={....Direction[2]}; // pick last element
+      };
+      AnyKinMeasureLinComb LinCombinationMeasure ={
+        AnyKinMeasureOrg &u1=.NormalDir;
+        AnyKinMeasureOrg &u2=.FrictionDir;    
+        Coef={
+          {1,....StaticFrictionCoefficient}
+        };     
+        OutDim = 1;
+      };
+      
+      AnyGeneralMuscle FrictionMuscle={
+        AnyKinMeasureLinComb &ref1=.LinCombinationMeasure;
+        //        AnyKinMeasureOrg &ref1=.FrictionDir;
+        
+        AnyMuscleModelUsr1 &ref2=...ContactMuscleModel2;
+        ForceDirection=1;
+      };
+      
+    };//Push
+    
+    AnyFolder Pull={
+      AnyKinMeasureOrg NormalDir={
+        AnyKinLinear &ref=...Lin;
+        MeasureOrganizer={....Direction[0]}; //always pick first element
+      };
+      AnyKinMeasureOrg FrictionDir={
+        AnyKinLinear &ref=...Lin;
+        MeasureOrganizer={....Direction[2]}; // pick last element
+      };
+      AnyKinMeasureLinComb LinCombinationMeasure ={
+        AnyKinMeasureOrg &u1=.NormalDir;
+        AnyKinMeasureOrg &u2=.FrictionDir;    
+        Coef={
+          {-1,....StaticFrictionCoefficient}
+        };     
+        OutDim = 1;
+      };
+      
+      AnyGeneralMuscle FrictionMuscle={
+        AnyKinMeasureLinComb &ref1=.LinCombinationMeasure;
+        //        AnyKinMeasureOrg &ref1=.FrictionDir;
+        AnyMuscleModelUsr1 &ref2=...ContactMuscleModel2;
+        ForceDirection=-1;
+      };
+      
+    };//Pull
+    
+  };
+  
+  AnyFolder RefMuscles = 
+  {
+    AnyMuscle& ref0 = .Direction0Muscle.NormalDirectionMuscle;
+    AnyMuscle& ref1 = .Direction01Muscle.Push.FrictionMuscle;
+    AnyMuscle& ref2 = .Direction01Muscle.Pull.FrictionMuscle;
+    AnyMuscle& ref3 = .Direction02Muscle.Push.FrictionMuscle;
+    AnyMuscle& ref4 = .Direction02Muscle.Pull.FrictionMuscle;
+  };
+  
+//  AnyForceMomentMeasure ForceMomentMeasure = 
+//  {
+//    AnyForceBase& ref0 = .Direction0Muscle.NormalDirectionMuscle;
+//    AnyForceBase& ref1 = .Direction01Muscle.Push.FrictionMuscle;
+//    AnyForceBase& ref2 = .Direction01Muscle.Pull.FrictionMuscle;
+//    AnyForceBase& ref3 = .Direction02Muscle.Push.FrictionMuscle;
+//    AnyForceBase& ref4 = .Direction02Muscle.Pull.FrictionMuscle;
+//    
+//    AnyRefFrame& base = ..BaseObject;
+//    
+//    AnyVec3 Flocal = F * base.Axes;
+//    AnyVec3 Mlocal = M * base.Axes;
+//  };
+  
+  AnyDrawVector DrawNormalForce =     
+  {
+    AnyRefFrame &ref=..TargetObject;
+    AnyVar Strength=   iffun(.ContactMuscleModel.S,.ContactMuscleModel.S,0.00001);
+    Vec =..ScaleFactor*..DrawRef.DrawSettingsSupport.Lin.ScaleFactor*(
+    .NormalVector*.Direction0Muscle.NormalDirectionMuscle.Ft*..BaseObject.Axes'
+    +.NormalVector*.Direction01Muscle.Push.FrictionMuscle.Ft*..BaseObject.Axes'
+    +.NormalVector*.Direction02Muscle.Push.FrictionMuscle.Ft*..BaseObject.Axes'
+    +.NormalVector*.Direction01Muscle.Pull.FrictionMuscle.Ft*..BaseObject.Axes'
+    +.NormalVector*.Direction02Muscle.Pull.FrictionMuscle.Ft*..BaseObject.Axes');
+    AnyVar length=Strength*(2-(1-Strength/sqrt(Strength^2)));
+    
+    PointAway = Off;
+    DrawCoord = Off;
+    
+    Line.RGB = ..DrawRef.DrawSettingsSupport.Lin.RGB;
+    Line.Thickness = ..DrawRef.DrawSettingsSupport.Lin.Thickness;
+    Line.End.Thickness = 2*..DrawRef.DrawSettingsSupport.Lin.Thickness;  
+    Line.End.Length = 4*..DrawRef.DrawSettingsSupport.Lin.Thickness;
+    
+  };  
+
+  AnyFolder NormalForceValue =     
+  {
+    AnyRefFrame &ref=..TargetObject;
+    AnyVar Strength=   iffun(.ContactMuscleModel.S,.ContactMuscleModel.S,0.00001);
+    AnyVec3 NormalForceVector =..ScaleFactor*..DrawRef.DrawSettingsSupport.Lin.ScaleFactor*(
+    .NormalVector*.Direction0Muscle.NormalDirectionMuscle.Ft*..BaseObject.Axes'
+    +.NormalVector*.Direction01Muscle.Push.FrictionMuscle.Ft*..BaseObject.Axes'
+    +.NormalVector*.Direction02Muscle.Push.FrictionMuscle.Ft*..BaseObject.Axes'
+    +.NormalVector*.Direction01Muscle.Pull.FrictionMuscle.Ft*..BaseObject.Axes'
+    +.NormalVector*.Direction02Muscle.Pull.FrictionMuscle.Ft*..BaseObject.Axes');
+    AnyVar length=Strength*(2-(1-Strength/sqrt(Strength^2)));
+  };
+  
+  AnyDrawVector DrawFrictionForce =     
+  {
+    AnyRefFrame &ref=..TargetObject;
+    
+    Vec =..ScaleFactor*..DrawRef.DrawSettingsSupport.Lin.ScaleFactor*..StaticFrictionCoefficient*(
+    .FrictionVector1*.Direction01Muscle.Push.FrictionMuscle.Ft
+    -.FrictionVector1*.Direction01Muscle.Pull.FrictionMuscle.Ft
+    +.FrictionVector2*.Direction02Muscle.Push.FrictionMuscle.Ft
+    -.FrictionVector2*.Direction02Muscle.Pull.FrictionMuscle.Ft)*..BaseObject.Axes';
+    
+    PointAway = Off;
+    DrawCoord = Off;
+    
+    Line.RGB = ..DrawRef.DrawSettingsSupport.Lin.RGB;
+    Line.Thickness = ..DrawRef.DrawSettingsSupport.Lin.Thickness;
+    Line.End.Thickness = 2*..DrawRef.DrawSettingsSupport.Lin.Thickness;  
+    Line.End.Length = 4*..DrawRef.DrawSettingsSupport.Lin.Thickness;
+  };
+  
+  
+  //resultann force given in global ref system
+  AnyVec3 NormalForceVec = NormalForceValue.NormalForceVector/(.ScaleFactor*.DrawRef.DrawSettingsSupport.Lin.ScaleFactor);
+  AnyVar NormalForceScalar = (NormalForceVec[0]^2+NormalForceVec[1]^2+NormalForceVec[2]^2)^0.5;
+  
+  AnyVec3 NormalForceVec2 = NormalForceValue.NormalForceVector/(.ScaleFactor*.DrawRef.DrawSettingsSupport.Lin.ScaleFactor);
+  AnyVar NormalForceScalar2 = (NormalForceVec2[0]^2+NormalForceVec2[1]^2+NormalForceVec2[2]^2)^0.5;
+  
+  AnyVec3 FrictionForceVec = DrawFrictionForce.Vec/(.ScaleFactor*.DrawRef.DrawSettingsSupport.Lin.ScaleFactor);
+  AnyVar FrictionForceScalar = (FrictionForceVec[0]^2+FrictionForceVec[1]^2+FrictionForceVec[2]^2)^0.5;
+  
+  //AnyVar TotalForceScalar = (TotalForceVec[0]^2+TotalForceVec[1]^2+TotalForceVec[2]^2)^0.5;
+  
+  /*
+  AnyDrawVector DrawFrictionForce1 =     {
+  
+  AnyRefFrame &ref=..TargetObject;
+  
+  Vec =0.001*..StaticFrictionCoefficient*(
+  .FrictionVector1*.Direction01Muscle.Push.FrictionMuscle.Ft*..BaseObject.Axes'+
+  -.FrictionVector1*.Direction01Muscle.Pull.FrictionMuscle.Ft*..BaseObject.Axes');
+  
+  PointAway = Off;
+  DrawCoord = Off;
+  Line.RGB = {0,1,0};
+  Line.Thickness = 0.015;
+  Line.End.Thickness = 2*0.015; 
+  Line.End.Length = 4*0.015;
+  };
+
+  AnyDrawVector DrawFrictionForce2 =     {
+  
+  AnyRefFrame &ref=..TargetObject;
+  
+  Vec =0.001*..StaticFrictionCoefficient*(
+  .FrictionVector2*.Direction02Muscle.Push.FrictionMuscle.Ft*..BaseObject.Axes'+
+  -.FrictionVector2*.Direction02Muscle.Pull.FrictionMuscle.Ft*..BaseObject.Axes');
+  
+  PointAway = Off;
+  DrawCoord = Off;
+  Line.RGB = {1,0,0};
+  Line.Thickness = 0.015;
+  Line.End.Thickness = 2*0.015; 
+  Line.End.Length = 4*0.015;
+  };
+  */
+};
+

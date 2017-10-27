@@ -6,11 +6,11 @@ The Cervical Spine Model
 The cervical spine model is the neck of the human model. It is always present
 when the human model is used.  
 
-The cervical spine model contains 7 vertebrae with 3 DoF spherical
-joints from T1 to C2, a 1 DoF joint between C2 and skull and 136 muscle
-fascicles. The center of rotations is based on Amevo et al. 1991.
+The cervical spine model contains **7 vertebrae** with 3 DoF spherical
+joints from T1 to C2, a 1 DoF joint between C2 and skull and **136 muscle
+fascicles**. The center of rotations is based on Amevo et al. 1991.
 
-The cervical spine model is part of the Trunk mode q l, and the segmentes,
+The cervical spine model is part of the Trunk model, and the segmentes,
 joints and kinematica is therefoore included by default.
 
 The segments of the cervical spine model are always present, but the muscles are
@@ -21,11 +21,11 @@ arms with muscles are present.
 
 .. raw:: html 
 
-    <video width="49%" style="display:inline; margin: 0 auto;" controls autoplay loop>
+    <video width="49%" style="display:block; margin: 0 auto;" controls autoplay loop>
         <source src="../_static/CervicalSpine_rotating_model.mp4" type="video/mp4">
     Your browser does not support the video tag.
     </video>
-    <img src="../_static/CervicalSpineCloseupBack.jpg" alt="Smiley face" width="49%">
+    <!--<img src="../_static/CervicalSpineCloseupBack.jpg" alt="Smiley face" width="49%">-->
 
 .. centered::  *Cervical spine model*.
 

@@ -1,0 +1,143 @@
+//define = (
+// [{'FP_TYPE':'1'}, 
+//  {'FP_TYPE':'2'}, 
+//  {'FP_TYPE':'3'}, 
+//  {'FP_TYPE':'4'}],
+// [{PLATE_LIMB_DISTANCE':0.01},
+//  {'PLATE_LIMB_DISTANCE': 0.5}]
+//)
+
+
+#include "../libdef.any"
+
+#include "<ANYMOCAP_PATH>\ForcePlates\ForcePlateAutoDetection.any"
+
+
+#ifndef FP_TYPE
+#define FP_TYPE 0
+#endif
+
+
+#ifndef PLATE_LIMB_DISTANCE  
+#define PLATE_LIMB_DISTANCE  0.05
+#endif
+
+
+
+// Prevent the no reaction bug
+Main = {
+  AnyFixedRefFrame fixref = {}; AnyReacForce reac = {AnyKinLinear lin = {AnyRefFrame& ref = ..fixref;};};
+};
+
+
+
+
+#define CREATE_DUMMY_LIMB(NAME, DIST)  AnyFixedRefFrame NAME= {\
+  Origin = .Plate.Corners.PlateCenter.sRel+ {0,0, DIST}*Axes';\
+  Axes = .Plate.Corners.PlateCenter.ARel;\
+  AnyRefNode HeelContactNodeLow = {}; AnyRefNode ToeLateralContactNode = {};  }
+#define CREATE_C3D(FNAME) AnyInputC3D C3D = {\
+  FileName = #FNAME;\
+  PointsScaleFactor = 0.001; ConstructChartOnOff = Off; ConstructModelOnOff = Off; }
+
+
+
+Main = 
+{  
+  
+  
+  AnyFolder ForcePlates =  {
+    
+    #if FP_TYPE == 1 | FP_TYPE == 0
+    AnyFolder  Type1 = {
+      CREATE_C3D(c3d_data/type1.c3d);
+      CREATE_DUMMY_LIMB(foot1, PLATE_LIMB_DISTANCE);
+      CREATE_DUMMY_LIMB(foot2, 5);
+      
+      ForcePlateAutoDetection Plate(
+        PLATE_NO=1,
+        HeightTolerance = 0.07,
+        VelThreshold = 2.2,
+        C3D_OBJECT = Main.ForcePlates.Type1.C3D,
+        FORCEPLATE_TYPE = 1,
+        LIMB1 =.foot1,
+        LIMB2 = .foot2
+      )
+      ={ };  
+      
+    };
+    #endif
+    
+    
+    
+    #if FP_TYPE == 2 | FP_TYPE == 0
+    AnyFolder Type2 = {
+      CREATE_C3D(c3d_data/type2.c3d);
+      CREATE_DUMMY_LIMB(foot1, PLATE_LIMB_DISTANCE);
+      CREATE_DUMMY_LIMB(foot2, 5);
+      
+      ForcePlateAutoDetection Plate(
+      PLATE_NO=1,
+      HeightTolerance = 0.07,
+      VelThreshold = 2.2,
+      C3D_OBJECT = Main.ForcePlates.Type2.C3D,
+      FORCEPLATE_TYPE = 2,
+      LIMB1 =.foot1,
+      LIMB2 = .foot2
+      )
+      ={ };  
+    };
+    
+    #endif
+    
+    #if FP_TYPE == 3 | FP_TYPE == 0
+    AnyFolder Type3 = {
+      CREATE_C3D(c3d_data/type3.c3d);
+      CREATE_DUMMY_LIMB(foot1, PLATE_LIMB_DISTANCE);
+      CREATE_DUMMY_LIMB(foot2, 5);
+      
+      ForcePlateAutoDetection Plate(
+      PLATE_NO=1,
+      HeightTolerance = 0.07,
+      VelThreshold = 2.2,
+      C3D_OBJECT = Main.ForcePlates.Type3.C3D ,
+      FORCEPLATE_TYPE = 3,
+      LIMB1 =.foot1,
+      LIMB2 = .foot2
+      )
+      ={ };  
+    };
+    #endif  
+    
+    #if FP_TYPE == 4 | FP_TYPE == 0
+    AnyFolder Type4 = {
+      CREATE_C3D(c3d_data/type4.c3d);
+      CREATE_DUMMY_LIMB(foot1, PLATE_LIMB_DISTANCE);
+      CREATE_DUMMY_LIMB(foot2, 5);
+      
+      
+      ForcePlateAutoDetection Plate(
+      PLATE_NO=1,
+      HeightTolerance = 0.07,
+      VelThreshold = 2.2,
+      C3D_OBJECT = Main.ForcePlates.Type4.C3D,
+      FORCEPLATE_TYPE = 4,
+      LIMB1 =.foot1,
+      LIMB2 = .foot2
+      )
+      ={ };
+    };
+    #endif
+  };
+  
+  AnyBodyStudy Study = {
+    Gravity= {0,0,-9.81};
+    tStart = 0.8;
+    tEnd = 2;
+    nStep = 100;
+    AnyFolder& ForcePlates = Main.ForcePlates;
+    Kinematics.SolverType = KinSolDeterminate;
+    InverseDynamics.Criterion.Type = MR_Linear;
+  };
+  
+};

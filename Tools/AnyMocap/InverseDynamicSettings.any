@@ -1,0 +1,49 @@
+Main.Studies.InverseDynamicStudy = {
+  
+ InitialConditions.KinematicTol=1e-5; 
+ Kinematics.KinematicTol=1e-5; 
+
+ Kinematics.SolverType = KinSolOff;
+ InitialConditions.SolverType = Kinematics.SolverType;
+ 
+
+InitialConditions.PreOperation = 
+{
+  AnyOperation &SetView = Main.ModelSetup.Views.SetViewMacros.InverseDynamicView; 
+};
+ 
+
+// Add the Analysis to the Main.RunAnalysis sequence
+Main.RunAnalysis.InverseDynamics = 
+{
+  #if BM_LEG_MUSCLES_BOTH == CONST_MUSCLES_3E_HILL
+    AnyOperationSequence &MuscleCalibration = Main.HumanModel.Calibration.CalibrationSequence;
+  #endif      
+  
+  AnyOperation &RunInverseDynamics = ...InverseDynamics;
+};
+
+
+ #ifndef N_STEP
+ #define N_STEP Main.ModelSetup.TrialSpecificData.nStep
+ #endif
+ 
+ #ifndef T_END
+ #define T_END Main.ModelSetup.TrialSpecificData.tEnd
+ #endif
+ 
+ #ifndef T_START
+ #define T_START Main.ModelSetup.TrialSpecificData.tStart
+ #endif
+ 
+ AnyVar tFrame = (T_END-T_START)/(max({Main.ModelSetup.TrialSpecificData.nStep-1,1}));
+ 
+ 
+ Kinematics.ApproxVelAccPerturb = min({1.0/C3DData.Header.VideoFrameRate, tFrame});
+ InitialConditions.ApproxVelAccPerturb = Kinematics.ApproxVelAccPerturb ;
+ 
+ tStart = min({T_START+2*tFrame, T_END}); 
+ tEnd = max({T_END-2*tFrame, tStart});
+ nStep= max({N_STEP-4, 1});  
+ 
+};

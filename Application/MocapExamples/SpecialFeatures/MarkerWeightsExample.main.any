@@ -1,0 +1,68 @@
+// Example on setting Marker weights.
+
+// Include Lower Extremity PiG example
+#include "../Plug-in-gait_Simple/LowerExtremity.main.any"
+
+
+
+Main = 
+{
+  
+
+// The simplest way to change marker weights is to 
+// alter the WeightX/Y/Z argument for the CreateMarkerDriver
+// class. See: #include "<MOCAP_MARKER_PROTOCOL_FILE>"
+//E.g.
+  
+ ModelSetup.MocapDrivers = {
+    
+    CreateMarkerDriver RBAK ( 
+      MarkerName= RBAK ,
+      MarkerPlacement=Trunk.SegmentsThorax.ThoraxSeg,
+      WeightX=1.0,WeightY=1.0,WeightZ=1.0) 
+     = { sRelOpt = {0.0, 0.32, 0.07}; };
+   
+ };
+  
+// The WeightX/Y/Z specification can be overruled. This can be usefull 
+// if speific trial requires it. The following will set the X marker weight
+// of RBAK marker to zero, eventhough WeightX is 1:
+ModelSetup.MocapDrivers.RBAK = {ConstMarkerWeightX=0;};
+
+
+
+
+// If the C3D file has marker drop outs we can use the reciduals of the C3D file
+// to create time varying weight functions. Just set `UseC3DWeightResiduals = "On"`
+// in the class template arguments:
+
+ModelSetup.MocapDrivers = {
+    
+      CreateMarkerDriver RSHO ( 
+          MarkerName= RSHO ,
+          MarkerPlacement=Trunk.SegmentsThorax.ThoraxSeg,
+          UseC3DWeightResiduals  = ON)
+     = { sRelOpt = {0.0, 0.41, 0.19}; };
+
+   };
+
+
+// Finally, it is possible to override all other settings and use an arbitrary interpolation
+// function as weights. Here we override the weights for the RKNE marker with a custom interpolation 
+// function.
+
+AnyFunInterpol CustomWeight = 
+{
+ Type = PiecewiseLinear;
+ T = {1.5, 2, 2.5, 3, 3.5, 4};
+ Data = {{0, 1, 10, 1, 0, 0},// X weight
+         {0, 1, 10, 1, 0, 0},// Y weight
+         {0, 1, 10, 1, 0, 0} // Z weight
+        };
+};
+
+  ModelSetup.MocapDrivers.RKNE = {
+    MarkerWeightsPtr = &Main.CustomWeight;
+  };
+
+}; 
