@@ -8,13 +8,13 @@ and ScalingLengthMassFat.
 
 This lesson introduces more scaling methods, more precisely:
 
--  ScalingUniformExt (scale equally in all directions; input is external
+*  ScalingUniformExt (scale equally in all directions; input is external
    measurements)
 
--  ScalingLengthMassExt (scale taking mass into account; input is
+*  ScalingLengthMassExt (scale taking mass into account; input is
    external measurements)
 
--  ScalingLengthMassFatExt (scale taking mass and fat into account;
+*  ScalingLengthMassFatExt (scale taking mass and fat into account;
    input is external measurements).
 
 Scaling External
@@ -33,15 +33,15 @@ selected like this:
 .. code-block:: AnyScriptDoc
 
     // Scaling laws using joint to joint measures
-    //  #define BM_SCALING CONST_SCALING_UNIFORM
-    //  #define BM_SCALING CONST_SCALING_LENGTHMASS§
-    //  #define BM_SCALING CONST_SCALING_LENGTHMASSFAT§
+    //  #define BM_SCALING _SCALING_UNIFORM_
+    //  #define BM_SCALING _SCALING_LENGTHMASS_
+    §//  #define BM_SCALING _SCALING_LENGTHMASSFAT_§
     
     
     // Scaling laws using external measures
-    //  #define BM_SCALING CONST_SCALING_UNIFORM_EXTMEASUREMENTS 
-    //  #define BM_SCALING CONST_SCALING_LENGTHMASS_EXTMEASUREMENTS §
-      #define BM_SCALING CONST_SCALING_LENGTHMASSFAT_EXTMEASUREMENTS §
+    //  #define BM_SCALING_SCALING_UNIFORM_EXTMEASUREMENTS 
+    //  #define BM_SCALING_SCALING_LENGTHMASS_EXTMEASUREMENTS 
+    §   #define BM_SCALING_SCALING_LENGTHMASSFAT_EXTMEASUREMENTS §
       
     // Anthropometric data file (unchanged files can be found in AAUHuman\Scaling\AnyFamily)
     §//  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyMan.any"§
@@ -77,8 +77,11 @@ shown below, it will display the exact dimensions on the model:
     // All added constraints reaction forces to simulate standing human
     #include "Model\Drivers.any"
     
+	§#define DRAW_EXTERNAL_MEASURES§
     // Visualization of the external measures
-    §#include "Model\DrawExternalMeasures.any"§
+    #ifdef DRAW_EXTERNAL_MEASURES
+      #include "Model\DrawExternalMeasures.any"
+    #endif
   };
 
 
@@ -87,7 +90,7 @@ We should also remove the drawing of the forces on the hands to make the
 view plainer. You can do this by commenting out the code in the
 Environment.any file:
 
-|ScalingExternalMeasure|
+.. image:: _static/lesson2/image1.jpeg
 
 .. code-block:: AnyScriptDoc
 
@@ -128,7 +131,22 @@ Environment.any file:
     //    AnyRefFrame &Hand = .LeftHandLoad.Hand;
     //  };§
 
+	
+	
+And secondly switch off muscles in the Main file by uncommenting these lines:
+	
+.. code-block:: AnyScriptDoc
 
+    §#ifndef BM_LEG_MUSCLES_BOTH
+	    #define BM_LEG_MUSCLES_BOTH _MUSCLES_NONE_
+    #endif
+	#ifndef BM_ARM_MUSCLES_BOTH
+	  #define BM_ARM_MUSCLES_BOTH _MUSCLES_NONE_
+	#endif
+	#ifndef BM_TRUNK_MUSCLES
+	  #define BM_TRUNK_MUSCLES _MUSCLES_NONE_
+	#endif§
+	
 
 After loading the model you will see that the red spheres on the image
 below show the bony landmarks used for scaling of segment lengths in
@@ -232,7 +250,3 @@ geometry data from MRI and CT scans.
 We are extremely grateful to Ford Forschungszentrum Aachen, Germany, for
 sponsoring the scaling implementation.
 
-
-.. |ScalingExternalMeasure| image:: _static/lesson2/image1.jpeg
-   :width: 4.16667in
-   :height: 4.93750in

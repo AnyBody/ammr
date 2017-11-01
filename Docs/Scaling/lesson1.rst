@@ -551,7 +551,8 @@ of the general configuration block:
     //#endif
     //#ifndef BM_TRUNK_MUSCLES
     //  #define BM_TRUNK_MUSCLES _MUSCLES_NONE_
-	//#endif§
+    //#endif
+	§
 
 
 
