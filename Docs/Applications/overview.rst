@@ -1,18 +1,56 @@
 Application examples
 =============================
 
-In the repository, you can find musculoskeletal applications from a wide
-area of interests. These models are from various AnyBody users, and
-all demonstrate features from the AnyBody Modeling System. 
+In the repository, you can find musculoskeletal applications from a wide area of
+interests. These models are from various AnyBody users, and all demonstrate
+features from the AnyBody Modeling System. 
 
 .. note:: All examples are powerful computational models where variables of interest have been
-      biomechanically checked to make sense. However, when modifying or using models for other purposes
-      results may occur that cannot be interpreted by anatomical or physiological considerations.
+      biomechanically checked to make sense. However, when modifying or using
+      models for other purposes results may occur that cannot be interpreted by
+      anatomical or physiological considerations.
 
 
 Motion Caputure and gait analysis
 ----------------------------------
 
+All MoCap examples uses the base *AnyMoCap* model, which is a new framework for 
+making MoCap models in the AMMR.
+
+- **Simple Lower extremity model** 
+    Example of lower body MoCap model using the Plug-in-Gait marker protocol,
+    and walking on three typ4 force platforms. The model is fairly simple and a
+    good starting point for new users. If you plan to have many trials/subjects,
+    take a look at 
+
+- **Simple Full body model**
+    Example of full body MoCap model using the Plug-in-Gait marker protocol, and
+    walking on three typ4 force platforms. The model is fairly simple and a good
+    starting point for new users. If you plan to have many trials/subjects, take
+    a look at 
+
+- **Simple GRF prediction model**
+    Example of full body MoCap mocdel using the Plug-in-Gait marker protocol but
+    without force plates. The external forces are predicted using the GRF
+    algorithms. 
+
+- **Multi trial MoCap model**
+    Example of MoCap model structured for analysing data from multiple trials
+    and subjects. The subject antropometry is scaled/optimized from a single
+    static (or dynamic) referece. The model is organized so each trial has its
+    own mainfile. A structure makes it much easier to work with large datasets.
+    This is the best starting point for analysing bigger MoCap experiments. 
+
+- **Inertial MoCap example**
+    Example of a MoCap mdoel using data from a inertial motional caputure suit.
+    The model uses a BVH file with data from an Xsens suit. The ground reaction
+    forces are predicted using the GRF prediction algorithm. 
+    
+- **Special AnyMocap features**
+    A collection of small models that show-off special features of the
+    *AnyMocap* framework. This includes offset to forceplates, individual cutoff
+    frequencies for markers,  normalization with respect to gait cycle events,
+    using time-varying weight for markers, plus more. 
 
 
 Orthopedics and rehab
