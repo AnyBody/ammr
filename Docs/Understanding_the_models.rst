@@ -1,8 +1,8 @@
 Understanding the AnyScript Models
 ##########################################
 
-Strucuture
-===========================
+.. Model Structure
+.. ======================================
 
 Most examples and application you will encounter in the *AnyBody Model Repository* use the Human Model in one way or another. 
 
@@ -39,38 +39,60 @@ Even thought the models wary greatly in complexity they mostly follow this commo
 
 
 
+.. ``#include "libdef.any"``
+.. ---------------------------------
 
-libdef.any
---------------------------
+Including ``"libdef.any"`` 
+---------------------------------------
 
-All models must have the ``#include "<path to the AMMR>/libdef.any"``. This will instruct AnyBody to use a certain AMMR.
-You can place your models anywhere on your computer, as long as you include the ``libdef.any`` which is found in the top level folder of the AMMR.
+All models must have the ``#include "<path to the AMMR>/libdef.any"``. This will
+instruct AnyBody to use a particular AMMR.
+
+You can place your models anywhere on your computer, as long as you include the
+``libdef.any`` file found in the top level folder of the AMMR.
 
 
 
-Including the Human Model
----------------------------------------------
+.. ``#define "BM_*"``
+.. ----------------------------------------------------
 
-The AnyBody Human Model is included using the ``#include
-"<ANYBODY_PATH_BODY>/HumanModel.any"``. See
-:doc:`/BodyModels/BodyParts_and_models` for a list of the possible body parts
-which can be included. 
+Configuring  the Human Model
+-------------------------------------------
 
-Before that happens the model must be configured using ``BM_*`` configuration statements. 
-These configurations are all ``#define`` or ``#path`` statements prefixed with ``BM_``. 
+The HumanBody Model is configured through a number of ``#define`` and ``#path``
+statements. These configuration are all prefixed with ``BM_`` (e.g. ``#define
+BM_ARM_RIGHT OFF`` to disable the right arm).
+
+If no configuration parameters are given, the full body model is loaded (the default configuration). 
 
 .. seealso:: :doc:`The documentation on BM configuration </BM_Config/HumanBody_configurations>`
 
 
-Composing the model
------------------------------
+.. ``#include "HumanModel.any"`` 
+.. -------------------------------------------------
 
-The model section is where we compose the model. It can consist of the body from
-the human, drivers, constraints and models of the environment. 
+Including the ``HumanModel`` 
+
+After the ``BM_*`` parameters we can include the Human Model. This with a single line:
+
+``#include "<ANYBODY_PATH_BODY>/HumanModel.any"``
 
 
-The Study
-------------------------------
+.. ``AnyFolder Model``
+.. ------------------------------------
+
+Compsing the Model
+---------------------------------------
+
+Most examples have a section where the model is composed. This is where we combine the ``Body`` from the HumanModel, and add extra things like drivers, external loads, and constraints. 
+
+It could also be any models of the environment which the body interacts with.
+
+.. ``AnyBodyStudy``
+.. -------------------------------
+
+The Study section
+-------------------------------
 
 The ``AnyBodyStudy`` is where you configure and define your simulation. It
 specificies start and end times of the simulation, and number of steps. It also
