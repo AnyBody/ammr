@@ -1,0 +1,364 @@
+
+#class_template AutoPelvisPos(
+RASIS=RASI,
+LASIS=LASI, 
+BACK=RPSI,
+DIRECT_PELVIS_POS=0,
+C3D_OBJECT=Main.ModelSetup.C3DFileData,
+T_START = Main.Studies.InverseDynamicStudy.tStart,
+MANNEQUIN_FOLDER = Main.HumanModel.Mannequin
+) {
+    #if DIRECT_PELVIS_POS == 0
+      #var AnyVar tStart = T_START;
+      // construct the position vector and rotation matrix from the values in the C3D file.
+      #var AnyVec3 Pelvis_RASIS = C3D_OBJECT.Points.Markers.RASIS.PosInterpol(tStart);
+      #var AnyVec3 Pelvis_LASIS = C3D_OBJECT.Points.Markers.LASIS.PosInterpol(tStart);
+      #var AnyVec3 Pelvis_Back = Main.ModelSetup.C3DFileData.Points.Markers.BACK.PosInterpol(tStart);
+    
+      #var AnyVec3 PelvisPos = 0.5*(Pelvis_RASIS + Pelvis_LASIS) - 0.02*PelvisRotMat'[0] - 0.01*PelvisRotMat'[1];
+      #var AnyMat33 PelvisRotMat = RotMat(Pelvis_LASIS, Pelvis_RASIS, Pelvis_Back)
+                              * RotMat(-pi/2,x)
+                              * RotMat(pi/2,y)*RotMat(11*pi/180,z);
+    #else
+      #var AnyVec3 PelvisPos;
+      #var AnyMat33 PelvisRotMat;
+      
+    #endif
+                            
+    AnyFolder PelvisRotations = 
+    {
+       AnyVar yRot1 = asin(-.PelvisRotMat[2][0]);
+       AnyVar yRot2 = pi - yRot1;
+       
+       AnyVar zRot1 = atan2(.PelvisRotMat[1][0]/cos(yRot1), .PelvisRotMat[0][0]/cos(yRot1));
+       AnyVar zRot2 = atan2(.PelvisRotMat[1][0]/cos(yRot2), .PelvisRotMat[0][0]/cos(yRot2));
+       
+       AnyVar xRot1 = atan2(.PelvisRotMat[2][1]/cos(yRot1),.PelvisRotMat[2][2]/cos(yRot1));
+       AnyVar xRot2 = atan2(.PelvisRotMat[2][1]/cos(yRot2),.PelvisRotMat[2][2]/cos(yRot2));
+       AnyVar abs1 = abs(zRot1)+abs(yRot1)+abs(zRot1);
+       AnyVar abs2 = abs(zRot2)+abs(yRot2)+abs(zRot2);
+       
+       AnyVar zRot = iffun(gtfun(abs1, abs2), zRot2, zRot1);
+       AnyVar yRot = iffun(gtfun(abs1, abs2), yRot2, yRot1);
+       AnyVar xRot = iffun(gtfun(abs1, abs2), xRot2, xRot1);
+
+       // Check that the auto pos can reconstruct the rotation matrix.
+       AnyFloat err = abs(.PelvisRotMat-RotMat(zRot,z)*RotMat(yRot,y)*RotMat(xRot,x));
+       AnyInt AutoPosAssert = expect(ltfun(err,1e-5), "AutoPos failed to calculate the correct values");
+     };
+     
+       
+    AnyFolder &InitPosRef= MANNEQUIN_FOLDER.Posture;    
+    
+    InitPosRef= 
+    {
+      PelvisPosX = DesignVar(.PelvisPos[0]);
+      PelvisPosY = DesignVar(.PelvisPos[1]);
+      PelvisPosZ = DesignVar(.PelvisPos[2]);
+      
+      
+      PelvisRotX = DesignVar(.PelvisRotations.xRot*180/pi);
+      PelvisRotY = DesignVar(.PelvisRotations.yRot*180/pi);
+      PelvisRotZ = DesignVar(.PelvisRotations.zRot*180/pi);
+    };
+};
+
+#class_template AutomaticFullBodyInitialPosition (
+MANNEQUIN_FOLDER = Main.HumanModel.Mannequin
+) {
+
+#var AnyVec3 RASIS = {-0.13,1,0};
+#var AnyVec3 LASIS = {0.13,1,0};
+#var AnyVec3 SACRUM = {0,1,-0.14} ;
+
+ #var AnyVec3 PelvisPos = DesignVar((1/3)*( RASIS + LASIS + SACRUM ));
+ #var AnyMat33 PelvisRotMat = RotMat(SACRUM , 
+                                    0.5*(LASIS +RASIS ),
+                                    LASIS )*RotMat(pi/2,x);  
+
+
+#var AnyVec3 RKNEE = RightHip +{0,-0.5,0}*PelvisRotMat';
+#var AnyVec3 LKNEE= LeftHip +{0,-0.5,0} *PelvisRotMat';
+#var AnyVec3 RANKLE= RKNEE + {0,-0.5,0}*RightThighRotation';
+#var AnyVec3 LANKLE= LKNEE + {0,-0.5,0}*LeftThighRotation';
+#var AnyVec3 RTOE= RANKLE + {0.21,-0.05,0}*RightShankRotation';
+#var AnyVec3 LTOE= LANKLE + {0.21,-0.05,0}*LeftShankRotation';
+
+#var AnyVec3 RSHOULDER= PelvisPos +{0,0.6,0.15}*PelvisRotMat';
+#var AnyVec3 LSHOULDER= PelvisPos +{0,0.6,-0.15}*PelvisRotMat';
+  
+
+
+
+
+  
+                            
+    AnyFolder PelvisRotations = 
+    {
+       AnyVar yRot1 = asin(-.PelvisRotMat[2][0]);
+       AnyVar yRot2 = pi - yRot1;
+       
+       AnyVar zRot1 = atan2(.PelvisRotMat[1][0]/cos(yRot1), .PelvisRotMat[0][0]/cos(yRot1));
+       AnyVar zRot2 = atan2(.PelvisRotMat[1][0]/cos(yRot2), .PelvisRotMat[0][0]/cos(yRot2));
+       
+       AnyVar xRot1 = atan2(.PelvisRotMat[2][1]/cos(yRot1),.PelvisRotMat[2][2]/cos(yRot1));
+       AnyVar xRot2 = atan2(.PelvisRotMat[2][1]/cos(yRot2),.PelvisRotMat[2][2]/cos(yRot2));
+       AnyVar abs1 = abs(zRot1)+abs(yRot1)+abs(zRot1);
+       AnyVar abs2 = abs(zRot2)+abs(yRot2)+abs(zRot2);
+       
+       AnyVar zRot = iffun(gtfun(abs1, abs2), zRot2, zRot1);
+       AnyVar yRot = iffun(gtfun(abs1, abs2), yRot2, yRot1);
+       AnyVar xRot = iffun(gtfun(abs1, abs2), xRot2, xRot1);
+
+       // Check that the auto pos can reconstruct the rotation matrix.
+       AnyFloat err = abs(.PelvisRotMat-RotMat(zRot,z)*RotMat(yRot,y)*RotMat(xRot,x));
+       AnyInt AutoPosAssert = expect(ltfun(err,1e-5), "AutoPos failed to calculate the correct values");
+     };
+     
+     
+      AnyVar PelvisPosX = PelvisPos[0];
+      AnyVar PelvisPosY = PelvisPos[1];
+      AnyVar PelvisPosZ = PelvisPos[2];
+      // Inital Pelvis rotation 
+      AnyVar PelvisRotX = DesignVar(PelvisRotations.xRot*180/pi);
+      AnyVar PelvisRotY = DesignVar(PelvisRotations.yRot*180/pi);
+      AnyVar PelvisRotZ = DesignVar(PelvisRotations.zRot*180/pi);
+
+  
+   AnyVec3 RightHip = PelvisPos + {0.08, -0.15, 0.12}*PelvisRotMat';
+   AnyVec3 LeftHip = PelvisPos + {0.08, -0.15, -0.12}*PelvisRotMat';
+                                      
+   AnyMat33 RightThighRotation = RotMat( RKNEE, 
+                                         RightHip , 
+                                         RKNEE+{0,0,1}*PelvisRotMat')
+                                        *RotMat(-pi/2,y)*RotMat(-pi/2,x);                             
+   AnyMat33 LeftThighRotation = RotMat( LKNEE,
+                                        LeftHip , 
+                                        RKNEE+ {0,0,1}*PelvisRotMat')
+                                        *RotMat(-pi/2,y)*RotMat(-pi/2,x);                             
+   
+   AnyMat33 RightShankRotation = RotMat(RANKLE, 
+                                       RKNEE,
+                                       RANKLE + {0,0,1}*RightThighRotation')
+                                        *RotMat(-pi/2,y)*RotMat(-pi/2,x);                             
+   AnyMat33 LeftShankRotation = RotMat( LANKLE, 
+                                       LKNEE,
+                                       LANKLE + {0,0,1}*LeftThighRotation')
+                                        *RotMat(-pi/2,y)*RotMat(-pi/2,x);                             
+   AnyMat33 RightFootRotation = RotMat(RANKLE, 
+                                       RTOE,
+                                       RKNEE);
+   AnyMat33 LeftFootRotation = RotMat( LANKLE, 
+                                       LTOE,
+                                       LKNEE );
+                                       
+   // Calculation of Hip Angles
+   AnyFolder RightHipRotations = {
+     AnyMat33 RotRel = .PelvisRotMat'*.RightThighRotation ;
+     AnyVar xRot1 = asin(RotRel[2][1]);
+     AnyVar xRot2 = pi-xRot1;
+     AnyVar yRot1 = atan2(-RotRel[2][0]/cos(xRot1 ),RotRel[2][2]/cos(xRot1));
+     AnyVar yRot2 = atan2(-RotRel[2][0]/cos(xRot2 ),RotRel[2][2]/cos(xRot2));
+     AnyVar zRot1 = atan2(-RotRel[0][1]/cos(yRot1),RotRel[1][1]/cos(yRot1));
+     AnyVar zRot2 = atan2(-RotRel[0][1]/cos(yRot2),RotRel[1][1]/cos(yRot2));
+     AnyVar abs1 = abs(zRot1)+abs(yRot1)+abs(zRot1);
+     AnyVar abs2 = abs(zRot2)+abs(yRot2)+abs(zRot2);
+     AnyVar zRot = iffun(gtfun(abs1,abs2), zRot2,zRot1);
+     AnyVar yRot = iffun(gtfun(abs1,abs2), yRot2,yRot1);
+     AnyVar xRot = iffun(gtfun(abs1,abs2), xRot2,xRot1) ;
+   };
+   AnyFolder LeftHipRotations = {
+     AnyMat33 RotRel = .PelvisRotMat'*.LeftThighRotation ;
+     AnyVar xRot1 = asin(RotRel[2][1]);
+     AnyVar xRot2 = pi-xRot1;
+     AnyVar yRot1 = atan2(-RotRel[2][0]/cos(xRot1 ),RotRel[2][2]/cos(xRot1));
+     AnyVar yRot2 = atan2(-RotRel[2][0]/cos(xRot2 ),RotRel[2][2]/cos(xRot2));
+     AnyVar zRot1 = atan2(-RotRel[0][1]/cos(yRot1),RotRel[1][1]/cos(yRot1));
+     AnyVar zRot2 = atan2(-RotRel[0][1]/cos(yRot2),RotRel[1][1]/cos(yRot2));
+     AnyVar abs1 = abs(zRot1)+abs(yRot1)+abs(zRot1);
+     AnyVar abs2 = abs(zRot2)+abs(yRot2)+abs(zRot2);
+     AnyVar zRot = iffun(gtfun(abs1,abs2), zRot2,zRot1);
+     AnyVar yRot = iffun(gtfun(abs1,abs2), yRot2,yRot1);
+     AnyVar xRot = iffun(gtfun(abs1,abs2), xRot2,xRot1) ;
+   };
+   AnyFolder RightKneeRotations = {
+     AnyMat33 RotRel = .RightThighRotation' *.RightShankRotation ;
+     AnyVar xRot1 = asin(RotRel[2][1]);
+     AnyVar xRot2 = pi-xRot1;
+     AnyVar yRot1 = atan2(-RotRel[2][0]/cos(xRot1 ),RotRel[2][2]/cos(xRot1));
+     AnyVar yRot2 = atan2(-RotRel[2][0]/cos(xRot2 ),RotRel[2][2]/cos(xRot2));
+     AnyVar zRot1 = atan2(-RotRel[0][1]/cos(yRot1),RotRel[1][1]/cos(yRot1));
+     AnyVar zRot2 = atan2(-RotRel[0][1]/cos(yRot2),RotRel[1][1]/cos(yRot2));
+     AnyVar abs1 = abs(zRot1)+abs(yRot1)+abs(zRot1);
+     AnyVar abs2 = abs(zRot2)+abs(yRot2)+abs(zRot2);
+     AnyVar zRot = iffun(gtfun(abs1,abs2), zRot2,zRot1);
+     AnyVar yRot = iffun(gtfun(abs1,abs2), yRot2,yRot1);
+     AnyVar xRot = iffun(gtfun(abs1,abs2), xRot2,xRot1) ;
+   };
+   AnyFolder LeftKneeRotations = {
+     AnyMat33 RotRel = .LeftThighRotation' *.LeftShankRotation ;
+     AnyVar xRot1 = asin(RotRel[2][1]);
+     AnyVar xRot2 = pi-xRot1;
+     AnyVar yRot1 = atan2(-RotRel[2][0]/cos(xRot1 ),RotRel[2][2]/cos(xRot1));
+     AnyVar yRot2 = atan2(-RotRel[2][0]/cos(xRot2 ),RotRel[2][2]/cos(xRot2));
+     AnyVar zRot1 = atan2(-RotRel[0][1]/cos(yRot1),RotRel[1][1]/cos(yRot1));
+     AnyVar zRot2 = atan2(-RotRel[0][1]/cos(yRot2),RotRel[1][1]/cos(yRot2));
+     AnyVar abs1 = abs(zRot1)+abs(yRot1)+abs(zRot1);
+     AnyVar abs2 = abs(zRot2)+abs(yRot2)+abs(zRot2);
+     AnyVar zRot = iffun(gtfun(abs1,abs2), zRot2,zRot1);
+     AnyVar yRot = iffun(gtfun(abs1,abs2), yRot2,yRot1);
+     AnyVar xRot = iffun(gtfun(abs1,abs2), xRot2,xRot1) ;
+   };
+   AnyFolder RightAnkleRotations = {
+     AnyMat33 RotRel = .RightShankRotation' *.RightFootRotation ;
+     AnyVar xRot1 = asin(RotRel[2][1]);
+     AnyVar xRot2 = pi-xRot1;
+     AnyVar yRot1 = atan2(-RotRel[2][0]/cos(xRot1 ),RotRel[2][2]/cos(xRot1));
+     AnyVar yRot2 = atan2(-RotRel[2][0]/cos(xRot2 ),RotRel[2][2]/cos(xRot2));
+     AnyVar zRot1 = atan2(-RotRel[0][1]/cos(yRot1),RotRel[1][1]/cos(yRot1));
+     AnyVar zRot2 = atan2(-RotRel[0][1]/cos(yRot2),RotRel[1][1]/cos(yRot2));
+     AnyVar abs1 = abs(zRot1)+abs(yRot1)+abs(zRot1);
+     AnyVar abs2 = abs(zRot2)+abs(yRot2)+abs(zRot2);
+     AnyVar zRot = iffun(gtfun(abs1,abs2), zRot2,zRot1);
+     AnyVar yRot = iffun(gtfun(abs1,abs2), yRot2,yRot1);
+     AnyVar xRot = iffun(gtfun(abs1,abs2), xRot2,xRot1) ;
+   };
+   AnyFolder LeftAnkleRotations = {
+     AnyMat33 RotRel = .LeftShankRotation' *.LeftFootRotation ;
+     AnyVar xRot1 = asin(RotRel[2][1]);
+     AnyVar xRot2 = pi-xRot1;
+     AnyVar yRot1 = atan2(-RotRel[2][0]/cos(xRot1 ),RotRel[2][2]/cos(xRot1));
+     AnyVar yRot2 = atan2(-RotRel[2][0]/cos(xRot2 ),RotRel[2][2]/cos(xRot2));
+     AnyVar zRot1 = atan2(-RotRel[0][1]/cos(yRot1),RotRel[1][1]/cos(yRot1));
+     AnyVar zRot2 = atan2(-RotRel[0][1]/cos(yRot2),RotRel[1][1]/cos(yRot2));
+     AnyVar abs1 = abs(zRot1)+abs(yRot1)+abs(zRot1);
+     AnyVar abs2 = abs(zRot2)+abs(yRot2)+abs(zRot2);
+     AnyVar zRot = iffun(gtfun(abs1,abs2), zRot2,zRot1);
+     AnyVar yRot = iffun(gtfun(abs1,abs2), yRot2,yRot1);
+     AnyVar xRot = iffun(gtfun(abs1,abs2), xRot2,xRot1) ;
+   };   
+   
+                                       
+   #var AnyVar PelvisThoraxExtension = 0;
+   #var AnyVar PelvisThoraxLateralBending = 0;
+   #var AnyVar PelvisThoraxRotation = 0;
+   
+   #var AnyVar NeckExtension = 0;
+   #var AnyVar NeckLateralBending = 0;
+   #var AnyVar NeckRotation = 0;
+
+AnyFolder Right = {
+  
+  #var AnyVar HipFlexion = .RightHipRotations.zRot*180/pi;
+  #var AnyVar HipAbduction = -.RightHipRotations.xRot*180/pi;
+  #var AnyVar HipExternalRotation = 0;
+  #var AnyVar KneeFlexion = -.RightKneeRotations.zRot*180/pi;
+  #var AnyVar AnklePlantarFlexion = -.RightAnkleRotations.zRot*180/pi;
+  #var AnyVar SubTalarEversion = 0;
+  
+  #var AnyVar GlenohumeralFlexion = 0;
+  #var AnyVar GlenohumeralAbduction = 0;
+  #var AnyVar GlenohumeralExternalRotation = 0;
+  #var AnyVar ElbowFlexion = 0;
+  #var AnyVar ElbowPronation = 0;
+  #var AnyVar WristFlexion = 0;
+  #var AnyVar WristAbduction = 0;
+  
+};
+AnyFolder Left = {
+  
+  #var AnyVar HipFlexion = .LeftHipRotations.zRot*180/pi;
+  #var AnyVar HipAbduction = .LeftHipRotations.xRot*180/pi;
+  #var AnyVar HipExternalRotation = 0;
+  #var AnyVar KneeFlexion = -.LeftKneeRotations.zRot*180/pi;
+  #var AnyVar AnklePlantarFlexion = -.LeftAnkleRotations.zRot*180/pi;
+  #var AnyVar SubTalarEversion = 0;
+        
+  #var AnyVar GlenohumeralFlexion = 0;
+  #var AnyVar GlenohumeralAbduction = 0;
+  #var AnyVar GlenohumeralExternalRotation = 0;
+  #var AnyVar ElbowFlexion = 0;
+  #var AnyVar ElbowPronation = 0;
+  #var AnyVar WristFlexion = 0;
+  #var AnyVar WristAbduction = 0;
+
+  
+};
+
+
+AnyFolder &InitPosRef= MANNEQUIN_FOLDER.Posture;    
+
+
+InitPosRef= {
+                                         
+
+PelvisPosX = .PelvisPosX;
+PelvisPosY = .PelvisPosY;
+PelvisPosZ = .PelvisPosZ;
+// Inital Pelvis rotation 
+PelvisRotX = .PelvisRotX;
+PelvisRotY = .PelvisRotY;
+PelvisRotZ = .PelvisRotZ;
+
+PelvisThoraxExtension = .PelvisThoraxExtension;
+PelvisThoraxLateralBending = .PelvisThoraxLateralBending ;
+PelvisThoraxRotation = .PelvisThoraxRotation ;
+
+NeckExtension = .NeckExtension ;
+NeckLateralBending = .NeckLateralBending ;
+NeckRotation = .NeckRotation ;
+
+Right = {
+  
+  HipFlexion = ..Right.HipFlexion ;
+  HipAbduction = ..Right.HipAbduction ;
+  HipExternalRotation = ..Right.HipExternalRotation ;
+  KneeFlexion = ..Right.KneeFlexion ;
+  AnklePlantarFlexion = ..Right.AnklePlantarFlexion ;
+  SubTalarEversion = ..Right.SubTalarEversion ;
+  
+  GlenohumeralFlexion = ..Right.GlenohumeralFlexion ;
+  GlenohumeralAbduction = ..Right.GlenohumeralAbduction ;
+  GlenohumeralExternalRotation = ..Right.GlenohumeralExternalRotation ;
+  ElbowFlexion = ..Right.ElbowFlexion ;
+  ElbowPronation = ..Right.ElbowPronation ;
+  WristFlexion = ..Right.WristFlexion ;
+  WristAbduction = ..Right.WristAbduction ;
+  
+};
+Left = {
+  
+  HipFlexion = ..Left.HipFlexion ;
+  HipAbduction = ..Left.HipAbduction ;
+  HipExternalRotation = ..Left.HipExternalRotation ;
+  KneeFlexion = ..Left.KneeFlexion ;
+  AnklePlantarFlexion = ..Left.AnklePlantarFlexion ;
+  SubTalarEversion = ..Left.SubTalarEversion ;
+  
+  GlenohumeralFlexion = ..Left.GlenohumeralFlexion ;
+  GlenohumeralAbduction = ..Left.GlenohumeralAbduction ;
+  GlenohumeralExternalRotation = ..Left.GlenohumeralExternalRotation ;
+  ElbowFlexion = ..Left.ElbowFlexion ;
+  ElbowPronation = ..Left.ElbowPronation ;
+  WristFlexion = ..Left.WristFlexion ;
+  WristAbduction = ..Left.WristAbduction ;
+
+  
+};
+
+
+};// InitPosRef
+
+//#var AnyVar ThighLengthIni = 0.5*(vnorm(RightHip-RKNEE)+vnorm(LeftHip-LKNEE));
+//#var AnyVar ShankLengthIni = 0.5*(vnorm(RKNEE-RANKLE)+vnorm(LKNEE-LANKLE));
+//
+//
+//AnyFolder &IniSegmentLength = Main.ModelSetup.SubjectSpecificData.Anthropometrics = {
+//ThighLengthIni = .ThighLengthIni;
+//ShankLengthIni = .ShankLengthIni;
+//
+//};// IniSegmentLength
+//
+
+
+};

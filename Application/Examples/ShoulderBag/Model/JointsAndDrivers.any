@@ -16,6 +16,31 @@ John Rasmussen, March 5, 2004.
 
 AnyFolder Drivers = {
   
+  #if BM_LEG_RIGHT & (BM_LEG_MODEL == _LEG_MODEL_Leg_)
+  #include "RightLegDrivers.any"
+  #else
+  #endif
+  
+  
+  #if BM_LEG_LEFT & (BM_LEG_MODEL == _LEG_MODEL_Leg_)
+  #include "LeftLegDrivers.any"
+  #else
+  #endif
+  
+  
+  #if BM_LEG_RIGHT & (BM_LEG_MODEL == _LEG_MODEL_TLEM_ | BM_LEG_MODEL == _LEG_MODEL_TLEM2_ )
+  #include "RightLegTDDrivers.any"
+  #else
+  #endif
+  
+  
+  #if BM_LEG_LEFT & (BM_LEG_MODEL == _LEG_MODEL_TLEM_ | BM_LEG_MODEL == _LEG_MODEL_TLEM2_ )
+  #include "LeftLegTDDrivers.any"
+  #else
+  #endif
+  
+    
+  
   // Aliases for convenient referencing
   AnyFolder &JntPos=..Mannequin.Posture;  
   AnyFolder &JntVel=..Mannequin.PostureVel;  
@@ -25,75 +50,6 @@ AnyFolder Drivers = {
   AnyFolder &LegL = ..HumanModel.Left.Leg;
   
   
-  // Place the right toe and heel on the ground
-  AnyKinEqSimpleDriver RToeGroundConstraint ={
-    AnyKinLinear ToePos = {
-      AnyFixedRefFrame &Ground = Main.Model.EnvironmentModel.GlobalRef;
-      AnyRefNode &Ball = Main.Model.HumanModel.Right.Leg.Seg.Foot.ToeJoint;
-    };
-    MeasureOrganizer = {1};  // Only the y coordinate
-    DriverPos = {0.0};
-    DriverVel = {0};
-    Reaction.Type = {Off};   // Provide ground reaction forces
-    
-  };
-  
-  AnyKinEqSimpleDriver RHeelGroundConstraint ={
-    AnyKinLinear HeelPos = {
-      AnyFixedRefFrame &Ground = Main.Model.EnvironmentModel.GlobalRef;
-      AnyRefNode &Ball = Main.Model.HumanModel.Right.Leg.Seg.Foot.HeelJoint;
-    };
-    MeasureOrganizer = {1};  // Only the y coordinate
-    DriverPos = {0.0};
-    DriverVel = {0};
-    Reaction.Type = {Off};   // Provide ground reaction forces
-  };
-  
-  // Place the left toe and heel on the ground
-  AnyKinEqSimpleDriver LToeGroundConstraint ={
-    AnyKinLinear ToePos = {
-      AnyFixedRefFrame &Ground = Main.Model.EnvironmentModel.GlobalRef;
-      AnyRefNode &Ball = Main.Model.HumanModel.Left.Leg.Seg.Foot.ToeJoint;
-    };
-    MeasureOrganizer = {1};  // Only the y coordinate
-    DriverPos = {0.0};
-    DriverVel = {0};
-    Reaction.Type = {Off};  // Provide ground reaction
-    
-  };
-  
-  AnyKinEqSimpleDriver LHeelGroundConstraint ={
-    AnyKinLinear HeelPos = {
-      AnyFixedRefFrame &Ground = Main.Model.EnvironmentModel.GlobalRef;
-      AnyRefNode &Ball = Main.Model.HumanModel.Left.Leg.Seg.Foot.HeelJoint;
-    };
-    MeasureOrganizer = {1};  // Only the y coordinate
-    DriverPos = {0.0};
-    DriverVel = {0};
-    Reaction.Type = {Off};  // Provide ground reaction
-  };  
-  
-  // Position the Ankles right above the z axis
-  AnyKinEqSimpleDriver RAnkleX = {
-    AnyKinLinear AnklePos = {
-      AnyFixedRefFrame &Ground = Main.Model.EnvironmentModel.GlobalRef;
-      AnyRefNode &Ankle = ..LegR.Seg.Foot.AnkleJoint;
-    };
-    MeasureOrganizer = {0};  // Only the x coordinate
-    DriverPos = {0.0};
-    DriverVel = {0.0};
-    Reaction.Type = {Off};
-  };
-  AnyKinEqSimpleDriver LAnkleX ={
-    AnyKinLinear AnklePos = {
-      AnyFixedRefFrame &Ground = Main.Model.EnvironmentModel.GlobalRef;
-      AnyRefNode &Ankle = ..LegL.Seg.Foot.AnkleJoint;
-    };
-    MeasureOrganizer = {0};  // Only the x coordinate
-    DriverPos = {0.0};
-    DriverVel = {0.0};
-    Reaction.Type = {Off};
-  };
   //Constraint the collective CoM to be right above the GlobalRef
   AnyKinEqSimpleDriver CoMDriver = {
     AnyKinCoM CoM = {
@@ -106,10 +62,6 @@ AnyFolder Drivers = {
   };  
   
   AnyFolder &RefHM = Main.Model.HumanModel;
-  
-  
-  
-  
   AnyFolder &ref=Main.Model.HumanModel.Trunk;
   
   //Neck driver 
@@ -298,129 +250,6 @@ AnyFolder Drivers = {
   
   
   
-  // ************************************
-  // Drivers for the right leg
-  // ************************************
-  
-  //Hip driver 
-  AnyKinEqSimpleDriver HipDriverRight={
-    AnyKinMeasure &ref1 =...HumanModel.Interface.Right.HipFlexion;
-    AnyKinMeasure &ref2 =...HumanModel.Interface.Right.HipExternalRotation;
-    AnyKinMeasure &ref3 =...HumanModel.Interface.Right.HipAbduction;
-    DriverPos= pi/180*{
-      .JntPos.Right.HipFlexion,
-      .JntPos.Right.HipExternalRotation,
-      .JntPos.Right.HipAbduction
-    };    
-    DriverVel = pi/180*{
-      .JntVel.Right.HipFlexion,
-      .JntVel.Right.HipExternalRotation,
-      .JntVel.Right.HipAbduction
-    };    
-    Reaction.Type={Off,Off,Off};
-    
-  };
-  
-  //Knee driver
-  AnyKinEqSimpleDriver KneeDriverRight={
-    AnyKinMeasure &Knee = ...HumanModel.Interface.Right.KneeFlexion;
-    DriverPos=pi/180*{.JntPos.Right.KneeFlexion};  
-    DriverVel = pi/180*{.JntVel.Right.KneeFlexion};  
-    Reaction.Type={Off};
-  };
-  
-  //Ankle driver
-  AnyKinEqSimpleDriver AnkleDriverRight={
-    AnyKinMeasure &ref1=...HumanModel.Interface.Right.AnklePlantarFlexion;
-    AnyKinMeasure &ref2=...HumanModel.Interface.Right.AnkleEversion;
-    DriverPos = pi/180*{.JntPos.Right.SubTalarEversion};  
-    DriverVel=pi/180*{.JntVel.Right.SubTalarEversion};  
-    Reaction.Type={Off};
-    MeasureOrganizer={1};
-  };
-  
-  
-  // ************************************
-  // Drivers for the Left leg
-  // ************************************
-  
-  //Left hip driver
-  AnyKinEqSimpleDriver HipDriverLeft={
-    AnyKinMeasure &ref1 =...HumanModel.Interface.Left.HipFlexion;
-    AnyKinMeasure &ref2 =...HumanModel.Interface.Left.HipExternalRotation;
-    AnyKinMeasure &ref3 =...HumanModel.Interface.Left.HipAbduction;
-    DriverPos=pi/180*{
-      .JntPos.Left.HipFlexion,
-      .JntPos.Left.HipExternalRotation,
-      .JntPos.Left.HipAbduction
-    };    
-    DriverVel = pi/180*{
-      .JntVel.Left.HipFlexion,
-      .JntVel.Left.HipExternalRotation,
-      .JntVel.Left.HipAbduction
-    };    
-    Reaction.Type={Off,Off,Off};
-  };
-  
-  //Knee driver
-  AnyKinEqSimpleDriver KneeDriverLeft={
-    AnyKinMeasure &Knee =...HumanModel.Interface.Left.KneeFlexion;
-    DriverPos=pi/180*{      .JntPos.Left.KneeFlexion   };  
-    DriverVel = pi/180*{      .JntVel.Left.KneeFlexion   };  
-    Reaction.Type={Off};
-  };
-  
-  
-  
-  
-  //Ankle driver
-  AnyKinEqSimpleDriver AnkleDriverLeft={
-    AnyKinMeasure &ref1=...HumanModel.Interface.Left.AnklePlantarFlexion;
-    AnyKinMeasure &ref2=...HumanModel.Interface.Left.AnkleEversion;
-    DriverPos = pi/180*{.JntPos.Left.SubTalarEversion};  
-    DriverVel=pi/180*{.JntVel.Left.SubTalarEversion};  
-    Reaction.Type={Off};
-    MeasureOrganizer={1};
-  };
-  
-  // Create reaction forces below the feet. Thi provides reactions
-  // for the feet regardless of their positions.
-  
-  AnyReacForce RightFootReaction = {
-    
-    
-    AnyKinRotational rot = {
-      AnySeg &ref1=..LegR.Seg.Foot;
-      AnyFixedRefFrame &ref2 = ....EnvironmentModel.GlobalRef;
-      Type = RotVector;
-      AngVelOnOff = On;
-    };  
-    
-    AnyKinLinear RightFootLinMeasure = {
-      AnySeg &ref1=..LegR.Seg.Foot;
-      AnyFixedRefFrame &ref2 = ....EnvironmentModel.GlobalRef;  
-    };
-    
-  };
-  
-  AnyReacForce LeftFootReaction = {
-    
-    AnyKinLinear LeftFootLinMeasure = {
-      AnySeg &ref1=..LegL.Seg.Foot;
-      AnyFixedRefFrame &ref2 = ....EnvironmentModel.GlobalRef;
-    };
-    AnyKinRotational LeftFootRotMeasure = {
-      AnySeg &ref1=..LegL.Seg.Foot;
-      AnyFixedRefFrame &ref2 = ....EnvironmentModel.GlobalRef;
-      Type = RotVector;
-      AngVelOnOff = On;
-    };  
-    
-    
-  };
-  
-};//Drivers
-
 // ---------------------------------
 // Loads from the Mannequin.any file
 // ---------------------------------
@@ -452,21 +281,7 @@ AnyFolder MannequinLoads = {
       //      F = .locmql.Hand*t;
       F = .locmql.Hand;
     };
-    
-    AnyForce3D Hip = {
-      AnyRefNode &ApplPoint = .rhm.Leg.Seg.Thigh.HipJoint;
-      F = .locmql.Hip;
-    };
-    
-    AnyForce3D Knee = {
-      AnyRefNode &ApplPoint = .rhm.Leg.Seg.Thigh.KneeJoint;
-      F = .locmql.Knee;
-    };
-    
-    AnyForce3D Ankle = {
-      AnyRefNode &ApplPoint = .rhm.Leg.Seg.Foot.AnkleJoint;
-      F = .locmql.Ankle;
-    };    
+
   };  // Right
   
   AnyFolder Left = {
@@ -488,21 +303,8 @@ AnyFolder MannequinLoads = {
       //      F = .locmql.Hand*t;
       F = .locmql.Hand;
     };
-    
-    AnyForce3D Hip = {
-      AnyRefNode &ApplPoint = .lhm.Leg.Seg.Thigh.HipJoint;
-      F = .locmql.Hip;
-    };
-    
-    AnyForce3D Knee = {
-      AnyRefNode &ApplPoint = .lhm.Leg.Seg.Thigh.KneeJoint;
-      F = .locmql.Knee;
-    };
-    
-    AnyForce3D Ankle = {
-      AnyRefNode &ApplPoint = .lhm.Leg.Seg.Foot.AnkleJoint;
-      F = .locmql.Ankle;
-    };    
   };  // Left
 };
+
+};//Drivers
 

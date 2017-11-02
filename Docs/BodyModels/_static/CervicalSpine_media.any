@@ -1,0 +1,82 @@
+#path ANYBODY_PATH_OUTPUT "."
+#include "../../../libdef.any"
+
+#define BM_ARM_LEFT ON
+#define BM_ARM_RIGHT ON
+#define BM_TRUNK_MUSCLES OFF
+#define BM_LEG_MODEL OFF
+#define BM_ARM_MUSCLES_BOTH ON
+
+#define BM_TRUNK_CERVICAL_MUSCLES ON
+
+
+#include "<ANYBODY_PATH_MODELUTILS>/Video/CameraClassTemplate.any"
+
+Main = {
+  
+
+  VideoLookAtCamera CervicalSpineCloseupBack(UP_DIRECTION=y, _AUTO_OPEN_PREVIEW_=OFF) =
+  {
+    VideoName = "CervicalSpineCloseupBack";
+    Analysis = {
+      AnyOperation &ref = Main.study.InitialConditions;
+    };
+    VideoInputScale = 5;
+    VideoResolution = {600,600};
+    CameraLookAtPoint = Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C1Seg.C2C1JntNode.r;
+    CameraFieldOfView = DesignVar(0.42);
+    CameraDirection  = {-1,0.55,-1};
+    BackgroundColor = DesignVar({1,1,1});
+    Preview.FileName = VideoName + ".jpg";
+  };
+  
+  
+  VideoLookAtCamera RotatingGif(UP_DIRECTION=y, _AUTO_PLAY_VIDEOS=OFF) =
+  {
+    VideoName = "CervicalSpine_rotating_model";
+    
+    Analysis = {
+      AnyOperation &ref = Main.study.Kinematics;
+    };
+    VideoInputScale = 5;
+    VideoResolution = {350,350};
+    VideoCodec = "libx264";
+    VideoInputFrameRate = 30; 
+    VideoOutputFrameRate = 30;
+    CameraLookAtPoint = Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C1Seg.C2C1JntNode.r;
+    CameraFieldOfView = DesignVar(0.4);
+    CameraDirection  = {cos(2*pi*Main.study.t), 0, sin(2*pi*Main.study.t)};
+    BackgroundColor = DesignVar({1,1,1});
+    Counter = Main.study.iStep;
+  }; 
+   
+  
+  #include "<ANYBODY_PATH_BODY>\HumanModel.any"
+    
+  HumanModel.Mannequin.Posture.Right = {
+    ElbowPronation = -70;
+    WristAbduction = 15;
+  };
+ 
+  AnyBodyStudy study = 
+  {
+    AnyFolder& CameraRef1 = Main.CervicalSpineCloseupBack;
+    AnyFolder& CameraRef2 = Main.RotatingGif;
+    AnyFolder& Model = Main.HumanModel.BodyModelWithDefaultDrivers;
+    Gravity = {0, -9.81, 0};
+    nStep = 150;
+  };
+  
+  
+  AnyOperationSequence RunApplication = 
+  {
+     AnyOperation&  init = Main.study.InitialConditions;
+     //AnyOperation& CreateFrontImage = Main.CervicalSpineCloseUpFront.Preview;
+     AnyOperation& CreateFrontBack = Main.CervicalSpineCloseupBack.Preview;
+     AnyOperation& CreateRotatingGif = Main.RotatingGif.Create_Video;
+  
+  
+  
+  };
+  
+};
