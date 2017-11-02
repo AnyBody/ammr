@@ -1,0 +1,54 @@
+// This files adds the required settings for the KinematicStudy.
+// There is no reason to edit this file. If you need to change
+// some settings do it from the application files. 
+
+
+Main.Studies.MarkerTracking = 
+{
+  Gravity = {0,0,0};//< Not relevant for AnyKinStudy but must be initialized
+
+  InitialConditions = 
+  {
+    PosAnalysisOnlyOnOff = On;
+    SolverType = KinSolOverDeterminate;
+    PreOperation = 
+    { 
+      AnyOperation &SetView = Main.ModelSetup.Views.SetViewMacros.KinematicView; 
+    };
+  };
+  
+  Kinematics = 
+  {
+    SmallStepAssumptionOnOff = On;
+    PosAnalysisOnlyOnOff = On;
+    SolverType = KinSolOverDeterminate;
+  };
+  
+  // Add the Analysis to the Main.RunAnalysis sequence
+  Main.RunAnalysis.MarkerTracking = 
+  {
+    AnyOperation &RunKinematics = ...Kinematics;
+  };
+
+  // Define statements allow us to overide tEnd/tStart/nStep to 
+  // when calling AnyBody from external programs.  
+  
+  #ifndef T_END
+  #define T_END Main.ModelSetup.TrialSpecificData.tEnd
+  #endif
+  
+  #ifndef T_START
+  #define T_START Main.ModelSetup.TrialSpecificData.tStart
+  #endif
+  
+  // The number of steps in the kinematic analysis should match framerate of the 
+  // motion caputure data. Thus, we don't use the `Main.ModelSetup.TrialSpecificData.nStep` here
+  #ifndef N_STEP_KINEMATICS
+  #define N_STEP_KINEMATICS round(1+(T_END-T_START)*Main.ModelSetup.C3DFileData.Header.VideoFrameRate)
+  #endif
+  
+  tStart = T_START;
+  tEnd = T_END;
+  nStep = N_STEP_KINEMATICS;
+   
+};

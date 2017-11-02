@@ -9,7 +9,7 @@ TEMPL = """//# Note. Since these tests include main files from other
 //# path = {{'ANYBODY_PATH_MAINFILEDIR':'{path_mainfiledir}',
 //#         'ANYBODY_PATH_MAINFILE':'{path_mainfile}' }}
 //#
-#include "../AnyTest_Templates.any"
+#include "../libdef.any"
 
 #include "{path_mainfile}"
 

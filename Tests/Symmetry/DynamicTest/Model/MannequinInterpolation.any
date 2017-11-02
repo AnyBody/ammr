@@ -1,0 +1,305 @@
+//This file can be used for controlling the mannequin to certain motions
+//All drivers in the model is based on interpolation drivers (PiesewiseLine)
+//
+//In this mannequin file you may type a vetor of values for each joint or
+//make a reference to a file containing the values as a column
+//For each data vector there must be an equivalent time serie
+//
+//In this file there are examples of joints which are diven using two values, three values 
+//(Hip and Glenohumeral) and finally there is a joint using an include file (PelvisThorax rotation)
+ 
+
+AnyFolder Mannequin ={
+  
+  // special functions to estimate initial conditions  
+  #include "InterpolationFunctions.any" 
+  
+  AnyFolder Posture ={
+    
+    AnyVector  TimeSerie={0/4,1/4,2/4,3/4,4/4}; //This time serie should be used in general
+  
+    AnyVector PelvisPosTime=TimeSerie;
+    AnyVector PelvisPos = .InterpolationFunctions.PelvisGroundFunction(Main.Study.tStart);  // uses Pelvis..Vec
+
+    //This controls the position of the pelvi wrt. to the global reference frame
+    AnyVar PelvisPosX= PelvisPos[0];
+    AnyVar PelvisPosY= PelvisPos[1];
+    AnyVar PelvisPosZ= PelvisPos[2];
+    
+    //This controls the rotation of the pelvis wrt. to the global reference frame
+    AnyVector PelvisRotTime=TimeSerie;
+    AnyVar PelvisRotX=(180/pi)*PelvisPos[3];
+    AnyVar PelvisRotY=(180/pi)*PelvisPos[4]; 
+    AnyVar PelvisRotZ=(180/pi)*PelvisPos[5];
+
+
+    AnyVector PelvisPosXVec={0,0,0,0,0};
+    AnyVector PelvisPosYVec={1,1,1,1,1};
+    AnyVector PelvisPosZVec={0,0,0,0,0};
+    AnyVector PelvisRotXVec={0,0,0,0,0};
+    AnyVector PelvisRotYVec={0,0,0,0,0};
+    AnyVector PelvisRotZVec={0,0,0,0,0};
+    
+    
+    // These variables control the rotation of the thorax wrt the
+    // pelvis    
+    AnyVector PelvisThoraxTime=TimeSerie;
+    AnyVector ThoraxRot = .InterpolationFunctions.PostureFunction(Main.Study.tStart);  // uses PelvisThorax..Vec
+    AnyVar PelvisThoraxExtension=(180/pi)*ThoraxRot[2]; 
+    AnyVar PelvisThoraxLateralBending=(180/pi)*ThoraxRot[1];
+    AnyVar PelvisThoraxRotation=(180/pi)*ThoraxRot[0]; 
+
+    AnyVector PelvisThoraxExtensionVec={-30,-15,0,15,30}; 
+    AnyVector PelvisThoraxLateralBendingVec=0*{0,10,20,30,40};  
+    AnyVector PelvisThoraxRotationVec={0,0,0,0,0};        
+
+    AnyVector NeckTime=TimeSerie;
+    AnyVar NeckExtension =(180/pi)*.InterpolationFunctions.NeckFunction(Main.Study.tStart)[2]; // uses NeckExtensionVec
+    AnyVar NeckRotation =(180/pi)*.InterpolationFunctions.NeckFunction(Main.Study.tStart)[1]; // uses NeckAxialRotationVec
+    AnyVar NeckLateralBending =(180/pi)*.InterpolationFunctions.NeckFunction(Main.Study.tStart)[0]; // uses NeckLateralBendingVec
+
+    AnyVector NeckExtensionVec={0,0,0,0,0}; 
+    AnyVector NeckLateralBendingVec={0,0,0,0,0}; 
+    AnyVector NeckAxialRotationVec={0,0,0,0,0}; 
+    
+    AnyFolder Right ={ 
+      //Arm 
+      AnyVector SternoClavicularTime=.TimeSerie;
+      AnyVector SternoClavicularProtraction={-20,-23,-26,-29,-30};   //This value is not used for initial position
+      AnyVector SternoClavicularElevation={8.5,10.5,11.5,12.5,13.5};    //This value is not used for initial position
+      AnyVector SternoClavicularAxialRotation={-18,-19,-20,-21,-22}; //This value is not used for initial position
+      
+      
+      AnyVector GlenohumeralTime=.TimeSerie;
+      AnyVec3 GHInitPos = ..InterpolationFunctions.GHFunctionRight(Main.Study.tStart);  // uses Glenohumeral..Vec
+      AnyVar GlenohumeralFlexion = (180/pi)*GHInitPos[0];
+      AnyVar GlenohumeralAbduction = (180/pi)*GHInitPos[1]; 
+      AnyVar GlenohumeralExternalRotation = (180/pi)*GHInitPos[2]; 
+      
+      AnyVector GlenohumeralFlexionVec ={10,30,50,70,90} ;
+      AnyVector GlenohumeralAbductionVec =2*{ 10,30,50,70,90}; 
+      AnyVector GlenohumeralExternalRotationVec ={10,30,50,70,90}; 
+      
+      AnyVector ElbowFlexionTime=.TimeSerie;
+      AnyVar ElbowFlexion =(180/pi)*..InterpolationFunctions.ElbowFlexionFunctionRight(Main.Study.tStart)[0]; // uses ElbowFlexionVec
+      AnyVector ElbowFlexionVec ={ 0,12,24,40,140}; 
+
+      AnyVector ElbowPronationTime=.TimeSerie;
+      AnyVar ElbowPronation =(180/pi)*..InterpolationFunctions.ElbowPronationFunctionRight(Main.Study.tStart)[0];  // uses ElbowPronationVec
+      AnyVector ElbowPronationVec ={ 30.0,-15,-30,-45,-60.0};
+      
+ 
+      AnyVector WristTime=.TimeSerie;
+      AnyVector WristRot =(180/pi)*..InterpolationFunctions.WristFunctionRight(Main.Study.tStart); // uses Wrist..Vec
+      AnyVar WristFlexion =(180/pi)*WristRot[0]; 
+      AnyVar WristAbduction =(180/pi)*WristRot[1]; 
+      
+      AnyVector WristFlexionVec =3*{-10,-5,0,5,10};
+      AnyVector WristAbductionVec =3*{-10,5,0,5,10};
+      
+       AnyFolder Finger1 ={
+        AnyVector FingerTime=..TimeSerie;
+        AnyVector CMCDeviationVec={0,-5,-10,-15,-20};
+        AnyVector CMCFlexionVec={0,5,10,15,20};
+        AnyVector MCPFlexionVec= {0,5,10,15,20};
+        AnyVector MCPDeviationVec={0,0,0,0,0};
+        AnyVector DIPFlexionVec={0,5,10,15,20};
+        AnyVar  CMCFlexion=...InterpolationFunctions.Right.CMC1Flexion(Main.Study.tStart)[0];
+        AnyVar  CMCDeviation=...InterpolationFunctions.Right.CMC1Abduction(Main.Study.tStart)[0];  
+        AnyVar  MCPFlexion=...InterpolationFunctions.Right.MCP1Flexion(Main.Study.tStart)[0];
+        AnyVar  MCPDeviation=...InterpolationFunctions.Right.MCP1Abduction(Main.Study.tStart)[0];
+        AnyVar  DIPFlexion=...InterpolationFunctions.Right.DIP1(Main.Study.tStart)[0]; 
+        
+      };
+      
+      AnyFolder Finger2 ={
+        AnyVector FingerTime=..TimeSerie;
+        AnyVector MCPFlexionVec={50,60,70,80,90};
+        AnyVector PIPFlexionVec={50,60,70,80,90};
+        AnyVector DIPFlexionVec={50,60,70,80,90};
+        AnyVar  MCPFlexion=...InterpolationFunctions.Right.MCP2(Main.Study.tStart)[0];  
+        AnyVar  PIPFlexion=...InterpolationFunctions.Right.PIP2(Main.Study.tStart)[0]; 
+        AnyVar  DIPFlexion=...InterpolationFunctions.Right.DIP2(Main.Study.tStart)[0]; 
+      };
+      
+      AnyFolder Finger3 ={
+        AnyVector FingerTime=..TimeSerie;
+        AnyVector MCPFlexionVec={0,5,10,15,20};
+        AnyVector PIPFlexionVec={0,5,10,15,20};
+        AnyVector DIPFlexionVec={0,5,10,15,20};
+        AnyVar  MCPFlexion=...InterpolationFunctions.Right.MCP3(Main.Study.tStart)[0];  
+        AnyVar  PIPFlexion=...InterpolationFunctions.Right.PIP3(Main.Study.tStart)[0]; 
+        AnyVar  DIPFlexion=...InterpolationFunctions.Right.DIP3(Main.Study.tStart)[0]; 
+        
+      };
+      
+      AnyFolder Finger4 ={
+        AnyVector FingerTime=..TimeSerie;
+        AnyVector MCPFlexionVec={0,5,10,15,20};
+        AnyVector PIPFlexionVec={0,5,10,15,20};
+        AnyVector DIPFlexionVec={0,5,10,15,20};
+        AnyVar  MCPFlexion=...InterpolationFunctions.Right.MCP4(Main.Study.tStart)[0]; 
+        AnyVar  PIPFlexion=...InterpolationFunctions.Right.PIP4(Main.Study.tStart)[0];  
+        AnyVar  DIPFlexion=...InterpolationFunctions.Right.DIP4(Main.Study.tStart)[0];  
+        
+      };
+      
+      AnyFolder Finger5 ={
+        AnyVector FingerTime=..TimeSerie;
+        AnyVector MCPFlexionVec={0,5,10,15,20};
+        AnyVector PIPFlexionVec={0,5,10,15,20};
+        AnyVector DIPFlexionVec={0,5,10,15,20};
+        AnyVar  MCPFlexion=...InterpolationFunctions.Right.MCP5(Main.Study.tStart)[0];  
+        AnyVar  PIPFlexion=...InterpolationFunctions.Right.PIP5(Main.Study.tStart)[0]; 
+        AnyVar  DIPFlexion=...InterpolationFunctions.Right.DIP5(Main.Study.tStart)[0];          
+      };           
+      
+      
+      AnyVector HipTime=.TimeSerie;
+      
+      AnyVector HipRot =..InterpolationFunctions.HipFunctionRight(Main.Study.tStart);  // uses Hip...Vec
+      AnyVar HipFlexion =(180/pi)*HipRot[0]; 
+      AnyVar HipAbduction =(180/pi)*HipRot[1];   
+      AnyVar HipExternalRotation =(180/pi)*HipRot[2];
+
+      AnyVector HipFlexionVec ={ 20,55,90,45,-10}; 
+      AnyVector HipAbductionVec ={ 20,40,60,45,0}; 
+      AnyVector HipExternalRotationVec ={ 10,5,0,-5,-10};
+      
+      AnyVector KneeTime=.TimeSerie;
+      AnyVar KneeFlexion =(180/pi)*..InterpolationFunctions.KneeFunctionRight(Main.Study.tStart)[0];   // uses KneeFlexionVec
+      AnyVector KneeFlexionVec ={ 120.0,60,16,8,0}; 
+      
+      AnyVector AnkleTime=.TimeSerie;
+      AnyVector AnkleRot = ..InterpolationFunctions.AnkleFunctionRight(Main.Study.tStart);
+      AnyVar AnklePlantarFlexion =(180/pi)*AnkleRot[0]; 
+      AnyVar SubTalarEversion =(180/pi)*AnkleRot[1]; // uses SubTalarEversionVec
+      
+      AnyVector AnklePlantarFlexionVec ={0,5,10,15,20}; 
+      AnyVector SubTalarEversionVec ={0,5,10,15,20}; //used by Leg
+    };
+    
+    AnyFolder Left ={ 
+      //all values are set to be equal to the right side values 
+      //feel free to change this!
+      
+      //Arm
+      AnyVector SternoClavicularTime=.Right.SternoClavicularTime;
+      AnyVector SternoClavicularProtraction=.Right.SternoClavicularProtraction;
+      AnyVector SternoClavicularElevation=.Right.SternoClavicularElevation;
+      AnyVector SternoClavicularAxialRotation=.Right.SternoClavicularAxialRotation;
+      
+      AnyVector GlenohumeralTime=.Right.GlenohumeralTime;
+      AnyVec3 GHInitPos = ..InterpolationFunctions.GHFunctionLeft(Main.Study.tStart);  // uses Glenohumeral..Vec
+      AnyVar GlenohumeralFlexion = (180/pi)*GHInitPos[0];
+      AnyVar GlenohumeralAbduction = (180/pi)*GHInitPos[1]; 
+      AnyVar GlenohumeralExternalRotation = (180/pi)*GHInitPos[2]; 
+      AnyVector GlenohumeralFlexionVec = .Right.GlenohumeralFlexionVec ; 
+      AnyVector GlenohumeralAbductionVec =.Right.GlenohumeralAbductionVec;      
+      AnyVector GlenohumeralExternalRotationVec =.Right.GlenohumeralExternalRotationVec ;
+      
+      AnyVector ElbowFlexionTime=.Right.ElbowFlexionTime;
+      AnyVar ElbowFlexion =(180/pi)*..InterpolationFunctions.ElbowFEFunctionLeft(Main.Study.tStart)[0]; // uses ElbowFlexionVec
+      AnyVector ElbowFlexionVec = .Right.ElbowFlexionVec; 
+    
+      AnyVector ElbowPronationTime=.Right.ElbowPronationTime;
+      AnyVar ElbowPronation =(180/pi)*..InterpolationFunctions.ElbowPSFunctionLeft(Main.Study.tStart)[0];  // uses ElbowPronationVec
+      AnyVector ElbowPronationVec = .Right.ElbowPronationVec;       
+      
+      AnyVector WristTime=.Right.WristTime;
+      AnyVector WristRot =(180/pi)*..InterpolationFunctions.WristFunctionLeft(Main.Study.tStart); // uses Wrist..Vec
+      AnyVar WristFlexion =(180/pi)*WristRot[0];       
+      AnyVar WristAbduction =(180/pi)*WristRot[1]; 
+      AnyVector WristFlexionVec =.Right.WristFlexionVec;
+      AnyVector WristAbductionVec =.Right.WristAbductionVec;
+
+      
+      
+      
+      
+        AnyFolder Finger1 ={
+        AnyVector FingerTime=..TimeSerie;
+        AnyVector CMCDeviationVec={0,-5,-10,-15,-20};
+        AnyVector CMCFlexionVec={0,5,10,15,20};
+        AnyVector MCPFlexionVec= {0,5,10,15,20};
+        AnyVector MCPDeviationVec={0,0,0,0,0};
+        AnyVector DIPFlexionVec={0,5,10,15,20};
+        AnyVar  CMCFlexion=...InterpolationFunctions.Left.CMC1Flexion(Main.Study.tStart)[0];
+        AnyVar  CMCDeviation=...InterpolationFunctions.Left.CMC1Abduction(Main.Study.tStart)[0];  
+        AnyVar  MCPFlexion=...InterpolationFunctions.Left.MCP1Flexion(Main.Study.tStart)[0];
+        AnyVar  MCPDeviation=...InterpolationFunctions.Left.MCP1Abduction(Main.Study.tStart)[0];
+        AnyVar  DIPFlexion=...InterpolationFunctions.Left.DIP1(Main.Study.tStart)[0]; 
+        
+      };
+      
+      AnyFolder Finger2 ={
+        AnyVector FingerTime=..TimeSerie;
+        AnyVector MCPFlexionVec={50,60,70,80,90};
+        AnyVector PIPFlexionVec={50,60,70,80,90};
+        AnyVector DIPFlexionVec={50,60,70,80,90};
+        AnyVar  MCPFlexion=...InterpolationFunctions.Left.MCP2(Main.Study.tStart)[0];  
+        AnyVar  PIPFlexion=...InterpolationFunctions.Left.PIP2(Main.Study.tStart)[0]; 
+        AnyVar  DIPFlexion=...InterpolationFunctions.Left.DIP2(Main.Study.tStart)[0]; 
+      };
+      
+      AnyFolder Finger3 ={
+        AnyVector FingerTime=..TimeSerie;
+        AnyVector MCPFlexionVec={0,5,10,15,20};
+        AnyVector PIPFlexionVec={0,5,10,15,20};
+        AnyVector DIPFlexionVec={0,5,10,15,20};
+        AnyVar  MCPFlexion=...InterpolationFunctions.Left.MCP3(Main.Study.tStart)[0];  
+        AnyVar  PIPFlexion=...InterpolationFunctions.Left.PIP3(Main.Study.tStart)[0]; 
+        AnyVar  DIPFlexion=...InterpolationFunctions.Left.DIP3(Main.Study.tStart)[0]; 
+        
+      };
+      
+      AnyFolder Finger4 ={
+        AnyVector FingerTime=..TimeSerie;
+        AnyVector MCPFlexionVec={0,5,10,15,20};
+        AnyVector PIPFlexionVec={0,5,10,15,20};
+        AnyVector DIPFlexionVec={0,5,10,15,20};
+        AnyVar  MCPFlexion=...InterpolationFunctions.Left.MCP4(Main.Study.tStart)[0]; 
+        AnyVar  PIPFlexion=...InterpolationFunctions.Left.PIP4(Main.Study.tStart)[0];  
+        AnyVar  DIPFlexion=...InterpolationFunctions.Left.DIP4(Main.Study.tStart)[0];  
+        
+      };
+      
+      AnyFolder Finger5 ={
+        AnyVector FingerTime=..TimeSerie;
+        AnyVector MCPFlexionVec={0,5,10,15,20};
+        AnyVector PIPFlexionVec={0,5,10,15,20};
+        AnyVector DIPFlexionVec={0,5,10,15,20};
+        AnyVar  MCPFlexion=...InterpolationFunctions.Left.MCP5(Main.Study.tStart)[0];  
+        AnyVar  PIPFlexion=...InterpolationFunctions.Left.PIP5(Main.Study.tStart)[0]; 
+        AnyVar  DIPFlexion=...InterpolationFunctions.Left.DIP5(Main.Study.tStart)[0];          
+      };           
+      
+      
+      
+      
+     
+      //Leg     
+      AnyVector HipTime=.Right.HipTime;
+      AnyVar HipFlexion =.Right.HipFlexion;  
+      AnyVector HipFlexionVec =.Right.HipFlexionVec;  
+      AnyVar HipAbduction =.Right.HipAbduction;
+      AnyVector HipAbductionVec =.Right.HipAbductionVec;
+      AnyVar HipExternalRotation = .Right.HipExternalRotation;
+      AnyVector HipExternalRotationVec = .Right.HipExternalRotationVec;
+      
+      AnyVector KneeTime=.Right.KneeTime;
+      AnyVar KneeFlexion = .Right.KneeFlexion;       
+      AnyVector KneeFlexionVec = .Right.KneeFlexionVec;       
+      
+      AnyVector AnkleTime=.Right.AnkleTime;
+      AnyVar AnklePlantarFlexion = .Right.AnklePlantarFlexion ;
+      AnyVector AnklePlantarFlexionVec = .Right.AnklePlantarFlexionVec ;
+      AnyVar SubTalarEversion =.Right.SubTalarEversion; 
+      AnyVector SubTalarEversionVec =.Right.SubTalarEversionVec; 
+    };
+  };
+  AnyFolder PostureVel={};  
+};
+
+
+

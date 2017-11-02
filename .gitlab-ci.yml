@@ -2,34 +2,96 @@
 variables:
   GIT_STRATEGY: fetch
 
-cache:
-    paths:
-    - .cache/
 
 BM_combination_tests:
   stage: test
   script:
-    - pytest --ff "Tests/BM combinations" -n 2
+    - pytest "Tests/BM combinations" -n 2
+  except:
+    -  /^docs.*$/
   tags:
     - ams
-    - python
 
 other_tests:
   stage: test
   script:
-    - pytest "--ignore=Tests/BM combinations" --ignore=Tests/Applications --ff Tests
+    - pytest "--ignore=Tests/BM combinations" "--ignore=Tests/Applications"
+  except:
+    -  /^docs.*$/
   tags:
     - ams
-    - python
 
 Application_tests:
   stage: test
   script:
-    - pytest --ff Tests/Applications -n 4
+    - pytest --ff Tests/Applications -n 4 --timeout=1700
+  except:
+    -  /^docs.*$/
   tags:
     - ams
-    - python
 
-    
 
-    
+
+test_docs:
+  image:
+    name: continuumio/miniconda3
+  before_script:
+    - export CONDA_PKGS_DIRS="conda-cache"
+    - conda config --set always_yes yes --set changeps1 no
+    - conda config --add channels conda-forge # For sphinxcontrib.autoprogram
+    - conda update -q conda 
+    - conda info -a
+    - conda install -q sphinx cloud_sptheme pygments_anyscript make
+  script:
+    - set -e
+    - cd Docs
+    - make html-dev
+    - cd ..
+    - mkdir -p public/dev
+    - cp -rT Docs/_build/html public/dev
+  only:
+    -  /^docs.*$/
+  cache:
+    paths:
+      - conda-cache
+  artifacts:
+    paths:
+    - public
+    expire_in: 1 hour
+
+
+deploy_docs:
+  stage: deploy
+  environment:
+    name: staging
+    url: https://anyscript.org/ammr-doc/dev
+  before_script:
+    - gem install dpl
+  only:
+    - /^docs.*$/
+  when: manual
+  script:
+    - touch public/.nojekyll
+    - ls public/dev
+    - dpl --provider=pages --repo="AnyBody/ammr-doc" --target-branch=master --local-dir="public" --skip_cleanup --github-token=$GITHUB_TOKEN 
+  #when: manual
+  tags:
+    - docker
+    - ruby
+
+
+
+
+# deploy_docs:
+#   stage: deploy
+#   script:
+#     - cd Docs/_build/html
+#     - ls
+#   only: 
+#     - tags
+#   except:
+#     - branches
+#   tags:
+#     - docker
+#     - linux
+

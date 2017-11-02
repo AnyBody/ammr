@@ -1,0 +1,62 @@
+
+AnyFunInterpol InterpolatedData = 
+{
+  Type  = iffun(gtfun(.FileReader.Length0, 1), Bspline, ConstantValue);
+  BsplineOrder = min({4,.FileReader.Length0});
+
+  Data = .FileReader.Data;
+  T = .FileReader.T;
+};
+
+AnyInputFile FileReader = {
+  // Check if the start time is with the range of data in the file. 
+  
+  /// Number of data elements in the file
+  AnyInt nFile = NumElemOf(.FileReader.TFile);
+   
+  AnyFloat TFileMin = arrcat(TFile, {0.0})[0];
+  AnyFloat TFileMax = arrcat(TFile, {0.0})[ max({ min({TFileNumRead,Length0})-1,0})];
+  AnyInt ValidStartTime = andfun( gtfun(....tArray[0],TFileMin-1e-13),
+                                  ltfun(....tArray[0], TFileMax+1e-13));
+
+    
+  AnyInt ValidData = andfun(ValidStartTime, bool(TFileIsMonotoneIncreasing));
+  
+  // If there is problems with the file data, force the use of default data. 
+  AlwaysUseData0 = not(ValidData); 
+  
+  // FileName: This is set externally to this include file.
+  FileErrorContinueOnOff = On;
+  ReloadOnOff = On;
+  SuppressWarningsOnOff = On;
+  
+  AnyInt Length0 = NumElemOf(Main.Studies.MarkerTracking.tArray);
+  T0 = Main.Studies.MarkerTracking.tArray;
+};
+
+#ifndef _ANYMOCAP_JOINT_ANGLE_WARNING_MSG_
+#define _ANYMOCAP_JOINT_ANGLE_WARNING_MSG_
+AnyMessage AnyMocap_msg1= 
+{
+  AnyInt LastTimeIdx = max({0,.FileReader.TFileNumRead-1});
+  AnyVar LastTimeInFile =  .FileReader.T[min({LastTimeIdx, NumElemOf(.FileReader.T)})];
+  TriggerRuntime = andfun(.FileReader.ValidData,
+                          andfun(Main.Studies.InverseDynamicStudy.iStep, gtfun(Main.Studies.InverseDynamicStudy.t,  LastTimeInFile ))); 
+  Type = MSG_ErrorFatal;
+  Message = DesignVar(strformat("\n"+
+  "----------------------------------------------------------------------------------------------------------\n"+
+  "                               No kinematic joint angle data available after t = "+strval(LastTimeInFile,  "%.3g") + "s.\n "+
+  "                         Please re-run the entire kinematic analysis first (or Main.RunAnalysis)\n"+
+  "----------------------------------------------------------------------------------------------------------\n"));
+};
+AnyMessage AnyMocap_msg2= 
+{                                          
+  TriggerRuntime = andfun(eqfun(....iStep,1), not(.FileReader.ValidData)); 
+  Type = MSG_ErrorFatal;
+  Message = DesignVar(strformat("\n"+
+  "----------------------------------------------------------------------------------------------------------\n"+
+  "                                 No valid kinematic joint angle data available.\n"+
+  "                         Please run the Kinematic analysis first (or Main.RunAnalysis)\n"+
+  "----------------------------------------------------------------------------------------------------------\n"));
+};
+#endif

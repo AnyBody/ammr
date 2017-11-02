@@ -1,0 +1,424 @@
+AnyFolder SymmetryCheck= {
+
+  #if (BM_ARM_RIGHT != OFF) & (BM_ARM_LEFT != OFF)
+  
+  
+  AnyFolder Arm ={
+    
+    //this is a trick to make the ouput of the search posvar not const
+    AnyFolder DummyModel ={
+      AnyFixedRefFrame GlobalRef ={};
+      AnySeg mass={Mass=0; Jii={0,0,0};};
+      AnyStdJoint jnt={      AnyFixedRefFrame &ref1=.GlobalRef;  AnySeg &ref2=.mass;};
+      
+    };
+    AnyFolder Kinematics ={
+      
+      AnyFolder Right ={
+        AnyObjectPtrArray RefFrames = ObjSearchRecursive("Main.HumanModel.BodyModel.Right.ShoulderArm", "r","AnyFloat", 10);
+        //this is a trick to make the ouput of the search posvar not const
+        AnyFloat PointsXY = (Obj2Num(RefFrames)+..DummyModel.mass.r[0])* {{1,0,0},{0,1,0},{0,0,0}};
+        //look at the Comparison.Max_ListComparison to detect which point no is causing non zero values...
+        //use the line below to find out which point is the trouble maker by typing in the number...
+        AnyString PointName = CompleteNameOf(RefFrames[1]);
+        
+      };
+      
+      AnyFolder Left ={
+        //this is the way it is supposed to be... but the Obj2Num returns consts... for the moment
+        AnyObjectPtrArray RefFrames = ObjSearchRecursive("Main.HumanModel.BodyModel.Left.ShoulderArm", "r","AnyFloat", 10);
+        //the model is symmetric on Z this trick allows us to check all nodes regardless if they are place on thorax or pelvis
+        AnyFloat PointsXY= (Obj2Num(RefFrames)+..DummyModel.mass.r[0])* {{1,0,0},{0,1,0},{0,0,0}};  
+        
+      };
+      
+      AnyFolder Comparison ={
+        AnyFloat r_Diff =.Right.PointsXY-.Left.PointsXY;
+        AnyFloat Max_r_Diff = max(abs(r_Diff));
+      };  
+      
+    };
+    
+    AnyFolder Inertia ={
+      
+      AnyFolder Right ={
+        
+        AnyKinCoM CoMAll ={
+          AnyFolder  &ref= Main.HumanModel.BodyModel.Right.ShoulderArm;
+        };
+        AnyKinCoM Clavicula ={   AnySeg  &ref= Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Clavicula;      };
+        AnyKinCoM Scapula={   AnySeg  &ref= Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Scapula;      };
+        AnyKinCoM Humerus={   AnySeg  &ref= Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Humerus;      };
+        AnyKinCoM Ulna={   AnySeg  &ref= Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Ulna;      };
+        AnyKinCoM Radius={   AnySeg  &ref= Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Radius;      }; 
+        // AnyKinCoM WristJointSeg={   AnySeg  &ref= Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.WristJointSeg;      }; 
+        AnyKinCoM Hand={   AnySeg  &ref= Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Hand;      }; 
+        //   AnyKinCoM Glove={   AnySeg  &ref= Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Glove;      }; 
+        
+      };
+      
+      AnyFolder Left ={
+        
+        AnyKinCoM CoMAll ={
+          AnyFolder  &ref= Main.HumanModel.BodyModel.Left.ShoulderArm;
+        };
+        
+        AnyKinCoM Clavicula ={   AnySeg  &ref= Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Clavicula;      };
+        AnyKinCoM Scapula={   AnySeg  &ref= Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Scapula;      };
+        AnyKinCoM Humerus={   AnySeg  &ref= Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Humerus;      };
+        AnyKinCoM Ulna={   AnySeg  &ref= Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Ulna;      };
+        AnyKinCoM Radius={   AnySeg  &ref= Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Radius;      }; 
+        AnyKinCoM Hand={   AnySeg  &ref= Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Hand;      }; 
+      };
+      
+      AnyFolder Comparison ={
+        AnyFloat CoMDif =(.Right.CoMAll.Pos-.Left.CoMAll.Pos)* {{1,0,0},{0,1,0},{0,0,0}};
+        AnyFloat Clavicula =(.Right.Clavicula.Pos-.Left.Clavicula.Pos)* {{1,0,0},{0,1,0},{0,0,0}};
+        AnyFloat Scapula=(.Right.Scapula.Pos-.Left.Scapula.Pos)* {{1,0,0},{0,1,0},{0,0,0}};
+        AnyFloat Humerus=(.Right.Humerus.Pos-.Left.Humerus.Pos)* {{1,0,0},{0,1,0},{0,0,0}};
+        AnyFloat Ulna=(.Right.Ulna.Pos-.Left.Ulna.Pos)* {{1,0,0},{0,1,0},{0,0,0}};
+        AnyFloat Radius=(.Right.Radius.Pos-.Left.Radius.Pos)* {{1,0,0},{0,1,0},{0,0,0}};
+        AnyFloat Hand=(.Right.Hand.Pos-.Left.Hand.Pos)* {{1,0,0},{0,1,0},{0,0,0}}; 
+      };
+    };  
+    
+    AnyFolder JntMuscle ={
+      AnyFolder Right ={
+        AnyObjectPtrArray JointTorquePtr = ObjSearchRecursive("Main.HumanModel.BodyModel.Right.ShoulderArm.JointMuscles", "Fout","AnyValue", 10);
+        AnyFloat JointTorque = Obj2Num(JointTorquePtr)+..DummyModel.mass.r[0];
+      };      
+      AnyFolder Left ={
+        AnyObjectPtrArray JointTorquePtr = ObjSearchRecursive("Main.HumanModel.BodyModel.Left.ShoulderArm.JointMuscles", "Fout","AnyValue", 10);
+        AnyFloat JointTorque = Obj2Num(JointTorquePtr)+..DummyModel.mass.r[0];
+        
+        //1 run the model 
+        //2 Look at the Max_listComparison
+        //3 indentify if a muscle is sticking out... ie has larger values than kin tolerance ...
+        //4 if so use the two lines below to identify the name of it... (replace 55)
+        //5 This can be used to find a name of a specific item in sf
+        
+        //  AnyString TorqueName = CompleteNameOf(JointTorquePtr[3]);
+        
+        
+      };
+      
+      AnyFolder Comparison ={
+        AnyFloat JointTorqueDiff =.Right.JointTorque-.Left.JointTorque;
+      };  
+    };  
+    
+    
+    AnyFolder Muscle ={
+      AnyFolder Right ={
+        AnyObjectPtrArray LmtPtr = ObjSearchRecursive("Main.HumanModel.BodyModel.Right.ShoulderArm", "Lmt","AnyValue", 10);
+        AnyFloat Lmt = Obj2Num(LmtPtr)+..DummyModel.mass.r[0];
+        
+        AnyObjectPtrArray LmtDotPtr = ObjSearchRecursive("Main.HumanModel.BodyModel.Right.ShoulderArm", "LmtDot","AnyValue", 10);
+        AnyFloat LmtDot = Obj2Num(LmtDotPtr)+..DummyModel.mass.r[0];
+        
+        AnyObjectPtrArray StrengthPtr = ObjSearchRecursive("Main.HumanModel.BodyModel.Right.ShoulderArm", "Strength","AnyValue", 10);
+        AnyFloat Strength = Obj2Num(StrengthPtr)+..DummyModel.mass.r[0];
+        
+        AnyObjectPtrArray FtPtr = ObjSearchRecursive("Main.HumanModel.BodyModel.Right.ShoulderArm", "Ft","AnyValue", 10);
+        AnyFloat Ft = Obj2Num(FtPtr)+..DummyModel.mass.r[0];
+        
+        AnyObjectPtrArray SP_PointsPtr = ObjSearchRecursive("Main.HumanModel.BodyModel.Right.ShoulderArm", "P","AnyValue", 10);
+        // AnyFloat SP_Points = Obj2Num(SP_PointsPtr[34])+..DummyModel.mass.r[0];
+    
+      };      
+      AnyFolder Left ={
+        AnyObjectPtrArray LmtPtr = ObjSearchRecursive("Main.HumanModel.BodyModel.Left.ShoulderArm", "Lmt","AnyValue", 10);
+        AnyFloat Lmt = Obj2Num(LmtPtr)+..DummyModel.mass.r[0];
+        
+        AnyObjectPtrArray LmtDotPtr = ObjSearchRecursive("Main.HumanModel.BodyModel.Left.ShoulderArm", "LmtDot","AnyValue", 10);
+        AnyFloat LmtDot = Obj2Num(LmtDotPtr)+..DummyModel.mass.r[0];
+        
+        AnyObjectPtrArray StrengthPtr = ObjSearchRecursive("Main.HumanModel.BodyModel.Left.ShoulderArm", "Strength","AnyValue", 10);
+        AnyFloat Strength = Obj2Num(StrengthPtr)+..DummyModel.mass.r[0];
+        
+        AnyObjectPtrArray FtPtr = ObjSearchRecursive("Main.HumanModel.BodyModel.Left.ShoulderArm", "Ft","AnyValue", 10);
+        AnyFloat Ft = Obj2Num(FtPtr)+..DummyModel.mass.r[0];        //Instructions:
+        
+        
+        AnyObjectPtrArray SP_PointsPtr = ObjSearchRecursive("Main.HumanModel.BodyModel.Left.ShoulderArm", "P","AnyValue", 10);
+        
+        // AnyFloat SP_Points = Obj2Num(SP_PointsPtr[34])+..DummyModel.mass.r[0];
+        
+        //1 run the model 
+        //2 Look at the Max_listComparison
+        //3 indentify if a muscle is sticking out... ie has larger values than kin tolerance ...
+        //4 if so use the two lines below to identify the name of it... (replace 55)
+        //5 This can be used to find a name of a specific item in sf
+        AnyObjectPtrArray MusclesNames = ObjSearchRecursive("Main.HumanModel.BodyModel.Left.ShoulderArm","*", "AnyMuscle",10);
+        AnyString MusclesName = NameOf(MusclesNames[34]);
+        
+      };
+      
+      AnyFolder Comparison ={
+        AnyFloat LmtDif =.Right.Lmt-.Left.Lmt;
+        AnyVar MaxLmtDiff= max(LmtDif);
+        
+        AnyFloat LmtDotDif =.Right.LmtDot-.Left.LmtDot;
+        AnyVar MaxLmtDotDiff= max(LmtDotDif);
+        AnyFloat StrengthDif =.Right.Strength-.Left.Strength;
+        AnyFloat FtDif =.Right.Ft-.Left.Ft;
+        AnyVar MaxFtDif= max(FtDif);
+        //   AnyFloat SP_Points =(.Right.SP_Points-.Left.SP_Points)* {{1,0,0},{0,1,0},{0,0,0}} ;
+        
+      };  
+    };  
+  };
+  #endif
+  
+  #if (BM_LEG_RIGHT != OFF) & (BM_LEG_LEFT != OFF)
+  AnyFolder Leg ={
+    
+    //this is a trick to make the ouput of the search posvar not const
+    AnyFolder DummyModel ={
+      AnyFixedRefFrame GlobalRef ={};
+      AnySeg mass={Mass=0; Jii={0,0,0};};
+      AnyStdJoint jnt={      AnyFixedRefFrame &ref1=.GlobalRef;  AnySeg &ref2=.mass;};
+      
+    };
+    AnyFolder Kinematics ={
+      
+      AnyFolder Right ={
+        AnyObjectPtrArray RefFrames = ObjSearchRecursive("Main.HumanModel.BodyModel.Right.Leg", "r","AnyFloat", 10);
+        //this is a trick to make the ouput of the search posvar not const
+        AnyFloat PointsXY = (Obj2Num(RefFrames)+..DummyModel.mass.r[0])* {{1,0,0},{0,1,0},{0,0,0}};
+        //look at the Comparison.Max_ListComparison to detect which point no is causing non zero values...
+        //use the line below to find out which point is the trouble maker by typing in the number...
+        AnyString PointName = CompleteNameOf(RefFrames[1]);
+        
+      };
+      
+      AnyFolder Left ={
+        //this is the way it is supposed to be... but the Obj2Num returns consts... for the moment
+        AnyObjectPtrArray RefFrames = ObjSearchRecursive("Main.HumanModel.BodyModel.Left.Leg", "r","AnyFloat", 10);
+        //the model is symmetric on Z this trick allows us to check all nodes regardless if they are place on thorax or pelvis
+        AnyFloat PointsXY= (Obj2Num(RefFrames)+..DummyModel.mass.r[0])* {{1,0,0},{0,1,0},{0,0,0}};  
+        
+      };
+      
+      AnyFolder Comparison ={
+        AnyFloat r_Diff =.Right.PointsXY-.Left.PointsXY;
+        AnyFloat Max_r_Diff = max(abs(r_Diff));
+      };  
+      
+    };
+    
+    AnyFolder Inertia ={
+      
+      AnyFolder Right ={
+        
+        AnyKinCoM CoMAll ={
+          AnyFolder  &ref= Main.HumanModel.BodyModel.Right.Leg;
+        };
+        AnyKinCoM Thigh ={   AnySeg  &ref= Main.HumanModel.BodyModel.Right.Leg.Seg.Thigh;      };
+        AnyKinCoM Shank={   AnySeg  &ref= Main.HumanModel.BodyModel.Right.Leg.Seg.Shank;      };
+        AnyKinCoM Talus={   AnySeg  &ref= Main.HumanModel.BodyModel.Right.Leg.Seg.Talus;      };
+        AnyKinCoM Foot={   AnySeg  &ref= Main.HumanModel.BodyModel.Right.Leg.Seg.Foot;      }; 
+        
+      };
+      
+      AnyFolder Left ={
+        
+        AnyKinCoM CoMAll ={
+          AnyFolder  &ref= Main.HumanModel.BodyModel.Left.Leg;
+        };
+        
+        AnyKinCoM Thigh ={   AnySeg  &ref= Main.HumanModel.BodyModel.Left.Leg.Seg.Thigh;      };
+         AnyKinCoM Shank={   AnySeg  &ref= Main.HumanModel.BodyModel.Left.Leg.Seg.Shank;      };
+        AnyKinCoM Talus={   AnySeg  &ref= Main.HumanModel.BodyModel.Left.Leg.Seg.Talus;      };
+        AnyKinCoM Foot={   AnySeg  &ref= Main.HumanModel.BodyModel.Left.Leg.Seg.Foot;      }; 
+      };
+      
+      AnyFolder Comparison ={
+        AnyFloat CoMDif =(.Right.CoMAll.Pos-.Left.CoMAll.Pos)* {{1,0,0},{0,1,0},{0,0,0}};
+        AnyFloat Thigh =(.Right.Thigh.Pos-.Left.Thigh.Pos)* {{1,0,0},{0,1,0},{0,0,0}};
+        AnyFloat Shank=(.Right.Shank.Pos-.Left.Shank.Pos)* {{1,0,0},{0,1,0},{0,0,0}};
+        AnyFloat Talus=(.Right.Talus.Pos-.Left.Talus.Pos)* {{1,0,0},{0,1,0},{0,0,0}};
+        AnyFloat Foot=(.Right.Foot.Pos-.Left.Foot.Pos)* {{1,0,0},{0,1,0},{0,0,0}};
+      };
+    };  
+    
+    AnyFolder JntMuscle ={
+      AnyFolder Right ={
+        AnyObjectPtrArray JointTorquePtr = ObjSearchRecursive("Main.HumanModel.BodyModel.Right.Leg.JointMuscles", "Fout","AnyValue", 10);
+        AnyFloat JointTorque = Obj2Num(JointTorquePtr)+..DummyModel.mass.r[0];
+      };      
+      AnyFolder Left ={
+        AnyObjectPtrArray JointTorquePtr = ObjSearchRecursive("Main.HumanModel.BodyModel.Left.Leg.JointMuscles", "Fout","AnyValue", 10);
+        AnyFloat JointTorque = Obj2Num(JointTorquePtr)+..DummyModel.mass.r[0];
+        
+        //1 run the model 
+        //2 Look at the Max_listComparison
+        //3 indentify if a muscle is sticking out... ie has larger values than kin tolerance ...
+        //4 if so use the two lines below to identify the name of it... (replace 55)
+        //5 This can be used to find a name of a specific item in sf
+        
+        //  AnyString TorqueName = CompleteNameOf(JointTorquePtr[3]);
+        
+        
+      };
+      
+      AnyFolder Comparison ={
+        AnyFloat JointTorqueDiff =.Right.JointTorque-.Left.JointTorque;
+      };  
+    };  
+    
+    
+    AnyFolder Muscle ={
+      AnyFolder Right ={
+        AnyObjectPtrArray LmtPtr = ObjSearchRecursive("Main.HumanModel.BodyModel.Right.Leg", "Lmt","AnyValue", 10);
+        AnyFloat Lmt = Obj2Num(LmtPtr)+..DummyModel.mass.r[0];
+        
+        AnyObjectPtrArray LmtDotPtr = ObjSearchRecursive("Main.HumanModel.BodyModel.Right.Leg", "LmtDot","AnyValue", 10);
+        AnyFloat LmtDot = Obj2Num(LmtDotPtr)+..DummyModel.mass.r[0];
+        
+        AnyObjectPtrArray StrengthPtr = ObjSearchRecursive("Main.HumanModel.BodyModel.Right.Leg", "Strength","AnyValue", 10);
+        AnyFloat Strength = Obj2Num(StrengthPtr)+..DummyModel.mass.r[0];
+        
+        AnyObjectPtrArray FtPtr = ObjSearchRecursive("Main.HumanModel.BodyModel.Right.Leg", "Ft","AnyValue", 10);
+        AnyFloat Ft = Obj2Num(FtPtr)+..DummyModel.mass.r[0];
+        
+        
+      };      
+      AnyFolder Left ={
+        AnyObjectPtrArray LmtPtr = ObjSearchRecursive("Main.HumanModel.BodyModel.Left.Leg", "Lmt","AnyValue", 10);
+        AnyFloat Lmt = Obj2Num(LmtPtr)+..DummyModel.mass.r[0];
+        
+        AnyObjectPtrArray LmtDotPtr = ObjSearchRecursive("Main.HumanModel.BodyModel.Left.Leg", "LmtDot","AnyValue", 10);
+        AnyFloat LmtDot = Obj2Num(LmtDotPtr)+..DummyModel.mass.r[0];
+        
+        AnyObjectPtrArray StrengthPtr = ObjSearchRecursive("Main.HumanModel.BodyModel.Left.Leg", "Strength","AnyValue", 10);
+        AnyFloat Strength = Obj2Num(StrengthPtr)+..DummyModel.mass.r[0];
+        
+        AnyObjectPtrArray FtPtr = ObjSearchRecursive("Main.HumanModel.BodyModel.Left.Leg", "Ft","AnyValue", 10);
+        AnyFloat Ft = Obj2Num(FtPtr)+..DummyModel.mass.r[0];        //Instructions:
+        
+        //1 run the model 
+        //2 Look at the Max_listComparison
+        //3 indentify if a muscle is sticking out... ie has larger values than kin tolerance ...
+        //4 if so use the two lines below to identify the name of it... (replace 55)
+        //5 This can be used to find a name of a specific item in sf
+        AnyObjectPtrArray MusclesNames = ObjSearchRecursive("Main.HumanModel.BodyModel.Left.Leg","*", "AnyMuscle",10);
+        //     AnyString MusclesName = NameOf(MusclesNames[36]);
+        
+        
+      };
+      
+      AnyFolder Comparison ={
+        AnyFloat LmtDif =.Right.Lmt-.Left.Lmt;
+        AnyVar MaxLmtDiff= max(LmtDif);
+        
+        AnyFloat LmtDotDif =.Right.LmtDot-.Left.LmtDot;
+        AnyVar MaxLmtDotDiff= max(LmtDotDif);
+        AnyFloat StrengthDif =.Right.Strength-.Left.Strength;
+        
+        AnyFloat FtDif =.Right.Ft-.Left.Ft;
+       
+ AnyVar MaxFtDif= max(FtDif);
+
+      };  
+    };  
+    
+    
+    
+    
+  };
+  #endif
+  
+  AnyFolder Trunk ={
+    //this is a trick to make the ouput of the search posvar not const
+    AnyFolder DummyModel ={
+      AnyFixedRefFrame GlobalRef ={};
+      AnySeg mass={Mass=0; Jii={0,0,0};};
+      AnyStdJoint jnt={      AnyFixedRefFrame &ref1=.GlobalRef;  AnySeg &ref2=.mass;};
+      
+    };
+    AnyFolder Kinematics ={
+      
+      //      AnyFolder Right ={
+      //        AnyObjectPtrArray RefFrames = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk", "*NodeR.r","AnyFloat", 10);
+      //        //this is a trick to make the ouput of the search posvar not const
+      //        AnyFloat PointsXY = (Obj2Num(RefFrames)+..DummyModel.mass.r[0])* {{1,0,0},{0,1,0},{0,0,0}};
+      //        //look at the Comparison.Max_ListComparison to detect which point no is causing non zero values...
+      //        //use the line below to find out which point is the trouble maker by typing in the number...
+      //        AnyString PointName = CompleteNameOf(RefFrames[1]);
+      //        
+      //      };
+      //      
+      //      AnyFolder Left ={
+      //        //this is the way it is supposed to be... but the Obj2Num returns consts... for the moment
+      //        AnyObjectPtrArray RefFrames = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk", "*NodeL.r","AnyFloat", 10);
+      //        //the model is symmetric on Z this trick allows us to check all nodes regardless if they are place on thorax or pelvis
+      //        AnyFloat PointsXY= (Obj2Num(RefFrames)+..DummyModel.mass.r[0])* {{1,0,0},{0,1,0},{0,0,0}};  
+      //        
+      //      };
+      //      
+      //      AnyFolder Comparison ={
+      //        AnyFloat r_Diff =.Right.PointsXY-.Left.PointsXY;
+      //        AnyFloat Max_r_Diff = max(abs(r_Diff));
+      //      };  
+      
+    };
+    
+    AnyFolder Inertia ={
+      
+      
+      
+      AnyKinCoM CoMAll ={
+        AnyFolder  &ref= Main.HumanModel.BodyModel.Trunk;
+      };
+      
+      
+    };  
+    
+    
+    
+    AnyFolder Muscle ={
+      AnyFolder Right ={
+        
+        AnyObjectPtrArray LmtPtr = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.MusclesSpineRight", "Lmt","AnyValue", 10);
+        AnyFloat Lmt = Obj2Num(LmtPtr)+..DummyModel.mass.r[0];
+        
+        AnyObjectPtrArray LmtDotPtr = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.MusclesSpineRight", "LmtDot","AnyValue", 10);
+        AnyFloat LmtDot = Obj2Num(LmtDotPtr)+..DummyModel.mass.r[0];
+        
+        AnyObjectPtrArray StrengthPtr = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.MusclesSpineRight", "Strength","AnyValue", 10);
+        AnyFloat Strength = Obj2Num(StrengthPtr)+..DummyModel.mass.r[0];
+        
+        AnyObjectPtrArray FtPtr = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.MusclesSpineRight", "Ft","AnyValue", 10);
+        AnyFloat Ft = Obj2Num(FtPtr)+..DummyModel.mass.r[0];
+        
+      };      
+      AnyFolder Left ={
+        AnyObjectPtrArray LmtPtr = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.MusclesSpineLeft", "Lmt","AnyValue", 10);
+        AnyFloat Lmt = Obj2Num(LmtPtr)+..DummyModel.mass.r[0];
+        
+        AnyObjectPtrArray LmtDotPtr = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.MusclesSpineLeft", "LmtDot","AnyValue", 10);
+        AnyFloat LmtDot = Obj2Num(LmtDotPtr)+..DummyModel.mass.r[0];
+        
+        AnyObjectPtrArray StrengthPtr = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.MusclesSpineLeft", "Strength","AnyValue", 10);
+        AnyFloat Strength = Obj2Num(StrengthPtr)+..DummyModel.mass.r[0];
+        
+        AnyObjectPtrArray FtPtr = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.MusclesSpineLeft", "Ft","AnyValue", 10);
+        AnyFloat Ft = Obj2Num(FtPtr)+..DummyModel.mass.r[0];
+      };
+      
+      AnyFolder Comparison ={
+        AnyFloat LmtDif =.Right.Lmt-.Left.Lmt;
+        AnyVar MaxLmtDiff= max(LmtDif);
+        
+        AnyFloat LmtDotDif =.Right.LmtDot-.Left.LmtDot;
+        AnyVar MaxLmtDotDiff= max(LmtDotDif);
+        AnyFloat StrengthDif =.Right.Strength-.Left.Strength;
+        AnyFloat FtDif =.Right.Ft-.Left.Ft;
+      AnyVar MaxFtDif= max(FtDif);
+      };  
+    };  
+  };
+};
+
+

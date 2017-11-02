@@ -1,0 +1,85 @@
+#include "../libdef.any"
+
+// This is the AnyMOCAP base model.
+// There should be no reason to change this file directly. 
+//
+// All user defined options can be configured in the application, by 
+// changing the files TrialSpcificData.any, SubjectSpecificData.any, LabSpecificData.any
+#include "PathDefinitions.any"
+#include "ClassTemplates.any"
+
+
+Main = 
+{
+  
+  // Mocap related setup
+  #include "ModelSetup.any"
+  
+  // Include environment model
+  // e.g. global reference, forceplates etc.
+  #include "EnvironmentModel.any"
+  
+  // Configure and include the human model. The configuration 
+  // is controlled by the file(#include "<BODY_MODEL_CONFIG_FILE>")
+  #include "<ANYBODY_PATH_BODY>/HumanModel.any"
+  #include "BodyModelWithoutMuscles.any" 
+  
+  AnyFolder Studies = 
+  {
+    // PreProcess functionality for Inertial MoCap (BVH) studies.
+    #if MOCAP_INPUT_DATA_TYPE == "BVH"
+    #include "BVH_ModelPreprocess.any"
+    #endif
+    
+    /// Study for parameter identification of segment length and marker positions. 
+    AnyOptKinStudy ParameterIdentification = 
+    {    
+      #include "KinematicStudyForParameterIdentification.any"  
+    };
+    
+    /// Overdeterminate kinematic study to generate joint angles for inv. dyn. study. 
+    AnyKinStudy MarkerTracking = 
+    {       
+      AnyFolder& C3DData= Main.ModelSetup.C3DFileData;
+      AnyFolder& BodyModel = Main.HumanModel.BodyModelWithoutMuscles; 
+      AnyFolder& EnvironmentModel = Main.EnvironmentModel;
+      AnyFolder ModelEnvironmentConnection =
+      {
+        AnyFolder &MarkerDrivers = Main.ModelSetup.MocapDrivers;
+        AnyFolder &ExtraDrivers = Main.ModelSetup.MocapExtraDrivers;
+      }; 
+      
+      #include "JointAngleOutputs.any"
+      
+      #include "MarkerTrackingSettings.any"      
+    };
+    
+    
+    /// Study for running the inverse dynamic simulation
+    AnyBodyStudy InverseDynamicStudy = 
+    { 
+      Gravity = Main.ModelSetup.LabSpecificData.Gravity;
+      AnyFolder& C3DData= Main.ModelSetup.C3DFileData ;
+      AnyFolder& BodyModel= Main.HumanModel.BodyModel;
+      AnyFolder& EnvironmentModel = Main.EnvironmentModel;
+      AnyFolder ModelEnvironmentConnection =
+      {
+        #include "HumanGroundResiduals.any"
+        #include "JointsAndDriversOptimized.any"
+      }; 
+      
+      // Include markers for visualization, but exclude the driver part 
+      AnyFolder &Markers= Main.ModelSetup.MocapDrivers;
+      MechObjectExclude = ObjSearchRecursive("Main.ModelSetup.MocapDrivers","*","AnyKinEq");
+
+      #include "InverseDynamicSettings.any"
+    };
+    
+  };  
+  
+  // Macros to excute the model
+  #include "RunApplication.any"  
+
+};//End Main
+
+
