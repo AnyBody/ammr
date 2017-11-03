@@ -80,7 +80,7 @@ extensions = [
 
     
     # 3rd party extensions
-
+    'sphinx_gallery.gen_gallery',
     'cloud_sptheme.ext.index_styling',
     'cloud_sptheme.ext.relbar_toc',
     'cloud_sptheme.ext.escaped_samp_literals',
@@ -90,6 +90,25 @@ extensions = [
     'inline_highlight',
     
 ]
+
+
+sphinx_gallery_conf = {
+    # path to your examples scripts
+    'examples_dirs' : 'Applications',
+    # path where to save gallery generated examples
+    'gallery_dirs'  : 'auto_examples',
+    # directory where function granular galleries are stored
+    'backreferences_dir'  : False,
+    'download_section_examples': False,
+    'min_reported_time': 100, 
+    }
+
+
+
+
+
+
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
