@@ -243,10 +243,10 @@ As the file AnyManExtPercentile represent European males, there is a
 file AnyWomanExtPercentile representing European females. The
 percentile is specified in exactly the same way.
 
-If you want to learn about more advanced patient specific scaling, take a look at the
-AnyBody tutorials. The tutorial on Scaling covers how to do patient-specific scaling based on
-geometry data from MRI and CT scans.
-
 We are extremely grateful to Ford Forschungszentrum Aachen, Germany, for
 sponsoring the scaling implementation.
+
+.. rst-class:: without-title
+.. seealso::
+    **Next lesson:** :doc:`lesson3`.
 
