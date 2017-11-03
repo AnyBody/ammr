@@ -100,7 +100,8 @@ sphinx_gallery_conf = {
     # directory where function granular galleries are stored
     'backreferences_dir'  : False,
     'download_section_examples': False,
-    'min_reported_time': 100, 
+    'min_reported_time': 100,
+    'show_code_section': False,
     }
 
 
