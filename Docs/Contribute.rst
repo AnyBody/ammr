@@ -1,6 +1,9 @@
 How to contribute to Model Development
 --------------------------------------
 
+The Model Repository is product of collaboration between AnyBody Technology, and many 
+academic institutions and research projects. 
+
 If you are interested in beta models/repositories that have not been integrated
 into the AMMR yet, please visit `the development repositories hosted on Github
 <https://github.com/anybody>`_. All contributions are most welcome. 
@@ -12,10 +15,12 @@ version of te AMMR.
 
 
 
-Develop your own body part model
---------------------------------
+.. only:: draft
 
 
 
 
-.. todolist::
+    To do list
+    --------------------------------
+
+    .. todolist::
