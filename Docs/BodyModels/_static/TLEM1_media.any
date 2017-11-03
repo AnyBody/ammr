@@ -1,0 +1,74 @@
+#path ANYBODY_PATH_OUTPUT "."
+#include "../../../libdef.any"
+
+#define BM_ARM_LEFT OFF
+#define BM_ARM_RIGHT OFF
+#define BM_TRUNK_MUSCLES OFF
+#define BM_LEG_MODEL _LEG_MODEL_TLEM1_
+
+#include "<ANYBODY_PATH_MODELUTILS>/Video/CameraClassTemplate.any"
+
+Main = {
+  
+  VideoLookAtCamera SnapShot1(UP_DIRECTION=y, _AUTO_OPEN_PREVIEW_=0) =
+  {
+    VideoName = "TLEM1_closeup";
+    Analysis = {
+      AnyOperation &ref = Main.study.InitialConditions;
+    };
+    Camera.Perspective = On;
+    CameraDistance = 1.04;
+    VideoInputScale = 5;
+    VideoResolution = {600,600};
+    CameraLookAtPoint = Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.r+{0,-0.56,0};
+    CameraFieldOfView = DesignVar(1.37);
+    CameraDirection  = {1,0.2,0.3};
+    BackgroundColor = DesignVar({1,1,1});
+    Preview.FileName = VideoName + ".jpg";
+  };   
+
+  
+  VideoLookAtCamera RotatingVideo(UP_DIRECTION=y , _AUTO_PLAY_VIDEOS=OFF) =
+  {
+    VideoName = "TLEM1_rotating_model";
+    
+    Analysis = {
+      AnyOperation &ref = Main.study.Kinematics;
+    };
+    VideoInputScale = 5;
+    VideoResolution = {350,350};
+    VideoCodec = "libx264";
+    VideoInputFrameRate = 30; 
+    VideoOutputFrameRate = 30;
+    CameraLookAtPoint = Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.r+{0, -0.50, 0};
+    CameraFieldOfView = DesignVar(1.15);
+    CameraDirection  = {cos(2*pi*Main.study.t),0,sin(2*pi*Main.study.t) };
+    BackgroundColor = DesignVar({1,1,1});
+    Counter = Main.study.iStep;
+  }; 
+   
+  
+  #include "<ANYBODY_PATH_BODY>\HumanModel.any"
+    
+  HumanModel.Mannequin.Posture.Right = {
+    ElbowPronation = -70;
+    WristAbduction = 15;
+  };
+ 
+  AnyBodyStudy study = 
+  {
+    AnyFolder& CameraRef1 = Main.RotatingVideo;
+    AnyFolder& Model = Main.HumanModel.BodyModelWithDefaultDrivers;
+    Gravity = {0, -9.81, 0};
+    nStep = 150;
+  };
+  
+  
+  AnyOperationSequence RunApplication = 
+  {
+     AnyOperation& initpos = Main.study.InitialConditions;
+     AnyOperation& SnapShot1 = Main.SnapShot1.Preview;
+     AnyOperation& RotatingVideo = Main.RotatingVideo.Create_Video;
+  };
+  
+};
