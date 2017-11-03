@@ -605,7 +605,7 @@ def generate_file_rst(fname, target_dir, src_dir, gallery_conf):
         sys.argv[1:] = []
 
     for blabel, bcontent, lineno in script_blocks:
-        if blabel == 'code' and gallery_conf['show_code_section']:
+        if blabel == 'code':
             code_output, rtime = execute_code_block(compiler, src_file,
                                                     bcontent, lineno,
                                                     example_globals,
@@ -618,14 +618,16 @@ def generate_file_rst(fname, target_dir, src_dir, gallery_conf):
                 lineno = None
 
             if is_example_notebook_like:
-                example_rst += codestr2rst(bcontent, lineno=lineno) + '\n'
+                if gallery_conf['show_code_section']:
+                    example_rst += codestr2rst(bcontent, lineno=lineno) + '\n'
                 example_rst += code_output
             else:
                 example_rst += code_output
-                if 'sphx-glr-script-out' in code_output:
-                    # Add some vertical space after output
-                    example_rst += "\n\n|\n\n"
-                example_rst += codestr2rst(bcontent, lineno=lineno) + '\n'
+                if gallery_conf['show_code_section']:
+                    if 'sphx-glr-script-out' in code_output:
+                        # Add some vertical space after output
+                        example_rst += "\n\n|\n\n"
+                    example_rst += codestr2rst(bcontent, lineno=lineno) + '\n'
 
         else:
             example_rst += bcontent + '\n\n'
