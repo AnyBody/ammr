@@ -34,8 +34,8 @@ import subprocess
 import cloud_sptheme
 
 
-
 sys.path.insert(0, os.path.abspath('exts'))
+sys.path.insert(0, os.path.abspath('exts/sphinx_gallery-0.1.13-py3.6.egg'))
 
 
 try: 
@@ -80,6 +80,7 @@ extensions = [
 
     
     # 3rd party extensions
+    #'sphinxcontrib.fulltoc',
     'sphinx_gallery.gen_gallery',
     'cloud_sptheme.ext.index_styling',
     'cloud_sptheme.ext.relbar_toc',
