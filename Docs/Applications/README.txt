@@ -12,10 +12,3 @@ features from the AnyBody Modeling System.
       models for other purposes results may occur that cannot be interpreted by
       anatomical or physiological considerations.
 
-
-.. _general_examples:
-
-General examples
-----------------
-
-General-purpose and introductory examples from the sphinx-gallery
