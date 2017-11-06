@@ -183,6 +183,16 @@ All BodyModel constants
 
     Joint definition based on bony landmarks. This will create a joint which resembles what is often used in traditional gait analysis. (E.g. revolute knee joint along the femoral condyles).
 
+.. ammr:bm_constant:: _CALIBRATION_TYPE_1PAR_
+    :value: 1
+
+    Constant to use 1 parameter muscle tendon calibration
+
+.. ammr:bm_constant:: _CALIBRATION_TYPE_2PAR_
+    :value: 2
+
+    Constant to use 2 parameter muscle tendon calibration
+
 .. ammr:bm_constant:: CONST_MUSCLES_NONE
     :value: 0
     :deprecated:

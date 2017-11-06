@@ -554,6 +554,17 @@ All BodyModel parameters
               - :any:`_MORPH_NONE_`: Constant for no-morphing between the upper and lower bodies.
 
 
+.. ammr:bm_statement:: BM_CALIBRATION_TYPE
+
+    Parameter to choose type of muscle tendon calibration
+
+
+    :Default: :ammr:bm_constant:`_CALIBRATION_TYPE_1PAR_`
+    :Example: ``#define BM_CALIBRATION_TYPE _CALIBRATION_TYPE_1PAR_``
+    :Options: - :any:`_CALIBRATION_TYPE_1PAR_`: Constant to use 1 parameter muscle tendon calibration
+              - :any:`_CALIBRATION_TYPE_2PAR_`: Constant to use 2 parameter muscle tendon calibration
+
+
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_PELVIS_POS_X
 
     Switch for the mannequin driver being active or not

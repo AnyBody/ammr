@@ -1,0 +1,373 @@
+/**This is the calibration1 file it will calibrate all muscle in the arm 40 deg abduction */
+AnyFolder ShoulderCal ={
+  AnyFolder &ThoraxSegs =  ...BodyModel.Trunk.SegmentsThorax;
+  AnyFolder &CervicalSegs =  ...BodyModel.Trunk.SegmentsCervicalSpine;
+  AnyFolder &LumbarSegs =  ...BodyModel.Trunk.SegmentsLumbar;
+  AnyFolder &LumbarSpineJoints =  ...BodyModel.Trunk.JointsLumbar;
+  AnyFolder &LumbarCervicalJoints =  ...BodyModel.Trunk.JointsCervicalSpine;
+  
+  AnyFolder &SegSideCal = .SideHumanFolderRef.ShoulderArm.Seg;
+  AnyFolder &JointsSideCal = .SideHumanFolderRef.ShoulderArm.Jnt;
+
+  AnyFolder &MusCalSide =  .SideHumanFolderRef.ShoulderArm.Mus;
+  AnyFolder &MusParCalSide =  .SideHumanFolderRef.ShoulderArm.MusPar;
+  
+  AnyFixedRefFrame ground = {
+    AnyRefNode node = { 
+      ARel=.....BodyModel.Trunk.SegmentsThorax.ThoraxSeg.Axes0; 
+      sRel=.....BodyModel.Trunk.SegmentsThorax.ThoraxSeg.r0;
+    };
+  };
+  
+  AnySphericalJoint ThoraxGround={
+    AnyRefFrame &Ground = .ground.node;
+    AnyRefFrame &Sacrum= ....BodyModel.Trunk.SegmentsThorax.ThoraxSeg;
+  };
+  
+  AnyKinEqSimpleDriver  ThoraxGroundDriver = {
+    AnySphericalJoint &Jnt = .ThoraxGround;
+    DriverPos = {0,0,0};
+    DriverVel = {0,0,0};
+    Reaction.Type = {Off,Off,Off};
+  };
+  
+  AnyFloat Abduction         = {180,0,0} * pi/180;
+  AnyFloat InternalRotation  = {90,0,90} * pi/180;
+  AnyFloat ExternalRotation  = {90,0,-70} * pi/180;
+  AnyFloat HorizontalFlexion = {90,120,0} * pi/180;
+  AnyFloat Adduction         = {-45,25,0} * pi/180;
+  AnyFloat VertivalExtension = {0,-60,0} * pi/180;
+  AnyFloat VerticalFlexion   = {0,180,0} * pi/180;
+  
+  AnyFloat ElbowFlexPosData  = {0,90,90,0,0,0,0} * pi/180;
+  
+  AnyFloat GHPosData         = repmat(1,{
+      Abduction,
+      InternalRotation,
+      ExternalRotation,
+      HorizontalFlexion,
+      Adduction,
+      VertivalExtension,
+      VerticalFlexion
+  }');
+  
+  
+  //Neck driver
+  AnyKinEqSimpleDriver NeckJntDriver = {
+    AnyKinMeasure &fe = ....BodyModel.Interface.Trunk.SkullThoraxFlexion;
+    AnyKinMeasure &ar = ....BodyModel.Interface.Trunk.SkullThoraxRotation;
+    AnyKinMeasure &lb = ....BodyModel.Interface.Trunk.SkullThoraxLateralBending;
+    DriverPos = pi/180*{0,0,0};
+    DriverVel = pi/180*{0,0,0};
+    Reaction.Type = {Off, Off, Off};
+  };
+  
+  AnyKinEqSimpleDriver ThoraxDriver ={
+    AnyKinMeasureOrg &Ref3 = ....BodyModel.Interface.Trunk.PelvisThoraxRotation;
+    AnyKinMeasureOrg &Ref1 = ....BodyModel.Interface.Trunk.PelvisThoraxExtension;
+    AnyKinMeasureOrg &Ref2 = ....BodyModel.Interface.Trunk.PelvisThoraxLateralBending;
+    DriverPos = pi/180*{0,0,0};
+    DriverVel = pi/180*{0,0,0};
+    Reaction.Type = {On,On,On};
+  };
+  
+  #if !BM_ARM_SHOULDER_RHYTHM
+  AnyKinEqSimpleDriver SCDriver ={
+    AnyKinRotational &SC =  ..SideInterfaceFolderRef.SternoClavicularProtraction.SCRot;
+    DriverPos = {-0.4226357, 0.148608, -0.1283884};
+    DriverVel = {0.0,0.0,0.0};
+    Reaction.Type={Off,Off,Off};
+  };
+  #endif
+  
+  AnyKinEqSimpleDriver WristFlexionDriver ={
+      AnyKinMeasure &WF = ....BodyModel.Interface.Right.WristFlexion;
+      DriverPos = {0}*pi/180;
+      DriverVel = {0};
+      Reaction.Type={On};
+    };
+    
+    AnyKinEqSimpleDriver WristAbductionDriver ={
+      AnyKinMeasure &WA = ....BodyModel.Interface.Right.WristAbduction;
+      DriverPos = {0}*pi/180;
+      DriverVel = {0};
+      Reaction.Type={On};
+    };
+    
+  AnyKinEqInterPolDriver FEDriver ={
+    AnyKinMeasure &FE = ..SideInterfaceFolderRef.ElbowFlexion;
+    Type = PiecewiseLinear;
+    T    = linspace(0,1,SizesOf(Data)[1]);
+    Data = {.ElbowFlexPosData};
+    Reaction.Type = {Off};
+  };
+
+  AnyKinEqInterPolDriver PSDriver ={
+    AnyKinMeasure &PS = ..SideInterfaceFolderRef.ElbowPronation;
+    Type = PiecewiseLinear;
+    T =      {0.0, 1.0};
+    Data = {{0,0}}*pi/180;
+    Reaction.Type = {Off};
+  };
+ 
+  AnyKinEqInterPolDriver GHDriver ={
+    AnyKinRotational &GHRotR = ..SideInterfaceFolderRef.GlenohumeralFlexion.GHMeasure;
+    Type = PiecewiseLinear;
+    T = linspace(0,1,SizesOf(Data)[1]);
+    Data = .GHPosData;
+    Reaction.Type = {Off,Off,Off};
+  };
+  
+  //---------------------------------------------------------------------
+  //Finger drivers
+  #if BM_ARM_DETAILED_HAND
+  //finger1
+  AnyKinEqSimpleDriver CMC1Flexion={
+    AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger1.Jnt.CMCFlexion;
+    DriverPos={0}*pi/180;
+    DriverVel={0};
+  };
+  
+  AnyKinEqSimpleDriver CMC1Abduction={
+    AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger1.Jnt.CMCAbduction;
+    DriverPos={0}*pi/180;
+    DriverVel={0};
+  };
+  
+
+  
+  AnyKinEqSimpleDriver MCP1Flexion=
+  {  
+    AnyRevoluteJoint &ref=..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger1.Jnt.MCPFlexion;
+    DriverPos={0}*pi/180;
+    DriverVel={0};
+  };
+  AnyKinEqSimpleDriver MCP1Abduction=
+  {
+    AnyRevoluteJoint &ref=..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger1.Jnt.MCPAbduction;
+    DriverPos={0}*pi/180;
+    DriverVel={0};
+  };
+  
+  AnyKinEqSimpleDriver DIP1={
+    AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger1.Jnt.DIP;
+    DriverPos={0}*pi/180;
+    DriverVel={0};
+  };
+  
+  
+ // finger2
+//    AnyKinEqSimpleDriver CMC2={
+//      AnyUniversalJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger2.Jnt.CMC;
+//      DriverPos={0,0};
+//      DriverVel={0,0};
+//    };
+  AnyKinEqSimpleDriver MCP2={
+    AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger2.Jnt.MCP;
+    DriverPos={0}*pi/180;
+    DriverVel={0};
+  };
+  AnyKinEqSimpleDriver PIP2={
+    AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger2.Jnt.PIP;
+    DriverPos={0}*pi/180;
+    DriverVel={0};
+  };
+    AnyKinEqSimpleDriver DIP2={
+      AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger2.Jnt.DIP;
+      DriverPos={0};
+      DriverVel={0};
+    };
+  
+  
+  
+ // finger3
+//    AnyKinEqSimpleDriver CMC3={
+//      AnyUniversalJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger3.Jnt.CMC;
+//      DriverPos={0,0};
+//      DriverVel={0,0};
+//    };
+  AnyKinEqSimpleDriver MCP3={
+    AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger3.Jnt.MCP;
+    DriverPos={0}*pi/180;
+    DriverVel={0};
+  };
+  AnyKinEqSimpleDriver PIP3={
+    AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger3.Jnt.PIP;
+    DriverPos={0}*pi/180;
+    DriverVel={0};
+  };
+    AnyKinEqSimpleDriver DIP3={
+      AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger3.Jnt.DIP;
+      DriverPos={0};
+      DriverVel={0};
+    };
+  
+  
+  //finger4
+//    AnyKinEqSimpleDriver CMC4={
+//      AnyUniversalJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger4.Jnt.CMC;
+//      DriverPos={0,0}*pi/180;
+//      DriverVel={0,0};
+//    };
+  AnyKinEqSimpleDriver MCP4={
+    AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger4.Jnt.MCP;
+    DriverPos={0}*pi/180;
+    DriverVel={0};
+  };
+  AnyKinEqSimpleDriver PIP4={
+    AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger4.Jnt.PIP;
+    DriverPos={0}*pi/180;
+    DriverVel={0};
+  };
+    AnyKinEqSimpleDriver DIP4={
+      AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger4.Jnt.DIP;
+      DriverPos={0}*pi/180;
+      DriverVel={0};
+    };
+  
+  
+ // finger5
+//    AnyKinEqSimpleDriver CMC5={
+//      AnyUniversalJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger5.Jnt.CMC;
+//      DriverPos={0,0};
+//      DriverVel={0,0};
+//    };
+  AnyKinEqSimpleDriver MCP5={
+    AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger5.Jnt.MCP;
+    DriverPos={0}*pi/180;
+    DriverVel={0};
+  };
+  AnyKinEqSimpleDriver PIP5={
+    AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger5.Jnt.PIP;
+    DriverPos={0}*pi/180;
+    DriverVel={0};
+  };
+    AnyKinEqSimpleDriver DIP5={
+      AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger5.Jnt.DIP;
+      DriverPos={0};
+      DriverVel={0};
+    };
+  #endif
+  
+  AnyString MusPrefix = CompleteNameOf(&.SideHumanFolderRef.ShoulderArm.Mus);
+  
+  AnyObjectPtrArray coracobrachialisMuscles = ObjSearch(MusPrefix+".coracobrachialis*", "AnyMuscle");
+AnyFloat  coracobrachialisRmin = repmat(NumElemOf(coracobrachialisMuscles), ..RMin);
+AnyFloat  coracobrachialisRmax = repmat(NumElemOf(coracobrachialisMuscles), ..RMax);
+
+AnyObjectPtrArray deltoideus_scapularMuscles = ObjSearch(MusPrefix+".deltoideus_scapular*", "AnyMuscle");
+AnyFloat  deltoideus_scapularRmin = repmat(NumElemOf(deltoideus_scapularMuscles), ..RMin);
+AnyFloat  deltoideus_scapularRmax = repmat(NumElemOf(deltoideus_scapularMuscles), ..RMax);
+
+AnyObjectPtrArray deltoideus_clavicularMuscles = ObjSearch(MusPrefix+".deltoideus_clavicular*", "AnyMuscle");
+AnyFloat  deltoideus_clavicularRmin = repmat(NumElemOf(deltoideus_clavicularMuscles), ..RMin);
+AnyFloat  deltoideus_clavicularRmax = repmat(NumElemOf(deltoideus_clavicularMuscles), ..RMax);
+
+AnyObjectPtrArray infraspinatusMuscles = ObjSearch(MusPrefix+".infraspinatus*", "AnyMuscle");
+AnyFloat  infraspinatusRmin = repmat(NumElemOf(infraspinatusMuscles), ..RMin);
+AnyFloat  infraspinatusRmax = repmat(NumElemOf(infraspinatusMuscles), ..RMax);
+
+AnyObjectPtrArray pectoralis_major_thoracicMuscles = ObjSearch(MusPrefix+".pectoralis_major_thoracic*", "AnyMuscle");
+AnyFloat  pectoralis_major_thoracicRmin = repmat(NumElemOf(pectoralis_major_thoracicMuscles), ..RMin);
+AnyFloat  pectoralis_major_thoracicRmax = repmat(NumElemOf(pectoralis_major_thoracicMuscles), ..RMax);
+
+AnyObjectPtrArray pectoralis_major_clavicularMuscles = ObjSearch(MusPrefix+".pectoralis_major_clavicular*", "AnyMuscle");
+AnyFloat  pectoralis_major_clavicularRmin = repmat(NumElemOf(pectoralis_major_clavicularMuscles), ..RMin);
+AnyFloat  pectoralis_major_clavicularRmax = repmat(NumElemOf(pectoralis_major_clavicularMuscles), ..RMax);
+
+AnyObjectPtrArray pectoralis_minorMuscles = ObjSearch(MusPrefix+".pectoralis_minor*", "AnyMuscle");
+AnyFloat  pectoralis_minorRmin = repmat(NumElemOf(pectoralis_minorMuscles), ..RMin);
+AnyFloat  pectoralis_minorRmax = repmat(NumElemOf(pectoralis_minorMuscles), ..RMax);
+
+AnyObjectPtrArray rhomboideusMuscles = ObjSearch(MusPrefix+".rhomboideus*", "AnyMuscle");
+AnyFloat  rhomboideusRmin = repmat(NumElemOf(rhomboideusMuscles), ..RMin);
+AnyFloat  rhomboideusRmax = repmat(NumElemOf(rhomboideusMuscles), ..RMax);
+
+AnyObjectPtrArray serratus_anteriorMuscles = ObjSearch(MusPrefix+".serratus_anterior*", "AnyMuscle");
+AnyFloat  serratus_anteriorRmin = repmat(NumElemOf(serratus_anteriorMuscles), ..RMin);
+AnyFloat  serratus_anteriorRmax = repmat(NumElemOf(serratus_anteriorMuscles), ..RMax);
+
+AnyObjectPtrArray subscapularisMuscles = ObjSearch(MusPrefix+".subscapularis*", "AnyMuscle");
+AnyFloat  subscapularisRmin = repmat(NumElemOf(subscapularisMuscles), ..RMin);
+AnyFloat  subscapularisRmax = repmat(NumElemOf(subscapularisMuscles), ..RMax);
+
+AnyObjectPtrArray supraspinatusMuscles = ObjSearch(MusPrefix+".supraspinatus*", "AnyMuscle");
+AnyFloat  supraspinatusRmin = repmat(NumElemOf(supraspinatusMuscles), ..RMin);
+AnyFloat  supraspinatusRmax = repmat(NumElemOf(supraspinatusMuscles), ..RMax);
+
+AnyObjectPtrArray teres_majorMuscles = ObjSearch(MusPrefix+".teres_major*", "AnyMuscle");
+AnyFloat  teres_majorRmin = repmat(NumElemOf(teres_majorMuscles), ..RMin);
+AnyFloat  teres_majorRmax = repmat(NumElemOf(teres_majorMuscles), ..RMax);
+
+AnyObjectPtrArray teres_minorMuscles = ObjSearch(MusPrefix+".teres_minor*", "AnyMuscle");
+AnyFloat  teres_minorRmin = repmat(NumElemOf(teres_minorMuscles), ..RMin);
+AnyFloat  teres_minorRmax = repmat(NumElemOf(teres_minorMuscles), ..RMax);
+
+AnyObjectPtrArray trapezius_scapularMuscles = ObjSearch(MusPrefix+".trapezius_scapular*", "AnyMuscle");
+AnyFloat  trapezius_scapularRmin = repmat(NumElemOf(trapezius_scapularMuscles), ..RMin);
+AnyFloat  trapezius_scapularRmax = repmat(NumElemOf(trapezius_scapularMuscles), ..RMax);
+  
+  
+};
+
+// The study: Operations to be performed on the model
+AnyBodyCalibrationStudy ArmCalibrationStudy0 = {
+  //MechObjectExclude = ObjSearch("...BodyModel.Trunk.SegmentsThorax.SkullSeg", "AnySeg");
+  AnyFolder &ref=.ShoulderCal;
+  nStep = 13;
+  Kinematics.SmallStepAssumptionOnOff = Off;
+  Kinematics.KinematicTol = 1e-07;
+  MuscleArr = arrcat(arrcat(
+      ref.coracobrachialisMuscles,
+      ref.deltoideus_scapularMuscles,
+      ref.deltoideus_clavicularMuscles,
+      ref.infraspinatusMuscles,
+      ref.pectoralis_major_thoracicMuscles,
+      ref.pectoralis_major_clavicularMuscles,
+      ref.pectoralis_minorMuscles,
+      ref.rhomboideusMuscles,
+      ref.serratus_anteriorMuscles),
+      ref.subscapularisMuscles,
+      ref.supraspinatusMuscles,
+      ref.teres_majorMuscles,
+      ref.teres_minorMuscles,
+      ref.trapezius_scapularMuscles
+  );
+  RminMuscleFiber = arrcat(arrcat(
+      ref.coracobrachialisRmin,
+      ref.deltoideus_scapularRmin,
+      ref.deltoideus_clavicularRmin,
+      ref.infraspinatusRmin,
+      ref.pectoralis_major_thoracicRmin,
+      ref.pectoralis_major_clavicularRmin,
+      ref.pectoralis_minorRmin,
+      ref.rhomboideusRmin,
+      ref.serratus_anteriorRmin),
+      ref.subscapularisRmin,
+      ref.supraspinatusRmin,
+      ref.teres_majorRmin,
+      ref.teres_minorRmin,
+      ref.trapezius_scapularRmin
+  );
+  RmaxMuscleFiber = arrcat(arrcat(
+      ref.coracobrachialisRmax,
+      ref.deltoideus_scapularRmax,
+      ref.deltoideus_clavicularRmax,
+      ref.infraspinatusRmax,
+      ref.pectoralis_major_thoracicRmax,
+      ref.pectoralis_major_clavicularRmax,
+      ref.pectoralis_minorRmax,
+      ref.rhomboideusRmax,
+      ref.serratus_anteriorRmax),
+      ref.subscapularisRmax,
+      ref.supraspinatusRmax,
+      ref.teres_majorRmax,
+      ref.teres_minorRmax,
+      ref.trapezius_scapularRmax
+  );
+  
+  
+  
+};
+
+  
