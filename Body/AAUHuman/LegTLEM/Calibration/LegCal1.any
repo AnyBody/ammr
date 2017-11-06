@@ -1,0 +1,88 @@
+//This is the calibration1 file, it will calibrate all muscle in the leg in
+//a neutral position (all joint angles in the drivers are zero)
+//The subsequent calibrations 2 and 3 will overwrite some of the values
+//obtained in this study
+
+AnyFolder LegCal1 ={
+  
+  AnyFolder &Pelvis = ...BodyModel.Trunk.SegmentsLumbar.PelvisSeg;
+  AnyFolder &Sacrum = ...BodyModel.Trunk.SegmentsLumbar.SacrumSeg;
+  
+  // Segments needed for the Psoas Major muscles
+  AnyFolder& SegmentsLumbar = Main.HumanModel.BodyModel.Trunk.SegmentsLumbar;
+  AnyFolder &Thorax = ...BodyModel.Trunk.SegmentsThorax.ThoraxSeg;
+  
+  AnyFolder &LegSegSide = .SideHumanFolderRef.Leg.Seg;
+  
+  AnyFolder &LegJointsSide = .SideHumanFolderRef.Leg.Jnt;
+  AnyFolder &TrunkJoints = ...BodyModel.Trunk.JointsLumbar;
+  
+  AnyFolder &MusCalSide =  .SideHumanFolderRef.Leg.Mus;
+    
+  
+  
+  AnyFixedRefFrame ground = {
+    AnyRefNode node = { 
+      ARel=..Pelvis.Axes0;
+      sRel=..Pelvis.r0;
+    };
+  };
+  
+  AnyKinEqDriver ThoraxFix = 
+  {
+    AnyKinMeasure& PelvisThoraxExtension = ....BodyModel.Interface.Trunk.PelvisThoraxExtension;
+    AnyKinMeasure& PelvisThoraxLateralBending = ....BodyModel.Interface.Trunk.PelvisThoraxLateralBending;
+    AnyKinMeasure& PelvisThoraxRotation = ....BodyModel.Interface.Trunk.PelvisThoraxRotation;
+  };
+  
+AnyKinEqDriver PelvisFix = {
+    AnyKinLinear Lin = {
+      AnyRefFrame &ground = ..ground.node;
+      AnyRefFrame &Pelvis = .....BodyModel.Trunk.SegmentsLumbar.PelvisSeg;
+    };
+    AnyKinRotational Rot = {
+      Type = RotAxesAngles;
+      AnyRefFrame &ground = ..ground.node;
+      AnyRefFrame &Pelvis = .....BodyModel.Trunk.SegmentsLumbar.PelvisSeg;
+    };
+  };
+  
+  
+  AnyKinEqSimpleDriver Hip = {
+    AnyKinRotational &Spherical = ..SideInterfaceFolderRef.HipFlexion.HipMeasure;
+    DriverPos = {0,0,0}*pi/180; // Flexion - Abduction - external rotation
+    DriverVel = {0,0,0}*pi/180;
+    Reaction.Type = {Off,Off,Off};
+  };
+  
+  
+  AnyKinEqSimpleDriver Knee = {
+    AnyKinMeasure &Hinge = ..SideInterfaceFolderRef.KneeFlexion;
+    DriverPos = {0*pi/180};
+    DriverVel = {0*pi/180};
+    Reaction.Type = {Off};
+  };
+  
+  
+  AnyKinEqSimpleDriver Ankle = {
+    AnyKinMeasure &Hinge = ..SideInterfaceFolderRef.AnklePlantarFlexion;
+    DriverPos = {0*pi/180};
+    DriverVel = {0*pi/180};
+    Reaction.Type = {Off};
+  };
+
+  AnyKinEqSimpleDriver SubTalar = {
+    AnyKinMeasure &Hinge = ..SideInterfaceFolderRef.SubTalarEversion;
+    DriverPos = {0*pi/180};
+    DriverVel = {0*pi/180}; 
+    Reaction.Type = {Off};
+  };
+
+};
+
+// The study: Operations to be performed on the model
+AnyBodyCalibrationStudy LegCalibrationStudy1 = {
+  AnyFolder &ref=.LegCal1; 
+  nStep = 1;
+  InitialConditions.SolverType = KinSolOverDeterminate;
+};
