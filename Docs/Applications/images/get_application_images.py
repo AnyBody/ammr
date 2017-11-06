@@ -18,7 +18,7 @@ files = [
     if 'InitPos' in img.name and img.name.endswith('jpg')
 ]
 
-RE_IMAGE = re.compile('.*test_(.*).any_0_InitPos.jpg')
+RE_IMAGE = re.compile('.*[tT]est_(.*).any_0_InitPos.jpg')
 
 for fimg in files:
     m = RE_IMAGE.match(fimg.name)

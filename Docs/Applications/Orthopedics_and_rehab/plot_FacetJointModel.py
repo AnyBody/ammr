@@ -5,6 +5,8 @@ Facet Joint Model
 
 A spine model with facet joints.
 
+**Main file:** :file:`Application/Examples/FacetJointModel/FacetJointModel.main.any`
+
 This model presents a methodology for implementation of facet joints in the
 lumbar spine model developed by De Zee et al. (2007: J Biomech. 40, 1219-1227).
 It enables the facet joint forces to become part of a redundant system of

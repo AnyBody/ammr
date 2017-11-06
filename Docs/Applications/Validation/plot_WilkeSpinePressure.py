@@ -6,6 +6,8 @@ Wilke Spine Disc Pressure Model
 Several models comparing loads in the spine with in vivo measurements
 during daily activities from Wilke et al., Spine 1999.
 
+.. figure:: /Applications/Validation/wilke.svg
+
 
 """
 
@@ -45,5 +47,6 @@ plt.figure()
 image = mimg.imread("../images/SpinePressureStandingLiftFlexed.jpg")
 plt.axis('off')
 plt.imshow(image)
+
 
 plt.show()
