@@ -1,0 +1,91 @@
+#ifndef ANYBODY_PATH_OUTPUT
+ #path ANYBODY_PATH_OUTPUT "."
+#endif 
+ 
+#include "../../../../libdef.any"
+
+#include "<ANYBODY_PATH_MODELUTILS>/Video/CameraClassTemplate.any"
+
+
+#define BM_SCALING CONST_SCALING_LENGTHMASS
+#path BM_SCALING_ANTHRO_FILE "AnyManLengthMassCorrect.any" 
+#include "<ANYBODY_PATH_AMMR>/Application/Examples/StandingModelScalingDisplay/StandingModelScalingDisplay.Main.any"
+
+Main = {
+  
+  
+  Main.Model.EnvironmentModel = {
+    
+    AnyForce3D RightHandLoad = {
+      F = {0, -50, 0};
+      AnyRefFrame &Hand = Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Glove;
+    };
+    
+    AnyForce3D LeftHandLoad = {
+      F = {0, -50, 0};
+      AnyRefFrame &Hand = Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Glove;
+    };
+    
+    AnyDrawVector DrawRightLoad = {
+      Vec = .RightHandLoad.F*0.015;
+      PointAway = On;
+      GlobalCoord = On;
+      Line = {
+        Style = Line3DStyleFull;
+        Thickness = 0.01;
+        RGB = {0, 0, 0};
+        End = {
+          Style = Line3DCapStyleArrow;
+          RGB = {0, 0, 0};
+          Thickness = 0.025;
+          Length = 0.025;
+        };
+      };
+      AnyRefFrame &Hand = .RightHandLoad.Hand;
+    };
+    
+    AnyDrawVector DrawLeftLoad = {
+      Vec = .LeftHandLoad.F*0.015;
+      PointAway = On;
+      GlobalCoord = On;
+      Line = {
+        Style = Line3DStyleFull;
+        Thickness = 0.01;
+        RGB = {0, 0, 0};
+        End = {
+          Style = Line3DCapStyleArrow;
+          RGB = {0, 0, 0};
+          Thickness = 0.025;
+          Length = 0.025;
+        };
+      };
+      AnyRefFrame &Hand = .LeftHandLoad.Hand;
+    };
+  };
+
+  VideoLookAtCamera Static_image2(UP_DIRECTION=y, _AUTO_OPEN_PREVIEW_=OFF) =
+  {
+    VideoName = "AppliedForcesFront";
+    Analysis = {
+      AnyOperation &ref = Main.Study.InitialConditions;
+    };
+    VideoInputScale = 5;
+    VideoResolution = {300,500};
+    CameraLookAtPoint = Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.r + {0,-0.2,0};
+    CameraFieldOfView = DesignVar(2.2);
+    CameraDirection  = {1,0.2,1.0};
+    BackgroundColor = DesignVar({1,1,1});
+    
+    Preview.FileName = VideoName + ".jpg";
+
+  };
+  
+  
+  AnyOperationSequence GenerateImages = 
+  {
+     AnyOperation&  init = Main.Study.InitialConditions;
+     #ifndef ExcludeImageGeneration
+     AnyOperation& CreateFront = Main.Static_image2.Preview;
+     #endif
+  };
+};
