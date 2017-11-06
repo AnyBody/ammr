@@ -59,12 +59,19 @@ Guides
     Scaling/intro
 
 
+What is new:
+----------------
+.. toctree::
+    :maxdepth: 1
+
+    CHANGELOG 
+
 
 Development
 -----------
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
 
     Contribute
 

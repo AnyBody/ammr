@@ -18,7 +18,15 @@
 #else
 #define  MOCAP_TEST_FILENAME_PREFIX  "GUI1_"
 #define BM_LEG_MODEL _LEG_MODEL_TLEM1_
+#define CREATE_IMAGE
 #endif
+
+
+#ifdef CREATE_IMAGE
+#undef MOCAP_TEST_FILENAME_PREFIX
+#path TEMP_PATH "<MOCAP_PATH_MAINFILEDIR>/../../Output"
+#endif
+
 
 
 //// Run Analysis with a reduced number of time steps
@@ -33,15 +41,21 @@
 
 Main = 
 {
-  AnyOperationSequence  RunTest = 
+  AnyOperationSequence  TestRunApplication = 
   {
     AnyOperation& BVH_preprocess = Main.BVH_PreProcess;
     AnyOperation& RunAnalysis = Main.RunAnalysis; 
   };
-Studies.ParameterIdentification = {
-AnyDesVar Dummy = {Val = 0;};
-};
 
   
+  #ifndef CREATE_IMAGE
+    AnyOperation& RunTest = Main.TestRunApplication;
+  #else
+    #include "../Cameras.any"
+    AnyOperation& CameraInitPos = Main.Studies.InverseDynamicStudy.InitialConditions;
+    LoadTimeCam.CameraLookAtPoint = Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.r +{0,-0.2,0};
+    LoadTimeCam.CameraFieldOfView = DesignVar(2);
+    LoadTimeCam.CameraDirection  = {-1,0.3,1};
+  #endif  
   
 };
