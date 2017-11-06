@@ -39,17 +39,15 @@ Using the AMMR
 Model Overview
 --------------
 
-The Model Repository consist of two parts. The *Body Models* which can be
-customized and scaled to build a subject specific musculoskeletal model, and *Application examples* in which the body models are utlizied in specific
-applications. 
-
-The following provides an overview of both.
+The Model Repository consist of two parts. The **Body Models** which can be
+customized and scaled to build a subject specific musculoskeletal model, and **Application examples** in which the body models are utlizied in specific
+applications.
 
 .. toctree::
     :maxdepth: 2
 
     BodyModels/BodyParts_and_models
-    Examples_and_applications
+    Applications/overview
 
 
 Guides
@@ -61,12 +59,19 @@ Guides
     Scaling/intro
 
 
+What is new:
+----------------
+.. toctree::
+    :maxdepth: 1
+
+    CHANGELOG 
+
 
 Development
 -----------
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
 
     Contribute
 

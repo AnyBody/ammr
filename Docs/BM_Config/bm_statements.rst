@@ -1006,6 +1006,18 @@ All BodyModel parameters
 | 
 
 
+.. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_HAND_RIGHT
+
+    Switch for the mannequin driver being active or not
+
+
+    :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_HAND_RIGHT BM_MANNEQUIN_DRIVER_DEFAULT``
+    :Options: - :any:`ON`: 
+              - :any:`OFF`: 
+              - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_LEFT
 
     Switch for all the mannequin drivers for the sterno clavicular degrees of freedom.
@@ -1191,6 +1203,18 @@ All BodyModel parameters
 |   
 | 
 | 
+
+
+.. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_HAND_LEFT
+
+    Switch for the mannequin driver being active or not
+
+
+    :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_HAND_LEFT BM_MANNEQUIN_DRIVER_DEFAULT``
+    :Options: - :any:`ON`: 
+              - :any:`OFF`: 
+              - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_HIP_FLEXION_RIGHT
