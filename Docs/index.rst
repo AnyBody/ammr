@@ -47,7 +47,7 @@ applications.
     :maxdepth: 2
 
     BodyModels/BodyParts_and_models
-    Examples_and_applications
+    Applications/overview
 
 
 Guides
