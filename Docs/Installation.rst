@@ -8,15 +8,26 @@ AnyBody Modeling System.
     because they must be available independently (not shared) for every user
     of the computer
 
+.. rst-class:: centered
 
-**STEP 1:** To get a fresh copy of the AMMR select the "Demo" tab in the AnyBody Assistant
+**STEP 1** 
+
+To get a fresh copy of the AMMR select the "Demo" tab in the AnyBody Assistant
 window that opens when AnyBody starts: 
 
 .. image:: _static/Installation-anybodyassistent.png
+    :width: 400
+    :align: center
 
-**STEP 2:** Then select the "Install demo repository..."
+.. rst-class:: centered
+
+**STEP 2**
+
+Then select the "Install demo repository..."
 
 .. image:: _static/Installation-demo-repo.png
+    :width: 400
+    :align: center
 
 This installs the repository into your Documents folder (e.g. |AMMR_DEMO_INST_DIR|). Next make a copy 
 these files before you start working. 
