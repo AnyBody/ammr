@@ -199,8 +199,10 @@ rst_epilog = f"""
 def setup(app):
     app.add_stylesheet('theme_override.css')
 
-html_sidebars = {'**': ['globaltoc.html', 'searchbox.html']}
-
+html_sidebars = {
+   '**': ['searchbox.html', 'globaltoc.html', 'sourcelink.html', ],
+   'using/windows': ['windowssidebar.html', 'searchbox.html'],
+}
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.

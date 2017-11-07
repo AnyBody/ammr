@@ -1,11 +1,13 @@
 
-Contents
-#####################################
 
+###############
+Contents
+###############
 
 .. toctree::
-    :maxdepth: 3
+    :maxdepth: 2
 
+    index
     Using_the_AMMR
     BM_Config/HumanBody_configurations
     BodyModels/BodyParts_and_models

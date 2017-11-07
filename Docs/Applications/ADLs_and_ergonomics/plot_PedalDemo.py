@@ -14,10 +14,10 @@ spring and the distance of the seat from the pedal.
 
 """
 
-import matplotlib.pyplot as plt
-import matplotlib.image as mimg
 
-image = mimg.imread("../images/PedalDemo.jpg")
-plt.axis('off')
-plt.imshow(image)
-plt.show()
+import sys
+sys.path.insert(0, '../../exts')
+import gallery
+
+gallery.plot("../images/PedalDemo.jpg")
+gallery.show()

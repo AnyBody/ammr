@@ -35,10 +35,9 @@ FreePostureMove is a dynamic model controlled through angles which can be set in
 
 """
 
-import matplotlib.pyplot as plt
-import matplotlib.image as mimg
+import sys
+sys.path.insert(0, '../../exts')
+import gallery
 
-image = mimg.imread("../images/FreePostureFullBodyStatic.jpg")
-plt.axis('off')
-plt.imshow(image)
-plt.show()
+gallery.plot("../images/FreePostureFullBodyStatic.jpg")
+gallery.show()

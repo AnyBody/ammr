@@ -39,10 +39,10 @@ is on the very upper limit of coach class passenger seats.
 
 """
 
-import matplotlib.pyplot as plt
-import matplotlib.image as mimg
 
-image = mimg.imread("../images/AirlinePassenger.jpg")
-plt.axis('off')
-plt.imshow(image)
-plt.show()
+import sys
+sys.path.insert(0, '../../exts')
+import gallery
+
+gallery.plot("../images/AirlinePassenger.jpg")
+gallery.show()
