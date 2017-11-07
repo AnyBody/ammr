@@ -30,7 +30,7 @@ which can be assembled into the full human in many combinations.
 
 .. note:: Parts of the AAUHuman (except the
     mandible) are by default assembled together into a full body model.
-    See :doc:`/BM_Config/HumanBody_configurations` for re-configuring the model to for example, only represent the trunk, or use a different leg/muscle model.
+    See :doc:`/BM_Config/index` for re-configuring the model to for example, only represent the trunk, or use a different leg/muscle model.
 
 
 .. rubric:: Models
