@@ -1,20 +1,18 @@
 Configuring the Body Model
 ===========================
 
+The body model can be configured in multiple ways. This include what limb
+segments are include, the type of muscles, scaling etc. 
 
-
-AnyBody users can exercise a multitude of choices when defining the anatomy of the AMMR's human body model. These include the the limb segments that must be included in the model, 
-degree of model complexity, cadaveric datasets to base the model on etc. This writeup will explain how you can configure the model by specifying these choices. 
-
-**Configuration is set in AnyScript through a number of switches called 
-Body Model (BM) parameters. BM parameters are always prefixed with BM_ and written in uppercase.**
-
-Setting the BM parameters can enable or disable body parts, change muscle types, or change other options. 
+All these choises are controlled through a number of switches called Body Model
+(BM) parameters. BM parameters are always prefixed with BM_ and written in
+uppercase.
 
 Simple example
 --------------
 
-The example below configures a model with no arms and enables the 3-element Hill muscles model on the legs. 
+The example below configures a model with no arms and enables the 3-element Hill
+muscles model on the legs. 
 
 .. code-block:: AnyScriptDoc
     :emphasize-lines: 1-3
