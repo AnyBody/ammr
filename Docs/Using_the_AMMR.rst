@@ -118,7 +118,7 @@ BM_ARM_RIGHT OFF`` to disable the right arm).
 
 If no configuration parameters are given, the full body model is loaded (the default configuration). 
 
-.. seealso:: :doc:`The documentation on BM configuration </BM_Config/HumanBody_configurations>`
+.. seealso:: :doc:`The documentation on BM configuration </BM_Config/index>`
 
 
 .. ``#include "HumanModel.any"`` 

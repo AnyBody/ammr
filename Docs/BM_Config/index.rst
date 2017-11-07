@@ -31,8 +31,7 @@ muscles model on the legs.
 The next section shows an overview of what BM statements are available for the different body parts.
 
 
-BM parameters
---------------------------------
+.. rubric:: BM parameters
 
 There are body model parameters for configuring each body part, controlling scaling, controlling the default
 mannequin drivers (click to see tutorial on :ref:`modelling from scratch <MannequinDriver>`), as well as other global options for the model. 
