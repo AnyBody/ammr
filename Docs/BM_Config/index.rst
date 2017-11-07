@@ -5,7 +5,7 @@ The body model can be configured in multiple ways. This include what limb
 segments are include, the type of muscles, scaling etc. 
 
 All these choises are controlled through a number of switches called Body Model
-(BM) parameters. BM parameters are always prefixed with BM_ and written in
+(BM) parameters. BM parameters are always prefixed with ``BM_`` and written in
 uppercase.
 
 Simple example
