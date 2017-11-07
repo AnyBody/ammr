@@ -16,7 +16,6 @@ sys.path.insert(0, '../../exts')
 import gallery
 
 gallery.plot("../images/SpinePressureLyingOnBack.jpg")
-gallery.plot("../images/SpinePressureSeatingFlexedNoSupport.jpg")
 gallery.plot("../images/SpinePressureSeatingRelaxed.jpg")
 gallery.plot("../images/SpinePressureStandingLiftStretchedArms.jpg")
 gallery.plot("../images/SpinePressureStandingLiftClose.jpg")
