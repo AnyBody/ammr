@@ -8,8 +8,7 @@ All these choises are controlled through a number of switches called Body Model
 (BM) parameters. BM parameters are always prefixed with ``BM_`` and written in
 uppercase.
 
-Simple example
---------------
+.. rubric:: Simple example
 
 The example below configures a model with no arms and enables the 3-element Hill
 muscles model on the legs. 
