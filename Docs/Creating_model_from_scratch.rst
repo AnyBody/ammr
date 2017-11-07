@@ -163,12 +163,14 @@ Create a reference to the human body model inside **Model** so that it is consid
 
 .. rst-class:: centered
 
+.. _MannequinDriver:
+
 **STEP 7**
 
 First add the lines of code highlighted in yellow below. An explanation follows.
 
 While the previous step included the human body model in **Model**, a key piece of machinery was still missing - Motion constraints. In fact, you will see a warning message 
-if the model is loaded now. While motion prescription in elaborated on in tutorial XYZ, a basic AnyBody requirement is that the number of motion constraints 
+if the model is loaded now. While motion prescription in elaborated on in :tutorials:doc:` thie tutorial <Making_things_move/index>`, a basic AnyBody requirement is that the number of motion constraints 
 (called motion drivers in AnyBody) must at least equal the number of DOFs of the model. 
 
 The total number of DOFs & motion constraints can be found by double clicking the **Study** object in the Model tree. This opens the Object Description which
@@ -179,7 +181,7 @@ These are termed **DefaultMannequinDrivers** and are included in the **Model** f
 Due to the inclusion of soft drivers, solver settings need to be readjusted (see yellow highlting in code below). 
 You can now gradually add more complex hard drivers (e.g, to constrain feet to ground, maintain balance etc.) to your model, which automatically over-ride the 
 constraints enforced by soft drivers. The alternative would have been to create all 42 constraints manually before the simulation could even be tested 
-- a debugging nightmare in the making!  
+- a debugging nightmare in the making!   
 
 
 .. code-block:: AnyScriptDoc

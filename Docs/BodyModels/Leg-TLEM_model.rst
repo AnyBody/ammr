@@ -65,10 +65,10 @@ Resources
 
 More details can be found online:
 
-.. [ESA_cycling_report] Report containing moment arm validation for `ESA:
+.. [Dendorfer and Toerholm 2008] Report containing moment arm validation for `ESA:
    report <http://www.anybodytech.com/fileadmin/downloads/Final_Report.pdf>`__
 
-.. [klein-horsman2007] Klein Horsman, M. D., Koopman, H. F. J. M., van der Helm, F. C. T., 
+.. [Horsman 2007] Klein Horsman, M. D., Koopman, H. F. J. M., van der Helm, F. C. T., 
    Prosé, L. P., and Veeger, H. E. J., 2007, “Morphological Muscle and Joint Parameters for
    Musculoskeletal Modelling of the Lower Extremity,” Clin. Biomech. , 22(2), pp. 239–247.
    `link <http://linkinghub.elsevier.com/retrieve/pii/S0268003306001896>`__
