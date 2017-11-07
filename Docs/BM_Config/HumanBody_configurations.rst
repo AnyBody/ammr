@@ -1,6 +1,8 @@
 Configuring the Body Model
 ===========================
 
+
+
 AnyBody users can exercise a multitude of choices when defining the anatomy of the AMMR's human body model. These include the the limb segments that must be included in the model, 
 degree of model complexity, cadaveric datasets to base the model on etc. This writeup will explain how you can configure the model by specifying these choices. 
 
@@ -24,12 +26,14 @@ The example below configures a model with no arms and enables the 3-element Hill
     // Now include the HumanModel
     #include "<ANYBODY_PATH_BODY>\HumanModel.any"
 
-There are two questions that naturally follow:
 
-- Which BM parameters are available for configuration?
-- What are options do are available for parameter values?
+.. note:: Some parameters have simple :ammr:bm_constant:`ON`/:ammr:bm_constant:`OFF`
+    options, while others have more options. 
 
-Available parameters and options
+The next section shows an overview of what BM statements are available for the different body parts.
+
+
+BM parameters
 --------------------------------
 
 There are body model parameters for configuring each body part, controlling scaling, controlling the default
@@ -47,29 +51,31 @@ See the following links for details on BM parameters related to different body p
     Scaling_configurations
     Other_configurations
 
-    
-Some parameters have simple :ammr:bm_constant:`ON`/:ammr:bm_constant:`OFF`
-options, while others have more options. Here is an example for the :ammr:bm_statement:`BM_LEG_MUSCLES_BOTH` parameter:
+.. 
+    Here is an example for the :ammr:bm_statement:`BM_LEG_MUSCLES_BOTH` parameter:
 
-.. admonition:: BM parameter options.
+    .. admonition:: BM parameter options.
 
-    .. ammr:bm_statement:: BM_LEG_MUSCLES_BOTH
-        :noindex:
+        .. ammr:bm_statement:: BM_LEG_MUSCLES_BOTH
+            :noindex:
 
-        Parameter to define muscle behavior of both right and left leg
+            Parameter to define muscle behavior of both right and left leg
 
-        :Default: :ammr:bm_constant:`CONST_MUSCLES_SIMPLE`
-        :Example: ``#define BM_LEG_MUSCLES_BOTH CONST_MUSCLES_SIMPLE``
-        :Options: - :any:`CONST_MUSCLES_NONE`: Constant to switch off muscles
-                - :any:`CONST_MUSCLES_SIMPLE`: Constant to use simple muscles
-                - :any:`CONST_MUSCLES_3E_HILL`: Constant to use 3 element Hill-type muscle
+            :Default: :ammr:bm_constant:`CONST_MUSCLES_SIMPLE`
+            :Example: ``#define BM_LEG_MUSCLES_BOTH CONST_MUSCLES_SIMPLE``
+            :Options: - :any:`CONST_MUSCLES_NONE`: Constant to switch off muscles
+                    - :any:`CONST_MUSCLES_SIMPLE`: Constant to use simple muscles
+                    - :any:`CONST_MUSCLES_3E_HILL`: Constant to use 3 element Hill-type muscle
 
 
-**The full list of all the parameter and their options is available in the links below:** 
+All Parameters and contants
+------------------------------------
+
+The full list of all the parameter and their options is available in the links below:
+
 
 .. toctree::
-    :maxdepth: 2
-    :caption: All Body Model Configurations
+    :maxdepth: 1
 
     bm_statements
     bm_constants

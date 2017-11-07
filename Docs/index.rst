@@ -24,66 +24,25 @@ AnyBody Technology in collaboration with academic institutions. The models are
 maintained by AnyBody Technology who ensure that various body part models can
 be used together as full body, scalable musculosketeal model.
 
-.. _AnyBody Modeling System: https://www.anybodytech.com/software/ams/
-
-Using the AMMR
---------------
-.. toctree::
-    :maxdepth: 1
-
-    Installation
-    Understanding_the_models
-    BM_Config/HumanBody_configurations
-
-
-Model Overview
---------------
+Gettting started with the AMMR
+--------------------------------
 
 The Model Repository consist of two parts. The **Body Models** which can be
-customized and scaled to build a subject specific musculoskeletal model, and **Application examples** in which the body models are utlizied in specific
-applications.
+customized and scaled to build a subject specific musculoskeletal model, and
+**Application examples** in which the body models are utlizied in specific
+application
 
-.. toctree::
-    :maxdepth: 2
-
-    BodyModels/BodyParts_and_models
-    auto_examples/index
-
-
-Guides
----------------
-.. toctree::
-    :maxdepth: 1
-
-    Creating_model_from_scratch
-    Scaling/intro
-
-
-What is new:
-----------------
-.. toctree::
-    :maxdepth: 1
-
-    CHANGELOG 
-
-
-Development
------------
-
-.. toctree::
-    :maxdepth: 1
-
-    Contribute
+.. _AnyBody Modeling System: https://www.anybodytech.com/software/ams/
 
 
 Indices and tables
-------------------
+==================
 
 * :ref:`genindex`
+* :ref:`modindex`
 * :ref:`search`
 
 .. rubric:: Footnotes
-
 
 .. [#f1] The double *M* in the *AMMR* comes from the repository sometimes
     beeing refered to as the "AnyBody Managed Model Repository". 

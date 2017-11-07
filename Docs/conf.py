@@ -126,7 +126,12 @@ templates_path = ['_templates']
 source_suffix = '.rst'
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = 'contents'
+
+# The frontpage document.
+index_doc = 'index'
+
+
 
 # General information about the project.
 project = 'AMMR'
@@ -191,6 +196,12 @@ rst_epilog = f"""
 # -- Options for HTML output ----------------------------------------------
 
 
+def setup(app):
+    app.add_stylesheet('theme_override.css')
+
+html_sidebars = {'**': ['globaltoc.html', 'searchbox.html']}
+
+
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
@@ -222,7 +233,7 @@ html_title = "%s v%s Documentation" % (project, release)
 # }
 
 html_theme_options = {
-    'roottarget': master_doc,
+    'roottarget': index_doc,
     'max_width': '1100px',
     'minimal_width': '700px',
     'borderless_decor': True,
