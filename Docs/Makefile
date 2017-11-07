@@ -15,6 +15,9 @@ html:
 html-dev: 
 	@$(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) -t draft $(O)
 
+clean:
+	rm -rf $(BUILDDIR)/*
+	rm -rf auto_examples/
 
 # Put it first so that "make" without argument is like "make help".
 help:
