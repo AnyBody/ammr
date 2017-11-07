@@ -33,10 +33,9 @@ should be checked to be aware of the influence of this spring on the results.
 
 """
 
-import matplotlib.pyplot as plt
-import matplotlib.image as mimg
+import sys
+sys.path.insert(0, '../../exts')
+import gallery
 
-image = mimg.imread("../images/THA_KneeBendDemo.jpg")
-plt.axis('off')
-plt.imshow(image)
-plt.show()
+gallery.plot("../images/THA-KneeBendDemo.jpg")
+gallery.show()

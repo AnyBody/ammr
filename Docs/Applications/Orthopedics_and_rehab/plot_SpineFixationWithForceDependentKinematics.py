@@ -11,10 +11,10 @@ rhythm which normally drives the vertebras to be switched entirely off.
 
 """
 
-import matplotlib.pyplot as plt
-import matplotlib.image as mimg
+import sys
+sys.path.insert(0, '../../exts')
+import gallery
 
-image = mimg.imread("../images/SpineFixationWithForceDependentKinematicsjpg")
-plt.axis('off')
-plt.imshow(image)
-plt.show()
+gallery.plot("../images/SpineFixationWithForceDependentKinematics.jpg")
+gallery.show()
+

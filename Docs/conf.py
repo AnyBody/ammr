@@ -105,6 +105,8 @@ sphinx_gallery_conf = {
     'min_reported_time': 100,
     'show_code_section': False,
     'default_thumb_file': '_static/no_image.png',
+    'thumbnail_size': (320, 280),
+
 }
 
 

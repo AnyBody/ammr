@@ -10,10 +10,9 @@ EMG measurements.
 
 """
 
-import matplotlib.pyplot as plt
-import matplotlib.image as mimg
+import sys
+sys.path.insert(0, '../../exts')
+import gallery
 
-image = mimg.imread("../images/GaitVaughan.jpg")
-plt.axis('off')
-plt.imshow(image)
-plt.show()
+gallery.plot("../images/GaitVaughan.jpg")
+gallery.show()

@@ -32,16 +32,10 @@ can be changed in the "Config.any" file
 
 """
 
-import matplotlib.pyplot as plt
-import matplotlib.image as mimg
+import sys
+sys.path.insert(0, '../../exts')
+import gallery
 
-image = mimg.imread("../images/BikeModel-FullBody.jpg")
-plt.axis('off')
-plt.imshow(image)
-
-plt.figure()
-image = mimg.imread("../images/BikeModel-LowerBody.jpg")
-plt.axis('off')
-plt.imshow(image)
-
-plt.show()
+gallery.plot("../images/BikeModel-FullBody.jpg")
+gallery.plot("../images/BikeModel-LowerBody.jpg")
+gallery.show()

@@ -11,42 +11,16 @@ during daily activities from Wilke et al., Spine 1999.
 
 """
 
-import matplotlib.pyplot as plt
-import matplotlib.image as mimg
+import sys
+sys.path.insert(0, '../../exts')
+import gallery
 
-image = mimg.imread("../images/SpinePressureLyingOnBack.jpg")
-plt.axis('off')
-plt.imshow(image)
+gallery.plot("../images/SpinePressureLyingOnBack.jpg")
+gallery.plot("../images/SpinePressureSeatingFlexedNoSupport.jpg")
+gallery.plot("../images/SpinePressureSeatingRelaxed.jpg")
+gallery.plot("../images/SpinePressureStandingLiftStretchedArms.jpg")
+gallery.plot("../images/SpinePressureStandingLiftClose.jpg")
+gallery.plot("../images/SpinePressureSeatingStraitNoSupport.jpg")
+gallery.plot("../images/SpinePressureStandingLiftFlexed.jpg")
+gallery.show()
 
-plt.figure()
-image = mimg.imread("../images/SpinePressureSeatingFlexedNoSupport.jpg")
-plt.axis('off')
-plt.imshow(image)
-
-plt.figure()
-image = mimg.imread("../images/SpinePressureSeatingRelaxed.jpg")
-plt.axis('off')
-plt.imshow(image)
-
-plt.figure()
-image = mimg.imread("../images/SpinePressureStandingLiftStretchedArms.jpg")
-plt.axis('off')
-plt.imshow(image)
-
-plt.figure()
-image = mimg.imread("../images/SpinePressureStandingLiftClose.jpg")
-plt.axis('off')
-plt.imshow(image)
-
-plt.figure()
-image = mimg.imread("../images/SpinePressureSeatingStraitNoSupport.jpg")
-plt.axis('off')
-plt.imshow(image)
-
-plt.figure()
-image = mimg.imread("../images/SpinePressureStandingLiftFlexed.jpg")
-plt.axis('off')
-plt.imshow(image)
-
-
-plt.show()
