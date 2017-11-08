@@ -43,8 +43,10 @@ Major changes:
 * New topology for the Trunk Pelvis
 
 
-* 
+* The Anatomical frame for the Pelvis segment has been updated.
 
+* Added new initial guess for wrapping muscles, which make the wrapping 
+  more when the model starts in extreme postures. 
 
 
 
@@ -55,19 +57,36 @@ Minor Changes:
 
 
 
+* BM mannequin drivers are now implemented with a class_template allowing all weights and other settings to be customized. 
+
+* The initial positions of the pelvis now use the anatomical reference frame.
+  This follows the logic from the initial rotation of the pelvis which also uses
+  the anatomical frame.
+
+* In TLEM models make the opacity of the patellar tendon dependent on the opacity of the patellar surface.
+
+
 
 Fixed:
 ------------------------
 
+* Sign for the plantar flexion variable were reversed in some section of the model. This has been fixed.
 
+* Bug in Mannequin drivers for the neck, where velocities were not set correctly. (Thanks to Assoc. Prof. Michael Skipper Andersen for reporting this)
+
+* Fix small bug preventing `StandingModelScalingDisplay` from loading when using the :ref`Leg <old_leg_model>` model. 
+
+* Fixed the opacity of the patellar surface in TLEM models, which pointing erroneously to the opacity of the talus.
 
 
 Removed:
 -----------------------
 
+* Old MoCap examples have been moved to :file:`Application/Examples/Deprecated`
 
+* Removed the deprecated AMMR1.4 hip rotation sequences. 
 
-
+ 
 
 
 New Tweente Lower Eximity Model V. 2.1
