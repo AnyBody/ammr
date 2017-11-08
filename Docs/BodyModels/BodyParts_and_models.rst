@@ -63,4 +63,5 @@ which can be assembled into the full human in many combinations.
     :maxdepth: 1
     :caption: other
 
-    Mandible_model
+    Symmetric_mandible_model
+    AalborgMandible
