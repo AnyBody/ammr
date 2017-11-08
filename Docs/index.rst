@@ -7,7 +7,7 @@ Welcome to the AMMR documentation!
 =======================================
 
 The AnyBody Model Repository (AMMR), is an open library of
-musculoskeletal models and examples ready to be used with the `AnyBody Modeling
+musculoskeletal models and examples ready to be used with the `AnyBody Modelling
 System`_. 
 
 .. figure:: _static/ammr_bodyparts.png
@@ -18,20 +18,34 @@ System`_.
 
    *The AnyBody Model Repository is a unique open collection of human body parts*.
 
+The AnyBody Managed Model Repository consists of two parts:
+
+* 
+    Body Models (put link): The human body models which can be 
+    customized and scaled to build a specific musculoskeletal model;
+    
+* 
+    Application examples (put link): in which the body models are
+    utilized in specific applications (from common daily activities,
+    like pushing the acceleration or brake pedals, to workplace
+    specific scenarios).
+     
 
 The models are developed in research projects at academic institutions or by
 AnyBody Technology in collaboration with academic institutions. The models are
 maintained by AnyBody Technology who ensure that various body part models can
-be used together as full body, scalable musculosketeal model.
-
-Gettting started with the AMMR
---------------------------------
-
-The Model Repository consist of two parts. The Body Models which can be
-customized and scaled to build a subject specific musculoskeletal model, and
-**Application examples** in which the body models are utlizied in specific
-application
-
-.. _AnyBody Modeling System: https://www.anybodytech.com/software/ams/
+be used together as full body, scalable musculosketal model.
 
 
+First time you're using AMMR?
+-----------------------------
+
+The Getting Started section provides insight into how AMMR is structured, how to
+install it and how to use it.
+You may run through the quick start for installing it and using it
+or read the detailed descriptions as well, depending on your needs.
+
+.. toctree::
+    Getting_Started/index
+
+.. _AnyBody Modelling System: https://www.anybodytech.com/software/ams/
