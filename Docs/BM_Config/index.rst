@@ -1,3 +1,5 @@
+.. _bm-config:
+
 Configuring the Body Model
 ===========================
 
