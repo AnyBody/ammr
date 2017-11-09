@@ -1,4 +1,5 @@
 
+.. _old_leg_model:
 
 The “Leg” Model
 ---------------
