@@ -34,8 +34,8 @@ import subprocess
 import cloud_sptheme
 
 
-
 sys.path.insert(0, os.path.abspath('exts'))
+sys.path.insert(0, os.path.abspath('exts/sphinx_gallery-0.1.13-py3.6.egg'))
 
 
 try: 
@@ -80,7 +80,8 @@ extensions = [
 
     
     # 3rd party extensions
-
+    #'sphinxcontrib.fulltoc',
+    'sphinx_gallery.gen_gallery',
     'cloud_sptheme.ext.index_styling',
     'cloud_sptheme.ext.relbar_toc',
     'cloud_sptheme.ext.escaped_samp_literals',
@@ -90,6 +91,30 @@ extensions = [
     'inline_highlight',
     
 ]
+
+
+sphinx_gallery_conf = {
+    # path to your examples scripts
+    'examples_dirs' : 'Applications',
+    # path where to save gallery generated examples
+    'gallery_dirs'  : 'auto_examples',
+    # directory where function granular galleries are stored
+    'backreferences_dir'  : False,
+    'download_section_examples': False,
+    'download_all_examples': False,
+    'min_reported_time': 100,
+    'show_code_section': False,
+    'default_thumb_file': '_static/no_image.png',
+    'thumbnail_size': (320, 280),
+
+}
+
+
+
+
+
+
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -101,7 +126,12 @@ templates_path = ['_templates']
 source_suffix = '.rst'
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = 'contents'
+
+# The frontpage document.
+index_doc = 'index'
+
+
 
 # General information about the project.
 project = 'AMMR'
@@ -166,6 +196,14 @@ rst_epilog = f"""
 # -- Options for HTML output ----------------------------------------------
 
 
+def setup(app):
+    app.add_stylesheet('theme_override.css')
+
+html_sidebars = {
+   '**': ['searchbox.html', 'globaltoc.html', 'sourcelink.html', ],
+   'using/windows': ['windowssidebar.html', 'searchbox.html'],
+}
+
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
@@ -197,7 +235,7 @@ html_title = "%s v%s Documentation" % (project, release)
 # }
 
 html_theme_options = {
-    'roottarget': master_doc,
+    'roottarget': index_doc,
     'max_width': '1100px',
     'minimal_width': '700px',
     'borderless_decor': True,
@@ -208,7 +246,7 @@ html_theme_options = {
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-#html_logo = '_static/ammr_logo.png'
+html_logo = '_static/AMMR_Logo.png'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32

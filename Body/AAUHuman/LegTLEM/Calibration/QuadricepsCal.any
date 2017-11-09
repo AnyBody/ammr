@@ -1,0 +1,126 @@
+AnyFolder QuadricepsCal ={
+
+  AnyFolder &Pelvis = ...HumanFolderRef.Trunk.SegmentsLumbar.PelvisSeg;
+  AnyFolder &Sacrum = ...HumanFolderRef.Trunk.SegmentsLumbar.SacrumSeg;
+  
+  AnyFolder &LegSegSide = .SideHumanFolderRef.Leg.Seg;
+  
+  AnyFolder &LegJointsSide = .SideHumanFolderRef.Leg.Jnt;
+  AnyFolder &SacrumPelvisJnt = ...HumanFolderRef.Trunk.JointsLumbar.SacrumPelvisJnt;
+  
+  
+  AnyFixedRefFrame ground = {
+    AnyRefNode node = {
+      ARel=..Pelvis.Axes0;
+      sRel=..Pelvis.r0;
+    };
+  };
+  
+  AnyKinEqDriver PelvisFix = {
+    AnyKinLinear PelvisSacrumLinFix = {
+      AnyRefFrame &ground = ..ground.node;
+      AnyRefFrame &Pelvis = .....HumanFolderRef.Trunk.SegmentsLumbar.PelvisSeg;
+    };
+    AnyKinRotational PelvisSacrumRotFix = {
+      Type = RotAxesAngles;
+      AnyRefFrame &ground = ..ground.node;
+      AnyRefFrame &Pelvis = .....HumanFolderRef.Trunk.SegmentsLumbar.PelvisSeg;
+    };
+  };
+  
+  AnyKinEqSimpleDriver PelvisSacrumFix = {
+    AnyKinMeasure &Jnt = .SacrumPelvisJnt;
+    DriverPos = {0,0,0};
+    DriverVel = {0,0,0};
+    Reaction.Type = {Off,Off,Off};
+  };
+  
+  AnyKinEqInterPolDriver Hip = {
+    AnyKinRotational &Spherical = ..SideInterfaceFolderRef.HipFlexion.HipMeasure;
+    Type = PiecewiseLinear;
+    T =      {0.0, 1.0 };
+    Data = { {110,  -20},
+             {0,  0},
+             {0,  0}
+    }*pi/180; // Flexion - Abduction - internal rotation 
+    
+    Reaction.Type = {Off, Off, Off};
+  };
+  
+  AnyKinEqInterPolDriver Knee = {
+    AnyKinMeasure &Hinge = ..SideInterfaceFolderRef.KneeFlexion;
+    Type = PiecewiseLinear;
+    T =      {0.0, 1.0 };
+    Data = {{-6,150}}*pi/180; // ? degrees knee flexion
+    Reaction.Type = {Off};
+  };
+  
+  
+  AnyKinEqInterPolDriver Ankle = {
+    AnyKinMeasure &Hinge = ..SideInterfaceFolderRef.AnklePlantarFlexion;
+    Type = PiecewiseLinear;
+    T =      {0.0, 1.0 };
+    Data = {{0,50}}*pi/180;
+    Reaction.Type = {Off};
+  };
+  
+  AnyKinEqInterPolDriver SubTalar = {
+    AnyKinMeasure &Hinge = ..SideInterfaceFolderRef.SubTalarEversion;
+    Type = PiecewiseLinear;
+    T =      {0.0, 1.0 };
+    Data = {{0,0}}*pi/180;
+    Reaction.Type = {Off};
+  };
+  
+  AnyString MusPrefix = CompleteNameOf(&.SideHumanFolderRef.Leg.Mus);
+  
+  AnyObjectPtrArray RectusFemorisMuscles = ObjSearch(MusPrefix+".RectusFemoris*", "AnyMuscle");
+  AnyFloat  RectusFemorisRmin = repmat(NumElemOf(RectusFemorisMuscles), 0.5);
+  AnyFloat  RectusFemorisRmax = repmat(NumElemOf(RectusFemorisMuscles), 1.2);
+  
+  AnyObjectPtrArray VastusMedialisMuscles = ObjSearch(MusPrefix+".VastusMedialis*", "AnyMuscle");
+  AnyFloat  VastusMedialisRmin = repmat(NumElemOf(VastusMedialisMuscles), 0.5);
+  AnyFloat  VastusMedialisRmax = repmat(NumElemOf(VastusMedialisMuscles), 1.2);
+  
+  AnyObjectPtrArray VastusLateralisMuscles = ObjSearch(MusPrefix+".VastusLateralis*", "AnyMuscle");
+  AnyFloat  VastusLateralisRmin = repmat(NumElemOf(VastusLateralisMuscles), 0.5);
+  AnyFloat  VastusLateralisRmax = repmat(NumElemOf(VastusLateralisMuscles), 1.2);
+  
+  AnyObjectPtrArray VastusIntermediusMuscles = ObjSearch(MusPrefix+".VastusIntermedius*", "AnyMuscle");
+  AnyFloat  VastusIntermediusRmin = repmat(NumElemOf(VastusIntermediusMuscles), 0.5);
+  AnyFloat  VastusIntermediusRmax = repmat(NumElemOf(VastusIntermediusMuscles), 1.2);
+  
+  AnyObjectPtrArray SartoriusMuscles = ObjSearch(MusPrefix+".Sartorius*", "AnyMuscle");
+  AnyFloat  SartoriusRmin = repmat(NumElemOf(SartoriusMuscles), 0.5);
+  AnyFloat  SartoriusRmax = repmat(NumElemOf(SartoriusMuscles), 1.2);
+  
+};
+
+// The study: Operations to be performed on the model
+AnyBodyCalibrationStudy LegCalibrationStudyQuadriceps = {
+  AnyFolder &ref=.QuadricepsCal; 
+  nStep = 2;
+  MuscleArr = arrcat(
+      ref.RectusFemorisMuscles,
+      ref.VastusMedialisMuscles,
+      ref.VastusLateralisMuscles,
+      ref.VastusIntermediusMuscles,
+      ref.SartoriusMuscles
+  );
+  RminMuscleFiber = arrcat(
+      ref.RectusFemorisRmin,
+      ref.VastusMedialisRmin,
+      ref.VastusLateralisRmin,
+      ref.VastusIntermediusRmin,
+      ref.SartoriusRmin
+  );
+  RmaxMuscleFiber = arrcat(
+      ref.RectusFemorisRmax,
+      ref.VastusMedialisRmax,
+      ref.VastusLateralisRmax,
+      ref.VastusIntermediusRmax,
+      ref.SartoriusRmax
+  );
+  InitialConditions.SolverType = KinSolOverDeterminate;
+};
+
