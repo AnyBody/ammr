@@ -28,6 +28,7 @@ Major changes:
         * Updated wrapping for Hamstring muscles, and Gastrocnemius around the knee. 
         * Redfinened revolute knee axis (thanks to Marco Antonio Marra (Radboudumc)
           for this improvement)
+        *  Corrected the femoral attachment points for the popliteus muscle
 
     * See the :doc:`TLEM2.1 documenation </Appl>` page for more information.
 
