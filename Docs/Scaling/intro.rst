@@ -1,3 +1,5 @@
+.. _scaling-intro:
+
 Introduction to Scaling
 =======================
 
