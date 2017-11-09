@@ -1,3 +1,4 @@
+.. _bm-arm-config:
 
 Arm Parameters
 ----------------

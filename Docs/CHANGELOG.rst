@@ -13,7 +13,7 @@ Major changes:
 
 * New lower extremity model (TLEM2.1)
 
-   * The `Tweente Lower Extremity Model version 2.0 dataset
+   * The `Twente Lower Extremity Model version 2.0 dataset
      <http://dx.doi.org/10.1016/j.jbiomech.2014.12.034>`_, developed in the
      TLEMSafe EU project was implmented in the AMMR repostory. The model is not
      the default model, but can be enabled with the :ref:`BM parameter
@@ -66,7 +66,51 @@ Major changes:
   * Renamed the ``Body/AUHuman`` to ``Body/Mandible_AU`` 
 
 
+* Configuration parameters
 
+  * Previously used system to configure human body using a BodyPartSetup file was completely 
+    replaced with the new body model (BM) parameters. Please see the documentation on: :ref:`BM parameters <bm-config>`.
+
+* Scaling laws 
+
+  * An additional scaling law based on individual segmental scaling factors was added to the 
+    repository. It can be enabled using this :ref:`BM parameter<bm-config>` ``#define BM_SCALING _SCALING_XYZ_``
+
+* Spine model 
+    
+
+    * :ref:`BM parameters <bm-trunk-config>` were updated to have control over each section of the spine and relevant components.
+    
+    * Anatomical reference frame of the thorax segment was modified. This change reflects a change 
+      in the pelvic anatomical reference, and ensures upright posture for the standing postures, to 
+      align C1C0 joint with the hip joint centers. 
+
+    * Boney surfaces of both pelvis and sacrum were updated and now correspond better to the relevant 
+      muscle attachments. These segments now also share a common scaling function. Hip joint centers 
+      were corrected for the old Leg model.
+    
+    * Improved wrapping surface for Psoas Major muscles based on the TLEM2.0 MR scans 
+    
+    * Insertion, via, and attachment nodes of relevant muscles have been updated to match new geometries 
+      of pelvis and sacrum.
+
+  
+* Arm model 
+
+    * The model now facilitates individual personalization for each side using nonlinear morphing schemes 
+      in a more consistent manner. Previously the morphing needed to be done on the right side and then 
+      reflect to have the left side morphing. This change removes an extra mirroring step. 
+
+    * Arm calibration was updated
+    
+    * :ref:`BM parameters <bm-arm-config>` have been updated for more convenient use. ``BM_ARM_DETAILED_HAND`` and 
+      ``BM_ARM_SHOULDER_RHYTHM`` are now used instead of individual switches for right and left side, which were deprecated. 
+
+    * Muscle wrapping surfaces were updated for more physiological behaviour.
+    
+    * Scapula reaction contact forces were simplified, and do not longer utilize slider segments. 
+
+  
 
 Minor Changes: 
 ------------------------
@@ -131,6 +175,9 @@ Fixed:
 * Fixed a problem with the drawings of the bones in the Arm model which were not always symmetrical.
 
 
+* Fixed symmetry issues in scaling laws for scapula, clavicula, and humerus. 
+
+
 
 
 Removed:
@@ -144,15 +191,13 @@ Removed:
 
  
 
-
-New Tweente Lower Eximity Model V. 2.1
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 * 
 
 
 
-Tweente Lower Eximity Model V. 1.1
+Twente Lower Eximity Model V. 1.1
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 

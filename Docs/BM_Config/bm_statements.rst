@@ -261,23 +261,6 @@ All BodyModel parameters
 | 
 
 
-.. ammr:bm_statement:: BM_TRUNK_THORACIC_MUSCLES
-
-    Definition of the thoracic spine muscles type.
-
-
-    :Default: ``OFF``
-    :Example: ``#define BM_TRUNK_THORACIC_MUSCLES OFF``
-    :Options: - :any:`OFF`: 
-              - :any:`_MUSCLES_SIMPLE_`: Constant to use simple muscles
-              - :any:`BM_TRUNK_MUSCLES`: 
-
-|  
-|   
-| 
-| 
-
-
 .. ammr:bm_statement:: BM_TRUNK_CERVICAL_MUSCLES
 
     Definition of the cervical spine muscles type.
@@ -330,24 +313,6 @@ All BodyModel parameters
 | 
 
 
-.. ammr:bm_statement:: BM_TRUNK_THORACIC_DISC_STIFNESS
-
-    Definition of the thoracic spine disc model.
-
-
-    :Default: :ammr:bm_statement:`BM_TRUNK_DISC_STIFNESS`
-    :Example: ``#define BM_TRUNK_THORACIC_DISC_STIFNESS BM_TRUNK_DISC_STIFNESS``
-    :Options: - :any:`_DISC_STIFFNESS_NONE_`: Constant to switch off disc spring in the spine
-              - :any:`_DISC_STIFFNESS_LINEAR_`: Constant to switch linear disc spring on in the spine
-              - :any:`_DISC_STIFFNESS_NONLINEAR_`: Constant to switch nonlinear disc spring on in the spine
-              - :any:`BM_TRUNK_DISC_STIFNESS`: 
-
-|  
-|   
-| 
-| 
-
-
 .. ammr:bm_statement:: BM_TRUNK_CERVICAL_DISC_STIFNESS
 
     Definition of the cervical spine disc model.
@@ -384,14 +349,6 @@ All BodyModel parameters
     :Default: :ammr:bm_statement:`BM_TRUNK_RHYTHM`
     :Example: ``#define BM_TRUNK_LUMBAR_RHYTHM BM_TRUNK_RHYTHM``
 
-.. ammr:bm_statement:: BM_TRUNK_THORACIC_RHYTHM
-
-    A switch to use a kinematic rhythm for the thoracic spine.
-
-
-    :Default: :ammr:bm_statement:`BM_TRUNK_RHYTHM`
-    :Example: ``#define BM_TRUNK_THORACIC_RHYTHM BM_TRUNK_RHYTHM``
-
 .. ammr:bm_statement:: BM_TRUNK_CERVICAL_RHYTHM
 
     A switch to use a kinematic rhythm for the cervical spine.
@@ -417,14 +374,6 @@ All BodyModel parameters
 
     :Default: :ammr:bm_statement:`BM_TRUNK_LIGAMENTS`
     :Example: ``#define BM_TRUNK_LUMBAR_LIGAMENTS BM_TRUNK_LIGAMENTS``
-
-.. ammr:bm_statement:: BM_TRUNK_THORACIC_LIGAMENTS
-
-    A switch to control the thoracic spine ligaments.
-
-
-    :Default: :ammr:bm_statement:`BM_TRUNK_LIGAMENTS`
-    :Example: ``#define BM_TRUNK_THORACIC_LIGAMENTS BM_TRUNK_LIGAMENTS``
 
 .. ammr:bm_statement:: BM_TRUNK_CERVICAL_LIGAMENTS
 
