@@ -24,7 +24,7 @@ AnyBody Technology in collaboration with academic institutions. The models are
 maintained by AnyBody Technology who ensure that various body part models can
 be used together as full body, scalable musculosketeal model.
 
-Gettting started with the AMMR
+Getting started with the AMMR
 --------------------------------
 
 The Model Repository consist of two parts. The Body Models which can be
