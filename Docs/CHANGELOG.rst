@@ -86,6 +86,9 @@ Removed:
 
 * Removed the deprecated AMMR1.4 hip rotation sequences. 
 
+* The GM-foot model. A new version of this in the pipeline. Contact us if you are interested in this work. 
+
+* 
  
 
 
