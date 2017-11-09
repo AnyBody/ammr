@@ -3,6 +3,7 @@
 Changelog
 #########
 
+.. default-domain:: ammr
 
 AMMR 2.0.0 (2017-10-30)
 =============================
@@ -28,6 +29,9 @@ Major changes:
         * Updated wrapping for Hamstring muscles, and Gastrocnemius around the knee. 
         * Redfinened revolute knee axis (thanks to Marco Antonio Marra (Radboudumc)
           for this improvement)
+        * Update the Sartorius via points.
+        * Included a more detailed version of the patella bone.
+        * Various minor bug fixes from the orignal implementation used in the TLEMSafe project. 
 
     * See the :doc:`TLEM2.1 documenation </Appl>` page for more information.
 
@@ -38,7 +42,13 @@ Major changes:
       The version of is now called 1.2. Changes include the following: 
 
         *   See the TLEM2.1 documenation page for more information.
-  
+
+* Add new framework for runnning MoCap models. The (`AnyMocap
+  <https://github.com/AnyBody/anymocap>`_ ) is now part of the AMMR, but
+  development will continue in the respository on Github. A few application on
+  how to used AnyMocap have been added to the examples folder. See the
+  :ref:`AnyMoCap example gallery <mocap_examples>`
+
 
 * New topology for the Trunk Pelvis
 
@@ -48,6 +58,11 @@ Major changes:
 * Added new initial guess for wrapping muscles, which make the wrapping 
   more when the model starts in extreme postures. 
 
+* Restructured the AMMR. 
+
+  * Added a top level ``Tools`` folder helper files and other models which don't belong in ``Body/`` or ``Application``. 
+  * Moved ``Body/AAUHuman/Toolbox`` to ``Tools/ModelUtilities`` 
+  * Renamed the ``Body/AUHuman`` to ``Body/Mandible_AU`` 
 
 
 
@@ -55,9 +70,15 @@ Major changes:
 Minor Changes: 
 ------------------------
 
-
+* Update many examples to use the TLEM 2.1 model. See the :ref:`example gallery <examples-index>`. 
 
 * BM mannequin drivers are now implemented with a class_template allowing all weights and other settings to be customized. 
+
+* A default ``HumanModel.Mannequin`` folder is now automatically created with a ``class_template`` when no user-defined Mannequin file is set.
+
+* A default ``Main.DrawSettings`` folder is now automatically created with a
+  ``class_template`` when no user-defined :bm_statement:`DrawSettings
+  <BM_DRAWSETTINGS_FILE>` file is set.
 
 * The initial positions of the pelvis now use the anatomical reference frame.
   This follows the logic from the initial rotation of the pelvis which also uses
@@ -65,6 +86,22 @@ Minor Changes:
 
 * In TLEM models make the opacity of the patellar tendon dependent on the opacity of the patellar surface.
 
+* Simplify the Scapular reactions to the thorax segment. 
+
+* updated the Wilke Validation example to reflect the forces for the AMMR 2.0 repository.
+
+* Updates to BM parameters:
+
+  * New :bm_statement:`BM_ARM_DETAILED_HAND` parameter for the detailed hand.
+    The old ``BM_ARM_DETAIL_HAND_RIGHT``/``LEFT`` are deprecated.
+  * New :bm_statement:`BM_ARM_SHOULDER_RHYTHM` parameter for controling the shoulder rythm.
+    The old ``BM_ARM_SHOULDER_RHYTHM_RIGHT``/``LEFT`` are deprecated.
+  * Added new ``BM_JOINT_TYPE_<joint>_<side>`` parameter for completely
+    disabling joint and associated nodes in the lower extremity models. (See:
+    for example :bm_statement:`BM_JOINT_TYPE_HIP_RIGHT`)
+  * New :bm_statement:`BM_LEG_MODEL` parameter for setting the type of leg model
+    used. The :bm_statement:`BM_LEG_RIGHT`/:bm_statement:`LEFT <BM_LEG_LEFT>` are 
+    now only :bm_constant:`ON`/:bm_constant:`OFF` options. 
 
 
 Fixed:
@@ -78,6 +115,22 @@ Fixed:
 
 * Fixed the opacity of the patellar surface in TLEM models, which pointing erroneously to the opacity of the talus.
 
+* Fixed wrong symmetry of nodes on the C7 segment of full neck model.
+
+* Latisimus Dorsi 5 fasicle was missing in ``MuscleNames.any``  and thus from many symmery measures. 
+
+* Fixed a symmetry problem for the Deltoid muscles at the shoulder.
+
+* Fixed a symmetry problem for the Disc Stiffnesses from L1 to L5
+
+* Fix white surfaces in examples with flat STL surfaces. For example :ref:`sphx_glr_auto_examples_Sports_plot_CrossTrainer.py`. 
+
+* Fixed an issue preventing :ref:`sphx_glr_auto_examples_ADLs_and_ergonomics_plot_StandingModel.py` from working with one leg.
+
+* Fixed a problem with the drawings of the bones in the Arm model which were not always symmetrical.
+
+
+
 
 Removed:
 -----------------------
@@ -88,7 +141,6 @@ Removed:
 
 * The GM-foot model. A new version of this in the pipeline. Contact us if you are interested in this work. 
 
-* 
  
 
 
