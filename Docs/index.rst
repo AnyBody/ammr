@@ -27,7 +27,7 @@ The AnyBody Managed Model Repository consists of two parts:
 * 
     Application examples (put link): in which the body models are
     utilized in specific applications (from common daily activities,
-    like pushing the acceleration or brake pedals, to workplace
+    like pushing the acceleration or brake pedals of a car, to workplace
     specific scenarios).
      
 
