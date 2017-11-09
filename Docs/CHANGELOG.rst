@@ -12,7 +12,7 @@ Major changes:
 
 * New lower extremity model (TLEM2.1)
 
-   * The `Tweente Lower Extremity Model version 2.0 dataset
+   * The `Twente Lower Extremity Model version 2.0 dataset
      <http://dx.doi.org/10.1016/j.jbiomech.2014.12.034>`_, developed in the
      TLEMSafe EU project was implmented in the AMMR repostory. The model is not
      the default model, but can be enabled with the :ref:`BM parameter
@@ -39,51 +39,29 @@ Major changes:
 
         *   See the TLEM2.1 documenation page for more information.
   
-
-* New topology for the Trunk Pelvis
-
-
-* The Anatomical frame for the Pelvis segment has been updated.
-
-* Added new initial guess for wrapping muscles, which make the wrapping 
-  more when the model starts in extreme postures. 
+    * New topology for the Trunk Pelvis
 
 
+    * The Anatomical frame for the Pelvis segment has been updated.
 
-Configuration parameters
+    * Added new initial guess for wrapping muscles, which make the wrapping 
+	  more when the model starts in extreme postures. 
 
-   * 
 
-
+* Configuration parameters
 
   * Previously used system to configure human body using a BodyPartSetup file was completely 
-    replaced with the new body model (BM) parameters. Please see the tutorials:
-    .. seealso:: :doc:`The documentation on BM configuration </BM_Config/HumanBody_configurations.rst>`.
-  * Scaling 
+    replaced with the new body model (BM) parameters. Please see the documentation on: :ref:`BM parameters <bm-config>`.
 
-
-
-
-
-
-
-
+* Scaling laws 
 
   * An additional scaling law based on individual segmental scaling factors was added to the 
-    repository. It can be enabled using *_SCALING_XYZ_* constant.
-
-
-
+    repository. It can be enabled using this :ref:`BM parameter<bm-config>` ``#define BM_SCALING _SCALING_XYZ_``
 
 * Spine model 
     
 
-    * BM parameters were updated to have control over each section of the spine and relevant components.
-
-    
-
-    * Pelvic anatomical reference frame was changed to provide a more physiological pelvic tilt. 
-      All associated kinematic measures use the anatomical ref. frame.
+    * :ref:`BM parameters <bm-trunk-config>` were updated to have control over each section of the spine and relevant components.
     
     * Anatomical reference frame of the thorax segment was modified. This change reflects a change 
       in the pelvic anatomical reference, and ensures upright posture for the standing postures, to 
@@ -107,9 +85,8 @@ Configuration parameters
 
     * Arm calibration was updated
     
-    * BM parameters have been updated for more convenient use. *BM_ARM_DETAIL_HAND_LEFT/RIGHT* and 
-      *BM_ARM_SHOULDER_RHYTHM_LEFT/RIGHT* were deprecated. Please see documentation for new controlling 
-      parameters.
+    * :ref:`BM parameters <bm-arm-config>` have been updated for more convenient use. ``BM_ARM_DETAILED_HAND`` and 
+      ``BM_ARM_SHOULDER_RHYTHM`` are now used instead of individual switches for right and left side, which were deprecated. 
 
     * Muscle wrapping surfaces were updated for more physiological behaviour.
     
@@ -143,6 +120,8 @@ Fixed:
 
 * Fixed the opacity of the patellar surface in TLEM models, which pointing erroneously to the opacity of the talus.
 
+* Fixed symmetry issues in scaling laws for scapula, clavicula, and humerus. 
+
 
 Removed:
 -----------------------
@@ -154,14 +133,14 @@ Removed:
  
 
 
-New Tweente Lower Eximity Model V. 2.1
+New Twente Lower Eximity Model V. 2.1
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 * 
 
 
 
-Tweente Lower Eximity Model V. 1.1
+Twente Lower Eximity Model V. 1.1
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
