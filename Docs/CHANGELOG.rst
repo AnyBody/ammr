@@ -32,6 +32,7 @@ Major changes:
         * Update the Sartorius via points.
         * Included a more detailed version of the patella bone.
         * Various minor bug fixes from the orignal implementation used in the TLEMSafe project. 
+        *  Corrected the femoral attachment points for the popliteus muscle
 
     * See the :doc:`TLEM2.1 documenation </Appl>` page for more information.
 
