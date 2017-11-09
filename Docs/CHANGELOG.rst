@@ -15,7 +15,7 @@ Major changes:
    * 
   
 
-
+* Corrected the femoral attachment points for the popliteus muscle
 
 
 
