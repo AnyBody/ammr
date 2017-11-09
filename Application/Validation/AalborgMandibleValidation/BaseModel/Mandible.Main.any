@@ -1,0 +1,249 @@
+Main ={
+  
+  #include "ModelSetup.any"
+  
+  #if (TMJ_LIGAMENT_REFRENCE_CONFIGURATION_MODEL == 0 & FREE_MOVEMENT == 0)
+  AnyOperationSequence AnalysisMandible = {
+    #ifdef MUSCLE_MODEL_HILL      
+    AnyOperation &TendonCal1 = Main.CalibrationMandibleStudy1.TendonLengthAdjustment;
+    AnyOperation &TendonCal2 = Main.CalibrationMandibleStudy2.TendonLengthAdjustment;
+    #endif
+    AnyOperation &MainStudy = Main.Model.Study.InverseDynamics;
+  };
+  #else
+  AnyOperationSequence AnalysisMandible = {
+    AnyOperation &MainStudy = Main.Model.Study.Kinematics;
+  };  
+  #endif
+  
+  //  AnyOperationMacro SaveResults = { 
+  //    MacroStr={
+  //      "classoperation Main.Studies.Study.Output" + " " + strquote("Save data") + " --file=" + strquote(FilePathCompleteOf(Main.ModelSetup.FileNames.KinResults )) + " --type=Deep"
+  //    };
+  //  };
+  //  
+  //  AnyOperationMacro LoadResults = { 
+  //    MacroStr={
+  //      "classoperation Main.Studies.Study.Output" + " " + strquote("Load data") + " --file=" + strquote(FilePathCompleteOf(Main.ModelSetup.FileNames.KinResults )) 
+  //    };
+  //  };
+  
+  AnyFixedRefFrame GlobalRef ={
+    AnyRefNode GroundNode = {};
+  };
+  
+  #if FREE_MOVEMENT == 0  
+  AnyFolder Model ={
+    AnyFolder HumanModel={
+      
+      #ifdef MUSCLE_MODEL_HILL      
+      #include  "<ANYBODY_PATH_MANDIBLE>\NormalMandible_AAU\NormalMandibleHill.root.any" //Model with 3 element Hill muscles
+      #endif
+      #ifdef MUSCLE_MODEL_SIMPLE      
+      #include  "<ANYBODY_PATH_MANDIBLE>\NormalMandible_AAU\NormalMandible.root.any" //Model with the simple muscle model
+      #endif
+      
+      AnyFolder StrengthParameters={
+        AnyVar SpecificMuscleTension = 90; //N/cm^2
+      };
+      
+      // The orientation of the constraining plane in the TMJ
+      AnyFolder AngleConstrainingPlane = {
+        AnyVar AngleYaxisR = 30*pi/180; //From Langenbach and Hannam, Archives of Oral Biology 44 (1999) 557-573
+        AnyVar AngleYaxisL = 30*pi/180;
+        
+        AnyVar AngleXaxisR = 5*pi/180;  //From Langenbach and Hannam, Archives of Oral Biology 44 (1999) 557-573
+        AnyVar AngleXaxisL = -5*pi/180;  //From Langenbach and Hannam, Archives of Oral Biology 44 (1999) 557-573
+        
+      };
+      
+      /*
+      Choice of Scaling
+      */
+      #include "<ANYBODY_PATH_MANDIBLE>\Scaling\ScalingStandard.any"
+      
+      
+    };
+    
+    AnyBodyStudy Study = {      
+      AnyFolder &BodyModel=.HumanModel;  
+      AnyFolder EnvironmentModel ={
+      };
+      AnyFolder ModelEnvironmentConnection = {
+        AnyFolder Drivers={
+          #include "Drivers.any"
+        };
+        
+        #include "Environment.any"
+      };
+      
+      #include "JointAngleOutputs.any"
+      #include "OutputFile.any"
+      
+      Gravity = ..ModelSetup.Gravity;
+      
+      #if TMJ_LIGAMENT_REFRENCE_CONFIGURATION_MODEL == 0       
+      tStart = Main.TrialSpecificData.tStart; 
+      tEnd = Main.TrialSpecificData.tEnd;      
+      nStep= Main.TrialSpecificData.nStep; 
+      #else
+      tStart = 0.0;
+      tEnd = 1.0;    
+      nStep= 1;             
+      #endif
+      
+      
+      #if OVER_DETERMINATE_DRIVERS == 1
+      InitialConditions.SolverType = KinSolOverDeterminate;
+      Kinematics.SolverType = KinSolOverDeterminate;
+      #endif
+      Kinematics.KinematicTol = 1e-6;
+      InverseDynamics.Criterion.Power = 2;
+      InverseDynamics.Criterion.UpperBoundOnOff = Off;
+      
+      
+      #include "ReactionForceMeasures.any"
+      
+      #if TMJ_CONTACT_MODEL == 1    
+      InverseDynamics.ForceDepKinOnOff=On;
+      InverseDynamics.ForceDepKin.Perturbation = 5e-5;
+      InverseDynamics.ForceDepKin.LocalSearchOnOff = On;    
+      InverseDynamics.ForceDepKin.UseAdaptiveForceTolOnOff = Off;
+      #endif
+      
+      // TMJ nodes in the skull anatomical frame
+      AnyKinLinear linL = {
+        Ref = 0;
+        AnyRefFrame &ref1 = Main.Model.HumanModel.Seg.Skull;
+        AnyRefFrame &ref2 = Main.Model.HumanModel.Seg.Mandible.TMJ_NodeL;  
+      };
+      
+      AnyKinLinear linR = {
+        Ref = 0;
+        AnyRefFrame &ref1 = Main.Model.HumanModel.Seg.Skull;
+        AnyRefFrame &ref2 = Main.Model.HumanModel.Seg.Mandible.TMJ_NodeR;  
+      };
+      
+     //#include "CreateChart.any"      
+    };
+  };
+  #endif
+  
+  #if FREE_MOVEMENT == 1
+  AnyFolder Model ={
+    AnyFolder HumanModel={
+      
+      #ifdef MUSCLE_MODEL_HILL      
+      #include  "<ANYBODY_PATH_MANDIBLE>\NormalMandible_AAU\NormalMandibleHill.root.any" //Model with 3 element Hill muscles
+      #endif
+      #ifdef MUSCLE_MODEL_SIMPLE      
+      #include   "<ANYBODY_PATH_MANDIBLE>\NormalMandible_AAU\NormalMandible.root.any" //Model with the simple muscle model
+      #endif
+      
+      AnyFolder StrengthParameters={
+        AnyVar SpecificMuscleTension = 90; //N/cm^2
+      };
+      
+      // The orientation of the constraining plane in the TMJ
+      AnyFolder AngleConstrainingPlane = {
+        AnyVar AngleYaxisR = 30*pi/180; //From Langenbach and Hannam, Archives of Oral Biology 44 (1999) 557-573
+        AnyVar AngleYaxisL = 30*pi/180;
+        
+        AnyVar AngleXaxisR = 5*pi/180;  //From Langenbach and Hannam, Archives of Oral Biology 44 (1999) 557-573
+        AnyVar AngleXaxisL = -5*pi/180;  //From Langenbach and Hannam, Archives of Oral Biology 44 (1999) 557-573
+        
+      };
+      
+      /*
+      Choice of Scaling
+      */
+      #include "<ANYBODY_PATH_MANDIBLE>\Scaling\ScalingStandard.any"
+      
+      
+    };
+    
+    
+    
+    AnyBodyStudy Study = {      
+      AnyFolder &BodyModel=.HumanModel;  
+      AnyFolder ModelEnvironmentConnection = {
+        AnyFolder Drivers={
+        };
+        
+        #include "EnvironmentFreeMovement.any"
+        
+      };
+      //      
+      //      #include "JointAngleOutputs.any"
+      //      
+      Gravity = ..ModelSetup.Gravity;
+      
+      tStart = Main.TrialSpecificData.tStart; 
+      tEnd = Main.TrialSpecificData.tEnd;
+      nStep= Main.TrialSpecificData.nStep; 
+      
+      
+      InitialConditions.SolverType = KinSolOverDeterminate;
+      Kinematics.SolverType = KinSolOverDeterminate;
+      Kinematics.KinematicTol = 1e-6;
+      InverseDynamics.Criterion.Power = 2;
+      InverseDynamics.Criterion.UpperBoundOnOff = Off;
+      
+      #include "OutputFile.any"
+      
+      
+      // TMJ nodes in the skull anatomical frame
+      AnyKinLinear linL = {
+        Ref = 0;
+        AnyRefFrame &ref1 = Main.Model.HumanModel.Seg.Skull;
+        AnyRefFrame &ref2 = Main.Model.HumanModel.Seg.Mandible.TMJ_NodeL;  
+      };
+      
+      AnyKinLinear linR = {
+        Ref = 0;
+        AnyRefFrame &ref1 = Main.Model.HumanModel.Seg.Skull;
+        AnyRefFrame &ref2 = Main.Model.HumanModel.Seg.Mandible.TMJ_NodeR;  
+      };
+      
+    };    
+  };
+  #endif
+  
+  #if FREE_MOVEMENT == 0
+  
+  #if TMJ_LIGAMENT_REFRENCE_CONFIGURATION_MODEL == 0
+  
+  /*
+  *******************************
+  Calibration models and studies
+  
+  Together with the geometry of the model, model calibration is one
+  of the most critical parts within our models. In theory it is not necessary
+  to calibrate the model provided that your muscle data and geometry are exactly correct,
+  which is rarely the case.
+  With model calibration we mean fine-tuning of the muscle properties in such
+  a way that each individual muscle works in the right part of their force-length
+  relationship complying as much as possible with existing literature. From the literature
+  information is gathered about joint positions where muscle fibres of individual
+  muscles have their optimal length (Note that those joint position are not
+  necessarily the position where the muscle creates the largest moment). When
+  these joint positions are known the tendon length in the model is modified
+  keeping the rest of the muscle properties constant (maximum muscle force, muscle
+  fibre length) in such a way that the fibres work at their optimal length in
+  that position.
+  
+  *******************************
+  */
+  
+  #include "<ANYBODY_PATH_MANDIBLE>\NormalMandible_AAU\CalibrationMandible.any"  
+  #endif    
+  #endif  
+};
+
+
+
+
+
+
+
+

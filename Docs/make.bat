@@ -13,7 +13,7 @@ set SPHINXPROJ=AMMRManual
 
 if "%1" == "" goto help
 
-if "%1" == "clean" (RMDIR /S /Q auto_examples)
+if "%1" == "clean" goto clean
 
 %SPHINXBUILD% >NUL 2>NUL
 if errorlevel 9009 (
@@ -29,10 +29,18 @@ if errorlevel 9009 (
 )
 
 %SPHINXBUILD% -M %1 %SOURCEDIR% %BUILDDIR% %SPHINXOPTS%
+robocopy /MIR _build\html ..\Documentation /mt /NFL /NDL /NJH /NJS /nc /ns /np
 goto end
 
 :help
 %SPHINXBUILD% -M help %SOURCEDIR% %BUILDDIR% %SPHINXOPTS%
+goto end
+
+:clean
+RMDIR /S /Q auto_examples
+RMDIR /S /Q ..\Documentation
+%SPHINXBUILD% -M %1 %SOURCEDIR% %BUILDDIR% %SPHINXOPTS%
+goto end
 
 :end
 popd
