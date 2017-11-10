@@ -8,10 +8,8 @@ The AnyMoCap model is an effort to create a simple and unified framework for
 doing any kind of mocap analysis with the `AnyBody Modeling
 System <http://anybodytech.com>`__. It currently support the following:
 
-
-* Full or lower body analysis
+* Using data from C3D files and BVH files
 * Forceplates: type 0-4
-* Using data from C3D files
 * Support standard force plates (Types 1-4)
 * Prediction of ground reaction forces
 * Easy setup with multiple trials and subjects
