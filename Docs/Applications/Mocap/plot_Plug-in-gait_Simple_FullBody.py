@@ -17,6 +17,11 @@ import sys
 sys.path.insert(0, '../../exts')
 import gallery
 
+# dummy call to categorize as certain 
+# type for back referencing.
+gallery.anymocap()
+
+
 gallery.plot("../images/Plug-in-gait_Main.jpg")
 gallery.show()
 

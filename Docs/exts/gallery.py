@@ -27,3 +27,22 @@ def plot(image_name, dpi=200, size=None):
 
 def show():
     plt.show()
+
+
+# Dummy functions for generating references to examples
+# See http://sphinx-gallery.readthedocs.io/en/latest/advanced_configuration.html#adding-references-to-examples 
+
+
+def anymocap():
+    pass
+
+def mandible():
+    pass
+
+
+
+
+
+
+
+

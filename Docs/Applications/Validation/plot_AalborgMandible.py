@@ -19,7 +19,7 @@ Introduction to Force-dependent Kinematics: Theory and Application to Mandible M
 Journal of Biomechanical Engineering, 139(9), 091001. DOI: 10.1115/1.4037100.
 
 The work was supported by the Sapere Aude program of the Danish Council for
-Independent Research under grant number: DFF‐4184‐00018.
+Independent Research under grant number: DFF-4184-00018.
 
 
 :file:`Application/Validation/AalborgMandibleValidation`
@@ -56,12 +56,15 @@ If you have any questions or comments, please do not hesitate to contact the aut
     Associate Professor
     Michael Skipper Andersen, PhD
     msa@mp.aau.dk
-
 """
 
 import sys
 sys.path.insert(0, '../../exts')
 import gallery
+
+# dummy call to categorize as certain 
+# type for back referencing.
+gallery.mandible()
 
 gallery.plot("../images/AalborgMandibleValidation.jpg")
 gallery.show()

@@ -95,18 +95,20 @@ extensions = [
 
 sphinx_gallery_conf = {
     # path to your examples scripts
-    'examples_dirs' : 'Applications',
+    'examples_dirs'            : 'Applications',
     # path where to save gallery generated examples
-    'gallery_dirs'  : 'auto_examples',
+    'gallery_dirs'             : 'auto_examples',
+    'backreferences_dir'       : 'auto_examples/backreferences',
+    'doc_module'               : ('gallery',),
+    'backreferences_heading'   : False,
     # directory where function granular galleries are stored
-    'backreferences_dir'  : False,
     'download_section_examples': False,
-    'download_all_examples': False,
-    'min_reported_time': 100,
-    'show_code_section': False,
-    'default_thumb_file': '_static/no_image.png',
-    'thumbnail_size': (320, 280),
-
+    'download_all_examples'    : False,
+    'min_reported_time'        : 100,
+    'show_code_section'        : False,
+    'default_thumb_file'       : '_static/no_image.png',
+    'thumbnail_size'           : (320, 280),
+    'is_egg_file'              : True,
 }
 
 
@@ -240,7 +242,7 @@ html_theme_options = {
     'minimal_width': '700px',
     'borderless_decor': True,
     'lighter_header_decor': False,
-    'sidebarwidth': "3.8in",
+    #'sidebarwidth': "3.8in",
     'fontcssurl': 'https://fonts.googleapis.com/css?family=Noticia+Text|Open+Sans|Droid+Sans+Mono',
 }
 

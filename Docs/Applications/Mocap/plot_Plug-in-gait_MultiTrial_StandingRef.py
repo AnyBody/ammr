@@ -59,6 +59,11 @@ import sys
 sys.path.insert(0, '../../exts')
 import gallery
 
+# dummy call to categorize as certain 
+# type for back referencing.
+gallery.anymocap()
+
+
 gallery.plot("../images/Plug-in-gait_Squat_StandigRef.jpg")
 gallery.plot("../images/Plug-in-gait_Squat_Flywheel.jpg")
 gallery.show()
