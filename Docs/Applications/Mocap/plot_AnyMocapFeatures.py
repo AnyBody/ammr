@@ -8,7 +8,7 @@ A collection of small models that show-off special features of the
 
 :file:`Application/MocapExamples/SpecialFeatures`
 
-This includes: 
+This includes:
 
 * offset to forceplates
 * individual cutoff frequencies for markers
@@ -20,6 +20,10 @@ This includes:
 import sys
 sys.path.insert(0, '../../exts')
 import gallery
+
+# dummy call to categorize as certain 
+# type for back referencing.
+gallery.anymocap()
 
 gallery.plot("../images/force_plate_offset.jpg")
 gallery.show()
