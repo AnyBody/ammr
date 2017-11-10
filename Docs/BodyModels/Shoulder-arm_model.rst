@@ -56,7 +56,7 @@ Short example of how to configure the Shoulder Arm model:
 .. seealso::
    
    See :doc:`Arm configuration parameters <../BM_Config/Arm_configurations>` for a
-   full list of configuration parmaeters or :doc:`configuration section <../BM_Config/HumanBody_configurations>`
+   full list of configuration parmaeters or :doc:`configuration section <../BM_Config/index>`
    for more information on BM parameters.
 
 
@@ -71,7 +71,7 @@ The model consists of the following joints:
     .. Image:arm.png
 
 
-Summary
+Terminology
 ---------------
 .. rst-class:: centered
 .. table:: Joints and kinematic contraints of the arm model
@@ -120,7 +120,7 @@ More details on the ShoulderArm model can be found online:
 
 
 
-Anatomy References:
+Anatomy References
 ----------------------
 
 -  F.C.T. van der Helm and R. Veenbaas, Modeling the mechanical efect of
@@ -164,7 +164,7 @@ Anatomy References:
    musculoskeletal modelling of the shoulder mechanism. Journal of
    Biomechanics, vol. 24, no. 7, pp. 615-629, 1991
 
-Muscle References:
+Muscle References
 ----------------------
 
 -  Jacobson, M. D., R. Raab, B. M. Fazeli, R. A. Abrams, M. J. Botte,

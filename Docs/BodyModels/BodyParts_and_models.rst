@@ -7,10 +7,7 @@ studies, thus ensuring high accuracy and anatomical fidelity.
 See the section below for a more detailed description of the models and the underlying anatomical data.
 
 
-.. rst-class:: html-toggle
-
-Background
-----------------------
+.. rubric:: Background
 
 The body models live in the ``Body/`` subfolder within your AMMR directory. The folder names and organization here depend on
 the origin of the models. 
@@ -33,48 +30,38 @@ which can be assembled into the full human in many combinations.
 
 .. note:: Parts of the AAUHuman (except the
     mandible) are by default assembled together into a full body model.
-    See :doc:`/BM_Config/HumanBody_configurations` for re-configuring the model to for example, only represent the trunk, or use a different leg/muscle model.
-    
-
-.. warning:: In most cases, it is not necessary (and not
-    recommended) to edit the files in the ``Body/`` subfolder in the AMMR.
-    Most changes can done in the application. 
+    See :doc:`/BM_Config/index` for re-configuring the model to for example, only represent the trunk, or use a different leg/muscle model.
 
 
-Trunk models
-------------------
+.. rubric:: Models
 
 .. toctree::
     :maxdepth: 1
+    :caption: Trunk
 
     Lumbar-spine_model
     Cervical-spine_model
 
 
-
-Upper extremity models
--------------------------
-
 .. toctree::
     :maxdepth: 1
+    :caption: Upper extremity
 
     Shoulder-arm_model
     Detailed-hand_model
 
-Lower extremity models 
------------------------
+
 .. toctree::
     :maxdepth: 1
+    :caption: Lower extremity
 
     Leg_model
     Leg-TLEM_model
     Leg-TLEM2_model
 
-
-Other models
------------------
-
 .. toctree::
     :maxdepth: 1
+    :caption: other
 
-    Mandible_model
+    Symmetric_mandible_model
+    AalborgMandible

@@ -1,0 +1,104 @@
+//This file contains the marker toplogy of the data set it links free floating markers with the markers on the human 
+
+AnyFolder ModelSetup ={
+  
+   AnyVec3 Gravity=  {0.0,0,-9.82};
+
+#if TMJ_LIGAMENT_REFRENCE_CONFIGURATION_MODEL == 0
+   //This is the input file to the analysis
+  AnyInputC3D C3DFileData =   {
+    AnyString PrefixStr=""; //if the dataset makes use of a prefix name which goes in front of all markers and processed datanames write it here
+    #define PrefixDef(Arg) Arg
+    #ifndef C3DFILEDATA_FILENAME
+    FileName = TRIAL_PATH+Main.TrialSpecificData.NameOfFile+ ".c3d"; //add the extension to the file name here
+    #else
+    FileName = C3DFILEDATA_FILENAME; //add the extension to the file name here
+    #endif
+    ConstructModelOnOff = Off;
+    ConstructChartOnOff = Off;
+
+    MarkerUseAllPointsOnOff = On; 
+    MarkerUseCamMaskOnOff = Off;
+    PointsScaleFactor = 1/1000;
+    MarkerDrawOnOff =On;
+    
+    Filter =  {
+      N = 2;
+      Fc = {5};
+      Type = LowPass;
+    };
+       
+    MarkerScaleXYZ = 0.015*{1,1,1};
+    MarkerRGB={0,0,1};
+    
+
+};
+
+  // Start and End times for the c3d file.
+  AnyFloatVar tStartC3DFile =(Main.ModelSetup.C3DFileData.Header.FirstFrameNo+3)/Main.ModelSetup.C3DFileData.Header.VideoFrameRate;
+  AnyFloatVar tEndC3DFile = (Main.ModelSetup.C3DFileData.Header.LastFrameNo-3)/Main.ModelSetup.C3DFileData.Header.VideoFrameRate;
+  AnyIntVar nStepC3DFile = Main.ModelSetup.C3DFileData.Header.LastFrameNo-Main.ModelSetup.C3DFileData.Header.FirstFrameNo-5;  
+ 
+#if OVER_DETERMINATE_DRIVERS == 1 | FREE_MOVEMENT == 1
+  #include "Markers.any"
+#endif
+  
+#endif
+  
+   AnyFolder FileNames={
+    //Definition of file names
+    AnyFileVar KinResults = TRIAL_PATH + "/" + Main.TrialSpecificData.NameOfFile + "-Kinematics.anydata.h5";
+    AnyFileVar Results = TRIAL_PATH + "/" + Main.TrialSpecificData.NameOfFile + ".anydata.h5";
+
+    AnyFileVar OptimizedMotion = TRIAL_PATH + Main.TrialSpecificData.NameOfFile + "-output-euler.txt";
+
+    #if OVER_DETERMINATE_DRIVERS == 1
+     AnyString OptDetString = "_OverDet_";
+    #else
+     AnyString OptDetString = "_Det_";
+    #endif
+    
+    #if FREE_MOVEMENT == 1
+      AnyString FreeMovementString = "_FreeMovement_";      
+    #else
+      AnyString FreeMovementString = "_ConstrainedMovement_";
+    #endif
+    
+    #if TMJ_CONTACT_MODEL == 1
+      AnyString TMJ_ContactModelString = "_FDKModel_";      
+    #else
+      AnyString TMJ_ContactModelString = "_PlanarModel_";
+    #endif
+    
+    #if TMJ_INCLUDE_LIGAMENTS == 1
+      AnyString TMJ_LigamentPropertiesString = strval(Main.Model.HumanModel.Lig.LigamentProperties.Stiffness,"%.5f")+"_"+strval(Main.Model.HumanModel.Lig.LigamentProperties.StrainAtReference,"%.5f");
+    #endif
+    
+    #if FREE_MOVEMENT == 1
+      AnyFileVar ResultPathTxt = TRIAL_PATH+ "/" + Main.TrialSpecificData.NameOfFile + FreeMovementString + ".txt";
+    #else
+      #if TMJ_INCLUDE_LIGAMENTS == 1
+      AnyFileVar ResultPathTxt = TRIAL_PATH+ "/" + Main.TrialSpecificData.NameOfFile + OptDetString + TMJ_ContactModelString + TMJ_LigamentPropertiesString + ".txt";
+
+      #else
+    
+       AnyFileVar ResultPathTxt = TRIAL_PATH+ "/" + Main.TrialSpecificData.NameOfFile + OptDetString + TMJ_ContactModelString + ".txt";
+      #endif
+      
+      #endif
+  };
+  
+  
+  //markers adds macros automatically into this folder
+  AnyFolder Macros = {  };
+  
+};
+
+
+
+
+
+  #include "DrawSettings.any"
+
+
+

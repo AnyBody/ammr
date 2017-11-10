@@ -1,8 +1,8 @@
-Tweente Lower Extremity Model
+Twente Lower Extremity Model
 ==============================
 
-The AnyBody implementation of a the Tweente lower extremity model (TLEM) consists 
-of 159 muscles, and 6 joint degrees. 
+The AnyBody implementation of a the Twente lower extremity model (TLEM) consists 
+of **159 muscles**, and **6 joint degrees**. 
 
 
 .. raw:: html 
@@ -14,7 +14,7 @@ of 159 muscles, and 6 joint degrees.
     <!--<img src="../_static/TLEM1_closeup.jpg" alt="TLEM model" width="45%">-->
 
 ..
-    .. centered:: *Tweente Lower Extremity Model (version 1.2)*
+    .. centered:: *Twente Lower Extremity Model (version 1.2)*
 
 The model has been validated against ‘state of the
 art’ literature with respect to its biomechanical performance and first
@@ -54,7 +54,7 @@ muscle model and only one leg:
 .. seealso::
    
    See :doc:`Leg configuration parameters <../BM_Config/Leg_configurations>` for a
-   full list of configuration parmaeters or :doc:`configuration section <../BM_Config/HumanBody_configurations>`
+   full list of configuration parmaeters or :doc:`configuration section <../BM_Config/index>`
    for more information on BM parameters.
 
 
@@ -65,10 +65,10 @@ Resources
 
 More details can be found online:
 
-.. [ESA_cycling_report] Report containing moment arm validation for `ESA:
+.. [Dendorfer and Toerholm 2008] Report containing moment arm validation for `ESA:
    report <http://www.anybodytech.com/fileadmin/downloads/Final_Report.pdf>`__
 
-.. [klein-horsman2007] Klein Horsman, M. D., Koopman, H. F. J. M., van der Helm, F. C. T., 
+.. [Horsman 2007] Klein Horsman, M. D., Koopman, H. F. J. M., van der Helm, F. C. T., 
    Prosé, L. P., and Veeger, H. E. J., 2007, “Morphological Muscle and Joint Parameters for
    Musculoskeletal Modelling of the Lower Extremity,” Clin. Biomech. , 22(2), pp. 239–247.
    `link <http://linkinghub.elsevier.com/retrieve/pii/S0268003306001896>`__
