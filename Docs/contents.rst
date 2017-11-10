@@ -8,7 +8,7 @@ Contents
     :maxdepth: 2
 
     index
-    Using_the_AMMR
+    Getting_Started/index
     BM_Config/index
     BodyModels/BodyParts_and_models
     auto_examples/index

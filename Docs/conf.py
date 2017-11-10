@@ -242,7 +242,7 @@ html_theme_options = {
     'minimal_width': '700px',
     'borderless_decor': True,
     'lighter_header_decor': False,
-    'sidebarwidth': "3.8in",
+    #'sidebarwidth': "3.8in",
     'fontcssurl': 'https://fonts.googleapis.com/css?family=Noticia+Text|Open+Sans|Droid+Sans+Mono',
 }
 
