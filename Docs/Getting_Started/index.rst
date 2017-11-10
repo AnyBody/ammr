@@ -1,7 +1,10 @@
+#########################
 Getting Started with AMMR
-===========================
+#########################
 
-.. rubric:: AMMR Intallation
+
+AMMR Intallation
+================
 
 
 The newest version of the *AnyBody Model Repository* (AMMR) comes bundled with the 
@@ -9,62 +12,46 @@ The newest version of the *AnyBody Model Repository* (AMMR) comes bundled with t
 version available at the time of its release will be installed together with it
 inside the installation folder. (Morten)
 
-.. note:: You might need however to use the newest AMMR Files instead,
-    which are setting up the AMMR with the latest Body Models and Application
-    scenarios.
-    You can find out how to get and install the latest AMMR here:
-
-    .. toctree::
-        :maxdepth: 1
-
-        Installing Latest AMMR Files<AMMR_Installation>
-
-        
+.. seealso:: Detailed guide on how to install :doc:`your own version of the AMMR <AMMR_Installation>` :
 
 
-.. rubric:: Before using AMMR
+.. toctree::
+    :maxdepth: 1
+    :hidden: 
 
-.. only:: draft
+    AMMR_Installation
 
-    Before editing or create models, it is great to know how
-    to track changes made along the development of your models. 
-    Modelling with AnyBody makes use of `AnyScript`_ ,
-    therefore version control software can be used to store the models safely in a remote
-    repository for keeping them safe or for sharing them easily.
 
-    .. note:: If want to know more about versioning software and how to set them up,
-        follow this link here:
+.. 
+..    1.. only:: draft
+..
+..    1.. rubric:: Before using AMMR
+..
 
-        .. toctree::
-            :maxdepth: 1
+..      Before editing or create models, it is great to know how
+        to track changes made along the development of your models. 
+        Modelling with AnyBody makes use of `AnyScript`_ ,
+        therefore version control software can be used to store the models safely in a remote
+        repository for keeping them safe or for sharing them easily.
 
-            Before_Using
+..        .. note:: If want to know more about versioning software see :doc:`this link <Before_Using>`
 
 
 Understanding the AnyScript Models
-----------------------------------
+==================================
 
 Most examples you will encounter when using the AnyBody Managed Model Repository
 use the `Human Model`_ . Regardless of complexity, all models share a
 common `AnyScript`_ structure used to set them up:
 
-* 
-    Path to the desired AMMR for using;
+* Path to the desired AMMR for using;
+* The configuration of your human model and the inclusion of the human model
+  itself;
+* Model Integration: add external loads, drivers etc.;
+* Model Study: this is where you set up the simulation parameters for the
+  scenario in which you will use the model.
 
-*   
-    The configuration of your human model and the inclusion of the human model
-    itself;
-
-*
-    Model Integration: add external loads, drivers etc.;
-
-*
-    Model Study: this is where you set up the simulation parameters for the
-    scenario in which you will use the model.
-
-.. note::
-
-    AnyScript is a sequential language. This means that each of the instructions
+.. note:: AnyScript is a sequential language. This means that each of the instructions
     lines are executed by AnyBody in the order they are written inside the ``.any``
     files. The structure above also represents the order of the code sections
     for the models.
@@ -117,12 +104,6 @@ version 2*.
 
 .. ``#include "HumanModel.any"`` 
 .. -------------------------------------------------
-
-Including the ``HumanModel`` 
-
-After the ``BM_*`` parameters we can include the Human Model. This with a single line:
-
-``#include "<ANYBODY_PATH_BODY>/HumanModel.any"``
 
 
 .. ``AnyFolder Model``
@@ -184,14 +165,6 @@ the simulation. In this case everything in ``Main.Model`` folder is part of the 
 
 
 .. [#f1] The preinstalled and (read only) AMMR is located in: ``C:/Program files/AnyBody Technology/AnyBody_X.X/AMMR`` 
-
-
-
-
-    .. toctree::
-        :maxdepth: 1
-
-        Understanding_Models
 
 
 .. _AnyBody Modelling System: https://www.anybodytech.com/software/ams/
