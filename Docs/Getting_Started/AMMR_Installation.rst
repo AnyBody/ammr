@@ -30,9 +30,7 @@ Then select the "Install demo repository..."
 This installs the repository into your Documents folder (e.g. |AMMR_DEMO_INST_DIR|). You
 may keep this files safe on your computer by copying them to another location. There you
 can initialise a git repository in which you can version you models, keep a backup or
-share them easily with the community. More details about this in the next section:
-:doc:`Before Using AMMR <Before_Using>`
-
+share them easily with the community.
 
 .. warning:: As written before, AnyBody Modelling System comes with a version of AMMR
     (not necessarily the latest) which you can find in the installation folder of the

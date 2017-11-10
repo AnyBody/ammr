@@ -36,18 +36,17 @@ AnyBody Technology in collaboration with academic institutions. The models are
 maintained by AnyBody Technology who ensure that various body part models can
 be used together as full body, scalable musculosketal model.
 
-Getting started with the AMMR
---------------------------------
 
-First time you're using AMMR?
------------------------------
+.. rubric:: First time you're using AMMR?
 
-The Getting Started section provides insight into how AMMR is structured, how to
+If you are a new user check the :tutorials:doc:`AnyBody Tutorials <index>` and the getting started video on AnyBody.
+
+The following :doc:`Getting Started section <Getting_Started/index>` on the AMMR provides insight into how AMMR is structured, how to
 install it and how to use it.
-You may run through the quick start for installing it and using it
-or read the detailed descriptions as well, depending on your needs.
 
-.. toctree::
-    Getting_Started/index
+.. rst-class:: without-title
+.. seealso::
+    **Continue:** :doc:`Get Started using the AMMR <Getting_Started/index>`
+
 
 .. _AnyBody Modelling System: https://www.anybodytech.com/software/ams/
