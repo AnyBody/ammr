@@ -42,7 +42,7 @@ repository for keeping them safe or for sharing them easily.
 .. rubric:: Understanding the AnyScript Models
 
 Most examples you will encounter when using the AnyBody Managed Model Repository
-include the Human Model (add photo). Regardless of complexity, all models share a
+use the Human Model (add photo). Regardless of complexity, all models share a
 common AnyScript structure used to set them up. To get a detailed insight into 
 AnyScript Models, follow this link here:
 
