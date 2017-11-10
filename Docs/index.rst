@@ -36,6 +36,8 @@ AnyBody Technology in collaboration with academic institutions. The models are
 maintained by AnyBody Technology who ensure that various body part models can
 be used together as full body, scalable musculosketal model.
 
+Getting started with the AMMR
+--------------------------------
 
 First time you're using AMMR?
 -----------------------------
