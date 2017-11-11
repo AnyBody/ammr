@@ -21,5 +21,5 @@ import gallery
 gallery.anymocap()
 
 
-# gallery.plot("../images/Plug-in-gait_Squat_Flywheel.jpg")
-# gallery.show()
+gallery.plot("../images/GRFPrediction-Plug-in-gait.jpg")
+gallery.show()
