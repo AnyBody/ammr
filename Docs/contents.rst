@@ -8,7 +8,7 @@ Contents
     :maxdepth: 2
 
     index
-    Getting_Started/index
+    getting_started
     BM_Config/index
     BodyModels/BodyParts_and_models
     auto_examples/index
