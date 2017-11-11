@@ -20,15 +20,13 @@ System`_.
 
 The AnyBody Managed Model Repository consists of two parts:
 
-* 
-    Body Models (put link): The human body models which can be 
-    customized and scaled to build a specific musculoskeletal model;
+* :ref:`Body Models <the_body_model>`: The human body models which can be 
+  customized and scaled to build a specific musculoskeletal model;
     
-* 
-    Application examples (put link): in which the body models are
-    utilized in specific applications (from common daily activities,
-    like pushing the acceleration or brake pedals of a car, to workplace
-    specific scenarios).
+* :ref:`Application examples <examples-index>`: in which the body models are
+  utilized in specific applications (from common daily activities,
+  like pushing the acceleration or brake pedals of a car, to workplace
+  specific scenarios).
      
 
 The models are developed in research projects at academic institutions or by
@@ -41,12 +39,12 @@ be used together as full body, scalable musculosketal model.
 
 If you are a new user check the :tutorials:doc:`AnyBody Tutorials <index>` and the getting started video on AnyBody.
 
-The following :doc:`Getting Started section <Getting_Started/index>` on the AMMR provides insight into how AMMR is structured, how to
+The following :doc:`Getting Started section </getting_started>` on the AMMR provides insight into how AMMR is structured, how to
 install it and how to use it.
 
 .. rst-class:: without-title
 .. seealso::
-    **Continue:** :doc:`Get Started using the AMMR <Getting_Started/index>`
+    **Continue:** :doc:`Get Started using the AMMR </getting_started>`
 
 
 .. _AnyBody Modelling System: https://www.anybodytech.com/software/ams/

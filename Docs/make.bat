@@ -28,7 +28,7 @@ if errorlevel 9009 (
 	exit /b 1
 )
 
-%SPHINXBUILD% -M %1 %SOURCEDIR% %BUILDDIR% %SPHINXOPTS%
+%SPHINXBUILD% -M %1 %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% -n
 robocopy /MIR _build\html ..\Documentation /mt /NFL /NDL /NJH /NJS /nc /ns /np
 goto end
 
