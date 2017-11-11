@@ -8,4 +8,4 @@ About the AMMR
 
     CHANGELOG 
     Contribute
-    legal 
+    legal
