@@ -20,15 +20,13 @@ System`_.
 
 The AnyBody Managed Model Repository consists of two parts:
 
-* 
-    Body Models (put link): The human body models which can be 
-    customized and scaled to build a specific musculoskeletal model;
+* :ref:`Body Models <the_body_model>`: The human body models which can be 
+  customized and scaled to build a specific musculoskeletal model;
     
-* 
-    Application examples (put link): in which the body models are
-    utilized in specific applications (from common daily activities,
-    like pushing the acceleration or brake pedals of a car, to workplace
-    specific scenarios).
+* :ref:`Application examples <examples-index>`: in which the body models are
+  utilized in specific applications (from common daily activities,
+  like pushing the acceleration or brake pedals of a car, to workplace
+  specific scenarios).
      
 
 The models are developed in research projects at academic institutions or by
