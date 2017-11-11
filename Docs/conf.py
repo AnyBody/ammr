@@ -31,6 +31,8 @@ import os
 import re
 import sys
 import subprocess
+from datetime import datetime
+
 import cloud_sptheme
 
 
@@ -152,7 +154,7 @@ pygments_style = 'AnyScript'
 
 
 
-current_year = os.environ.get('YEAR', '2017')
+current_year = os.environ.get('YEAR', datetime.now().year)
 
 ams_version = os.environ.get('AMS_VERSION', '7.1.0')
 if not re.match('^\d\.\d\.\d$',ams_version):
