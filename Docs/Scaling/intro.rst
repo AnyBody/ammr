@@ -68,8 +68,8 @@ Models” <http://www.anybodytech.com/downloads/documentation/#20090319>`__.
 
 .. rubric:: Tutorial
 
-The first five scaling methods are covered in Lesson 1. They are often
-referred to as Joint to joint scaling methods. Lesson 2 covers the
+The first five scaling methods are covered in :doc:`Lesson 1 <lesson1>`. They are often
+referred to as Joint to joint scaling methods. :doc:`Lesson 2 <lesson2>` covers the
 next three which are based on external body measurement. And Lesson 3 covers
 the ScalingXYZ scaling law, since the usage logic slightly differs from 
 the rest of the laws.
@@ -77,9 +77,7 @@ the rest of the laws.
 With the AnyBody Modeling System you already have a repository of models
 available, for details please see the AnyBody Assistant available from
 the menu. As a starting point for this tutorial please find the model
-StandingModelScalingDisplay. This model can be found in the folder
-Applications/Examples.
-
+:ref:`StandingModelScalingDisplay <sphx_glr_auto_examples_Other_plot_StandingModelScalingDisplay.py>`.
 
 .. toctree::
     :maxdepth: 1
@@ -92,5 +90,6 @@ Applications/Examples.
 .. seealso::
     **Next lesson:** Now head for :doc:`lesson1`.
 
-..  image:: _static/intro/image1.jpeg
-   :width: 80%
+.. 
+    ..  image:: _static/intro/image1.jpeg
+        :width: 80%
