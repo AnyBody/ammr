@@ -1,21 +1,18 @@
 .. _ammr-legal:
 
 #########################################
-Legal Notices, Trademarks and Copyrights 
+Legal, Trademarks and Copyrights 
 #########################################
 
 Remarks about documentation
 ****************************
 
-CAUTION: This documentation is intended for qualified users who will
-exercise sound engineering judgment and expertise in the use of the
-AnyBody™ Software. The AnyBody™ Software is inherently complex, and the
-examples and procedures in this documentation are not intended to be
-exhaustive or to apply to any particular situation. Users are cautioned
-to satisfy themselves as to the accuracy and results of their analyses.
-
-The AnyBody™ Software is available only under license from AnyBody
-Technology and is subject to the *AnyBody Software License Agreement*.
+.. caution:: This documentation is intended for qualified users who will
+    exercise sound engineering judgment and expertise in the use of the
+    AnyBody™ Software. The AnyBody™ Software is inherently complex, and the
+    examples and procedures in this documentation are not intended to be
+    exhaustive or to apply to any particular situation. Users are cautioned
+    to satisfy themselves as to the accuracy and results of their analyses.
 
 This documentation and the software described in this documentation are
 subject to change without prior notice.
@@ -46,7 +43,7 @@ and/or in the installation directory, or online at:
 See: https://www.anybodytech.com/legal/software-license-agreement/
 
 
-trademarks
+Trademarks
 **********
 
 The AnyBody™ Software includes products that are registered trademarks
@@ -70,8 +67,6 @@ at *www.anybodytech.com/legal/trademarks-and-brands/*.
 
 -  AnyFE2APDL™
 
--  AnyGait™
-
 -  AnyMoCap™
 
 -  Force-Dependent Kinematics™ (FDK™)
@@ -91,6 +86,8 @@ are the following:
 -  Microsoft®, Windows® are registered trademarks of Microsoft
    Corporation.
 
+.. _copyright:
+
 Copyright Notice
 ****************
 
@@ -109,8 +106,8 @@ estoppel, implication, or otherwise.
 
 Copyright © 2002–|CURRENT_YEAR| AnyBody Technology A/S. All Rights Reserved.
 
-Making References to AnyBody Software
-*************************************
+Making References to Software and Models
+****************************************
 
 When referring to the AnyBody™ Software in papers, journals etc.  The
 licensee is requested to use the following academic conventions for the
