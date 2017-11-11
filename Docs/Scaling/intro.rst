@@ -20,33 +20,38 @@ choose the actual law.
 
 Currently there are nine pre-defined scaling laws available in AnyBody
 
-Scaling laws
------------------------
+.. rubric:: Scaling 
 
-*  ScalingStandard  (scale to a standard size; i.e. use 50th percentile sizes for a European male)
 
-*  ScalingNone  (do not scale; i.e. use underlying cadaveric dataset as is)
+.. list-table:: Scaling laws
+   :widths: 3 7
+   :header-rows: 1
 
-*  ScalingUniform  (scale segments equally in all directions; input is joint to
-   joint distances)
-
-*  ScalingLengthMass (scale taking mass into account; input is joint to
-   joint distances and mass)
-
-*  ScalingLengthMassFat (scale taking mass and fat into account; input
-   is joint to joint distances)
-
-*  ScalingUniformExt (scale equally in all directions; input is external
-   measurements)
-
-*  ScalingLengthMassExt (scale taking mass into account; input is
-   external measurement)
-
-*  ScalingLengthMassFatExt (scale taking mass and fat into account;
-   input is external measurements).
-
-*  ScalingXYZ (scale taking mass and fat into account; scale segments along X, Y, Z axes;
-   input is scale factors along X, Y, Z axes).
+   * - Scaling law
+     - Description
+   * - :any:`ScalingStandard <_SCALING_STANDARD_>`
+     - scale to a standard size; i.e. use 50th percentile sizes for a European male
+   * - :any:`ScalingNone <_SCALING_NONE_>`
+     - do not scale; i.e. use underlying cadaveric dataset as is
+   * - :any:`ScalingUniform  <_SCALING_UNIFORM_>`
+     - cale segments equally in all directions; input is joint to
+       joint distances
+   * - :any:`ScalingLengthMass <_SCALING_LENGTHMASS_>`
+     - scale taking mass into account; input is joint to
+       joint distances and mass
+   * - :any:`ScalingLengthMassFat <_SCALING_LENGTHMASSFAT_>`
+     - scale taking mass and fat into account; input
+       is joint to joint distances
+   * - :any:`ScalingUniformExt <_SCALING_UNIFORM_EXTMEASUREMENTS_>`
+     - scale equally in all directions; input is external
+       measurements
+   * - :any:`ScalingLengthMassExt <_SCALING_LENGTHMASS_EXTMEASUREMENTS_>`
+     - scale taking mass into account; input is external measurement
+   * - :any:`ScalingLengthMassFatExt  <_SCALING_LENGTHMASSFAT_EXTMEASUREMENTS_>`
+     - scale taking mass and fat into account; input is external measurements.
+   * - :any:`ScalingXYZ  <_SCALING_XYZ_>`
+     - scale taking mass and fat into account; scale segments along X, Y, Z axes;
+       input is scale factors along X, Y, Z axes.
 
 **Input parameters of scaling laws are specified in a file that is always named
 AnyMan.any.** Several versions of this file are available, each for a different scaling law. 
@@ -61,11 +66,10 @@ Musculoskeletal
 Models” <http://www.anybodytech.com/downloads/documentation/#20090319>`__.
 
 
-Tutorial
------------------------
+.. rubric:: Tutorial
 
-The first five scaling methods are covered in Lesson 1. They are often
-referred to as Joint to joint scaling methods. Lesson 2 covers the
+The first five scaling methods are covered in :doc:`Lesson 1 <lesson1>`. They are often
+referred to as Joint to joint scaling methods. :doc:`Lesson 2 <lesson2>` covers the
 next three which are based on external body measurement. And Lesson 3 covers
 the ScalingXYZ scaling law, since the usage logic slightly differs from 
 the rest of the laws.
@@ -73,9 +77,7 @@ the rest of the laws.
 With the AnyBody Modeling System you already have a repository of models
 available, for details please see the AnyBody Assistant available from
 the menu. As a starting point for this tutorial please find the model
-StandingModelScalingDisplay. This model can be found in the folder
-Applications/Examples.
-
+:ref:`StandingModelScalingDisplay <sphx_glr_auto_examples_Other_plot_StandingModelScalingDisplay.py>`.
 
 .. toctree::
     :maxdepth: 1
@@ -88,5 +90,6 @@ Applications/Examples.
 .. seealso::
     **Next lesson:** Now head for :doc:`lesson1`.
 
-..  image:: _static/intro/image1.jpeg
-   :width: 80%
+.. 
+    ..  image:: _static/intro/image1.jpeg
+        :width: 80%

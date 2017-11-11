@@ -6,19 +6,25 @@ The AnyMoCap Framework
 
 The AnyMoCap model is an effort to create a simple and unified framework for
 doing any kind of mocap analysis with the `AnyBody Modeling
-System <http://anybodytech.com>`__. It currently support the following:
-
-* Using data from C3D files and BVH files
-* Forceplates: type 0-4
-* Support standard force plates (Types 1-4)
-* Prediction of ground reaction forces
-* Easy setup with multiple trials and subjects
-* Optimization of marker locations and anthropometrics. 
-
+System <http://anybodytech.com>`__.
 
 .. image:: /_static/anymocap.jpg
     :width: 50%
     :align: center
+
+
+Features
+********
+* Addapts to any Mocap protocol 
+* Optimization of marker locations and anthropometrics. 
+* Support inertial MoCap and BVH file import
+* Support for standard forceplates: (Types 1-4) plus more.
+* Prediction of ground reaction forces
+* Easy setup with multiple trials and subjects
+
+
+Overdeterminate kinematic analysis
+**********************************
 
 Musculoskeletal models that use Motion caputure data are different from other
 types of models found the AMMR.  Most importantly, MOCAP models usually require
@@ -41,6 +47,7 @@ with the determinate kinematic solver in the inverse dynamic analysis.
 
 .. seealso:: The AnyBody tutorials, and the :tutorials:doc:`lesson on using the
     AnyMocap model <Making_things_move/lesson5>`
+
 
 
 AnyMocap examples:
