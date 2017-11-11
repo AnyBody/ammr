@@ -39,12 +39,12 @@ be used together as full body, scalable musculosketal model.
 
 If you are a new user check the :tutorials:doc:`AnyBody Tutorials <index>` and the getting started video on AnyBody.
 
-The following :doc:`Getting Started section <Getting_Started/index>` on the AMMR provides insight into how AMMR is structured, how to
+The following :doc:`Getting Started section </getting_started>` on the AMMR provides insight into how AMMR is structured, how to
 install it and how to use it.
 
 .. rst-class:: without-title
 .. seealso::
-    **Continue:** :doc:`Get Started using the AMMR <Getting_Started/index>`
+    **Continue:** :doc:`Get Started using the AMMR </getting_started>`
 
 
 .. _AnyBody Modelling System: https://www.anybodytech.com/software/ams/
