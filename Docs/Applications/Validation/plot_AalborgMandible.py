@@ -22,7 +22,7 @@ The work was supported by the Sapere Aude program of the Danish Council for
 Independent Research under grant number: DFF-4184-00018.
 
 
-:file:`Application/Validation/AalborgMandibleValidation`
+``Application/Validation/AalborgMandibleValidation``
 
 
 How to run the model

@@ -6,7 +6,7 @@ Symmetric Mandible example
 Mandible model example. 
 
 | **Main file:** 
-| :file:`Application/Validation/MandibleChewingAndClenching/MandibleChewingAndClenching.main.any`
+| ``Application/Validation/MandibleChewingAndClenching/MandibleChewingAndClenching.main.any``
 
       
 Model simulating chewing and comparing values to measurements from de Zee et al., J. of Biomechanics 2007.
