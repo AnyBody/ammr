@@ -6,7 +6,7 @@ Standin Model Scaling Display
 This application shows all the scaling laws available.
 
 | **Main file:** 
-| :file:`Application/Examples/StandingModelScalingDisplay/StandingModelScalingDisplay.Main.any`
+| ``Application/Examples/StandingModelScalingDisplay/StandingModelScalingDisplay.Main.any``
 
 The model can be scaled either regarding to measures between joint center, 
 or exteranal measures of bony tips, or by representation of a certain percentile of the population.

@@ -5,7 +5,7 @@ Arm curl
 
 Example of an Arm Curl fitness machine.
 
-**Main file:** :file:`Application/Examples/ArmCurl/ArmCurl.main.any`
+**Main file:** ``Application/Examples/ArmCurl/ArmCurl.main.any``
 
 The objective of this example is to adjust the eccentricity of the cable wheel
 such that the arm muscles experience a constant effort throughout the elbow

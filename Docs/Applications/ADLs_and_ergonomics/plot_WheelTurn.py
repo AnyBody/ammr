@@ -7,7 +7,7 @@ This is a model of a person turning a horizontal wheel by means of a handle.
 The purpose of the model is shoulder validation.
 
 
-**Main file:** :file:`Application/Examples/WheelTurn/WheelTurn.Main.any`
+**Main file:** ``Application/Examples/WheelTurn/WheelTurn.Main.any``
 
 
 """

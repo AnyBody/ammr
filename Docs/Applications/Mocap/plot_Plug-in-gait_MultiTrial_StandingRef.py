@@ -13,7 +13,7 @@ reference recording, and the values are then applied two squatting trials.
 The data is provided by Maria Jönsson from KTH (Royal Institute of Technology
 School of Technology and Health) in Sweden.
 
-:file:`Application/MocapExamples/Plug-in-gait_MultiTrial_StandingRef`
+``Application/MocapExamples/Plug-in-gait_MultiTrial_StandingRef``
 
 The files are structured so each trials has its own folder with a main file
 (``Main.any``), a file with trial specific data (``TrialSpecificData.any```) and a

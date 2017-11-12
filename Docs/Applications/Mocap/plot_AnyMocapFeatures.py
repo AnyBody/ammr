@@ -6,7 +6,7 @@ AnyMocap Features
 A collection of small models that show-off special features of the
 *AnyMocap* framework.
 
-:file:`Application/MocapExamples/SpecialFeatures`
+``Application/MocapExamples/SpecialFeatures``
 
 This includes:
 
