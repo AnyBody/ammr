@@ -7,10 +7,10 @@ A basic static full-body model standing on a floor.
 
 **Main files:** 
 
-* :file:`Application/Examples/FreePosture/FreePostureFullBodyMove.Main.any`
-* :file:`Application/Examples/FreePosture/FreePostureFullBodyShoulderRhythmMove.Main.any`
-* :file:`Application/Examples/FreePosture/FreePostureFullBodyShoulderRhythmStatic.Main.any`
-* :file:`Application/Examples/FreePosture/FreePostureFullBodyStatic.Main.any`
+* ``Application/Examples/FreePosture/FreePostureFullBodyMove.Main.any``
+* ``Application/Examples/FreePosture/FreePostureFullBodyShoulderRhythmMove.Main.any``
+* ``Application/Examples/FreePosture/FreePostureFullBodyShoulderRhythmStatic.Main.any``
+* ``Application/Examples/FreePosture/FreePostureFullBodyStatic.Main.any``
 
 This model uses the full body model, i.e. most of the body parts available
 in the AAUHuman part of the Body directory. The model is grounded at the

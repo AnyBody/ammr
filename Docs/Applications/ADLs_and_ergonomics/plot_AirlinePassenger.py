@@ -5,7 +5,7 @@ Airline passenger
 
 The airline passenger example.
 
-**Main file:** :file:`Application/Examples/AirlinePassenger/AirlinePassenger.main.any`
+**Main file:** ``Application/Examples/AirlinePassenger/AirlinePassenger.main.any``
 
 This is a model of a coach class airline passenger seat 
 characterized by the following:

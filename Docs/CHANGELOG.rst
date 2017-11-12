@@ -71,7 +71,7 @@ Scaling laws
 * An additional scaling law based on individual segmental scaling factors was added to the 
   repository. It can be enabled using this :ref:`BM parameter<bm-config>` ``#define BM_SCALING _SCALING_XYZ_``. 
   See the :ref:`guide on scaling <scaling-intro>`.
-* Default scaling is now :bm_constant:`_SCALING_STANARD_` (e.g  ``#define BM_SCALING _SCALING_STANDARD_``
+* Default scaling is now :any:`_SCALING_STANDARD_` (e.g  ``#define BM_SCALING _SCALING_STANDARD_``
   which scales all models to default standard 50% male. 
 * Introduced :bm_constant:`_SCALING_NONE_`, which disables scaling. E.g. models gets the orignal unscaled size. 
 
@@ -170,7 +170,7 @@ Fixed:
 Removed:
 ===========
 
-* Old MoCap examples have been moved to :file:`Application/Examples/Deprecated`
+* Old MoCap examples have been moved to ``Application/Examples/Deprecated``
 * Removed the deprecated AMMR1.4 hip rotation sequences. 
 * The GM-foot model. A new version of this in the pipeline. Contact us if you are 
   interested in this work. 
