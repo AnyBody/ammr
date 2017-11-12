@@ -6,6 +6,7 @@ Contents
 
 .. toctree::
     :maxdepth: 2
+    :includehidden:
 
     index
     getting_started
