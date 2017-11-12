@@ -1,3 +1,5 @@
+.. _installing_ammr:
+
 Installing Latest AMMR Files
 ================================
 
