@@ -7,8 +7,8 @@ Standing body model lifting a box.
 
 **Main files:** 
 
-* :file:`Application/Examples/StandingLift/StandingLift.Main.any`
-* :file:`Application/Examples/StandingLift/StandingLiftFEA.Main.any`
+* ``Application/Examples/StandingLift/StandingLift.Main.any``
+* ``Application/Examples/StandingLift/StandingLiftFEA.Main.any``
 
 
 

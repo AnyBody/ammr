@@ -8,8 +8,8 @@ FullBody or as LowerExtremity version.
 
 **Main files:** 
 
-* :file:`Application/Examples/BikeModel/BikeModel-FullBody.main.any`
-* :file:`Application/Examples/BikeModel/BikeModel-LowerBody.main.any`
+* ``Application/Examples/BikeModel/BikeModel-FullBody.main.any``
+* ``Application/Examples/BikeModel/BikeModel-LowerBody.main.any``
 
 The model illustrates several important topics in model 
 construction:

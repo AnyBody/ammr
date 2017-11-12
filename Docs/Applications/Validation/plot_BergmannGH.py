@@ -7,7 +7,7 @@ Model simulating arm-lift motion adapted from Bergmann et al., J. of
 Biomechanics 2007 to compare the results to in vivo measurements from that
 study.
 
-**Main file:** :file:`Application/Validation/BergmannGH/BergmannGH.Main.any`
+**Main file:** ``Application/Validation/BergmannGH/BergmannGH.Main.any``
 
 
 """

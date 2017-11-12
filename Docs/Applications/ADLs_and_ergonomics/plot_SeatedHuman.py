@@ -6,7 +6,7 @@ Seated Human
 A model of a seated human consisting of the full body model, a chair, and an
 interface between the two.
 
-**Main file:** :file:`Application/Examples/SeatedHuman/SeatedHuman.Main.any`
+**Main file:** ``Application/Examples/SeatedHuman/SeatedHuman.Main.any``
 
 
 The Seated Human is a family of models resulting from a
