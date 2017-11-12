@@ -203,6 +203,13 @@ release = f'{ammr_version}'
 if tags.has('draft'):
     release = release + 'beta'
 
+
+
+
+suppress_warnings = ['ref.citation']
+
+
+
 # -- Options for HTML output ----------------------------------------------
 
 
