@@ -6,12 +6,14 @@ Contents
 
 .. toctree::
     :maxdepth: 2
+    :includehidden:
 
     index
-    Using_the_AMMR
+    getting_started
     BM_Config/index
     BodyModels/BodyParts_and_models
     auto_examples/index
-    Guides
-    CHANGELOG 
-    Contribute
+    Creating_model_from_scratch
+    Scaling/intro
+    AnyMocap
+    about

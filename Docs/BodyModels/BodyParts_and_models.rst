@@ -1,3 +1,5 @@
+.. _the_body_model:
+
 The Body Models
 ===============
 

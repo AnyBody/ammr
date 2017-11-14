@@ -5,7 +5,7 @@ Bench Press
 
 A full-body model doing push-ups with assumed drivers.
 
-**Main file:** :file:`Application/Examples/BenchPress/BenchPress.Main.any`
+**Main file:** ``Application/Examples/BenchPress/BenchPress.Main.any``
 
 The model of a bench press exercise is developed from the free posture model.
 The bench is simulated by reaction forces between the head, thorax, pelvis,

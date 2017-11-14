@@ -6,7 +6,7 @@ Total Hip Arthroplasty (THA) Model
 Model of a total hip replacement using a contact implant model and
 force-dependent kinematics (FDK).
 
-**Main file:** :file:`Application/Examples/THA-KneeBendDemo/THA-KneeBendDemo.main.any`
+**Main file:** ``Application/Examples/THA-KneeBendDemo/THA-KneeBendDemo.main.any``
 
 This is a demo model for the simulation of a knee bend for a body model 
 with a total hip arthroplasty (THA)using:

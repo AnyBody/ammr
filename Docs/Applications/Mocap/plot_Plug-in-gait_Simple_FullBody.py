@@ -8,7 +8,7 @@ walking on three typ4 force platforms. The model is fairly simple and a good
 starting point for new users. If you plan to have many trials/subjects, take
 a look at the example which better support multiple trails.
 
-:file:`Application/MocapExamples/Plug-in-gait_Simple/FullBody.main.any`
+``Application/MocapExamples/Plug-in-gait_Simple/FullBody.main.any``
 
 """
 
@@ -16,6 +16,11 @@ a look at the example which better support multiple trails.
 import sys
 sys.path.insert(0, '../../exts')
 import gallery
+
+# dummy call to categorize as certain 
+# type for back referencing.
+gallery.anymocap()
+
 
 gallery.plot("../images/Plug-in-gait_Main.jpg")
 gallery.show()

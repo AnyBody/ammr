@@ -6,7 +6,7 @@ Symmetric Mandible example
 Mandible model example. 
 
 | **Main file:** 
-| :file:`Application/Validation/MandibleChewingAndClenching/MandibleChewingAndClenching.main.any`
+| ``Application/Validation/MandibleChewingAndClenching/MandibleChewingAndClenching.main.any``
 
       
 Model simulating chewing and comparing values to measurements from de Zee et al., J. of Biomechanics 2007.
@@ -42,6 +42,10 @@ Do not hesitate to contact the author for questions and/or suggestions.
 import sys
 sys.path.insert(0, '../../exts')
 import gallery
+
+# dummy call to categorize as certain 
+# type for back referencing.
+gallery.mandible()
 
 gallery.plot("../images/MandibleChewingAndClenching.jpg")
 gallery.show()
