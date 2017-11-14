@@ -1,0 +1,317 @@
+AnyFolder SpineDependentCal ={
+  AnyFolder &ThoraxSegs =  ...BodyModel.Trunk.SegmentsThorax;
+  AnyFolder &CervicalSegs =  ...BodyModel.Trunk.SegmentsCervicalSpine;
+  AnyFolder &LumbarSegs =  ...BodyModel.Trunk.SegmentsLumbar;
+  AnyFolder &LumbarSpineJoints =  ...BodyModel.Trunk.JointsLumbar;
+  AnyFolder &LumbarCervicalJoints =  ...BodyModel.Trunk.JointsCervicalSpine;
+  
+  AnyFolder &SegSideCal = .SideHumanFolderRef.ShoulderArm.Seg;
+  AnyFolder &JointsSideCal = .SideHumanFolderRef.ShoulderArm.Jnt;
+
+  AnyFolder &MusCalSide =  .SideHumanFolderRef.ShoulderArm.Mus;
+  AnyFolder &MusParCalSide =  .SideHumanFolderRef.ShoulderArm.MusPar;
+  
+  AnyFixedRefFrame ground = 
+  {
+    AnyRefNode node = 
+    { 
+      ARel=..LumbarSegs.PelvisSeg.Axes0;
+      sRel=..LumbarSegs.PelvisSeg.r0;
+    };
+  };
+  
+  AnyKinEqDriver PelvisFix = 
+  {
+    AnyKinLinear Lin = 
+    {
+      AnyRefFrame &ground = ..ground.node;
+      AnyRefFrame &Pelvis = .....BodyModel.Trunk.SegmentsLumbar.PelvisSeg;
+    };
+    AnyKinRotational Rot = 
+    {
+      Type = RotAxesAngles;
+      AnyRefFrame &ground = ..ground.node;
+      AnyRefFrame &Pelvis = .....BodyModel.Trunk.SegmentsLumbar.PelvisSeg;
+    };
+  };
+
+  
+  
+  // Posture data
+  AnyFloat NeckFlexion          = { 45,  0,         0} * pi/180;
+  AnyFloat NeckLateralFlexRight = {  0,  0, .Sign* 45} * pi/180;
+  AnyFloat NeckExtension        = {-45,  0,         0} * pi/180;
+  AnyFloat NeckLateralFlexLeft  = {  0,  0, .Sign*-45} * pi/180;
+  
+  AnyFloat ThoraxLateralRight    = {  0,.Sign* 30,  0} * pi/180;
+  AnyFloat ThoraxLateralLeft     = {  0,.Sign*-30,  0} * pi/180;
+  
+  AnyFloat GlenohumeralAbd      = {140,  0,  0} * pi/180;
+  AnyFloat GlenohumeralAdd      = {-10,-20,  0} * pi/180;
+  
+  AnyFloat NeckPosData = repmat(1,2,{
+      NeckFlexion,
+      NeckLateralFlexRight,
+      NeckExtension,
+      NeckLateralFlexLeft
+  }'); // columns repeated twice
+  
+  AnyFloat ThoraxPosData = arrcat(
+      repmat(1,4,ThoraxLateralRight)',
+      repmat(1,4,ThoraxLateralLeft)'
+  )'; // Four right lat positions followed by 4 left
+  
+  AnyFloat GlenohumeralPosData = arrcat(
+      repmat(1,4,GlenohumeralAdd)',
+      repmat(1,4,GlenohumeralAbd)'
+  )'; // Four right Add positions followed by 4 Abd
+  
+  
+  //Neck driver
+  AnyKinEqInterPolDriver NeckJntDriver = {
+    AnyKinMeasure &lb = ....BodyModel.Interface.Trunk.SkullThoraxLateralBending;
+    AnyKinMeasure &ar = ....BodyModel.Interface.Trunk.SkullThoraxRotation;
+    AnyKinMeasure &fe = ....BodyModel.Interface.Trunk.SkullThoraxFlexion;
+    Type = PiecewiseLinear;
+    T    = linspace(0,1,SizesOf(Data)[1]);
+    Data = .NeckPosData;
+    Reaction.Type = {Off, Off, Off};
+  };
+  
+  AnyKinEqInterPolDriver ThoraxDriver = {
+    AnyKinMeasure& PelvisThoraxExtension = ....BodyModel.Interface.Trunk.PelvisThoraxExtension;
+    AnyKinMeasure& PelvisThoraxLateralBending = ....BodyModel.Interface.Trunk.PelvisThoraxLateralBending;
+    AnyKinMeasure& PelvisThoraxRotation = ....BodyModel.Interface.Trunk.PelvisThoraxRotation;    Type = PiecewiseLinear;
+    T    = linspace(0,1,SizesOf(Data)[1]);
+    Data = .ThoraxPosData;
+    Reaction.Type = {On,On,On};
+  };
+  
+  #if !BM_ARM_SHOULDER_RHYTHM
+  AnyKinEqSimpleDriver SCDriver ={
+    AnyKinRotational &SC =  ..SideInterfaceFolderRef.SternoClavicularProtraction.SCRot;
+    DriverPos = {-0.4226357, 0.148608, -0.1283884};
+    DriverVel = {0.0,0.0,0.0};
+    Reaction.Type={Off,Off,Off};
+  };
+  #endif
+  
+  AnyKinEqInterPolDriver WristFlexionDriver ={
+      AnyKinMeasure &WF = ....BodyModel.Interface.Right.WristFlexion;
+      Type = PiecewiseLinear;
+      T =      {0.0, 1.0};
+      Data = {{0,0}}*pi/180;
+      Reaction.Type={On};
+    };
+    
+    AnyKinEqInterPolDriver WristAbductionDriver ={
+      AnyKinMeasure &WA = ....BodyModel.Interface.Right.WristAbduction;
+      Type = PiecewiseLinear;
+      T =      {0.0, 1.0};
+      Data = {{0,0}}*pi/180;
+      Reaction.Type={On};
+    };
+    
+  AnyKinEqInterPolDriver FEDriver ={
+    AnyKinMeasure &FE = ..SideInterfaceFolderRef.ElbowFlexion;
+    Type = PiecewiseLinear;
+    T =      {0.0, 1.0};
+    Data = {{0,0}}*pi/180;
+    Reaction.Type = {Off};
+  };
+
+  AnyKinEqInterPolDriver PSDriver ={
+    AnyKinMeasure &PS = ..SideInterfaceFolderRef.ElbowPronation;
+    Type = PiecewiseLinear;
+    T =      {0.0, 1.0};
+    Data = {{0,0}}*pi/180;
+    Reaction.Type = {Off};
+  };
+ 
+  AnyKinEqInterPolDriver GHDriver ={
+    AnyKinRotational &GHRotR = ..SideInterfaceFolderRef.GlenohumeralFlexion.GHMeasure;
+    Type = PiecewiseLinear;
+    T = linspace(0,1,SizesOf(Data)[1]);
+    Data = .GlenohumeralPosData;
+    Reaction.Type = {Off,Off,Off};
+  };
+  
+  //---------------------------------------------------------------------
+  //Finger drivers
+  #if BM_ARM_DETAILED_HAND
+  //finger1
+  AnyKinEqSimpleDriver CMC1Flexion={
+    AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger1.Jnt.CMCFlexion;
+    DriverPos={0}*pi/180;
+    DriverVel={0};
+  };
+  
+  AnyKinEqSimpleDriver CMC1Abduction={
+    AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger1.Jnt.CMCAbduction;
+    DriverPos={0}*pi/180;
+    DriverVel={0};
+  };
+  
+
+  
+  AnyKinEqSimpleDriver MCP1Flexion=
+  {  
+    AnyRevoluteJoint &ref=..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger1.Jnt.MCPFlexion;
+    DriverPos={0}*pi/180;
+    DriverVel={0};
+  };
+  AnyKinEqSimpleDriver MCP1Abduction=
+  {
+    AnyRevoluteJoint &ref=..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger1.Jnt.MCPAbduction;
+    DriverPos={0}*pi/180;
+    DriverVel={0};
+  };
+  
+  AnyKinEqSimpleDriver DIP1={
+    AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger1.Jnt.DIP;
+    DriverPos={0}*pi/180;
+    DriverVel={0};
+  };
+  
+  
+ // finger2
+//    AnyKinEqSimpleDriver CMC2={
+//      AnyUniversalJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger2.Jnt.CMC;
+//      DriverPos={0,0};
+//      DriverVel={0,0};
+//    };
+  AnyKinEqSimpleDriver MCP2={
+    AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger2.Jnt.MCP;
+    DriverPos={0}*pi/180;
+    DriverVel={0};
+  };
+  AnyKinEqSimpleDriver PIP2={
+    AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger2.Jnt.PIP;
+    DriverPos={0}*pi/180;
+    DriverVel={0};
+  };
+    AnyKinEqSimpleDriver DIP2={
+      AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger2.Jnt.DIP;
+      DriverPos={0};
+      DriverVel={0};
+    };
+  
+  
+  
+ // finger3
+//    AnyKinEqSimpleDriver CMC3={
+//      AnyUniversalJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger3.Jnt.CMC;
+//      DriverPos={0,0};
+//      DriverVel={0,0};
+//    };
+  AnyKinEqSimpleDriver MCP3={
+    AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger3.Jnt.MCP;
+    DriverPos={0}*pi/180;
+    DriverVel={0};
+  };
+  AnyKinEqSimpleDriver PIP3={
+    AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger3.Jnt.PIP;
+    DriverPos={0}*pi/180;
+    DriverVel={0};
+  };
+    AnyKinEqSimpleDriver DIP3={
+      AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger3.Jnt.DIP;
+      DriverPos={0};
+      DriverVel={0};
+    };
+  
+  
+  //finger4
+//    AnyKinEqSimpleDriver CMC4={
+//      AnyUniversalJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger4.Jnt.CMC;
+//      DriverPos={0,0}*pi/180;
+//      DriverVel={0,0};
+//    };
+  AnyKinEqSimpleDriver MCP4={
+    AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger4.Jnt.MCP;
+    DriverPos={0}*pi/180;
+    DriverVel={0};
+  };
+  AnyKinEqSimpleDriver PIP4={
+    AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger4.Jnt.PIP;
+    DriverPos={0}*pi/180;
+    DriverVel={0};
+  };
+    AnyKinEqSimpleDriver DIP4={
+      AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger4.Jnt.DIP;
+      DriverPos={0}*pi/180;
+      DriverVel={0};
+    };
+  
+  
+ // finger5
+//    AnyKinEqSimpleDriver CMC5={
+//      AnyUniversalJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger5.Jnt.CMC;
+//      DriverPos={0,0};
+//      DriverVel={0,0};
+//    };
+  AnyKinEqSimpleDriver MCP5={
+    AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger5.Jnt.MCP;
+    DriverPos={0}*pi/180;
+    DriverVel={0};
+  };
+  AnyKinEqSimpleDriver PIP5={
+    AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger5.Jnt.PIP;
+    DriverPos={0}*pi/180;
+    DriverVel={0};
+  };
+    AnyKinEqSimpleDriver DIP5={
+      AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Seg.Hand.Finger5.Jnt.DIP;
+      DriverPos={0};
+      DriverVel={0};
+    };
+  #endif
+  
+  AnyString MusPrefix = CompleteNameOf(&.SideHumanFolderRef.ShoulderArm.Mus);
+  
+  AnyObjectPtrArray levator_scapulaeMuscles = ObjSearch(MusPrefix+".levator_scapulae*", "AnyMuscle");
+  AnyFloat  levator_scapulaeRmin = repmat(NumElemOf(levator_scapulaeMuscles), ..RMin);
+  AnyFloat  levator_scapulaeRmax = repmat(NumElemOf(levator_scapulaeMuscles), ..RMax);
+
+  AnyObjectPtrArray trapezius_clavicularMuscles = ObjSearch(MusPrefix+".trapezius_clavicular*", "AnyMuscle");
+  AnyFloat  trapezius_clavicularRmin = repmat(NumElemOf(trapezius_clavicularMuscles), ..RMin);
+  AnyFloat  trapezius_clavicularRmax = repmat(NumElemOf(trapezius_clavicularMuscles), ..RMax);
+
+  AnyObjectPtrArray SternocleidomastoidMuscles = ObjSearch(MusPrefix+".Sternocleidomastoid*", "AnyMuscle");
+  AnyFloat  SternocleidomastoidRmin = repmat(NumElemOf(SternocleidomastoidMuscles), ..RMin);
+  AnyFloat  SternocleidomastoidRmax = repmat(NumElemOf(SternocleidomastoidMuscles), ..RMax);
+
+  AnyObjectPtrArray latissimus_dorsiMuscles = ObjSearch(MusPrefix+".latissimus_dorsi*", "AnyMuscle");
+  AnyFloat  latissimus_dorsiRmin = repmat(NumElemOf(latissimus_dorsiMuscles), ..RMin);
+  AnyFloat  latissimus_dorsiRmax = repmat(NumElemOf(latissimus_dorsiMuscles), ..RMax);
+  
+};
+
+// The study: Operations to be performed on the model
+AnyBodyCalibrationStudy ArmCalibrationStudySpineDependent = {
+  AnyFolder &ref=.SpineDependentCal;
+  nStep = 8;
+  Kinematics.SmallStepAssumptionOnOff = Off;
+  MuscleArr = arrcat(
+      ref.levator_scapulaeMuscles,
+      ref.trapezius_clavicularMuscles,
+      ref.SternocleidomastoidMuscles,
+      ref.latissimus_dorsiMuscles
+  );
+  RminMuscleFiber = arrcat(
+      ref.levator_scapulaeRmin,
+      ref.trapezius_clavicularRmin,
+      ref.SternocleidomastoidRmin,
+      ref.latissimus_dorsiRmin
+  );
+  RmaxMuscleFiber = arrcat(
+      ref.levator_scapulaeRmax,
+      ref.trapezius_clavicularRmax,
+      ref.SternocleidomastoidRmax,
+      ref.latissimus_dorsiRmax
+  );
+  
+  
+};
+
+  
