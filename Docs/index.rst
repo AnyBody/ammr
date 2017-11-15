@@ -32,7 +32,7 @@ The AnyBody Managed Model Repository consists of two parts:
 The models are developed in research projects at academic institutions or by
 AnyBody Technology in collaboration with academic institutions. The models are
 maintained by AnyBody Technology who ensure that various body part models can
-be used together as full body, scalable musculosketal model.
+be used together as full body, scalable musculoskeletal model.
 
 
 .. rubric:: First time you're using AMMR?
