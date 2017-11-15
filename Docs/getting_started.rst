@@ -88,7 +88,7 @@ Path to AMMR
 When having multiple versions of AMMR available on your computer, you have to 
 specify which one will be used by AnyBody. Each AMMR includes a file called ``libdef.any``
 located at the top level folder. The AnyScript line used for instructing AnyBody
-which line to use should be at the very beginning of your ``.any`` file:
+which AMMR to use should be at the very beginning of your ``.any`` file:
 
 
 
@@ -121,8 +121,8 @@ Including the Human Model
       #include "<ANYBODY_PATH_BODY>/HumanModel.any"
 
 
-After the configuration statements the HumanModel is include. It is important that any configuration 
-paramters comes before this line. 
+After the configuration statements the HumanModel is included. It is important that any configuration 
+parameters comes before this line. 
 
 
 Compsing the Model
