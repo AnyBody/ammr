@@ -1,0 +1,1282 @@
+/* ----------------------------------------------------------------
+Default mannequin drivers:
+
+-The pelvis is locked to the ground 
+-The remaining degrees of freedom are controlled by parameters in the "<BM_MANNEQUIN_FILE>" file.
+-This file is a good way to get an overview of the dof in the full body model
+ all the dof in the body model is driven from this file.
+-In total 
+
+Soeren, March 1, 2006.
+----------------------------------------------------------------  */
+// The Default mannequin drivers are implemented as a class template. 
+// The implementation is a bit ackward, since all define statements
+// and has to be passed into the class template as arguments. 
+//
+// But the bennefit of this implementation is that all variables
+// can be overridden, as if they were variables of a class. 
+// For example all weight can be customized: 
+// Main.HumanModel.DefaultMannequinDrivers = {
+//       PostureDriverBending.Weights.Fun.Value = 0.1;
+// };
+  
+#class_template Template_MannequinDrivers (
+MANNEQUIN_DRIVER_WEAK_SWITCH,
+GLOBAL_REFERENCE_FRAME_SWITCH,
+MANNEQUIN_DRIVER_PELVIS_POS_X,
+MANNEQUIN_DRIVER_PELVIS_POS_Y,
+MANNEQUIN_DRIVER_PELVIS_POS_Z,
+MANNEQUIN_DRIVER_PELVIS_ROT_Z,
+MANNEQUIN_DRIVER_PELVIS_ROT_Y,
+MANNEQUIN_DRIVER_PELVIS_ROT_X,
+MANNEQUIN_DRIVER_NECK,
+MANNEQUIN_DRIVER_PELVIS_THORAX_LATERAL_BENDING,
+MANNEQUIN_DRIVER_PELVIS_THORAX_ROTATION,
+MANNEQUIN_DRIVER_PELVIS_THORAX_EXTENSION,
+MANNEQUIN_DRIVER_STERNOCLAVICULAR_PROTRACTION_RIGHT,
+MANNEQUIN_DRIVER_STERNOCLAVICULAR_ELEVATION_RIGHT,
+MANNEQUIN_DRIVER_STERNOCLAVICULAR_AXIAL_ROTATION_RIGHT,
+MANNEQUIN_DRIVER_GLENOHUMERAL_ABDUCTION_RIGHT,
+MANNEQUIN_DRIVER_GLENOHUMERAL_FLEXION_RIGHT,
+MANNEQUIN_DRIVER_GLENOHUMERAL_EXTERNAL_ROTATION_RIGHT,
+MANNEQUIN_DRIVER_ELBOW_FLEXION_RIGHT,
+MANNEQUIN_DRIVER_ELBOW_PRONATION_RIGHT,
+MANNEQUIN_DRIVER_WRIST_FLEXION_RIGHT,
+MANNEQUIN_DRIVER_WRIST_ABDUCTION_RIGHT,
+MANNEQUIN_DRIVER_HIP_FLEXION_RIGHT,
+MANNEQUIN_DRIVER_HIP_ABDUCTION_RIGHT,
+MANNEQUIN_DRIVER_HIP_EXTERNAL_ROTATION_RIGHT,
+MANNEQUIN_DRIVER_KNEE_FLEXION_RIGHT,
+MANNEQUIN_DRIVER_ANKLE_FLEXION_RIGHT,
+MANNEQUIN_DRIVER_ANKLE_EVERSION_RIGHT,
+MANNEQUIN_DRIVER_ANKLE_SUBTALAR_EVERSION_RIGHT,
+MANNEQUIN_DRIVER_STERNOCLAVICULAR_PROTRACTION_LEFT,
+MANNEQUIN_DRIVER_STERNOCLAVICULAR_ELEVATION_LEFT,
+MANNEQUIN_DRIVER_STERNOCLAVICULAR_AXIAL_ROTATION_LEFT,
+MANNEQUIN_DRIVER_GLENOHUMERAL_ABDUCTION_LEFT,
+MANNEQUIN_DRIVER_GLENOHUMERAL_FLEXION_LEFT,
+MANNEQUIN_DRIVER_GLENOHUMERAL_EXTERNAL_ROTATION_LEFT,
+MANNEQUIN_DRIVER_ELBOW_FLEXION_LEFT,
+MANNEQUIN_DRIVER_ELBOW_PRONATION_LEFT,
+MANNEQUIN_DRIVER_WRIST_FLEXION_LEFT,
+MANNEQUIN_DRIVER_WRIST_ABDUCTION_LEFT,
+MANNEQUIN_DRIVER_HIP_FLEXION_LEFT,
+MANNEQUIN_DRIVER_HIP_ABDUCTION_LEFT,
+MANNEQUIN_DRIVER_HIP_EXTERNAL_ROTATION_LEFT,
+MANNEQUIN_DRIVER_KNEE_FLEXION_LEFT,
+MANNEQUIN_DRIVER_ANKLE_FLEXION_LEFT,
+MANNEQUIN_DRIVER_ANKLE_EVERSION_LEFT,
+MANNEQUIN_DRIVER_HAND_RIGHT, 
+MANNEQUIN_DRIVER_HAND_LEFT, 
+MANNEQUIN_DRIVER_ANKLE_SUBTALAR_EVERSION_LEFT,
+LEG_MODEL_Leg,
+LEG_MODEL_TLEM,
+LEG_MODEL_TLEM2,
+LEG_MODEL,
+LEG_RIGHT,
+ARM_RIGHT,
+LEG_LEFT,
+ARM_LEFT,
+ARM_DETAILED_HAND, 
+TRUNK_LUMBAR_RHYTHM
+) {
+
+  #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+    #var AnyFloat DefaultWeakDriverWeight = 0.001;
+  #endif
+  
+
+  #if GLOBAL_REFERENCE_FRAME_SWITCH == 0
+    AnyFixedRefFrame GenericGRF = {Origin={0,0,0};};
+  #endif
+  
+  AnyFolder &JntPos = .Mannequin.Posture;
+  AnyFolder &JntVel = .Mannequin.PostureVel;
+  
+  #if MANNEQUIN_DRIVER_PELVIS_POS_X
+  AnyKinEqSimpleDriver PelvisGroundDriverPosX = {
+    AnyKinLinear lin = {
+      #if GLOBAL_REFERENCE_FRAME_SWITCH == 0
+        AnyFixedRefFrame &ref1 =..GenericGRF;
+      #else
+        AnyFixedRefFrame &ref1 = GLOBAL_REFERENCE_FRAME;
+      #endif
+      AnySeg &ref2 = ...BodyModel.Trunk.SegmentsLumbar.PelvisSeg;
+    };
+    MeasureOrganizer = {0};
+    #var DriverPos={.JntPos.PelvisPosX};
+    DriverVel={.JntVel.PelvisPosX};
+    Reaction = {#var Type={Off};};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};
+        };
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif
+  };
+  #endif
+  
+  
+  #if MANNEQUIN_DRIVER_PELVIS_POS_Y
+  AnyKinEqSimpleDriver PelvisGroundDriverPosY ={
+    AnyKinLinear lin ={
+      #if GLOBAL_REFERENCE_FRAME_SWITCH == 0
+        AnyFixedRefFrame &ref1 =..GenericGRF;
+      #else
+        AnyFixedRefFrame &ref1 = GLOBAL_REFERENCE_FRAME;
+      #endif
+      AnySeg &ref2 =  ...BodyModel.Trunk.SegmentsLumbar.PelvisSeg;
+    };
+    MeasureOrganizer = {1};
+    DriverPos={.JntPos.PelvisPosY};
+    DriverVel={.JntVel.PelvisPosY};
+    Reaction = {#var Type={Off};};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};
+        };
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif
+  };
+  #endif
+
+  
+  
+  #if MANNEQUIN_DRIVER_PELVIS_POS_Z
+  AnyKinEqSimpleDriver PelvisGroundDriverPosZ ={
+    AnyKinLinear lin ={
+      #if GLOBAL_REFERENCE_FRAME_SWITCH == 0
+        AnyFixedRefFrame &ref1 =..GenericGRF;
+      #else
+        AnyFixedRefFrame &ref1 = GLOBAL_REFERENCE_FRAME;
+      #endif
+      AnySeg &ref2 =...BodyModel.Trunk.SegmentsLumbar.PelvisSeg;
+    };
+    MeasureOrganizer = {2};
+    DriverPos={.JntPos.PelvisPosZ};
+    DriverVel={.JntVel.PelvisPosZ};
+    Reaction = {#var Type={Off};};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+     #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};};
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif
+  };
+  #endif
+
+  
+  #if MANNEQUIN_DRIVER_PELVIS_ROT_Z
+  AnyKinEqSimpleDriver PelvisGroundDriverRotZ ={
+    AnyKinRotational rot ={
+      #if GLOBAL_REFERENCE_FRAME_SWITCH == 0
+        AnyFixedRefFrame &ref1 =..GenericGRF;
+      #else
+        AnyFixedRefFrame &ref1 = GLOBAL_REFERENCE_FRAME;
+      #endif
+      AnySeg &ref2 =...BodyModel.Trunk.SegmentsLumbar.PelvisSeg;
+      Type=RotAxesAngles;
+    };
+    MeasureOrganizer = {0};
+    DriverPos=pi/180*{.JntPos.PelvisRotZ};
+    DriverVel=pi/180*{.JntVel.PelvisRotZ};
+    Reaction = {#var Type={Off};};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};};
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif
+  };
+  #endif
+  
+  
+  #if MANNEQUIN_DRIVER_PELVIS_ROT_Y
+  AnyKinEqSimpleDriver PelvisGroundDriverRotY ={
+    AnyKinRotational rot ={
+      #if GLOBAL_REFERENCE_FRAME_SWITCH == 0
+        AnyFixedRefFrame &ref1 =..GenericGRF;
+      #else
+        AnyFixedRefFrame &ref1 = GLOBAL_REFERENCE_FRAME;
+      #endif
+      AnySeg &ref2 =...BodyModel.Trunk.SegmentsLumbar.PelvisSeg;
+      Type=RotAxesAngles;
+    };
+    MeasureOrganizer = {1};
+    DriverPos=pi/180*{.JntPos.PelvisRotY};
+    DriverVel=pi/180*{.JntVel.PelvisRotY};
+    Reaction = {#var Type={Off};};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};};
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif
+  };
+  #endif
+  
+  
+  #if MANNEQUIN_DRIVER_PELVIS_ROT_X
+  AnyKinEqSimpleDriver PelvisGroundDriverRotX ={
+    AnyKinRotational rot ={
+      #if GLOBAL_REFERENCE_FRAME_SWITCH == 0
+        AnyFixedRefFrame &ref1 =..GenericGRF;
+      #else
+        AnyFixedRefFrame &ref1 = GLOBAL_REFERENCE_FRAME
+      #endif
+      AnySeg &ref2 =...BodyModel.Trunk.SegmentsLumbar.PelvisSeg;
+      Type=RotAxesAngles;
+    };
+    MeasureOrganizer = {2};
+    DriverPos=pi/180*{.JntPos.PelvisRotX};
+    DriverVel=pi/180*{.JntVel.PelvisRotX};
+    Reaction = {#var Type={Off};};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};};
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif
+  };
+  #endif
+  
+  
+  
+  
+  
+  
+  // ************************************
+  // Drivers for the spine
+  // ************************************
+  #if TRUNK_LUMBAR_RHYTHM == 0
+    AnyMessage LumbarSpineMannequinDrivers = {TriggerPreProcess=On;Type=MSG_Message; Message="Please note that BM_SPINE_RHYTHM is set to 0; No default mannequin drivers are used to drive lumbar spine joints.";};
+  #endif
+  
+  //Neck driver 
+   #if MANNEQUIN_DRIVER_NECK
+     AnyKinEqSimpleDriver NeckJntDriver = {
+       AnyKinMeasure& SkullThoraxFlexion = ..BodyModel.Interface.Trunk.SkullThoraxFlexion;
+       AnyKinMeasure& SkullThoraxLateralBending = ..BodyModel.Interface.Trunk.SkullThoraxLateralBending;
+       AnyKinMeasure& SkullThoraxRotation = ..BodyModel.Interface.Trunk.SkullThoraxRotation;
+
+       DriverPos = pi/180*{-.JntPos.NeckExtension, .JntPos.NeckLateralBending, .JntPos.NeckRotation};
+       DriverVel = pi/180*{-.JntVel.NeckExtension, .JntVel.NeckLateralBending, .JntVel.NeckRotation};
+       Reaction.Type = {Off, Off, Off};
+       #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+         #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+         AnyFolder Weights = 
+         {
+           AnyFunConst Fun = {
+             #var Value = {..WeakDriverWeight};
+           };
+         };
+         #var WeightFun = {&Weights.Fun,&Weights.Fun,&Weights.Fun};
+         CType = {Soft,Soft,Soft};
+       #endif
+     };
+  #endif
+  
+  //Thorax pelvis rotation driver
+  #if MANNEQUIN_DRIVER_PELVIS_THORAX_LATERAL_BENDING
+  AnyKinEqSimpleDriver PostureDriverBending ={
+    AnyKinMeasure &Ref2 = ..BodyModel.Interface.Trunk.PelvisThoraxLateralBending;        
+    DriverPos = pi/180*{.JntPos.PelvisThoraxLateralBending};
+    DriverVel = pi/180*{.JntVel.PelvisThoraxLateralBending};
+    Reaction.Type = {Off};  
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};
+        };
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif
+  };  
+  #endif
+
+  #if MANNEQUIN_DRIVER_PELVIS_THORAX_ROTATION
+  AnyKinEqSimpleDriver PostureDriverRotation ={
+    AnyKinMeasure &Ref3 = ..BodyModel.Interface.Trunk.PelvisThoraxRotation;   
+    DriverPos = pi/180*{.JntPos.PelvisThoraxRotation};
+    DriverVel = pi/180*{.JntVel.PelvisThoraxRotation};
+    Reaction.Type = {Off};  
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};
+        };
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif
+  };  
+  #endif
+  
+  #if MANNEQUIN_DRIVER_PELVIS_THORAX_EXTENSION
+  AnyKinEqSimpleDriver PostureDriverExtension ={
+    AnyKinMeasure &Ref1 = ..BodyModel.Interface.Trunk.PelvisThoraxExtension;
+    DriverPos = pi/180*{.JntPos.PelvisThoraxExtension};
+    DriverVel = pi/180*{.JntVel.PelvisThoraxExtension};
+    Reaction.Type = {Off};  
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};
+        };
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif
+  };  
+  #endif
+  
+  
+  // ************************************
+  // Drivers for the right arm
+  // ************************************
+
+  #if ARM_RIGHT == 1
+  
+  //Sterno clavicular joint driver
+  #if  MANNEQUIN_DRIVER_STERNOCLAVICULAR_PROTRACTION_RIGHT
+    AnyKinEqSimpleDriver SCProtractionDriverRight ={
+    AnyKinMeasure &ref1 =..BodyModel.Interface.Right.SternoClavicularProtraction;
+    DriverPos = pi/180*{.JntPos.Right.SternoClavicularProtraction};
+    DriverVel = pi/180*{.JntVel.Right.SternoClavicularProtraction};
+    Reaction = {#var Type={Off};};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};
+        };
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif
+  };
+  #endif
+  
+  #if  MANNEQUIN_DRIVER_STERNOCLAVICULAR_ELEVATION_RIGHT
+  AnyKinEqSimpleDriver SCElevationDriverRight ={
+    AnyKinMeasure &ref1 =..BodyModel.Interface.Right.SternoClavicularElevation;
+    DriverPos = pi/180*{ .JntPos.Right.SternoClavicularElevation };
+    DriverVel = pi/180*{ .JntVel.Right.SternoClavicularElevation };
+    Reaction = {#var Type={Off};};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+    #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};
+        };
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif
+  };
+  #endif
+  
+  #if  MANNEQUIN_DRIVER_STERNOCLAVICULAR_AXIAL_ROTATION_RIGHT
+  AnyKinEqSimpleDriver SCAxialRotationDriverRight ={
+    AnyKinMeasure &ref1 =..BodyModel.Interface.Right.SternoClavicularAxialRotation;
+    DriverPos = pi/180*{ .JntPos.Right.SternoClavicularAxialRotation  };
+    DriverVel = pi/180*{ .JntVel.Right.SternoClavicularAxialRotation  };
+    Reaction = {#var Type={Off};};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};
+        };
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif
+  };  
+  #endif
+  
+  
+  //Glenohumeral joint 
+  #if MANNEQUIN_DRIVER_GLENOHUMERAL_ABDUCTION_RIGHT
+  AnyKinEqSimpleDriver GHDriverRightAbduction={
+    AnyKinMeasure &ref1 =..BodyModel.Interface.Right.GlenohumeralAbduction;
+     DriverPos=pi/180*{.JntPos.Right.GlenohumeralAbduction};
+     DriverVel = pi/180*{.JntVel.Right.GlenohumeralAbduction};    
+     Reaction = {#var Type={Off};};
+     #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+       AnyFolder Weights = 
+       {
+         AnyFunConst Fun = {
+           #var Value = {..WeakDriverWeight};
+         };
+       };
+       #var WeightFun = {&Weights.Fun};
+       #var CType = {Soft};
+     #endif
+  };
+  #endif
+  
+  #if MANNEQUIN_DRIVER_GLENOHUMERAL_FLEXION_RIGHT
+  AnyKinEqSimpleDriver GHDriverRightFlexion={
+    AnyKinMeasure &ref2 =..BodyModel.Interface.Right.GlenohumeralFlexion;
+     DriverPos=pi/180*{.JntPos.Right.GlenohumeralFlexion};
+     DriverVel = pi/180*{.JntVel.Right.GlenohumeralFlexion};    
+     Reaction = {#var Type={Off};};
+     #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+       AnyFolder Weights = 
+       {
+         AnyFunConst Fun = {
+           #var Value = {..WeakDriverWeight};
+         };
+       };
+       #var WeightFun = {&Weights.Fun};
+       #var CType = {Soft};
+     #endif
+  };
+  #endif
+  
+  #if MANNEQUIN_DRIVER_GLENOHUMERAL_EXTERNAL_ROTATION_RIGHT
+  AnyKinEqSimpleDriver GHDriverRightExternalRotation={
+    AnyKinMeasure &ref3 =..BodyModel.Interface.Right.GlenohumeralExternalRotation;
+     DriverPos=pi/180*{.JntPos.Right.GlenohumeralExternalRotation};
+     DriverVel = pi/180*{.JntVel.Right.GlenohumeralExternalRotation};    
+     Reaction = {#var Type={Off};};
+     #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+       AnyFolder Weights = 
+       {
+         AnyFunConst Fun = {
+           #var Value = {..WeakDriverWeight};
+         };
+       };
+       #var WeightFun = {&Weights.Fun};
+       #var CType = {Soft};
+     #endif
+  };
+  #endif
+  
+  
+  
+  //Elbow flexion driver  
+  #if MANNEQUIN_DRIVER_ELBOW_FLEXION_RIGHT
+  AnyKinEqSimpleDriver ElbowFlexionDriverRight={
+    AnyKinMeasureOrg  &Elbow =..BodyModel.Interface.Right.ElbowFlexion;
+    DriverPos=pi/180*{.JntPos.Right.ElbowFlexion};  
+    DriverVel = pi/180*{.JntVel.Right.ElbowFlexion};  
+    Reaction = {#var Type={Off};};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};};
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif
+  };
+  #endif
+  
+  
+  //Elbow pronation driver
+  #if MANNEQUIN_DRIVER_ELBOW_PRONATION_RIGHT
+  AnyKinEqSimpleDriver ElbowPronationDriverRight={
+    AnyKinMeasure &Elbow =..BodyModel.Interface.Right.ElbowPronation;
+    DriverPos = pi/180*{.JntPos.Right.ElbowPronation };  
+
+    DriverVel=pi/180*{.JntVel.Right.ElbowPronation };  
+    Reaction = {#var Type={Off};};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};
+        };
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif
+  };
+  #endif
+
+  
+  
+  //Wrist driver 
+  #if MANNEQUIN_DRIVER_WRIST_FLEXION_RIGHT
+  AnyKinEqSimpleDriver WristDriverRightFlexion ={
+    AnyKinMeasure &ref1 =..BodyModel.Interface.Right.WristFlexion;
+    DriverPos = pi/180*{.JntPos.Right.WristFlexion};
+    DriverVel = pi/180*{.JntVel.Right.WristFlexion};
+    Reaction = {#var Type={Off};};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};
+        };
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif
+  };
+  #endif
+  
+  #if MANNEQUIN_DRIVER_WRIST_ABDUCTION_RIGHT
+  AnyKinEqSimpleDriver WristDriverRightAbduction ={
+    AnyKinMeasure &ref2 =..BodyModel.Interface.Right.WristAbduction;
+    DriverPos = pi/180*{.JntPos.Right.WristAbduction};
+    DriverVel = pi/180*{.JntVel.Right.WristAbduction};
+    Reaction = {#var Type={Off};};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};
+        };
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif
+  };
+  #endif
+  
+  #endif
+
+  
+
+  // ************************************
+  // Drivers for the left arm
+  // ************************************
+  
+  #if ARM_LEFT == 1
+  
+  //Sterno clavicular joint driver
+  #if MANNEQUIN_DRIVER_STERNOCLAVICULAR_PROTRACTION_LEFT
+  AnyKinEqSimpleDriver SCProtractionDriverLeft ={
+    AnyKinMeasure &ref1 =..BodyModel.Interface.Left.SternoClavicularProtraction;
+    DriverPos = pi/180*{.JntPos.Left.SternoClavicularProtraction};
+    DriverVel = pi/180*{.JntVel.Left.SternoClavicularProtraction};
+    Reaction = {#var Type={Off};};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};
+        };
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif
+  };
+  #endif
+  
+  #if  MANNEQUIN_DRIVER_STERNOCLAVICULAR_ELEVATION_LEFT
+  AnyKinEqSimpleDriver SCElevationDriverLeft ={
+    AnyKinMeasure &ref1 =..BodyModel.Interface.Left.SternoClavicularElevation;
+    DriverPos = pi/180*{ .JntPos.Left.SternoClavicularElevation };
+    DriverVel = pi/180*{ .JntVel.Left.SternoClavicularElevation };
+    Reaction = {#var Type={Off};};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};
+        };
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif
+  };
+  #endif
+  
+  #if  MANNEQUIN_DRIVER_STERNOCLAVICULAR_AXIAL_ROTATION_LEFT
+  AnyKinEqSimpleDriver SCAxialRotationDriverLeft ={
+    AnyKinMeasure &ref1 =..BodyModel.Interface.Left.SternoClavicularAxialRotation;
+    DriverPos = pi/180*{ .JntPos.Left.SternoClavicularAxialRotation  };
+    DriverVel = pi/180*{ .JntVel.Left.SternoClavicularAxialRotation  };
+    Reaction = {#var Type={Off};};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};
+        };
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif
+  };  
+  #endif
+    
+  
+  //Glenohumeral joint driver
+  #if MANNEQUIN_DRIVER_GLENOHUMERAL_ABDUCTION_LEFT
+  AnyKinEqSimpleDriver GHDriverLeftAbduction={
+    AnyKinMeasure &ref1 =..BodyModel.Interface.Left.GlenohumeralAbduction;
+    DriverPos=pi/180*{.JntPos.Left.GlenohumeralAbduction};    
+    DriverVel = pi/180*{.JntVel.Left.GlenohumeralAbduction};    
+    Reaction = {#var Type={Off};};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};
+        };
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif
+  };
+  #endif
+  
+  #if MANNEQUIN_DRIVER_GLENOHUMERAL_FLEXION_LEFT
+  AnyKinEqSimpleDriver GHDriverLeftFlexion={
+    AnyKinMeasure &ref2 =..BodyModel.Interface.Left.GlenohumeralFlexion;
+    DriverPos=pi/180*{.JntPos.Left.GlenohumeralFlexion};    
+    DriverVel = pi/180*{.JntVel.Left.GlenohumeralFlexion};    
+    Reaction = {#var Type={Off};};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};};
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif   
+  };
+  #endif
+
+  #if MANNEQUIN_DRIVER_GLENOHUMERAL_EXTERNAL_ROTATION_LEFT
+  AnyKinEqSimpleDriver GHDriverLeftExternalRotation={
+    AnyKinMeasure &ref3 =..BodyModel.Interface.Left.GlenohumeralExternalRotation;
+    DriverPos=pi/180*{.JntPos.Left.GlenohumeralExternalRotation};    
+    DriverVel = pi/180*{.JntVel.Left.GlenohumeralExternalRotation};    
+    Reaction = {#var Type={Off};};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};
+        };
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif    
+  };
+  #endif
+
+  //Elbow flexion driver  
+  #if MANNEQUIN_DRIVER_ELBOW_FLEXION_LEFT
+  AnyKinEqSimpleDriver ElbowFlexionDriverLeft={
+    AnyKinMeasureOrg  &Elbow =..BodyModel.Interface.Left.ElbowFlexion;
+    DriverPos=pi/180*{.JntPos.Left.ElbowFlexion};  
+    DriverVel = pi/180*{.JntVel.Left.ElbowFlexion};  
+    Reaction = {#var Type={Off};};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};
+        };
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif
+  };
+  #endif
+  
+  
+  //Elbow pronation driver
+  #if MANNEQUIN_DRIVER_ELBOW_PRONATION_LEFT
+  AnyKinEqSimpleDriver ElbowPronationDriverLeft={
+    AnyKinMeasure &Elbow =..BodyModel.Interface.Left.ElbowPronation;
+    DriverPos = pi/180*{.JntPos.Left.ElbowPronation };  
+    DriverVel=pi/180*{.JntVel.Left.ElbowPronation };  
+    Reaction = {#var Type={Off};};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};
+        };
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif
+  };
+  #endif  
+  
+  //Wrist driver
+  #if MANNEQUIN_DRIVER_WRIST_FLEXION_LEFT
+  AnyKinEqSimpleDriver WristDriverLeftFlexion ={
+    AnyKinMeasure &ref1 =..BodyModel.Interface.Left.WristFlexion;
+    DriverPos = pi/180*{.JntPos.Left.WristFlexion};
+    DriverVel = pi/180*{.JntVel.Left.WristFlexion};
+    Reaction = {#var Type={Off};};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};
+        };
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif
+  };
+  #endif
+  
+  #if MANNEQUIN_DRIVER_WRIST_ABDUCTION_LEFT
+  AnyKinEqSimpleDriver WristDriverLeftAbduction ={
+    AnyKinMeasure &ref2 =..BodyModel.Interface.Left.WristAbduction;
+    DriverPos = pi/180*{.JntPos.Left.WristAbduction};
+    DriverVel = pi/180*{.JntVel.Left.WristAbduction};
+    Reaction = {#var Type={Off};};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};
+        };
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif  
+  };
+  #endif
+  
+  
+  #endif //Left arm
+  
+  #if ARM_DETAILED_HAND 
+  #if ARM_RIGHT & MANNEQUIN_DRIVER_HAND_RIGHT
+  AnyKinEqSimpleDriver HandDriversRight ={
+    AnyKinMeasure& CMC1Flexion = ..BodyModel.Right.ShoulderArm.Seg.Hand.Finger1.Jnt.CMCFlexion;
+    AnyKinMeasure& CMC1Abduction = ..BodyModel.Right.ShoulderArm.Seg.Hand.Finger1.Jnt.CMCAbduction;
+    AnyKinMeasure& MCP1Flexion = ..BodyModel.Right.ShoulderArm.Seg.Hand.Finger1.Jnt.MCPFlexion;
+    AnyKinMeasure& MCP1Abduction = ..BodyModel.Right.ShoulderArm.Seg.Hand.Finger1.Jnt.MCPAbduction;
+    AnyKinMeasure& DIP1 = ..BodyModel.Right.ShoulderArm.Seg.Hand.Finger1.Jnt.DIP;
+    AnyKinMeasure& MCP2 = ..BodyModel.Right.ShoulderArm.Seg.Hand.Finger2.Jnt.MCP;
+    AnyKinMeasure& PIP2 = ..BodyModel.Right.ShoulderArm.Seg.Hand.Finger2.Jnt.PIP;
+    AnyKinMeasure& DIP2 = ..BodyModel.Right.ShoulderArm.Seg.Hand.Finger2.Jnt.DIP;
+    AnyKinMeasure& MCP3 = ..BodyModel.Right.ShoulderArm.Seg.Hand.Finger3.Jnt.MCP;
+    AnyKinMeasure& PIP3 = ..BodyModel.Right.ShoulderArm.Seg.Hand.Finger3.Jnt.PIP;
+    AnyKinMeasure& DIP3 = ..BodyModel.Right.ShoulderArm.Seg.Hand.Finger3.Jnt.DIP;
+    AnyKinMeasure& MCP4 = ..BodyModel.Right.ShoulderArm.Seg.Hand.Finger4.Jnt.MCP;
+    AnyKinMeasure& PIP4 = ..BodyModel.Right.ShoulderArm.Seg.Hand.Finger4.Jnt.PIP;
+    AnyKinMeasure& DIP4 = ..BodyModel.Right.ShoulderArm.Seg.Hand.Finger4.Jnt.DIP;
+    AnyKinMeasure& MCP5 = ..BodyModel.Right.ShoulderArm.Seg.Hand.Finger5.Jnt.MCP;
+    AnyKinMeasure& PIP5 = ..BodyModel.Right.ShoulderArm.Seg.Hand.Finger5.Jnt.PIP;
+    AnyKinMeasure& DIP5 = ..BodyModel.Right.ShoulderArm.Seg.Hand.Finger5.Jnt.DIP;    
+    DriverPos = pi/180*{
+      .JntPos.Right.Finger1.CMCFlexion,
+      .JntPos.Right.Finger1.CMCDeviation,
+      .JntPos.Right.Finger1.MCPFlexion,
+      .JntPos.Right.Finger1.MCPDeviation,
+      .JntPos.Right.Finger1.DIPFlexion,
+      .JntPos.Right.Finger2.MCPFlexion,
+      .JntPos.Right.Finger2.PIPFlexion,
+      .JntPos.Right.Finger2.DIPFlexion,
+      .JntPos.Right.Finger3.MCPFlexion,
+      .JntPos.Right.Finger3.PIPFlexion,
+      .JntPos.Right.Finger3.DIPFlexion,
+      .JntPos.Right.Finger4.MCPFlexion,
+      .JntPos.Right.Finger4.PIPFlexion,
+      .JntPos.Right.Finger4.DIPFlexion,
+      .JntPos.Right.Finger5.MCPFlexion,
+      .JntPos.Right.Finger5.PIPFlexion,
+      .JntPos.Right.Finger5.DIPFlexion   
+    };
+    DriverVel = pi/180*{
+      .JntVel.Right.Finger1.CMCFlexion,
+      .JntVel.Right.Finger1.CMCDeviation,
+      .JntVel.Right.Finger1.MCPFlexion,
+      .JntVel.Right.Finger1.MCPDeviation,
+      .JntVel.Right.Finger1.DIPFlexion,
+      .JntVel.Right.Finger2.MCPFlexion,
+      .JntVel.Right.Finger2.PIPFlexion,
+      .JntVel.Right.Finger2.DIPFlexion,
+      .JntVel.Right.Finger3.MCPFlexion,
+      .JntVel.Right.Finger3.PIPFlexion,
+      .JntVel.Right.Finger3.DIPFlexion,
+      .JntVel.Right.Finger4.MCPFlexion,
+      .JntVel.Right.Finger4.PIPFlexion,
+      .JntVel.Right.Finger4.DIPFlexion,
+      .JntVel.Right.Finger5.MCPFlexion,
+      .JntVel.Right.Finger5.PIPFlexion,
+      .JntVel.Right.Finger5.DIPFlexion   
+    };    
+    Reaction = {#var Type= repmat(.nDim, Off);};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};
+        };
+      };
+      #var WeightFun = {&Weights.Fun,&Weights.Fun,&Weights.Fun,&Weights.Fun,&Weights.Fun,&Weights.Fun,&Weights.Fun,&Weights.Fun,&Weights.Fun,&Weights.Fun,&Weights.Fun,&Weights.Fun,&Weights.Fun,&Weights.Fun,&Weights.Fun,&Weights.Fun,&Weights.Fun};
+      #var CType = repmat(nDim, Soft);
+    #endif  
+  };
+  #endif // MANNEQUIN_DRIVER_HAND
+  
+  
+  #if ARM_LEFT & MANNEQUIN_DRIVER_HAND_LEFT
+  AnyKinEqSimpleDriver HandDriversLeft ={
+    AnyKinMeasure& CMC1Flexion = ..BodyModel.Left.ShoulderArm.Seg.Hand.Finger1.Jnt.CMCFlexion;
+    AnyKinMeasure& CMC1Abduction = ..BodyModel.Left.ShoulderArm.Seg.Hand.Finger1.Jnt.CMCAbduction;
+    AnyKinMeasure& MCP1Flexion = ..BodyModel.Left.ShoulderArm.Seg.Hand.Finger1.Jnt.MCPFlexion;
+    AnyKinMeasure& MCP1Abduction = ..BodyModel.Left.ShoulderArm.Seg.Hand.Finger1.Jnt.MCPAbduction;
+    AnyKinMeasure& DIP1 = ..BodyModel.Left.ShoulderArm.Seg.Hand.Finger1.Jnt.DIP;
+    AnyKinMeasure& MCP2 = ..BodyModel.Left.ShoulderArm.Seg.Hand.Finger2.Jnt.MCP;
+    AnyKinMeasure& PIP2 = ..BodyModel.Left.ShoulderArm.Seg.Hand.Finger2.Jnt.PIP;
+    AnyKinMeasure& DIP2 = ..BodyModel.Left.ShoulderArm.Seg.Hand.Finger2.Jnt.DIP;
+    AnyKinMeasure& MCP3 = ..BodyModel.Left.ShoulderArm.Seg.Hand.Finger3.Jnt.MCP;
+    AnyKinMeasure& PIP3 = ..BodyModel.Left.ShoulderArm.Seg.Hand.Finger3.Jnt.PIP;
+    AnyKinMeasure& DIP3 = ..BodyModel.Left.ShoulderArm.Seg.Hand.Finger3.Jnt.DIP;
+    AnyKinMeasure& MCP4 = ..BodyModel.Left.ShoulderArm.Seg.Hand.Finger4.Jnt.MCP;
+    AnyKinMeasure& PIP4 = ..BodyModel.Left.ShoulderArm.Seg.Hand.Finger4.Jnt.PIP;
+    AnyKinMeasure& DIP4 = ..BodyModel.Left.ShoulderArm.Seg.Hand.Finger4.Jnt.DIP;
+    AnyKinMeasure& MCP5 = ..BodyModel.Left.ShoulderArm.Seg.Hand.Finger5.Jnt.MCP;
+    AnyKinMeasure& PIP5 = ..BodyModel.Left.ShoulderArm.Seg.Hand.Finger5.Jnt.PIP;
+    AnyKinMeasure& DIP5 = ..BodyModel.Left.ShoulderArm.Seg.Hand.Finger5.Jnt.DIP;    
+    DriverPos = pi/180*{
+      .JntPos.Left.Finger1.CMCFlexion,
+      .JntPos.Left.Finger1.CMCDeviation,
+      .JntPos.Left.Finger1.MCPFlexion,
+      .JntPos.Left.Finger1.MCPDeviation,
+      .JntPos.Left.Finger1.DIPFlexion,
+      .JntPos.Left.Finger2.MCPFlexion,
+      .JntPos.Left.Finger2.PIPFlexion,
+      .JntPos.Left.Finger2.DIPFlexion,
+      .JntPos.Left.Finger3.MCPFlexion,
+      .JntPos.Left.Finger3.PIPFlexion,
+      .JntPos.Left.Finger3.DIPFlexion,
+      .JntPos.Left.Finger4.MCPFlexion,
+      .JntPos.Left.Finger4.PIPFlexion,
+      .JntPos.Left.Finger4.DIPFlexion,
+      .JntPos.Left.Finger5.MCPFlexion,
+      .JntPos.Left.Finger5.PIPFlexion,
+      .JntPos.Left.Finger5.DIPFlexion   
+    };
+    DriverVel = pi/180*{
+      .JntVel.Left.Finger1.CMCFlexion,
+      .JntVel.Left.Finger1.CMCDeviation,
+      .JntVel.Left.Finger1.MCPFlexion,
+      .JntVel.Left.Finger1.MCPDeviation,
+      .JntVel.Left.Finger1.DIPFlexion,
+      .JntVel.Left.Finger2.MCPFlexion,
+      .JntVel.Left.Finger2.PIPFlexion,
+      .JntVel.Left.Finger2.DIPFlexion,
+      .JntVel.Left.Finger3.MCPFlexion,
+      .JntVel.Left.Finger3.PIPFlexion,
+      .JntVel.Left.Finger3.DIPFlexion,
+      .JntVel.Left.Finger4.MCPFlexion,
+      .JntVel.Left.Finger4.PIPFlexion,
+      .JntVel.Left.Finger4.DIPFlexion,
+      .JntVel.Left.Finger5.MCPFlexion,
+      .JntVel.Left.Finger5.PIPFlexion,
+      .JntVel.Left.Finger5.DIPFlexion   
+    };    
+    Reaction = {#var Type= repmat(.nDim, Off);};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};
+        };
+      };
+      #var WeightFun = {&Weights.Fun,&Weights.Fun,&Weights.Fun,&Weights.Fun,&Weights.Fun,&Weights.Fun,&Weights.Fun,&Weights.Fun,&Weights.Fun,&Weights.Fun,&Weights.Fun,&Weights.Fun,&Weights.Fun,&Weights.Fun,&Weights.Fun,&Weights.Fun,&Weights.Fun};
+      #var CType = repmat(nDim, Soft);
+    #endif  
+  };
+  #endif // MANNEQUIN_DRIVER_HAND  
+  
+  #endif //Detailed hand
+  
+  
+  
+  
+ 
+  // ************************************
+  // Drivers for the right leg
+  // ************************************
+  
+  #if LEG_RIGHT == 1
+  
+   //Hip driver 
+  #if MANNEQUIN_DRIVER_HIP_FLEXION_RIGHT
+  AnyKinEqSimpleDriver HipDriverRightFlexion={
+    AnyKinMeasure &ref1 =..BodyModel.Interface.Right.HipFlexion;
+    DriverPos= pi/180*{.JntPos.Right.HipFlexion};    
+    DriverVel = pi/180*{.JntVel.Right.HipFlexion};    
+    Reaction = {#var Type={Off};};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};
+        };
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif  
+  };
+  #endif
+  
+  #if MANNEQUIN_DRIVER_HIP_EXTERNAL_ROTATION_RIGHT
+  AnyKinEqSimpleDriver HipDriverRightExternalRotation={
+    AnyKinMeasure &ref2 =..BodyModel.Interface.Right.HipExternalRotation;
+    DriverPos= pi/180*{.JntPos.Right.HipExternalRotation};    
+    DriverVel = pi/180*{.JntVel.Right.HipExternalRotation};    
+    Reaction = {#var Type={Off};};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};
+        };
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif    
+  };
+  #endif
+  
+  #if MANNEQUIN_DRIVER_HIP_ABDUCTION_RIGHT
+  AnyKinEqSimpleDriver HipDriverRightAbduction={
+    AnyKinMeasure &ref3 =..BodyModel.Interface.Right.HipAbduction;
+    DriverPos= pi/180*{.JntPos.Right.HipAbduction};    
+    DriverVel = pi/180*{.JntVel.Right.HipAbduction};    
+    Reaction = {#var Type={Off};};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};
+        };
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif    
+  };
+  #endif
+  
+  
+   
+  //Knee driver
+  #if MANNEQUIN_DRIVER_KNEE_FLEXION_RIGHT
+  AnyKinEqSimpleDriver KneeDriverRight={
+    AnyKinMeasure  &Knee = ..BodyModel.Interface.Right.KneeFlexion;
+    DriverPos=pi/180*{.JntPos.Right.KneeFlexion};  
+    DriverVel = pi/180*{.JntVel.Right.KneeFlexion};  
+    Reaction = {#var Type={Off};};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};
+        };
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif
+  };
+  #endif
+  
+  
+  //Ankle driver
+  #if MANNEQUIN_DRIVER_ANKLE_FLEXION_RIGHT
+  AnyKinEqSimpleDriver AnkleDriverRightFlexion={
+    AnyKinMeasure &ref1=..BodyModel.Interface.Right.AnklePlantarFlexion;
+    DriverPos = pi/180*{.JntPos.Right.AnklePlantarFlexion};  
+    DriverVel=pi/180*{.JntVel.Right.AnklePlantarFlexion};  
+    Reaction = {#var Type={Off};};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};
+        };
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif
+  };
+  #endif
+  
+  #if LEG_RIGHT & (LEG_MODEL == LEG_MODEL_Leg)
+   #if MANNEQUIN_DRIVER_ANKLE_EVERSION_RIGHT
+   AnyKinEqSimpleDriver AnkleDriverRightEversion={
+     AnyKinMeasure &ref2=..BodyModel.Interface.Right.AnkleEversion;
+     DriverPos = pi/180*{.JntPos.Right.SubTalarEversion};  
+     DriverVel=pi/180*{.JntVel.Right.SubTalarEversion};  
+     Reaction = {#var Type={Off};};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};
+        };
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif   
+   };
+   #endif
+  #endif
+ 
+  
+  #if LEG_RIGHT & (LEG_MODEL == LEG_MODEL_TLEM | LEG_MODEL == LEG_MODEL_TLEM2)
+   #if MANNEQUIN_DRIVER_ANKLE_SUBTALAR_EVERSION_RIGHT
+   AnyKinEqSimpleDriver AnkleDriverRightEversion={
+     AnyKinMeasure &ref1=..BodyModel.Interface.Right.AnklePlantarFlexion;
+     AnyKinMeasure &ref2=..BodyModel.Interface.Right.SubTalarEversion;
+     DriverPos = pi/180*{.JntPos.Right.SubTalarEversion};  
+     DriverVel=pi/180*{.JntVel.Right.SubTalarEversion};  
+     Reaction = {#var Type={Off};};
+     MeasureOrganizer={1};  // Driving subtalar eversion only
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};
+        };
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif
+   };
+   #endif
+  #endif
+  
+#endif
+  
+
+  // ************************************
+  // Drivers for the Left leg
+  // ************************************
+  
+  #if LEG_LEFT == 1 
+  
+  //Left hip driver
+  #if MANNEQUIN_DRIVER_HIP_FLEXION_LEFT
+  AnyKinEqSimpleDriver HipDriverLeftFlexion={
+    AnyKinMeasure &ref1 =..BodyModel.Interface.Left.HipFlexion;
+    DriverPos=pi/180*{.JntPos.Left.HipFlexion};    
+    DriverVel = pi/180*{.JntVel.Left.HipFlexion};    
+    Reaction = {#var Type={Off};};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};
+        };
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif  
+  };
+  #endif
+  
+  #if MANNEQUIN_DRIVER_HIP_EXTERNAL_ROTATION_LEFT
+  AnyKinEqSimpleDriver HipDriverLeftExternalRotation={
+    AnyKinMeasure &ref2 =..BodyModel.Interface.Left.HipExternalRotation;
+    DriverPos=pi/180*{.JntPos.Left.HipExternalRotation};    
+    DriverVel = pi/180*{.JntVel.Left.HipExternalRotation};    
+    Reaction = {#var Type={Off};};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};
+        };
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif  
+  };
+  #endif
+  
+  #if MANNEQUIN_DRIVER_HIP_ABDUCTION_LEFT
+  AnyKinEqSimpleDriver HipDriverLeftAbduction={
+    AnyKinMeasure &ref3 =..BodyModel.Interface.Left.HipAbduction;
+    DriverPos=pi/180*{.JntPos.Left.HipAbduction};    
+    DriverVel = pi/180*{.JntVel.Left.HipAbduction};    
+    Reaction = {#var Type={Off};};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};
+        };
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif    
+  };
+  #endif
+  
+  
+  
+  //Knee driver
+  #if MANNEQUIN_DRIVER_KNEE_FLEXION_LEFT
+  AnyKinEqSimpleDriver KneeDriverLeft={
+    AnyKinMeasure &Knee =..BodyModel.Interface.Left.KneeFlexion;
+    DriverPos=pi/180*{.JntPos.Left.KneeFlexion   };  
+    DriverVel = pi/180*{.JntVel.Left.KneeFlexion   };  
+    Reaction = {#var Type={Off};};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};
+        };
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif   
+  };
+  #endif
+  
+
+  
+ 
+  //Ankle driver
+  #if MANNEQUIN_DRIVER_ANKLE_FLEXION_LEFT
+  AnyKinEqSimpleDriver AnkleDriverLeftFlexion={
+    AnyKinMeasure &ref1=..BodyModel.Interface.Left.AnklePlantarFlexion;
+    DriverPos = pi/180*{.JntPos.Left.AnklePlantarFlexion};  
+    DriverVel=pi/180*{.JntVel.Left.AnklePlantarFlexion};  
+    Reaction = {#var Type={Off};};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};
+        };
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif   
+  };
+  #endif
+  
+  
+  #if LEG_LEFT & (LEG_MODEL == LEG_MODEL_Leg)
+   #if MANNEQUIN_DRIVER_ANKLE_EVERSION_LEFT
+   AnyKinEqSimpleDriver AnkleDriverLeftEversion={
+     AnyKinMeasure &ref2=..BodyModel.Interface.Left.AnkleEversion;
+     DriverPos = pi/180*{.JntPos.Left.SubTalarEversion};  
+     DriverVel=pi/180*{.JntVel.Left.SubTalarEversion};  
+     Reaction = {#var Type={Off};};
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};
+        };
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif    
+   };
+   #endif
+  #endif
+
+  #if LEG_LEFT & (LEG_MODEL == LEG_MODEL_TLEM | LEG_MODEL == LEG_MODEL_TLEM2 )
+  
+   #if MANNEQUIN_DRIVER_ANKLE_SUBTALAR_EVERSION_LEFT
+   AnyKinEqSimpleDriver AnkleDriverLeftEversion={
+     AnyKinMeasure &ref1=..BodyModel.Interface.Left.AnklePlantarFlexion;
+     AnyKinMeasure &ref2=..BodyModel.Interface.Left.SubTalarEversion;
+     DriverPos = pi/180*{.JntPos.Left.SubTalarEversion};  
+     DriverVel=pi/180*{.JntVel.Left.SubTalarEversion};  
+     Reaction = {#var Type={Off};};
+     MeasureOrganizer={1};  // Driving subtalar eversion only
+    #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+      #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+      AnyFolder Weights = 
+      {
+        AnyFunConst Fun = {
+          #var Value = {..WeakDriverWeight};
+        };
+      };
+      #var WeightFun = {&Weights.Fun};
+      #var CType = {Soft};
+    #endif   
+   };
+   #endif
+  #endif
+  
+  #endif
+  
+  
+};

@@ -1,13 +1,16 @@
 #include "../../libdef.any"
-/**
-This application can be a good starting point for new applications involving 
-the entire body, doing lifts from a standing posture. The model uses artificial 
-muscles between the feet and the floor for creating non-sticking boundary conditions.
-Similarly there are non-sticking boundary conditions between the hands and the box.
-The drivers for the model are listed in the file "JointsAndDrivers.any".
-*/
+
+// This is a Wilke Spine Pressure Validation Model. To see the documentation click the link below.
+// #path HTML_DOC "<ANYBODY_PATH_BODY>/Documentation/auto_examples/Validation/plot_WilkeSpinePressure.html"
+
 Main = {
   
+  AnyDrawOverlayImage wilke = 
+  {
+    Opacity = 1.0;
+    ImageFile = "wilke et al., 2001 Fig3b.jpg";
+  };
+
   /**Execute this operation to run the model in the intended operation sequence.  
   It is also possible to run operations seperately, by manual selections in the operation tree*/
   AnyOperationSequence RunApplication = {
@@ -48,6 +51,7 @@ Main = {
   AnyFolder Model={
     
     AnyFolder &HumanModel=.HumanModel.BodyModel;
+    AnyFolder &Mannedriver = .HumanModel.BodyModelWithDefaultDrivers.Drivers;
     
     #include "Environment.any"   
     
@@ -66,10 +70,18 @@ Main = {
   
   AnyBodyStudy Study = {
     AnyFolder &Model = .Model;
+    InitialConditions.SolverType = KinSolOverDeterminate;
+    Kinematics.SolverType = KinSolOverDeterminate;
    
     tEnd = 1.0;
     Gravity = {0.0001, -9.81, 0.0001};
     nStep = 1;
+    
+    //Size of total force in the L5 Sacrum joint
+    AnyVar L5SacrumReac = (Main.Model.HumanModel.Trunk.JointsLumbar.L5SacrumJnt.Constraints.Reaction.Fout[0]^2+
+    Main.Model.HumanModel.Trunk.JointsLumbar.L5SacrumJnt.Constraints.Reaction.Fout[1]^2+
+    Main.Model.HumanModel.Trunk.JointsLumbar.L5SacrumJnt.Constraints.Reaction.Fout[2]^2)^0.5;
+    
   }; // End of study
   
 }; //Main

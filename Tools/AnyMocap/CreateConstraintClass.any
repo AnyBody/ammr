@@ -1,0 +1,88 @@
+
+
+#class_template LinkDesignVars (DesVar1, DesVar2,
+Contraint_Type = EqualToZero, Coef1 = 1, Coef2= 1, PARAMETER_OPT_STUDY = Main.Studies.ParameterIdentification){
+  
+  Main.ModelSetup.ParameterIdentification = {
+     AnyDesMeasure LinkedDesignVars_##DesVar1##_##DesVar2 = {
+         Type = Contraint_Type;
+         Val = (Coef1) *.DesVar1.Val - (Coef2)*.DesVar2.Val;
+     }; 
+  };
+  
+  PARAMETER_OPT_STUDY = {
+      AnyDesMeasure &LinkedDesignVars_##DesVar1##_##DesVar2 = Main.ModelSetup.ParameterIdentification.LinkedDesignVars_##DesVar1##_##DesVar2 ;  
+   };
+  
+  
+}; 
+
+
+
+/// Add an AnyDesMeasure contraint class to Main.ModelSetup.###### and link it 
+/// to the paramter optimzation study. 
+///
+/// Arguments: 
+///    - NAME: Unique name used to create objects. 
+///    - Constraint_Type: Type of the contraints (default: EqualToZero )
+/// 
+/// Obligatory variables: 
+///    - Value : The value/measured used for the contraint.                           
+#class_template CreateConstraint (
+   NAME,
+   Contraint_Type = EqualToZero, PARAMETER_OPT_STUDY = Main.Studies.ParameterIdentification)
+{
+  
+  #var AnyFloat Value;
+  
+  Main.ModelSetup.ParameterIdentification = {
+      AnyDesMeasure NAME##Contraint_Type= {
+          Type = Contraint_Type;
+          Val = ....Value;
+      };  
+  };
+  
+  PARAMETER_OPT_STUDY = {
+      AnyDesMeasure &NAME##Contraint_Type = Main.ModelSetup.ParameterIdentification.NAME##Contraint_Type ;  
+   };
+    
+}; 
+
+
+
+#class_template Create4clusterRectangleConstraint (name, marker1, marker2, marker3, marker4,
+PARAMETER_OPT_STUDY = Main.Studies.ParameterIdentification){
+  PARAMETER_OPT_STUDY = {
+     // equal opposing sides in the rectangular cluster
+    AnyDesMeasure name##_SideConstraint1 = {
+         Type = EqualToZero;
+         Val = vnorm(marker1.sRelOptEdit-marker2.sRelOptEdit) - vnorm(marker3.sRelOptEdit-marker4.sRelOptEdit);
+     };
+     // equal opposing sides in the rectangular cluster
+     AnyDesMeasure name##_SideConstraint2= {
+         Type = EqualToZero;
+         Val = vnorm(marker2.sRelOptEdit-marker3.sRelOptEdit) - vnorm(marker4.sRelOptEdit-marker1.sRelOptEdit);
+     };
+     // equal diagonals in the cluster
+     AnyDesMeasure name##_DiagonalConstraint= {
+         Type = EqualToZero;
+         Val = vnorm(marker1.sRelOptEdit-marker3.sRelOptEdit) - vnorm(marker2.sRelOptEdit-marker4.sRelOptEdit);
+     };
+  };
+  
+  
+};
+
+#class_template Create4clusterParallelogramConstraint (name, marker1, marker2, marker3, marker4,
+PARAMETER_OPT_STUDY = Main.Studies.ParameterIdentification){
+  PARAMETER_OPT_STUDY = {
+     // equal opposing sides in the rectangular cluster
+    AnyDesMeasure name##_ParallelogramConstraint = {
+         Type = EqualToZero;
+         Val = vnorm(marker4.sRelOptEdit+ marker2.sRelOptEdit - marker1.sRelOptEdit - marker3.sRelOptEdit);
+     };
+  };
+  
+  
+};
+

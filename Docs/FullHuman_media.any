@@ -1,0 +1,107 @@
+#path ANYBODY_PATH_OUTPUT "."
+#include "C:\Workspace\ammr/libdef.any"
+
+//#define BM_ARM_LEFT OFF
+//#define BM_TRUNK_MUSCLES OFF
+//#define BM_LEG_MODEL OFF
+#define BM_LEG_MODEL _LEG_MODEL_TLEM2_
+
+#include "C:\Users\ag\Documents\video-recorder-master/CameraClassTemplate.any"
+
+Main = {
+  
+//  VideoLookAtCamera ShoulderCloseUpFront(UP_DIRECTION=y, _AUTO_OPEN_PREVIEW_=0) =
+//  {
+//    VideoName = "ShoulderCloseupFront";
+//    Analysis = {
+//      AnyOperation &ref = Main.study.InitialConditions;
+//    };
+//    VideoInputScale = 5;
+//    VideoResolution = {600,600};
+//    CameraLookAtPoint = Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Humerus.gh.r+{0,0,-0.05};
+//    CameraFieldOfView = DesignVar(0.4);
+//    CameraDirection  = {1,0,0};
+//    BackgroundColor = DesignVar({1,1,1});
+//    Preview.FileName = VideoName + ".jpg";
+//  };   
+//  VideoLookAtCamera ShoulderCloseUpBack(UP_DIRECTION=y, _AUTO_OPEN_PREVIEW_=0) =
+//  {
+//    VideoName = "ShoulderCloseupBack";
+//    Analysis = {
+//      AnyOperation &ref = Main.study.InitialConditions;
+//    };
+//    VideoInputScale = 5;
+//    VideoResolution = {600,600};
+//    CameraLookAtPoint = Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Humerus.gh.r+{0,0,-0.05};
+//    CameraFieldOfView = DesignVar(0.4);
+//    CameraDirection  = {-1,0,0};
+//    BackgroundColor = DesignVar({1,1,1});
+//    Preview.FileName = VideoName + ".jpg";
+//  };   
+  
+  
+  VideoLookAtCamera RotatingGif(UP_DIRECTION=y , _AUTO_PLAY_VIDEOS=OFF) =
+  {
+    VideoName = "_static/Human_rotating_model";
+    
+    Analysis = {
+      AnyOperation &ref = Main.study.Kinematics;
+    };
+    VideoInputScale = 5;
+    VideoResolution = {350,350};
+    VideoCodec = "libx264";
+    VideoInputFrameRate = 30; 
+    VideoOutputFrameRate = 30;
+    CameraLookAtPoint = Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.r - {0,0.1,0};
+    CameraFieldOfView = DesignVar(2);
+    CameraDirection  = {cos(2*pi*Main.study.t),sin(pi*30/180),sin(2*pi*Main.study.t) };
+    BackgroundColor = DesignVar({1,1,1});
+    Counter = Main.study.iStep;
+  }; 
+   
+  
+  #include "<ANYBODY_PATH_BODY>/HumanModel.any"
+  
+  AnyFolder Model =
+  {
+    AnyFolder &Human = .HumanModel.BodyModel; 
+    AnyFolder &MotionDrivers = .HumanModel.DefaultMannequinDrivers;      
+    
+    AnyReacForce HumanGroundResiduals = 
+    {
+      AnyKinMeasure &PelvisPosX = .Human.Interface.Trunk.PelvisPosX;
+      AnyKinMeasure &PelvisPosY = .Human.Interface.Trunk.PelvisPosY;
+      AnyKinMeasure &PelvisPosZ = .Human.Interface.Trunk.PelvisPosZ;
+      AnyKinMeasure &PelvisRotX = .Human.Interface.Trunk.PelvisRotX;
+      AnyKinMeasure &PelvisRotY = .Human.Interface.Trunk.PelvisRotY;
+      AnyKinMeasure &PelvisRotZ = .Human.Interface.Trunk.PelvisRotZ;
+    };
+    
+  };
+  
+  
+  AnyBodyStudy study =
+  {
+    AnyFolder &ModelForSim = .Model; // '&' creates a local reference to existing folder
+    AnyFolder &Cam = Main.RotatingGif;
+    Gravity = {0,-9.81,1}; // Gravity Vector
+    tStart = 0; // Start time
+    tEnd = 1; // End time
+    
+    InitialConditions.SolverType = KinSolOverDeterminate;
+    Kinematics.SolverType = KinSolOverDeterminate;
+  };
+
+  
+  
+  AnyOperationSequence RunApplication = 
+  {
+     //AnyOperation& CreateFrontImage = Main.ShoulderCloseUpFront.Preview;
+//     AnyOperation& CreateFrontBack = Main.ShoulderCloseUpBack.Preview;
+     AnyOperation& CreateRotatingGif = Main.RotatingGif.Create_Video;
+  
+  
+  
+  };
+  
+};

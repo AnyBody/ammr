@@ -1,0 +1,62 @@
+// Default C3DSettings file.
+// This file is used automatically if the AnyMOCAP application does not provide
+// its own C3D settings with this statement
+//
+// #path MOCAP_C3DSETTINGS "C3D_settings.any"
+// 
+// TRY NOT TO EDIT THIS FILE. Instead copy it to your application and set the
+// path-statement above to point to our own copy. 
+
+Main.ModelSetup.C3DFileData = {
+  
+    FileName = MOCAP_C3D_DATA_PATH +"/"+ Main.ModelSetup.TrialSpecificData.TrialFileName + ".c3d"; //add the extension to the file name here
+    
+    // Search/replace in marker names. 
+    // This option can be used to remove 
+    // prefixes from marker name, or replace
+    // characters from which are illegal in AnyScript
+    SearchAndReplace = {
+      /*{"old", "new"},*/ 
+        {"WeirdMarkerPrefix", ""}
+    };    
+    
+    
+    ConstructModelOnOff = Off;
+    ConstructChartOnOff = Off;
+
+    MarkerUseAllPointsOnOff = On; 
+    MarkerUseCamMaskOnOff = Off;
+    PointsScaleFactor = 1/1000;
+    MarkerDrawOnOff =On;
+    
+    AnyInt MarkerFilterOrder = 2; 
+    AnyInt AnalogFilterOrder = 2;
+   
+    // HACK_WORKAROUND. We need to disable filters (i.e. set FilterIndex to -1) when 
+    // using recordings which has less data than 3 times filter order
+    MarkerFilterIndex = iffun(gtfun(Header.LastFrameNo-Header.FirstFrameNo+1,MarkerFilterOrder *3 ), 0 ,-1) ;
+    AnalogFilterIndex = iffun(gtfun((Header.LastFrameNo-Header.FirstFrameNo+1)*Header.NoAnalogSamplesPer3DFrame,
+                                     AnalogFilterOrder *3 ), 1 ,-1);    
+    MarkerBsplineOrder = 4;
+    
+    Filter =  {
+      N = .MarkerFilterOrder;
+      Fc = {5};
+      Type = LowPass;
+    };
+    
+    /// This filter is used for the analog data
+    AnyFunButterworthFilter LowPassFilter = {
+      FilterForwardBackwardOnOff = On;
+      AutomaticInitialConditionOnOff = On;
+      N = .AnalogFilterOrder  ;
+      AnyVar CutOffFrequency=12;
+      AnyVar SampleFreq=.Header.VideoFrameRate* .Header.NoAnalogSamplesPer3DFrame   ;
+      W = {1/(iffun(eqfun(SampleFreq,0),100.0,SampleFreq)*0.5)*CutOffFrequency};
+      Type = LowPass;
+    };
+    
+    MarkerScaleXYZ = 0.015*{1,1,1};
+    MarkerRGB={0,0,1};    
+    
+};    

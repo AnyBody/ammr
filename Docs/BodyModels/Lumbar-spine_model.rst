@@ -1,40 +1,38 @@
 The Lumbar Spine Model
 =========================
 
-The Lumbar spine contains 5 vertebrae with 3 DoF spherical joints in
-between, 188 muscle fascicles and intra-abdominal pressure.
+The Lumbar spine contains **5 vertebrae** with 3 DoF spherical joints in
+between, **188 muscle fascicles** and a model of intra-abdominal pressure.
 
   
 .. raw:: html 
 
-    <img src="../_static/LumbarSpineBack.jpg" alt="Smiley face" width="32%">
-    <img src="../_static/LumbarSpineFront.jpg" alt="Smiley face" width="32%">
-    <video width="32%" style="display:inline; margin: 0 auto;" controls autoplay loop>
+    <!--<img src="../_static/LumbarSpineBack.jpg" alt="Smiley face" width="32%">
+    <img src="../_static/LumbarSpineFront.jpg" alt="Smiley face" width="32%">-->
+    <video width="32%" style="display:block; margin: 0 auto;" controls autoplay loop>
         <source src="../_static/LumbarSpine_rotating_model.mp4" type="video/mp4">
     Your browser does not support the video tag.
     </video>
     
-
-
-The functional spinal units (FSU) are driven using a prescribed
-kinematic rhythm, and by default, facet joints are not employed due to
-the fact that most of the application do not focus on the lumbar spine
-section. However, several examples demonstrate possible mechanisms of
+Since it is impractical to measure or specify the motions of individual segments within the spine
+(termed functional spinal units or FSU), these motions are prescribed by default as a function of overall lumbar curvature.
+These functions are known as kinematic rhythms.
+  
+Facet joints are also not employed by default, since most applications do not focus on the lumbar spine
+section. However, several examples in ``AMMR/Applications`` folder demonstrate possible mechanisms of
 facet joint incorporation and detailed modeling of the lumbar spine.
 
-The
-spinal muscles do not include the force-length-velocity relations (i.e.
+The spinal muscles do not include the force-length-velocity relations (i.e.
 we use the so-called simple muscle model). The only input parameter in
 the muscle model is the cross-sectional area multiplied by a factor.
 Daggfeldt and Thorstensson (J.Biomech. 2003, 36: 815-825) didn't include
 the force-length-velocity relations either. 
 
-The inclusion of the lumbar
-spine ligaments is optional and can be done as cumulative stiffness of
-FSU or as separate elastic elements. Similarly, the intervertebral disc
-(IVD) stiffness can be used as a single cumulative value for a FSU or as
-linear and nonlinear functions for the disc only. This, however, is
-mostly utilized for the spine specific applications, where the level of
+The inclusion of the lumbar spine ligaments is optional and can be defined as a cumulative stiffness of
+FSUs or as separate elastic elements. Similarly, the intervertebral disc
+(IVD) stiffness can be defined as a single cumulative value for a FSU or as
+linear and nonlinear functions for the disc alone. This, however, is
+mostly utilized for the spine specific applications, where such a level of
 detail is important. 
 
 In other cases, it has been shown that the torque
@@ -45,7 +43,7 @@ and whole body parameters is taken from: Nissan and Gilad (J.Biomech.
 from: Pintar et al. (J.Biomech. 25(11): 1351-1356, 1992).
 
 The spine model contains a preliminary model of the Intra Abdominal
-pressure (IAP). In short the IAP is modeled as constant volume, which,
+pressure (IAP). In short the abdomen is modeled as constant volume, which,
 when squeezed from the side by the transversus muscles extends the spine
 by pushing on the rib thorax and the pelvic floor.
 
@@ -56,14 +54,14 @@ limit of the IAP was set to 26600 Pa, which was based on measurements on
 well-trained subjects (Essendrop, M., 2003. Significance of
 intra-abdominal pressure in work related trunk-loading. Ph.D. Thesis,
 National Institute of Occupational Health, Denmark.) and using
-geometric/anatomic estimates of pressure surface area and area
+geometric/anatomical estimates of pressure surface area and area
 centroids, which in turn determines the effective moment arm of the
-pressure.
+resulting forces.
 
 Example Configuration
 -----------------------
 
-The lumbar spine model is always part of the AnyBody Human model. The muscle can
+The lumbar spine model is always part of the AnyBody Human model. The muscles can
 be enabled/disabled, and the lumbar disc stiffness can be controlled.
 
 .. code-block:: AnyScriptDoc
@@ -77,7 +75,7 @@ be enabled/disabled, and the lumbar disc stiffness can be controlled.
 .. seealso::
    
    The :doc:`Trunk configuration parameters <../BM_Config/Trunk_configurations>` for a
-   full list of Trunk parmaeters.
+   full list of Trunk parameters.
 
 
 
@@ -90,55 +88,16 @@ More details on the lumbar spine model can be found online:
 -  Presentation about the `Abdominal pressure
    Presentation <https://www.anybodytech.com/download.html?did=publications.files&fname=AbdominalPressureModel.pdf>`__
 
--  **Webcast `A lumbar spine model with facets joints and a dynamic
-   stabilization
-   device  <https://www.anybodytech.com/anybody.html?fwd=webcasts#20101221>`__**\ (Sebastian
-   Dendorfer, 21. December, 2010). This presentation will bring an
-   insight to added features and methods available in Anybody Modelling
-   System using a lumbar spine example. First, we will shown a
-   computational prediction of spine curvature and show the effect of
-   the muscles on human posture. Secondly, this approach will be
-   employed to highlight the effect of different designs of spinal
-   fixation devices. Moreover, an overview of how to apply this
-   modelling strategy in conjunction with two different formulations of
-   the facet joints will be given.
+-  Webcast: `A lumbar spine model with facets joints and a dynamic stabilization device <https://www.anybodytech.com/downloads/documentation/#20101221>`__
 
--  Webcast `Implementation of facet joints in a lumbar spine model (Mark
-   de Zee, 25. September,
-   2008). <https://www.anybodytech.com/downloads/documentation/#2008925>`__
-   This work presents a new methodology for implementation of facet
-   joints in the lumbar spine model developed by De Zee et al. (2007: J
-   Biomech. 40, 1219-1227). It enables the facet joint forces to become
-   part of a redundant system of equilibrium equations for the entire
-   system including the muscles. This redundant system is subsequently
-   solved uniquely thereby making it possible to analyze the effect of
-   whole body movements and loads on facet joint loading for the whole
-   lumbar spine together with its muscles.
-
+-  Webcast: `Implementation of facet joints in a lumbar spine model <https://www.anybodytech.com/downloads/documentation/#2008925>`__
+  
 -  Webcast `A detailed rigid-body cervical spine model based on inverse
-   dynamics (Dr. Mark de Zee, 18. September,
-   2007) <https://www.anybodytech.com/anybody.html?fwd=webcasts#2007918>`__
-   This webcast presents a detailed model of the cervical spine, which
-   was presented at the ISB congress in Taipei. We will go through the
-   model and its assumptions including the muscles and a preliminary
-   validation. Moreover an application will be presented where we try to
-   predict neuromuscular adaptation of experimentally induced neck pain
-   using the cervical spine model. (The webcast is available for
-   playback.)
+   dynamics <https://www.anybodytech.com/anybody.html?fwd=webcasts#2007918>`__
 
--  Webcast `A generic detailed rigid-body lumbar spine model (Dr. Mark
-   de Zee, 4. December,
-   2006) <https://www.anybodytech.com/anybody.html?fwd=webcasts#2006124>`__
-   This webcast presents a detailed model of the lumbar spine, which has
-   been published in the Journal of Biomechanics. We will go through the
-   model and its assumptions including the muscles, intra-abdominal
-   pressure and validation. With the presented model it will be possible
-   to investigate a range of research questions, because the model is
-   relatively easy to share and modify, available in the public domain
-   repository. (The webcast is available for playback.)
+-  Webcast `A generic detailed rigid-body lumbar spine model <https://www.anybodytech.com/anybody.html?fwd=webcasts#2006124>`__
 
--  PowerPoint presentation `Spine Rhythm Presentation (PDF with videos
-   click to activate
+-  PowerPoint presentation `Spine Rhythm Presentation (PDF with videos click to activate
    them) <https://www.anybodytech.com/download.html?did=publications.files&fname=Spinerhythm.pdf>`__
 
 You can read more about this lumbar spine model and some preliminary

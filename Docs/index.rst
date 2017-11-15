@@ -6,8 +6,8 @@
 Welcome to the AMMR documentation!
 =======================================
 
-The AnyBody Model Repository (AMMR) [#f1]_, is an open library of
-musculoskeletal models and examples ready to be used with the `AnyBody Modeling
+The AnyBody Model Repository (AMMR), is an open library of
+musculoskeletal models and examples ready to be used with the `AnyBody Modelling
 System`_. 
 
 .. figure:: _static/ammr_bodyparts.png
@@ -18,63 +18,33 @@ System`_.
 
    *The AnyBody Model Repository is a unique open collection of human body parts*.
 
+The AnyBody Managed Model Repository consists of two parts:
+
+* :ref:`Body Models <the_body_model>`: The human body models which can be 
+  customized and scaled to build a specific musculoskeletal model;
+    
+* :ref:`Application examples <examples-index>`: in which the body models are
+  utilized in specific applications (from common daily activities,
+  like pushing the acceleration or brake pedals of a car, to workplace
+  specific scenarios).
+     
 
 The models are developed in research projects at academic institutions or by
 AnyBody Technology in collaboration with academic institutions. The models are
-maintained by AnyBody Technology who ensures various body part models can
-be used together as full body scalable musculosketeal model.
-
-.. _AnyBody Modeling System: https://www.anybodytech.com/software/ams/
+maintained by AnyBody Technology who ensure that various body part models can
+be used together as full body, scalable musculoskeletal model.
 
 
-Model Overview
---------------
+.. rubric:: First time you're using AMMR?
 
-The Model repository consist of two parts. The *Body Models* which can
-customized and scaled to build any subject specific musculoskeletal model. And a
-of *Application examples* in which the body models are a applied to specific
-applications. 
+If you are a new user check the :tutorials:doc:`AnyBody Tutorials <index>` and the getting started video on AnyBody.
 
-The following provides a overview of both.
+The following :doc:`Getting Started section </getting_started>` on the AMMR provides insight into how AMMR is structured, how to
+install it and how to use it.
 
-.. toctree::
-    :maxdepth: 2
-
-    BodyModels/BodyParts_and_models
-    Examples_and_applications
+.. rst-class:: without-title
+.. seealso::
+    **Continue:** :doc:`Get Started using the AMMR </getting_started>`
 
 
-
-Using the AMMR
---------------
-.. toctree::
-    :maxdepth: 1
-
-    Installation
-    Creating_model_from_scratch
-    BM_Config/HumanBody_configurations
-    Scaling/intro
-
-
-
-Development
------------
-
-.. toctree::
-    :maxdepth: 2
-
-    Contribute
-
-
-Indices and tables
-------------------
-
-* :ref:`genindex`
-* :ref:`search`
-
-.. rubric:: Footnotes
-
-
-.. [#f1] The double *M* in the *AMMR* comes from the repository sometimes
-    beeing refered to as the "AnyBody Managed Model Repository". 
-    You may call it what you like. 
+.. _AnyBody Modelling System: https://www.anybodytech.com/software/ams/

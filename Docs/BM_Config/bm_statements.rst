@@ -12,7 +12,7 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_constant:`_SCALING_STANDARD_`
-    :Example: :anyscript:`#define BM_SCALING _SCALING_STANDARD_`
+    :Example: ``#define BM_SCALING _SCALING_STANDARD_``
     :Options: - :any:`_SCALING_NONE_`: A scaling law to use body part datasets as is without any scaling.
               - :any:`_SCALING_STANDARD_`: A default scaling law that corresponds to the 50th percentile European male.
               - :any:`_SCALING_UNIFORM_`: Uniform anthropometric scaling law to be used by the entire model.
@@ -23,6 +23,11 @@ All BodyModel parameters
               - :any:`_SCALING_LENGTHMASSFAT_EXTMEASUREMENTS_`: Length/mass/fat anthropometric with external measurements scaling law to be used by the entire model.
               - :any:`_SCALING_XYZ_`: Scaling using xyz factors for all Segments.
               - :any:`_SCALING_USERDEFINED_`: Don't use a builtin scaling law. A user-defined law must be specified with ``BM_SCALING_FILE``.
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_SCALING_ANTHRO_FILE
@@ -47,7 +52,7 @@ All BodyModel parameters
 
 
     :Default: ``OFF``
-    :Example: :anyscript:`#define BM_SCALING_STANDARDPARAM_EXTERIOR OFF`
+    :Example: ``#define BM_SCALING_STANDARDPARAM_EXTERIOR OFF``
     :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
 
 
@@ -57,7 +62,7 @@ All BodyModel parameters
 
 
     :Default: ``OFF``
-    :Example: :anyscript:`#define BM_CONFIG_MESSAGES OFF`
+    :Example: ``#define BM_CONFIG_MESSAGES OFF``
     :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
 
 
@@ -67,7 +72,7 @@ All BodyModel parameters
 
 
     :Default: ``OFF``
-    :Example: :anyscript:`#define BM_CONFIG_VALUES OFF`
+    :Example: ``#define BM_CONFIG_VALUES OFF``
     :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
 
 
@@ -82,7 +87,7 @@ All BodyModel parameters
 
 
     :Default: ``OFF``
-    :Example: :anyscript:`#define BM_DRAWSETTINGS_SKIP OFF`
+    :Example: ``#define BM_DRAWSETTINGS_SKIP OFF``
     :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
 
 
@@ -92,11 +97,16 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_constant:`_LEG_MODEL_TLEM_`
-    :Example: :anyscript:`#define BM_LEG_MODEL _LEG_MODEL_TLEM_`
+    :Example: ``#define BM_LEG_MODEL _LEG_MODEL_TLEM_``
     :Options: - :any:`OFF`: 
               - :any:`_LEG_MODEL_TLEM_`: Switch to use leg model: "TLEM 1"
               - :any:`_LEG_MODEL_TLEM2_`: Switch to use leg model: "TLEM 2"
               - :any:`_LEG_MODEL_LEG_`: Switch to use leg model: "Leg"
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_LEG_LEFT
@@ -105,9 +115,14 @@ All BodyModel parameters
 
 
     :Default: ``ON``
-    :Example: :anyscript:`#define BM_LEG_LEFT ON`
+    :Example: ``#define BM_LEG_LEFT ON``
     :Options: - :any:`OFF`: 
               - :any:`ON`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_LEG_RIGHT
@@ -116,9 +131,14 @@ All BodyModel parameters
 
 
     :Default: ``ON``
-    :Example: :anyscript:`#define BM_LEG_RIGHT ON`
+    :Example: ``#define BM_LEG_RIGHT ON``
     :Options: - :any:`OFF`: 
               - :any:`ON`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_LEG_STRENGTH_INDEX
@@ -127,7 +147,7 @@ All BodyModel parameters
 
 
     :Default: ``1.0``
-    :Example: :anyscript:`#define BM_LEG_STRENGTH_INDEX 1.0`
+    :Example: ``#define BM_LEG_STRENGTH_INDEX 1.0``
 
 .. ammr:bm_statement:: BM_LEG_MUSCLES_BOTH
 
@@ -135,10 +155,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_constant:`_MUSCLES_SIMPLE_`
-    :Example: :anyscript:`#define BM_LEG_MUSCLES_BOTH _MUSCLES_SIMPLE_`
+    :Example: ``#define BM_LEG_MUSCLES_BOTH _MUSCLES_SIMPLE_``
     :Options: - :any:`OFF`: 
               - :any:`_MUSCLES_SIMPLE_`: Constant to use simple muscles
               - :any:`_MUSCLES_3E_HILL_`: Constant to use 3 element Hill-type muscle
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_LEG_MUSCLES_LEFT
@@ -147,11 +172,16 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_LEG_MUSCLES_BOTH`
-    :Example: :anyscript:`#define BM_LEG_MUSCLES_LEFT BM_LEG_MUSCLES_BOTH`
+    :Example: ``#define BM_LEG_MUSCLES_LEFT BM_LEG_MUSCLES_BOTH``
     :Options: - :any:`OFF`: 
               - :any:`_MUSCLES_SIMPLE_`: Constant to use simple muscles
               - :any:`_MUSCLES_3E_HILL_`: Constant to use 3 element Hill-type muscle
               - :any:`BM_LEG_MUSCLES_BOTH`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_LEG_MUSCLES_RIGHT
@@ -160,11 +190,16 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_LEG_MUSCLES_BOTH`
-    :Example: :anyscript:`#define BM_LEG_MUSCLES_RIGHT BM_LEG_MUSCLES_BOTH`
+    :Example: ``#define BM_LEG_MUSCLES_RIGHT BM_LEG_MUSCLES_BOTH``
     :Options: - :any:`OFF`: 
               - :any:`_MUSCLES_SIMPLE_`: Constant to use simple muscles
               - :any:`_MUSCLES_3E_HILL_`: Constant to use 3 element Hill-type muscle
               - :any:`BM_LEG_MUSCLES_BOTH`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_LEG_DATASET
@@ -183,7 +218,7 @@ All BodyModel parameters
 
 
     :Default: ``"TrunkData1.1"``
-    :Example: :anyscript:`#define BM_TRUNK_DATASET "TrunkData1.1"`
+    :Example: ``#define BM_TRUNK_DATASET "TrunkData1.1"``
 
 .. ammr:bm_statement:: BM_TRUNK_STRENGTH_INDEX
 
@@ -191,7 +226,7 @@ All BodyModel parameters
 
 
     :Default: ``1.0``
-    :Example: :anyscript:`#define BM_TRUNK_STRENGTH_INDEX 1.0`
+    :Example: ``#define BM_TRUNK_STRENGTH_INDEX 1.0``
 
 .. ammr:bm_statement:: BM_TRUNK_MUSCLES
 
@@ -199,9 +234,14 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_constant:`_MUSCLES_SIMPLE_`
-    :Example: :anyscript:`#define BM_TRUNK_MUSCLES _MUSCLES_SIMPLE_`
+    :Example: ``#define BM_TRUNK_MUSCLES _MUSCLES_SIMPLE_``
     :Options: - :any:`OFF`: 
               - :any:`_MUSCLES_SIMPLE_`: Constant to use simple muscles
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_TRUNK_LUMBAR_MUSCLES
@@ -210,22 +250,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_TRUNK_MUSCLES`
-    :Example: :anyscript:`#define BM_TRUNK_LUMBAR_MUSCLES BM_TRUNK_MUSCLES`
+    :Example: ``#define BM_TRUNK_LUMBAR_MUSCLES BM_TRUNK_MUSCLES``
     :Options: - :any:`OFF`: 
               - :any:`_MUSCLES_SIMPLE_`: Constant to use simple muscles
               - :any:`BM_TRUNK_MUSCLES`: 
 
-
-.. ammr:bm_statement:: BM_TRUNK_THORACIC_MUSCLES
-
-    Definition of the thoracic spine muscles type.
-
-
-    :Default: ``OFF``
-    :Example: :anyscript:`#define BM_TRUNK_THORACIC_MUSCLES OFF`
-    :Options: - :any:`OFF`: 
-              - :any:`_MUSCLES_SIMPLE_`: Constant to use simple muscles
-              - :any:`BM_TRUNK_MUSCLES`: 
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_TRUNK_CERVICAL_MUSCLES
@@ -234,10 +267,15 @@ All BodyModel parameters
 
 
     :Default: ``OFF``
-    :Example: :anyscript:`#define BM_TRUNK_CERVICAL_MUSCLES OFF`
+    :Example: ``#define BM_TRUNK_CERVICAL_MUSCLES OFF``
     :Options: - :any:`OFF`: 
               - :any:`_MUSCLES_SIMPLE_`: Constant to use simple muscles
               - :any:`BM_TRUNK_MUSCLES`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_TRUNK_DISC_STIFNESS
@@ -246,10 +284,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_constant:`_DISC_STIFFNESS_LINEAR_`
-    :Example: :anyscript:`#define BM_TRUNK_DISC_STIFNESS _DISC_STIFFNESS_LINEAR_`
+    :Example: ``#define BM_TRUNK_DISC_STIFNESS _DISC_STIFFNESS_LINEAR_``
     :Options: - :any:`_DISC_STIFFNESS_NONE_`: Constant to switch off disc spring in the spine
               - :any:`_DISC_STIFFNESS_LINEAR_`: Constant to switch linear disc spring on in the spine
               - :any:`_DISC_STIFFNESS_NONLINEAR_`: Constant to switch nonlinear disc spring on in the spine
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_TRUNK_LUMBAR_DISC_STIFNESS
@@ -258,24 +301,16 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_TRUNK_DISC_STIFNESS`
-    :Example: :anyscript:`#define BM_TRUNK_LUMBAR_DISC_STIFNESS BM_TRUNK_DISC_STIFNESS`
+    :Example: ``#define BM_TRUNK_LUMBAR_DISC_STIFNESS BM_TRUNK_DISC_STIFNESS``
     :Options: - :any:`_DISC_STIFFNESS_NONE_`: Constant to switch off disc spring in the spine
               - :any:`_DISC_STIFFNESS_LINEAR_`: Constant to switch linear disc spring on in the spine
               - :any:`_DISC_STIFFNESS_NONLINEAR_`: Constant to switch nonlinear disc spring on in the spine
               - :any:`BM_TRUNK_DISC_STIFNESS`: 
 
-
-.. ammr:bm_statement:: BM_TRUNK_THORACIC_DISC_STIFNESS
-
-    Definition of the thoracic spine disc model.
-
-
-    :Default: :ammr:bm_statement:`BM_TRUNK_DISC_STIFNESS`
-    :Example: :anyscript:`#define BM_TRUNK_THORACIC_DISC_STIFNESS BM_TRUNK_DISC_STIFNESS`
-    :Options: - :any:`_DISC_STIFFNESS_NONE_`: Constant to switch off disc spring in the spine
-              - :any:`_DISC_STIFFNESS_LINEAR_`: Constant to switch linear disc spring on in the spine
-              - :any:`_DISC_STIFFNESS_NONLINEAR_`: Constant to switch nonlinear disc spring on in the spine
-              - :any:`BM_TRUNK_DISC_STIFNESS`: 
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_TRUNK_CERVICAL_DISC_STIFNESS
@@ -284,11 +319,16 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_TRUNK_DISC_STIFNESS`
-    :Example: :anyscript:`#define BM_TRUNK_CERVICAL_DISC_STIFNESS BM_TRUNK_DISC_STIFNESS`
+    :Example: ``#define BM_TRUNK_CERVICAL_DISC_STIFNESS BM_TRUNK_DISC_STIFNESS``
     :Options: - :any:`_DISC_STIFFNESS_NONE_`: Constant to switch off disc spring in the spine
               - :any:`_DISC_STIFFNESS_LINEAR_`: Constant to switch linear disc spring on in the spine
               - :any:`_DISC_STIFFNESS_NONLINEAR_`: Constant to switch nonlinear disc spring on in the spine
               - :any:`BM_TRUNK_DISC_STIFNESS`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_TRUNK_RHYTHM
@@ -297,7 +337,7 @@ All BodyModel parameters
 
 
     :Default: ``ON``
-    :Example: :anyscript:`#define BM_TRUNK_RHYTHM ON`
+    :Example: ``#define BM_TRUNK_RHYTHM ON``
     :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
 
 
@@ -307,15 +347,7 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_TRUNK_RHYTHM`
-    :Example: :anyscript:`#define BM_TRUNK_LUMBAR_RHYTHM BM_TRUNK_RHYTHM`
-
-.. ammr:bm_statement:: BM_TRUNK_THORACIC_RHYTHM
-
-    A switch to use a kinematic rhythm for the thoracic spine.
-
-
-    :Default: :ammr:bm_statement:`BM_TRUNK_RHYTHM`
-    :Example: :anyscript:`#define BM_TRUNK_THORACIC_RHYTHM BM_TRUNK_RHYTHM`
+    :Example: ``#define BM_TRUNK_LUMBAR_RHYTHM BM_TRUNK_RHYTHM``
 
 .. ammr:bm_statement:: BM_TRUNK_CERVICAL_RHYTHM
 
@@ -323,7 +355,7 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_TRUNK_RHYTHM`
-    :Example: :anyscript:`#define BM_TRUNK_CERVICAL_RHYTHM BM_TRUNK_RHYTHM`
+    :Example: ``#define BM_TRUNK_CERVICAL_RHYTHM BM_TRUNK_RHYTHM``
 
 .. ammr:bm_statement:: BM_TRUNK_LIGAMENTS
 
@@ -331,7 +363,7 @@ All BodyModel parameters
 
 
     :Default: ``OFF``
-    :Example: :anyscript:`#define BM_TRUNK_LIGAMENTS OFF`
+    :Example: ``#define BM_TRUNK_LIGAMENTS OFF``
     :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
 
 
@@ -341,15 +373,7 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_TRUNK_LIGAMENTS`
-    :Example: :anyscript:`#define BM_TRUNK_LUMBAR_LIGAMENTS BM_TRUNK_LIGAMENTS`
-
-.. ammr:bm_statement:: BM_TRUNK_THORACIC_LIGAMENTS
-
-    A switch to control the thoracic spine ligaments.
-
-
-    :Default: :ammr:bm_statement:`BM_TRUNK_LIGAMENTS`
-    :Example: :anyscript:`#define BM_TRUNK_THORACIC_LIGAMENTS BM_TRUNK_LIGAMENTS`
+    :Example: ``#define BM_TRUNK_LUMBAR_LIGAMENTS BM_TRUNK_LIGAMENTS``
 
 .. ammr:bm_statement:: BM_TRUNK_CERVICAL_LIGAMENTS
 
@@ -357,7 +381,7 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_TRUNK_LIGAMENTS`
-    :Example: :anyscript:`#define BM_TRUNK_CERVICAL_LIGAMENTS BM_TRUNK_LIGAMENTS`
+    :Example: ``#define BM_TRUNK_CERVICAL_LIGAMENTS BM_TRUNK_LIGAMENTS``
 
 .. ammr:bm_statement:: BM_ARM_STRENGTH_INDEX
 
@@ -365,7 +389,7 @@ All BodyModel parameters
 
 
     :Default: ``1.0``
-    :Example: :anyscript:`#define BM_ARM_STRENGTH_INDEX 1.0`
+    :Example: ``#define BM_ARM_STRENGTH_INDEX 1.0``
 
 .. ammr:bm_statement:: BM_ARM_LEFT
 
@@ -373,7 +397,7 @@ All BodyModel parameters
 
 
     :Default: ``ON``
-    :Example: :anyscript:`#define BM_ARM_LEFT ON`
+    :Example: ``#define BM_ARM_LEFT ON``
     :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
 
 
@@ -384,7 +408,7 @@ All BodyModel parameters
 
 
     :Default: ``OFF``
-    :Example: :anyscript:`#define BM_ARM_DETAIL_HAND_LEFT OFF`
+    :Example: ``#define BM_ARM_DETAIL_HAND_LEFT OFF``
     :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
 
 
@@ -395,7 +419,7 @@ All BodyModel parameters
 
 
     :Default: ``OFF``
-    :Example: :anyscript:`#define BM_ARM_SHOULDER_RHYTHM_LEFT OFF`
+    :Example: ``#define BM_ARM_SHOULDER_RHYTHM_LEFT OFF``
     :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
 
 
@@ -405,7 +429,7 @@ All BodyModel parameters
 
 
     :Default: ``ON``
-    :Example: :anyscript:`#define BM_ARM_RIGHT ON`
+    :Example: ``#define BM_ARM_RIGHT ON``
     :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
 
 
@@ -416,7 +440,7 @@ All BodyModel parameters
 
 
     :Default: ``OFF``
-    :Example: :anyscript:`#define BM_ARM_DETAIL_HAND_RIGHT OFF`
+    :Example: ``#define BM_ARM_DETAIL_HAND_RIGHT OFF``
     :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
 
 
@@ -427,7 +451,7 @@ All BodyModel parameters
 
 
     :Default: ``OFF``
-    :Example: :anyscript:`#define BM_ARM_SHOULDER_RHYTHM_RIGHT OFF`
+    :Example: ``#define BM_ARM_SHOULDER_RHYTHM_RIGHT OFF``
     :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
 
 
@@ -437,18 +461,17 @@ All BodyModel parameters
 
 
     :Default: ``OFF``
-    :Example: :anyscript:`#define BM_ARM_SHOULDER_RHYTHM OFF`
+    :Example: ``#define BM_ARM_SHOULDER_RHYTHM OFF``
     :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
 
 
 .. ammr:bm_statement:: BM_ARM_DETAILED_HAND
-    :deprecated:
 
     Switch for enabling the detailed hand.
 
 
     :Default: ``OFF``
-    :Example: :anyscript:`#define BM_ARM_DETAILED_HAND OFF`
+    :Example: ``#define BM_ARM_DETAILED_HAND OFF``
     :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
 
 
@@ -458,10 +481,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_constant:`_MUSCLES_SIMPLE_`
-    :Example: :anyscript:`#define BM_ARM_MUSCLES_BOTH _MUSCLES_SIMPLE_`
+    :Example: ``#define BM_ARM_MUSCLES_BOTH _MUSCLES_SIMPLE_``
     :Options: - :any:`OFF`: 
               - :any:`_MUSCLES_SIMPLE_`: Constant to use simple muscles
               - :any:`_MUSCLES_3E_HILL_`: Constant to use 3 element Hill-type muscle
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_ARM_MUSCLES_LEFT
@@ -470,11 +498,16 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_ARM_MUSCLES_BOTH`
-    :Example: :anyscript:`#define BM_ARM_MUSCLES_LEFT BM_ARM_MUSCLES_BOTH`
+    :Example: ``#define BM_ARM_MUSCLES_LEFT BM_ARM_MUSCLES_BOTH``
     :Options: - :any:`OFF`: 
               - :any:`_MUSCLES_SIMPLE_`: Constant to use simple muscles
               - :any:`_MUSCLES_3E_HILL_`: Constant to use 3 element Hill-type muscle
               - :any:`BM_ARM_MUSCLES_BOTH`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_ARM_MUSCLES_RIGHT
@@ -483,11 +516,16 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_ARM_MUSCLES_BOTH`
-    :Example: :anyscript:`#define BM_ARM_MUSCLES_RIGHT BM_ARM_MUSCLES_BOTH`
+    :Example: ``#define BM_ARM_MUSCLES_RIGHT BM_ARM_MUSCLES_BOTH``
     :Options: - :any:`OFF`: 
               - :any:`_MUSCLES_SIMPLE_`: Constant to use simple muscles
               - :any:`_MUSCLES_3E_HILL_`: Constant to use 3 element Hill-type muscle
               - :any:`BM_ARM_MUSCLES_BOTH`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_BONY_LANDMARK_DEFINED_JOINTAXIS
@@ -496,7 +534,7 @@ All BodyModel parameters
 
 
     :Default: ``OFF``
-    :Example: :anyscript:`#define BM_BONY_LANDMARK_DEFINED_JOINTAXIS OFF`
+    :Example: ``#define BM_BONY_LANDMARK_DEFINED_JOINTAXIS OFF``
     :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
 
 
@@ -506,7 +544,7 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_constant:`_PELVIS_DISPLAY_LEGPELVIS_ONLY_`
-    :Example: :anyscript:`#define BM_PELVIS_DISPLAY _PELVIS_DISPLAY_LEGPELVIS_ONLY_`
+    :Example: ``#define BM_PELVIS_DISPLAY _PELVIS_DISPLAY_LEGPELVIS_ONLY_``
 
 .. ammr:bm_statement:: BM_MANNEQUIN_FILE
 
@@ -519,7 +557,7 @@ All BodyModel parameters
 
 
     :Default: ``ON``
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_DEFAULT ON`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_DEFAULT ON``
     :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
 
 
@@ -529,7 +567,7 @@ All BodyModel parameters
 
 
     :Default: ``ON``
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_WEAK_SWITCH ON`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_WEAK_SWITCH ON``
     :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
 
 
@@ -539,7 +577,7 @@ All BodyModel parameters
 
 
     :Default: ``OFF``
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_INDIVIDUAL_WEIGHTS OFF`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_INDIVIDUAL_WEIGHTS OFF``
     :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
 
 
@@ -549,10 +587,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_constant:`_MORPH_TRUNK_TO_LEG_`
-    :Example: :anyscript:`#define BM_LEG_TRUNK_INTERFACE _MORPH_TRUNK_TO_LEG_`
+    :Example: ``#define BM_LEG_TRUNK_INTERFACE _MORPH_TRUNK_TO_LEG_``
     :Options: - :any:`_MORPH_TRUNK_TO_LEG_`: Constant for the trunk-to-leg morphing
               - :any:`_MORPH_LEG_TO_TRUNK_`: Constant for the leg-to-trunk morhping
               - :any:`_MORPH_NONE_`: Constant for no-morphing between the upper and lower bodies.
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_CALIBRATION_TYPE
@@ -560,10 +603,10 @@ All BodyModel parameters
     Parameter to choose type of muscle tendon calibration
 
 
-    :Default: :ammr:bm_constant:`_1PARAMETER_CALIBRATION_`
-    :Example: :anyscript:`#define BM_CALIBRATION_TYPE _1PARAMETER_CALIBRATION_`
-    :Options: - :any:`_1PARAMETER_CALIBRATION_`: Constant to use 1 parameter muscle tendon calibration
-              - :any:`_2PARAMETER_CALIBRATION_`: Constant to use 2 parameter muscle tendon calibration
+    :Default: :ammr:bm_constant:`_CALIBRATION_TYPE_1PAR_`
+    :Example: ``#define BM_CALIBRATION_TYPE _CALIBRATION_TYPE_1PAR_``
+    :Options: - :any:`_CALIBRATION_TYPE_1PAR_`: Constant to use 1 parameter muscle tendon calibration
+              - :any:`_CALIBRATION_TYPE_2PAR_`: Constant to use 2 parameter muscle tendon calibration
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_PELVIS_POS_X
@@ -572,10 +615,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_PELVIS_POS_X BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_PELVIS_POS_X BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_PELVIS_POS_Y
@@ -584,10 +632,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_PELVIS_POS_Y BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_PELVIS_POS_Y BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_PELVIS_POS_Z
@@ -596,10 +649,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_PELVIS_POS_Z BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_PELVIS_POS_Z BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_PELVIS_ROT_Z
@@ -608,10 +666,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_PELVIS_ROT_Z BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_PELVIS_ROT_Z BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_PELVIS_ROT_Y
@@ -620,10 +683,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_PELVIS_ROT_Y BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_PELVIS_ROT_Y BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_PELVIS_ROT_X
@@ -632,10 +700,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_PELVIS_ROT_X BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_PELVIS_ROT_X BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_NECK
@@ -644,10 +717,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_NECK BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_NECK BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_PELVIS_THORAX_LATERAL_BENDING
@@ -656,10 +734,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_PELVIS_THORAX_LATERAL_BENDING BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_PELVIS_THORAX_LATERAL_BENDING BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_PELVIS_THORAX_ROTATION
@@ -668,10 +751,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_PELVIS_THORAX_ROTATION BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_PELVIS_THORAX_ROTATION BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_PELVIS_THORAX_EXTENSION
@@ -680,10 +768,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_PELVIS_THORAX_EXTENSION BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_PELVIS_THORAX_EXTENSION BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_RIGHT
@@ -692,10 +785,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_RIGHT BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_RIGHT BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_PROTRACTION_RIGHT
@@ -704,10 +802,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_RIGHT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_PROTRACTION_RIGHT BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_RIGHT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_PROTRACTION_RIGHT BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_RIGHT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_RIGHT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_ELEVATION_RIGHT
@@ -716,10 +819,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_RIGHT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_ELEVATION_RIGHT BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_RIGHT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_ELEVATION_RIGHT BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_RIGHT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_RIGHT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_AXIAL_ROTATION_RIGHT
@@ -728,10 +836,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_RIGHT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_AXIAL_ROTATION_RIGHT BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_RIGHT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_AXIAL_ROTATION_RIGHT BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_RIGHT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_RIGHT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_GLENOHUMERAL_ABDUCTION_RIGHT
@@ -740,10 +853,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_GLENOHUMERAL_ABDUCTION_RIGHT BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_GLENOHUMERAL_ABDUCTION_RIGHT BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_GLENOHUMERAL_FLEXION_RIGHT
@@ -752,10 +870,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_GLENOHUMERAL_FLEXION_RIGHT BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_GLENOHUMERAL_FLEXION_RIGHT BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_GLENOHUMERAL_EXTERNAL_ROTATION_RIGHT
@@ -764,10 +887,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_GLENOHUMERAL_EXTERNAL_ROTATION_RIGHT BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_GLENOHUMERAL_EXTERNAL_ROTATION_RIGHT BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_ELBOW_FLEXION_RIGHT
@@ -776,10 +904,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_ELBOW_FLEXION_RIGHT BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_ELBOW_FLEXION_RIGHT BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_ELBOW_PRONATION_RIGHT
@@ -788,10 +921,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_ELBOW_PRONATION_RIGHT BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_ELBOW_PRONATION_RIGHT BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_WRIST_FLEXION_RIGHT
@@ -800,10 +938,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_WRIST_FLEXION_RIGHT BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_WRIST_FLEXION_RIGHT BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_WRIST_ABDUCTION_RIGHT
@@ -812,7 +955,24 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_WRIST_ABDUCTION_RIGHT BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_WRIST_ABDUCTION_RIGHT BM_MANNEQUIN_DRIVER_DEFAULT``
+    :Options: - :any:`ON`: 
+              - :any:`OFF`: 
+              - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
+
+
+.. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_HAND_RIGHT
+
+    Switch for the mannequin driver being active or not
+
+
+    :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_HAND_RIGHT BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
@@ -824,10 +984,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_LEFT BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_LEFT BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_PROTRACTION_LEFT
@@ -836,10 +1001,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_LEFT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_PROTRACTION_LEFT BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_LEFT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_PROTRACTION_LEFT BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_LEFT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_LEFT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_ELEVATION_LEFT
@@ -848,10 +1018,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_LEFT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_ELEVATION_LEFT BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_LEFT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_ELEVATION_LEFT BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_LEFT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_LEFT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_AXIAL_ROTATION_LEFT
@@ -860,10 +1035,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_LEFT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_AXIAL_ROTATION_LEFT BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_LEFT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_AXIAL_ROTATION_LEFT BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_LEFT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_LEFT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_GLENOHUMERAL_ABDUCTION_LEFT
@@ -872,10 +1052,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_GLENOHUMERAL_ABDUCTION_LEFT BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_GLENOHUMERAL_ABDUCTION_LEFT BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_GLENOHUMERAL_FLEXION_LEFT
@@ -884,10 +1069,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_GLENOHUMERAL_FLEXION_LEFT BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_GLENOHUMERAL_FLEXION_LEFT BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_GLENOHUMERAL_EXTERNAL_ROTATION_LEFT
@@ -896,10 +1086,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_GLENOHUMERAL_EXTERNAL_ROTATION_LEFT BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_GLENOHUMERAL_EXTERNAL_ROTATION_LEFT BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_ELBOW_FLEXION_LEFT
@@ -908,10 +1103,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_ELBOW_FLEXION_LEFT BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_ELBOW_FLEXION_LEFT BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_ELBOW_PRONATION_LEFT
@@ -920,10 +1120,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_ELBOW_PRONATION_LEFT BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_ELBOW_PRONATION_LEFT BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_WRIST_FLEXION_LEFT
@@ -932,10 +1137,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_WRIST_FLEXION_LEFT BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_WRIST_FLEXION_LEFT BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_WRIST_ABDUCTION_LEFT
@@ -944,7 +1154,24 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_WRIST_ABDUCTION_LEFT BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_WRIST_ABDUCTION_LEFT BM_MANNEQUIN_DRIVER_DEFAULT``
+    :Options: - :any:`ON`: 
+              - :any:`OFF`: 
+              - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
+
+
+.. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_HAND_LEFT
+
+    Switch for the mannequin driver being active or not
+
+
+    :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_HAND_LEFT BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
@@ -956,10 +1183,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_HIP_FLEXION_RIGHT BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_HIP_FLEXION_RIGHT BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_HIP_EXTERNAL_ROTATION_RIGHT
@@ -968,10 +1200,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_HIP_EXTERNAL_ROTATION_RIGHT BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_HIP_EXTERNAL_ROTATION_RIGHT BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_HIP_ABDUCTION_RIGHT
@@ -980,10 +1217,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_HIP_ABDUCTION_RIGHT BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_HIP_ABDUCTION_RIGHT BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_KNEE_FLEXION_RIGHT
@@ -992,10 +1234,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_KNEE_FLEXION_RIGHT BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_KNEE_FLEXION_RIGHT BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_ANKLE_FLEXION_RIGHT
@@ -1004,10 +1251,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_ANKLE_FLEXION_RIGHT BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_ANKLE_FLEXION_RIGHT BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_ANKLE_EVERSION_RIGHT
@@ -1016,10 +1268,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_ANKLE_EVERSION_RIGHT BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_ANKLE_EVERSION_RIGHT BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_ANKLE_SUBTALAR_EVERSION_RIGHT
@@ -1028,10 +1285,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_ANKLE_SUBTALAR_EVERSION_RIGHT BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_ANKLE_SUBTALAR_EVERSION_RIGHT BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_HIP_FLEXION_LEFT
@@ -1040,10 +1302,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_HIP_FLEXION_LEFT BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_HIP_FLEXION_LEFT BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_HIP_EXTERNAL_ROTATION_LEFT
@@ -1052,10 +1319,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_HIP_EXTERNAL_ROTATION_LEFT BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_HIP_EXTERNAL_ROTATION_LEFT BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_HIP_ABDUCTION_LEFT
@@ -1064,10 +1336,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_HIP_ABDUCTION_LEFT BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_HIP_ABDUCTION_LEFT BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_KNEE_FLEXION_LEFT
@@ -1076,10 +1353,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_KNEE_FLEXION_LEFT BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_KNEE_FLEXION_LEFT BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_ANKLE_FLEXION_LEFT
@@ -1088,10 +1370,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_ANKLE_FLEXION_LEFT BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_ANKLE_FLEXION_LEFT BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_ANKLE_EVERSION_LEFT
@@ -1100,10 +1387,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_ANKLE_EVERSION_LEFT BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_ANKLE_EVERSION_LEFT BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_ANKLE_SUBTALAR_EVERSION_LEFT
@@ -1112,10 +1404,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: :anyscript:`#define BM_MANNEQUIN_DRIVER_ANKLE_SUBTALAR_EVERSION_LEFT BM_MANNEQUIN_DRIVER_DEFAULT`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_ANKLE_SUBTALAR_EVERSION_LEFT BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_JOINT_TYPE_HIP_RIGHT
@@ -1124,10 +1421,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_constant:`_JOINT_TYPE_DEFAULT_`
-    :Example: :anyscript:`#define BM_JOINT_TYPE_HIP_RIGHT _JOINT_TYPE_DEFAULT_`
+    :Example: ``#define BM_JOINT_TYPE_HIP_RIGHT _JOINT_TYPE_DEFAULT_``
     :Options: - :any:`_JOINT_TYPE_DEFAULT_`: Default joint definition.
               - :any:`_JOINT_TYPE_BONY_LANDMARK_`: Joint definition based on bony landmarks. This will create a joint which resembles what is often used in traditional gait analysis. (E.g. revolute knee joint along the femoral condyles).
               - :any:`_JOINT_TYPE_USERDEFINED_`: User-defined joint. This will exclude the joint and which nodes.
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_JOINT_TYPE_HIP_LEFT
@@ -1136,10 +1438,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_constant:`_JOINT_TYPE_DEFAULT_`
-    :Example: :anyscript:`#define BM_JOINT_TYPE_HIP_LEFT _JOINT_TYPE_DEFAULT_`
+    :Example: ``#define BM_JOINT_TYPE_HIP_LEFT _JOINT_TYPE_DEFAULT_``
     :Options: - :any:`_JOINT_TYPE_DEFAULT_`: Default joint definition.
               - :any:`_JOINT_TYPE_BONY_LANDMARK_`: Joint definition based on bony landmarks. This will create a joint which resembles what is often used in traditional gait analysis. (E.g. revolute knee joint along the femoral condyles).
               - :any:`_JOINT_TYPE_USERDEFINED_`: User-defined joint. This will exclude the joint and which nodes.
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_JOINT_TYPE_KNEE_RIGHT
@@ -1148,10 +1455,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_constant:`_JOINT_TYPE_DEFAULT_`
-    :Example: :anyscript:`#define BM_JOINT_TYPE_KNEE_RIGHT _JOINT_TYPE_DEFAULT_`
+    :Example: ``#define BM_JOINT_TYPE_KNEE_RIGHT _JOINT_TYPE_DEFAULT_``
     :Options: - :any:`_JOINT_TYPE_DEFAULT_`: Default joint definition.
               - :any:`_JOINT_TYPE_BONY_LANDMARK_`: Joint definition based on bony landmarks. This will create a joint which resembles what is often used in traditional gait analysis. (E.g. revolute knee joint along the femoral condyles).
               - :any:`_JOINT_TYPE_USERDEFINED_`: User-defined joint. This will exclude the joint and which nodes.
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_JOINT_TYPE_KNEE_LEFT
@@ -1160,10 +1472,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_constant:`_JOINT_TYPE_DEFAULT_`
-    :Example: :anyscript:`#define BM_JOINT_TYPE_KNEE_LEFT _JOINT_TYPE_DEFAULT_`
+    :Example: ``#define BM_JOINT_TYPE_KNEE_LEFT _JOINT_TYPE_DEFAULT_``
     :Options: - :any:`_JOINT_TYPE_DEFAULT_`: Default joint definition.
               - :any:`_JOINT_TYPE_BONY_LANDMARK_`: Joint definition based on bony landmarks. This will create a joint which resembles what is often used in traditional gait analysis. (E.g. revolute knee joint along the femoral condyles).
               - :any:`_JOINT_TYPE_USERDEFINED_`: User-defined joint. This will exclude the joint and which nodes.
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_JOINT_TYPE_PATELLOFEMORAL_RIGHT
@@ -1172,10 +1489,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_constant:`_JOINT_TYPE_DEFAULT_`
-    :Example: :anyscript:`#define BM_JOINT_TYPE_PATELLOFEMORAL_RIGHT _JOINT_TYPE_DEFAULT_`
+    :Example: ``#define BM_JOINT_TYPE_PATELLOFEMORAL_RIGHT _JOINT_TYPE_DEFAULT_``
     :Options: - :any:`_JOINT_TYPE_DEFAULT_`: Default joint definition.
               - :any:`_JOINT_TYPE_BONY_LANDMARK_`: Joint definition based on bony landmarks. This will create a joint which resembles what is often used in traditional gait analysis. (E.g. revolute knee joint along the femoral condyles).
               - :any:`_JOINT_TYPE_USERDEFINED_`: User-defined joint. This will exclude the joint and which nodes.
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_JOINT_TYPE_PATELLOFEMORAL_LEFT
@@ -1184,10 +1506,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_constant:`_JOINT_TYPE_DEFAULT_`
-    :Example: :anyscript:`#define BM_JOINT_TYPE_PATELLOFEMORAL_LEFT _JOINT_TYPE_DEFAULT_`
+    :Example: ``#define BM_JOINT_TYPE_PATELLOFEMORAL_LEFT _JOINT_TYPE_DEFAULT_``
     :Options: - :any:`_JOINT_TYPE_DEFAULT_`: Default joint definition.
               - :any:`_JOINT_TYPE_BONY_LANDMARK_`: Joint definition based on bony landmarks. This will create a joint which resembles what is often used in traditional gait analysis. (E.g. revolute knee joint along the femoral condyles).
               - :any:`_JOINT_TYPE_USERDEFINED_`: User-defined joint. This will exclude the joint and which nodes.
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_JOINT_TYPE_ANKLE_RIGHT
@@ -1196,10 +1523,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_constant:`_JOINT_TYPE_DEFAULT_`
-    :Example: :anyscript:`#define BM_JOINT_TYPE_ANKLE_RIGHT _JOINT_TYPE_DEFAULT_`
+    :Example: ``#define BM_JOINT_TYPE_ANKLE_RIGHT _JOINT_TYPE_DEFAULT_``
     :Options: - :any:`_JOINT_TYPE_DEFAULT_`: Default joint definition.
               - :any:`_JOINT_TYPE_BONY_LANDMARK_`: Joint definition based on bony landmarks. This will create a joint which resembles what is often used in traditional gait analysis. (E.g. revolute knee joint along the femoral condyles).
               - :any:`_JOINT_TYPE_USERDEFINED_`: User-defined joint. This will exclude the joint and which nodes.
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_JOINT_TYPE_ANKLE_LEFT
@@ -1208,10 +1540,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_constant:`_JOINT_TYPE_DEFAULT_`
-    :Example: :anyscript:`#define BM_JOINT_TYPE_ANKLE_LEFT _JOINT_TYPE_DEFAULT_`
+    :Example: ``#define BM_JOINT_TYPE_ANKLE_LEFT _JOINT_TYPE_DEFAULT_``
     :Options: - :any:`_JOINT_TYPE_DEFAULT_`: Default joint definition.
               - :any:`_JOINT_TYPE_BONY_LANDMARK_`: Joint definition based on bony landmarks. This will create a joint which resembles what is often used in traditional gait analysis. (E.g. revolute knee joint along the femoral condyles).
               - :any:`_JOINT_TYPE_USERDEFINED_`: User-defined joint. This will exclude the joint and which nodes.
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_JOINT_TYPE_SUBTALAR_RIGHT
@@ -1220,10 +1557,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_constant:`_JOINT_TYPE_DEFAULT_`
-    :Example: :anyscript:`#define BM_JOINT_TYPE_SUBTALAR_RIGHT _JOINT_TYPE_DEFAULT_`
+    :Example: ``#define BM_JOINT_TYPE_SUBTALAR_RIGHT _JOINT_TYPE_DEFAULT_``
     :Options: - :any:`_JOINT_TYPE_DEFAULT_`: Default joint definition.
               - :any:`_JOINT_TYPE_BONY_LANDMARK_`: Joint definition based on bony landmarks. This will create a joint which resembles what is often used in traditional gait analysis. (E.g. revolute knee joint along the femoral condyles).
               - :any:`_JOINT_TYPE_USERDEFINED_`: User-defined joint. This will exclude the joint and which nodes.
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_JOINT_TYPE_SUBTALAR_LEFT
@@ -1232,10 +1574,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_constant:`_JOINT_TYPE_DEFAULT_`
-    :Example: :anyscript:`#define BM_JOINT_TYPE_SUBTALAR_LEFT _JOINT_TYPE_DEFAULT_`
+    :Example: ``#define BM_JOINT_TYPE_SUBTALAR_LEFT _JOINT_TYPE_DEFAULT_``
     :Options: - :any:`_JOINT_TYPE_DEFAULT_`: Default joint definition.
               - :any:`_JOINT_TYPE_BONY_LANDMARK_`: Joint definition based on bony landmarks. This will create a joint which resembles what is often used in traditional gait analysis. (E.g. revolute knee joint along the femoral condyles).
               - :any:`_JOINT_TYPE_USERDEFINED_`: User-defined joint. This will exclude the joint and which nodes.
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_JOINT_TYPE_PATELLATENDON_RIGHT
@@ -1244,10 +1591,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_constant:`_JOINT_TYPE_DEFAULT_`
-    :Example: :anyscript:`#define BM_JOINT_TYPE_PATELLATENDON_RIGHT _JOINT_TYPE_DEFAULT_`
+    :Example: ``#define BM_JOINT_TYPE_PATELLATENDON_RIGHT _JOINT_TYPE_DEFAULT_``
     :Options: - :any:`_JOINT_TYPE_DEFAULT_`: Default joint definition.
               - :any:`_JOINT_TYPE_BONY_LANDMARK_`: Joint definition based on bony landmarks. This will create a joint which resembles what is often used in traditional gait analysis. (E.g. revolute knee joint along the femoral condyles).
               - :any:`_JOINT_TYPE_USERDEFINED_`: User-defined joint. This will exclude the joint and which nodes.
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_JOINT_TYPE_PATELLATENDON_LEFT
@@ -1256,10 +1608,15 @@ All BodyModel parameters
 
 
     :Default: :ammr:bm_constant:`_JOINT_TYPE_DEFAULT_`
-    :Example: :anyscript:`#define BM_JOINT_TYPE_PATELLATENDON_LEFT _JOINT_TYPE_DEFAULT_`
+    :Example: ``#define BM_JOINT_TYPE_PATELLATENDON_LEFT _JOINT_TYPE_DEFAULT_``
     :Options: - :any:`_JOINT_TYPE_DEFAULT_`: Default joint definition.
               - :any:`_JOINT_TYPE_BONY_LANDMARK_`: Joint definition based on bony landmarks. This will create a joint which resembles what is often used in traditional gait analysis. (E.g. revolute knee joint along the femoral condyles).
               - :any:`_JOINT_TYPE_USERDEFINED_`: User-defined joint. This will exclude the joint and which nodes.
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_GLOBAL_REFERENCE_FRAME_SWITCH
@@ -1268,7 +1625,7 @@ All BodyModel parameters
 
 
     :Default: ``OFF``
-    :Example: :anyscript:`#define BM_GLOBAL_REFERENCE_FRAME_SWITCH OFF`
+    :Example: ``#define BM_GLOBAL_REFERENCE_FRAME_SWITCH OFF``
     :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
 
 
@@ -1278,4 +1635,4 @@ All BodyModel parameters
 
 
     :Default: ``..GenericGlobalRefFrame``
-    :Example: :anyscript:`#define BM_GLOBAL_REFERENCE_FRAME ..GenericGlobalRefFrame`
+    :Example: ``#define BM_GLOBAL_REFERENCE_FRAME ..GenericGlobalRefFrame``

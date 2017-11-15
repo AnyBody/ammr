@@ -2,32 +2,38 @@
 The Shoulder Arm Model
 ======================
 
-The ShoulderArm model contains data from two different persons. Most of the data
-that has been used in this model comes from the Dutch Shoulder Group and their 
-`should model available online 
+The ShoulderArm model contains data from two different persons. Most of this data
+comes from the Dutch Shoulder Group and their 
+`shoulder model available online 
 <http://homepage.tudelft.nl/g6u61/repository/shoulder/overview.htm>`_
+
+.. todo:: What is the VU and MAYO study shown below? Need to add references?
 
 The model is built using data from subject 2 from the VU study and subject 2
 from the MAYO study. The files, which contains the name "forearm", are
 built on data from the MAYO study
 
-A shoulder rhythm is also available in the repository it can be switched on
-and off, for full details on its implementation please see this report
+The shoulder is the site of complex, mutually coupled motions of the scapula,
+clavicle and the humerus. To balance realism with model simplicity, the model 
+defines motions of the scapula and clavicle as mathematical functions of the 
+glenohumeral joint angles, also known as a "Shoulder rhythms".
+
+The AnyBody shoulder model's rhythm can be switched on
+and off, the full details of which can be seen in this report
 `Shoulder Rhythm
 Report <https://www.anybodytech.com/download.html?did=publications.files&fname=ShoulderRhythmReport.pdf>`__.
 
 
-
 .. raw:: html 
 
-    <video width="45%" style="display:inline; margin: 0 auto;" controls autoplay loop>
+    <video width="45%" style="display:block; margin: 0 auto;" controls autoplay loop>
         <source src="../_static/ShoulderArm_rotating_model.mp4" type="video/mp4">
     Your browser does not support the video tag.
     </video>
-    <img src="../_static/ShoulderCloseupBack.jpg" alt="Smiley face" width="45%">
+    <!--<img src="../_static/ShoulderCloseupBack.jpg" alt="Smiley face" width="45%">-->
 
-
-.. centered:: *Figure shoulder model*
+..
+    .. centered:: *Figure shoulder model*
 
 
 Example Configuration
@@ -49,15 +55,26 @@ Short example of how to configure the Shoulder Arm model:
 
 .. seealso::
    
-   The :doc:`Arm configuration parameters <../BM_Config/Arm_configurations>` for a
-   full list of Arm parmaeters or :doc:`configuration section <../BM_Config/HumanBody_configurations>`
-   for more information how to configure your model using BM parameters.
+   See :doc:`Arm configuration parameters <../BM_Config/Arm_configurations>` for a
+   full list of configuration parmaeters or :doc:`configuration section <../BM_Config/index>`
+   for more information on BM parameters.
 
 
 
 The model consists of the following joints:
 
-.. table:: Joints and kinematic contraints
+.. rst-class:: centered
+
+
+
+..
+    .. Image:arm.png
+
+
+Terminology
+---------------
+.. rst-class:: centered
+.. table:: Joints and kinematic contraints of the arm model
     :widths: 1 2 4
     :align: center
     :column-alignment: center left left
@@ -65,63 +82,45 @@ The model consists of the following joints:
     :column-dividers: none none none none
 
     ================= ==================== =======================================================
-    Name              Description          Joint typeType
+    Name              Description          Joint/Constraint Type
     ================= ==================== =======================================================
     SC                SternoClavicular     Spherical joint
     AC                AcromioClavicular    Spherical joint
-    GH                Glenohumeral joint   Spherical joint (Normal reactions of the spherical 
-                                           joint is not used instead they are created so that 
-                                           they fall within the glenoid cavity the file,
-                                           please see the file GHReactions.any for details
-    AI                                     One dimensional constraint between
-                                           the scapula and the thorax at
-                                           the bonylandmark AI om scapula
-    AA                                     One dimensional constraint between 
-                                           the scapula and the thorax at
-                                           the bonylandmark AA om scapula
-    ConoideumLigament                      The length of this segment is driven
-                                           to a constant length
+    GH                Glenohumeral joint   Spherical joint (The default joint reactions are  
+                                           disabled, since they do not automatically ensure that
+                                           the net force vector passes through the glenoid cavity. 
+                                           The special force elements providing these biofidelic
+                                           reaction forces are contained in the file "GHReactions.any")
+    AI                                     One DOF constraint requiring the bony landmark
+                                           AI on the scapula, to stay in contact with the thorax 
+    AA                                     One DOF constraint requiring the bony landmark
+                                           AA on the scapula, to stay in contact with the thorax 
+    ConoideumLigament                      The length of this ligament is driven
+                                           to always remain constant
     FE                Flexion-extension    Revolute joint
                       of the elbow    
     PS                Pronation-supination 
-                      joint or the forearm Combination of joints in distal and
+                      joint or the forearm Combination of joints at the distal and
                                            proximal end of the radius bone that
-                                           leaves one dof free which is 
+                                           leaves one DOF free which is 
                                            pronation/supination of the forearm
-    Wrist joint                            created as two revolute joints where 
-                                           the axis of rotations are not coincident
+    Wrist joint                            Two successive revolute joints where 
+                                           the axes of rotations are not coincident
     ================= ==================== =======================================================
 
-.. Image:arm.png
 
+Resources
+------------
 
-Summery
----------------
+More details on the ShoulderArm model can be found online:
 
-
-.. table:: Body part summery
-    :widths: 1 2 4
-    :align: center
-    :column-alignment: center left left
-    :column-wrapping: false true true
-    :column-dividers: none none none none
-
-    ================= ==================== =================================
-    Name              Description          Joint typeType
-    SC                SternoClavicular     spherical joint
-    AC      
-    ================= ==================== =================================
+-  Webcast: `Validation of the AnyBody version of the Dutch Shoulder Model by the in-vivo measurement of GH contact forces by Bergmann et al.
+   <https://www.anybodytech.com/downloads/documentation/#2007426>`__
 
 
 
 
-
-
-
-
-
-
-Anatomy references:
+Anatomy References
 ----------------------
 
 -  F.C.T. van der Helm and R. Veenbaas, Modeling the mechanical efect of
@@ -165,7 +164,7 @@ Anatomy references:
    musculoskeletal modelling of the shoulder mechanism. Journal of
    Biomechanics, vol. 24, no. 7, pp. 615-629, 1991
 
-Muscle references:
+Muscle References
 ----------------------
 
 -  Jacobson, M. D., R. Raab, B. M. Fazeli, R. A. Abrams, M. J. Botte,

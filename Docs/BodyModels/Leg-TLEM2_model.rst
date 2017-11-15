@@ -1,64 +1,103 @@
 
-Tweente Lower Extremity Model version 2
-=======================================
+Twente Lower Extremity Model v.2.1
+==================================
 
-The cervical spine model contains 7 vertebrae with 3 DoF spherical
-joints from T1 to C2, a 1 DoF joint between C2 and skull and 136 muscle
-fascicles. The center of rotations is based on Amevo et al. 1991.
+The Twente lower extremity model version 2 (TLEM2) is a successor to the TLEM
+model documented `here <Leg-TLEM_model.html>`__. It contains **6 DOF** and **169
+muscles**.
 
+.. raw:: html 
 
-More details can be found online at:
+    <video width="45%" style="display:block; margin: 0 auto;" controls autoplay loop>
+        <source src="../_static/TLEM2_rotating_model.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+    </video>
 
--  Data based on a neck model described by `Marike van der
-   Horst <http://alexandria.tue.nl/extra2/200211336.pdf>`__
+The model is based on published anatomical data produced from a cadaver study in
+the `TLEMsafe EU project <https://www.tlemsafe.eu/>`__ (see the study by Carbone
+et al. at the University of Twente, The Netherlands). The first implmentation of
+the musculoskeletal model was created by Vincenzo Carbone and René Fluit from
+the University of Twente [CFPK15]_.
 
--  Webcast `A detailed rigid-body cervical spine model based on inverse
-   dynamics (Dr. Mark de Zee, 18. September,
-   2007) <https://www.anybodytech.com/anybody.html?fwd=webcasts#2007918>`__
-   This webcast presents a detailed model of the cervical spine, which
-   was presented at the ISB Congress in Taipei. We will go through the
-   model and its assumptions including the muscles and preliminary
-   validation. Moreover, an application will be presented where we try
-   to predict neuromuscular adaptation of experimentally induced neck
-   pain using the cervical spine model. (The webcast is available for
-   playback.)
-
-References:
-
--  de Zee, M., Falla, D., Farina, D. & Rasmussen, J. (2007), "A detailed
-   rigid-body cervical spine model based on inverse dynamics", Journal
-   of Biomechanics, vol. 40 (2), pp. S284.
-
-The “LegTLEM” Model
--------------------
-
-Implementation of a new lower extremity model labeled the Twente Lower
-Extremity Model (TLEM) consisting of 159 muscles, and 6 joint degrees of
-freedom is almost completed. It has been validated against ‘state of the
-art’ literature with respect to its biomechanical performance and first
-applications in gait and cycling deliver very convincing results.
-
-The model is based on published morphological consistent anatomical
-dataset on muscle and joint parameters by Martijn Klein-Horsman from the
-University of Twente, The Netherlands. The implementation of the model
-was started by Karin Gorter, a Master Student, also from the University
-of Twente, during a three-month stay at Aalborg University and has been
-finished by the AnyBody Technology.
-
-The current version has been updated several times and is still being
-maintained in collaboration with The AnyBody Research Group at Aalborg
-University (DK) (www.anybody.aau.dk) and University of Twente (NL) under
-the TLEMsafe project (`www.tlemsafe.eu <http://www.tlemsafe.eu>`__).
-Currently, new cadaver datasets are recorded within the TLEMsafe
-project.
+After the TLEMSafe project the model was futher refined
+in the `Life
+Long Joints project <https://lifelongjoints.eu/>`__ where its anatomical
+fidelity and joint force prediction accuracy were improved by De Pieri et al.
+[DLGR17]_, resulting the version 2.1 which was integrated here in the AMMR. 
 
 
-More details can be found online:
+Key feature of this TLEM 2.1 model in the AMMR is:
 
--  Report containing moment arm validation for `ESA:
-   report <http://www.anybodytech.com/fileadmin/downloads/Final_Report.pdf>`__
+*   Unlike the old TLEM model, the dataset consisted of muscle attachment data &
+    bone surface scans from the same subject. This makes TLEM2 the more
+    anatomically consistent model. Bone contact at joints such as the knee thus
+    consists of naturally congruent surfaces, making it easier to implement
+    Force Dependent Kinematics on joint moments (:tutorials:doc:`see tutorial <ForceDependentKinematics/index>`)
+*   Updated the wrapping surfaces for several muscles. These changes were engineered to 
+    result in realistic muscle coordination and hip contact forces as documented
+    in the publication by De Pieri et al. [DLGR17]_
 
--  Link to publication of the dataset: `Klein-Horsman et al.
-   Morphological muscle and joint parameters for musculoskeletal
-   modelling of the lower extremity. Clin Biomech, 2007, 22,
-   239-247 <http://linkinghub.elsevier.com/retrieve/pii/S0268003306001896>`__
+.. figure::  _static/Wrapping_TLEM2.png
+    :width: 80%
+
+    *New wrapping surfaces for (clockwise) Gluteus maximus, Ilio-Psoas, Gluteus
+    medius & minimus, Hamstrings & Gastrocnemius (version 1.2). All figures are
+    from the publication by De Pieri et al. [DLGR17]_*
+
+
+Example Configuration
+-----------------------
+
+Short example of how to configure the model with the TLEM model, Hill type
+muscle model and only one leg:  
+
+.. code-block:: AnyScriptDoc
+
+    #define BM_LEG_MODEL _LEG_MODEL_TLEM2_
+    #define BM_LEG_RIGHT ON
+    #define BM_LEG_LEFT OFF
+    #define BM_LEG_MUSCLE _MUSCLES_3E_HILL_
+
+
+.. rst-class:: float-right
+
+.. seealso::
+   
+   See :doc:`Leg configuration parameters <../BM_Config/Leg_configurations>` for a
+   full list of configuration parameters or :doc:`configuration section <../BM_Config/index>`
+   for more information on BM parameters.
+
+
+Resources
+-----------------------
+
+More details on the TLEM2 model can be found online:
+
+- Webcast: `TLEMsafe: Personalization of musculoskeletal models and prediction of functional outcome <https://www.anybodytech.com/downloads/documentation/#20150903>`__
+
+- Webcast: `TLEMsafe: An integrated system to improve predictability of functional recovery of patients requiring musculoskeletal surgery <https://www.anybodytech.com/downloads/documentation/#20130305>`__
+
+
+References
+-----------------------
+
+If you need to cite the model use the following references: 
+
+.. [DLGR17] De Pieri,E., Lund,ME., Gopalakrishnan, A, Rasmussen, KP., Lunn, DE., Ferguson, SJ.
+   “Biofidelic Muscle Wrapping in a Musculoskeletal Model Improves Hip Contact Force Prediction Accuracy”
+   PlosOne (2017) **Submitted**
+
+.. [CFPK15] Carbone,V., Fluit,R., Pellikaan,P., van der Krogt,MM., Jansen,D., Damsgaard,M., 
+   Vigneron,L.,Feilkas,T., Koopman,HF., Verdonschot,N., 
+   "Tlem 2.0–A comprehensive musculoskeletal geometry dataset for subject-specific 
+   modeling of lower extremity", J. Biomech.,48(5) (2015) 734-741.   
+
+Other usefull papers using or related to the TLEM2 model are: 
+
+.. [Ca16] Carbone,V., "Subject-specific lower extremity modeling: personalization of 
+   musculoskeletal models using medical imaging and functional measurements", 
+   PhD thesis, University of Twente, Netherlands (2016).
+
+.. [CKKV16] Carbone,V., van der Krogt,MM., Koopman,HF., Verdonschot,N., "Sensitivity of subject-specific 
+   models to Hill muscle-tendon model parameters in simulations of gait", 
+   J. Biomech.,49 (2016) 1953-1960.

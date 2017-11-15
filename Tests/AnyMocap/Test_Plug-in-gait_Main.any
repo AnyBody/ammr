@@ -1,0 +1,61 @@
+//# Defintions for the python test framwork 
+//define = [
+//  {'BM_LEG_MODEL':'_LEG_MODEL_TLEM1_'}, 
+//  {'BM_LEG_MODEL':'_LEG_MODEL_TLEM2_'}, 
+//]
+
+#include "../libdef.any"
+
+#path MOCAP_PATH_MAINFILEDIR "<ANYMOCAP_EXAMPLES>/Plug-in-gait_Simple"
+#path MOCAP_PATH_MAINFILE "<MOCAP_PATH_MAINFILEDIR>/FullBody.main.any"
+#define MOCAP_NAME_MAINFILEDIR "Plug-in-gait_Simple"
+
+
+
+#ifdef TEST_NAME
+#define  MOCAP_TEST_FILENAME_PREFIX  TEST_NAME + "_"
+#else
+#define  MOCAP_TEST_FILENAME_PREFIX  "GUI_"
+#define BM_LEG_MODEL _LEG_MODEL_TLEM2_
+#define CREATE_IMAGE
+#endif
+
+#ifdef CREATE_IMAGE
+#undef MOCAP_TEST_FILENAME_PREFIX
+#define MOCAP_TEST_FILENAME_PREFIX "FullBody_"
+#path TEMP_PATH "<MOCAP_PATH_MAINFILEDIR>/Output"
+#endif
+
+
+
+// Run Analysis with a reduced number of time steps
+// to make test go faster. 
+#define N_STEP_PARAM_OPT 20
+#define N_STEP 40
+
+
+#include "<MOCAP_PATH_MAINFILE>"
+
+Main = 
+{  
+  
+  AnyOperationSequence  TestRunApplication = 
+  {
+    AnyOperation& ParameterId =  Main.RunParameterIdentification;
+    AnyOperation& RunAnalysis = Main.RunAnalysis; 
+  };
+
+  #ifndef CREATE_IMAGE
+    AnyOperation& RunTest = Main.TestRunApplication;
+  #else
+    #include "../Cameras.any"
+    AnyOperationSequence CameraInitPos = 
+    {
+      AnyOperation& ref1 = Main.RunAnalysis.LoadParameters;
+      AnyOperation& ref2 = Main.Studies.InverseDynamicStudy.InitialConditions;
+    };
+    LoadTimeCam.CameraLookAtPoint = {0.5,0.95,0};
+    LoadTimeCam.CameraFieldOfView = DesignVar(2);
+    LoadTimeCam.CameraDirection  = {-0.5,0.3,1};
+  #endif    
+};

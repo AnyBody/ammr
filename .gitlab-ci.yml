@@ -41,16 +41,21 @@ test_docs:
     - conda config --add channels conda-forge # For sphinxcontrib.autoprogram
     - conda update -q conda 
     - conda info -a
-    - conda install -q sphinx cloud_sptheme pygments_anyscript make
+    - conda install -q sphinx cloud_sptheme pygments_anyscript make matplotlib pillow
   script:
     - set -e
     - cd Docs
-    - make html
+    - make html-dev
     - cd ..
     - mkdir -p public/dev
     - cp -rT Docs/_build/html public/dev
+    - git checkout $(git describe --tags `git rev-list --tags --max-count=1`);
+    - cd Docs
+    - make clean
+    - make html
+    - cd ..
+    - cp -rT Docs/_build/html public
   only:
-    - branches
     -  /^docs.*$/
   cache:
     paths:
@@ -58,7 +63,8 @@ test_docs:
   artifacts:
     paths:
     - public
-    expire_in: 1 hour
+    expire_in: 10 hours
+
 
 
 deploy_docs:
@@ -69,11 +75,11 @@ deploy_docs:
   before_script:
     - gem install dpl
   only:
-    - web
-    - tags
+    - /^docs.*$/
+  when: manual
   script:
     - touch public/.nojekyll
-    - ls public/dev
+    - ls public
     - dpl --provider=pages --repo="AnyBody/ammr-doc" --target-branch=master --local-dir="public" --skip_cleanup --github-token=$GITHUB_TOKEN 
   #when: manual
   tags:
