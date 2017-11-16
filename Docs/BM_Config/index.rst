@@ -45,7 +45,7 @@ See the following links for details on BM parameters related to different body p
     leg
     arm
     Trunk_configurations
-    Mannequin_configurations
+    mannequin
     Scaling_configurations
     Other_configurations
 
