@@ -11,7 +11,7 @@ Contents
     index
     getting_started
     bm_config/index
-    BodyModels/BodyParts_and_models
+    body/BodyParts_and_models
     auto_examples/index
     creating_model_from_scratch
     Scaling/intro
