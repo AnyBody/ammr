@@ -53,8 +53,8 @@ muscle model and only one leg:
 
 .. seealso::
    
-   See :doc:`Leg configuration parameters <../BM_Config/leg>` for a
-   full list of configuration parmaeters or :doc:`configuration section <../BM_Config/index>`
+   See :doc:`Leg configuration parameters <../bm_config/leg>` for a
+   full list of configuration parmaeters or :doc:`configuration section <../bm_config/index>`
    for more information on BM parameters.
 
 

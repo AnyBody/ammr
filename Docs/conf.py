@@ -170,7 +170,7 @@ ammr_version_short = ammr_version.rpartition('.')[0]
 
 
 rst_epilog = f"""
-.. include:: /BM_Config/Substitutions.txt
+.. include:: /bm_config/Substitutions.txt
 
 .. |AMS| replace:: AnyBody Modeling System™
 .. |AMS_VERSION_X| replace:: {ams_version_x}

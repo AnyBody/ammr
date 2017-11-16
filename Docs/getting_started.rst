@@ -110,7 +110,7 @@ The Human Body Model is configured through a number of ``#define`` and ``#path``
 statements. These statements are all prefixed with ``BM_`` inside AnyScript,
 and they can also be referred to as "bm-statements". 
 
-.. seealso:: :doc:`The documentation on BM configuration </BM_Config/index>`
+.. seealso:: :doc:`The documentation on BM configuration </bm_config/index>`
 
 
 Including the Human Model

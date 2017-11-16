@@ -49,7 +49,7 @@ also enabled.
 
 .. seealso::
    
-   The :doc:`Trunk configuration parameters <../BM_Config/trunk>` for a
+   The :doc:`Trunk configuration parameters <../bm_config/trunk>` for a
    full list of Trunk parmaeters.
 
 Resources
