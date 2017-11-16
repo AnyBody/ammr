@@ -7,5 +7,5 @@ About the AMMR
     :maxdepth: 1
 
     changelog 
-    Contribute
+    contribute
     legal
