@@ -43,7 +43,7 @@ See the following links for details on BM parameters related to different body p
     :maxdepth: 1
 
     Leg_configurations
-    Arm_configurations
+    arm
     Trunk_configurations
     Mannequin_configurations
     Scaling_configurations

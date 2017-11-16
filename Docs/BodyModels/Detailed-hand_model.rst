@@ -57,5 +57,5 @@ detailed hand model by setting the values  in ``Main.HumanModel.Mannequin``:
 
 .. seealso::
    
-   The :doc:`Arm configuration parameters <../BM_Config/Arm_configurations>` for a
+   The :doc:`Arm configuration parameters <../BM_Config/arm>` for a
    full list of parmaeters.

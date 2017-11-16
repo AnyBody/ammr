@@ -55,7 +55,7 @@ Short example of how to configure the Shoulder Arm model:
 
 .. seealso::
    
-   See :doc:`Arm configuration parameters <../BM_Config/Arm_configurations>` for a
+   See :doc:`Arm configuration parameters <../BM_Config/arm>` for a
    full list of configuration parmaeters or :doc:`configuration section <../BM_Config/index>`
    for more information on BM parameters.
 
