@@ -165,7 +165,7 @@ Only the model elements which are referenced from within the Study, will be incl
 the simulation. In this case everything in ``Main.Model`` folder is part of the simulation.
 
 
-.. seealso:: :doc:`The full tutorial on how to create a HumanModel from scratch </Creating_model_from_scratch>`
+.. seealso:: :doc:`The full tutorial on how to create a HumanModel from scratch </creating_model_from_scratch>`
 
 
 .. _AnyBody Modelling System: https://www.anybodytech.com/software/ams/

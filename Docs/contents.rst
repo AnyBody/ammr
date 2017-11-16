@@ -13,7 +13,7 @@ Contents
     BM_Config/index
     BodyModels/BodyParts_and_models
     auto_examples/index
-    Creating_model_from_scratch
+    creating_model_from_scratch
     Scaling/intro
     anymocap
     about
