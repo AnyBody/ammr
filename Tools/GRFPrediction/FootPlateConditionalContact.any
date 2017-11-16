@@ -19,8 +19,7 @@
    NUMBER_OF_NODES: 
            The number of contact nodes to expect within NODE_BASE_FRAME
    SHOW_TRIGGER_VOLUME:
-           Debug option to visualize the volume where contacts may be 
-           triggered.
+           Visualize the volume where contacts may be triggered.
    
    Optional initialization:
    ------------------------
@@ -28,7 +27,6 @@
     .LimitDistLow                : 
     .LimitDistHigh               :
     .LimitVelHigh                :
-    .Radius                      :
     .Strength                    :
     .FrictionCoefficient         :
     .ScaleFactor                 :
@@ -49,7 +47,6 @@
       [ LimitDistHigh = 0.04;               ]
       [ LimitVelHigh = 0.8;                 ]
       [ GroundVelocity = {0.0, 0.0, 0.0};   ]
-      [ Radius = 10;                        ]
       [ Strength = 200;                     ]
       [ FrictionCoefficient = 0.5;          ]
       [ ScaleFactor = 1;                    ]
@@ -81,7 +78,7 @@ SHOW_TRIGGER_VOLUME = 0
     #var AnyVar LimitDistLow = DesignVar(-0.10);
     #var AnyVar LimitDistHigh = DesignVar(0.04);
     #var AnyVar LimitVelHigh = DesignVar(0.8);
-    #var AnyVar Radius = DesignVar(10);
+    #var AnyVar Radius = DesignVar(1000); ///< Set this very high to avoid it plate size to have an effect
     #var AnyVar Strength = DesignVar(200);
     #var AnyVar FrictionCoefficient = DesignVar(0.5);
     #var AnyVar ScaleFactor = DesignVar(1);
@@ -161,6 +158,52 @@ SHOW_TRIGGER_VOLUME = 0
     Opacity = .OnOff;
   };
   
+                    
+  #if SHOW_TRIGGER_VOLUME == 1
+  AnyDrawLine DrawUpperTriggerVolume = 
+  {
+    AnyRefFrame & ref = .PlateBaseFrame;
+       AnyFloat project = {{{0,0,0},{0,1,0}, {0,0,1}},
+                           {{1,0,0},{0,0,0}, {0,0,1}},
+                           {{1,0,0},{0,1,0}, {0,0,0}}};
+    p1 =  .Contacts.Contact14.TargetObject.r*project[.Contacts.NormalDir];
+    p0 =  .Contacts.Contact14.TargetObject.r*project[.Contacts.NormalDir] + .Settings.LimitDistHigh*eye(3)[.Contacts.NormalDir];
+    #var Opacity = 0.05;
+    Pickable = On;
+    //PickableZOrder = -1;
+    Line = {
+        #var Thickness = 0.45;
+        #var RGB = {0.6, 0.6, 0.6};
+        Start.Style = Line3DCapStyleNone;
+        End.Style = Line3DCapStyleNone;
+        End.Thickness = Thickness;
+        Start.Thickness = Thickness;
+    };
+  };
+  AnyDrawLine DrawLowerTriggerVolume = 
+  {
+    AnyRefFrame & ref = .PlateBaseFrame;
+       AnyFloat project = {{{0,0,0},{0,1,0}, {0,0,1}},
+                           {{1,0,0},{0,0,0}, {0,0,1}},
+                           {{1,0,0},{0,1,0}, {0,0,0}}};
+    p1 =  .Contacts.Contact14.TargetObject.r*project[.Contacts.NormalDir] + .Settings.LimitDistLow*eye(3)[.Contacts.NormalDir];
+    p0 =  .Contacts.Contact14.TargetObject.r*project[.Contacts.NormalDir];
+    #var Opacity = 0.05;
+    Pickable = On;
+    //PickableZOrder = -1;
+    Line = {
+        #var Thickness = 0.45;
+        #var RGB = {0.6, 0.6, 0.6};
+        Start.Style = Line3DCapStyleDisk;
+        End.Style = Line3DCapStyleNone;
+        End.Thickness = Thickness;
+        Start.Thickness = Thickness;
+    };
+  };
+  #endif
+
+  
+  
   //  //<--Code for calculationg COP
   
   AnyFolder Contacts = {
@@ -192,8 +235,7 @@ SHOW_TRIGGER_VOLUME = 0
     #if 0 < NUMBER_OF_NODES
     ConditionalContactDistanceAndVelocityDepClass Contact0 (
     BaseObject = ..PlateBaseFrame ,
-    TargetObject = ..NodesBaseFolder.Node0,
-    DisplayTriggerVolume = SHOW_TRIGGER_VOLUME ) = 
+    TargetObject = ..NodesBaseFolder.Node0 ) = 
     {
       UserDefinedDistLimitLow = ..Settings.LimitDistLow;
       UserDefinedDistLimitHigh = ..Settings.LimitDistHigh; 
