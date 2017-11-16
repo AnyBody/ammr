@@ -42,28 +42,28 @@ which can be assembled into the full human in many combinations.
     :caption: Trunk
 
     Lumbar-spine_model
-    Cervical-spine_model
+    cervical_spine_model
 
 
 .. toctree::
     :maxdepth: 1
     :caption: Upper extremity
 
-    Shoulder-arm_model
-    Detailed-hand_model
+    shoulder_arm_model
+    detailed_hand_model
 
 
 .. toctree::
     :maxdepth: 1
     :caption: Lower extremity
 
-    Leg_model
-    Leg-TLEM_model
+    leg_model
+    leg_tlem_model
     Leg-TLEM2_model
 
 .. toctree::
     :maxdepth: 1
     :caption: other
 
-    Symmetric_mandible_model
-    AalborgMandible
+    symmetric_mandible_model
+    aalborg_mandible

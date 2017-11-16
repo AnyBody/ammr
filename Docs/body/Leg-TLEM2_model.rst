@@ -2,8 +2,8 @@
 Twente Lower Extremity Model v.2.1
 ==================================
 
-The Twente lower extremity model version 2 (TLEM2) is a successor to the TLEM
-model documented `here <Leg-TLEM_model.html>`__. It contains **6 DOF** and **169
+The Twente lower extremity model version 2 (TLEM2) is a successor to the :doc:`TLEM
+model <leg_tlem_model>`. It contains **6 DOF** and **169
 muscles**.
 
 .. raw:: html 
