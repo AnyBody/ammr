@@ -42,7 +42,7 @@ See the following links for details on BM parameters related to different body p
 .. toctree::
     :maxdepth: 1
 
-    Leg_configurations
+    leg
     arm
     Trunk_configurations
     Mannequin_configurations
