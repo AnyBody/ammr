@@ -11,14 +11,14 @@ The *AnyBody Model Repository* (AMMR) comes bundled with the
 `AnyBody Modelling System`_. But it must be installed/unpacked manually after you installed AnyBody. 
 You can install the AMMR from the *AnyBody Assistent* dialog which is presented when AnyBody starts. 
 
-.. seealso:: :doc:`Detailed guide on how to install the AMMR <AMMR_Installation>`:
+.. seealso:: :doc:`Detailed guide on how to install the AMMR <ammr_installation>`:
 
 
 .. toctree::
     :maxdepth: 1
     :hidden: 
 
-    AMMR_Installation
+    ammr_installation
 
 
 .. 
@@ -110,7 +110,7 @@ The Human Body Model is configured through a number of ``#define`` and ``#path``
 statements. These statements are all prefixed with ``BM_`` inside AnyScript,
 and they can also be referred to as "bm-statements". 
 
-.. seealso:: :doc:`The documentation on BM configuration </BM_Config/index>`
+.. seealso:: :doc:`The documentation on BM configuration </bm_config/index>`
 
 
 Including the Human Model
@@ -165,7 +165,7 @@ Only the model elements which are referenced from within the Study, will be incl
 the simulation. In this case everything in ``Main.Model`` folder is part of the simulation.
 
 
-.. seealso:: :doc:`The full tutorial on how to create a HumanModel from scratch </Creating_model_from_scratch>`
+.. seealso:: :doc:`The full tutorial on how to create a HumanModel from scratch </creating_model_from_scratch>`
 
 
 .. _AnyBody Modelling System: https://www.anybodytech.com/software/ams/

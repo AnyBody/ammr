@@ -6,6 +6,6 @@ About the AMMR
 .. toctree::
     :maxdepth: 1
 
-    CHANGELOG 
-    Contribute
+    changelog 
+    contribute
     legal
