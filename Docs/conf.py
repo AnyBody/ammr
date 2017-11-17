@@ -170,7 +170,7 @@ ammr_version_short = ammr_version.rpartition('.')[0]
 
 
 rst_epilog = f"""
-.. include:: /BM_Config/Substitutions.txt
+.. include:: /bm_config/Substitutions.txt
 
 .. |AMS| replace:: AnyBody Modeling System™
 .. |AMS_VERSION_X| replace:: {ams_version_x}
@@ -273,7 +273,7 @@ html_favicon = '_static/favicon.ico'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static', 'BodyModels/_static']
+html_static_path = ['_static', 'body/_static']
 
 # Custom sidebar templates, maps document names to template names.
 #html_sidebars = {'**': ['searchbox.html', 'globaltoc.html']}
