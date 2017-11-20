@@ -38,7 +38,7 @@ New lower extremity model (TLEM2.1)
     * Various minor bug fixes from the orignal implementation used in the TLEMSafe project. 
     *  Corrected the femoral attachment points for the popliteus muscle
 
-* See the dedicated :doc:`TLEM2.1 page </BodyModels/Leg-TLEM2_model>` page for more information.
+* See the dedicated :doc:`TLEM2.1 page </body/Leg-TLEM2_model>` page for more information.
 
 
 AnyMocap
@@ -103,8 +103,9 @@ Arm model
   ``BM_ARM_SHOULDER_RHYTHM`` are now used instead of individual switches for right and left side, which were deprecated. 
 * Muscle wrapping surfaces were updated for more physiological behaviour.
 * Scapula reaction contact forces were simplified, and do not longer utilize slider segments. 
+* Conoid ligament length now scales along with the scapula width.
 
-
+  
 Minor Changes: 
 ===============
 
@@ -119,6 +120,7 @@ Minor Changes:
 * The initial positions of the pelvis now use the anatomical reference frame.
   This follows the logic from the initial rotation of the pelvis which also uses
   the anatomical frame.
+* DeltoidMuscleConnector segment loading time positioning now depends on the Humerus segment.  
 * Updates to the TLEM 1 model. The commulated small bug fixes and updates to the TLEM1 model means that we now 
   denote the model 1.2.
 * In TLEM models make the opacity of the patellar tendon dependent on the opacity of the patellar surface.

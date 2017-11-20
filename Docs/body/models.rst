@@ -32,7 +32,7 @@ which can be assembled into the full human in many combinations.
 
 .. note:: Parts of the AAUHuman (except the
     mandible) are by default assembled together into a full body model.
-    See :doc:`/BM_Config/index` for re-configuring the model to for example, only represent the trunk, or use a different leg/muscle model.
+    See :doc:`/bm_config/index` for re-configuring the model to for example, only represent the trunk, or use a different leg/muscle model.
 
 
 .. rubric:: Models
@@ -42,28 +42,28 @@ which can be assembled into the full human in many combinations.
     :caption: Trunk
 
     Lumbar-spine_model
-    Cervical-spine_model
+    cervical_spine_model
 
 
 .. toctree::
     :maxdepth: 1
     :caption: Upper extremity
 
-    Shoulder-arm_model
-    Detailed-hand_model
+    shoulder_arm_model
+    detailed_hand_model
 
 
 .. toctree::
     :maxdepth: 1
     :caption: Lower extremity
 
-    Leg_model
-    Leg-TLEM_model
+    leg_model
+    leg_tlem_model
     Leg-TLEM2_model
 
 .. toctree::
     :maxdepth: 1
     :caption: other
 
-    Symmetric_mandible_model
-    AalborgMandible
+    symmetric_mandible_model
+    aalborg_mandible

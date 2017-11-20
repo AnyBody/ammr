@@ -42,12 +42,12 @@ See the following links for details on BM parameters related to different body p
 .. toctree::
     :maxdepth: 1
 
-    Leg_configurations
-    Arm_configurations
-    Trunk_configurations
-    Mannequin_configurations
-    Scaling_configurations
-    Other_configurations
+    leg
+    arm
+    trunk
+    mannequin
+    scaling
+    other
 
 .. 
     Here is an example for the :ammr:bm_statement:`BM_LEG_MUSCLES_BOTH` parameter:

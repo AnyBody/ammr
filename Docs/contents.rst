@@ -10,10 +10,10 @@ Contents
 
     index
     getting_started
-    BM_Config/index
-    BodyModels/BodyParts_and_models
+    bm_config/index
+    body/models
     auto_examples/index
-    Creating_model_from_scratch
+    creating_model_from_scratch
     Scaling/intro
-    AnyMocap
+    anymocap
     about
