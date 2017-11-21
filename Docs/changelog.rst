@@ -38,7 +38,7 @@ New lower extremity model (TLEM2.1)
     * Update the Sartorius via points.
     * Included a more detailed version of the patella bone.
     * Various minor bug fixes from the original implementation used in the TLEMSafe project. 
-    * Corrected the femoral attachment points for the popliteus muscle
+    *  Corrected the femoral attachment points for the popliteus muscle
 
 * See the dedicated :doc:`TLEM2.1 page </body/Leg-TLEM2_model>` page for more information.
 
@@ -76,7 +76,7 @@ AMMR restructure
 
 * Added a top level ``Tools`` folder helper files and other models which don't belong in ``Body/`` or ``Application``. 
 * Moved ``Body/AAUHuman/Toolbox`` to ``Tools/ModelUtilities`` 
-* Renamed the ``Body/AUHuman`` to ``Body/Mandible_AU``
+* Renamed the ``Body/AUHuman`` to ``Body/Mandible_AU`` 
 * Restructured the antropometric ("AnyMan") folder.  The folder ``HumanModel.AntroDataSubject`` is renamed to 
   ``HumanModel.Antropometics``. The structure of the folder has also changed with a ``SegmentDimensions`` and ``SegmentMasses` subfolder. 
 
@@ -208,7 +208,8 @@ Fixed:
   and humerus. 
 * Fixed a bug where a the Pectoralis wrapping cylinder was not a included in the calibration study.
 * Fixed wrong sign for the AnklePlantarFlexion variable.
-
+* Added missing GeomScale and AnatomicalFrame for Ulna segment. 
+  
 
 
 
