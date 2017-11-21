@@ -1,4 +1,3 @@
-
 #########
 Changelog
 #########
@@ -29,6 +28,7 @@ New lower extremity model (TLEM2.1)
     * Updated wrapping for the Gluteus Maximus, Iliacus, Psoas around the hip.
     * Reworked muscle topology for Gluteus Medius and Gluteus Minimus
     * Updated wrapping for Hamstring muscles, and Gastrocnemius around the knee. 
+    * Edited muscle attachments on thigh for Vastus Medialis and Adductor Longus
     * Redefined revolute knee axis and patella joint axis and patella tendon length based on the bone geometry. 
       The original TLEM knee axis was estimated from functional trial, and was only valid 
       for very small flexion angles. 
