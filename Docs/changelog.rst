@@ -55,13 +55,30 @@ AnyMocap
   :ref:`MoCap examples <sphx_glr_auto_examples_Mocap_plot_Plug-in-gait_Simple_FullBody_GRFPrediction.py>`
   for how they are used.
 
+TLEM 1 updates
+--------------
+
+* The cumulated smaller bug fixes and updates to the TLEM1 model means that we now 
+  denote the model 1.2.
+* Changed the position of the Heel contact node, to align the heights of the
+  TLEM1 and TLEM2 models. 
+* Added missing ``GeomScale`` function to the patella
+  segment. 
+* PSCA is now calculated based on the scaled fiber length. This aligns
+  the TLEM 1 model with the new TLEM 2 model. It also means that scaling the model
+  without changing the muscle volumes will change the strength of the model.
+* Update scaling of the Patella tendon to work with non-linear scaling laws.
+* Added visualization of the Fibula bone. 
+
 
 AMMR restructure
 -----------------
 
 * Added a top level ``Tools`` folder helper files and other models which don't belong in ``Body/`` or ``Application``. 
 * Moved ``Body/AAUHuman/Toolbox`` to ``Tools/ModelUtilities`` 
-* Renamed the ``Body/AUHuman`` to ``Body/Mandible_AU`` 
+* Renamed the ``Body/AUHuman`` to ``Body/Mandible_AU``
+* Restructured the antropometric ("AnyMan") folder.  The folder ``HumanModel.AntroDataSubject`` is renamed to 
+  ``HumanModel.Antropometics``. The structure of the folder has also changed with a ``SegmentDimensions`` and ``SegmentMasses` subfolder. 
 
 
 Configuration parameters
@@ -121,6 +138,7 @@ Arm model
 * Muscle wrapping surfaces were updated for more physiological behavior.
 * Scapula reaction contact forces were simplified, and do not longer utilize slider segments. 
 * Conoid ligament length now scales along with the scapula width.
+* Add a ``GeomScale`` function the the Clavicula segment.
 
   
 Minor Changes: 
@@ -142,8 +160,6 @@ Minor Changes:
   This follows the logic from the initial rotation of the pelvis which also uses
   the anatomical frame.
 * DeltoidMuscleConnector segment loading time positioning now depends on the Humerus segment.  
-* Updates to the TLEM 1 model. The cumulated smaller bug fixes and updates to the TLEM1 model means that we now 
-  denote the model 1.2.
 * Added `class template to easily create videos from AnyScript model <https://anyscript.org/tips-n-tricks/creating-videos-from-your-simulations/>`_.
   The tool requires that `FFmpeg <https://www.ffmpeg.org/>`_ is installed. 
   The class template can be found in: ``<ANYBODY_PATH_MODELUTILS>/Video/CameraClassTemplate.any``. 
@@ -191,6 +207,7 @@ Fixed:
 * Fixed symmetry issues in scaling laws for scapula and clavicula, 
   and humerus. 
 * Fixed a bug where a the Pectoralis wrapping cylinder was not a included in the calibration study.
+* Fixed wrong sign for the AnklePlantarFlexion variable.
 
 
 
