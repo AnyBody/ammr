@@ -165,7 +165,8 @@ Fixed:
   always symmetrical.
 * Fixed symmetry issues in scaling laws for scapula, clavicula, 
   and humerus. 
-
+* Added missing GeomScale and AnatomicalFrame for Ulna segment. 
+  
 
 
 
