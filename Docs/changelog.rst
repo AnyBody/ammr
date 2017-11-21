@@ -17,7 +17,7 @@ New lower extremity model (TLEM2.1)
 
 * The `Twente Lower Extremity Model version 2.0 dataset
   <http://dx.doi.org/10.1016/j.jbiomech.2014.12.034>`_, developed in the
-  TLEMSafe EU project was implmented in the AMMR repostory. The model is not
+  TLEMSafe EU project was implemented in the AMMR repository. The model is not
   the default model, but can be enabled with the :ref:`BM parameter
   <bm-config>` ``#define BM_LEG_MODEL _LEG_MODEL_TLEM2_``
 * The model is versioned TLEM 2.1, to indicate the number of changes and
@@ -27,16 +27,18 @@ New lower extremity model (TLEM2.1)
 * The most important changes to the TLEM 2 dataset include the following: 
   
     * Updated wrapping for the Gluteus Maximus, Iliacus, Psoas around the hip.
-    * Reworked muscle topology for Gluteus Medius and Gluetus Minimus
+    * Reworked muscle topology for Gluteus Medius and Gluteus Minimus
     * Updated wrapping for Hamstring muscles, and Gastrocnemius around the knee. 
-    * Redfinened revolute knee axis (thanks to Marco Antonio Marra (Radboudumc)
-      for this improvement)
-    * The  ratio of volume between Gluetus Maximus superior/inferior has been re-estimated 
-      based on the orignal cadaver MRI scans.
+    * Redefined revolute knee axis and patella joint axis and patella tendon length based on the bone geometry. 
+      The original TLEM knee axis was estimated from functional trial, and was only valid 
+      for very small flexion angles. 
+      Thanks to Marco Antonio Marra (Radboudumc) for this for this improvement.
+    * The  ratio of volume between Gluteus Maximus superior/inferior has been re-estimated 
+      based on the original cadaver MRI scans.
     * Update the Sartorius via points.
     * Included a more detailed version of the patella bone.
-    * Various minor bug fixes from the orignal implementation used in the TLEMSafe project. 
-    *  Corrected the femoral attachment points for the popliteus muscle
+    * Various minor bug fixes from the original implementation used in the TLEMSafe project. 
+    * Corrected the femoral attachment points for the popliteus muscle
 
 * See the dedicated :doc:`TLEM2.1 page </body/Leg-TLEM2_model>` page for more information.
 
@@ -44,10 +46,14 @@ New lower extremity model (TLEM2.1)
 AnyMocap
 --------
 
-* New framework for runnning MoCap models. The AnyMoCap framework is an effort to
-  create a simple and unified framework for doing any kind of mocap analysis with
+* New framework for running MoCap models. The AnyMoCap framework is an effort to
+  create a simple and unified framework for doing any kind of MoCap analysis with
   the AnyBody Modeling System. See the :ref:`AnyMocap example gallery <mocap_examples>`
   for more information.
+* Algorithms and file for Ground reaction force prediction are added to: ``ammr/tools/GRFPrediction/``. 
+  See the 
+  :ref:`MoCap examples <sphx_glr_auto_examples_Mocap_plot_Plug-in-gait_Simple_FullBody_GRFPrediction.py>`
+  for how they are used.
 
 
 AMMR restructure
@@ -71,9 +77,20 @@ Scaling laws
 * An additional scaling law based on individual segmental scaling factors was added to the 
   repository. It can be enabled using this :ref:`BM parameter<bm-config>` ``#define BM_SCALING _SCALING_XYZ_``. 
   See the :ref:`guide on scaling <scaling-intro>`.
-* Default scaling is now :any:`_SCALING_STANDARD_` (e.g  ``#define BM_SCALING _SCALING_STANDARD_``
+* Default scaling is now :any:`_SCALING_STANDARD_` (e.g  ``#define BM_SCALING _SCALING_STANDARD_``)
   which scales all models to default standard 50% male. 
-* Introduced :bm_constant:`_SCALING_NONE_`, which disables scaling. E.g. models gets the orignal unscaled size. 
+* Introduced :any:`_SCALING_NONE_`, which disables scaling. E.g. models gets the original unscaled size. 
+
+
+New Mandible model
+------------------
+
+* Added new mandible model based on a CT scan of a 40 year old male.
+  For more information see :doc:`the documentation for the model </body/aalborg_mandible>` or the 
+  :ref:`validation example <sphx_glr_auto_examples_Validation_plot_AalborgMandible.py>`.
+
+
+
 
 
 
@@ -101,7 +118,7 @@ Arm model
 * Arm calibration was updated
 * :ref:`BM parameters <bm-arm-config>` have been updated for more convenient use. ``BM_ARM_DETAILED_HAND`` and 
   ``BM_ARM_SHOULDER_RHYTHM`` are now used instead of individual switches for right and left side, which were deprecated. 
-* Muscle wrapping surfaces were updated for more physiological behaviour.
+* Muscle wrapping surfaces were updated for more physiological behavior.
 * Scapula reaction contact forces were simplified, and do not longer utilize slider segments. 
 * Conoid ligament length now scales along with the scapula width.
 
@@ -144,20 +161,28 @@ Minor Changes:
 * A default ``Main.DrawSettings`` folder is now automatically created with a
   ``class_template`` when no user-defined :bm_statement:`DrawSettings
   <BM_DRAWSETTINGS_FILE>` file is set.
+* Extra Mannequin drivers for the individual shoulder degrees of freedom:
+  :any:`Sterno clavicula protraction <BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_PROTRACTION_RIGHT>`,
+  :any:`Sterno clavicula elevation <BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_ELEVATION_RIGHT>`,
+  :any:`Sterno clavicula axial rotation <BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_AXIAL_ROTATION_RIGHT>`
 * The initial positions of the pelvis now use the anatomical reference frame.
   This follows the logic from the initial rotation of the pelvis which also uses
   the anatomical frame.
 * DeltoidMuscleConnector segment loading time positioning now depends on the Humerus segment.  
-* Updates to the TLEM 1 model. The commulated small bug fixes and updates to the TLEM1 model means that we now 
+* Updates to the TLEM 1 model. The cumulated smaller bug fixes and updates to the TLEM1 model means that we now 
   denote the model 1.2.
+* Added `class template to easily create videos from AnyScript model <https://anyscript.org/tips-n-tricks/creating-videos-from-your-simulations/>`_.
+  The tool requires that `FFmpeg <https://www.ffmpeg.org/>`_ is installed. 
+  The class template can be found in: ``<ANYBODY_PATH_MODELUTILS>/Video/CameraClassTemplate.any``. 
+  See `this blog post <https://anyscript.org/tips-n-tricks/creating-videos-from-your-simulations/>`_. 
 * In TLEM models make the opacity of the patellar tendon dependent on the opacity of the patellar surface.
 * Simplify the Scapular reactions to the thorax segment. 
-* updated the Wilke Validation example to reflect the forces for the AMMR 2.0 repository.
+* Updated the Wilke Validation example to reflect the forces for the AMMR 2.0 repository.
 * Updates to BM parameters:
 
   * New :bm_statement:`BM_ARM_DETAILED_HAND` parameter for the detailed hand.
     The old ``BM_ARM_DETAIL_HAND_RIGHT``/``LEFT`` are deprecated.
-  * New :bm_statement:`BM_ARM_SHOULDER_RHYTHM` parameter for controling the shoulder rythm.
+  * New :bm_statement:`BM_ARM_SHOULDER_RHYTHM` parameter for controlling the shoulder rhythm.
     The old ``BM_ARM_SHOULDER_RHYTHM_RIGHT``/``LEFT`` are deprecated.
   * Added new ``BM_JOINT_TYPE_<joint>_<side>`` parameter for completely
     disabling joint and associated nodes in the lower extremity models. (See:
@@ -179,10 +204,10 @@ Fixed:
 * Fixed the opacity of the patellar surface in TLEM models, which pointing 
   erroneously to the opacity of the talus.
 * Fixed wrong symmetry of nodes on the C7 segment of full neck model.
-* Latisimus Dorsi 5 fasicle was missing in ``MuscleNames.any``  and thus from 
-  many symmery measures. 
+* Latissimus Dorsi 5 fascicle was missing in ``MuscleNames.any``  and thus from 
+  many symmetry measures. 
 * Fixed a symmetry problem for the Deltoid muscles at the shoulder.
-* Fixed a symmetry problem for the Disc Stiffnesses from L1 to L5
+* Fixed a symmetry problem for the Disc stiffness from L1 to L5
 * Fix white surfaces in examples with flat STL surfaces. For example 
   :ref:`sphx_glr_auto_examples_Sports_plot_CrossTrainer.py`. 
 * Fixed an issue preventing 
@@ -190,8 +215,9 @@ Fixed:
   from working with one leg.
 * Fixed a problem with the drawings of the bones in the Arm model which were not
   always symmetrical.
-* Fixed symmetry issues in scaling laws for scapula, clavicula, 
+* Fixed symmetry issues in scaling laws for scapula and clavicula, 
   and humerus. 
+* Fixed a bug where a the Pectoralis wrapping cylinder was not a included in the calibration study.
 
 
 
