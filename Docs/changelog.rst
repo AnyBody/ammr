@@ -38,7 +38,8 @@ New lower extremity model (TLEM2.1)
     * Update the Sartorius via points.
     * Included a more detailed version of the patella bone.
     * Various minor bug fixes from the original implementation used in the TLEMSafe project. 
-    *  Corrected the femoral attachment points for the popliteus muscle
+    * Corrected the femoral attachment points for the popliteus muscle
+    * Small correction to wrong insetion points for Adductor Longus and Vastus Medialis.
 
 * See the dedicated :doc:`TLEM2.1 page </body/Leg-TLEM2_model>` page for more information.
 
@@ -209,7 +210,7 @@ Fixed:
 * Fixed a bug where a the Pectoralis wrapping cylinder was not a included in the calibration study.
 * Fixed wrong sign for the AnklePlantarFlexion variable.
 * Added missing GeomScale and AnatomicalFrame for Ulna segment. 
-  
+
 
 
 
