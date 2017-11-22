@@ -283,8 +283,8 @@ All BodyModel parameters
     Definition of the disc model of all spine parts.
 
 
-    :Default: :ammr:bm_constant:`_DISC_STIFFNESS_LINEAR_`
-    :Example: ``#define BM_TRUNK_DISC_STIFNESS _DISC_STIFFNESS_LINEAR_``
+    :Default: :ammr:bm_constant:`_DISC_STIFFNESS_NONE_`
+    :Example: ``#define BM_TRUNK_DISC_STIFNESS _DISC_STIFFNESS_NONE_``
     :Options: - :any:`_DISC_STIFFNESS_NONE_`: Constant to switch off disc spring in the spine
               - :any:`_DISC_STIFFNESS_LINEAR_`: Constant to switch linear disc spring on in the spine
               - :any:`_DISC_STIFFNESS_NONLINEAR_`: Constant to switch nonlinear disc spring on in the spine
