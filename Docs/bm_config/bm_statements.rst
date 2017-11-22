@@ -608,6 +608,11 @@ All BodyModel parameters
     :Options: - :any:`_CALIBRATION_TYPE_1PAR_`: Constant to use 1 parameter muscle tendon calibration
               - :any:`_CALIBRATION_TYPE_2PAR_`: Constant to use 2 parameter muscle tendon calibration
 
+|  
+|   
+| 
+| 
+
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_PELVIS_POS_X
 
@@ -977,6 +982,11 @@ All BodyModel parameters
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
 
+|  
+|   
+| 
+| 
+
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_STERNO_CLAVICULAR_LEFT
 
@@ -1175,6 +1185,11 @@ All BodyModel parameters
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
               - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+|  
+|   
+| 
+| 
 
 
 .. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_HIP_FLEXION_RIGHT
