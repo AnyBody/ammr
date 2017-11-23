@@ -169,6 +169,24 @@ Muscle models
       };
 
 
+Calibration
+-----------
+
+* Updated calibration for Arms and TLEM legs in the BodyModel to
+
+    * include muscles to the calibration study with search functions. 
+    * drive the postures using the measures from the interface folder to remain anatomically
+      similar throughout future versions.
+
+* Added new **experimental** 2 parameter calibration, which is based on range-of-motion postures.
+  The calibration type is controlled by the :any:`BM_CALIBRATION_TYPE` parameter.
+  
+  For example:
+  
+  .. code-block:: AnyScriptDoc
+
+    #define BM_CALIBRATION_TYPE _CALIBRATION_TYPE_2PAR_
+
 Minor Changes: 
 ===============
 
