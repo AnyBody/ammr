@@ -41,7 +41,7 @@ New lower extremity model (TLEM2.1)
     * Corrected the femoral attachment points for the popliteus muscle
     * Small correction to wrong insetion points for Adductor Longus and Vastus Medialis.
 
-* See the dedicated :doc:`TLEM2.1 page </body/Leg-TLEM2_model>` page for more information.
+* See the dedicated :doc:`TLEM2.1 page </body/leg_tlem2_model>` page for more information.
 
 
 AnyMocap
@@ -79,7 +79,7 @@ AMMR restructure
 * Moved ``Body/AAUHuman/Toolbox`` to ``Tools/ModelUtilities`` 
 * Renamed the ``Body/AUHuman`` to ``Body/Mandible_AU`` 
 * Restructured the antropometric ("AnyMan") folder.  The folder ``HumanModel.AntroDataSubject`` is renamed to 
-  ``HumanModel.Antropometics``. The structure of the folder has also changed with a ``SegmentDimensions`` and ``SegmentMasses` subfolder. 
+  ``HumanModel.Antropometics``. The structure of the folder has also changed with a ``SegmentDimensions`` and ``SegmentMasses`` subfolder. 
 
 
 Configuration parameters
@@ -166,6 +166,8 @@ Minor Changes:
   The class template can be found in: ``<ANYBODY_PATH_MODELUTILS>/Video/CameraClassTemplate.any``. 
   See `this blog post <https://anyscript.org/tips-n-tricks/creating-videos-from-your-simulations/>`_. 
 * In TLEM models make the opacity of the patellar tendon dependent on the opacity of the patellar surface.
+* New ``AnyDoc`` classes are added to the different body model, so the GUI
+  can create direct links to the documentation.
 * Simplify the Scapular reactions to the thorax segment. 
 * Updated the Wilke Validation example to reflect the forces for the AMMR 2.0 repository.
 * Updates to BM parameters:
