@@ -41,7 +41,7 @@ New lower extremity model (TLEM2.1)
     * Corrected the femoral attachment points for the popliteus muscle
     * Small correction to wrong insetion points for Adductor Longus and Vastus Medialis.
 
-* See the dedicated :doc:`TLEM2.1 page </body/Leg-TLEM2_model>` page for more information.
+* See the dedicated :doc:`TLEM2.1 page </body/leg_tlem2_model>` page for more information.
 
 
 AnyMocap
