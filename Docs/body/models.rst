@@ -41,7 +41,7 @@ which can be assembled into the full human in many combinations.
     :maxdepth: 1
     :caption: Trunk
 
-    Lumbar-spine_model
+    lumbar_spine_model
     cervical_spine_model
 
 
@@ -59,7 +59,7 @@ which can be assembled into the full human in many combinations.
 
     leg_model
     leg_tlem_model
-    Leg-TLEM2_model
+    leg_tlem2_model
 
 .. toctree::
     :maxdepth: 1

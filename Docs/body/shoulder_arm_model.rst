@@ -36,6 +36,7 @@ Report <https://www.anybodytech.com/download.html?did=publications.files&fname=S
     .. centered:: *Figure shoulder model*
 
 
+
 Example Configuration
 -----------------------
 
@@ -71,8 +72,31 @@ The model consists of the following joints:
     .. Image:arm.png
 
 
-Terminology
----------------
+Degrees of freedom
+------------------
+
+The arm has the following basic dof, which can be controlled by combinations
+joint drivers directly or indirectly through connections to the environment
+
+* SternoClavicularProtraction
+* SternoClavicularElevation
+* SternoClavicularAxialRotation
+
+* GlenohumeralFlexion 
+* GlenohumeralAbduction
+* GlenohumeralExternalRotation
+
+* ElbowFlexion
+* ElbowPronation
+
+* WristFlexion 
+* WristAbduction
+
+
+
+
+Joint terminology
+------------------
 .. rst-class:: centered
 .. table:: Joints and kinematic contraints of the arm model
     :widths: 1 2 4
