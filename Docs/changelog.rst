@@ -166,6 +166,8 @@ Minor Changes:
   The class template can be found in: ``<ANYBODY_PATH_MODELUTILS>/Video/CameraClassTemplate.any``. 
   See `this blog post <https://anyscript.org/tips-n-tricks/creating-videos-from-your-simulations/>`_. 
 * In TLEM models make the opacity of the patellar tendon dependent on the opacity of the patellar surface.
+* New ``AnyDoc`` classes are added to the different body model, so the GUI
+  can create direct links to the documentation.
 * Simplify the Scapular reactions to the thorax segment. 
 * Updated the Wilke Validation example to reflect the forces for the AMMR 2.0 repository.
 * Updates to BM parameters:
