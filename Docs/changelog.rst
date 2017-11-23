@@ -79,7 +79,7 @@ AMMR restructure
 * Moved ``Body/AAUHuman/Toolbox`` to ``Tools/ModelUtilities`` 
 * Renamed the ``Body/AUHuman`` to ``Body/Mandible_AU`` 
 * Restructured the antropometric ("AnyMan") folder.  The folder ``HumanModel.AntroDataSubject`` is renamed to 
-  ``HumanModel.Antropometics``. The structure of the folder has also changed with a ``SegmentDimensions`` and ``SegmentMasses` subfolder. 
+  ``HumanModel.Antropometics``. The structure of the folder has also changed with a ``SegmentDimensions`` and ``SegmentMasses`` subfolder. 
 
 
 Configuration parameters
