@@ -141,7 +141,34 @@ Arm model
 * Conoid ligament length now scales along with the scapula width.
 * Add a ``GeomScale`` function the the Clavicula segment.
 
+
+Muscle models
+-------------
+
+* All muscle models are updated to support the structure of the new
+  ``AnyMuscleModel3E`` and ``AnyMuscleModel`` in the AnyBody Modeling System 7.1. 
+  The following variables are renamed: 
+    
+    * The "optimal fiber length" varaible renamed from ``Lfbar`` to ``Lf0`` 
+    * The "Pennation angle" variable renamed from ``Gammabar`` to ``Gamma0``
+    * The "Tendon strain at F0" variable renamed from ``Epsilonbar`` to ``Epsilon0``
+    
+* Restructured the muscle model section of the both TLEM1 and TLEM2 models. 
   
+  * All the orignal TLEM based muscle parameter are now located under: ``Leg/ModelParameters/Muscles``
+  * All scaled muscle paramters are located in ``Leg/MusPar/SubjectMusPar``. This folder references 
+    the TLEM muscle and applies strength scaling etc. The ``SubjectMusPar`` folder and all subfolders are
+    implemented with ``class_template``. Thus, all muscle parameter can now be overridden in applications
+    by just assigning the variables a new value: E.g.
+
+    .. code-block:: AnyScriptDoc
+
+      Main.HumanModel.BodyModel.Right.Leg.MusPar.SubjectMusPar = {
+        GastrocnemiusMedialis.MuscleVolume = 300; // Volume in mililiters
+        GastrocnemiusMedialis.Pennationangle = 15; // (in degrees)
+      };
+
+
 Minor Changes: 
 ===============
 
