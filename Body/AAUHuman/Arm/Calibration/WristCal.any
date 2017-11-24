@@ -1,4 +1,4 @@
-AnyFolder ShoulderCal ={
+AnyFolder WristCal ={
   AnyFolder &ThoraxSegs =  ...BodyModel.Trunk.SegmentsThorax;
   AnyFolder &CervicalSegs =  ...BodyModel.Trunk.SegmentsCervicalSpine;
   AnyFolder &LumbarSegs =  ...BodyModel.Trunk.SegmentsLumbar;
@@ -29,26 +29,11 @@ AnyFolder ShoulderCal ={
     DriverVel = {0,0,0};
     Reaction.Type = {Off,Off,Off};
   };
-  
-  AnyFloat Abduction         = {180,0,0} * pi/180;
-  AnyFloat InternalRotation  = {90,0,90} * pi/180;
-  AnyFloat ExternalRotation  = {90,0,-70} * pi/180;
-  AnyFloat HorizontalFlexion = {90,120,0} * pi/180;
-  AnyFloat Adduction         = {-45,25,0} * pi/180;
-  AnyFloat VertivalExtension = {0,-60,0} * pi/180;
-  AnyFloat VerticalFlexion   = {0,180,0} * pi/180;
-  
-  AnyFloat ElbowFlexPosData  = {0,90,90,0,0,0,0} * pi/180;
-  
-  AnyFloat GHPosData         = repmat(1,{
-      Abduction,
-      InternalRotation,
-      ExternalRotation,
-      HorizontalFlexion,
-      Adduction,
-      VertivalExtension,
-      VerticalFlexion
-  }');
+
+  AnyFloat ElbowFlexPosData   = {150,150,150,150,  0,  0,  0,  0,  0,  0,  0,  0} * pi/180;
+  AnyFloat ElbowProPosData    = {-90,-90,-90,-90,-90,-90,-90,-90, 90, 90, 90, 90} * pi/180;
+  AnyFloat WristFlexPosData   = { 85,  0,-70,  0, 85,  0,-70,  0, 85,  0,-70,  0} * pi/180;
+  AnyFloat WristAbductPosData = {  0, 20,  0,-35,  0, 20,  0,-35,  0, 20,  0,-35} * pi/180;
   
   
   //Neck driver
@@ -70,17 +55,19 @@ AnyFolder ShoulderCal ={
     Reaction.Type = {On,On,On};
   };
   
-  AnyKinEqSimpleDriver WristFlexionDriver ={
+  AnyKinEqInterPolDriver WristFlexionDriver ={
       AnyKinMeasure &WF = ..SideInterfaceFolderRef.WristFlexion;
-      DriverPos = {0}*pi/180;
-      DriverVel = {0};
+      Type = PiecewiseLinear;
+      T    = linspace(0,1,SizesOf(Data)[1]);
+      Data = {.WristFlexPosData};
       Reaction.Type={On};
     };
     
-    AnyKinEqSimpleDriver WristAbductionDriver ={
+    AnyKinEqInterPolDriver WristAbductionDriver ={
       AnyKinMeasure &WA = ..SideInterfaceFolderRef.WristAbduction;
-      DriverPos = {0}*pi/180;
-      DriverVel = {0};
+      Type = PiecewiseLinear;
+      T    = linspace(0,1,SizesOf(Data)[1]);
+      Data = {.WristAbductPosData};
       Reaction.Type={On};
     };
     
@@ -95,16 +82,18 @@ AnyFolder ShoulderCal ={
   AnyKinEqInterPolDriver PSDriver ={
     AnyKinMeasure &PS = ..SideInterfaceFolderRef.ElbowPronation;
     Type = PiecewiseLinear;
-    T =      {0.0, 1.0};
-    Data = {{0,0}}*pi/180;
+    T    = linspace(0,1,SizesOf(Data)[1]);
+    Data = {.ElbowProPosData};
     Reaction.Type = {Off};
   };
- 
+  
   AnyKinEqInterPolDriver GHDriver ={
     AnyKinRotational &GHRotR = ..SideInterfaceFolderRef.GlenohumeralFlexion.GHMeasure;
     Type = PiecewiseLinear;
-    T = linspace(0,1,SizesOf(Data)[1]);
-    Data = .GHPosData;
+    T = {0.0, 1.0};
+    Data = {{0,  0},
+            {0,  0},
+            {0,  0}}*pi/180;
     Reaction.Type = {Off,Off,Off};
   };
   
@@ -241,118 +230,95 @@ AnyFolder ShoulderCal ={
   
   AnyString MusPrefix = CompleteNameOf(&.SideHumanFolderRef.ShoulderArm.Mus);
   
-  AnyObjectPtrArray coracobrachialisMuscles = ObjSearch(MusPrefix+".coracobrachialis*", "AnyMuscle");
-  AnyFloat  coracobrachialisRmin = repmat(NumElemOf(coracobrachialisMuscles), ..RMin);
-  AnyFloat  coracobrachialisRmax = repmat(NumElemOf(coracobrachialisMuscles), ..RMax);
-  
-  AnyObjectPtrArray deltoideus_scapularMuscles = ObjSearch(MusPrefix+".deltoideus_scapular*", "AnyMuscle");
-  AnyFloat  deltoideus_scapularRmin = repmat(NumElemOf(deltoideus_scapularMuscles), ..RMin);
-  AnyFloat  deltoideus_scapularRmax = repmat(NumElemOf(deltoideus_scapularMuscles), ..RMax);
-  
-  AnyObjectPtrArray deltoideus_clavicularMuscles = ObjSearch(MusPrefix+".deltoideus_clavicular*", "AnyMuscle");
-  AnyFloat  deltoideus_clavicularRmin = repmat(NumElemOf(deltoideus_clavicularMuscles), ..RMin);
-  AnyFloat  deltoideus_clavicularRmax = repmat(NumElemOf(deltoideus_clavicularMuscles), ..RMax);
-  
-  AnyObjectPtrArray infraspinatusMuscles = ObjSearch(MusPrefix+".infraspinatus*", "AnyMuscle");
-  AnyFloat  infraspinatusRmin = repmat(NumElemOf(infraspinatusMuscles), ..RMin);
-  AnyFloat  infraspinatusRmax = repmat(NumElemOf(infraspinatusMuscles), ..RMax);
-  
-  AnyObjectPtrArray pectoralis_major_thoracicMuscles = ObjSearch(MusPrefix+".pectoralis_major_thoracic*", "AnyMuscle");
-  AnyFloat  pectoralis_major_thoracicRmin = repmat(NumElemOf(pectoralis_major_thoracicMuscles), ..RMin);
-  AnyFloat  pectoralis_major_thoracicRmax = repmat(NumElemOf(pectoralis_major_thoracicMuscles), ..RMax);
-  
-  AnyObjectPtrArray pectoralis_major_clavicularMuscles = ObjSearch(MusPrefix+".pectoralis_major_clavicular*", "AnyMuscle");
-  AnyFloat  pectoralis_major_clavicularRmin = repmat(NumElemOf(pectoralis_major_clavicularMuscles), ..RMin);
-  AnyFloat  pectoralis_major_clavicularRmax = repmat(NumElemOf(pectoralis_major_clavicularMuscles), ..RMax);
-  
-  AnyObjectPtrArray pectoralis_minorMuscles = ObjSearch(MusPrefix+".pectoralis_minor*", "AnyMuscle");
-  AnyFloat  pectoralis_minorRmin = repmat(NumElemOf(pectoralis_minorMuscles), ..RMin);
-  AnyFloat  pectoralis_minorRmax = repmat(NumElemOf(pectoralis_minorMuscles), ..RMax);
-  
-  AnyObjectPtrArray rhomboideusMuscles = ObjSearch(MusPrefix+".rhomboideus*", "AnyMuscle");
-  AnyFloat  rhomboideusRmin = repmat(NumElemOf(rhomboideusMuscles), ..RMin);
-  AnyFloat  rhomboideusRmax = repmat(NumElemOf(rhomboideusMuscles), ..RMax);
-  
-  AnyObjectPtrArray serratus_anteriorMuscles = ObjSearch(MusPrefix+".serratus_anterior*", "AnyMuscle");
-  AnyFloat  serratus_anteriorRmin = repmat(NumElemOf(serratus_anteriorMuscles), ..RMin);
-  AnyFloat  serratus_anteriorRmax = repmat(NumElemOf(serratus_anteriorMuscles), ..RMax);
-  
-  AnyObjectPtrArray subscapularisMuscles = ObjSearch(MusPrefix+".subscapularis*", "AnyMuscle");
-  AnyFloat  subscapularisRmin = repmat(NumElemOf(subscapularisMuscles), ..RMin);
-  AnyFloat  subscapularisRmax = repmat(NumElemOf(subscapularisMuscles), ..RMax);
-  
-  AnyObjectPtrArray supraspinatusMuscles = ObjSearch(MusPrefix+".supraspinatus*", "AnyMuscle");
-  AnyFloat  supraspinatusRmin = repmat(NumElemOf(supraspinatusMuscles), ..RMin);
-  AnyFloat  supraspinatusRmax = repmat(NumElemOf(supraspinatusMuscles), ..RMax);
-  
-  AnyObjectPtrArray teres_majorMuscles = ObjSearch(MusPrefix+".teres_major*", "AnyMuscle");
-  AnyFloat  teres_majorRmin = repmat(NumElemOf(teres_majorMuscles), ..RMin);
-  AnyFloat  teres_majorRmax = repmat(NumElemOf(teres_majorMuscles), ..RMax);
-  
-  AnyObjectPtrArray teres_minorMuscles = ObjSearch(MusPrefix+".teres_minor*", "AnyMuscle");
-  AnyFloat  teres_minorRmin = repmat(NumElemOf(teres_minorMuscles), ..RMin);
-  AnyFloat  teres_minorRmax = repmat(NumElemOf(teres_minorMuscles), ..RMax);
-  
-  AnyObjectPtrArray trapezius_scapularMuscles = ObjSearch(MusPrefix+".trapezius_scapular*", "AnyMuscle");
-  AnyFloat  trapezius_scapularRmin = repmat(NumElemOf(trapezius_scapularMuscles), ..RMin);
-  AnyFloat  trapezius_scapularRmax = repmat(NumElemOf(trapezius_scapularMuscles), ..RMax);
-  
+  AnyObjectPtrArray biceps_brachii_caput_breveMuscles = ObjSearch(MusPrefix+".biceps_brachii_caput_breve*", "AnyMuscle");
+  AnyFloat  biceps_brachii_caput_breveRmin = repmat(NumElemOf(biceps_brachii_caput_breveMuscles), ..RMin);
+  AnyFloat  biceps_brachii_caput_breveRmax = repmat(NumElemOf(biceps_brachii_caput_breveMuscles), ..RMax);
+
+  AnyObjectPtrArray biceps_brachii_caput_longumMuscles = ObjSearch(MusPrefix+".biceps_brachii_caput_longum*", "AnyMuscle");
+  AnyFloat  biceps_brachii_caput_longumRmin = repmat(NumElemOf(biceps_brachii_caput_longumMuscles), ..RMin);
+  AnyFloat  biceps_brachii_caput_longumRmax = repmat(NumElemOf(biceps_brachii_caput_longumMuscles), ..RMax);
+
+  AnyObjectPtrArray BrachialisMuscles = ObjSearch(MusPrefix+".Brachialis*", "AnyMuscle");
+  AnyFloat  BrachialisRmin = repmat(NumElemOf(BrachialisMuscles), ..RMin);
+  AnyFloat  BrachialisRmax = repmat(NumElemOf(BrachialisMuscles), ..RMax);
+
+  AnyObjectPtrArray TricepsMuscles = ObjSearch(MusPrefix+".Triceps*", "AnyMuscle");
+  AnyFloat  TricepsRmin = repmat(NumElemOf(TricepsMuscles), ..RMin);
+  AnyFloat  TricepsRmax = repmat(NumElemOf(TricepsMuscles), ..RMax);
+
+  AnyObjectPtrArray Brach_radMuscles = ObjSearch(MusPrefix+".Brach_rad*", "AnyMuscle");
+  AnyFloat  Brach_radRmin = repmat(NumElemOf(Brach_radMuscles), ..RMin);
+  AnyFloat  Brach_radRmax = repmat(NumElemOf(Brach_radMuscles), ..RMax);
+
+  AnyObjectPtrArray AnconeusMuscles = ObjSearch(MusPrefix+".Anconeus*", "AnyMuscle");
+  AnyFloat  AnconeusRmin = repmat(NumElemOf(AnconeusMuscles), ..RMin);
+  AnyFloat  AnconeusRmax = repmat(NumElemOf(AnconeusMuscles), ..RMax);
+
+  AnyObjectPtrArray Pronator_teres_caput_humeralMuscles = ObjSearch(MusPrefix+".Pronator_teres_caput_humeral*", "AnyMuscle");
+  AnyFloat  Pronator_teres_caput_humeralRmin = repmat(NumElemOf(Pronator_teres_caput_humeralMuscles), ..RMin);
+  AnyFloat  Pronator_teres_caput_humeralRmax = repmat(NumElemOf(Pronator_teres_caput_humeralMuscles), ..RMax);
+
+  AnyObjectPtrArray Pronator_teres_caput_ulnareMuscles = ObjSearch(MusPrefix+".Pronator_teres_caput_ulnare*", "AnyMuscle");
+  AnyFloat  Pronator_teres_caput_ulnareRmin = repmat(NumElemOf(Pronator_teres_caput_ulnareMuscles), ..RMin);
+  AnyFloat  Pronator_teres_caput_ulnareRmax = repmat(NumElemOf(Pronator_teres_caput_ulnareMuscles), ..RMax);
+
+  AnyObjectPtrArray Supinator_humerusMuscles = ObjSearch(MusPrefix+".Supinator_humerus*", "AnyMuscle");
+  AnyFloat  Supinator_humerusRmin = repmat(NumElemOf(Supinator_humerusMuscles), ..RMin);
+  AnyFloat  Supinator_humerusRmax = repmat(NumElemOf(Supinator_humerusMuscles), ..RMax);
+
+  AnyObjectPtrArray Supinator_ulnaMuscles = ObjSearch(MusPrefix+".Supinator_ulna*", "AnyMuscle");
+  AnyFloat  Supinator_ulnaRmin = repmat(NumElemOf(Supinator_ulnaMuscles), ..RMin);
+  AnyFloat  Supinator_ulnaRmax = repmat(NumElemOf(Supinator_ulnaMuscles), ..RMax);
+
+  AnyObjectPtrArray Pron_quadrMuscles = ObjSearch(MusPrefix+".Pron_quadr*", "AnyMuscle");
+  AnyFloat  Pron_quadrRmin = repmat(NumElemOf(Pron_quadrMuscles), ..RMin);
+  AnyFloat  Pron_quadrRmax = repmat(NumElemOf(Pron_quadrMuscles), ..RMax);
   
 };
 
 // The study: Operations to be performed on the model
-AnyBodyCalibrationStudy ArmCalibrationStudyShoulder = {
-  AnyFolder &ref=.ShoulderCal;
-  nStep = 13;
-  FiberAndTendonLengthAdjustment.CalibrateTendonAtMaxForceOnOff = On;
+AnyBodyCalibrationStudy ArmCalibrationStudyWrist = {
+  AnyFolder &ref=.WristCal;
+  nStep = 12;
   Kinematics.SmallStepAssumptionOnOff = Off;
   MuscleArr = arrcat(arrcat(
-      ref.coracobrachialisMuscles,
-      ref.deltoideus_scapularMuscles,
-      ref.deltoideus_clavicularMuscles,
-      ref.infraspinatusMuscles,
-      ref.pectoralis_major_thoracicMuscles,
-      ref.pectoralis_major_clavicularMuscles,
-      ref.pectoralis_minorMuscles,
-      ref.rhomboideusMuscles,
-      ref.serratus_anteriorMuscles),
-      ref.subscapularisMuscles,
-      ref.supraspinatusMuscles,
-      ref.teres_majorMuscles,
-      ref.teres_minorMuscles,
-      ref.trapezius_scapularMuscles
+      ref.biceps_brachii_caput_breveMuscles,
+      ref.biceps_brachii_caput_longumMuscles,
+      ref.BrachialisMuscles,
+      ref.TricepsMuscles,
+      ref.Brach_radMuscles,
+      ref.AnconeusMuscles,
+      ref.Pronator_teres_caput_humeralMuscles,
+      ref.Pronator_teres_caput_ulnareMuscles,
+      ref.Supinator_humerusMuscles,
+      ref.Supinator_ulnaMuscles),
+      ref.Pron_quadrMuscles
   );
   RminMuscleFiber = arrcat(arrcat(
-      ref.coracobrachialisRmin,
-      ref.deltoideus_scapularRmin,
-      ref.deltoideus_clavicularRmin,
-      ref.infraspinatusRmin,
-      ref.pectoralis_major_thoracicRmin,
-      ref.pectoralis_major_clavicularRmin,
-      ref.pectoralis_minorRmin,
-      ref.rhomboideusRmin,
-      ref.serratus_anteriorRmin),
-      ref.subscapularisRmin,
-      ref.supraspinatusRmin,
-      ref.teres_majorRmin,
-      ref.teres_minorRmin,
-      ref.trapezius_scapularRmin
+      ref.biceps_brachii_caput_breveRmin,
+      ref.biceps_brachii_caput_longumRmin,
+      ref.BrachialisRmin,
+      ref.TricepsRmin,
+      ref.Brach_radRmin,
+      ref.AnconeusRmin,
+      ref.Pronator_teres_caput_humeralRmin,
+      ref.Pronator_teres_caput_ulnareRmin,
+      ref.Supinator_humerusRmin,
+      ref.Supinator_ulnaRmin),
+      ref.Pron_quadrRmin
   );
   RmaxMuscleFiber = arrcat(arrcat(
-      ref.coracobrachialisRmax,
-      ref.deltoideus_scapularRmax,
-      ref.deltoideus_clavicularRmax,
-      ref.infraspinatusRmax,
-      ref.pectoralis_major_thoracicRmax,
-      ref.pectoralis_major_clavicularRmax,
-      ref.pectoralis_minorRmax,
-      ref.rhomboideusRmax,
-      ref.serratus_anteriorRmax),
-      ref.subscapularisRmax,
-      ref.supraspinatusRmax,
-      ref.teres_majorRmax,
-      ref.teres_minorRmax,
-      ref.trapezius_scapularRmax
+      ref.biceps_brachii_caput_breveRmax,
+      ref.biceps_brachii_caput_longumRmax,
+      ref.BrachialisRmax,
+      ref.TricepsRmax,
+      ref.Brach_radRmax,
+      ref.AnconeusRmax,
+      ref.Pronator_teres_caput_humeralRmax,
+      ref.Pronator_teres_caput_ulnareRmax,
+      ref.Supinator_humerusRmax,
+      ref.Supinator_ulnaRmax),
+      ref.Pron_quadrRmax
   );
   
   
