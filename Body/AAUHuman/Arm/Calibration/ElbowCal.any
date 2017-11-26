@@ -31,12 +31,19 @@ AnyFolder ElbowCal ={
   };
 
   
-  AnyFloat ElbowExtended     = {  0,  0,  0} * pi/180;
-  AnyFloat ElbowFlexed       = {  0,  0,  0} * pi/180;
-  AnyFloat ElbowPronation    = {  0,  0,  0} * pi/180;
-  AnyFloat ElbowSupination   = {  0,  0,  0} * pi/180;
-  AnyFloat ShoulderStretch   = { 90,120,  0} * pi/180;
-  AnyFloat PectoralisStretch = { 90,-10, 90} * pi/180;
+  #if BM_ARM_SHOULDER_RHYTHM == ON
+  #include "ExcludeShoulderRhythm.any"
+  #endif
+    
+
+  AnyFloat Neutral = {  0,  0,   0,  -23,  12, -20} * pi/180;
+  
+  AnyFloat ElbowExtended     = {  0,  0,  0, -23,  12, -20} * pi/180;
+  AnyFloat ElbowFlexed       = {  0,  0,  0, -23,  12, -20} * pi/180;
+  AnyFloat ElbowPronation    = {  0,  0,  0, -23,  12, -20} * pi/180;
+  AnyFloat ElbowSupination   = {  0,  0,  0, -23,  12, -20} * pi/180;
+  AnyFloat ShoulderStretch   = { 90,120,  0,   5,  20, -20} * pi/180;
+  AnyFloat PectoralisStretch = { 90,-10, 90, -23,  20, -10} * pi/180;
 
   AnyFloat ElbowFlexPosData  = {  0,150, 90, 90,  0,  0} * pi/180;
   
@@ -101,13 +108,20 @@ AnyFolder ElbowCal ={
     Reaction.Type = {Off};
   };
  
+  
   AnyKinEqInterPolDriver GHDriver ={
-    AnyKinRotational &GHRotR = ..SideInterfaceFolderRef.GlenohumeralFlexion.GHMeasure;
+    AnyKinMeasure &GHAbduction = ..SideInterfaceFolderRef.GlenohumeralAbduction;
+    AnyKinMeasure &GHFlexion = ..SideInterfaceFolderRef.GlenohumeralFlexion;
+    AnyKinMeasure &GHExtRot = ..SideInterfaceFolderRef.GlenohumeralExternalRotation;
+    AnyKinMeasure &SCProtraction = ..SideInterfaceFolderRef.SternoClavicularProtraction;
+    AnyKinMeasure &SCElevation = ..SideInterfaceFolderRef.SternoClavicularElevation;
+    AnyKinMeasure &GHAxialRot = ..SideInterfaceFolderRef.SternoClavicularAxialRotation;
     Type = PiecewiseLinear;
     T = linspace(0,1,SizesOf(Data)[1]);
     Data = .GHPosData;
-    Reaction.Type = {Off,Off,Off};
+    Reaction.Type = repmat(nDim,{Off});
   };
+  
   
   //---------------------------------------------------------------------
   //Finger drivers
@@ -291,7 +305,7 @@ AnyFolder ElbowCal ={
 // The study: Operations to be performed on the model
 AnyBodyCalibrationStudy ArmCalibrationStudyElbow = {
   AnyFolder &ref=.ElbowCal;
-  nStep = 6; //12 ?
+  nStep = SizesOf(ref.GHPosData)[1];
   Kinematics.SmallStepAssumptionOnOff = Off;
   Kinematics.KinematicTol = 1e-07;
   MuscleArr = arrcat(arrcat(
