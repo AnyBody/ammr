@@ -47,6 +47,7 @@ See the following links for details on BM parameters related to different body p
     trunk
     mannequin
     scaling
+    joint_type
     other
 
 .. 
