@@ -6,6 +6,7 @@
 "msxsl.exe" ../BodyModel.define.xml reST_parameter_tables.xslt -o ../../../Docs/bm_config/ArmTable.txt table-type=Arm
 "msxsl.exe" ../BodyModel.define.xml reST_parameter_tables.xslt -o ../../../Docs/bm_config/ScalingTable.txt table-type=Scaling
 "msxsl.exe" ../BodyModel.define.xml reST_parameter_tables.xslt -o ../../../Docs/bm_config/MannequinTable.txt table-type=Mannequin_Driver
+"msxsl.exe" ../BodyModel.define.xml reST_parameter_tables.xslt -o ../../../Docs/bm_config/JointTypeTable.txt table-type=Joint_type
 "msxsl.exe" ../BodyModel.define.xml reST_parameter_tables.xslt -o ../../../Docs/bm_config/OtherTable.txt table-type=Other
 "msxsl.exe" ../BodyModel.define.xml reST_description_substitutions.xslt -o ../../../Docs/bm_config/Substitutions.txt
 "msxsl.exe" ../BodyModel.define.xml anyxdefs2const.xslt -o ../BodyModels/GenericBodyModel/BodyModel.constants.any
