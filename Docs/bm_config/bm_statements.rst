@@ -712,22 +712,6 @@ All BodyModel parameters
 | 
 
 
-.. ammr:bm_statement:: BM_BONY_LANDMARK_DEFINED_JOINTAXIS
-
-    Keyword to choose the option of the joint axes defintion based on the anatomical landmarks.
-
-
-    :Default: ``OFF``
-    :Example: ``#define BM_BONY_LANDMARK_DEFINED_JOINTAXIS OFF``
-    :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
-
-
-|  
-|   
-| 
-| 
-
-
 .. ammr:bm_statement:: BM_PELVIS_DISPLAY
 
     Keyword for pelvis display setting.
