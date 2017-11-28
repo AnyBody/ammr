@@ -6,7 +6,7 @@ Changelog
 .. default-domain:: ammr
 
 ***********************
-AMMR 2.0.0 (2017-10-30)
+AMMR 2.0.0 (2017-11-29)
 ***********************
 
 Major changes:
