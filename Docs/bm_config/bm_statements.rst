@@ -712,22 +712,6 @@ All BodyModel parameters
 | 
 
 
-.. ammr:bm_statement:: BM_BONY_LANDMARK_DEFINED_JOINTAXIS
-
-    Keyword to choose the option of the joint axes defintion based on the anatomical landmarks.
-
-
-    :Default: ``OFF``
-    :Example: ``#define BM_BONY_LANDMARK_DEFINED_JOINTAXIS OFF``
-    :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
-
-
-|  
-|   
-| 
-| 
-
-
 .. ammr:bm_statement:: BM_PELVIS_DISPLAY
 
     Keyword for pelvis display setting.
@@ -1712,7 +1696,6 @@ All BodyModel parameters
     :Default: :ammr:bm_constant:`_JOINT_TYPE_DEFAULT_`
     :Example: ``#define BM_JOINT_TYPE_HIP_RIGHT _JOINT_TYPE_DEFAULT_``
     :Options: - :any:`_JOINT_TYPE_DEFAULT_`: Default joint definition.
-              - :any:`_JOINT_TYPE_BONY_LANDMARK_`: Joint definition based on bony landmarks. This will create a joint which resembles what is often used in traditional gait analysis. (E.g. revolute knee joint along the femoral condyles).
               - :any:`_JOINT_TYPE_USERDEFINED_`: User-defined joint. This will exclude the joint and which nodes.
 
 
@@ -1730,7 +1713,6 @@ All BodyModel parameters
     :Default: :ammr:bm_constant:`_JOINT_TYPE_DEFAULT_`
     :Example: ``#define BM_JOINT_TYPE_HIP_LEFT _JOINT_TYPE_DEFAULT_``
     :Options: - :any:`_JOINT_TYPE_DEFAULT_`: Default joint definition.
-              - :any:`_JOINT_TYPE_BONY_LANDMARK_`: Joint definition based on bony landmarks. This will create a joint which resembles what is often used in traditional gait analysis. (E.g. revolute knee joint along the femoral condyles).
               - :any:`_JOINT_TYPE_USERDEFINED_`: User-defined joint. This will exclude the joint and which nodes.
 
 

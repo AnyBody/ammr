@@ -36,10 +36,13 @@ New lower extremity model (TLEM2.1)
     * The  ratio of volume between Gluteus Maximus superior/inferior has been re-estimated 
       based on the original cadaver MRI scans.
     * Update the Sartorius via points.
+    * Re-implemented the Hip Joint location for the pelvis and the femur by fitting a spheres to 
+      the femoral head, and the acetabulumn. This is in contrast to the original TLEM2.0 implementation
+      where the hip joint center were found using a functional method. 
     * Included a more detailed version of the patella bone.
     * Various minor bug fixes from the original implementation used in the TLEMSafe project. 
     * Corrected the femoral attachment points for the popliteus muscle
-    * Small correction to wrong insetion points for Adductor Longus and Vastus Medialis.
+    * Small correction to wrong insertion points for Adductor Longus and Vastus Medialis.
 
 * See the dedicated :doc:`TLEM2.1 page </body/leg_tlem2_model>` page for more information.
 

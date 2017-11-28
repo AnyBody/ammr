@@ -78,19 +78,34 @@ Apr.  Restructure scaling for more accurate definition of anatomical
   #define DRAWAXES 0
 #endif
 
-#if (BM_BONY_LANDMARK_DEFINED_JOINTAXIS== ON)
-  #ifndef BONY_LANDMARK_DEFINED_HIPJOINT
-  #define BONY_LANDMARK_DEFINED_HIPJOINT
-  #endif
-  #ifndef BONY_LANDMARK_DEFINED_ANKLEJOINT
-  #define BONY_LANDMARK_DEFINED_ANKLEJOINT
-  #endif
-  #ifndef BONY_LANDMARK_DEFINED_KNEEJOINT
-  #define BONY_LANDMARK_DEFINED_KNEEJOINT
-  #endif
+
+#ifdef JOINT_TYPE_HIP
+#undef JOINT_TYPE_HIP
+#undef JOINT_TYPE_KNEE
+#undef JOINT_TYPE_ANKLE
+#undef JOINT_TYPE_PATELLOFEMORAL
+#undef JOINT_TYPE_SUBTALAR
+#undef JOINT_TYPE_PATELLATENDON
 #endif
 
-//
+#if _LEFT_RIGHT_ == "Right"
+#define JOINT_TYPE_HIP            BM_JOINT_TYPE_HIP_RIGHT
+#define JOINT_TYPE_KNEE           BM_JOINT_TYPE_KNEE_RIGHT
+#define JOINT_TYPE_ANKLE          BM_JOINT_TYPE_ANKLE_RIGHT
+#define JOINT_TYPE_PATELLOFEMORAL BM_JOINT_TYPE_PATELLOFEMORAL_RIGHT
+#define JOINT_TYPE_SUBTALAR       BM_JOINT_TYPE_SUBTALAR_RIGHT
+#define JOINT_TYPE_PATELLATENDON  BM_JOINT_TYPE_PATELLATENDON_RIGHT
+#endif
+
+#if _LEFT_RIGHT_ == "Left"
+#define JOINT_TYPE_HIP            BM_JOINT_TYPE_HIP_LEFT
+#define JOINT_TYPE_KNEE           BM_JOINT_TYPE_KNEE_LEFT
+#define JOINT_TYPE_ANKLE          BM_JOINT_TYPE_ANKLE_LEFT
+#define JOINT_TYPE_PATELLOFEMORAL BM_JOINT_TYPE_PATELLOFEMORAL_LEFT
+#define JOINT_TYPE_SUBTALAR       BM_JOINT_TYPE_SUBTALAR_LEFT
+#define JOINT_TYPE_PATELLATENDON  BM_JOINT_TYPE_PATELLATENDON_LEFT
+#endif
+
 
 AnyFolder STL =
 {
@@ -137,7 +152,7 @@ AnySeg Talus =
     #include "../DrawSettings/BML.any"
   };
 
-  #if (BM_JOINT_TYPE_SUBTALAR_RIGHT == _JOINT_TYPE_DEFAULT_ & _LEFT_RIGHT_ == "Right") | (BM_JOINT_TYPE_SUBTALAR_LEFT == _JOINT_TYPE_DEFAULT_ & _LEFT_RIGHT_ == "Left")
+  #if JOINT_TYPE_SUBTALAR != _JOINT_TYPE_USERDEFINED_
   AnyRefNode SubTalarJoint =
   {
     sRel = .Scale(.StdPar.SubTalarJoint);
@@ -160,10 +175,10 @@ AnySeg Talus =
   };
   #endif
   
-  #if (BM_JOINT_TYPE_ANKLE_RIGHT == _JOINT_TYPE_DEFAULT_ & _LEFT_RIGHT_ == "Right") | (BM_JOINT_TYPE_ANKLE_LEFT == _JOINT_TYPE_DEFAULT_ & _LEFT_RIGHT_ == "Left")
+  #if JOINT_TYPE_ANKLE != _JOINT_TYPE_USERDEFINED_
   AnyRefNode AnkleJoint =
   {
-    #ifdef BONY_LANDMARK_DEFINED_ANKLEJOINT
+    #if JOINT_TYPE_ANKLE == _JOINT_TYPE_BONY_LANDMARK_
        AnyVec3 sRelUnscaled =  0.5*(.StdPar.LateralAnkleAxisMarker+.StdPar.MedialAnkleAxisMarker);
        AnyMat33 ARelUnscaled = RotMat({0.0,0,0},
                                       ...Sign*(.StdPar.LateralAnkleAxisMarker - .StdPar.MedialAnkleAxisMarker ),
@@ -172,7 +187,8 @@ AnySeg Talus =
        sRel = 0.5*(.Scale(.StdPar.LateralAnkleAxisMarker)+.Scale(.StdPar.MedialAnkleAxisMarker));
        /// Ankle joint axis is defined from the two malleolus bony landmarks
        ARel = RotMat({0.0,0,0}, ...Sign*(.Scale(.StdPar.LateralAnkleAxisMarker) - .Scale(.StdPar.MedialAnkleAxisMarker) ), .AnatomicalFrame.ARel'[1]  )*RotMat(pi/2,y);
-    #else
+    #endif
+    #if JOINT_TYPE_ANKLE == _JOINT_TYPE_DEFAULT_
        AnyVec3 sRelUnscaled = .StdPar.AnkleJoint;
        AnyMat33 ARelUnscaled = RotMat({0.0,0,0}, .StdPar.AnkleJointAxis, .AnatomicalFrame.ARelUnscaled'[1])*RotMat(pi/2,y);
        /// Control point for the Ankle joint. Found by projecting the malleolus bony landmarks onto the
@@ -251,7 +267,7 @@ AnySeg Foot =
 
   AnyRefNode &HeelJoint = HeelContactNodeLow;
 
-  #if (BM_JOINT_TYPE_SUBTALAR_RIGHT == _JOINT_TYPE_DEFAULT_ & _LEFT_RIGHT_ == "Right") | (BM_JOINT_TYPE_SUBTALAR_LEFT == _JOINT_TYPE_DEFAULT_ & _LEFT_RIGHT_ == "Left")
+  #if JOINT_TYPE_SUBTALAR != _JOINT_TYPE_USERDEFINED_ 
   AnyRefNode SubTalarJoint =
   {
     AnyVec3 sRelUnscaled = .StdPar.SubTalarJoint;
@@ -268,11 +284,12 @@ AnySeg Foot =
   /// Section 3.4
   AnyRefNode AnkleJointComplexAnatomicalFrame =
   {
-    #ifdef BONY_LANDMARK_DEFINED_ANKLEJOINT
-      sRel = 0.5*(.Scale(.StdPar.MedialAnkleAxisMarkerInNeutralConf) + .Scale(.StdPar.LateralAnkleAxisMarkerInNeutralConf));
-    #else
+    #if JOINT_TYPE_ANKLE == _JOINT_TYPE_BONY_LANDMARK_
       sRel = (.MedialMalleolus.sRel + .LateralMalleolus.sRel)*0.5;
+    #else
+      sRel = 0.5*(.Scale(.StdPar.MedialAnkleAxisMarkerInNeutralConf) + .Scale(.StdPar.LateralAnkleAxisMarkerInNeutralConf));
     #endif
+
     ARel = .AnatomicalFrame.ARel;
   };
 
@@ -664,7 +681,7 @@ AnySeg Shank =
   /// Section 3.3
   AnyRefNode AnkleJointComplexAnatomicalFrame =
   {
-    #ifdef BONY_LANDMARK_DEFINED_ANKLEJOINT
+    #if JOINT_TYPE_ANKLE ==  _JOINT_TYPE_BONY_LANDMARK_
       AnyVec3 O = 0.5*(.Scale(.StdPar.LateralAnkleAxisMarker) + .Scale(.StdPar.MedialAnkleAxisMarker) );
       AnyVec3 Z = ...Sign*(.Scale(.StdPar.LateralAnkleAxisMarker) - .Scale(.StdPar.MedialAnkleAxisMarker) );
     #else
@@ -677,16 +694,17 @@ AnySeg Shank =
     ARel = {X/vnorm(X),Y/vnorm(Y),Z/vnorm(Z)}';
   };
 
-  #if (BM_JOINT_TYPE_ANKLE_RIGHT == _JOINT_TYPE_DEFAULT_ & _LEFT_RIGHT_ == "Right") | (BM_JOINT_TYPE_ANKLE_LEFT == _JOINT_TYPE_DEFAULT_ & _LEFT_RIGHT_ == "Left")
+  #if JOINT_TYPE_ANKLE != _JOINT_TYPE_USERDEFINED_
   AnyRefNode AnkleJoint =
   {
      AnyVar TibialTorsionOffset = DesignVar(0);
-     #ifdef BONY_LANDMARK_DEFINED_ANKLEJOINT
+     #if JOINT_TYPE_ANKLE == _JOINT_TYPE_BONY_LANDMARK_
        AnyVec3 sRelUnscaled =  0.5*(.StdPar.LateralAnkleAxisMarker+ .StdPar.MedialAnkleAxisMarker);
        AnyMat33 ARelUnscaled = RotMat({0.0, 0, 0 } , .Sign*(.StdPar.LateralAnkleAxisMarker - .StdPar.MedialAnkleAxisMarker ), .AnatomicalFrame.ARelUnscaled'[1])*RotMat(pi/2,y);
        sRel = 0.5*(.Scale(.StdPar.LateralAnkleAxisMarker) + .Scale(.StdPar.MedialAnkleAxisMarker));
        ARel = RotMat(sRel, sRel+ .Sign*(.Scale(.StdPar.LateralAnkleAxisMarker) - .Scale(.StdPar.MedialAnkleAxisMarker) ),  .AnatomicalFrame.ARel'[1])*RotMat(pi/2,y)*RotMat(TibialTorsionOffset,y);
-     #else
+     #endif
+     #if JOINT_TYPE_ANKLE == _JOINT_TYPE_DEFAULT_
        AnyVec3 sRelUnscaled =  .StdPar.AnkleJoint;
        AnyMat33 ARelUnscaled =   RotMat({0, 0, 0.0}, .Sign*(AnkleLateralControlPoint-AnkleMedialControlPoint ), .AnatomicalFrame.ARelUnscaled'[1])*RotMat(pi/2,y);
        // Control point for the Ankle joint. Found by projecting the malleolus bony landmarks onto the
@@ -704,10 +722,10 @@ AnySeg Shank =
   };
   #endif
   
-  #if (BM_JOINT_TYPE_KNEE_RIGHT == _JOINT_TYPE_DEFAULT_ & _LEFT_RIGHT_ == "Right") | (BM_JOINT_TYPE_KNEE_LEFT == _JOINT_TYPE_DEFAULT_ & _LEFT_RIGHT_ == "Left")
+  #if JOINT_TYPE_KNEE != _JOINT_TYPE_USERDEFINED_
   AnyRefNode KneeJoint =
   {
-    #ifdef BONY_LANDMARK_DEFINED_KNEEJOINT
+    #if JOINT_TYPE_KNEE == _JOINT_TYPE_BONY_LANDMARK_
        AnyVec3 sRelUnscaled = 0.5*(.StdPar.LateralFemuralCondyleInNeutralConf + .StdPar.MedialFemuralCondyleInNeutralConf);
        AnyMat33 ARelUnscaled =  RotMat({0,0,0.0},
                                        .Sign*(.StdPar.LateralFemuralCondyleInNeutralConf - .StdPar.MedialFemuralCondyleInNeutralConf),
@@ -718,7 +736,8 @@ AnySeg Shank =
        ARel = RotMat({0,0,0.0},
                      .Sign*(.Scale(.StdPar.LateralFemuralCondyleInNeutralConf) - .Scale(.StdPar.MedialFemuralCondyleInNeutralConf)),
                      -1*.AnatomicalFrame.ARel'[1])*RotMat(pi,z)*RotMat(-pi/2,y);
-    #else
+    #endif
+    #if JOINT_TYPE_KNEE == _JOINT_TYPE_DEFAULT_
        AnyVec3 sRelUnscaled = .StdPar.KneeJoint;
        AnyMat33 ARelUnscaled =  RotMat({0,0,0.0},
                                        .Sign*(LateralControlPoint - MedialControlPoint),
@@ -782,8 +801,8 @@ AnySeg Shank =
     #include "../DrawSettings/BML.any"
   };
 
-  #if (BM_JOINT_TYPE_PATELLATENDON_RIGHT == _JOINT_TYPE_DEFAULT_ & _LEFT_RIGHT_ == "Right") | (BM_JOINT_TYPE_PATELLATENDON_LEFT == _JOINT_TYPE_DEFAULT_ & _LEFT_RIGHT_ == "Left")
-  /// The node below is a reference node for the patella tendon to define the movement of
+  #if JOINT_TYPE_PATELLATENDON != _JOINT_TYPE_USERDEFINED_
+  /// This node is a reference node for the patella tendon to define the movement of
   /// the patella. The tendon will be regarded as being stiff, so the length will not change.
   /// This is defined by an AnyKinPLine in the file Jnt.any.
   /// The Origin lies on the Patella segment.
@@ -1235,14 +1254,14 @@ AnySeg Thigh =
 
 #endif
 
-   #if (BM_JOINT_TYPE_KNEE_RIGHT == _JOINT_TYPE_DEFAULT_ & _LEFT_RIGHT_ == "Right") | (BM_JOINT_TYPE_KNEE_LEFT == _JOINT_TYPE_DEFAULT_ & _LEFT_RIGHT_ == "Left") 
+   #if JOINT_TYPE_KNEE != _JOINT_TYPE_USERDEFINED_
    AnyRefNode KneeJoint =
    {
     /// Deprecated name the variable 'VarusValgusRotation'.
     AnyVar AxisRot= VarusValgusRotation;
     /// Variable that allows for changing the varus valgus rotation in the model.
     AnyVar VarusValgusRotation = DesignVar(0);
-    #ifdef BONY_LANDMARK_DEFINED_KNEEJOINT
+     #if JOINT_TYPE_KNEE == _JOINT_TYPE_BONY_LANDMARK_
        AnyVec3 sRelUnscaled = 0.5*(.StdPar.EpicondylusFemorisLateralis + .StdPar.EpicondylusFemorisMedialis);
        AnyMat33 ARelUnscaled = RotMat({0.0,0,0}, .Sign*(.StdPar.EpicondylusFemorisLateralis - .StdPar.EpicondylusFemorisMedialis), .AnatomicalFrame.ARelUnscaled'[1])
                                *RotMat(pi/2,y)*RotMat(AxisRot,x);
@@ -1250,7 +1269,8 @@ AnySeg Thigh =
        sRel =0.5*(.Scale(.StdPar.EpicondylusFemorisLateralis) + .Scale(.StdPar.EpicondylusFemorisMedialis));
        /// Knee joint orientation. Defined from the two epicondyle bony landmarks
        ARel = RotMat({0.0,0,0}, .Sign*(.Scale(.StdPar.EpicondylusFemorisLateralis) - .Scale(.StdPar.EpicondylusFemorisMedialis)), .AnatomicalFrame.ARel'[1])*RotMat(pi/2,y)*RotMat(AxisRot,x);
-    #else
+     #endif
+     #if JOINT_TYPE_KNEE == _JOINT_TYPE_DEFAULT_
       AnyVec3 sRelUnscaled = .StdPar.KneeJoint;
       AnyMat33 ARelUnscaled = RotMat({0,0,0.0},
                                      .Sign * (KneeLateralControlPoint - KneeMedialControlPoint ),
@@ -1284,14 +1304,10 @@ AnySeg Thigh =
   };
   #endif
   
-  #if (BM_JOINT_TYPE_HIP_RIGHT == _JOINT_TYPE_DEFAULT_ & _LEFT_RIGHT_ == "Right") | (BM_JOINT_TYPE_HIP_LEFT == _JOINT_TYPE_DEFAULT_ & _LEFT_RIGHT_ == "Left")
+  #if JOINT_TYPE_HIP != _JOINT_TYPE_USERDEFINED_
   AnyRefNode HipJoint =
   {
-    #ifdef BONY_LANDMARK_DEFINED_HIPJOINT
-      AnyVec3 sRelUnscaled = .StdPar.HipJointBoneFitted;
-    #else
-      AnyVec3 sRelUnscaled = .StdPar.HipJoint;
-    #endif
+    AnyVec3 sRelUnscaled = .StdPar.HipJoint;
     
     AnyMat33 ARelUnscaled = RotMat({0.0,0,0},sRelUnscaled-.KneeJoint.sRelUnscaled, .AnatomicalFrame.ARelUnscaled'[2]) *RotMat(-pi/2,x)*RotMat(-pi/2,z);
     sRel = .Scale(sRelUnscaled);
@@ -1301,7 +1317,7 @@ AnySeg Thigh =
   };
   #endif
   
-  #if (BM_JOINT_TYPE_PATELLOFEMORAL_RIGHT == _JOINT_TYPE_DEFAULT_ & _LEFT_RIGHT_ == "Right") | (BM_JOINT_TYPE_PATELLOFEMORAL_LEFT == _JOINT_TYPE_DEFAULT_ & _LEFT_RIGHT_ == "Left")
+  #if JOINT_TYPE_PATELLOFEMORAL != _JOINT_TYPE_USERDEFINED_
    AnyRefNode PatellaFemurJoint =
    {
      AnyVec3 sRelUnscaled = .StdPar.PatellaFemurJoint;
@@ -1709,7 +1725,7 @@ AnySeg Patella =
   };
   AnyRefNode& ScalingNode=AnatomicalFrame ;
 
-  #if (BM_JOINT_TYPE_PATELLOFEMORAL_RIGHT == _JOINT_TYPE_DEFAULT_ & _LEFT_RIGHT_ == "Right") | (BM_JOINT_TYPE_PATELLOFEMORAL_LEFT == _JOINT_TYPE_DEFAULT_ & _LEFT_RIGHT_ == "Left")
+  #if JOINT_TYPE_PATELLOFEMORAL != _JOINT_TYPE_USERDEFINED_
   AnyRefNode PatellaFemurJoint =
   {
     AnyVec3 sRelUnscaled = .StdPar.PatellaFemurJoint;
@@ -1736,7 +1752,7 @@ AnySeg Patella =
     Opacity = ...BonesOpacity.Patella;
   };
 
-  #if (BM_JOINT_TYPE_PATELLATENDON_RIGHT == _JOINT_TYPE_DEFAULT_ & _LEFT_RIGHT_ == "Right") | (BM_JOINT_TYPE_PATELLATENDON_LEFT == _JOINT_TYPE_DEFAULT_ & _LEFT_RIGHT_ == "Left")
+  #if JOINT_TYPE_PATELLATENDON != _JOINT_TYPE_USERDEFINED_
   /// A reference node for the patella tendon to define the movement of
   /// the patella. The tendon will be regarded as being stiff, so the length will not change.
   /// This is defined by an AnyKinPLine in the file Jnt.any.
@@ -1877,13 +1893,9 @@ PelvisSeg =
   {
   #undef __RightLeft__
   
-    #if (BM_JOINT_TYPE_HIP_RIGHT == _JOINT_TYPE_DEFAULT_ & _LEFT_RIGHT_ == "Right") | (BM_JOINT_TYPE_HIP_LEFT == _JOINT_TYPE_DEFAULT_ & _LEFT_RIGHT_ == "Left")
+    #if JOINT_TYPE_HIP != _JOINT_TYPE_USERDEFINED_
     AnyRefNode HipJoint = {
-      #ifndef BONY_LANDMARK_DEFINED_HIPJOINT
-        AnyVec3 sRelUnscaled = .Muscles.StdPar.HipJoint;
-      #else
-        AnyVec3 sRelUnscaled = .Muscles.StdPar.HipJointBoneFitted;
-      #endif
+      AnyVec3 sRelUnscaled = .Muscles.StdPar.HipJoint;
       sRel = ..Scale_Leg_Pelvis(sRelUnscaled );
       #include "../DrawSettings/JointAxesProximal.any"
       ARel = ..AnatomicalFrame.ARel;
