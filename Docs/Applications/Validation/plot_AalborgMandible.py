@@ -7,11 +7,11 @@ This is a validation example of mandible model based on a CT scan of a 40 year o
 
 The model was developed for two purposes:
 
-1 Demonstration of how to apply force-dependent kinematics (FDK) for modeling of
-  the temporomandibular joint (TMJ) 
+1. Demonstration of how to apply force-dependent kinematics (FDK) for modeling of
+   the temporomandibular joint (TMJ) 
 
-2 Validation of the predicted mandible kinematics with the FDK TMJ model and
-  comparison to a simpler point-on-plane (POP) model.
+2. Validation of the predicted mandible kinematics with the FDK TMJ model and
+   comparison to a simpler point-on-plane (POP) model.
 
 You can read more about this model and the validation in:
 Andersen MS, de Zee M, Damsgaard M, Nolte D, Rasmussen J. 2017. 
@@ -21,8 +21,8 @@ Journal of Biomechanical Engineering, 139(9), 091001. DOI: 10.1115/1.4037100.
 The work was supported by the Sapere Aude program of the Danish Council for
 Independent Research under grant number: DFF-4184-00018.
 
-
-``Application/Validation/AalborgMandibleValidation``
+| **Model path:**
+| ``Application/Validation/AalborgMandibleValidation``
 
 
 How to run the model
@@ -52,10 +52,10 @@ these, load the main file and run the operation "AnalysisMandible".
 
 If you have any questions or comments, please do not hesitate to contact the author.
 
-    On behalf of the authors
-    Associate Professor
-    Michael Skipper Andersen, PhD
-    msa@mp.aau.dk
+| On behalf of the authors
+| Associate Professor
+| Michael Skipper Andersen, PhD
+| msa@mp.aau.dk
 """
 
 import sys

@@ -56,12 +56,20 @@ All BodyModel parameters
 <xsl:template match="parameter[not(opt) and (@default='ON' or @default='OFF')]">
 <xsl:call-template name="parameter_header"/>
     :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
+<xsl:text>
+
+|  
+|   
+| 
+| 
+</xsl:text>	
 </xsl:template>
 
 <xsl:template match="parameter[opt]">
 <xsl:call-template name="parameter_header"/>
     :Options: <xsl:apply-templates select="opt"/>
 <xsl:text>
+
 |  
 |   
 | 
@@ -72,6 +80,13 @@ All BodyModel parameters
 
 <xsl:template match="parameter">
 <xsl:call-template name="parameter_header"/>
+<xsl:text>
+
+|  
+|   
+| 
+| 
+</xsl:text>	
 </xsl:template>
 
 
