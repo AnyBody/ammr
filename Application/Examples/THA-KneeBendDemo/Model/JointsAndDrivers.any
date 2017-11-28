@@ -1,0 +1,112 @@
+/* ----------------------------------------------------------------
+   Drivers for a standing model:
+   
+   - The two feet are constrained forward/backward and vertically (x & y)
+   - The pelvis is constrained laterally (z)
+   - The CoM is constrained forward/backward and laterally above the origin.
+   
+   The remaining degrees of freedom (with the exception of a few shoulder
+   movements) are controlled by parameters in the mannequin.any file.
+   
+   The forces defined in the mannequin.any file are attached to the body
+   locations at the bottom of this file.
+   
+   John Rasmussen, March 5, 2004.
+   ----------------------------------------------------------------  */
+
+AnyFolder Drivers = {
+  
+  #include "<ANYBODY_PATH_BODY>/BodyModels/include/MannequinDrivers.any"
+  
+  // Aliases for convenient referencing
+  AnyFolder &JntPos=..Mannequin.Posture;  
+  AnyFolder &JntVel=..Mannequin.PostureVel;  
+  
+  AnyFolder &LegR = ..HumanModel.Right.Leg;
+  AnyFolder &LegL = ..HumanModel.Left.Leg;
+  
+  AnyFolder &RefHM = Main.Model.HumanModel;
+
+
+
+  //Constraint the collective CoM to be right above the GlobalRef
+  AnyKinEqSimpleDriver CoMDriver = {
+    AnyKinCoM CoM = {
+      AnyFolder &Body = Main.Model.HumanModel;
+    };
+    MeasureOrganizer = {0,2};  // Only the x and z directions
+    DriverPos = {0,0};
+    DriverVel = {0,0};
+    Reaction.Type = {Off,Off};
+  };  
+  
+  
+  // The body parts are included only if there is no unhallowed combination detected
+  #ifdef UNHALLOWED_COMBINATION
+  #else
+  
+  #include "TrunkDrivers.any"
+  
+  #if BM_ARM_RIGHT == ON
+  #include "RightArmDrivers.any"
+    #if BM_ARM_DETAILED_HAND == ON
+    #include "RightHandDrivers.any"
+    #endif
+  #else
+  #endif
+  
+  
+  #if BM_ARM_LEFT == ON
+  #include "LeftArmDrivers.any"
+    #if BM_ARM_DETAILED_HAND == ON
+    #include "LeftHandDrivers.any"
+    #endif
+  #else
+  #endif
+  
+  
+  #if BM_LEG_RIGHT & (BM_LEG_MODEL == _LEG_MODEL_Leg_)
+  #include "RightLegDrivers.any"
+  #else
+  #endif
+  
+  
+  #if BM_LEG_MODEL & (BM_LEG_MODEL == _LEG_MODEL_Leg_)
+  #include "LeftLegDrivers.any"
+  #else
+  #endif
+  
+  
+  #if BM_LEG_RIGHT & (BM_LEG_MODEL == _LEG_MODEL_TLEM_ | BM_LEG_MODEL == _LEG_MODEL_TLEM2_)
+  #include "RightLegTDDrivers.any"
+  #else
+  #endif
+  
+  
+  #if BM_LEG_LEFT & (BM_LEG_MODEL == _LEG_MODEL_TLEM_ | BM_LEG_MODEL == _LEG_MODEL_TLEM2_)
+  #include "LeftLegTDDrivers.any"
+  #else
+  #endif
+  
+  
+  #endif
+  
+  
+  //Loads from the Mannequin file.
+  AnyFolder MannequinLoads = {
+    AnyFolder &hm = Main.Model.HumanModel;  // For easy reference
+    AnyFolder &mql = Main.Model.Mannequin.Load;
+    
+    AnyFolder Right = {
+      AnyFolder &rhm = .hm.Right;
+      AnyFolder &locmql = .mql.Right;
+    };  // Right
+    
+    AnyFolder Left = {
+      AnyFolder &lhm = .hm.Left;
+      AnyFolder &locmql = .mql.Left;
+    };  // Left
+  };
+
+  
+};//Drivers
