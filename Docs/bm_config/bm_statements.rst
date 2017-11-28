@@ -1696,7 +1696,6 @@ All BodyModel parameters
     :Default: :ammr:bm_constant:`_JOINT_TYPE_DEFAULT_`
     :Example: ``#define BM_JOINT_TYPE_HIP_RIGHT _JOINT_TYPE_DEFAULT_``
     :Options: - :any:`_JOINT_TYPE_DEFAULT_`: Default joint definition.
-              - :any:`_JOINT_TYPE_BONY_LANDMARK_`: Joint definition based on bony landmarks. This will create a joint which resembles what is often used in traditional gait analysis. (E.g. revolute knee joint along the femoral condyles).
               - :any:`_JOINT_TYPE_USERDEFINED_`: User-defined joint. This will exclude the joint and which nodes.
 
 
@@ -1714,7 +1713,6 @@ All BodyModel parameters
     :Default: :ammr:bm_constant:`_JOINT_TYPE_DEFAULT_`
     :Example: ``#define BM_JOINT_TYPE_HIP_LEFT _JOINT_TYPE_DEFAULT_``
     :Options: - :any:`_JOINT_TYPE_DEFAULT_`: Default joint definition.
-              - :any:`_JOINT_TYPE_BONY_LANDMARK_`: Joint definition based on bony landmarks. This will create a joint which resembles what is often used in traditional gait analysis. (E.g. revolute knee joint along the femoral condyles).
               - :any:`_JOINT_TYPE_USERDEFINED_`: User-defined joint. This will exclude the joint and which nodes.
 
 
