@@ -1,11 +1,40 @@
 AnyFolder HumanGroundResiduals = {
   
-  AnyFolder &Segment = ..BodyModel.Trunk.SegmentsLumbar.PelvisSeg;
+  AnyFolder CenterOfMass = {
+    AnySeg DummySeg={
+      Mass=0;
+      Jii={0,0,0};
+    };
+    AnyKinEqSimpleDriver  FixRotation ={
+      AnyKinRotational rot ={
+        AnySeg &ref1=..DummySeg;
+        Type=RotAxesAngles;
+      };
+      DriverPos ={0,0,0}; DriverVel={0,0,0};
+    };
+    AnyKinEqSimpleDriver  DummySegDriver ={
+      AnyKinMeasureLinComb LinComb ={
+        AnyKinLinear LinSeg ={
+          AnySeg &ref=...DummySeg;
+        };
+        AnyKinCoM CoMMeasure =  {
+          AnyFolder& ref = Main.HumanModel.BodyModel;
+        };
+        Coef ={{1,0,0,-1,0,0},{0,1,0,0,-1,0},{0,0,1,0,0,-1}};
+        OutDim =3;
+      };
+      DriverPos ={0,0,0}; DriverVel={0,0,0};
+    };
+  };
+
+  
+  AnyFolder &PelvisSegment = ..BodyModel.Trunk.SegmentsLumbar.PelvisSeg;
+  AnyFolder &COMSegment = CenterOfMass.DummySeg;
   
   AnyFolder Measures = {
     AnyKinMeasureOrg PosX ={
       AnyKinLinear lin ={
-        AnySeg &ref2 = ...Segment;
+        AnySeg &ref2 = ...COMSegment;
       };
       MeasureOrganizer={0};
     };
@@ -19,7 +48,7 @@ AnyFolder HumanGroundResiduals = {
     };    
     AnyKinMeasureOrg RotX ={
       AnyKinRotational rot ={
-        AnySeg &ref2 = ...Segment;
+        AnySeg &ref2 = ...PelvisSegment;
         Type=RotAxesAngles;
       };
       MeasureOrganizer={2};
@@ -100,13 +129,13 @@ AnyFolder HumanGroundResiduals = {
     AnyGeneralMuscle RotY_Push=
     {
       AnyKinMeasureOrg &ref= ..Measures.RotY;
-      AnyMuscleModel & mus = .MusMoldel2;
+      AnyMuscleModel & mus = .MusMoldel1;
       ForceDirection = 1;
     };
     AnyGeneralMuscle RotY_Pull=
     {
       AnyKinMeasureOrg &ref= ..Measures.RotY;
-      AnyMuscleModel & mus = .MusMoldel2;
+      AnyMuscleModel & mus = .MusMoldel1;
       ForceDirection = -1;
     };    
     // For RotZ
