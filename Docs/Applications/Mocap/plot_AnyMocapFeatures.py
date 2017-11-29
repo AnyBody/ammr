@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 r"""
-AnyMocap Features
+AnyMoCap Features
 ===============================
 
 A collection of small models that show-off special features of the
-*AnyMocap* framework.
+*AnyMoCap* framework.
 
 ``Application/MocapExamples/SpecialFeatures``
 
