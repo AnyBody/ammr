@@ -3,11 +3,11 @@ r"""
 Inertial MoCap example
 ===============================
 
-Example of a MoCap mdoel using data from a inertial motional caputure suit.
+Example of a MoCap mdoel using data from an inertial motional caputure suit.
 The model uses a BVH file with data from an Xsens suit. The ground reaction
 forces are predicted using the GRF prediction algorithm. 
     
-``Application/MocapExamples/BVH/Trials/BVH01/Main.any``
+``Application/MocapExamples/BVH_Xsens/Trials/BVH01/Main.any``
 
 """
 import sys
