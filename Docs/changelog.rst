@@ -17,11 +17,11 @@ New lower extremity model (TLEM2.1)
 
 * The `Twente Lower Extremity Model version 2.0 dataset
   <http://dx.doi.org/10.1016/j.jbiomech.2014.12.034>`_, developed in the
-  TLEMSafe EU project was implemented in the AMMR repository. The model is not
+  TLEM\ *safe* EU project was implemented in the AMMR repository. The model is not
   the default model, but can be enabled with the :ref:`BM parameter
   <bm-config>` ``#define BM_LEG_MODEL _LEG_MODEL_TLEM2_``
 * The model is versioned TLEM 2.1, to indicate the number of changes and
-  correction which has been added in process. The changes and updates to the
+  correction which has been added in the process. The changes and updates to the
   TLEM2 dataset was done in the `Life Long Joints
   <https://lifelongjoints.eu/>`_ EU research project (paper submitted for publication). 
 * The most important changes to the TLEM 2 dataset include the following: 
@@ -30,15 +30,15 @@ New lower extremity model (TLEM2.1)
     * Reworked muscle topology for Gluteus Medius and Gluteus Minimus
     * Updated wrapping for Hamstring muscles, and Gastrocnemius around the knee. 
     * Redefined revolute knee axis and patella joint axis and patella tendon length based on the bone geometry. 
-      The original TLEM knee axis was estimated from functional trial, and was only valid 
+      The original TLEM knee axis was estimated using a functional method, and was only valid 
       for very small flexion angles. 
       Thanks to Marco Antonio Marra (Radboudumc) for this for this improvement.
     * The  ratio of volume between Gluteus Maximus superior/inferior has been re-estimated 
       based on the original cadaver MRI scans.
     * Update the Sartorius via points.
-    * Re-implemented the Hip Joint location for the pelvis and the femur by fitting a spheres to 
-      the femoral head, and the acetabulumn. This is in contrast to the original TLEM2.0 implementation
-      where the hip joint center were found using a functional method. 
+    * Re-implemented the Hip Joint location for the pelvis and the femur by fitting spheres to 
+      the femoral head and the acetabulum. This is in contrast to the original TLEM2.0 implementation
+      where the hip joint center was found using a functional method. 
     * Included a more detailed version of the patella bone.
     * Various minor bug fixes from the original implementation used in the TLEMSafe project. 
     * Corrected the femoral attachment points for the popliteus muscle
@@ -48,12 +48,12 @@ New lower extremity model (TLEM2.1)
 * See the dedicated :doc:`TLEM2.1 page </body/leg_tlem2_model>` page for more information.
 
 
-AnyMocap
+AnyMoCap
 --------
 
 * New framework for running MoCap models. The AnyMoCap framework is an effort to
   create a simple and unified framework for doing any kind of MoCap analysis with
-  the AnyBody Modeling System. See the :ref:`AnyMocap example gallery <mocap_examples>`
+  the AnyBody Modeling System. See the :ref:`AnyMoCap example gallery <mocap_examples>`
   for more information.
 * Algorithms and file for Ground reaction force prediction are added to: ``ammr/tools/GRFPrediction/``. 
   See the 
@@ -63,7 +63,7 @@ AnyMocap
 TLEM 1 updates
 --------------
 
-* The cumulated smaller bug fixes and updates to the TLEM1 model means that we now 
+* The cumulated smaller bug fixes and updates to the TLEM1 model mean that we now 
   denote the model 1.2.
 * Changed the position of the Heel contact node, to align the heights of the
   TLEM1 and TLEM2 models. 
@@ -80,17 +80,17 @@ TLEM 1 updates
 AMMR restructure
 -----------------
 
-* Added a top level ``Tools`` folder helper files and other models which don't belong in ``Body/`` or ``Application``. 
+* Added a top-level ``Tools`` folder helper files and other models which don't belong in ``Body/`` or ``Application``. 
 * Moved ``Body/AAUHuman/Toolbox`` to ``Tools/ModelUtilities`` 
 * Renamed the ``Body/AUHuman`` to ``Body/Mandible_AU`` 
-* Restructured the antropometric ("AnyMan") folder.  The folder ``HumanModel.AntroDataSubject`` is renamed to 
-  ``HumanModel.Antropometics``. The structure of the folder has also changed with a ``SegmentDimensions`` and ``SegmentMasses`` subfolder. 
+* Restructured the anthropometric ("AnyMan") folder.  The folder ``HumanModel.AnthroDataSubject`` is renamed to 
+  ``HumanModel.Anthropometics``. The structure of the folder has also changed with a ``SegmentDimensions`` and ``SegmentMasses`` subfolder. 
 
 
 Configuration parameters
 ------------------------
 
-* Previously used system to configure human body using a BodyPartSetup file was completely 
+* The previously used system to configure human body using a BodyPartSetup file was completely 
   replaced with the new body model (BM) parameters. 
 * Please see the documentation on: :ref:`BM parameters <bm-config>`.
 
@@ -121,7 +121,7 @@ Spine model
 -----------
     
 * :ref:`BM parameters <bm-trunk-config>` were updated to have control over each section of the spine and relevant components.
-* Anatomical reference frame of the thorax segment was modified. This change reflects a change 
+* The anatomical reference frame of the thorax segment was modified. This change reflects a change 
   in the pelvic anatomical reference, and ensures upright posture for the standing postures, to 
   align C1C0 joint with the hip joint centers. 
 * Boney surfaces of both pelvis and sacrum were updated and now correspond better to the relevant 
@@ -144,7 +144,7 @@ Arm model
 * Muscle wrapping surfaces were updated for more physiological behavior.
 * Scapula reaction contact forces were simplified, and do not longer utilize slider segments. 
 * Conoid ligament length now scales along with the scapula width.
-* Add a ``GeomScale`` function the the Clavicula segment.
+* Add a ``GeomScale`` function the Clavicula segment.
 
 
 Muscle models
@@ -154,14 +154,14 @@ Muscle models
   ``AnyMuscleModel3E`` and ``AnyMuscleModel`` in the AnyBody Modeling System 7.1. 
   The following variables are renamed: 
     
-    * The "optimal fiber length" varaible renamed from ``Lfbar`` to ``Lf0`` 
+    * The "optimal fiber length" variable renamed from ``Lfbar`` to ``Lf0`` 
     * The "Pennation angle" variable renamed from ``Gammabar`` to ``Gamma0``
     * The "Tendon strain at F0" variable renamed from ``Epsilonbar`` to ``Epsilon0``
     
-* Restructured the muscle model section of the both TLEM1 and TLEM2 models. 
+* Restructured the muscle model section of both TLEM1 and TLEM2 models. 
   
-  * All the orignal TLEM based muscle parameter are now located under: ``Leg/ModelParameters/Muscles``
-  * All scaled muscle paramters are located in ``Leg/MusPar/SubjectMusPar``. This folder references 
+  * All the original TLEM based muscle parameter are now located under: ``Leg/ModelParameters/Muscles``
+  * All scaled muscle parameters are located in ``Leg/MusPar/SubjectMusPar``. This folder references 
     the TLEM muscle and applies strength scaling etc. The ``SubjectMusPar`` folder and all subfolders are
     implemented with ``class_template``. Thus, all muscle parameter can now be overridden in applications
     by just assigning the variables a new value: E.g.
@@ -177,13 +177,13 @@ Muscle models
 Calibration
 -----------
 
-* Updated calibration for Arms and TLEM legs in the BodyModel to
+* Updated calibration for Arms and TLEM legs in the Body Model to
 
     * include muscles to the calibration study with search functions. 
     * drive the postures using the measures from the interface folder to remain anatomically
       similar throughout future versions.
 
-* Added new **experimental** 2 parameter calibration, which is based on range-of-motion postures.
+* Added new **experimental** two-parameter calibration, which is based on range-of-motion postures.
   The calibration type is controlled by the :any:`BM_CALIBRATION_TYPE` parameter.
   
   For example:

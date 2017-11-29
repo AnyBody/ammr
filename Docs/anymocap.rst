@@ -46,11 +46,11 @@ with the determinate kinematic solver in the inverse dynamic analysis.
 
 
 .. seealso:: The AnyBody tutorials, and the :tutorials:doc:`lesson on using the
-    AnyMocap model <Making_things_move/lesson5>`
+    AnyMoCap model <Making_things_move/lesson5>`
 
 
 
-AnyMocap examples:
+AnyMoCap examples:
 ***********************
 
 
