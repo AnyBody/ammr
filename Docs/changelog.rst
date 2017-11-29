@@ -17,7 +17,7 @@ New lower extremity model (TLEM2.1)
 
 * The `Twente Lower Extremity Model version 2.0 dataset
   <http://dx.doi.org/10.1016/j.jbiomech.2014.12.034>`_, developed in the
-  TLEMSafe EU project was implemented in the AMMR repository. The model is not
+  TLEM\ *safe* EU project was implemented in the AMMR repository. The model is not
   the default model, but can be enabled with the :ref:`BM parameter
   <bm-config>` ``#define BM_LEG_MODEL _LEG_MODEL_TLEM2_``
 * The model is versioned TLEM 2.1, to indicate the number of changes and

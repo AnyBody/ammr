@@ -19,7 +19,7 @@ et al. at the University of Twente, The Netherlands). The first implmentation of
 the musculoskeletal model was created by Vincenzo Carbone and René Fluit from
 the University of Twente [CFPK15]_.
 
-After the TLEMSafe project the model was futher refined
+After the TLEM\ *safe* project the model was futher refined
 in the `Life
 Long Joints project <https://lifelongjoints.eu/>`__ where its anatomical
 fidelity and joint force prediction accuracy were improved by De Pieri et al.
