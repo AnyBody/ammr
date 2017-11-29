@@ -42,6 +42,7 @@ New lower extremity model (TLEM2.1)
     * Included a more detailed version of the patella bone.
     * Various minor bug fixes from the original implementation used in the TLEMSafe project. 
     * Corrected the femoral attachment points for the popliteus muscle
+    * Update ankle joint nodes with positions fitted to the bone geometry
     * Small correction to wrong insertion points for Adductor Longus and Vastus Medialis.
 
 * See the dedicated :doc:`TLEM2.1 page </body/leg_tlem2_model>` page for more information.
@@ -68,6 +69,7 @@ TLEM 1 updates
   TLEM1 and TLEM2 models. 
 * Added missing ``GeomScale`` function to the patella
   segment. 
+* Update ankle joint nodes with positions fitted to the bone geometry
 * PSCA is now calculated based on the scaled fiber length. This aligns
   the TLEM 1 model with the new TLEM 2 model. It also means that scaling the model
   without changing the muscle volumes will change the strength of the model.
@@ -217,6 +219,7 @@ Minor Changes:
 * New ``AnyDoc`` classes are added to the different body model, so the GUI
   can create direct links to the documentation.
 * Simplify the Scapular reactions to the thorax segment. 
+* Foot contact nodes are aligned with the AnatomicalFrame
 * Updated the Wilke Validation example to reflect the forces for the AMMR 2.0 repository.
 * Updates to BM parameters:
 
