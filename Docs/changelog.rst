@@ -5,6 +5,25 @@ Changelog
 
 .. default-domain:: ammr
 
+
+
+***********************
+Current development
+***********************
+
+Fixed:
+========
+
+* Wrong masses in the deprecated "old" MOCAP models. The model was not using the
+  body mass specified in ``Main.TrialSpecificData.Anthropometrics.BodyMass``
+
+
+
+
+
+
+
+
 ***********************
 AMMR 2.0.0 (2017-11-29)
 ***********************
