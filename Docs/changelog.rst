@@ -19,9 +19,10 @@ Fixed:
 
 
 
+Added:
+===============
 
-
-
+* AnyMoCap: New argument ``DRAW_SCALE`` in the ``CreateMarkerDriver`` template to control the visual size of markers.
 
 
 ***********************
