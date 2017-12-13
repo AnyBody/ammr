@@ -7,11 +7,10 @@ This is a mandible model based on a CT scan of a 40 year old male.
 
 The model was developed for two purposes:
 
-1 Demonstration of how to apply force-dependent kinematics (FDK) for modeling of
-  the temporomandibular joint (TMJ) 
-
-2 Validation of the predicted mandible kinematics with the FDK TMJ model and
-  comparison to a simpler point-on-plane (POP) model.
+1. Demonstration of how to apply force-dependent kinematics (FDK) for modeling of
+   the temporomandibular joint (TMJ) 
+2. Validation of the predicted mandible kinematics with the FDK TMJ model and
+   comparison to a simpler point-on-plane (POP) model.
 
 You can read more about this model and the validation in [AZDN17]_
 

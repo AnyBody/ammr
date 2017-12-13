@@ -42,7 +42,7 @@ Key feature of this TLEM 2.1 model in the AMMR is:
 
     *New wrapping surfaces for (clockwise) Gluteus maximus, Ilio-Psoas, Gluteus
     medius & minimus, Hamstrings & Gastrocnemius (version 1.2). All figures are
-    from the publication by De Pieri et al. [DLGR17]_*
+    from the publication by De Pieri et al.* [DLGR17]_
 
 
 Example Configuration
@@ -63,9 +63,8 @@ muscle model and only one leg:
 
 .. seealso::
    
-   See :doc:`Leg configuration parameters <../bm_config/leg>` for a
-   full list of configuration parameters or :doc:`configuration section <../bm_config/index>`
-   for more information on BM parameters.
+   The :doc:`Leg configuration parameters <../bm_config/leg>` for a
+   full list of configuration parameters.
 
 
 Resources
