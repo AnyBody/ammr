@@ -20,9 +20,10 @@ Fixed:
 * Better initial position for scapula. The initial position is now calculated from the 
   the initial position of the clavicula. This should help make the arm model more robust. 
 
+Added:
+===============
 
-
-
+* AnyMoCap: New argument ``DRAW_SCALE`` in the ``CreateMarkerDriver`` template to control the visual size of markers.
 
 
 ***********************
