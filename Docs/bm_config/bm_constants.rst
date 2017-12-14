@@ -61,6 +61,16 @@ All BodyModel constants
 
     Switch to use leg model: "Leg"
 
+.. ammr:bm_constant:: _FOOT_MODEL_DEFAULT_
+    :value: 0
+
+    Switch for using the default foot model
+
+.. ammr:bm_constant:: _FOOT_MODEL_NONE_
+    :value: 1
+
+    Switch for using the GM foot model"
+
 .. ammr:bm_constant:: _MORPH_NONE_
     :value: 0
 
