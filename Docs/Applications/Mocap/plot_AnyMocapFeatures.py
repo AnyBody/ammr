@@ -10,11 +10,11 @@ A collection of small models that show-off special features of the
 
 This includes:
 
-* offset to forceplates
-* individual cutoff frequencies for markers
-* normalization with respect to gait cycle events
-* using time-varying weight for markers
-* plus more.
+* Offset to forceplates.
+* Individual cutoff frequencies for markers.
+* Normalization with respect to gait cycle events
+* Using time-varying weight for markers
+* Much more.
 
 """
 import sys
