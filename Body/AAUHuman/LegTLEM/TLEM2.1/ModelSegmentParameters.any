@@ -113,17 +113,18 @@ Talus = {
   AnyVar MassStandard = 0.26049;
   AnyVar Density = 1000;
 
-  // AnyVar LengthStandard = 0.03808687;//**used for fiber length scaling**
-  AnyVar LengthStandard = 0.133*vnorm(..Seg.Foot.StdPar.BigToeNode-..Seg.Foot.StdPar.HeelNode);
-  AnyVar Length = 0.133*vnorm(..Seg.Foot.BigToeNode.sRel-..Seg.Foot.HeelNode.sRel);
+  AnyVar LengthStandard = 0.133*vnorm(.Foot.BigToeNode-.Foot.HeelNode);
 
-  AnyVec3 sCoM = (..Seg.Talus.StdPar.SubTalarJoint + ..Seg.Talus.StdPar.AnkleJoint)/2;
-  /// kg, 20% of Klein Horsman dataset Mass of Foot (% calculated from bone volume ratio);
+  AnyVec3 sCoM = (.Talus.SubTalarJoint + .Talus.AnkleJoint)/2;
+  // kg, 20% of Klein Horsman dataset Mass of Foot (% calculated from bone volume ratio);
+  
+  #if BM_FOOT_MODEL == _FOOT_MODEL_DEFAULT_
   AnyVar Ixx = 2/5 * ..Seg.Talus.Mass * (vnorm(0.5*(..Seg.Talus.AnkleJoint.sRel - ..Seg.Talus.MedialMalleolus.sRel)))^2;
   AnyVar Iyy = Ixx;
   AnyVar Izz = Ixx;
   AnyVec3 Jii = {Ixx, Iyy, Izz};
   AnyVec3 Jij = {0,0,0};
+  #endif
 
 };
 
@@ -132,10 +133,11 @@ Foot = {
   /// the ratio TLEM2/TLEM1 segment length ratio
   AnyVar MassStandard = 0.7226;
   AnyVar LengthStandardForFibers = 0.285;//**used for fiber length scaling**
-  AnyVar LengthStandard = vnorm(..Seg.Foot.StdPar.BigToeNode-..Seg.Foot.StdPar.HeelNode);
+  AnyVar LengthStandard = vnorm(.Foot.BigToeNode-.Foot.HeelNode);
   AnyVar Density = 1000;
   AnyVec3 sCoM = { 0.0509 , -0.0161  ,  0.0139  }*.TF';
 
+  #if BM_FOOT_MODEL == _FOOT_MODEL_DEFAULT_
   AnyVar Length = vnorm(..Seg.Foot.BigToeNode.sRel-..Seg.Foot.HeelNode.sRel);
   AnyVar Radius = (..Seg.Foot.Mass/(3.1416*Length*Density))^0.5;
   AnyVar Ixx = 0.25*..Seg.Foot.Mass*Radius*Radius + 1/12*..Seg.Foot.Mass*Length*Length;
@@ -144,4 +146,5 @@ Foot = {
   AnyMat33 JM=..Seg.Foot.ScalingNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*..Seg.Foot.ScalingNode.ARel';
   AnyVec3 Jii = {JM[0][0], JM[1][1], JM[2][2]};
   AnyVec3 Jij = {JM[1][0], JM[2][1], JM[2][0]};
+  #endif
 };
