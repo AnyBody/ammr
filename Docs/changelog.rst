@@ -31,6 +31,7 @@ Added:
 
 * New ``class_template`` for adding limit dirvers to kinmatic measures. 
   Can be included with ``#include "<ANYBODY_PATH_MODELUTILS>/KinematicLimits/KinLimit_template.any"`` 
+  
 * Added new `BM_FOOT_MODEL` parameter. This is preparation for integrating the GM foot model back into the AMMR.
   Currently the parameter can only be used for excluding the feet from the current models 
   (``#define BM_FOOT_MODEL _FOOT_MODEL_NONE_``) 
