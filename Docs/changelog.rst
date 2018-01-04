@@ -20,6 +20,10 @@ Fixed:
 * Better initial position for scapula. The initial position is now calculated from the 
   the initial position of the clavicula. This should help make the arm model more robust. 
 
+* Weak residuals for GRF prediction: Ensure the same strength is used in all directions for
+  the weak recruited actuators. 
+
+
 Added:
 ===============
 
@@ -27,6 +31,8 @@ Added:
 
 * New ``class_template`` for adding limit dirvers to kinmatic measures. 
   Can be included with ``#include "<ANYBODY_PATH_MODELUTILS>/KinematicLimits/KinLimit_template.any"`` 
+
+
 
 
 
