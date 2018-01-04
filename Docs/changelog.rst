@@ -26,7 +26,7 @@ Added:
 * AnyMoCap: New argument ``DRAW_SCALE`` in the ``CreateMarkerDriver`` template to control the visual size of markers.
 
 * New ``class_template`` for adding limit dirvers to kinmatic measures. 
-  Can be included with ```#include "<ANYBODY_PATH_MODELUTILS>/KinematicLimits/KinLimit_template.any"`` 
+  Can be included with ``#include "<ANYBODY_PATH_MODELUTILS>/KinematicLimits/KinLimit_template.any"`` 
 
 
 
