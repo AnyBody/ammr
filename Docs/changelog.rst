@@ -11,6 +11,18 @@ Changelog
 Current development
 ***********************
 
+Changed:
+========
+
+* Default mannequin drivers for the Pelvis now correctly drive the Pelvis anatomical frame
+  instead of the segmental reference frame. This fixes the discrepancy between the load time 
+  postion and the mannequin driver position, and makes the driver consistent with the interface 
+  measures ``BodyModel.Interface.Trunk.PelvisPosX/Y/Z``. 
+
+  .. warning:: This change will affect models using the default mannequin drivers unless 
+     the driver values are updated. 
+
+
 Fixed:
 ========
 
