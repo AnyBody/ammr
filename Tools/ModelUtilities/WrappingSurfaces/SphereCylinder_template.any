@@ -2,9 +2,15 @@
 
 #class_template MultiWrapSurfs_SINGLE (AnyFolder& REF, NUMBER, _TYPE="CYLINDER", DEBUG = 0) {
     #var AnyVar angle = .Angles[NUMBER-1]*pi/180;
-    AnyVec3 Tangent_sRel = {REF.Sph.Radius[0]*sin(angle), 0, REF.Sph.Radius[2]*cos(angle)};       
-    AnyMat33 Tangent_ARel = RotMat({0,0,0},Tangent_sRel,{0,1,0});
+    AnyVec3 Tangent_sRel = {.RadiusX*sin(angle), 0, .RadiusZ*cos(angle)};  
     
+    AnyVec3 normal_vector = vnorm(Tangent_sRel)*{
+      .RadiusZ*sin(angle)/sqrt( (.RadiusX *cos(angle))^2 +  (.RadiusZ*sin(angle))^2 ),
+      0,
+     .RadiusX*cos(angle)/sqrt( (.RadiusX *cos(angle))^2 +  (.RadiusZ*sin(angle))^2 ) 
+    };
+    AnyMat33 Tangent_ARel = RotMat({0,0,0},normal_vector,{0,1,0});
+        
     
        
     
@@ -32,10 +38,13 @@
       #endif
       
       #if _TYPE == "ELIPSOID"
+        sRel =  ..Tangent_sRel - ..normal_vector;// (1-...RadiusHeight/vnorm(..Tangent_sRel)) *..Tangent_sRel +
+        //        ...WrapSurfLength*{0,0,-0.5}*..Tangent_ARel';
+
         ARel = ..Tangent_ARel;
         AnySurfEllipsoid Surf =
         {
-          Radius = { ....RadiusWidth, ....RadiusHeight, ....WrapSurfLength/2 };
+          Radius = { vnorm(...Tangent_sRel), ....RadiusHeight, ....WrapSurfLength/2 };
           #if DEBUG
           AnyDrawParamSurf drw=
           {
@@ -63,8 +72,8 @@
         };
         AnyDrawLine Tangent = 
         {
-          p0 = {0,0, 0.5*....RadiusWidth};
-          p1 = -{0,0, 0.5*....RadiusWidth};
+          p0 = {0,0, 0.5*....RadiusZ};
+          p1 = -{0,0, 0.5*....RadiusZ};
           GlobalCoord = Off;
           //#var Visible = ....Visibility[NUMBER-1];
           Line = 
@@ -92,14 +101,18 @@ DEBUG=1
 ) 
 {
   #var AnyVar Radius = 0.05;
-  /// Radius of the sphere (elipsoid) in the x/z directions
-  #var AnyVar RadiusWidth = Radius;
+  /// Radius of the sphere (elipsoid) in the z directions
+  #var AnyVar RadiusZ = Radius;
+  
+  /// Radius of the sphere (elipsoid) in the x directions
+  #var AnyVar RadiusX = Radius;
+  
   /// Radius of the sphere (elipsoid) in the y directions
   #var AnyVar RadiusHeight = Radius;
   
   AnyInt NumberOfCylinders = NUMBER_OF_CYLINDERS;
   
-  #var AnyVar WrapSurfLength = 8*RadiusWidth;
+  #var AnyVar WrapSurfLength = 8*RadiusZ;
   
   #var AnyVector Angles = linspace(0,90,NUMBER_OF_CYLINDERS);
   #var AnySwitch Visibility = repmat(NUMBER_OF_CYLINDERS, On);
@@ -118,7 +131,7 @@ DEBUG=1
      };        
      AnySurfEllipsoid Sph =
      {
-       Radius = {..RadiusWidth, ..RadiusHeight, ..RadiusWidth}; //this parameter should be dependent 
+       Radius = {..RadiusX, ..RadiusHeight, ..RadiusZ}; //this parameter should be dependent 
        #if DEBUG
        AnyDrawParamSurf drw = { WireFrameOnOff = On;}; 
        #endif
