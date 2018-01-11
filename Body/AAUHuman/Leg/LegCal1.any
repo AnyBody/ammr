@@ -7,9 +7,16 @@ AnyFolder LegCal1 ={
   AnyFolder &Pelvis = ...BodyModel.Trunk.SegmentsLumbar.PelvisSeg; //This is a reference to the folder which holds the human part of the model
   AnyFolder &LegSegSide = .SideHumanFolderRef.Leg.Seg; //This is a reference to the folder which holds the human part of the model
   
-  AnyFolder &JointsSideCal = .SideHumanFolderRef.Leg.Jnt;
+  // Segments needed for the Psoas Major muscles
+  AnyFolder& SegmentsLumbar =...BodyModel.Trunk.SegmentsLumbar;
+  AnyFolder &Thorax = ...BodyModel.Trunk.SegmentsThorax.ThoraxSeg;
+    
   
+  AnyFolder &JointsSideCal = .SideHumanFolderRef.Leg.Jnt;
+  AnyFolder &TrunkJoints = ...BodyModel.Trunk.JointsLumbar;
+
   AnyFolder &MusCalSide =  .SideHumanFolderRef.Leg.Mus;
+
   
   AnyFolder &MusParCalSide =  .SideHumanFolderRef.Leg.MusPar;
   
@@ -17,28 +24,34 @@ AnyFolder LegCal1 ={
   
   AnyFixedRefFrame ground = {
     AnyRefNode node = { 
-     ARel=..Pelvis.Axes0;
+      ARel=..Pelvis.Axes0;
       sRel=..Pelvis.r0;
     };
   };
   
-  AnyRevoluteJoint PelvisGround={
-    AnyRefFrame &Ground = .ground.node;
-    AnyRefFrame &Sacrum= ....BodyModel.Trunk.SegmentsLumbar.PelvisSeg; 
-    Axis=z;
+  AnyKinEqDriver ThoraxFix = 
+  {
+    AnyKinMeasure& PelvisThoraxExtension = ....BodyModel.Interface.Trunk.PelvisThoraxExtension;
+    AnyKinMeasure& PelvisThoraxLateralBending = ....BodyModel.Interface.Trunk.PelvisThoraxLateralBending;
+    AnyKinMeasure& PelvisThoraxRotation = ....BodyModel.Interface.Trunk.PelvisThoraxRotation;
   };
   
-  AnyKinEqSimpleDriver PelvisGroundRot = {
-    AnyRevoluteJoint &Jnt = .PelvisGround;
-    DriverPos = {0};
-    DriverVel = {0};
-    Reaction.Type = {Off}; 
+  AnyKinEqDriver PelvisFix = {
+    AnyKinLinear Lin = {
+      AnyRefFrame &ground = ..ground.node;
+      AnyRefFrame &Pelvis = .....BodyModel.Trunk.SegmentsLumbar.PelvisSeg;
+    };
+    AnyKinRotational Rot = {
+      Type = RotAxesAngles;
+      AnyRefFrame &ground = ..ground.node;
+      AnyRefFrame &Pelvis = .....BodyModel.Trunk.SegmentsLumbar.PelvisSeg;
+    };
   };
   
   #if BM_FOOT_MODEL == _FOOT_MODEL_DEFAULT_
   AnyKinEqSimpleDriver JntDOFDriverSide = {
     AnyKinMeasure &Joint = ..SideHumanFolderRef.Leg.JntDOF;
-    DriverPos = {1.57,0.0,0,0,0,0};
+    DriverPos = {1.57, 0.0, 0, 0, 0, 0};
     DriverVel = {0.0,0.0,0,0,0,0};
     Reaction.Type = {Off,Off,Off,Off,Off,Off};
   };
@@ -52,6 +65,10 @@ AnyFolder LegCal1 ={
 AnyBodyCalibrationStudy LegCalibrationStudy1 = {
   AnyFolder &ref=.LegCal1; 
   nStep = 1;
+  InitialConditions.SolverType = KinSolDeterminate;
+  Kinematics.SolverType = KinSolDeterminate;
+  InitialConditions.SmallStepAssumptionOnOff = Off;
+  Kinematics.SmallStepAssumptionOnOff = Off;
 };
 
   

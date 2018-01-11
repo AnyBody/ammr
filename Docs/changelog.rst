@@ -11,14 +11,29 @@ Changelog
 Current development
 ***********************
 
+Changed:
+========
+
+* Default mannequin drivers for the Pelvis now correctly drive the Pelvis anatomical frame
+  instead of the segmental reference frame. This fixes the discrepancy between the load time 
+  postion and the mannequin driver position, and makes the driver consistent with the interface 
+  measures ``BodyModel.Interface.Trunk.PelvisPosX/Y/Z``. 
+
+  .. warning:: This change will affect models using the default mannequin drivers unless 
+     the driver values are updated. 
+
+
 Fixed:
 ========
 
 * Wrong masses in the deprecated "old" MOCAP models. The model was not using the
   body mass specified in ``Main.TrialSpecificData.Anthropometrics.BodyMass``
 
-* Better initial position for scapula. The initial position is now calculated from the 
-  the initial position of the clavicula. This should help make the arm model more robust. 
+* Fixed smaller warnings when running calibration routines with the lower extremity models.
+
+* Better initial position for scapula and clavicula. The initial position is now calculated from the 
+  the initial position of the chain from thorax through the clavicula to scapula.
+  This will not change the model output but should make the arm model more robust solving the first step. 
 
 * Weak residuals for GRF prediction: Ensure the same strength is used in all directions for
   the weak recruited actuators. 
