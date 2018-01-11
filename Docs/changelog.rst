@@ -33,6 +33,11 @@ Fixed:
   the initial position of the chain from thorax through the clavicula to scapula.
   This will not change the model output but should make the arm model more robust solving the first step. 
 
+* Fixed muscle insertions for the old leg model (``#define BM_LEG_MODEL _LEG_MODEL_LEG_``). The mal alligned 
+  pelvis muscles insertions was a regression due to the updated Trunk pelvis
+  introduced in AMMR 2.0. The pelvis muscles insertions have been translated and
+  rotated to fit the new Trunk geometry as best as possible.
+
 * Weak residuals for GRF prediction: Ensure the same strength is used in all directions for
   the weak recruited actuators. 
 
