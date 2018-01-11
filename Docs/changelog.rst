@@ -29,6 +29,8 @@ Fixed:
 * Wrong masses in the deprecated "old" MOCAP models. The model was not using the
   body mass specified in ``Main.TrialSpecificData.Anthropometrics.BodyMass``
 
+* Fixed smaller warnings when running calibration routines with the lower extremity models.
+
 * Better initial position for scapula and clavicula. The initial position is now calculated from the 
   the initial position of the chain from thorax through the clavicula to scapula.
   This will not change the model output but should make the arm model more robust solving the first step. 
