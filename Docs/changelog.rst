@@ -38,6 +38,8 @@ Fixed:
 * Weak residuals for GRF prediction: Ensure the same strength is used in all directions for
   the weak recruited actuators. 
 
+* Detailed hand: Fix a problem causing the detailed hand to scale incorrectly. 
+
 
 Added:
 ===============
