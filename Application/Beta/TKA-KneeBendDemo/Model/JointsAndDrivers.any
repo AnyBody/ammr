@@ -1,0 +1,128 @@
+
+
+
+AnyFolder JointsAndDrivers = {
+  
+  // Aliases for convenient referencing
+  AnyFolder &JntPos=...HumanModel.Mannequin.Posture;  
+  AnyFolder &JntVel=...HumanModel.Mannequin.PostureVel;  
+  
+  
+  AnyKinEqSimpleDriver NeckDrv={
+    AnyKinMeasure &ref0= ...HumanModel.Interface.Trunk.SkullThoraxLateralBending; 
+    AnyKinMeasure &ref1= ...HumanModel.Interface.Trunk.SkullThoraxRotation; 
+    AnyKinMeasure &ref2= ...HumanModel.Interface.Trunk.SkullThoraxFlexion; 
+    DriverPos={0,0,0};
+    DriverVel={0,0,0};
+    Reaction.Type={Off,Off,Off};
+  };
+  
+  
+  
+  AnyKinEqInterPolDriver JntDriverTrunk = {
+    FileErrorContinueOnOff = On;
+    Type = Bspline;
+    BsplineOrder = 4;
+    FileName = "../Input/output-med-euler-trunk.txt";
+    AnyKinMeasureOrg &PelvisPosX = ...HumanModel.Interface.Trunk.PelvisPosX;
+    AnyKinMeasureOrg &PelvisPosY = ...HumanModel.Interface.Trunk.PelvisPosY;
+    AnyKinMeasureOrg &PelvisPosZ = ...HumanModel.Interface.Trunk.PelvisPosZ;
+    AnyKinMeasureOrg &PelvisRotX = ...HumanModel.Interface.Trunk.PelvisRotX;
+    AnyKinMeasureOrg &PelvisRotY = ...HumanModel.Interface.Trunk.PelvisRotY;
+    AnyKinMeasureOrg &PelvisRotZ = ...HumanModel.Interface.Trunk.PelvisRotZ;
+    AnyKinMeasureOrg &PelvisThoraxExtension = ...HumanModel.Interface.Trunk.PelvisThoraxExtension;
+    AnyKinMeasureOrg &PelvisThoraxLateralBending = ...HumanModel.Interface.Trunk.PelvisThoraxLateralBending;
+    AnyKinMeasureOrg &PelvisThoraxRotation = ...HumanModel.Interface.Trunk.PelvisThoraxRotation;
+    Reaction.Type={On,On,On,On,On,On, Off, Off, Off};
+  };
+ 
+  
+  AnyKinEqInterPolDriver JntDriverRightLegTD = {
+    FileErrorContinueOnOff = On;
+    Type = Bspline;
+    BsplineOrder = 4;
+    FileName = "../Input/output-med-euler-rightlegtd.txt";
+    AnyKinMeasureOrg &HipFlexion = ...HumanModel.Interface.Right.HipFlexion;
+    AnyKinMeasureOrg &HipAbduction = ...HumanModel.Interface.Right.HipAbduction;
+    AnyKinMeasureOrg &HipExternalRotation = ...HumanModel.Interface.Right.HipExternalRotation;
+    Reaction.Type={Off,Off,Off};
+  };
+
+  
+  
+   AnyKinEqInterPolDriver JntDriverFoot = {
+    FileErrorContinueOnOff = On;
+    Type = Bspline;
+    BsplineOrder = 4;
+    FileName = "../Input/output-foot-pos.txt";
+    AnyKinMeasureOrg &FootPosX = Main.Model.EnvironmentModel.FootPosX;
+    AnyKinMeasureOrg &FootPosY = Main.Model.EnvironmentModel.FootPosY;
+    AnyKinMeasureOrg &FootPosZ = Main.Model.EnvironmentModel.FootPosZ;
+    Reaction.Type={Off,Off,Off};
+  };
+  
+  
+  
+  AnyInputFile InputForce = 
+  { FileName = "../Input/output-med-euler-contactforce-force.txt";
+    FileErrorContinueOnOff = On;};     
+  
+
+    AnyInputFile InputMoment = 
+  { FileName = "../Input/output-med-euler-contactforce-moments.txt";
+    FileErrorContinueOnOff = On;};     
+  
+
+    
+
+  
+AnyForce FootReacForceRight = {
+  AnyFunInterpol force ={
+    Type=PiecewiseLinear;
+    T= Main.Model.ModelEnvironmentConnection.JointsAndDrivers.InputForce.T;
+    Data={ Main.Model.ModelEnvironmentConnection.JointsAndDrivers.InputForce.Data[0], Main.Model.ModelEnvironmentConnection.JointsAndDrivers.InputForce.Data[1], Main.Model.ModelEnvironmentConnection.JointsAndDrivers.InputForce.Data[2]};
+  }; 
+  F ={force(t)[0],force(t)[1],force(t)[2]};  
+  AnyKinMeasure &ForcePlateLin = Main.Model.EnvironmentModel.ForcePlateLin;
+};
+
+
+
+
+
+
+AnyForce FootReaMomentRight = {
+  AnyFunInterpol force ={
+    Type=PiecewiseLinear;
+    T= Main.Model.ModelEnvironmentConnection.JointsAndDrivers.InputMoment.T;
+    Data={ Main.Model.ModelEnvironmentConnection.JointsAndDrivers.InputMoment.Data[0], Main.Model.ModelEnvironmentConnection.JointsAndDrivers.InputMoment.Data[1], Main.Model.ModelEnvironmentConnection.JointsAndDrivers.InputMoment.Data[2]};
+  };
+    F={force(t)[0],force(t)[1],force(t)[2]};  
+  AnyKinMeasure &ForcePlateRot = Main.Model.EnvironmentModel.ForcePlateDriver.ForcePlateRot;
+ }; 
+
+
+
+
+
+
+ // connection between Med and Lat node and ForcePlate
+  AnyReacForce RightFootReactionLat = {
+    AnyKinRotational rot = {
+      AnyRefNode &ref1= Main.Model.HumanModel.Right.Leg.Seg.Foot.ToeLateralContactNode;
+      AnyRefFrame &ref2 = ....EnvironmentModel.ForcePlate;
+      Type = RotVector;
+    };  
+    AnyKinLinear RightFootLinMeasure = {
+      AnyRefNode &ref1= Main.Model.HumanModel.Right.Leg.Seg.Foot.ToeLateralContactNode;
+      AnyRefFrame &ref2 = ....EnvironmentModel.ForcePlate;  
+    Ref=0;
+    };
+  };
+
+};
+
+
+
+
+

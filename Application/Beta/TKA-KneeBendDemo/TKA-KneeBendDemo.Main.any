@@ -1,17 +1,60 @@
 #include "../libdef.any"
 
-/**
+//Find a detailed description here:
+#include "Model/Description.any"
 
-NOTE:
-This demo has been temporarily removed from the AMMR repository. 
+Main = {
+  // Include an operation sequence to run all required steps of your application (see Operations tab)
+  #include "<ANYBODY_PATH_MODELUTILS>\Operations\RunAppSequence.any"
 
-This demo will added back as soon as possible, when it has been 
-adapted to the newest verison of the body models.
-
-Please contact us if you need this model urgently. 
-
-*/
-Main = 
-{
   
+  // This implements parameters for the contact definition and the study
+  #include "Model/Parameters.any"
+
+  // Definition of BM statments to configure the human model
+  #include "Model/BMSettings.any"
+  
+  // Include default human model
+  #include "<ANYBODY_PATH_BODY>/HumanModel.any"
+  
+  AnyFolder Model = {
+    
+    AnyFolder &HumanModel=.HumanModel.BodyModel;
+    
+    // Defintion of the environment of the human model
+    #include "Model/Environment.any"   
+    
+    AnyFolder ModelEnvironmentConnection = {
+      AnyFolder &HumanModel=.HumanModel;
+      #include "Model/JointsAndDrivers.any"
+    };
+    
+    // This file includes the geometry of the implants and defines
+    // the attachment points of the ligaments.
+    #include "Model/Implants.any"
+  };
+  
+  AnyBodyStudy Study = {
+    AnyFolder &Model = .Model;
+    
+    tEnd = Main.Parameters.Duration;
+    Gravity = {0.0, -9.81, 0.0};
+    nStep = Main.Parameters.TimeSteps;
+    
+    // This file implements the contact forces and the ligaments in the knee.
+    #include "Model/ContactForces.any"
+    
+    #if USE_FDK    
+      // This file implements the new joint definition for the contact knee.
+      #include "Model/KneeExchange.any"
+      
+      // Define settings for the FDK solver
+      InverseDynamics.ForceDepKinOnOff=On;
+      InverseDynamics.ForceDepKin.ForceTol=1;// 5e-1;
+      InverseDynamics.ForceDepKin.Perturbation=5e-5;
+      InverseDynamics.ForceDepKin.LocalSearchOnOff = On;
+      InverseDynamics.ForceDepKin.MaxNewtonStep = 10; //10;   
+    #endif
+    
+  }; // End of study
 }; //Main
