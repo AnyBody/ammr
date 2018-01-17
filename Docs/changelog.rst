@@ -47,7 +47,8 @@ Added:
 * New ``class_template`` for adding limit dirvers to kinmatic measures. 
   Can be included with ``#include "<ANYBODY_PATH_MODELUTILS>/KinematicLimits/KinLimit_template.any"`` 
 
-
+* Added the TKA knee bend demo model back into the repository. This demo model
+  was temporarily removed in the AMMR 2.0.0 release. 
 
 
 
