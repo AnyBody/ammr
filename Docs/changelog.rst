@@ -11,6 +11,9 @@ Changelog
 Current development
 ***********************
 
+.. To minimize the risk of merge conflicts insert the your changes at a random empty or make
+   a new entry a random place in the bullet lists. 
+
 Changed:
 ========
 
@@ -21,6 +24,24 @@ Changed:
 
   .. warning:: This change will affect models using the default mannequin drivers unless 
      the driver values are updated. 
+
+* empty
+
+* empty
+
+* empty
+
+* empty
+
+* empty
+
+* empty
+
+* empty
+
+* empty
+
+
 
 
 Fixed:
@@ -38,6 +59,25 @@ Fixed:
 * Weak residuals for GRF prediction: Ensure the same strength is used in all directions for
   the weak recruited actuators. 
 
+* Detailed Hand model: Fix a problem with the default mannequin drivers for the left thumb, where CMC  and MCP abduction was treated as 
+  adduction.
+
+* empty
+
+* empty
+
+* empty
+
+* empty
+
+* empty
+
+* empty
+
+* empty
+
+
+
 
 Added:
 ===============
@@ -47,6 +87,21 @@ Added:
 * New ``class_template`` for adding limit dirvers to kinmatic measures. 
   Can be included with ``#include "<ANYBODY_PATH_MODELUTILS>/KinematicLimits/KinLimit_template.any"`` 
 
+* empty
+
+* empty
+
+* empty
+
+* empty
+
+* empty
+
+* empty
+
+* empty
+
+* empty
 
 
 
