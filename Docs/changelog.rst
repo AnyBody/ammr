@@ -29,6 +29,11 @@ Fixed:
 * Wrong masses in the deprecated "old" MOCAP models. The model was not using the
   body mass specified in ``Main.TrialSpecificData.Anthropometrics.BodyMass``
 
+* Fix the AAU Mandible Model introduced in AMMR 2.0.0. By accident the authors did 
+  not share the exact same version of the model that was used in the publication by
+  `Andersen et al. 2017<https://www.anybodytech.com/downloads/publications/#Skipper_Andersen2017-zd>`__
+  This is now corrected and the validaiton example produces the same results as published version. 
+
 * Fixed smaller warnings when running calibration routines with the lower extremity models.
 
 * Better initial position for scapula and clavicula. The initial position is now calculated from the 
