@@ -8,6 +8,7 @@ The Wilke Spine Pressure models are eight models that compare intradiscal pressu
 For the comparison, all data is normalized (100 %) to the forces from *'SpinePressureStanding.Main.any'*  and *'Relaxed Standing'* to show trend validity between the various postures.
 
 .. figure:: /Applications/Validation/wilke.svg
+    :align: center
 
 Both papers refer to the same trial, but supplements each other with study information.
 

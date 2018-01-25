@@ -22,6 +22,7 @@ Changed:
   .. warning:: This change will affect models using the default mannequin drivers unless 
      the driver values are updated. 
 
+* The Wilke spine presure validation example is updated and now uses the TLEM2 lower extremity model.
 
 Fixed:
 ========
