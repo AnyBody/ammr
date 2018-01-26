@@ -22,6 +22,7 @@ Changed:
   .. warning:: This change will affect models using the default mannequin drivers unless 
      the driver values are updated. 
 
+* The Wilke spine presure validation example is updated and now uses the TLEM2 lower extremity model.
 
 Fixed:
 ========
@@ -29,11 +30,21 @@ Fixed:
 * Wrong masses in the deprecated "old" MOCAP models. The model was not using the
   body mass specified in ``Main.TrialSpecificData.Anthropometrics.BodyMass``
 
+* Fix the AAU Mandible Model introduced in AMMR 2.0.0. By accident the authors did 
+  not share the exact same version of the model that was used in the publication by
+  `Andersen et al. 2017<https://www.anybodytech.com/downloads/publications/#Skipper_Andersen2017-zd>`__
+  This is now corrected and the validaiton example produces the same results as published version. 
+
 * Fixed smaller warnings when running calibration routines with the lower extremity models.
 
 * Better initial position for scapula and clavicula. The initial position is now calculated from the 
   the initial position of the chain from thorax through the clavicula to scapula.
   This will not change the model output but should make the arm model more robust solving the first step. 
+
+* Fixed muscle insertions for the old leg model (``#define BM_LEG_MODEL _LEG_MODEL_LEG_``). The mal alligned 
+  pelvis muscles insertions was a regression due to the updated Trunk pelvis
+  introduced in AMMR 2.0. The pelvis muscles insertions have been translated and
+  rotated to fit the new Trunk geometry as best as possible.
 
 * Weak residuals for GRF prediction: Ensure the same strength is used in all directions for
   the weak recruited actuators. 
