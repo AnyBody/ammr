@@ -142,17 +142,19 @@ Pelvis = {
     AnyMat33 RotNeutral= .TF*{{0.6172795, -0.7692081, 0.1651814}, {0.656022, 0.619138, 0.4316287}, {-0.4342824, -0.1580729, 0.8867986}}*.TF';
     AnyVec3 PosNeutral=  {-0.3408125, -0.2974407, -0.1020002}*.TF';
 
-    AnyVar LengthStandard = 0.133*vnorm(..Seg.Foot.StdPar.BigToeNode-..Seg.Foot.StdPar.HeelNode);
+    AnyVar LengthStandard = 0.133*vnorm(.Foot.BigToeNode-.Foot.HeelNode);
 
-    AnyVec3 sCoM = (..Seg.Talus.StdPar.SubTalarJoint + ..Seg.Talus.StdPar.AnkleJoint)/2;
+    AnyVec3 sCoM = (SubTalarJoint + AnkleJoint)/2;
     AnyVar MassStandard = 0.2*.GlobalParameters.FootMass;
     AnyVar Density = 1000;
     
+    #if BM_FOOT_MODEL == _FOOT_MODEL_DEFAULT_
     AnyVar Ixx = 2/5 * ..Seg.Talus.Mass * (vnorm(0.5*(..Seg.Talus.AnkleJoint.sRel - ..Seg.Talus.MedialMalleolus.sRel)))^2;
     AnyVar Iyy = Ixx;
     AnyVar Izz = Ixx;
     AnyVec3 Jii = {Ixx, Iyy, Izz};
     AnyVec3 Jij = {0,0,0};
+    #endif
   };
   
   Foot = {
@@ -162,10 +164,12 @@ Pelvis = {
     
     AnyVec3 sCoM = {0.1048, -0.8814, 0.0114}*.TF';
     AnyVar MassStandard = 0.8*.GlobalParameters.FootMass; 
-    AnyVar LengthStandard = vnorm(..Seg.Foot.StdPar.BigToeNode-..Seg.Foot.StdPar.HeelNode); 
+    AnyVar LengthStandard = vnorm(BigToeNode-HeelNode); 
     AnyVar Density = 1000;
     
     AnyVar HeelHeight = 0.05;  // This was used previously, need to figure out how to compute this value 
+    
+    #if BM_FOOT_MODEL == _FOOT_MODEL_DEFAULT_
     AnyVar Length = vnorm(..Seg.Foot.BigToeNode.sRel-..Seg.Foot.HeelNode.sRel); 
     AnyVar Radius = (..Seg.Foot.Mass/(pi*Length*Density))^0.5;
     AnyVar Ixx = 0.25*..Seg.Foot.Mass*Radius*Radius + 1/12*..Seg.Foot.Mass*Length*Length;
@@ -174,4 +178,5 @@ Pelvis = {
     AnyMat33 JM=..Seg.Foot.ScalingNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*..Seg.Foot.ScalingNode.ARel';
     AnyVec3 Jii = {JM[0][0], JM[1][1], JM[2][2]};
     AnyVec3 Jij = {JM[1][0], JM[2][1], JM[2][0]};
+    #endif
   };

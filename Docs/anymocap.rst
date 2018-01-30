@@ -15,9 +15,9 @@ System <http://anybodytech.com>`__.
 
 Features
 ********
-* Addapts to any Mocap protocol 
+* Adapts to any Mocap protocol 
 * Optimization of marker locations and anthropometrics. 
-* Support inertial MoCap and BVH file import
+* Support Marker based (C3D) and inertial based (BVH) input.
 * Support for standard forceplates: (Types 1-4) plus more.
 * Prediction of ground reaction forces
 * Easy setup with multiple trials and subjects

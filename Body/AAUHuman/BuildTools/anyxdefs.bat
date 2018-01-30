@@ -9,6 +9,7 @@
 "msxsl.exe" ../BodyModel.define.xml reST_parameter_tables.xslt -o ../../../Docs/bm_config/JointTypeTable.txt table-type=Joint_type
 "msxsl.exe" ../BodyModel.define.xml reST_parameter_tables.xslt -o ../../../Docs/bm_config/OtherTable.txt table-type=Other
 "msxsl.exe" ../BodyModel.define.xml reST_description_substitutions.xslt -o ../../../Docs/bm_config/Substitutions.txt
+"msxsl.exe" ../BodyModel.define.xml ifdef_BM_param.xslt -o ../BodyModels/GenericBodyModel/Ifdef_BM_param.any
 "msxsl.exe" ../BodyModel.define.xml anyxdefs2const.xslt -o ../BodyModels/GenericBodyModel/BodyModel.constants.any
 "msxsl.exe" ../BodyModel.define.xml anyxdefs2default.xslt -o ../BodyModels/GenericBodyModel/BodyModel.defaults.any
 "msxsl.exe" ../BodyModel.define.xml anyxdefs2define.xslt -o ../Documentation/BodyModel.parameters.any
