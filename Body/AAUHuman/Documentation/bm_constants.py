@@ -15,6 +15,8 @@
 '_LEG_MODEL_TLEM2_': '2',
 '_LEG_MODEL_Leg_': '3',
 '_LEG_MODEL_LEG_': '3',
+'_FOOT_MODEL_DEFAULT_': '0',
+'_FOOT_MODEL_NONE_': '1',
 '_MORPH_NONE_': '0',
 '_MORPH_TRUNK_TO_LEG_': '1',
 '_MORPH_LEG_TO_TRUNK_': '2',
