@@ -11,6 +11,9 @@ Changelog
 Current development
 ***********************
 
+.. To minimize the risk of merge conflicts insert the your changes at a random empty or make
+   a new entry a random place in the bullet lists. 
+
 Changed:
 ========
 
@@ -23,6 +26,21 @@ Changed:
      the driver values are updated. 
 
 * The Wilke spine presure validation example is updated and now uses the TLEM2 lower extremity model.
+
+* empty
+
+* empty
+
+* empty
+
+* empty
+
+* empty
+
+* empty
+
+* empty
+
 
 Fixed:
 ========
@@ -49,6 +67,25 @@ Fixed:
 * Weak residuals for GRF prediction: Ensure the same strength is used in all directions for
   the weak recruited actuators. 
 
+* Detailed Hand model: Fix a problem with the default mannequin drivers for the left thumb, where CMC  and MCP abduction was treated as 
+  adduction.
+
+* empty
+
+* empty
+
+* empty
+
+* empty
+
+* empty
+
+* empty
+
+* empty
+
+
+
 
 Added:
 ===============
@@ -63,6 +100,21 @@ Added:
   (``#define BM_FOOT_MODEL _FOOT_MODEL_NONE_``) 
   making it easier to work inegrating the GM foot model. 
 
+* empty
+
+* empty
+
+* empty
+
+* empty
+
+* empty
+
+* empty
+
+* empty
+
+* empty
 
 
 
