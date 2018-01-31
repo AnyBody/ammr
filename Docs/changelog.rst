@@ -27,7 +27,9 @@ Changed:
 
 * The Wilke spine presure validation example is updated and now uses the TLEM2 lower extremity model.
 
-* empty
+* TLEM2.1: Pecineus implmentation has been adjusted based on the orignal MRI
+  Scans. Only the most lateral element of the pectineus muscle was changed. This
+  was done to prevent it from  penetrating the femural head in some situations.
 
 * empty
 
