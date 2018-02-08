@@ -69,6 +69,7 @@ Fixed:
 * Weak residuals for GRF prediction: Ensure the same strength is used in all directions for
   the weak recruited actuators. 
 
+* Detailed hand: Fix a problem causing the detailed hand to scale incorrectly. 
 * Detailed Hand model: Fix a problem with the default mannequin drivers for the left thumb, where CMC  and MCP abduction was treated as 
   adduction.
 
@@ -96,7 +97,7 @@ Added:
 
 * New ``class_template`` for adding limit dirvers to kinmatic measures. 
   Can be included with ``#include "<ANYBODY_PATH_MODELUTILS>/KinematicLimits/KinLimit_template.any"`` 
-  
+
 * Added new `BM_FOOT_MODEL` parameter. This is preparation for integrating the GM foot model back into the AMMR.
   Currently the parameter can only be used for excluding the feet from the current models 
   (``#define BM_FOOT_MODEL _FOOT_MODEL_NONE_``) 
