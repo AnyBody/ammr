@@ -39,7 +39,12 @@ Changed:
 
 * empty
 
-* empty
+* Update the MoCap Multi trial example ``Plug-in-gait_MultiTrial_StandingRef`` to make it better 
+  starting point for creating new models.
+
+  * Moved the Human-Ground residuals from the Trunk to the Pelvis segment. 
+  * Use the TLEM 2 lower body model in the example. 
+  * Disable upper bounds for the muscle recruitment ``Criterion.UpperBoundOnOff = Off;`` to improve the stability of the simulations. 
 
 * empty
 
@@ -77,7 +82,7 @@ Fixed:
 
 * empty
 
-* empty
+* AnyMoCap: Fix bug in ``CreateMarkerDriver``  class template which prevented the ``UseC3DWeightResiduals`` from having any effect.
 
 * empty
 
