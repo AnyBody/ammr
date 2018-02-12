@@ -81,7 +81,8 @@ Fixed:
 
 * empty
 
-* empty
+* Fix wrong visualization of contact area in ground reaction force prediction class template, when the 
+  base frame is different from the global coordinate system. 
 
 * empty
 
