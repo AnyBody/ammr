@@ -39,7 +39,12 @@ Changed:
 
 * empty
 
-* empty
+* Update the MoCap Multi trial example ``Plug-in-gait_MultiTrial_StandingRef`` to make it better 
+  starting point for creating new models.
+
+  * Moved the Human-Ground residuals from the Trunk to the Pelvis segment. 
+  * Use the TLEM 2 lower body model in the example. 
+  * Disable upper bounds for the muscle recruitment ``Criterion.UpperBoundOnOff = Off;`` to improve the stability of the simulations. 
 
 * empty
 
@@ -52,7 +57,7 @@ Fixed:
 
 * Fix the AAU Mandible Model introduced in AMMR 2.0.0. By accident the authors did 
   not share the exact same version of the model that was used in the publication by
-  `Andersen et al. 2017<https://www.anybodytech.com/downloads/publications/#Skipper_Andersen2017-zd>`__
+  `Andersen et al. 2017 <https://www.anybodytech.com/downloads/publications/#Skipper_Andersen2017-zd>`__
   This is now corrected and the validaiton example produces the same results as published version. 
 
 * Fixed smaller warnings when running calibration routines with the lower extremity models.
@@ -77,7 +82,7 @@ Fixed:
 
 * empty
 
-* empty
+* AnyMoCap: Fix bug in ``CreateMarkerDriver``  class template which prevented the ``UseC3DWeightResiduals`` from having any effect.
 
 * empty
 
