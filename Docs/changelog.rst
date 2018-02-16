@@ -80,7 +80,7 @@ Fixed:
 
 * empty
 
-* empty
+* The "Evaluate joint strength" studies now also work when the shoulder rythmn is enabled.
 
 * AnyMoCap: Fix bug in ``CreateMarkerDriver``  class template which prevented the ``UseC3DWeightResiduals`` from having any effect.
 
