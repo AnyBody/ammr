@@ -82,6 +82,10 @@ Fixed:
 * Weak residuals for GRF prediction: Ensure the same strength is used in all directions for
   the weak recruited actuators. 
 
+* Fixed problems with via points of the wrist extensor muscles coliding with the wrist
+  wrapping surface in normal range of motion. The via point of Extensor indicis ``Via_Extensor_Indicis_pos```has been slightly adjusted 
+  and the location of the wrist wrapping cylinder ``MedialExtensorCyl`` has been improved.
+
 * Detailed hand: Fix a problem causing the detailed hand to scale incorrectly. 
 * Detailed Hand model: Fix a problem with the default mannequin drivers for the left thumb, where CMC  and MCP abduction was treated as 
   adduction.
