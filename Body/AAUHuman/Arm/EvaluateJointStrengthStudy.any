@@ -41,20 +41,51 @@ AnyFolder Model = {
  
   
  AnyFolder Drivers = {
-   AnyVar AngularVelocity = (..RangeOfMotion[1]-..RangeOfMotion[0])*pi/180;
+   
+    AnyVar AngularVelocity = (..RangeOfMotion[1]-..RangeOfMotion[0])*pi/180;
    
    AnyKinMeasureOrg ArmMeasure = {
+     #if BM_ARM_SHOULDER_RHYTHM == OFF
      AnyKinMeasure &SCProtraction= ...SideBodyInterfaceRef.SternoClavicularProtraction;
      AnyKinMeasure &SCElevation= ...SideBodyInterfaceRef.SternoClavicularElevation;
      AnyKinMeasure &SCAxialRotation= ...SideBodyInterfaceRef.SternoClavicularAxialRotation;
-     AnyKinMeasure &GHFlexion= ...SideBodyInterfaceRef.GlenohumeralFlexion;
+     #endif
      AnyKinMeasure &GHAbduction= ...SideBodyInterfaceRef.GlenohumeralAbduction;
+     AnyKinMeasure &GHFlexion= ...SideBodyInterfaceRef.GlenohumeralFlexion;
      AnyKinMeasure &GHExternalRotation= ...SideBodyInterfaceRef.GlenohumeralExternalRotation;
      AnyKinMeasure &ElbowFlexion= ...SideBodyInterfaceRef.ElbowFlexion;
      AnyKinMeasure &ElbowPronation= ...SideBodyInterfaceRef.ElbowPronation;
      AnyKinMeasure &WristFlexion= ...SideBodyInterfaceRef.WristFlexion;
      AnyKinMeasure &WristAbduction= ...SideBodyInterfaceRef.WristAbduction;  
    };
+      
+    AnyKinEqSimpleDriver ArmDriver= {
+      AnyKinMeasure &ref = .ArmMeasure;
+      
+      #if BM_ARM_SHOULDER_RHYTHM == OFF
+      #define __MEASURE_INDEXER(X) { X[0],X[1],X[2],X[3],X[4],X[5],X[6],X[7],X[8],X[9] }
+      #else
+      #define __MEASURE_INDEXER(X) { X[3],X[4],X[5],X[6],X[7],X[8],X[9] }
+      #endif
+      
+      DriverPos = __MEASURE_INDEXER(...DriverPos);
+      AnyFloat Mask = __MEASURE_INDEXER( ...Mask);
+      Reaction.Type = __MEASURE_INDEXER(...Reactions);
+      
+      #undef __MEASURE_INDEXER
+      
+      DriverVel = Mask* (...RangeOfMotion[1]-...RangeOfMotion[0])*pi/180/...Study.tEnd;
+    };        
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
    
    AnyStdJoint TrunkGround={
      AnyRefFrame &Ground = ..ground.node;
@@ -85,7 +116,8 @@ AnyBodyStudy Study = {
   #endif
   
   
-  Kinematics.SmallStepAssumptionOnOff = On;
+  Kinematics.SmallStepAssumptionOnOff = Off;
+  InitialConditions.SmallStepAssumptionOnOff = Off;
 
   Kinematics.PosAnalysisOnlyOnOff = On;
   InitialConditions.PosAnalysisOnlyOnOff = On;
