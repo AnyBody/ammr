@@ -62,6 +62,10 @@ Fixed:
 
 * Fixed smaller warnings when running calibration routines with the lower extremity models.
 
+* Fixed problems with Pecotoralis Major wrapping. Wrapping could fail unpredictively when muscles wrapped in the
+  insection between the coracoid wrapping and pectoralis minor cylinder. The coracoid wrapping cylinder have been removed,
+  and the others has been made longer. This create a more robust wrapping for Pecotoralis Major
+
 * Better initial position for scapula and clavicula. The initial position is now calculated from the 
   the initial position of the chain from thorax through the clavicula to scapula.
   This will not change the model output but should make the arm model more robust solving the first step. 
