@@ -59,6 +59,10 @@ Fixed:
 * Wrong masses in the deprecated "old" MOCAP models. The model was not using the
   body mass specified in ``Main.TrialSpecificData.Anthropometrics.BodyMass``
 
+* Wrapping convergence for multiple muscle has been improved. This was done by 
+  tweaking the string-mesh of the muscles to improve the wrapping solvers ability to find
+  the solution within the given number of iterations.  
+
 * Fix the AAU Mandible Model introduced in AMMR 2.0.0. By accident the authors did 
   not share the exact same version of the model that was used in the publication by
   `Andersen et al. 2017 <https://www.anybodytech.com/downloads/publications/#Skipper_Andersen2017-zd>`__
