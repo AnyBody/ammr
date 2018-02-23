@@ -79,6 +79,9 @@ Fixed:
   introduced in AMMR 2.0. The pelvis muscles insertions have been translated and
   rotated to fit the new Trunk geometry as best as possible.
 
+* Fix Arm Model wrapping problems: Improve the Teres Minor wrapping by adjustining the wrapping surface, and 
+  ensure that the insertion poinst are not directly on the surface. 
+
 * Weak residuals for GRF prediction: Ensure the same strength is used in all directions for
   the weak recruited actuators. 
 
