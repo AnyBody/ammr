@@ -6,16 +6,49 @@ Changelog
 .. default-domain:: ammr
 
 
+.. only:: draft
+
+  .. rubric:: Current development
+
+  .. To minimize the risk of merge conflicts insert the your changes at a random empty or make
+     a new entry a random place in the bullet lists. 
+
+  **Added:**
+
+  * empty
+  * empty
+  * empty
+  * empty
+  * empty
+  * empty
+  * empty
+
+  **Changed:**
+
+  * empty
+  * empty
+  * empty
+  * empty
+  * empty
+  * empty
+  * empty
+
+  **Fixed:**
+
+  * empty
+  * empty
+  * empty
+  * empty
+  * empty
+  * empty
+
+
 
 ***********************
-Current development
+AMMR 2.0.1 (2018-03-08)
 ***********************
 
-.. To minimize the risk of merge conflicts insert the your changes at a random empty or make
-   a new entry a random place in the bullet lists. 
-
-Changed:
-========
+**Changed:**
 
 * Default mannequin drivers for the Pelvis now correctly drive the Pelvis anatomical frame
   instead of the segmental reference frame. This fixes the discrepancy between the load time 
@@ -53,8 +86,7 @@ Changed:
 * empty
 
 
-Fixed:
-========
+**Fixed:**
 
 * Wrong masses in the deprecated "old" MOCAP models. The model was not using the
   body mass specified in ``Main.TrialSpecificData.Anthropometrics.BodyMass``
@@ -115,8 +147,7 @@ Fixed:
 
 
 
-Added:
-===============
+**Added:**
 
 * AnyMoCap: New argument ``DRAW_SCALE`` in the ``CreateMarkerDriver`` template to control the visual size of markers.
 
