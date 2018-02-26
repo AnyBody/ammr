@@ -45,8 +45,21 @@ Changelog
 
 
 ***********************
-AMMR 2.0.1 (2018-03-08)
+AMMR 2.1.0 (2018-03-ZZ)
 ***********************
+
+**Added:**
+
+* AnyMoCap: New argument ``DRAW_SCALE`` in the ``CreateMarkerDriver`` template to control the visual size of markers.
+
+* New ``class_template`` for adding limit dirvers to kinmatic measures. 
+  Can be included with ``#include "<ANYBODY_PATH_MODELUTILS>/KinematicLimits/KinLimit_template.any"`` 
+
+* Added new `BM_FOOT_MODEL` parameter. This is preparation for integrating the GM foot model back into the AMMR.
+  Currently the parameter can only be used for excluding the feet from the current models 
+  (``#define BM_FOOT_MODEL _FOOT_MODEL_NONE_``) 
+  making it easier to work inegrating the GM foot model. 
+
 
 **Changed:**
 
@@ -64,17 +77,10 @@ AMMR 2.0.1 (2018-03-08)
   Scans. Only the most lateral element of the pectineus muscle was changed. This
   was done to prevent it from  penetrating the femural head in some situations.
 
-* empty
-
 * Tweaked the Gluetus Maximum Superior implementation to reduce risk of
   collisions between muscle insertions and the wrapping surface. The two most
   proximal insertion points of the Gluetus Superior are shifted more distally,
   and the locations of the wrapping surfaces are tweaked. 
-
-
-* empty
-
-* empty
 
 * Update the MoCap Multi trial example ``Plug-in-gait_MultiTrial_StandingRef`` to make it better 
   starting point for creating new models.
@@ -82,8 +88,6 @@ AMMR 2.0.1 (2018-03-08)
   * Moved the Human-Ground residuals from the Trunk to the Pelvis segment. 
   * Use the TLEM 2 lower body model in the example. 
   * Disable upper bounds for the muscle recruitment ``Criterion.UpperBoundOnOff = Off;`` to improve the stability of the simulations. 
-
-* empty
 
 
 **Fixed:**
@@ -126,54 +130,16 @@ AMMR 2.0.1 (2018-03-08)
   and the location of the wrist wrapping cylinder ``MedialExtensorCyl`` has been improved.
 
 * Detailed hand: Fix a problem causing the detailed hand to scale incorrectly. 
+
 * Detailed Hand model: Fix a problem with the default mannequin drivers for the left thumb, where CMC  and MCP abduction was treated as 
   adduction.
-
-* empty
 
 * The "Evaluate joint strength" studies now also work when the shoulder rythmn is enabled.
 
 * AnyMoCap: Fix bug in ``CreateMarkerDriver``  class template which prevented the ``UseC3DWeightResiduals`` from having any effect.
 
-* empty
-
 * Fix wrong visualization of contact area in ground reaction force prediction class template, when the 
   base frame is different from the global coordinate system. 
-
-* empty
-
-* empty
-
-
-
-
-**Added:**
-
-* AnyMoCap: New argument ``DRAW_SCALE`` in the ``CreateMarkerDriver`` template to control the visual size of markers.
-
-* New ``class_template`` for adding limit dirvers to kinmatic measures. 
-  Can be included with ``#include "<ANYBODY_PATH_MODELUTILS>/KinematicLimits/KinLimit_template.any"`` 
-
-* Added new `BM_FOOT_MODEL` parameter. This is preparation for integrating the GM foot model back into the AMMR.
-  Currently the parameter can only be used for excluding the feet from the current models 
-  (``#define BM_FOOT_MODEL _FOOT_MODEL_NONE_``) 
-  making it easier to work inegrating the GM foot model. 
-
-* empty
-
-* empty
-
-* empty
-
-* empty
-
-* empty
-
-* empty
-
-* empty
-
-* empty
 
 
 
