@@ -157,14 +157,13 @@ pygments_style = 'AnyScript'
 current_year = os.environ.get('YEAR', datetime.now().year)
 
 ams_version = os.environ.get('AMS_VERSION', '7.1.1')
-if not re.match('^\d\.\d\.\d$',ams_version):
+if not re.match('^\d\.\d\.\d',ams_version):
     raise ValueError('Wrong format for AMS version, environment variable')
 ams_version_short = ams_version.rpartition('.')[0]
 ams_version_x = ams_version_short + '.x'
 
 
-ammr_version = os.environ.get('AMMR_VERSION', '2.1.0')
-if not re.match('^\d\.\d\.\d$',ammr_version):
+if not re.match('^\d\.\d\.\d',ammr_version):
     raise ValueError('Wrong format for AMMR version, environment variable')
 ammr_version_short = ammr_version.rpartition('.')[0]
 
@@ -209,8 +208,8 @@ version = f'{ammr_version_short}'
 # The full version, including alpha/beta/rc tags.
 release = f'{ammr_version}'
 
-if tags.has('draft'):
-    release = release + 'beta'
+if tags.has('draft') and not release.endswith('beta'):
+    release = release + '-beta'
 
 
 
