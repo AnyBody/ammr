@@ -63,7 +63,7 @@ if tags.has('offline'):
 
 
 if not tagged_commit() and not tags.has('offline'):
-    tags.add('draft')
+    pass#tags.add('draft')
 
 
 # `todo` and `todoList` produce output, else they produce nothing.
