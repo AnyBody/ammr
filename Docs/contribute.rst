@@ -15,16 +15,16 @@ Please contact us if you need access to the development version of the AMMR.
 
    .. rubric:: Release checklist
 
-    # Update version numbers in :file:`AMMR.version.any` and :file:`AMMR.version.xml`.
+   # Update version numbers in `AMMR.version.any``.
 
-    # Update version numbers in :file:`Docs/conf.py` (only used when building locally)
+   # Update version numbers in ``Docs/conf.py`` (only used when building locally)
 
-    # Clean up, and update :file:`Docs/changelog.rst`
+   # Clean up, and update ``Docs/changelog.rst``
 
-    # Check that the docs can build, and that the tests pass. 
+   # Check that the docs can build, and that the tests pass. 
 
-    # Merge the branch and add a git tag. 
+   # Merge the branch and add a git tag. 
 
-    .. rubric:: To do list
+   .. rubric:: To do list
 
-    .. todolist::
+   .. todolist::
