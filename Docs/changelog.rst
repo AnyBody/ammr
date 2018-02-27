@@ -93,6 +93,9 @@ AMMR 2.1.0 (2018-03-ZZ)
   * Use the TLEM 2 lower body model in the example. 
   * Disable upper bounds for the muscle recruitment ``Criterion.UpperBoundOnOff = Off;`` to improve the stability of the simulations. 
 
+* Muscle ColorScale can now be set from the ``Main.DrawSettings.Muscles.ColorScale``. 
+  If you port an older model to the new AMMR you will need to update your :file:`DrawSettings.any`
+  
 
 **Fixed:**
 
