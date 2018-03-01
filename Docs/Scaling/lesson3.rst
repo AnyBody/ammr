@@ -58,7 +58,7 @@ Please enable this code by uncommenting the following code:
 .. code-block:: AnyScriptDoc
 
     // Head scaling visualization and measurements
-    #define HEAD_SCALING_XYZ
+    §#define HEAD_SCALING_XYZ§
     #ifdef HEAD_SCALING_XYZ 
       #include "Model\HeadScalingXYZ.any"
     #endif
@@ -79,13 +79,13 @@ switch it on like shown below:
     //  #define BM_SCALING _SCALING_UNIFORM_
     //  #define BM_SCALING _SCALING_LENGTHMASS_
     //  #define BM_SCALING _SCALING_LENGTHMASSFAT_
-       #define BM_SCALING _SCALING_XYZ_
+    §   #define BM_SCALING _SCALING_XYZ_§
     
     
     // Scaling laws using external measures
     //  #define BM_SCALING _SCALING_UNIFORM_EXTMEASUREMENTS 
     //  #define BM_SCALING _SCALING_LENGTHMASS_EXTMEASUREMENTS 
-    //  #define BM_SCALING _SCALING_LENGTHMASSFAT_EXTMEASUREMENTS
+    §//  #define BM_SCALING _SCALING_LENGTHMASSFAT_EXTMEASUREMENTS§
       
 
 And let us choose a special AnyMan file that can be used with this particular 
@@ -94,9 +94,9 @@ scaling law:
 .. code-block:: AnyScriptDoc
 
     //  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyManExternal.any"
-    //  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyManExtPercentile.any"
+    §//  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyManExtPercentile.any"§
     //  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyWomanExtPercentile.any"  
-    #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyManXYZ.any"
+    §#path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyManXYZ.any"§
 
 Let us double-click on the last line, which defines an anthropometric scaling file.
 
@@ -160,7 +160,7 @@ reload the model:
     AnyFolder Pelvis = { AnyFloat LengthScale = 1; AnyFloat DepthScale = 1; AnyFloat WidthScale = 1; };
     AnyFolder Trunk = { AnyFloat LengthScale = 1; AnyFloat DepthScale = 1; AnyFloat WidthScale = 1; };
     AnyFolder Head = {
-      // Standard unscaled values 
+      §// Standard unscaled values 
       AnyVar HEAD_BREADTH = 0.19;
       AnyVar HEAD_LENGTH  = 0.239;
       AnyVar HEAD_HEIGHT  = 0.26;
@@ -168,7 +168,7 @@ reload the model:
       // Scale factor computation
       AnyFloat LengthScale = 0.228/HEAD_HEIGHT;///< 228mm, DIN 1986 
       AnyFloat DepthScale = 0.193/HEAD_LENGTH; ///< 193mm, DIN 1986
-      AnyFloat WidthScale = 0.156/HEAD_BREADTH;///< 156mm, DIN 1986 
+      AnyFloat WidthScale = 0.156/HEAD_BREADTH;///< 156mm, DIN 1986 §
     };
       
 .. image:: _static/lesson3/HeadMarkersFrontView.jpg 
@@ -189,21 +189,21 @@ by defining a common scaling factor and applying it to all dimensions like this:
     AnyVar BodyMass = 75 ;
     AnyVar BodyHeight = 180 /100;
     
-    #define STATURE_SCALE_FACTOR 1.733/1.8    
+    §#define STATURE_SCALE_FACTOR 1.733/1.8§    
     
     ...
     
     AnyFolder SegmentScaleFactors = 
     {
       AnyFolder Pelvis = { 
-        AnyFloat LengthScale = STATURE_SCALE_FACTOR; 
-        AnyFloat DepthScale = STATURE_SCALE_FACTOR; 
-        AnyFloat WidthScale = STATURE_SCALE_FACTOR; 
+        AnyFloat LengthScale = §STATURE_SCALE_FACTOR§; 
+        AnyFloat DepthScale = §STATURE_SCALE_FACTOR§; 
+        AnyFloat WidthScale = §STATURE_SCALE_FACTOR§; 
       };
       AnyFolder Trunk = { 
-        AnyFloat LengthScale = STATURE_SCALE_FACTOR; 
-        AnyFloat DepthScale = STATURE_SCALE_FACTOR; 
-        AnyFloat WidthScale = STATURE_SCALE_FACTOR; 
+        AnyFloat LengthScale = §STATURE_SCALE_FACTOR§; 
+        AnyFloat DepthScale = §STATURE_SCALE_FACTOR§; 
+        AnyFloat WidthScale = §STATURE_SCALE_FACTOR§; 
       };
     
     ...
