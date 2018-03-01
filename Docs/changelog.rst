@@ -50,7 +50,9 @@ Changed:
   * Use the TLEM 2 lower body model in the example. 
   * Disable upper bounds for the muscle recruitment ``Criterion.UpperBoundOnOff = Off;`` to improve the stability of the simulations. 
 
-* empty
+* Update to the BVH MoCap example. Pre-processing the BVH data is now a separate operation which saves the
+  virtual marker positions to a file. Thus, this step can be skipped the next
+  time the model is reloaded. 
 
 
 Fixed:
