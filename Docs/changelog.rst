@@ -54,6 +54,10 @@ Changed:
   virtual marker positions to a file. Thus, this step can be skipped the next
   time the model is reloaded. 
 
+* In :bm_constant:`_SCALING_XYZ_` scaling law the definition of
+  length/depth/width of the scapula is corrected to match the anatomical
+  definitions.
+
 
 Fixed:
 ========
@@ -112,7 +116,7 @@ Fixed:
 
 * empty
 
-* empty
+* Fixed compatability between the detailed hand and scaling law :bm_constant:`_SCALING_XYZ_`.
 
 
 
