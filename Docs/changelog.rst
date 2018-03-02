@@ -6,57 +6,103 @@ Changelog
 .. default-domain:: ammr
 
 
+.. only:: draft
+
+  .. rubric:: Current development
+
+  .. To minimize the risk of merge conflicts insert the your changes at a random empty or make
+     a new entry a random place in the bullet lists. 
+
+  **Added:**
+
+  * empty
+  * empty
+  * empty
+  * empty
+  * empty
+  * empty
+  * empty
+
+  **Changed:**
+
+  * empty
+  * empty
+  * empty
+  * empty
+  * empty
+  * empty
+  * empty
+
+  **Fixed:**
+
+  * empty
+  * empty
+  * empty
+  * empty
+  * empty
+  * empty
+
+
 
 ***********************
-Current development
+AMMR 2.1.0 (2018-03-ZZ)
 ***********************
 
-.. To minimize the risk of merge conflicts insert the your changes at a random empty or make
-   a new entry a random place in the bullet lists. 
+**Added:**
 
-Changed:
-========
+* AnyMoCap: New argument ``DRAW_SCALE`` in the ``CreateMarkerDriver`` template to control the visual size of markers.
 
-* Default mannequin drivers for the Pelvis now correctly drive the Pelvis anatomical frame
-  instead of the segmental reference frame. This fixes the discrepancy between the load time 
-  postion and the mannequin driver position, and makes the driver consistent with the interface 
-  measures ``BodyModel.Interface.Trunk.PelvisPosX/Y/Z``. 
+* New ``class_template`` for adding limit drivers to kinematic measures. 
+  Can be included with ``#include "<ANYBODY_PATH_MODELUTILS>/KinematicLimits/KinLimit_template.any"`` 
 
+* Added new ``BM_FOOT_MODEL`` parameter, as preparation for integrating the Glasgow-Maastricht foot model (GM-Foot) back into the AMMR.
+  Currently, the parameter can only be used for excluding the feet  (``#define BM_FOOT_MODEL _FOOT_MODEL_NONE_``).
+  making it easier to work on integrating  the GM foot model.
+
+  .. seealso:: Adding the GM-Foot to the TLEM2 model is a work in progress. An early version is
+               released on GitHub: https://github.com/AnyBody/gm-foot 
+
+
+**Changed:**
+
+* Default mannequin drivers for the Pelvis now correctly drive the Pelvis
+  anatomical frame instead of the segmental reference frame. This fixes the
+  discrepancy between the load time position and the mannequin driver position and
+  makes the driver consistent with the interface measures
+  ``BodyModel.Interface.Trunk.PelvisPosX/Y/Z``. 
+  
   .. warning:: This change will affect models using the default mannequin drivers unless 
      the driver values are updated. 
 
-* The Wilke spine presure validation example is updated and now uses the TLEM2 lower extremity model.
+* The Wilke spine pressure  validation examples have been updated and now uses
+  the TLEM2 lower extremity model.
 
-* TLEM2.1: Pecineus implmentation has been adjusted based on the orignal MRI
+* TLEM2.1: Pectineus implementation has been adjusted based on the original MRI
   Scans. Only the most lateral element of the pectineus muscle was changed. This
-  was done to prevent it from  penetrating the femural head in some situations.
+  was done to prevent it from penetrating the femoral head in some situations.
 
-* empty
-
-* Tweaked the Gluetus Maximum Superior implementation to reduce risk of
+* Tweaked the Gluteus Maximum Superior implementation to reduce the risk of
   collisions between muscle insertions and the wrapping surface. The two most
-  proximal insertion points of the Gluetus Superior are shifted more distally,
-  and the locations of the wrapping surfaces are tweaked. 
+  proximal insertion points of the Gluteus Superior are shifted more distally, and
+  the locations of the wrapping surfaces are tweaked.
 
-* Muscle ColorScale can now be set from the ``Main.DrawSettings.Muscles.ColorScale``. 
-  If you port an older model to the new AMMR you will need to update your :file:`DrawSettings.any`
-  file.
-
-
-* empty
-
-* empty
-
-* Update the MoCap Multi trial example ``Plug-in-gait_MultiTrial_StandingRef`` to make it better 
-  starting point for creating new models.
+* Update the MoCap Multi trial example ``Plug-in-gait_MultiTrial_StandingRef`` to 
+  make it a better starting point for creating new models.
 
   * Moved the Human-Ground residuals from the Trunk to the Pelvis segment. 
   * Use the TLEM 2 lower body model in the example. 
   * Disable upper bounds for the muscle recruitment ``Criterion.UpperBoundOnOff = Off;`` to improve the stability of the simulations. 
 
+* Muscle ColorScale can now be set from the ``Main.DrawSettings.Muscles.ColorScale``. 
+  If you port an older model to the new AMMR you will need to update your :file:`DrawSettings.any`
+  file.
+
 * Update to the BVH MoCap example. Pre-processing the BVH data is now a separate operation which saves the
   virtual marker positions to a file. Thus, this step can be skipped the next
   time the model is reloaded. 
+
+* Muscle ColorScale can now be set from the ``Main.DrawSettings.Muscles.ColorScale``. 
+  If you port an older model to the new AMMR you will need to update your ``DrawSettings.any``
 
 * In :bm_constant:`_SCALING_XYZ_` scaling law the definition of
   length/depth/width of the scapula is corrected to match the anatomical
@@ -69,93 +115,61 @@ Fixed:
 * Wrong masses in the deprecated "old" MOCAP models. The model was not using the
   body mass specified in ``Main.TrialSpecificData.Anthropometrics.BodyMass``
 
-* Wrapping convergence for multiple muscle has been improved. This was done by 
+* Wrapping convergence for multiple muscles has been improved. This was done by 
   tweaking the string-mesh of the muscles to improve the wrapping solvers ability to find
   the solution within the given number of iterations.  
 
 * Fix the AAU Mandible Model introduced in AMMR 2.0.0. By accident the authors did 
   not share the exact same version of the model that was used in the publication by
-  `Andersen et al. 2017<https://www.anybodytech.com/downloads/publications/#Skipper_Andersen2017-zd>`__
-  This is now corrected and the validaiton example produces the same results as published version. 
+  `Andersen et al. 2017 <https://www.anybodytech.com/downloads/publications/#Skipper_Andersen2017-zd>`__
+  This is now corrected and the validation  example produces the same results as 
+  published version.
 
-* Fixed smaller warnings when running calibration routines with the lower extremity models.
+* Fixed various warnings when running calibration routines with the lower extremity models.
 
-* Fixed problems with Pecotoralis Major wrapping. Wrapping could fail unpredictively when muscles wrapped in the
-  insection between the coracoid wrapping and pectoralis minor cylinder. The coracoid wrapping cylinder have been removed,
-  and the others has been made longer. This create a more robust wrapping for Pecotoralis Major
+* Fixed problems with Pectoralis Major wrapping. Wrapping could fail unpredictively when 
+  muscles wrapped in the insection between the coracoid wrapping and pectoralis
+  minor cylinder. The coracoid wrapping cylinder has been removed, and the
+  others has been made longer. This creates a more robust wrapping for the
+  Pectoralis Major muscle.
 
-* Better initial position for scapula and clavicula. The initial position is now calculated from the 
-  the initial position of the chain from thorax through the clavicula to scapula.
-  This will not change the model output but should make the arm model more robust solving the first step. 
+* Better initial position for scapula and clavicula. The initial position is now calculated
+  from the initial position of the chain from thorax through the clavicula to
+  scapula. This will not change the model output but should make the arm model
+  more robust solving the first step. 
 
-* Fixed muscle insertions for the old leg model (``#define BM_LEG_MODEL _LEG_MODEL_LEG_``). The mal alligned 
-  pelvis muscles insertions was a regression due to the updated Trunk pelvis
-  introduced in AMMR 2.0. The pelvis muscles insertions have been translated and
-  rotated to fit the new Trunk geometry as best as possible.
+* Fixed muscle insertions for the old leg model (``#define BM_LEG_MODEL _LEG_MODEL_LEG_``). 
+  The malaligned pelvis muscles insertions was a regression due to the updated
+  Trunk pelvis introduced in AMMR 2.0. The pelvis muscles insertions have been
+  translated and rotated to fit the new Trunk geometry as best as possible.
 
-* Fix Arm Model wrapping problems: Improve the Teres Minor wrapping by adjustining the wrapping surface, and 
-  ensure that the insertion poinst are not directly on the surface. 
+* Fix Arm Model wrapping problems: Improve the Teres Minor wrapping by adjusting the 
+  wrapping surface, and ensure that the insertion point is not directly on the surface.
 
 * Weak residuals for GRF prediction: Ensure the same strength is used in all directions for
   the weak recruited actuators. 
 
 * Fixed problems with via points of the wrist extensor muscles coliding with the wrist
-  wrapping surface in normal range of motion. The via point of Extensor indicis ``Via_Extensor_Indicis_pos```has been slightly adjusted 
-  and the location of the wrist wrapping cylinder ``MedialExtensorCyl`` has been improved.
+  wrapping surface in normal range of motion. The via point of Extensor indicis
+  ``Via_Extensor_Indicis_pos`` has been slightly adjusted and the location of
+  the wrist wrapping cylinder ``MedialExtensorCyl`` has been improved.
 
 * Detailed hand: Fix a problem causing the detailed hand to scale incorrectly. 
-* Detailed Hand model: Fix a problem with the default mannequin drivers for the left thumb, where CMC  and MCP abduction was treated as 
-  adduction.
 
-* empty
+* Detailed Hand model: Fix a problem with the default mannequin drivers for the left
+  thumb, where CMC  and MCP abduction was treated as adduction.
 
-* The "Evaluate joint strength" studies now also work when the shoulder rythmn is enabled.
+* The "Evaluate joint strength" studies now also work when the shoulder rhythm is enabled.
 
-* AnyMoCap: Fix bug in ``CreateMarkerDriver``  class template which prevented the ``UseC3DWeightResiduals`` from having any effect.
+* AnyMoCap: Fix bug in ``CreateMarkerDriver`` class template which prevented the 
+  ``UseC3DWeightResiduals`` from having any effect.
 
-* empty
+* Fix the wrong visualization of the contact area in ground reaction force 
+  prediction class template, when the base frame is different from the global
+  coordinate system. 
 
-* Fix wrong visualization of contact area in ground reaction force prediction class template, when the 
-  base frame is different from the global coordinate system. 
-
-* empty
 
 * Fixed compatability between the detailed hand and scaling law :bm_constant:`_SCALING_XYZ_`.
-
-
-
-
-Added:
-===============
-
-* AnyMoCap: New argument ``DRAW_SCALE`` in the ``CreateMarkerDriver`` template to control the visual size of markers.
-
-* New ``class_template`` for adding limit dirvers to kinmatic measures. 
-  Can be included with ``#include "<ANYBODY_PATH_MODELUTILS>/KinematicLimits/KinLimit_template.any"`` 
-
-* Added new `BM_FOOT_MODEL` parameter. This is preparation for integrating the GM foot model back into the AMMR.
-  Currently the parameter can only be used for excluding the feet from the current models 
-  (``#define BM_FOOT_MODEL _FOOT_MODEL_NONE_``) 
-  making it easier to work inegrating the GM foot model. 
-
-* empty
-
-* empty
-
-* empty
-
-* empty
-
-* empty
-
-* empty
-
-* empty
-
-* empty
-
-
-
 
 
 ***********************
