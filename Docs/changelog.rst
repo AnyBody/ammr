@@ -94,9 +94,23 @@ AMMR 2.1.0 (2018-03-ZZ)
   * Disable upper bounds for the muscle recruitment ``Criterion.UpperBoundOnOff = Off;`` to improve the stability of the simulations. 
 
 * Muscle ColorScale can now be set from the ``Main.DrawSettings.Muscles.ColorScale``. 
+  If you port an older model to the new AMMR you will need to update your :file:`DrawSettings.any`
+  file.
+
+* Update to the BVH MoCap example. Pre-processing the BVH data is now a separate operation which saves the
+  virtual marker positions to a file. Thus, this step can be skipped the next
+  time the model is reloaded. 
+
+* Muscle ColorScale can now be set from the ``Main.DrawSettings.Muscles.ColorScale``. 
   If you port an older model to the new AMMR you will need to update your ``DrawSettings.any``
 
-**Fixed:**
+* In :bm_constant:`_SCALING_XYZ_` scaling law the definition of
+  length/depth/width of the scapula is corrected to match the anatomical
+  definitions.
+
+
+Fixed:
+========
 
 * Wrong masses in the deprecated "old" MOCAP models. The model was not using the
   body mass specified in ``Main.TrialSpecificData.Anthropometrics.BodyMass``
@@ -150,12 +164,12 @@ AMMR 2.1.0 (2018-03-ZZ)
 * AnyMoCap: Fix bug in ``CreateMarkerDriver`` class template which prevented the 
   ``UseC3DWeightResiduals`` from having any effect.
 
-* FFix the wrong visualization of the contact area in ground reaction force 
+* Fix the wrong visualization of the contact area in ground reaction force 
   prediction class template, when the base frame is different from the global
   coordinate system. 
 
 
-
+* Fixed compatability between the detailed hand and scaling law :bm_constant:`_SCALING_XYZ_`.
 
 
 ***********************
