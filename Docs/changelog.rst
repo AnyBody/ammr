@@ -116,7 +116,7 @@ Fixed:
 
 * empty
 
-* empty
+* Fixed compatability between the detailed hand and scaling law :bm_constant:`_SCALING_XYZ_`.
 
 
 
