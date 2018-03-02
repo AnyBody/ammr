@@ -38,6 +38,10 @@ Changed:
   proximal insertion points of the Gluetus Superior are shifted more distally,
   and the locations of the wrapping surfaces are tweaked. 
 
+* Muscle ColorScale can now be set from the ``Main.DrawSettings.Muscles.ColorScale``. 
+  If you port an older model to the new AMMR you will need to update your :file:`DrawSettings.any`
+  file.
+
 
 * empty
 
@@ -71,8 +75,8 @@ Fixed:
 
 * Fix the AAU Mandible Model introduced in AMMR 2.0.0. By accident the authors did 
   not share the exact same version of the model that was used in the publication by
-  `Andersen et al. 2017 <https://www.anybodytech.com/downloads/publications/#Skipper_Andersen2017-zd>`__
-  This is now corrected and the validaiton example produces the same results as published version.
+  `Andersen et al. 2017<https://www.anybodytech.com/downloads/publications/#Skipper_Andersen2017-zd>`__
+  This is now corrected and the validaiton example produces the same results as published version. 
 
 * Fixed smaller warnings when running calibration routines with the lower extremity models.
 
