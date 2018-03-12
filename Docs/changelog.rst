@@ -62,6 +62,7 @@ AMMR 2.1.0 (2018-03-ZZ)
   .. seealso:: Adding the GM-Foot to the TLEM2 model is a work in progress. An early version is
                released on GitHub: https://github.com/AnyBody/gm-foot 
 
+* Add support for the Shoulder Rhythm in AnyMoCap based models. 
 
 **Changed:**
 
@@ -107,6 +108,14 @@ AMMR 2.1.0 (2018-03-ZZ)
 * In :bm_constant:`_SCALING_XYZ_` scaling law the definition of
   length/depth/width of the scapula is corrected to match the anatomical
   definitions.
+
+* AnyMoCap model now uses the default kinematic solver for the inverse dynamic analysis.
+
+* Changed the set joint drivers used in the AnyMoCap model for transferring the
+  joint angles from the over-determinate marker tracking to the inverse dynamic analysis. 
+  To improve the stability of the scapula kinematics the Scapula Thorax Elevation angle is
+  used instead of the sterno clavicula elevation angle.
+  
 
 
 Fixed:
