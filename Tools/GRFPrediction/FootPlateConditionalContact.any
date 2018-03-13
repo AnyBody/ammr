@@ -20,6 +20,9 @@
            The number of contact nodes to expect within NODE_BASE_FRAME
    SHOW_TRIGGER_VOLUME:
            Visualize the volume where contacts may be triggered.
+   GLOBAL_REF: 
+           The global reference. This must be set if the global reference is not
+           Main.EnvironmentModel.GlobalRef
    
    Optional initialization:
    ------------------------
@@ -64,7 +67,8 @@ NORMAL_DIRECTION = "Z",
 NUMBER_OF_NODES = 1,
 NODES_FOLDER = Nodes,
 PLATE_BASE_FRAME = Main.Model.Environment.GlobalRef,
-SHOW_TRIGGER_VOLUME = 0
+SHOW_TRIGGER_VOLUME = 0,
+GLOBAL_REF = Main.EnvironmentModel.GlobalRef
 )
 {
   
@@ -162,11 +166,17 @@ SHOW_TRIGGER_VOLUME = 0
   AnyDrawLine DrawUpperTriggerVolume = 
   {
     AnyRefFrame & ref = .PlateBaseFrame;
-       AnyFloat project = {{{0,0,0},{0,1,0}, {0,0,1}},
-                           {{1,0,0},{0,0,0}, {0,0,1}},
-                           {{1,0,0},{0,1,0}, {0,0,0}}};
-    p1 =  (.Contacts.Contact14.TargetObject.r*ref.ARel - ref.r)  *project[.Contacts.NormalDir];
-    p0 =  (.Contacts.Contact14.TargetObject.r*ref.ARel- ref.r) *project[.Contacts.NormalDir] + .Settings.LimitDistHigh*eye(3)[.Contacts.NormalDir];
+    AnyFloat projection = {{{0,0,0},{0,1,0}, {0,0,1}},
+                        {{1,0,0},{0,0,0}, {0,0,1}},
+                        {{1,0,0},{0,1,0}, {0,0,0}}};
+    AnyFunTransform3DLinRef GlobalToBaseFrame = {
+      Ref = &GLOBAL_REF;
+      RefTarget = &..PlateBaseFrame;
+    }; 
+    AnyVec3 PointPojectedOnBaseFrame = GlobalToBaseFrame(.Contacts.Contact14.TargetObject.r)*projection[.Contacts.NormalDir];
+    
+    p1 =  PointPojectedOnBaseFrame;
+    p0 =  PointPojectedOnBaseFrame + .Settings.LimitDistHigh*eye(3)[.Contacts.NormalDir];
     #var Opacity = 0.05;
     GlobalCoord = Off;
     Pickable = On;
@@ -183,11 +193,11 @@ SHOW_TRIGGER_VOLUME = 0
   AnyDrawLine DrawLowerTriggerVolume = 
   {
     AnyRefFrame & ref = .PlateBaseFrame;
-       AnyFloat project = {{{0,0,0},{0,1,0}, {0,0,1}},
-                           {{1,0,0},{0,0,0}, {0,0,1}},
-                           {{1,0,0},{0,1,0}, {0,0,0}}};
-    p1 =  (.Contacts.Contact14.TargetObject.r*ref.ARel - ref.r)  *project[.Contacts.NormalDir]+ .Settings.LimitDistLow*eye(3)[.Contacts.NormalDir];
-    p0 =  (.Contacts.Contact14.TargetObject.r*ref.ARel- ref.r) *project[.Contacts.NormalDir] ;
+    AnyFloat projection = {{{0,0,0},{0,1,0}, {0,0,1}},
+                        {{1,0,0},{0,0,0}, {0,0,1}},
+                        {{1,0,0},{0,1,0}, {0,0,0}}};
+    p1 =  .DrawUpperTriggerVolume.PointPojectedOnBaseFrame + .Settings.LimitDistLow*eye(3)[.Contacts.NormalDir];
+    p0 =  .DrawUpperTriggerVolume.PointPojectedOnBaseFrame;
     #var Opacity = 0.05;
     GlobalCoord = Off;
     Pickable = On;
