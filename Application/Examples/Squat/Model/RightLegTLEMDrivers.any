@@ -1,0 +1,80 @@
+// ************************************
+// Drivers for the Right leg
+// ************************************
+
+FootConnection_3Points FootOnGround_Right(
+RefFootPrintFolder = Main.Model.ModelEnvironmentConnection.FootPrintGeneration.FootPrintRight,
+HeelLiftOffEnable = 0 )=
+{
+};
+
+AnyKinEqFourierDriver KneeFlexionDriverRight = 
+{
+  AnyKinMeasureLinComb lincomb = 
+  {
+    AnyKinMeasureOrg &ref = ....HumanModel.Interface.Right.KneeFlexion;
+    Coef = {{1.0}};
+    Const = {-0.5*(ADL_SQUAT_ANGLE_KNEE_FLEXION_MAX+ADL_SQUAT_ANGLE_KNEE_FLEXION_MIN)*pi/180};
+    OutDim = 1;
+  };
+  Type = Cos;
+  Freq = 1/ADL_SQUAT_TIME_PERIOD;
+  A = {{0.0, -0.5*(ADL_SQUAT_ANGLE_KNEE_FLEXION_MAX-ADL_SQUAT_ANGLE_KNEE_FLEXION_MIN)*pi/180}};
+  B = {{0.0, 0.0}};
+  Reaction.Type = {Off};
+};
+
+//AnyKinEqSimpleDriver KneeAnteriorPosteriorDriverRight = 
+//{
+//  AnyKinLinear lin = 
+//  {
+//    AnyRefFrame& ref0  = ....HumanModel.Right.Leg.Seg.Patella.Origin_patella_tendon ;
+//    AnyRefFrame& ref1  = ....HumanModel.Right.Leg.Seg.Foot.BigToeNode ;
+//    Ref = -1;
+//  };
+//  MeasureOrganizer = {0};
+//  DriverPos = {0};
+//  DriverVel = {0};
+//  Reaction.Type = {Off};
+//};
+
+AnyKinEqFourierDriver KneeAnteriorPosteriorDriverRight = 
+{
+  AnyVar HeelContactNodeLow_X = ...Environment.GlobalRef.FootPrintBase_Right.FP1.HeelContactNodeLow.sRel[0];
+  AnyVar ToeLateralContactNode_X = ...Environment.GlobalRef.FootPrintBase_Right.FP1.ToeLateralContactNode.sRel[0];
+  AnyVar ToeMedialContactNode_X = ...Environment.GlobalRef.FootPrintBase_Right.FP1.ToeMedialContactNode.sRel[0];
+  AnyVar MinSideContactNode_X = min({ToeLateralContactNode_X, ToeMedialContactNode_X}) ;
+  AnyVar BigToeNode_X = ...Environment.GlobalRef.FootPrintBase_Right.FP1.BigToeNode.sRel[0];
+  
+  AnyVar range_min = MinSideContactNode_X ;
+  AnyVar range_max = BigToeNode_X ;
+  
+  AnyKinMeasureLinComb lincomb = 
+  {
+    AnyKinMeasureOrg org = 
+    {
+      AnyKinLinear lin = 
+      {
+        AnyRefFrame& ref0 = ......Environment.GlobalRef.FootPrintBase_Right.FP1;
+        AnyRefFrame& ref1 = ......HumanModel.Right.Leg.Seg.Patella.Origin_patella_tendon ;
+        Ref = 0;
+      };
+      MeasureOrganizer = {0}; //x
+    };
+    Coef = {{1.0}};
+    Const = {-0.5*(.range_max + .range_min)};
+    OutDim = 1;
+  };
+  Type = Cos;
+  Freq = 1/ADL_SQUAT_TIME_PERIOD;
+  A = {{0.0, -0.5*(range_max - range_min)}};
+  B = {{0.0, 0.0}};
+  Reaction.Type = {Off};
+};  
+
+
+
+
+
+
+
