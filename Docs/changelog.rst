@@ -115,7 +115,12 @@ AMMR 2.1.0 (2018-03-ZZ)
   joint angles from the over-determinate marker tracking to the inverse dynamic analysis. 
   To improve the stability of the scapula kinematics the Scapula Thorax Elevation angle is
   used instead of the sterno clavicula elevation angle.
-  
+
+* Changed the default velocity threshold value for the ``ForcePlateAutoDetection``
+  class template used in MoCap models. This prevents the accidental detection of contact 
+  for the collateral leg in the swing phase. The new default velocity threshold is set to 1 m/s,
+  or 3.6 km/h. When simulating slower walking speeds this needs to be explicitly set for force plates. 
+
 
 
 Fixed:
