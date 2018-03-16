@@ -11,7 +11,8 @@
     LIMB2 = Main.HumanModel.BodyModel.Left.Leg.Seg.Foot,
     VerticalDirection = "Automatic",
     HeightTolerance = 0.07,
-    VelThreshold = 1, 
+    VelThreshold = 2.2, 
+    EXLCLUSIVE_LIMB_CONTACT = 0,
     FORCEPLATE_TYPE,
     CREATE_KIN_GRF = 0,
     KIN_GRF_LIMB1_FUN = GlobalCopFun,
@@ -341,8 +342,15 @@
     #include "ContactDetection.any"
     
     AnyMuscleModelUsr1 InContactMuscle = {
+      /// If the ExclusiveContact option is ON this ensures that two limbs can't
+      /// have contact with the plate at the same time
+      /// UseOpositeLimb is 1 if opposite limb has contact and a lower velocity that limb1
+      AnyVar UseOpositeLimb = EXLCLUSIVE_LIMB_CONTACT*
+            andfun(..ContactDetectionLimb2.NodeWithInBox.WithinBoxAndVelBelowThreshold,
+                   ltfun(..ContactDetectionLimb2.NodeWithInBox.P1Vel, .P1Vel)));
+     
       F0 = 0;
-      S = .NodeWithInBox.WithinBoxAndVelBelowThreshold *10000;
+      S = .NodeWithInBox.WithinBoxAndVelBelowThreshold *10000*not(UseOpositeLimb);
     };
     
     AnyMuscleModelUsr1 NoContactMuscle = {
@@ -377,8 +385,15 @@
     #include "ContactDetection.any"
     
     AnyMuscleModelUsr1 InContactMuscle = {
+      /// If the ExclusiveContact option is ON this ensures that two limbs can't
+      /// have contact with the plate at the same time
+      /// UseOpositeLimb is 1 if opposite limb has contact and a lower velocity that limb1
+      AnyVar UseOpositeLimb = EXLCLUSIVE_LIMB_CONTACT*
+            andfun(..ContactDetectionLimb1.NodeWithInBox.WithinBoxAndVelBelowThreshold,
+                   ltfun(..ContactDetectionLimb1.NodeWithInBox.P1Vel, .P1Vel)));
+     
       F0 = 0;
-      S = .NodeWithInBox.WithinBoxAndVelBelowThreshold *10000;
+      S = .NodeWithInBox.WithinBoxAndVelBelowThreshold *10000*not(UseOpositeLimb);
     };
     
     AnyMuscleModelUsr1 NoContactMuscle = {
