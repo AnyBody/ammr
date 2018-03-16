@@ -117,7 +117,7 @@ AMMR 2.1.0 (2018-03-ZZ)
   used instead of the sterno clavicula elevation angle.
 
 * Added an option to the ForcePlateAutoDetection class template to make the limb1/2 contact detection 
-  mutually exclusive. Setting the option ``EXLCLUSIVE_LIMB_CONTACT=ON`` will ensure that both legs cant 
+  mutually exclusive. Setting the option ``ALLOW_MULTI_LIMB_CONTACT=OFF`` will ensure that both legs cant 
   be in contact with the plate at the same time. This can prevent accidental contact detection 
   for the collateral leg in the swing phase. 
 
