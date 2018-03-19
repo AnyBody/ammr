@@ -181,8 +181,9 @@ Fixed:
 
 * Fix the wrong visualization of the contact area in ground reaction force 
   prediction class template, when the base frame is different from the global
-  coordinate system. 
+  coordinate system.
 
+* Fix missing left leg calibration operations when right leg was excluded.
 
 * Fixed compatability between the detailed hand and scaling law :bm_constant:`_SCALING_XYZ_`.
 
