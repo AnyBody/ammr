@@ -121,7 +121,10 @@ AMMR 2.1.0 (2018-03-ZZ)
   be in contact with the plate at the same time. This can prevent accidental contact detection 
   for the collateral leg in the swing phase. 
 
-
+* AnyMoCap: Changed the way marker drivers are excluded from the Inverse Dynamic analysis. 
+  The drivers are now excluded using the new ``AnyMechObjectExcluder`` class instead of 
+  the ``MechObjectExlcude`` member of the Study. This has no practical effect on model output
+  but means that the ``MechObjectExlcude`` can now be assigned by the users.
 
 
 Fixed:
