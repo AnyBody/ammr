@@ -179,6 +179,8 @@ rst_epilog = f"""
 .. |AMMR_VERSION| replace:: {ammr_version}
 .. |AMMR_DEMO_INST_DIR| replace:: :literal:`~/Documents/{ams_version_x}/AMMR.v{ammr_version}-Demo`
 .. |CURRENT_YEAR| replace:: {current_year}
+.. |WHAT_IS_NEW| replace:: :ref:`What's new in AMMR {ammr_version_short} <whats-new>`
+
 """
 
 no_index = """
@@ -225,7 +227,7 @@ def setup(app):
     app.add_stylesheet('theme_override.css')
 
 html_sidebars = {
-   '**': ['searchbox.html', 'globaltoc.html', 'sourcelink.html', ],
+   '**': ['searchbox.html', 'globaltoc.html'],# 'sourcelink.html', ],
    'using/windows': ['windowssidebar.html', 'searchbox.html'],
 }
 
@@ -265,6 +267,7 @@ html_theme_options = {
     'minimal_width': '700px',
     'borderless_decor': True,
     'lighter_header_decor': False,
+    #'sidebar_master_title':'TEST2'
     #'sidebarwidth': "3.8in",
     'fontcssurl': 'https://fonts.googleapis.com/css?family=Noticia+Text|Open+Sans|Droid+Sans+Mono',
 }
