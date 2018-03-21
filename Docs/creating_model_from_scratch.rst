@@ -26,7 +26,7 @@ the main model file, and all its contents (e.g, model objects, simulation object
 **STEP 2** 
 
 Link a ``libdef.any`` file to specify the AMMR directories that you wish to import the human model from. 
-If instructions for installing the Demo AMMR in the `previous chapter <Installation.html>`__ were exactly followed, the file path typed below should work. 
+If instructions for installing the Demo AMMR in the :doc:`previous chapter <ammr_installation>` were exactly followed, the file path typed below should work. 
 Otherwise, make the necessary changes.
 
 
