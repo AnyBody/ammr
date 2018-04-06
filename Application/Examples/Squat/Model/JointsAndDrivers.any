@@ -1,0 +1,81 @@
+AnyFolder Joints = 
+{
+  
+};
+
+AnyFolder Drivers = 
+{
+  AnyFolder &JntPos= Main.HumanModel.Mannequin.Posture;  
+  AnyFolder &JntVel= Main.HumanModel.Mannequin.PostureVel;
+  
+  AnyFolder CoM_Control_Def = 
+  {
+    AnyKinCoM CoM_Measure = 
+    {
+      AnyFolder &Body = Main.Model.HumanModel; 
+    };    
+        
+    AnyKinEqSimpleDriver CoM_Z_Driver = 
+    {
+      AnyKinMeasure& ref = .CoM_Measure;
+      MeasureOrganizer = {2}; 
+      DriverPos = {0};
+      DriverVel = {0};
+      Reaction.Type = {Off};
+    };    
+     
+    AnySeg CoM_DummySeg =
+    {
+      Mass=0;
+      Jii={0,0,0};
+      r0 = Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.r0;
+      AnyDrawNode drw=
+      { 
+        ScaleXYZ={1,1,1}*0.05; 
+        RGB={0,1,1};
+        Opacity = 0.5;
+      };
+    };
+    
+    AnyKinLinear CoM_DummySeg_Lin =
+    {
+      AnySeg &ref =.CoM_DummySeg ;
+    };
+    
+    AnyKinEq CoM_DummySeg_Driver =
+    {
+      AnyKinMeasureLinComb lincomb=
+      {
+        AnyKinMeasure &ref1 = ..CoM_DummySeg_Lin ;
+        AnyKinMeasure &ref2 = ..CoM_Measure ;
+        Coef={{1,0,0,-1,0,0},{0,1,0,0,-1,0},{0,0,1,0,0,-1}};
+        OutDim = 3;
+      };
+      AnyKinRotational rot =
+      {
+        AnySeg &ref = ..CoM_DummySeg;
+        Type=RotAxesAngles;
+      };
+    };
+  };
+  
+  #include "TrunkDrivers.any"
+  
+  #if BM_ARM_RIGHT == ON
+  #include "RightArmDrivers.any"
+  #endif
+  
+  #if BM_ARM_LEFT == ON
+  #include "LeftArmDrivers.any"
+  #endif
+  
+  #if BM_LEG_RIGHT == ON
+  #include "RightLegTLEMDrivers.any"
+  #endif
+  
+  #if BM_LEG_LEFT == ON
+  #include "LeftLegTLEMDrivers.any"
+  #endif
+};
+
+

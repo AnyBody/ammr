@@ -65,12 +65,10 @@ float smoothramp(float edge0, float edge1, float x)
 #ifndef KINLIMIT_TEMPLATE_ANY
 #define KINLIMIT_TEMPLATE_ANY
 
-#if ANYBODY_V1 >= 7
-#define KIN_LIMIT_SMOOTHRAMP smoothramp
-#else
+
 // The smoothramp function is not available in AMS 6 and below. 
 // This just defines an equallent implementation directly in AnyScript.
-#define KIN_LIMIT_SMOOTHRAMP(edge0, edge1, val) 2*iffun(gtfun(((val)-(edge0))/(2*((edge1)-(edge0))), 0.5), -0.5+2*(((val)-(edge0))/(2*((edge1)-(edge0)))),\
+#define KIN_LIMIT_SMOOTHRAMP_ANYSCRIPT(edge0, edge1, val) iffun(gtfun(((val)-(edge0))/(2*((edge1)-(edge0))), 0.5), -0.5+2*(((val)-(edge0))/(2*((edge1)-(edge0)))),\
                                                 mult(iffun(ltfun(((val)-(edge0))/(2*((edge1)-(edge0))),0.0), 0*(val), iffun(gtfun(((val)-(edge0))/(2*((edge1)-(edge0))),0.5),0*(val)+0.5, ((val)-(edge0))/(2*((edge1)-(edge0)))))\
                                                ,mult(iffun(ltfun(((val)-(edge0))/(2*((edge1)-(edge0))),0.0), 0*(val), iffun(gtfun(((val)-(edge0))/(2*((edge1)-(edge0))),0.5),0*(val)+0.5, ((val)-(edge0))/(2*((edge1)-(edge0)))))\
                                                ,mult(iffun(ltfun(((val)-(edge0))/(2*((edge1)-(edge0))),0.0), 0*(val), iffun(gtfun(((val)-(edge0))/(2*((edge1)-(edge0))),0.5),0*(val)+0.5, ((val)-(edge0))/(2*((edge1)-(edge0)))))\
@@ -78,9 +76,16 @@ float smoothramp(float edge0, float edge1, float x)
                                                ,(iffun(ltfun(((val)-(edge0))/(2*((edge1)-(edge0))),0.0), 0*(val), iffun(gtfun(((val)-(edge0))/(2*((edge1)-(edge0))),0.5),0*(val)+0.5, ((val)-(edge0))/(2*((edge1)-(edge0)))))\
                                                 *6 - 15)) + 10) )))\
                                                )
+                                               
+#if ANYBODY_V1 >= 7
+#define KIN_LIMIT_SMOOTHRAMP smoothramp
+#else
+#define KIN_LIMIT_SMOOTHRAMP KIN_LIMIT_SMOOTHRAMP_ANYSCRIPT
 #endif
                                                
-                                               
+
+
+
 
 #class_template KinLimitsDriver(AnyKinMeasure &KinMeasure, _DEBUG=0) {
 
@@ -170,4 +175,47 @@ AnyKinEqSimpleDriver JointLimitDriver =
 
 };
 
+
+
+#if ANYBODY_NAME_MAINFILE  == "KinLimit_template"
+
+
+Main = 
+{
+
+AnyStringVar test = ANYBODY_NAME_MAINFILE;
+
+AnyKinStudy Test_study =
+{
+  Gravity = {0,0,0.0};
+  tStart = 0;
+  tEnd = 100;
+  AnyFloat Smoothramp_buitin = smoothramp(40, 60,t);
+  AnyFloat Smoothramp_anyscript = KIN_LIMIT_SMOOTHRAMP_ANYSCRIPT(40, 60,t);
+  AnyFloat diff = Smoothramp_buitin- Smoothramp_anyscript;
+  
+  
+  AnyFolder test = 
+  {
+    #define DIFFMAT(N) arrcat(zeros(1,N-1), eye(N-1)')' - arrcat(eye(N-1)', zeros(1,N-1))'
+    AnyMatrix diffmat = DIFFMAT(101);
+    
+    AnyFloat Vec = .tArray;
+    
+    AnyFloat smoothramp_builtin = smoothramp(40, 60, Vec);
+    AnyFloat smoothramp_anyscript = KIN_LIMIT_SMOOTHRAMP_ANYSCRIPT(40, 60,Vec);
+
+    AnyFloat smoothramp_builtin_diff = diffmat*smoothramp_builtin';
+    AnyFloat smoothramp_anyscript_diff = diffmat*smoothramp_anyscript';
+  
+  
+  
+  
+  };
+};
+
+};
+
 #endif
+#endif
+

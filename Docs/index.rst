@@ -1,14 +1,13 @@
-.. AMMR documentation master file, created by
-   sphinx-quickstart on Wed Aug 23 14:56:19 2017.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Welcome to the AMMR documentation!
 =======================================
 
 The AnyBody Model Repository (AMMR), is an open library of
 musculoskeletal models and examples ready to be used with the `AnyBody Modelling
 System`_. 
+
+.. rst-class:: float-right
+
+.. seealso:: |WHAT_IS_NEW|
 
 .. figure:: _static/ammr_bodyparts.png
    :align: center
@@ -18,6 +17,7 @@ System`_.
 
    *The AnyBody Model Repository is a unique open collection of human body parts*.
 
+   
 The AnyBody Managed Model Repository consists of two parts:
 
 * :ref:`Body Models <the_body_model>`: The human body models which can be 
@@ -37,7 +37,7 @@ be used together as full body, scalable musculoskeletal model.
 
 .. rubric:: First time you're using AMMR?
 
-If you are a new user check the :tutorials:doc:`AnyBody Tutorials <index>` and the getting started video on AnyBody.
+If you are a new user check the `AnyBody Tutorials <https://anyscript.org/tutorials>`__ and the getting started video on AnyBody.
 
 The following :doc:`Getting Started section </getting_started>` on the AMMR provides insight into how AMMR is structured, how to
 install it and how to use it.

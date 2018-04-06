@@ -12,7 +12,10 @@
     VerticalDirection = "Automatic",
     HeightTolerance = 0.07,
     VelThreshold = 2.2, 
+    ALLOW_MULTI_LIMB_CONTACT = 1,
     FORCEPLATE_TYPE,
+    CONTACT_NODE1 = HeelContactNodeLow,
+    CONTACT_NODE2 = ToeLateralContactNode,
     CREATE_KIN_GRF = 0,
     KIN_GRF_LIMB1_FUN = GlobalCopFun,
     KIN_GRF_LIMB2_FUN = GlobalCopFun,
@@ -332,17 +335,24 @@
   
   
   AnyFolder ContactDetectionLimb1 ={
-    AnyVec3 P1= .Limb1.HeelContactNodeLow.r;
-    AnyVar P1Vel= vnorm(.Limb1.HeelContactNodeLow.rDot,2);
+    AnyVec3 P1= .Limb1.CONTACT_NODE1.r;
+    AnyVar P1Vel= vnorm(.Limb1.CONTACT_NODE1.rDot,2);
     
-    AnyVec3 P2= .Limb1.ToeLateralContactNode.r;
-    AnyVar P2Vel= vnorm(.Limb1.HeelContactNodeLow.rDot,2);
+    AnyVec3 P2= .Limb1.CONTACT_NODE2.r;
+    AnyVar P2Vel= vnorm(.Limb1.CONTACT_NODE2.rDot,2);
     
     #include "ContactDetection.any"
     
     AnyMuscleModelUsr1 InContactMuscle = {
+      /// If the ALLOW_MULTI_LIMB_CONTACT option is OFF this ensures that two limbs can't
+      /// have contact with the plate at the same time
+      /// UseOppositeLimb is 1 if the opposite limb has contact and a lower velocity that limb1
+      AnyVar UseOppositeLimb = not(ALLOW_MULTI_LIMB_CONTACT)*
+            andfun(..ContactDetectionLimb2.NodeWithInBox.WithinBoxAndVelBelowThreshold,
+                   ltfun(..ContactDetectionLimb2.P1Vel, .P1Vel));
+     
       F0 = 0;
-      S = .NodeWithInBox.WithinBoxAndVelBelowThreshold *10000;
+      S = .NodeWithInBox.WithinBoxAndVelBelowThreshold *10000*not(UseOppositeLimb);
     };
     
     AnyMuscleModelUsr1 NoContactMuscle = {
@@ -368,17 +378,24 @@
   };
  
   AnyFolder ContactDetectionLimb2 = {
-    AnyVec3 P1= .Limb2.HeelContactNodeLow.r;
-    AnyVar P1Vel= vnorm(.Limb2.HeelContactNodeLow.rDot,2);
+    AnyVec3 P1= .Limb2.CONTACT_NODE1.r;
+    AnyVar P1Vel= vnorm(.Limb2.CONTACT_NODE1.rDot,2);
     
-    AnyVec3 P2= .Limb2.ToeLateralContactNode.r;
-    AnyVar P2Vel= vnorm(.Limb2.HeelContactNodeLow.rDot,2);
+    AnyVec3 P2= .Limb2.CONTACT_NODE2.r;
+    AnyVar P2Vel= vnorm(.Limb2.CONTACT_NODE2.rDot,2);
     
     #include "ContactDetection.any"
     
     AnyMuscleModelUsr1 InContactMuscle = {
+      /// If the ALLOW_MULTI_LIMB_CONTACT option is OFF this ensures that two limbs can't
+      /// have contact with the plate at the same time
+      /// UseOppositeLimb is 1 if the opposite limb has contact and a lower velocity that limb2
+      AnyVar UseOppositeLimb = not(ALLOW_MULTI_LIMB_CONTACT)*
+            andfun(..ContactDetectionLimb1.NodeWithInBox.WithinBoxAndVelBelowThreshold,
+                   ltfun(..ContactDetectionLimb1.P1Vel, .P1Vel));
+     
       F0 = 0;
-      S = .NodeWithInBox.WithinBoxAndVelBelowThreshold *10000;
+      S = .NodeWithInBox.WithinBoxAndVelBelowThreshold *10000*not(UseOppositeLimb);
     };
     
     AnyMuscleModelUsr1 NoContactMuscle = {
