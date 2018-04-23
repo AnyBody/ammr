@@ -21,7 +21,7 @@ def ReadMLFile(context,filename, path = None):
         m = re.search('"/>', line)
         res = line[:m.start()].split() 
         #line = '{' + res[0] + ','+ res[1] + ','+ res[2] + '}'
-	vec = [float(res[0]), float(res[1]), float(res[2])]
+        vec = [float(res[0]), float(res[1]), float(res[2])]
         output.append(tuple(vec))
     fin.close()
     return tuple(output)

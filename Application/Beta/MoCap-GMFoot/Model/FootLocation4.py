@@ -21,7 +21,7 @@ def LocationFunction(context,path):
         step = None
         flag = 0
         rl=rb=rw=rh=0
-        for i in xrange(len(lines)):
+        for i in range(len(lines)):
             if not lines[i].lower().find("rectangle left"):
                 rl = float(lines[i+1])
             if not lines[i].lower().find("rectangle width"):
@@ -63,7 +63,7 @@ def LocationFunction(context,path):
     
     # Zipped Data matrix, first line is time, second line is cell1, etc...
     #*******************************************************************
-    DataZip = zip(*Data)
+    DataZip = list(zip(*Data))
     Time = DataZip[0]
     Force = DataZip[1:]
     
