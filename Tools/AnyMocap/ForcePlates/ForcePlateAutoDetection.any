@@ -96,7 +96,18 @@
     )
 {
   
-  AnyInt ForcePlateType = C3D_OBJECT.Groups.FORCE_PLATFORM.TYPE.Data[PLATE_NO-1];
+  AnyFolder ForcePlateInfo = 
+  {
+    #var AnyInt USED = reshape(C3D_OBJECT.Groups.FORCE_PLATFORM.USED.Data, repmat(0,0));
+    #var AnyInt ZERO = reshape(C3D_OBJECT.Groups.FORCE_PLATFORM.ZERO.Data, {2});
+    #var AnyInt TYPE = reshape(C3D_OBJECT.Groups.FORCE_PLATFORM.TYPE.Data, {USED});
+    #var AnyFloat CORNERS = reshape(C3D_OBJECT.Groups.FORCE_PLATFORM.CORNERS.Data, {USED, 4, 3});
+    #var AnyFloat ORIGIN = reshape(C3D_OBJECT.Groups.FORCE_PLATFORM.ORIGIN.Data, {USED, 3});
+    #var AnyIntVar MaxChannels = iffun(sum(eqfun(3, TYPE)), 8, 6);
+    #var AnyInt CHANNEL = reshape(C3D_OBJECT.Groups.FORCE_PLATFORM.CHANNEL.Data, {USED, MaxChannels});  
+  };
+  
+  AnyInt ForcePlateType = ForcePlateInfo.TYPE[PLATE_NO-1];
   
   
   #var AnyVar ColorScale = max({min({InContactOnOff *ForcePlate.OnOff*(1* ForcePlate.LoadRatio),1}),0});
@@ -104,12 +115,12 @@
       
   /// Checks that the FORCEPLATE_TYPE match the specification in the C3D file.   
   AnyMessage PlateTypeCheck  = {
-      AnyInt test = neqfun(.ForcePlateType, FORCEPLATE_TYPE);
+      AnyInt test = max(neqfun(.ForcePlateType, FORCEPLATE_TYPE));
       TriggerPreProcess = test;
       Type = MSG_ErrorFatal ;
       Message = strformat("AnyMOCAP: Wrong force plate type:\n"+
 	            "C3D file reports force plate as beeing type " +
-				strval(C3D_OBJECT.Groups.FORCE_PLATFORM.TYPE.Data[PLATE_NO-1]) + 
+				strval(.ForcePlateInfo.TYPE[PLATE_NO-1]) + 
 				" not type: " + strval(FORCEPLATE_TYPE));
    };  
    
@@ -171,14 +182,13 @@
   
   AnyFixedRefFrame Corners ={
     AnyVar CoordinateSystemSize= 0.1;
-    #var AnyFloat Data = C3D_OBJECT.Groups.FORCE_PLATFORM.CORNERS.Data;
     #var AnyInt plate_idx=PLATE_NO-1;
     AnyRefNode c01={
       #var AnyInt i=0;
       #var sRel=C3D_OBJECT.PointsScaleFactor*{
-          .Data[.plate_idx][i][0],
-          .Data[.plate_idx][i][1],
-          .Data[.plate_idx][i][2]
+          ..ForcePlateInfo.CORNERS[.plate_idx][i][0],
+          ..ForcePlateInfo.CORNERS[.plate_idx][i][1],
+          ..ForcePlateInfo.CORNERS[.plate_idx][i][2]
       };
       AnyDrawNode drw={ScaleXYZ=0.01*{1,1,1};RGB={1,0,0};};
       AnyDrawVector  DrawName = {
@@ -193,9 +203,9 @@
     AnyRefNode c02={
       #var AnyInt i=1;
       #var sRel=C3D_OBJECT.PointsScaleFactor*{
-          .Data[.plate_idx][i][0],
-          .Data[.plate_idx][i][1],
-          .Data[.plate_idx][i][2]
+          ..ForcePlateInfo.CORNERS[.plate_idx][i][0],
+          ..ForcePlateInfo.CORNERS[.plate_idx][i][1],
+          ..ForcePlateInfo.CORNERS[.plate_idx][i][2]
       };
       AnyDrawNode drw={ScaleXYZ=0.01*{1,1,1};RGB={1,0,0};};
       AnyDrawVector  DrawName = {
@@ -210,9 +220,9 @@
     AnyRefNode c03={
       #var AnyInt i=2;
       #var sRel=C3D_OBJECT.PointsScaleFactor*{
-          .Data[.plate_idx][i][0],
-          .Data[.plate_idx][i][1],
-          .Data[.plate_idx][i][2]
+          ..ForcePlateInfo.CORNERS[.plate_idx][i][0],
+          ..ForcePlateInfo.CORNERS[.plate_idx][i][1],
+          ..ForcePlateInfo.CORNERS[.plate_idx][i][2]
       };
       AnyDrawNode drw={ScaleXYZ=0.01*{1,1,1};RGB={1,0,0};};
       
@@ -228,9 +238,9 @@
     AnyRefNode c04={
       #var AnyInt i=3;
       #var sRel=C3D_OBJECT.PointsScaleFactor*{
-          .Data[.plate_idx][i][0],
-          .Data[.plate_idx][i][1],
-          .Data[.plate_idx][i][2]
+          ..ForcePlateInfo.CORNERS[.plate_idx][i][0],
+          ..ForcePlateInfo.CORNERS[.plate_idx][i][1],
+          ..ForcePlateInfo.CORNERS[.plate_idx][i][2]
       };
       AnyDrawNode drw={ScaleXYZ=0.01*{1,1,1};RGB={1,0,0};};
       AnyDrawVector  DrawName = {
@@ -283,7 +293,7 @@
         
         
       AnyRefNode SurfaceGraphics = {
-        #var AnyVar VisualPlateHeight = C3D_OBJECT.PointsScaleFactor*abs(C3D_OBJECT.Groups.FORCE_PLATFORM.ORIGIN.Data[PLATE_NO-1][2]);
+        #var AnyVar VisualPlateHeight = C3D_OBJECT.PointsScaleFactor*abs(....ForcePlateInfo.ORIGIN[PLATE_NO-1][2]);
         sRel={0,0,VisualPlateHeight/2};
         AnyVec3 Size={
           vnorm( ....SurfaceCorner_c01 - ....SurfaceCorner_c02 ,2),
