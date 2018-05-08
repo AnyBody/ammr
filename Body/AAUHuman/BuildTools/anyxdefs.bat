@@ -15,5 +15,6 @@
 "msxsl.exe" ../BodyModel.define.xml anyxdefs2define.xslt -o ../Documentation/BodyModel.parameters.any
 "msxsl.exe" ../BodyModel.define.xml anyxdefs2messages.xslt -o ../BodyModels/GenericBodyModel/BodyModel.config_info.any
 "msxsl.exe" ../BodyModel.define.xml BM_ConstantsMap.xslt -o ../Documentation/bm_constants.py
+"msxsl.exe" ../BodyModel.define.xml undef_BM_param.xslt -o ../BodyModels/GenericBodyModel/undef_BM_params.any
 
 cmd /k
