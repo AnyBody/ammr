@@ -236,12 +236,12 @@ of the Pelvis w.r.t ground.
             
             AnyReacForce HumanGroundResiduals = 
             {
-            AnyKinMeasure &PelvisPosX = .Human.Interface.Trunk.PelvisPosX;
-            AnyKinMeasure &PelvisPosY = .Human.Interface.Trunk.PelvisPosY;
-            AnyKinMeasure &PelvisPosZ = .Human.Interface.Trunk.PelvisPosZ;
-            AnyKinMeasure &PelvisRotX = .Human.Interface.Trunk.PelvisRotX;
-            AnyKinMeasure &PelvisRotY = .Human.Interface.Trunk.PelvisRotY;
-            AnyKinMeasure &PelvisRotZ = .Human.Interface.Trunk.PelvisRotZ;
+            AnyKinMeasure& PelvisPosX = .Human.Interface.Trunk.PelvisPosX;
+            AnyKinMeasure& PelvisPosY = .Human.Interface.Trunk.PelvisPosY;
+            AnyKinMeasure& PelvisPosZ = .Human.Interface.Trunk.PelvisPosZ;
+            AnyKinMeasure& PelvisRotX = .Human.Interface.Trunk.PelvisRotX;
+            AnyKinMeasure& PelvisRotY = .Human.Interface.Trunk.PelvisRotY;
+            AnyKinMeasure& PelvisRotZ = .Human.Interface.Trunk.PelvisRotZ;
             };
  
         };
