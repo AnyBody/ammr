@@ -162,7 +162,7 @@ if not re.match('^\d\.\d\.\d',ams_version):
 ams_version_short = ams_version.rpartition('.')[0]
 ams_version_x = ams_version_short + '.x'
 
-ammr_version = os.environ.get('AMMR_VERSION', '2.1.0')
+ammr_version = os.environ.get('AMMR_VERSION', '2.1.1')
 if not re.match('^\d\.\d\.\d',ammr_version):
     raise ValueError('Wrong format for AMMR version, environment variable')
 ammr_version_short = ammr_version.rpartition('.')[0]
@@ -179,9 +179,11 @@ rst_epilog = f"""
 .. |AMMR_VERSION| replace:: {ammr_version}
 .. |AMMR_DEMO_INST_DIR| replace:: :literal:`~/Documents/{ams_version_x}/AMMR.v{ammr_version}-Demo`
 .. |CURRENT_YEAR| replace:: {current_year}
-.. |WHAT_IS_NEW| replace:: :ref:`What's new in AMMR {ammr_version_short} <whats-new>`
-
+.. |WHAT_IS_NEW| replace:: :ref:`What's new in AMMR {ammr_version} <whats-new>`
+.. |DOI| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.1250764.svg
+                 :target: https://doi.org/10.5281/zenodo.1250764
 """
+
 
 no_index = """
 .. meta::
