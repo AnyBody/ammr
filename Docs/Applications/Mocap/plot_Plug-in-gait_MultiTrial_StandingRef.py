@@ -3,54 +3,71 @@ r"""
 Multi trial MoCap model
 ===============================
 
-Example of a MoCap model structured for analyzing data from multiple trials
-and subjects. 
+Example of a MoCap model structured for analyzing data from multiple subjects
+and trials. This special structure makes it much easier to work with large 
+datasets with multiple subjects and trials. Hence, this model is the best
+starting point for analyzing bigger MoCap experiments.
 
-This example shows the AnyMoCap framework applied to a set of squatting trials.
+This example shows the :doc:`AnyMoCap framework </anymocap>` applied to a set
+of squatting trials.
 The subject specific scaling and marker optimization is done on a standing
-reference recording, and the values are then applied two squatting trials.
+reference recording, and the values are then applied to a squatting trial.
 
 The data is provided by Maria Jönsson from KTH (Royal Institute of Technology
 School of Technology and Health) in Sweden.
 
-``Application/MocapExamples/Plug-in-gait_MultiTrial_StandingRef``
+The files are structured so each trial has its own folder with a main file
+(``Main.any``) and a file with trial specific data (``TrialSpecificData.any``).
+The C3D files are placed together in a separate folder.
 
-The files are structured so each trials has its own folder with a main file
-(``Main.any``), a file with trial specific data (``TrialSpecificData.any```) and a
-C3D data file. (The C3D files could have been placed together in a separate folder if
-that was desirable.)
+The model is structured as outlined below:
 
-.. code-block: none
+.. code-block:: none
+   :emphasize-lines: 8,21,24,25
 
-    │   BodyModelConfig.any
+   Application/MocapExamples/Plug-in-gait_MultiTrial_StandingRef
+    │   libdef.any
     │   C3DSettings.any
+    │   BodyModelConfig.any
     │   ExtraDrivers.any
     │   ForcePlates.any
-    │   LabSpecificData.any
     │   MarkerProtocol.any
-    │   libdef.any
+    │   LabSpecificData.any
+    │
+    ├───c3d_files\
+    |      S1_FlywheelSquat.c3d
+    |      S1_StandingRef.c3d
+    |      S2_FlywheelSquat.c3d
+    |      S2_StandingRef.c3d
     │
     ├───Output\
     │
-    └───Trials\
-        │   SubjectSpecificData.any
+    └───Subjects\
         │
-        ├───FlywheelSquat_1\
-        │       FlywheelSquat_1.c3d
-        │       Main.any
-        │       TrialSpecificData.any
-        │
-        └───StandingRef_1\
-                Main.any
-                StandingRef_1.c3d
-                TrialSpecificData.any
+        ├───S1\
+        │   |   SubjectSpecificData.any
+        |   |
+        │   ├───S1_FlywheelSquat\
+        |   |      Main.any
+        |   |      TrialSpecificData.any
+        |   |   
+        │   └───S1_StandingRef\
+        |          Main.any
+        |          TrialSpecificData.any
+        │   
+        └───S2\
+            |   SubjectSpecificData.any
+            |
+            ├───S2_FlywheelSquat\
+            |      Main.any
+            |      TrialSpecificData.any
+            |
+            └───S2_StandingRef\
+                   Main.any
+                   TrialSpecificData.any
 
 
-
-.. image:: /Applications/Mocap/MultiTrialStructure.png
-
-This special structure makes it much easier to work with large datasets. And
-this model is the best starting point for analyzing bigger MoCap experiments. 
+ 
 
 """
 
