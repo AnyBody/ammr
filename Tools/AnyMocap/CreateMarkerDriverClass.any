@@ -200,7 +200,11 @@
             BsplineOrder =4;
             #if USE_BVH_INPUT
             T = C3D_OBJECT.Points.Markers.MarkerName.FromBVH.val_T;
-            Data = .LowPassFilter(C3D_OBJECT.Points.Markers.MarkerName.FromBVH.Data);
+            Data = {
+               .LowPassFilter(C3D_OBJECT.Points.Markers.MarkerName.FromBVH.val_X),
+               .LowPassFilter(C3D_OBJECT.Points.Markers.MarkerName.FromBVH.val_Y),
+               .LowPassFilter(C3D_OBJECT.Points.Markers.MarkerName.FromBVH.val_Z)
+            };
             #else
             T = C3D_OBJECT.Points.Markers.MarkerName.PosInterpol.T;
             Data = .LowPassFilter(C3D_OBJECT.Points.Markers.MarkerName.Pos');
@@ -233,37 +237,44 @@
 
 #if USE_BVH_INPUT
 //-->Test
-  AnyFolder Test_Visual = 
-  {
-    AnyFunInterpol UnfilteredPosInterpol = 
-    {
-      Type = PiecewiseLinear ;
-      T = C3D_OBJECT.Points.Markers.MarkerName.FromBVH.val_T ;
-      Data = C3D_OBJECT.Points.Markers.MarkerName.FromBVH.Data ;
-    };
-    AnyDrawSphere UnfilteredTest ={
-      RGB={0.8,0.2,0.8};
-      Opacity = 0.5;
-      ScaleXYZ={1,1,1}*0.01;
-      Position = .UnfilteredPosInterpol(..Driver.t);
-    };        
-  };
+//  AnyFolder Test_Visual = 
+//  {
+//    AnyFunInterpol UnfilteredPosInterpol = 
+//    {
+//      Type = PiecewiseLinear ;
+//      T = C3D_OBJECT.Points.Markers.MarkerName.FromBVH.val_T ;
+//      Data = {
+//        C3D_OBJECT.Points.Markers.MarkerName.FromBVH.val_X,
+//        C3D_OBJECT.Points.Markers.MarkerName.FromBVH.val_Y,
+//        C3D_OBJECT.Points.Markers.MarkerName.FromBVH.val_Z
+//      };
+//    };
+//    AnyDrawSphere UnfilteredTest ={
+//      RGB={0.8,0.2,0.8};
+//      Opacity = 0.5;
+//      ScaleXYZ={1,1,1}*0.01;
+//      Position = .UnfilteredPosInterpol(..Driver.t);
+//    };        
+//  };
   //<--Test
     
   C3D_OBJECT.Points.Markers = 
   {
     AnyFolder MarkerName = 
     {
-      AnyFunction& FilterRef = C3D_OBJECT.Filter;
-      AnyFloat Pos = FromBVH.Data';
-      AnyFloat PosFiltered = FilterRef(FromBVH.Data)';
+
       AnyFunInterpol PosInterpol = 
       {
         #var Type = Bspline;
         BsplineOrder =4;
         
         T = .FromBVH.val_T;
-        Data = (.PosFiltered)';
+        Data = {
+          C3D_OBJECT.Filter(.FromBVH.val_X),
+          C3D_OBJECT.Filter(.FromBVH.val_Y),
+          C3D_OBJECT.Filter(.FromBVH.val_Z) 
+        };
+
       };         
       AnyFolder FromBVH = 
       {
@@ -271,7 +282,6 @@
         AnyVector val_Y =DesignVar(zeros(Main.Studies.BVH_CreateMarkerTrajectoriesStudy.nStep,1)');
         AnyVector val_Z =DesignVar(zeros(Main.Studies.BVH_CreateMarkerTrajectoriesStudy.nStep,1)');
         AnyVector val_T=DesignVar(iarr(0, Main.Studies.BVH_CreateMarkerTrajectoriesStudy.nStep-1));
-        AnyFloat  Data= DesignVar({val_X,val_Y,val_Z});        
       };
     };
   };  
