@@ -46,10 +46,12 @@ GitLab](https://gitlab.com/anybody/beta/ammr) to protect academic contributors
 who also often need to publish their models before release. Access to the closed
 GitLab repository is given on request. 
 
+<!---
 A [public mirror](https://gihub.com/anybody/ammr) exists on GitHub in which the
 [main development
 branch](https://github.com/AnyBody-Research-Group/AMMR/commits/master) is
 available. Pull request are very welcome on GitHub.
+--->
 
 ## License
 
