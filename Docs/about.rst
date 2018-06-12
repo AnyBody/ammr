@@ -12,7 +12,7 @@ The DOI is also usefull when citing the AMMR. For example, when citing the AMMR 
 
 .. rst-class:: without-title
 
-.. note::  Lund, Morten Enemark, Tørholm, Søren, & Jung, Moonki. (2018, Jun 12). The AnyBody Managed Model Repository (AMMR) (Version 2.1.1). Zenodo. http://doi.org/10.5281/zenodo.1252190
+.. note::  Lund, Morten Enemark, Tørholm, Søren, & Jung, Moonki. (2018, Jun. 12). The AnyBody Managed Model Repository (AMMR) (Version 2.1.1). Zenodo. http://doi.org/10.5281/zenodo.1287730
 
 Remember to use the DOI for the specific version you use.
 
