@@ -3,19 +3,19 @@
 About the AMMR
 ###################
 
-  The AnyBody Managed Model Repository has a DOI |DOI|. 
+The AnyBody Managed Model Repository now has a DOI |DOI|. 
 
-  This is handled by `Zenodo.org <https://zenodo.org/>`__, which is a European Open Science platform hosted at CERN. 
-  You can download all archived versions of the AMMR from `Zenodo.org <https://zenodo.org/>`__. When citing the AMMR
-  please use:
+This is handled by `Zenodo.org <https://zenodo.org/>`__, which is an European Open Science platform hosted at CERN. 
+You can download all archived versions of the AMMR from `Zenodo.org <https://doi.org/10.5281/zenodo.1250764/>`__.
 
-.. rst-class:: float-right
+The DOI is also usefull when citing the AMMR. For example, when citing the AMMR 2.1.1:
 
-.. note::  Lund, Morten Enemark, Damsgaard, Michael, Tørholm, Søren, Galibarov, Pavel E, Jung, Moonki, & Gopalakrishnan, Anantharaman. (2018, March 25). The AnyBody Managed Model Repository (AMMR) (Version 2.1.0). Zenodo. http://doi.org/10.5281/zenodo.1251276
+.. rst-class:: without-title
 
-Remember to the DOI for the specific version you use.
+.. note::  Lund, Morten Enemark, Tørholm, Søren, & Jung, Moonki. (2018, Jun 12). The AnyBody Managed Model Repository (AMMR) (Version 2.1.1). Zenodo. http://doi.org/10.5281/zenodo.1252190
 
-  
+Remember to use the DOI for the specific version you use.
+
 
 .. toctree::
     :maxdepth: 1
