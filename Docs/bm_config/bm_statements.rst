@@ -140,6 +140,23 @@ All BodyModel parameters
 | 
 
 
+.. ammr:bm_statement:: BM_FOOT_MODEL
+
+    Parameter defining the foot model used.
+
+
+    :Default: :ammr:bm_constant:`_FOOT_MODEL_DEFAULT_`
+    :Example: ``#define BM_FOOT_MODEL _FOOT_MODEL_DEFAULT_``
+    :Options: - :any:`_FOOT_MODEL_DEFAULT_`: Switch for using the default foot model
+              - :any:`_FOOT_MODEL_NONE_`: Switch for using the GM foot model"
+
+
+|  
+|   
+| 
+| 
+
+
 .. ammr:bm_statement:: BM_LEG_MODEL
 
     Parameter defining the Leg model used.
@@ -151,23 +168,6 @@ All BodyModel parameters
               - :any:`_LEG_MODEL_TLEM_`: Switch to use leg model: "TLEM 1"
               - :any:`_LEG_MODEL_TLEM2_`: Switch to use leg model: "TLEM 2"
               - :any:`_LEG_MODEL_LEG_`: Switch to use leg model: "Leg"
-
-
-|  
-|   
-| 
-| 
-
-
-.. ammr:bm_statement:: BM_FOOT_MODEL
-
-    Parameter defining the foot model used.
-
-
-    :Default: :ammr:bm_constant:`_FOOT_MODEL_DEFAULT_`
-    :Example: ``#define BM_FOOT_MODEL _FOOT_MODEL_DEFAULT_``
-    :Options: - :any:`_FOOT_MODEL_DEFAULT_`: Switch for using the default foot model
-              - :any:`_FOOT_MODEL_NONE_`: Switch for using the GM foot model"
 
 
 |  
