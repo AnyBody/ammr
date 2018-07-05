@@ -5,27 +5,33 @@
 // This file contains segment inertia properties and geometry used for muscle wrapping.
 // The file includes a number of segment files which contains muscles attachment points and 
 // bonylandmarks.
+
+AnyVar coronoid_gh = vnorm(.Seg.Scapula.coronoid.sRel - .Seg.Scapula.gh.sRel); // These vectors are used to scale control surfaces
+AnyVar aa_gh = vnorm(.Seg.Scapula.aa.sRel - .Seg.Scapula.gh.sRel);
+AnyVar ai_gh = vnorm(.Seg.Scapula.ai.sRel - .Seg.Scapula.gh.sRel);
+AnyVar acj_gh = vnorm(.Seg.Scapula.acj.sRel - .Seg.Scapula.gh.sRel);
+
 MultiWrapSurfs CylindersPosterior (
-     BASE_FRAME = .DeltoidPosteriorWrapping.Cyl.gh.DeltoidPosteriorWrap,
+BASE_FRAME = .DeltoidPosteriorWrapping.Cyl.gh.DeltoidPosteriorWrap,
 
-     TYPE="ELIPSOID",
-     NUMBER_OF_CYLINDERS= 4,
-     DEBUG=1
-     ) = 
-   {     
-       Radius = .Humerus.test_fitting_2.scaledposterior.Radius[1];
-       RadiusX = .Humerus.test_fitting_2.scaledposterior.Radius[0];
-       RadiusHeight = .Humerus.test_fitting_2.scaledposterior.Radius[2];
-
-
-       WrapSurfLength = 0.8;
-       //Angles = ({15, 17, 20, 30}-10);
-
-       Angles = ..Sign*({15, 17, 20, 30}-10);
-       //Angles = {0,0,0,0};
-       Visibility = repmat(NumberOfCylinders, Off);
-//         Visibility = {On, Off, Off, Off};
-   }; 
+TYPE="ELIPSOID",
+NUMBER_OF_CYLINDERS= 4,
+DEBUG=0
+) = 
+{   
+  
+  Radius = .aa_gh -0.015;
+  RadiusX = .ai_gh - 0.13;
+  RadiusHeight = .acj_gh - 0.01;
+  
+  
+  WrapSurfLength = .ai_gh*3;
+  
+  Angles = ..Sign*({20, 22, 30, 45}-25);
+  //Angles = {0,0,0,0};
+  Visibility = repmat(NumberOfCylinders, On);
+  //         Visibility = {On, Off, Off, Off};
+}; 
 
 
 
@@ -42,22 +48,22 @@ AnyFolder DeltoidPosteriorWrapping ={
       sRel=....Seg.Scapula.gh.sRel;
       ARel=....Seg.Scapula.gh.ARel;
       AnyRefNode DeltoidPosteriorWrap ={
-      //  AnyDrawRefFrame drw2 ={ScaleXYZ={1,1,1};};
+        //  AnyDrawRefFrame drw2 ={ScaleXYZ={1,1,1};};
         
         sRel=.....Seg.Scapula.gh.DeltoidPosteriorWrap.sRel;
         ARel=.....Seg.Scapula.gh.DeltoidPosteriorWrap.ARel*RotMat((1-.....Sign)*0.5*pi,y);
-//        ARel=.....Seg.Scapula.gh.DeltoidPosteriorWrap.ARel;
-
-
+        //        ARel=.....Seg.Scapula.gh.DeltoidPosteriorWrap.ARel;
+        
+        
       };
       
     };
     AnyRefNode RotNode= {
       sRel=.gh.sRel;
       ARel =RotMat(sRel,.ai.sRel,....Seg.Scapula.ts.sRel);
-//      AnyDrawRefFrame drw ={
-//        ScaleXYZ={1,1,1}*0.3;
-//        RGB={0,1,0};};
+      //      AnyDrawRefFrame drw ={
+      //        ScaleXYZ={1,1,1}*0.3;
+      //        RGB={0,1,0};};
     };
   };
   
@@ -84,17 +90,17 @@ AnyFolder DeltoidPosteriorWrapping ={
     AnyRefNode &ref1=.Cyl.ai;
     AnyRefNode &ref2=...Seg.Scapula.ai;
     Type=RotAxesAngles;
-
+    
     Axis1=x;
-        Axis2=y;
-            Axis3=z;
+    Axis2=y;
+    Axis3=z;
   };
   
   AnyKinEq ai_rot_drv ={
     AnyKinRotational &ref=.ai_rot;
     MeasureOrganizer ={0};  //x is long axis...rot around it to be driven 
   };
-
+  
   
 };
 
@@ -105,24 +111,23 @@ AnyFolder DeltoidPosteriorWrapping ={
 //DeltoidLateralAndAnteriorWrapping
 AnyFolder DeltoidLateralAndAnteriorWrapping ={
   
-  
   MultiWrapSurfs Cylinders (
   BASE_FRAME = .DeltoidMuscleConnector.Symmetry.DeltoidLateralWrap,
   NUMBER_OF_CYLINDERS= 4,
-  DEBUG=0
+  TYPE="ELIPSOID",
+  DEBUG=1
   ) = 
   {     
-//           Radius = 0.04;
-//           RadiusHeight = 0.04;
-           Radius = 0.03918008;
-           RadiusX = 0.04493714;
-           RadiusHeight = 0.03526207;
-
-//    Radius = .Humerus.test_fitting_2.scaledlateral.Radius[1];
-//    RadiusX = .Humerus.test_fitting_2.scaledlateral.Radius[0];
-//    RadiusHeight = .Humerus.test_fitting_2.scaledlateral.Radius[2];
-    AnyVar deltoid_gh_dist = vnorm(...Seg.Humerus.I_deltoideus_clavicular_part_4.sRel - ...Seg.Humerus.gh.sRel);
-    Angles = ...Sign*{65, 85, 110, 140};
+    
+    Radius = ..aa_gh -0.015;
+    RadiusX = ..acj_gh-0.007;
+    RadiusHeight = ..acj_gh - 0.01;
+    
+    AnyVar deltoid_gh_dist = vnorm(...Seg.Humerus.I_deltoideus_scapular_part_3.sRel - ...Seg.Humerus.gh.sRel);
+    WrapSurfLength = deltoid_gh_dist*2;
+    //WrapSurfLength = 0.12;
+    //    Angles = ...Sign*{65, 85, 110, 140};
+    Angles = ...Sign*{68, 85, 100, 120};
     Visibility = repmat(NumberOfCylinders, On);
     //         Visibility = {On, On, Off, Off, Off, Off};
   }; 
@@ -134,71 +139,81 @@ AnyFolder DeltoidLateralAndAnteriorWrapping ={
   DEBUG=0
   ) = 
   {     
-//           Radius = 0.049;
-//           RadiusX = 0.06;
-//           RadiusHeight = 0.049;
-           Radius = 0.03215468;
-           RadiusX = 0.0684904;
-           RadiusHeight = 0.04134173;
-//    Radius = .Humerus.test_fitting_2.scaledanterior.Radius[1];
-//    RadiusX = .Humerus.test_fitting_2.scaledanterior.Radius[0];
-//    RadiusHeight = .Humerus.test_fitting_2.scaledanterior.Radius[2];
+    
+    Radius = ..coronoid_gh - 0.02;
+    RadiusX = ..coronoid_gh+0.015;
+    RadiusHeight = ..acj_gh - 0.01;
+    //    Radius = .Humerus.test_fitting_2.scaledanterior.Radius[1];
+    //    RadiusX = .Humerus.test_fitting_2.scaledanterior.Radius[0];
+//        RadiusHeight = .Humerus.test_fitting_2.scaledanterior.Radius[2];
     Angles = ...Sign*({190, 200, 215, 225}-20);
     //         Angles = ...Sign*{190, 200, 215, 225};
+    
+    
+    
     AnyVar deltoid_gh_dist = vnorm(...Seg.Humerus.I_deltoideus_clavicular_part_4.sRel - ...Seg.Humerus.gh.sRel);
     WrapSurfLength = 2*deltoid_gh_dist;
-    Visibility = repmat(NumberOfCylinders, On); 
+    Visibility = repmat(NumberOfCylinders, Off); 
     //       Visibility = {Off, Off, Off, Off, Off, On};
   };
   
   
   
   AnySeg DeltoidMuscleConnector ={
-
+    
+    AnyDrawRefFrame Rake = 
+    {
+      
+      ScaleXYZ = 0.1*{1.0, 1.0, 1.0};
+      
+    };
+    
+    
     //AnyDrawRefFrame drw ={ScaleXYZ={1,1,1};RGB={0,0,1};};
-
+    
     AnyRefNode Symmetry = {
-  //    AnyDrawRefFrame drw ={ScaleXYZ={1,1,1};RGB={0,1,1};};
-
+      AnyDrawRefFrame drw ={ScaleXYZ=0.1*{1,1,1};RGB={0,1,1};};
+      
+      //      #if _LEFT_RIGHT_ == "LEFT"
+      //        ARel = RotMat(pi,x)*RotMat(0.1,y);
+      //       //  ARel = RotMat(-0.1,y);
+      //      #else
+      //        ARel =RotMat(-0.1,y);
+      //      #endif
+      
       #if _LEFT_RIGHT_ == "LEFT"
-        ARel = RotMat(pi,x)*RotMat(0.1,y);
-       //  ARel = RotMat(-0.1,y);
-      #else
-        ARel =RotMat(-0.1,y);
+      ARel = RotMat(pi,x);
       #endif
-     
+      
       AnyRefNode DeltoidAnteriorWrap = {
-  
-//        ARel = RotMat(.....Sign*-20*pi/180.0, y)*RotMat(7*pi/180.0, x);
+        
+        //        ARel = RotMat(.....Sign*-20*pi/180.0, y)*RotMat(7*pi/180.0, x);
         ARel = RotMat(.....Sign*-20*pi/180.0, y)*RotMat(7*pi/180.0, x);
-
+        
       };
       
       AnyRefNode DeltoidLateralWrap = {};
       
-      AnyRefNode DeltoidPosteriorWrap = {
-        ARel = RotMat(.....Sign*40*pi/180.0, z)*RotMat(72*pi/180.0, x)*RotMat(-70*pi/180.0, x);
-      };
       
     };
     
     
-   
     
-
-     AnyMat33  As= {
+    
+    
+    AnyMat33  As= {
       {...Seg.Humerus.Axes0[0][0],...Sign*...Seg.Humerus.Axes0[0][1],...Sign*...Seg.Humerus.Axes0[0][2]},
       {...Seg.Humerus.Axes0[1][0],...Sign*...Seg.Humerus.Axes0[1][1],...Sign*...Seg.Humerus.Axes0[1][2]},
       {...Seg.Humerus.Axes0[2][0],...Sign*...Seg.Humerus.Axes0[2][1],...Sign*...Seg.Humerus.Axes0[2][2]}
     };
-
     
-//     AnyMat33  As= {
-//      {...Sign*...Seg.Humerus.Axes0[0][0],...Sign*...Seg.Humerus.Axes0[0][1],...Sign*...Seg.Humerus.Axes0[0][2]},
-//      {...Sign*...Seg.Humerus.Axes0[1][0],...Sign*...Seg.Humerus.Axes0[1][1],...Sign*...Seg.Humerus.Axes0[1][2]},
-//      {...Seg.Humerus.Axes0[2][0],...Seg.Humerus.Axes0[2][1],...Seg.Humerus.Axes0[2][2]}
-//    };
-
+    
+    //     AnyMat33  As= {
+    //      {...Sign*...Seg.Humerus.Axes0[0][0],...Sign*...Seg.Humerus.Axes0[0][1],...Sign*...Seg.Humerus.Axes0[0][2]},
+    //      {...Sign*...Seg.Humerus.Axes0[1][0],...Sign*...Seg.Humerus.Axes0[1][1],...Sign*...Seg.Humerus.Axes0[1][2]},
+    //      {...Seg.Humerus.Axes0[2][0],...Seg.Humerus.Axes0[2][1],...Seg.Humerus.Axes0[2][2]}
+    //    };
+    
     
     r0=...Seg.Humerus.r0;  
     Axes0=As;
@@ -213,17 +228,79 @@ AnyFolder DeltoidLateralAndAnteriorWrapping ={
     
   };
   
-  AnySphericalJoint DeltoidMuscleConnectorJnt ={
-    AnySeg &ref1=.DeltoidMuscleConnector ;
-    AnyRefNode &ref2=.Humerus.gh_rotated;
+  //  AnySphericalJoint DeltoidMuscleConnectorJnt ={
+  //    AnySeg &ref1=.DeltoidMuscleConnector ;
+  //    AnyRefNode &ref2=.Humerus.gh_rotated;
+  //  };
+  //  
+  //  AnyReacForce DeltoidMuscleConnectorReactionForce={
+  //    AnySphericalJoint &ref2=.DeltoidMuscleConnectorJnt;//.DeltoidMuscleConnectorHumerusRot;
+  //  };
+  //
+  //  
+  //  AnyFolder &Scapula=..Seg.Scapula;
+  //  Scapula={
+  //    AnyRefNode gh_rotated={
+  //      sRel=.gh.sRel;
+  //      ARel={{....Sign*1,0,0},{0,1,0},{0,0,....Sign*1}};
+  //    };
+  //  };
+  //  
+  //  AnyFolder &Humerus =..Seg.Humerus;
+  //  Humerus={
+  //    AnyRefNode gh_rotated={
+  //      sRel=.gh.sRel;
+  //      ARel={{1,0,0},{0,....Sign*1,0},{0,0,....Sign*1}};
+  //    };
+  //  };
+  //  
+  //  AnyKinRotational HumerusDeltoidMuscleConnectorRot={
+  //    AnyRefNode &ref1=.Scapula.gh_rotated;
+  //    AnySeg &ref2=.DeltoidMuscleConnector;
+  //    Type =RotAxesAngles;
+  //
+  //  };
+  //  
+  //  AnyKinEqSimpleDriver drv = {
+  //    AnyKinMeasure &u2 = .HumerusDeltoidMuscleConnectorRot;
+  //    DriverPos={0,0,0};
+  //    DriverVel={0,0,0};
+  //    Reaction.Type={Off,Off,Off};  
+  //    
+  //  }; // Measure
+  //  
+  //  
+  //
+  //  
+  //  
+  //};
+  
+  AnySeg DeltoidMuscleRotControlSeg ={
+    Mass=0.00;
+    Jii={0.0,0.0,0.0};
+    AnyFolder NeutralPositionOnThorax = {
+      AnyMat33 DeltoidMuscleConnector_Axes = {
+        {....Sign*-0.021288,....Sign* -0.139315, ....Sign*-0.990019}, 
+        {....Sign*0.142582,....Sign*   0.979699, ....Sign*-0.140929},
+        {0.989554, -0.144159, -0.000992}};
+      AnyMat33 Pelvis_Axes  = {{1.000000, 0.000000, 0.000000}, {-0.000000, 1.000000, -0.000000}, {-0.000000, 0.000000, 1.000000}};
+      AnyMat33 ARel=DeltoidMuscleConnector_Axes'*Pelvis_Axes;
+    };
+    
+    AnyMat33  As= .....Trunk.SegmentsThorax.ThoraxSeg.Axes0*NeutralPositionOnThorax.ARel';
+    r0=...Seg.Humerus.DeltoidConnectorCenter.sRel*...Seg.Humerus.Axes0'+...Seg.Humerus.r0;  
+    Axes0={{As[0][0],As[0][1],As[0][2]},
+      {As[1][0],As[1][1],As[1][2]},
+      {As[2][0],As[2][1],As[2][2]}};
   };
   
-  AnyReacForce DeltoidMuscleConnectorReactionForce={
-    AnySphericalJoint &ref2=.DeltoidMuscleConnectorJnt;//.DeltoidMuscleConnectorHumerusRot;
+  AnySphericalJoint DeltoidMuscleConnectorJnt ={
+    AnyRefNode &ref1=...Seg.Humerus.DeltoidConnectorCenter ;
+    AnySeg &ref2=.DeltoidMuscleRotControlSeg; 
   };
-
   
   AnyFolder &Scapula=..Seg.Scapula;
+  
   Scapula={
     AnyRefNode gh_rotated={
       sRel=.gh.sRel;
@@ -239,24 +316,80 @@ AnyFolder DeltoidLateralAndAnteriorWrapping ={
     };
   };
   
-  AnyKinRotational HumerusDeltoidMuscleConnectorRot={
-    AnyRefNode &ref1=.Scapula.gh_rotated;
-    AnySeg &ref2=.DeltoidMuscleConnector;
-    Type =RotAxesAngles;
-
+  
+  AnyKinRotational HumerusScapulaRot={
+    AnyRefNode &ref2=.Scapula.gh_rotated; 
+    AnyRefNode &ref1=.Humerus.gh_rotated;
+    Type = RotVector;
   };
   
-  AnyKinEqSimpleDriver drv = {
+  AnyKinRotational HumerusDeltoidMuscleConnectorRot={
+    AnyRefNode &ref1=.Scapula.gh_rotated;
+    AnySeg &ref2=.DeltoidMuscleRotControlSeg; 
+    Type =RotVector;
+  };
+  
+  AnyKinMeasureLinComb LinComb = {
+    AnyKinMeasure &u1 = .HumerusScapulaRot;
     AnyKinMeasure &u2 = .HumerusDeltoidMuscleConnectorRot;
+    OutDim = 3;
+    Coef={
+      {0.3,0,0,-1,0,0},
+      {0,0.05,0,0,-1,0}, //this one controls the rotaion around the long axis og humerus
+      {0,0,0.3,0,0,-1}
+    };      
+  }; // Measure
+  
+  //This is not an engine no muscles are attached to the control segment
+  //and the deltoidmuscleconnector segment is only driven kinematically 
+  //all reactions are swithed off
+  AnyKinEqSimpleDriver LinCombDrv={
+    AnyKinMeasureLinComb &ref=.LinComb ;
     DriverPos={0,0,0};
     DriverVel={0,0,0};
     Reaction.Type={Off,Off,Off};  
-    
-  }; // Measure
+  };
   
+  AnyRevoluteJoint DeltoidRevoluteJoint={
+    Axis=y;
+    AnyRefFrame &ref1=.DeltoidMuscleRotControlSeg; 
+    AnyRefFrame &ref2=.DeltoidMuscleConnector; 
+    Constraints.Reaction.Type={On,On,On,On,On};
+  };
   
-
+  AnyReacForce DeltoidRevoluteJointReactionForce={
+    AnyRevoluteJoint &ref=.DeltoidRevoluteJoint;
+  };
+  
+  AnyKinRotational DeltoidMuscleConnectorHumerusRot={
+    AnyRefFrame &ref1 = .Humerus;
+    AnyRefFrame &ref2 = .DeltoidMuscleRotControlSeg; 
+    Type=RotVector;
+  };
+  
+  AnyReacForce DeltoidMuscleConnectorReactionForce={
+    AnyKinRotational &ref2=.DeltoidMuscleConnectorHumerusRot;
+  };
+  
+  AnyKinRotational ScapulaDeltoidMuscleConnectorRot={
+    AnyRefFrame &ref1=.DeltoidMuscleRotControlSeg; 
+    AnySeg &ref2 = .DeltoidMuscleConnector;
+    Type=RotVector; 
+  };
+  
+  AnyKinMeasureOrg ScapulaDeltoidMuscleConnectorRotY={
+    AnyKinRotational &ref=.ScapulaDeltoidMuscleConnectorRot;
+    MeasureOrganizer ={1};
+  };
+  
+  AnyKinEqSimpleDriver LinCom2Drv={ 
+    AnyKinMeasureOrg &ref=.ScapulaDeltoidMuscleConnectorRotY;
+    DriverPos={-0.1};  
+    DriverVel={0};
+    Reaction.Type={Off};
+  };
   
   
 };
+
 
