@@ -140,6 +140,23 @@ All BodyModel parameters
 | 
 
 
+.. ammr:bm_statement:: BM_FOOT_MODEL
+
+    Parameter defining the foot model used.
+
+
+    :Default: :ammr:bm_constant:`_FOOT_MODEL_DEFAULT_`
+    :Example: ``#define BM_FOOT_MODEL _FOOT_MODEL_DEFAULT_``
+    :Options: - :any:`_FOOT_MODEL_DEFAULT_`: Switch for using the default foot model
+              - :any:`_FOOT_MODEL_NONE_`: Switch for using the GM foot model"
+
+
+|  
+|   
+| 
+| 
+
+
 .. ammr:bm_statement:: BM_LEG_MODEL
 
     Parameter defining the Leg model used.
@@ -151,23 +168,6 @@ All BodyModel parameters
               - :any:`_LEG_MODEL_TLEM_`: Switch to use leg model: "TLEM 1"
               - :any:`_LEG_MODEL_TLEM2_`: Switch to use leg model: "TLEM 2"
               - :any:`_LEG_MODEL_LEG_`: Switch to use leg model: "Leg"
-
-
-|  
-|   
-| 
-| 
-
-
-.. ammr:bm_statement:: BM_FOOT_MODEL
-
-    Parameter defining the foot model used.
-
-
-    :Default: :ammr:bm_constant:`_FOOT_MODEL_DEFAULT_`
-    :Example: ``#define BM_FOOT_MODEL _FOOT_MODEL_DEFAULT_``
-    :Options: - :any:`_FOOT_MODEL_DEFAULT_`: Switch for using the default foot model
-              - :any:`_FOOT_MODEL_NONE_`: Switch for using the GM foot model"
 
 
 |  
@@ -455,6 +455,22 @@ All BodyModel parameters
 | 
 
 
+.. ammr:bm_statement:: BM_TRUNK_RHYTHM_SOFT
+
+    A switch to make rhythms in the spine as soft constraints.
+
+
+    :Default: ``ON``
+    :Example: ``#define BM_TRUNK_RHYTHM_SOFT ON``
+    :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
+
+
+|  
+|   
+| 
+| 
+
+
 .. ammr:bm_statement:: BM_TRUNK_LUMBAR_RHYTHM
 
     A switch to use a kinematic rhythm for the lumbar spine.
@@ -648,6 +664,22 @@ All BodyModel parameters
 
     :Default: ``OFF``
     :Example: ``#define BM_ARM_SHOULDER_RHYTHM OFF``
+    :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
+
+
+|  
+|   
+| 
+| 
+
+
+.. ammr:bm_statement:: BM_ARM_SHOULDER_RHYTHM_SOFT
+
+    A switch to make shoulder rhythms a soft contraint.
+
+
+    :Default: ``ON``
+    :Example: ``#define BM_ARM_SHOULDER_RHYTHM_SOFT ON``
     :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
 
 
