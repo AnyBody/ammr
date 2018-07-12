@@ -4,7 +4,10 @@ Configuring the Body Model
 ===========================
 
 The body model can be configured in multiple ways. This include what limb
-segments are include, the type of muscles, scaling etc. 
+segments are include, the type of muscles, scaling etc.
+
+.. note:: To easily configure the body model, you can also use the 
+    :doc:`/bm_config/bm_plugin`.
 
 All these choises are controlled through a number of switches called Body Model
 (BM) parameters. BM parameters are always prefixed with ``BM_`` and written in
@@ -49,6 +52,7 @@ See the following links for details on BM parameters related to different body p
     scaling
     joint_type
     other
+    bm_plugin
 
 .. 
     Here is an example for the :ammr:bm_statement:`BM_LEG_MUSCLES_BOTH` parameter:
