@@ -705,6 +705,22 @@ All BodyModel parameters
 | 
 
 
+.. ammr:bm_statement:: BM_ARM_DELTOID_WRAPPING
+
+    Switch enabling/disabling the deltoid wrapping. Setting this to OFF will revert to the older rake based implementation of the deltoid.
+
+
+    :Default: ``ON``
+    :Example: ``#define BM_ARM_DELTOID_WRAPPING ON``
+    :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
+
+
+|  
+|   
+| 
+| 
+
+
 .. ammr:bm_statement:: BM_ARM_MUSCLES_BOTH
 
     Keyword for the muscle model type for both left and right arms.
@@ -781,7 +797,7 @@ All BodyModel parameters
 
 .. ammr:bm_statement:: BM_MANNEQUIN_FILE
 
-    File name of the mannequin definition file. By default this is no longer used, since the values in ``HumanModel.Mannequin`` can be assigned directly in your applicaiton ( E.g. ``Main.HumanModel.Mannequin.Posture.NeckExtension = 30;``). However, the parameter can still be used to set your own mannequin file. Just define your own mannequin file in your applicaiton like this: ``#path BM_MANNEQUIN_FILE "<ANYBODY_PATH_BODY>\BodyModels\GenericBodyModel\BodyModel.mannequin.any"``
+    File name of the mannequin definition file. By default this is no longer used, since the values in ``HumanModel.Mannequin`` can be assigned directly in your applicaiton ( E.g. ``Main.HumanModel.Mannequin.Posture.NeckExtension = 30;``). However, the parameter can still be used to set your own mannequin file. Just define your own mannequin file in your applicaiton like this: ``#path BM_MANNEQUIN_FILE "<ANYBODY_PATH_BODY>\BodyModels\GenericBodyModel\BodyModel.mannequin.any";``
 
 
 |  
