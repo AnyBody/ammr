@@ -1,0 +1,215 @@
+#class_template MultiWrapSurfs_SINGLE (AnyFolder& REF, NUMBER, _TYPE="CYLINDER", DEBUG = 0) {
+    #var AnyVar angle = .Angles[NUMBER-1]*pi/180;
+    AnyVec3 Tangent_sRel = {.RadiusX*sin(angle), 0, .RadiusZ*cos(angle)};  
+    
+    AnyVec3 normal_vector = vnorm(Tangent_sRel)*{
+      .RadiusZ*sin(angle)/sqrt( (.RadiusX *cos(angle))^2 +  (.RadiusZ*sin(angle))^2 ),
+      0,
+     .RadiusX*cos(angle)/sqrt( (.RadiusX *cos(angle))^2 +  (.RadiusZ*sin(angle))^2 ) 
+    };
+    AnyMat33 Tangent_ARel = RotMat({0,0,0},normal_vector,{0,1,0});
+           
+    REF = 
+    {
+      AnyRefNode Wrapping_##NUMBER = 
+      {
+      #if _TYPE == "CYLINDER"
+        sRel = (1-...RadiusHeight/vnorm(..Tangent_sRel)) *..Tangent_sRel +
+                ...WrapSurfLength*{0,0,-0.5}*..Tangent_ARel';
+        ARel = ..Tangent_ARel;
+        AnySurfCylinder Surf =
+        {
+          Radius = ....RadiusHeight;
+          Length = ....WrapSurfLength;
+          #if DEBUG
+          AnyDrawParamSurf drw=
+          {
+             RGB={0,0,1};
+             Opacity = 0.3;
+             #var Visible = .....Visibility[NUMBER-1];
+          };
+          #endif
+        };
+      #endif
+      
+      #if _TYPE == "ELIPSOID"
+        sRel =  ..Tangent_sRel - ..normal_vector;// (1-...RadiusHeight/vnorm(..Tangent_sRel)) *..Tangent_sRel +
+        //        ...WrapSurfLength*{0,0,-0.5}*..Tangent_ARel';
+
+        ARel = ..Tangent_ARel;
+        AnySurfEllipsoid Surf =
+        {
+          Radius = { vnorm(...Tangent_sRel), ....RadiusHeight, ....WrapSurfLength/2 };
+          #if DEBUG
+          AnyDrawParamSurf drw=
+          {
+             RGB={0,0,1};
+             Opacity = 0.3;
+             #var Visible = .....Visibility[NUMBER-1];
+          };
+          #endif
+        };
+      #endif
+      
+      };
+      
+     
+      
+     #if DEBUG
+      AnyRefNode Tangent##NUMBER = 
+      {
+        sRel = ..Tangent_sRel;
+        ARel = ..Tangent_ARel;
+        AnyDrawNode drw = {
+          ScaleXYZ=0.03*....RadiusHeight*{1,1,1};
+          Visible = Off;
+          //#var Visible = ....Visibility[NUMBER-1];
+        };
+        AnyDrawLine Tangent = 
+        {
+          p0 = {0,0, 0.5*....RadiusZ};
+          p1 = -{0,0, 0.5*....RadiusZ};
+          GlobalCoord = Off;
+          //#var Visible = ....Visibility[NUMBER-1];
+          Line = 
+          {
+            Style = Line3DStyleFull;
+            Thickness = 0.001;
+            RGB = {0.0, 0.0, 0.0};
+          };
+        };
+      };    
+    #endif
+    };
+    
+};
+
+
+
+
+
+#class_template MultiWrapSurfs (
+AnyRefFrame& BASE_FRAME,
+NUMBER_OF_CYLINDERS = 10,
+TYPE = "CYLINDER",
+DEBUG=1
+) 
+{
+  #var AnyVar Radius = 0.05;
+  /// Radius of the sphere (elipsoid) in the z directions
+  #var AnyVar RadiusZ = Radius;
+  
+  /// Radius of the sphere (elipsoid) in the x directions
+  #var AnyVar RadiusX = Radius;
+  
+  /// Radius of the sphere (elipsoid) in the y directions
+  #var AnyVar RadiusHeight = Radius;
+  
+  AnyInt NumberOfCylinders = NUMBER_OF_CYLINDERS;
+  
+  #var AnyVar WrapSurfLength = 8*RadiusZ;
+  
+  #var AnyVector Angles = linspace(0,90,NUMBER_OF_CYLINDERS);
+  #var AnySwitch Visibility = repmat(NUMBER_OF_CYLINDERS, On);
+  
+  AnyFolder ErrorCheck = {
+     AnyInt check1 = assert( gteqfun( NumElemOf(.Visibility), NUMBER_OF_CYLINDERS), 
+            "Visibility variables must have at least" + strval(NUMBER_OF_CYLINDERS) + " elements.");
+     AnyInt check2 = assert( gteqfun( NumElemOf(.Angles), NUMBER_OF_CYLINDERS), 
+            "Angles variables must have at least" + strval(NUMBER_OF_CYLINDERS) + " elements.");
+  };
+  BASE_FRAME = 
+  {
+     AnyDrawRefFrame drw = {  
+       RGB = {1,0,0};
+       ScaleXYZ = {0.1, 0.1, 0.1};
+       Visible = DEBUG;
+     };        
+     AnySurfEllipsoid Sph =
+     {
+       Radius = {..RadiusX, ..RadiusHeight, ..RadiusZ}; //this parameter should be dependent 
+       #if DEBUG
+       AnyDrawParamSurf drw = { WireFrameOnOff = On;}; 
+       #endif
+       
+     };
+    
+  };
+      
+
+  #if NUMBER_OF_CYLINDERS >= 1
+  MultiWrapSurfs_SINGLE WrapSurf1(REF = .BASE_FRAME, NUMBER = 1, _TYPE=TYPE, DEBUG=DEBUG ) = {};
+  #endif
+  #if NUMBER_OF_CYLINDERS >= 2
+  MultiWrapSurfs_SINGLE WrapSurf2(REF = .BASE_FRAME, NUMBER = 2, _TYPE=TYPE, DEBUG=DEBUG ) = {};
+  #endif
+  #if NUMBER_OF_CYLINDERS >= 3
+  MultiWrapSurfs_SINGLE WrapSurf3(REF = .BASE_FRAME, NUMBER = 3, _TYPE=TYPE, DEBUG=DEBUG ) = {};
+  #endif  
+  #if NUMBER_OF_CYLINDERS >= 4
+  MultiWrapSurfs_SINGLE WrapSurf4(REF = .BASE_FRAME, NUMBER = 4, _TYPE=TYPE, DEBUG=DEBUG ) = {};
+  #endif  
+  #if NUMBER_OF_CYLINDERS >= 5
+  MultiWrapSurfs_SINGLE WrapSurf5(REF = .BASE_FRAME, NUMBER = 5, _TYPE=TYPE, DEBUG=DEBUG ) = {};
+  #endif  
+  #if NUMBER_OF_CYLINDERS >= 6
+  MultiWrapSurfs_SINGLE WrapSurf6(REF = .BASE_FRAME, NUMBER = 6, _TYPE=TYPE, DEBUG=DEBUG ) = {};
+  #endif  
+  #if NUMBER_OF_CYLINDERS >= 7
+  MultiWrapSurfs_SINGLE WrapSurf7(REF = .BASE_FRAME, NUMBER = 7, _TYPE=TYPE, DEBUG=DEBUG ) = {};
+  #endif  
+  #if NUMBER_OF_CYLINDERS >= 8
+  MultiWrapSurfs_SINGLE WrapSurf8(REF = .BASE_FRAME, NUMBER = 8, _TYPE=TYPE, DEBUG=DEBUG ) = {};
+  #endif  
+  #if NUMBER_OF_CYLINDERS >= 9
+  MultiWrapSurfs_SINGLE WrapSurf9(REF = .BASE_FRAME, NUMBER = 9, _TYPE=TYPE, DEBUG=DEBUG ) = {};
+  #endif
+  #if NUMBER_OF_CYLINDERS >= 10
+  MultiWrapSurfs_SINGLE WrapSurf10(REF = .BASE_FRAME, NUMBER = 10, _TYPE=TYPE, DEBUG=DEBUG ) = {};
+  #endif  
+  #if NUMBER_OF_CYLINDERS >= 11
+  MultiWrapSurfs_SINGLE WrapSurf11(REF = .BASE_FRAME, NUMBER = 11, _TYPE=TYPE, DEBUG=DEBUG ) = {};
+  #endif  
+  #if NUMBER_OF_CYLINDERS >= 12
+  MultiWrapSurfs_SINGLE WrapSurf12(REF = .BASE_FRAME, NUMBER = 12, _TYPE=TYPE, DEBUG=DEBUG ) = {};
+  #endif  
+  #if NUMBER_OF_CYLINDERS >= 13
+  MultiWrapSurfs_SINGLE WrapSurf13(REF = .BASE_FRAME, NUMBER = 13, _TYPE=TYPE, DEBUG=DEBUG ) = {};
+  #endif  
+  #if NUMBER_OF_CYLINDERS >= 14
+  MultiWrapSurfs_SINGLE WrapSurf14(REF = .BASE_FRAME, NUMBER = 14, _TYPE=TYPE, DEBUG=DEBUG ) = {};
+  #endif  
+  #if NUMBER_OF_CYLINDERS >= 15
+  MultiWrapSurfs_SINGLE WrapSurf15REF = .BASE_FRAME, NUMBER = 15, _TYPE=TYPE, DEBUG=DEBUG ) = {};
+  #endif  
+  #if NUMBER_OF_CYLINDERS >= 16
+  MultiWrapSurfs_SINGLE WrapSurf16(REF = .BASE_FRAME, NUMBER = 16, _TYPE=TYPE, DEBUG=DEBUG ) = {};
+  #endif  
+  #if NUMBER_OF_CYLINDERS >= 17
+  MultiWrapSurfs_SINGLE WrapSurf17(REF = .BASE_FRAME, NUMBER = 17, _TYPE=TYPE, DEBUG=DEBUG ) = {};
+  #endif  
+  #if NUMBER_OF_CYLINDERS >= 18
+  MultiWrapSurfs_SINGLE WrapSurf18(REF = .BASE_FRAME, NUMBER = 18, _TYPE=TYPE, DEBUG=DEBUG ) = {};
+  #endif  
+  #if NUMBER_OF_CYLINDERS >= 19
+  MultiWrapSurfs_SINGLE WrapSurf19(REF = .BASE_FRAME, NUMBER = 19, _TYPE=TYPE, DEBUG=DEBUG ) = {};
+  #endif  
+  #if NUMBER_OF_CYLINDERS >= 20
+  MultiWrapSurfs_SINGLE WrapSurf20(REF = .BASE_FRAME, NUMBER = 20, _TYPE=TYPE, DEBUG=DEBUG ) = {};
+  #endif  
+  #if NUMBER_OF_CYLINDERS >= 21
+  MultiWrapSurfs_SINGLE WrapSurf21(REF = .BASE_FRAME, NUMBER = 21, _TYPE=TYPE, DEBUG=DEBUG ) = {};
+  #endif  
+  #if NUMBER_OF_CYLINDERS >= 22
+  MultiWrapSurfs_SINGLE WrapSurf22(REF = .BASE_FRAME, NUMBER = 22, _TYPE=TYPE, DEBUG=DEBUG ) = {};
+  #endif  
+  #if NUMBER_OF_CYLINDERS >= 23
+  MultiWrapSurfs_SINGLE WrapSurf23(REF = .BASE_FRAME, NUMBER = 23, _TYPE=TYPE, DEBUG=DEBUG ) = {};
+  #endif  
+  #if NUMBER_OF_CYLINDERS >= 24
+  MultiWrapSurfs_SINGLE WrapSurf24(REF = .BASE_FRAME, NUMBER = 24, _TYPE=TYPE, DEBUG=DEBUG ) = {};
+  #endif  
+  #if NUMBER_OF_CYLINDERS >= 25
+  MultiWrapSurfs_SINGLE WrapSurf25(REF = .BASE_FRAME, NUMBER = 25, _TYPE=TYPE, DEBUG=DEBUG ) = {};
+  #endif  
+};
