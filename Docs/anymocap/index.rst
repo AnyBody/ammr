@@ -19,8 +19,15 @@ Features
 * Optimization of marker locations and anthropometrics. 
 * Support Marker based (C3D) and inertial based (BVH) input.
 * Support for standard forceplates: (Types 1-4) plus more.
-* Prediction of ground reaction forces
+* :doc:`Prediction of ground reaction forces <grf-prediction>`
 * Easy setup with multiple trials and subjects
+
+.. toctree::
+    :maxdepth: 2
+    :hidden:
+
+    grf-prediction
+
 
 
 Overdeterminate kinematic analysis
@@ -49,12 +56,10 @@ with the determinate kinematic solver in the inverse dynamic analysis.
     AnyMoCap model <Making_things_move/lesson5>`
 
 
-
 AnyMoCap examples:
 ***********************
 
-
-.. include:: auto_examples/backreferences/gallery.anymocap.examples
+.. include:: /auto_examples/backreferences/gallery.anymocap.examples
 .. raw:: html
 
     <div style='clear:both'></div>
