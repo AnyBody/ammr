@@ -69,7 +69,7 @@ The models will typically look like this:
       // Configuring  the Study
       AnyBodyStudy Study =
       {
-        Gravity = {0,-9.81,1}; // Gravity Vector
+        Gravity = {0,-9.81,0}; // Gravity Vector
         AnyFolder &Model= Main.Model;
       };
     };

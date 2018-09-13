@@ -8,7 +8,7 @@ and trials. This special structure makes it much easier to work with large
 datasets with multiple subjects and trials. Hence, this model is the best
 starting point for analyzing bigger MoCap experiments.
 
-This example shows the :doc:`AnyMoCap framework </anymocap>` applied to a set
+This example shows the :doc:`AnyMoCap framework </anymocap/index>` applied to a set
 of squatting trials.
 The subject specific scaling and marker optimization is done on a standing
 reference recording, and the values are then applied to a squatting trial.
