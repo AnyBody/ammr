@@ -1,85 +1,45 @@
  
 MultiWrapSurfs DeltoidWrappingPosterior (
-BASE_FRAME = WrappingSegment.RotNode,
+BASE_FRAME = WrappingSegment.RotNodePosterior,
 
 TYPE="ELIPSOID",
 NUMBER_OF_CYLINDERS= 4,
 DEBUG=0
 ) = 
 {   
-     
   Radius = vnorm(..Seg.Scapula.aa.sRel - ..Seg.Scapula.gh.sRel)*0.71418;
-  RadiusX = vnorm(..Seg.Scapula.ai.sRel - ..Seg.Scapula.gh.sRel)*0.26997;
-  RadiusHeight = vnorm(..Seg.Scapula.acj.sRel - ..Seg.Scapula.gh.sRel)*0.801990;
-  
- 
-  WrapSurfLength = vnorm(..Seg.Scapula.ai.sRel - ..Seg.Scapula.gh.sRel)*1.6;
-  
-  Angles = ..Sign*({20, 22, 30, 45}-25);
-  //Angles = {0,0,0,0};
-  Visibility = repmat(NumberOfCylinders, Off);
-  //         Visibility = {On, Off, Off, Off};
+  RadiusX = vnorm(..Seg.Scapula.acj.sRel - ..Seg.Scapula.gh.sRel)*0.8613933;
+  RadiusHeight = .vnorm(..Seg.Scapula.acj.sRel - ..Seg.Scapula.gh.sRel)*0.76;
 
-  
-  AnySeg WrappingSegment ={
-    //^ Segment on which the wrapping cylinders are placed. 
-    //^ The ssegment follows scapula kinematically, but is dynamically 
-    //^ attached to both scapula and humerus to ensure that forces on 
-    //^ the wrapping cylinders are distributed correctly between humerus 
-    //^ scapula 
+  WrapSurfLength = 2 * vnorm(..Seg.Humerus.I_deltoideus_lateral_part_1.sRel - ..Seg.Humerus.gh.sRel);
+  Angles = DesignVar(..Sign*{25, 30, 36, 55});
+
+//  
+//  Radius = vnorm(..Seg.Scapula.aa.sRel - ..Seg.Scapula.gh.sRel)*0.71418;
+//  RadiusX = vnorm(..Seg.Scapula.ai.sRel - ..Seg.Scapula.gh.sRel)*0.26997;
+//  RadiusHeight = vnorm(..Seg.Scapula.acj.sRel - ..Seg.Scapula.gh.sRel)*0.801990;
+//  
+// 
+//  WrapSurfLength = vnorm(..Seg.Scapula.ai.sRel - ..Seg.Scapula.gh.sRel)*1.6;
+//  
+//  Angles = ..Sign*({20, 22, 30, 45}-25);
+//  //Angles = {0,0,0,0};
+   Visibility = repmat(NumberOfCylinders, Off);
+           //Visibility = {Of, Off, Off, On};
+           
+  AnyRefFrame& WrappingSegment = .DeltoidWrappingLateral.WrappingSegment;
+  WrappingSegment = {
     
-    r0=...Seg.Scapula.r0;
-    Axes0=...Seg.Scapula.Axes0;
-    Mass=0;
-    Jii={0,0,0};
-    AnyRefNode ai= {
-      sRel=....Seg.Scapula.ai.sRel;
-      ARel=....Seg.Scapula.ai.ARel;      
+    AnyRefNode RotNodePosterior = 
+    {
+      sRel = .RotNode.sRel;
+      ARel = .RotNode.ARel;
     };
-    AnyRefNode gh= {
-      sRel=....Seg.Scapula.gh.sRel;
-      ARel=....Seg.Scapula.gh.ARel;      
-    };
-    AnyRefNode RotNode= {
-      sRel=.gh.sRel;
-      ARel = RotMat (sRel,.ai.sRel, {0,0,0})
-      #if _LEFT_RIGHT_ == "RIGHT"
-      *RotMat(pi,y);
-      #else
-      ;
-      #endif
-    };
+  
   };
   
- 
- AnySphericalJoint ai_Joint={
-   AnyRefNode &ref1=.WrappingSegment.ai;
-   AnyRefNode &ref2=...Seg.Scapula.ai;
- };
- 
- AnyKinLinear gh_lin ={
-   AnyRefNode &ref1=.WrappingSegment.gh;
-   AnyRefNode &ref2=...Seg.Humerus.gh;
-   Ref=0;
- };
- 
- AnyKinEq gh_lin_drv ={
-   AnyKinLinear &ref=.gh_lin;
-   MeasureOrganizer ={1,2};  //x is long axis...not to be driven 
- };
- AnyKinRotational ai_rot ={
-   AnyRefNode &ref1=.WrappingSegment.ai;
-   AnyRefNode &ref2=...Seg.Scapula.ai;
-   Type=RotAxesAngles;
-   Axis1=x;
-   Axis2=y;
-   Axis3=z;
- };
- AnyKinEq ai_rot_drv ={
-   AnyKinRotational &ref=.ai_rot;
-   MeasureOrganizer ={0};  //x is long axis...rot around it to be driven 
- };
- 
+  
+  
   
 };
 
@@ -94,7 +54,7 @@ DEBUG=0
 {     
   Radius = vnorm(..Seg.Scapula.aa.sRel - ..Seg.Scapula.gh.sRel)*0.71418;
   RadiusX = vnorm(..Seg.Scapula.acj.sRel - ..Seg.Scapula.gh.sRel)*0.8613933;
-  RadiusHeight = .vnorm(..Seg.Scapula.acj.sRel - ..Seg.Scapula.gh.sRel)*0.801990;
+  RadiusHeight = .vnorm(..Seg.Scapula.acj.sRel - ..Seg.Scapula.gh.sRel)*0.78;
   
   WrapSurfLength = 2 * vnorm(..Seg.Humerus.I_deltoideus_lateral_part_1.sRel - ..Seg.Humerus.gh.sRel);
   Angles = ..Sign*{68, 85, 100, 120};
@@ -119,11 +79,12 @@ DEBUG=0
 
     AnyRefNode RotNode = 
     {
+      AnyVar PosteriorTilt = 7;
 //      AnyDrawRefFrame drwf ={ScaleXYZ=0.1*{1,1,1};RGB={0,1,1};};
       #if _LEFT_RIGHT_ == "LEFT"
-      ARel = RotMat(-0.1,y)*RotMat(pi,x);
+      ARel = RotMat(-0.1,y)*RotMat(pi,x)*RotMat(PosteriorTilt*pi/180,x);
       #else
-      ARel = RotMat(-0.1,y);
+      ARel = RotMat(-0.1,y)*RotMat(PosteriorTilt*pi/180,x);
       #endif
     };  
   };   
@@ -199,7 +160,7 @@ DEBUG=0
   Radius = vnorm(..Seg.Scapula.coronoid.sRel - ..Seg.Scapula.gh.sRel)*0.619731369494;
   RadiusX = vnorm(..Seg.Scapula.coronoid.sRel - ..Seg.Scapula.gh.sRel)*1.28520147;
   RadiusHeight = vnorm(..Seg.Scapula.acj.sRel - ..Seg.Scapula.gh.sRel) *0.770093944;
-  Angles = ..Sign*({190, 200, 215, 225}-20);
+  Angles = ..Sign*({160, 190, 210, 220}-20);
   
   WrapSurfLength = 2*vnorm(..Seg.Humerus.I_deltoideus_anterior_part_3.sRel - ..Seg.Humerus.gh.sRel);
   Visibility = repmat(NumberOfCylinders, Off); 
