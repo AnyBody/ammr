@@ -98,7 +98,7 @@ fibers in place.
 
 
 New deltoid wrapping can be disabled/enabled with the switch
-:ammr:bm_statement:`BM_ARM_SHOULDER_DELTOID_WRAPPING`. 
+:ammr:bm_statement:`BM_ARM_DELTOID_WRAPPING`. 
 
 The new deltoid wrapping was developed by Marta Strzelczak from Département de
 génie de la production automatisée, École de technologie supérieure, Montreal,
