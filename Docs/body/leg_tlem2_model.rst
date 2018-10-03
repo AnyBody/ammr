@@ -83,8 +83,8 @@ References
 If you need to cite the model use the following references: 
 
 .. [DLGR17] De Pieri,E., Lund,ME., Gopalakrishnan, A, Rasmussen, KP., Lunn, DE., Ferguson, SJ.
-   “Biofidelic Muscle Wrapping in a Musculoskeletal Model Improves Hip Contact Force Prediction Accuracy”
-   PlosOne (2017) **Submitted**
+   “Refining muscle geometry and wrapping in the TLEM 2 model for improved hip contact force prediction”
+   PloS One 13 (2018) ( `link <https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0204109>`__ ) 
 
 .. [CFPK15] Carbone,V., Fluit,R., Pellikaan,P., van der Krogt,MM., Jansen,D., Damsgaard,M., 
    Vigneron,L.,Feilkas,T., Koopman,HF., Verdonschot,N., 
