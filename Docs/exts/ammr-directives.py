@@ -357,12 +357,12 @@ def make_git_link(name, rawtext, text, lineno, inliner, options={}, content=[]):
 
 
 def setup(app):
-    app.add_crossref_type('configfile', 'file',
-                          objname='Configuration file',
-                          indextemplate='pair: %s; Configuration files')
-    app.add_crossref_type('logfile', 'file',
-                          objname='Log file',
-                          indextemplate='pair: %s; Log files')
+    # app.add_crossref_type('configfile', 'file',
+    #                       objname='Configuration file',
+    #                       indextemplate='pair: %s; Configuration files')
+    # app.add_crossref_type('logfile', 'file',
+    #                       objname='Log file',
+    #                       indextemplate='pair: %s; Log files')
 
     app.add_domain(AMMRDomain)
 
