@@ -92,7 +92,7 @@ fibers in place.
 .. raw:: html 
 
     <video width="45%" style="display:block; margin: 0 auto;" controls autoplay loop>
-        <source src="../_static/DeltoidWrapping.mp4" type="video/mp4">
+        <source src="../_static/new_deltoid_wrapping.mp4" type="video/mp4">
     Your browser does not support the video tag.
     </video>
 
