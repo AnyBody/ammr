@@ -2,18 +2,22 @@
 variables:
   GIT_STRATEGY: fetch
 
-
 other_tests:
   stage: test
   script:
     - mkdir Documentation
     - pytest "--ignore=Tests/Applications" -n 4
   only: 
-    - branches@anybody/beta/ammr
-    - branches@anybody/github-mirror/ammr
+    refs:
+      - branches@anybody/beta/ammr
+      - branches@anybody/github-mirror/ammr
+    changes:
+      - Application/*
+      - Body/*
+      - Tests/*
+      - Tools/*
   except:
     - master@anybody/github-mirror/ammr
-    - /^docs.*$/
   tags:
     - ams
 
@@ -23,14 +27,18 @@ Application_tests:
     - mkdir Documentation
     - pytest Tests/Applications -n 4 --timeout=1700
   only: 
-    - branches@anybody/beta/ammr
-    - branches@anybody/github-mirror/ammr
+    refs:
+      - branches@anybody/beta/ammr
+      - branches@anybody/github-mirror/ammr
+    changes:
+      - Application/*
+      - Body/*
+      - Tests/*
+      - Tools/*
   except:
     - master@anybody/github-mirror/ammr
-    - /^docs.*$/
   tags:
     - ams
-
 
 
 test_docs:
@@ -57,9 +65,8 @@ test_docs:
     - cd ..
     - cp -rT Docs/_build/html public
   only:
-    - /^docs.*$/
-    - master@anybody/beta/ammr
-    - tags@anybody/beta/ammr
+    changes:
+      - Docs/*
   cache:
     paths:
       - /conda-cache
@@ -78,8 +85,11 @@ deploy_docs:
   before_script:
     - gem install dpl
   only:
-    - master@anybody/beta/ammr
-    - tags@anybody/beta/ammr
+    refs:
+      - master@anybody/beta/ammr
+      - tags@anybody/beta/ammr
+    changes:
+      - Docs/*
   script:
     - touch public/.nojekyll
     - ls public
@@ -90,20 +100,4 @@ deploy_docs:
   tags:
     - docker
     - ruby
-
-
-
-
-# deploy_docs:
-#   stage: deploy
-#   script:
-#     - cd Docs/_build/html
-#     - ls
-#   only: 
-#     - tags
-#   except:
-#     - branches
-#   tags:
-#     - docker
-#     - linux
 
