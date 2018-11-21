@@ -108,37 +108,75 @@ ThoraxSegRef ={
   
   //Corresponding to P5
 
+  #ifdef USE_AMMR21_TRUNK_SCAPULA_ELLIPSOID
+  // Use the Scapula-thorax elipsoid from AMMR2.1. 
+  // This is here in case some users need backward compatability. 
+  // It will be removed in future versions.
+
   AnyRefNode ScapulaEllipsoidOrigin={
-    sRel=.P4.sRel+.n + {0.0, -0.016, 0}; 
-    AnyMat33 MAT=RotMat(.P2.sRel,.P1.sRel,.P3.sRel); 
+    sRel=.P4.sRel+.n + {0.0, -0.016, 0};
+    AnyMat33 MAT=RotMat(.P2.sRel,.P1.sRel,.P3.sRel);
     ARel=MAT;
-    
+   
     AnyVec3 P1LocalEllipCoo = (.P1.sRel-sRel)*ARel;
     AnyVec3 P2LocalEllipCoo = (.P3.sRel-sRel)*ARel;
-    
+   
     AnyVar X1 = P1LocalEllipCoo[0];
     AnyVar Y1 = P1LocalEllipCoo[1];
     AnyVar Z1 = P1LocalEllipCoo[2];
-    
+   
     AnyVar X2 = P2LocalEllipCoo[0];
     AnyVar Y2 = P2LocalEllipCoo[1];
     AnyVar Z2 = P2LocalEllipCoo[2];
-    
+   
     AnyVar A = ((Y2^2 - Y1^2*((X2^2 + Z2^2)/(X1^2 + Z1^2))) / (1 - ((X2^2 + Z2^2)/(X1^2 + Z1^2))))^0.5;
     AnyVar B = (- (X1^2 + Z1^2) / ((Y1^2 / A^2) - 1))^0.5;
-    
+   
     AnySurfEllipsoid  Elipse ={
       Radius={.B, .A, .B};
       //AnyDrawParamSurf drw={ Opacity = 0.5; };
     };
-    
-    AnyRefNode RotNode = 
+   
+    AnyRefNode RotNode =
     {
       ARel = RotMat( iffun(gtfun(...Sign,0), pi, 0.0), y)* RotMat( iffun(ltfun(...Sign,0), pi, 0.0), z);
     };
   };
+  #endif
+ 
+  #ifndef USE_AMMR21_TRUNK_SCAPULA_ELLIPSOID
+    AnyRefNode Input ={
+    AnySwitchVar VisibleNodes = Off;
+    AnyRefNode  P1 ={    sRel =..Scale({0.02,-0.13,0.16})*..Mirror; AnyDrawNode drw ={ScaleXYZ={1,1,1}*0.005;Visible=.VisibleNodes;};};
+    AnyRefNode  P2 ={    sRel =..Scale({0.155,-0.13,0.05})*..Mirror;AnyDrawNode drw ={ScaleXYZ={1,1,1}*0.005;Visible=.VisibleNodes;}; };
+    AnyRefNode  P3 ={    sRel =..Scale({0.08,0.02,0.11})*..Mirror; AnyDrawNode drw ={ScaleXYZ={1,1,1}*0.005;Visible=.VisibleNodes;};};
+    AnyRefNode  P6 ={    sRel =..Scale({0.07,-0.08,0.15})*..Mirror; AnyDrawNode drw ={ScaleXYZ={1,1,1}*0.005;Visible=.VisibleNodes;};};
+    AnyRefNode  P7 ={    sRel =..Scale({0.06,-0.2,0.15})*..Mirror;AnyDrawNode drw ={ScaleXYZ={1,1,1}*0.005;Visible=.VisibleNodes;}; };
+    AnyRefNode  P8 ={    sRel =..Scale({-0.01,0,0})*..Mirror; AnyDrawNode drw ={ScaleXYZ={1,1,1}*0.005;Visible=.VisibleNodes;};};
+    AnyRefNode  P9 ={    sRel =..Scale({0.145,-0.08,0.05})*..Mirror;AnyDrawNode drw ={ScaleXYZ={1,1,1}*0.005;Visible=.VisibleNodes;}; };
+    AnyRefNode  P10 ={    sRel =..Scale({0.115,-0.01,0.08})*..Mirror; AnyDrawNode drw ={ScaleXYZ={1,1,1}*0.005;Visible=.VisibleNodes;};};
+    AnyRefNode  P11 ={    sRel =..Scale({0.1,-0.1,-0.02})*..Mirror;AnyDrawNode drw ={ScaleXYZ={1,1,1}*0.005;Visible=.VisibleNodes;}; };
+   
+    AnyMatrix Points={
+      P1.sRel,P2.sRel,P3.sRel,P6.sRel,P7.sRel, P8.sRel, P9.sRel,P10.sRel, P11.sRel     
+    };
+  };
   
-  
+  AnyRefNode ScapulaEllipsoidOrigin={
+    sRel=  Elipse.sRel;
+    ARel=  Elipse.ARel;   
+    AnySurfEllipsoidFit  Elipse =
+    {
+      FixedAxes = On;
+      AxisSymmetry = Off;
+      Axis = x;
+      Points = (..Input.Points);
+      AnyDrawParamSurf srf={RGB={0,0,1};};
+    };
+  };
+#endif
+ 
+   
   
 }; //ThoraxRef
 
