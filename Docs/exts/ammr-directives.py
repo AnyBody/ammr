@@ -33,6 +33,9 @@
     :copyright: Copyright 2017 AnyBodyTechnology
     :license: Apache
 """
+import subprocess
+import re
+import os
 
 from docutils import nodes
 from docutils.parsers import rst
@@ -42,8 +45,7 @@ from sphinx.roles import XRefRole
 from sphinx.locale import l_, _
 import sphinx
 
-import subprocess
-import re
+
 
 
 class AMMR_BMStatement(std.Target):
@@ -320,7 +322,7 @@ class AMMRDomain(Domain):
 
 
 # get the branch this documentation is building for in X.X.x form
-with open("../AMMR.version.any", "r") as f:
+with open(os.path.join(__file__, "../../../AMMR.version.any"), "r") as f:
     contents = f.read()
     match = re.compile(r'.*AMMR_VERSION\s"(?P<version>.*)"').search(contents)
     ammr_version = ".".join(match.groupdict()["version"].split(".", 3)[:3])
