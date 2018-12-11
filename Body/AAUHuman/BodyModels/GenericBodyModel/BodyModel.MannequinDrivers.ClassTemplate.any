@@ -29,7 +29,9 @@ MANNEQUIN_DRIVER_PELVIS_POS_Z,
 MANNEQUIN_DRIVER_PELVIS_ROT_Z,
 MANNEQUIN_DRIVER_PELVIS_ROT_Y,
 MANNEQUIN_DRIVER_PELVIS_ROT_X,
-MANNEQUIN_DRIVER_NECK,
+MANNEQUIN_DRIVER_SKULL_THORAX_FLEXION,
+MANNEQUIN_DRIVER_SKULL_THORAX_LATERALBENDING,
+MANNEQUIN_DRIVER_SKULL_THORAX_ROTATION,
 MANNEQUIN_DRIVER_PELVIS_THORAX_LATERAL_BENDING,
 MANNEQUIN_DRIVER_PELVIS_THORAX_ROTATION,
 MANNEQUIN_DRIVER_PELVIS_THORAX_EXTENSION,
@@ -286,16 +288,13 @@ BODYMODEL_FOLDER = BodyModel
     AnyMessage LumbarSpineMannequinDrivers = {TriggerPreProcess=On;Type=MSG_Message; Message="Please note that BM_SPINE_RHYTHM is set to 0; No default mannequin drivers are used to drive lumbar spine joints.";};
   #endif
   
-  //Neck driver 
-   #if MANNEQUIN_DRIVER_NECK
-     AnyKinEqSimpleDriver NeckJntDriver = {
+   #if MANNEQUIN_DRIVER_SKULL_THORAX_FLEXION
+     AnyKinEqSimpleDriver SkullThoraxFlexionDriver = {
        AnyKinMeasure& SkullThoraxFlexion = ..BODYMODEL_FOLDER.Interface.Trunk.SkullThoraxFlexion;
-       AnyKinMeasure& SkullThoraxLateralBending = ..BODYMODEL_FOLDER.Interface.Trunk.SkullThoraxLateralBending;
-       AnyKinMeasure& SkullThoraxRotation = ..BODYMODEL_FOLDER.Interface.Trunk.SkullThoraxRotation;
 
-       #var DriverPos= pi/180*{-.JntPos.NeckExtension, .JntPos.NeckLateralBending, .JntPos.NeckRotation};
-       DriverVel = pi/180*{-.JntVel.NeckExtension, .JntVel.NeckLateralBending, .JntVel.NeckRotation};
-       Reaction = {#var Type = {Off, Off, Off};};
+       #var DriverPos= pi/180*{-.JntPos.NeckExtension};
+       DriverVel = pi/180*{-.JntVel.NeckExtension};
+       Reaction = {#var Type = {Off};};
        #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
          #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
          AnyFolder Weights = 
@@ -304,11 +303,53 @@ BODYMODEL_FOLDER = BodyModel
              #var Value = {..WeakDriverWeight};
            };
          };
-         #var WeightFun = {&Weights.Fun,&Weights.Fun,&Weights.Fun};
-         CType = {Soft,Soft,Soft};
+         #var WeightFun = {&Weights.Fun};
+         CType = {Soft};
        #endif
      };
-  #endif
+   #endif
+   
+   #if MANNEQUIN_DRIVER_SKULL_THORAX_LATERALBENDING
+     AnyKinEqSimpleDriver SkullThoraxLateralBendingDriver = {
+       AnyKinMeasure& SkullThoraxLateralBending = ..BODYMODEL_FOLDER.Interface.Trunk.SkullThoraxLateralBending;
+
+       #var DriverPos= pi/180*{-.JntPos.NeckLateralBending};
+       DriverVel = pi/180*{-.JntVel.NeckLateralBending};
+       Reaction = {#var Type = {Off};};
+       #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+         #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+         AnyFolder Weights = 
+         {
+           AnyFunConst Fun = {
+             #var Value = {..WeakDriverWeight};
+           };
+         };
+         #var WeightFun = {&Weights.Fun};
+         CType = {Soft};
+       #endif
+     };
+   #endif
+   
+   #if MANNEQUIN_DRIVER_SKULL_THORAX_ROTATION
+     AnyKinEqSimpleDriver SkullThoraxRotationDriver = {
+       AnyKinMeasure& SkullThoraxRotation = ..BODYMODEL_FOLDER.Interface.Trunk.SkullThoraxRotation;
+
+       #var DriverPos= pi/180*{-.JntPos.NeckRotation};
+       DriverVel = pi/180*{-.JntVel.NeckRotation};
+       Reaction = {#var Type = {Off};};
+       #if MANNEQUIN_DRIVER_WEAK_SWITCH == 1
+         #var AnyVar WeakDriverWeight = .DefaultWeakDriverWeight;
+         AnyFolder Weights = 
+         {
+           AnyFunConst Fun = {
+             #var Value = {..WeakDriverWeight};
+           };
+         };
+         #var WeightFun = {&Weights.Fun};
+         CType = {Soft};
+       #endif
+     };
+   #endif  
   
   //Thorax pelvis rotation driver
   #if MANNEQUIN_DRIVER_PELVIS_THORAX_LATERAL_BENDING
