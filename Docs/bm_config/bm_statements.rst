@@ -1006,7 +1006,6 @@ All BodyModel parameters
     :Example: ``#define BM_MANNEQUIN_DRIVER_NECK BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
-              - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
 
 
 |  
@@ -1020,11 +1019,10 @@ All BodyModel parameters
     Switch for the mannequin driver being active or not
 
 
-    :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: ``#define BM_MANNEQUIN_DRIVER_SKULL_THORAX_FLEXION BM_MANNEQUIN_DRIVER_DEFAULT``
+    :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_NECK`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_SKULL_THORAX_FLEXION BM_MANNEQUIN_DRIVER_NECK``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
-              - :any:`BM_MANNEQUIN_DRIVER_NECK`: 
 
 
 |  
@@ -1038,11 +1036,10 @@ All BodyModel parameters
     Switch for the mannequin driver being active or not
 
 
-    :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: ``#define BM_MANNEQUIN_DRIVER_SKULL_THORAX_LATERALBENDING BM_MANNEQUIN_DRIVER_DEFAULT``
+    :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_NECK`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_SKULL_THORAX_LATERALBENDING BM_MANNEQUIN_DRIVER_NECK``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
-              - :any:`BM_MANNEQUIN_DRIVER_NECK`: 
 
 
 |  
@@ -1056,11 +1053,10 @@ All BodyModel parameters
     Switch for the mannequin driver being active or not
 
 
-    :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_DEFAULT`
-    :Example: ``#define BM_MANNEQUIN_DRIVER_SKULL_THORAX_ROTATION BM_MANNEQUIN_DRIVER_DEFAULT``
+    :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_NECK`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_SKULL_THORAX_ROTATION BM_MANNEQUIN_DRIVER_NECK``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
-              - :any:`BM_MANNEQUIN_DRIVER_NECK`: 
 
 
 |  
