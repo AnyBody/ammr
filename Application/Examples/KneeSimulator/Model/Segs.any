@@ -1,0 +1,633 @@
+AnyFolder Segs = 
+{
+  AnySeg Femur = 
+  {
+    Mass = 0;
+    Jii = {0, 0, 0};
+    r0 = {0, 0.5, 0};
+    //Axes0 = {{1.0, 0, 0}, {0, 1.0, 0}, {0, 0, 1.0}};
+    //Axes0 = RotMat(pi, y);
+    
+    AnyDrawSurf DrwFemur = 
+    {
+      FileName = "..\Input\STL_New\Femur.stl" ;
+      //RGB = {1, 1, 0};
+      RGB = Main.DrawSettings.Colors.AnyBodyPaleYellow;
+      Opacity = 0.5;
+      ScaleXYZ = 0.001*{1, 1, 1};
+    };
+    
+    AnyDrawSurf DrwFemoralComponent = 
+    {
+      FileName = "..\Input\STL_New\Femoral Component_scaled.stl";
+      ScaleXYZ = {1, 1, 1};
+      //RGB = 1*{1, 1, 1};
+      RGB = {192,192,192}/255.0;
+      Opacity = 0.5;
+    };       
+    
+    AnyRefNode PrincipalAxesNode =
+    {
+      sRel =  0.001 * {18.829176, 182.386520, -12.663239};
+      ARel = 
+      {
+        { 0.132059, 0.990246, -0.044418 },
+        { 0.186276, -0.068804, -0.980085},
+        {-0.973582, 0.121155, -0.193546 }
+      }' * RotMat(-pi/2, y);
+      
+//      AnyDrawRefFrame Drw = 
+//      {
+//        RGB = {1, 0, 0};
+//        ScaleXYZ = 0.25*{1, 1, 1};
+//      };
+      
+      AnyRefNode OffsetNode =
+      {
+        ARel = RotMat(pi/2, z);
+        sRel = {0.05, 0, 0};    
+        
+        AnyDrawSTL DrwSTL = 
+        {
+          FileName = PATH_STL_UNIT_BOX ;
+          RGB = {0.65, 0.65, 0.65};
+          ScaleXYZ = {0.045, 0.02, 0.04};
+          Opacity = 0.5;
+        };
+      };
+    };      
+    
+    AnyFolder Femoral_Head_Points_Picked =
+    {
+      AnyInputXML XMLObject = 
+      {
+        FileName = "..\Input\STL_New\Femur_picked_points_femoral_head.pp";    
+      };
+      AnyFloat xptr0 = Obj2Num(ObjSelect("XMLObject.Contents.PickedPoints.point*.active", "==1", ".x_*"));
+      AnyFloat yptr0 = Obj2Num(ObjSelect("XMLObject.Contents.PickedPoints.point*.active", "==1", ".y_*"));
+      AnyFloat zptr0 = Obj2Num(ObjSelect("XMLObject.Contents.PickedPoints.point*.active", "==1", ".z_*"));
+      AnyString PointNames = Obj2Str(ObjSelect("XMLObject.Contents.PickedPoints.point*.active", "==1", ".name")) ;      
+      AnyFloat Points_Original = {xptr0',yptr0',zptr0'}'; 
+      AnyFloat Points_Scaled = 0.001 * Points_Original ;
+    };
+    
+    AnyRefNode HipJointFittingNode = 
+    {
+      sRel = Surf.sRel ;
+      ARel = Surf.ARel ;
+      AnySurfEllipsoidFit Surf = 
+      {
+        Points = ..Femoral_Head_Points_Picked.Points_Scaled ;
+        Spherical = On;
+        AnyDrawParamSurf Drw = 
+        {
+          RGB = {0, 1, 0};
+          Opacity = 0.5;
+        };
+      };
+    };        
+    
+    AnyRefNode LateralEpicondyle = 
+    { 
+      sRel = 0.001 * {10.7594, 1.21095, -44.6209};
+      //AnyDrawNode Drw = { RGB = {1, 0, 0}; ScaleXYZ = 0.0025*{1, 1, 1}; };
+    };
+    
+    AnyRefNode MedialEpicondyle = 
+    {
+      sRel = 0.001 * {10.7594, 1.21095, 43.7668};
+      //AnyDrawNode Drw = { RGB = {1, 0, 0}; ScaleXYZ = 0.0025*{1, 1, 1}; };        
+    };        
+    
+    AnyRefNode KJC_A = 
+    {
+      sRel = {-0.004858753, -0.002610163, -0.005625471};
+      //AnyDrawNode Drw = { RGB = {1, 0, 0}; ScaleXYZ = 0.0025*{1, 1, 1}; };
+    };
+    
+    AnyRefNode KJC_E = 
+    {
+      sRel = {0.00439332, -0.008256942, -0.0006075123};
+      //AnyDrawNode Drw = { RGB = {1, 0, 0}; ScaleXYZ = 0.0025*{1, 1, 1}; };
+    };
+    
+    AnyRefNode KJC_P = 
+    {
+      sRel = {0.01, -0.01, -2.669848e-18};
+      //AnyDrawNode Drw = { RGB = {1, 0, 0}; ScaleXYZ = 0.0025*{1, 1, 1}; };
+    };
+    
+    AnyRefNode HipJointRef = 
+    {
+      sRel = .HipJointFittingNode.sRel ;
+    };
+    
+    AnyRefNode& KneeJoint = KneeJointNew;
+    
+    AnyRefNode KneeJointNew = 
+    {
+      //sRel = .KJC_P.sRel ;
+      //ARel = RotMat(.KJC_E.sRel, .LateralEpicondyle.sRel, .HipJointRef.sRel ) * RotMat(pi/2, y);
+      sRel = (.LateralEpicondyle.sRel + .MedialEpicondyle.sRel)*0.5 ;
+      ARel = RotMat( sRel, .LateralEpicondyle.sRel, .HipJointRef.sRel ) * RotMat(pi/2, y);
+      //ARel = RotMat(pi, y);
+      //ARel = RotMat( sRel, .LateralEpicondyle.sRel, sRel + {0, 1.0, 0} ) * RotMat(pi/2, y);
+//      AnyDrawRefFrame Drw = 
+//      {
+//        RGB = {0, 0, 0};
+//        ScaleXYZ = 0.25*{1, 1, 1};
+//      };
+    };      
+    
+    AnyRefNode PatellaJoint = 
+    {
+      sRel = {(.KJC_E.sRel[0] + .KJC_A.sRel[0])/2, .KJC_A.sRel[1], (.KJC_E.sRel[2] + .KJC_A.sRel[2])/2}  ;
+      ARel = .KneeJointNew.ARel ;
+      
+//      AnyDrawRefFrame Drw = 
+//      {
+//        RGB = {1, 0.5, 0.2};
+//        ScaleXYZ = 0.1 * {1, 1, 1};
+//      }; 
+    };
+    
+    AnyRefNode HipJoint = 
+    {
+      sRel = .HipJointRef.sRel ;
+      ARel = .KneeJointNew.ARel ;
+      
+      AnySurfCylinder Cyl = 
+      {
+        Radius = 0.025;
+        Length = 0.05;
+        CapRatio = 0;
+        AnyDrawParamSurf Drw  =
+        {
+          RGB = {0.65, 0.65, 0.65};
+          Opacity = 0.3;
+        };
+      };          
+    };
+    
+    
+    AnyRefNode AnatomicalFrame =
+    {
+      sRel = .KJC_E.sRel;
+      ARel = RotMat(sRel, .HipJointRef.sRel, .LateralEpicondyle.sRel) *RotMat(pi/2, y)*RotMat(pi/2, z);
+//      AnyDrawRefFrame Drw = 
+//      {
+//        RGB = {1, 0, 0};
+//        ScaleXYZ = 0.05*{1, 1, 1};
+//      };
+//        AnyRefNode RotNode = 
+//        {
+//          ARel = RotMat(pi, y);
+//          AnyDrawRefFrame Drw = 
+//          {
+//            RGB = {1, 0, 0};
+//            ScaleXYZ = 0.05*{1, 1, 1};
+//          };        
+//        };
+    };
+    
+    AnyVar Length = vnorm(KneeJointNew.sRel - HipJoint.sRel);    
+  };//Femur  
+  
+  AnySeg FemurMass = 
+  {
+    r0 = .Femur.r0 + .Femur.PrincipalAxesNode.sRel * .Femur.Axes0';
+    Axes0 = .Femur.Axes0 * .Femur.PrincipalAxesNode.ARel;
+    
+    AnyVar Cyl_Radius = 0.055;
+    AnyVar Cyl_Height = 0.475;    
+    
+    Mass = BODY_MASS * FEMUR_MASS_RATIO;
+    Jii = Mass*{(3*pow(Cyl_Radius,2)+pow(Cyl_Height,2))/12,
+      (3*pow(Cyl_Radius,2)+pow(Cyl_Height,2))/12, 
+      pow(Cyl_Radius,2)/2};
+    
+    AnyRefNode CylNode = 
+    {
+      sRel = {0, 0, -.Cyl_Height/2};
+      AnySurfCylinder Surf = 
+      {
+        Radius = ..Cyl_Radius;
+        Length = ..Cyl_Height;
+        CapRatio = 0.0;
+//        AnyDrawParamSurf DrwSurf = 
+//        {
+//          RGB = {1, 1, 0};
+//          Opacity = 0.5;
+//        };
+      };
+    };    
+    
+//    AnyDrawRefFrame Drw = 
+//    {
+//      RGB = {1, 0.5, 0.2};
+//      ScaleXYZ = 0.15 * {1, 1, 1};
+//    };  
+//    
+//    AnyDrawSeg DrwSeg = 
+//    {
+//      Opacity = 0.5;
+//    };
+    
+  };//FemurMass
+  
+  AnySeg FemurHipDummy = 
+  {
+    Mass = 0;
+    Jii = {0, 0, 0};
+    r0 = .Femur.r0 + .Femur.HipJoint.sRel * .Femur.Axes0';
+    Axes0 = .Femur.Axes0 * .Femur.HipJoint.ARel;
+    
+    AnyDrawSTL DrwSTL = 
+    {
+      FileName = PATH_STL_UNIT_BOX ;
+      RGB = {0.65, 0.65, 0.65};
+      ScaleXYZ = 0.05*{1, 1, 1};
+      Opacity = 0.5;
+    };    
+    
+    AnyDrawRefFrame Drw = 
+    {
+      RGB = {0.65, 0.65, 0.65};
+      ScaleXYZ = 0.05 * {1, 1, 1};
+    };
+    //    AnySurfCylinder Cyl = 
+    //    {
+    //      Radius = 0.025;
+    //      Length = 0.1;
+    //      CapRatio = 1.0;
+    //      AnyDrawParamSurf Drw = 
+    //      {
+    //        Opacity = 0.5;
+    //        RGB = {1, 1, 0};
+    //      };
+    //    }; 
+    
+  };//FemurHipDummy
+  
+  AnySeg Tibia = 
+  {
+    Mass = 0;
+    Jii = {0, 0, 0};
+    
+    r0 = .Femur.r0 + {5/1000, -41/1000, 0} * .Femur.Axes0';
+    Axes0 = .Femur.Axes0;    
+        
+    AnyDrawSurf DrwTibia = 
+    {
+      FileName = "..\Input\STL_New\Tibia.stl";
+      RGB = Main.DrawSettings.Colors.AnyBodyPaleYellow;
+      Opacity = 0.5;
+      ScaleXYZ = 0.001*{1, 1, 1};
+    };
+    AnyDrawSurf DrwFibula = 
+    {
+      FileName = "..\Input\STL_New\Fibula.stl";
+      RGB = Main.DrawSettings.Colors.AnyBodyPaleYellow;
+      Opacity = 0.5;
+      ScaleXYZ = 0.001*{1, 1, 1};
+    };         
+    
+    AnyDrawSurf DrwTibialInsert = 
+    {
+      FileName = "..\Input\STL_New\Tibial Insert_scaled_remeshed.stl";
+      ScaleXYZ = {1, 1, 1};
+      //RGB = 1*{1, 1, 1};
+      RGB = {192,192,192}/255.0;
+      Opacity = 0.5;
+    };    
+    
+    AnyDrawSTL TibialTray = 
+    {
+      FileName = "..\Input\STL_New\Tibial Tray_scaled_remeshed.stl";
+      ScaleXYZ = 1*{1, 1, 1};
+      RGB = 0.2 *{1, 1, 1};
+      Opacity = 1;          
+    };    
+    
+    AnyRefNode KneeJointNew = 
+    {
+      sRel = ..Femur.KneeJointNew.sRel - {5/1000, -41/1000, 0} ;
+      ARel = ..Femur.KneeJointNew.ARel ;
+//      AnyDrawRefFrame Drw = 
+//      {
+//        RGB = {1, 0.5, 0.2};
+//        ScaleXYZ = 0.1 * {1, 1, 1};
+//      };
+    };         
+    AnyRefNode PrincipalAxesNode =
+    {
+      sRel =  {-0.009742, -0.154347, -0.002264};
+      ARel = 
+      {
+        { 0.034021, 0.997491, 0.062081 },
+        { -0.490013, 0.070787, -0.868836 },
+        { -0.871051, -0.000862, 0.491192 }
+      }' * RotMat(-pi/2, y);
+//      AnyDrawRefFrame Drw = 
+//      {
+//        RGB = 0*{1, 1, 1};
+//        ScaleXYZ = 0.1 * {1, 1, 1};
+//      };      
+    };
+    
+    AnyRefNode& KneeJoint = KneeJointNew;
+       
+    AnyFolder Ankle_Points_Picked =
+    {
+      AnyInputXML XMLObject = 
+      {
+        FileName = "..\Input\STL_New\Tibia_picked_points_ankle.pp";    
+      };
+      AnyFloat xptr0 = Obj2Num(ObjSelect("XMLObject.Contents.PickedPoints.point*.active", "==1", ".x_*"));
+      AnyFloat yptr0 = Obj2Num(ObjSelect("XMLObject.Contents.PickedPoints.point*.active", "==1", ".y_*"));
+      AnyFloat zptr0 = Obj2Num(ObjSelect("XMLObject.Contents.PickedPoints.point*.active", "==1", ".z_*"));
+      AnyString PointNames = Obj2Str(ObjSelect("XMLObject.Contents.PickedPoints.point*.active", "==1", ".name")) ;      
+      AnyFloat Points_Original = {xptr0',yptr0',zptr0'}'; 
+      AnyFloat Points_Scaled = 0.001 * Points_Original ;
+    };
+    
+    AnyRefNode AnkleJointFittingNode = 
+    {
+      sRel = Surf.sRel ;
+      ARel = Surf.ARel ;
+      AnySurfEllipsoidFit Surf = 
+      {
+        Points = ..Ankle_Points_Picked.Points_Scaled ;
+        Spherical = On;
+        AnyDrawParamSurf Drw = 
+        {
+          RGB = {0, 1, 0};
+          Opacity = 0.5;
+        };
+      };
+    };      
+    
+    AnyRefNode AnkleJoint = 
+    {
+      sRel = .AnkleJointFittingNode.sRel ;
+      ARel = .KneeJointNew.ARel;
+      AnyDrawRefFrame Drw = 
+      {
+        RGB = Main.DrawSettings.Colors.AnyBodyPaleYellow;
+        ScaleXYZ = 0.15 * {1, 1, 1};
+      }; 
+      
+//      AnySurfSphere Cyl = 
+//      {
+//        Radius = 0.02;
+//        //Length = 0.02;
+//        //CapRatio = 0.0;
+//        //        AnyDrawParamSurf Drw = 
+//        //        {
+//        //          Opacity = 0.5;
+//        //          RGB = {0, 1, 0};
+//        //        };
+//      };
+//      
+//      //      AnyRefNode RotNode =
+//      //      {
+//      //        ARel = RotMat(pi, y);
+//      //        AnySurfCylinder Cyl = 
+//      //        {
+//      //          Radius = 0.022;
+//      //          Length = 0.02;
+//      //          CapRatio = 0.0;
+//      //          AnyDrawParamSurf Drw = 
+//      //          {
+//      //            Opacity = 0.5;
+//      //          };
+//      //        };        
+//      //      };
+    };  
+    
+    AnyRefNode AnatomicalFrame = 
+    {
+      sRel = ..Femur.AnatomicalFrame.sRel;
+      ARel = ..Femur.AnatomicalFrame.ARel;
+//      AnyDrawRefFrame Drw = 
+//      {
+//        RGB = {0, 0, 1};
+//        ScaleXYZ = 0.05*{1, 1, 1};
+//      };      
+    };
+    
+    AnyVar Length = vnorm(KneeJointNew.sRel - AnkleJoint.sRel);
+  }; //Tibia
+  
+  AnySeg TibiaMass = 
+  {
+    r0 = .Tibia.r0 + .Tibia.PrincipalAxesNode.sRel * .Tibia.Axes0';
+    Axes0 = .Tibia.Axes0 * .Tibia.PrincipalAxesNode.ARel;
+    
+    AnyVar Cyl_Radius = 0.05;
+    AnyVar Cyl_Height = 0.4;    
+    
+    Mass = BODY_MASS * TIBIA_MASS_RATIO;
+    Jii = Mass*{(3*pow(Cyl_Radius,2)+pow(Cyl_Height,2))/12,
+                (3*pow(Cyl_Radius,2)+pow(Cyl_Height,2))/12, 
+                pow(Cyl_Radius,2)/2};
+    
+    AnyRefNode CylNode = 
+    {
+      sRel = {0, 0, -.Cyl_Height/2};
+      AnySurfCylinder Surf = 
+      {
+        Radius = ..Cyl_Radius;
+        Length = ..Cyl_Height;
+        CapRatio = 0.0;
+//        AnyDrawParamSurf DrwSurf = 
+//        {
+//          RGB = {1, 1, 0};
+//          Opacity = 0.5;
+//        };
+      };
+    };    
+    
+//    AnyDrawRefFrame Drw = 
+//    {
+//      RGB = {1, 0.5, 0.2};
+//      ScaleXYZ = 0.15 * {1, 1, 1};
+//    };  
+//
+//    AnyDrawSeg DrwSeg = 
+//    {
+//      Opacity = 0.5;
+//    };
+    
+  };//TibiaMass
+  
+  AnySeg TibiaAnkleConnect1 = 
+  {
+    Mass = 0;
+    Jii = {0, 0, 0};
+    r0 = .Tibia.r0 + .Tibia.AnkleJoint.sRel * .Tibia.Axes0';
+    Axes0 = .Tibia.Axes0 * .Tibia.AnkleJoint.ARel; 
+    AnyVar len_x = 0.1;
+    AnyVar len_y = 0.01;
+    AnyVar len_z = 0.05;
+    
+    AnyDrawRefFrame Drw = 
+    {
+      RGB = .DrwSTL.RGB;
+      ScaleXYZ = 0.05 * {1, 1, 1};
+    };    
+    AnyDrawSTL DrwSTL = 
+    {
+      FileName = PATH_STL_UNIT_BOX ;
+      RGB = {1, 0.65, 0.65};
+      ScaleXYZ = {.len_x, .len_y, .len_z};
+      Opacity = 0.5;
+    };    
+    //    AnyRefNode node_axis_x = 
+    //    {
+    //      sRel = {.len_x/2, 0, 0};
+    //      AnyDrawRefFrame Drw = 
+    //      {
+    //        RGB = ..DrwSTL.RGB;
+    //        ScaleXYZ = 0.05 * {1, 1, 1};
+    //      };       
+    //    };
+  };//TibiaAnkleConnect1
+  
+  AnySeg TibiaAnkleConnect2 = 
+  {
+    Mass = 0;
+    Jii = {0, 0, 0};
+    r0 = .Tibia.r0 + .Tibia.AnkleJoint.sRel * .Tibia.Axes0';
+    Axes0 = .Tibia.Axes0 * .Tibia.AnkleJoint.ARel; 
+    AnyVar len_x = sqrt(2)/2/10;
+    AnyVar len_y = 0.01;
+    AnyVar len_z = sqrt(2)/2/10;    
+    
+    AnyDrawRefFrame Drw = 
+    {
+      RGB = .DrwSTL.RGB;
+      ScaleXYZ = 0.05 * {1, 1, 1};
+    };    
+    AnyDrawSTL DrwSTL = 
+    {
+      FileName = PATH_STL_UNIT_BOX ;
+      RGB = {0.65, 0.65, 1};
+      ScaleXYZ = {.len_x, .len_y, .len_z};
+      Opacity = 0.2;
+    };
+    //    AnyRefNode node_axis_x = 
+    //    {
+    //      sRel = {.len_x/2, .len_y/2, 0};
+    //      AnyDrawRefFrame Drw = 
+    //      {
+    //        RGB = ..DrwSTL.RGB;
+    //        ScaleXYZ = 0.05 * {1, 1, 1};
+    //      };       
+    //    };
+    //    AnyRefNode node_axis_y = 
+    //    {
+    //      sRel = {0, -.len_y/2, 0};
+    //      AnyDrawRefFrame Drw = 
+    //      {
+    //        RGB = ..DrwSTL.RGB;
+    //        ScaleXYZ = 0.05 * {1, 1, 1};
+    //      };       
+    //    };    
+  };//TibiaAnkleConnect1     
+  
+  AnySeg TibiaAnkleDummy = 
+  {
+    Mass = 0;
+    Jii = {0, 0, 0};
+    r0 = .Tibia.r0 + .Tibia.AnkleJoint.sRel * .Tibia.Axes0';
+    Axes0 = .Tibia.Axes0 * .Tibia.AnkleJoint.ARel; 
+    AnyVar len_x = 0.05;
+    AnyVar len_y = 0.01;
+    AnyVar len_z = 0.1;    
+    
+    AnyDrawRefFrame Drw = 
+    {
+      RGB = {0.65, 0.65, 0.65};
+      ScaleXYZ = 0.05 * {1, 1, 1};
+    };    
+    AnyDrawSTL DrwSTL = 
+    {
+      FileName = PATH_STL_UNIT_BOX ;
+      RGB = {0.65, 0.65, 0.65};
+      ScaleXYZ = {.len_x, .len_y, .len_z};
+      Opacity = 0.5;
+    };  
+    //    AnyRefNode node_axis_y = 
+    //    {
+    //      sRel = {0, 0, 0};
+    //      AnyDrawRefFrame Drw = 
+    //      {
+    //        RGB = ..DrwSTL.RGB;
+    //        ScaleXYZ = 0.05 * {1, 1, 1};
+    //      };       
+    //    };     
+  };//TibiaAnkleDummy  
+  
+  AnySeg Patella = 
+  {
+    Mass = 0;
+    Jii = {0, 0, 0}; 
+    r0 = .Femur.r0 + {-0.038, 0, -0.00275} * .Femur.Axes0';
+    Axes0 = .Femur.Axes0;
+    
+    AnyDrawSurf DrwPatella = 
+    {
+      FileName = "..\Input\STL_New\Patella.stl";
+      ScaleXYZ = 0.001*{1, 1, 1};
+      RGB = 	Main.DrawSettings.Colors.AnyBodyPaleYellow;
+      Opacity = 0.5;
+    };    
+    
+    AnyDrawSurf DrwPatellaButton = 
+    {
+      FileName = "..\Input\STL_New\Patellar Button_scaled_remeshed.stl";
+      ScaleXYZ = 1.0*{1, 1, 1};
+      //RGB = {1, 1, 1};
+      RGB = {192,192,192}/255.0;
+      Opacity = 0.5;
+    };      
+    
+    AnyRefNode PatellaJoint = 
+    {
+      sRel = ..Femur.PatellaJoint.sRel - {-0.038, 0, -0.00275};
+      ARel = ..Femur.PatellaJoint.ARel;
+//      AnyDrawRefFrame Drw = 
+//      {
+//        RGB = Main.DrawSettings.Colors.AnyBodyPaleYellow;
+//        ScaleXYZ = 0.1 * {1, 1, 1};
+//        Visible = On;
+//      };      
+    }; 
+    
+    AnyRefNode QTNode = 
+    {
+      sRel = {-0.001798878, 0.02028166, 0.0007074652};
+      AnyDrawNode Drw = 
+      {
+        RGB = {1, 0, 0};
+        Opacity = 0.5;
+        ScaleXYZ = 0.0025*{1, 1, 1};
+      };
+    };
+    
+    AnyRefNode AnatomicalFrame = 
+    {
+      sRel = ..Femur.AnatomicalFrame.sRel ; 
+      ARel = ..Femur.AnatomicalFrame.ARel ;
+      //      AnyDrawRefFrame Drw = 
+      //      {
+      //        RGB = {0, 1, 0};
+      //        ScaleXYZ = 0.050*{1, 1, 1};
+      //      };
+    };
+    
+  };//Patella
+  
+};
+

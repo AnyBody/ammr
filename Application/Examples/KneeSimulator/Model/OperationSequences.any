@@ -1,0 +1,34 @@
+#ifdef USE_LIGAMENT_CALIBRATION
+AnyOperationSequence LigamentCalibrationSequence = 
+{
+  AnyOperation& EvaluateLigamentLengths = Main.EvalStudy.UpdateDesign;
+  /// This operation updates the values based on the dependancies.
+  AnyOperationMacro UpdateValues = 
+  {
+    MacroStr = 
+    {
+      "classoperation Main" + strquote("Update Values")
+    };
+  };  
+};
+#endif
+
+AnyOperationSequence RunLoadStudySequence = 
+{      
+  #ifdef USE_LIGAMENT_CALIBRATION
+  AnyOperation& LigamentCalibrationSequence = .LigamentCalibrationSequence;
+  #endif
+  
+  AnyOperation &LoadStudyInvAnal=Main.LoadStudy.InverseDynamics;
+  
+  #ifdef USE_AUTO_SAVE 
+  /// This operation saves the output of the study to an h5 file in the Output folder
+  AnyOperationMacro SaveResult = 
+  {
+    MacroStr=
+    { 
+      "classoperation Main.LoadStudy.Output" + strquote("Save data") + " --file="+ "../Output/" + OutputFileNamePrefix + "-Result.anydata.h5 " + "--type=Deep"
+    };
+  };
+  #endif
+};
