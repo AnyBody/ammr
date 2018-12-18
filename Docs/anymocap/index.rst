@@ -135,6 +135,7 @@ Description of Model folders
     ``LoadAndReplay``                       This loads any previously saved data and starts the replay operation.
     ======================================= ==============================================================================================
 
+.. rst-class:: emphasize-children
 
 Options and settings
 ***************************
@@ -156,7 +157,7 @@ The following two sections gives an overview of the settings available:
 
 .. rst-class:: html-toggle
 
-``#path``/``#define`` settings
+Paths settings and switches
 -------------------------------
 
 Path settings and switches are usually prefixed by ``MOCAP_`` to indicate that
@@ -216,7 +217,7 @@ they are specific to the AnyMoCap framework.
 
 .. rst-class:: html-toggle
 
-Settings in Main.ModelSetup
+Configurable variables 
 -----------------------------
 
 The ``Main.ModelSetup`` folder contains all the machinery of the AnyMoCap
