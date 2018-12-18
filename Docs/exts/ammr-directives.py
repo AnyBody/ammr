@@ -322,7 +322,7 @@ class AMMRDomain(Domain):
 
 
 # get the branch this documentation is building for in X.X.x form
-with open(os.path.join(__file__, "../../../AMMR.version.any"), "r") as f:
+with open(os.path.normpath(os.path.join(__file__, "../../../AMMR.version.any")), "r") as f:
     contents = f.read()
     match = re.compile(r'.*AMMR_VERSION\s"(?P<version>.*)"').search(contents)
     ammr_version = ".".join(match.groupdict()["version"].split(".", 3)[:3])
