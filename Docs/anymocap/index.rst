@@ -202,6 +202,8 @@ they are specific to the AnyMoCap framework.
     ``MOCAP_INPUT_DATA_TYPE``                      Data type ("C3D", "BVH") used by the AnyMoCap application.                                     "C3D"
     ``MOCAP_CREATE_PARAMETER_ID_SHORTCUT``         Setting for creating the ``Main.RunParameterIdentification`` shortcut operation  .             ON
     ``MOCAP_OUTPUT_FILENAME_PREFIX``               Prefix added to all output files from the model.                                               ""
+    ``MOCAP_PARAMETER_FILE_PREFIX``                Prefix for the parameter identfication files. Can be usefull to set explicitly                 ``MOCAP_OUTPUT_FILENAME_PREFIX``
+                                                   in special cases where subjects share a common parameter file.
     ``MOCAP_USE_GRF_PREDICTION``                   Switch to indicate that the model uses Ground Reaction Force (GRF) prediction. It will ensure  OFF
                                                    that the AnyMoCap framework uses the appropriate settings. (e.g. recruited actuators as weak 
                                                    residuals on the pelvis. 
