@@ -838,22 +838,6 @@ All BodyModel parameters
 | 
 
 
-.. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_INDIVIDUAL_WEIGHTS
-
-    Allows for individual weights if the BM mannequin drivers are soft. Weights are set by assigning the BM_MANNEQUIN_DRIVER_* switches a value instead of ON/OFF.
-
-
-    :Default: ``OFF``
-    :Example: ``#define BM_MANNEQUIN_DRIVER_INDIVIDUAL_WEIGHTS OFF``
-    :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
-
-
-|  
-|   
-| 
-| 
-
-
 .. ammr:bm_statement:: BM_LEG_TRUNK_INTERFACE
 
     Keyword for the interface morhping between the trunk and the leg pelvis segments.
