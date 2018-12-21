@@ -1,0 +1,102 @@
+//define = (
+//  [
+//    {'BM_ARM_LEFT': 'ON'},
+//    {'BM_ARM_LEFT': 'OFF'},
+//  ],
+//  [
+//    {'BM_ARM_RIGHT': 'ON'},
+//    {'BM_ARM_RIGHT': 'OFF'},
+//  ],
+//  [
+//    {'BM_ARM_DETAILED_HAND': 'OFF'},
+//    {'BM_ARM_DETAILED_HAND': 'ON'},
+//  ],
+//  [ 
+//    {'BM_TRUNK_NECK': 'OFF'},
+//    {'BM_TRUNK_NECK': 'ON'},
+//  ],
+//  [ 
+//    {'BM_ARM_SHOULDER_RHYTHM': 'OFF'},
+//    {'BM_ARM_SHOULDER_RHYTHM': 'ON'},
+//  ],
+//)
+//ignore_errors = ['BodyModel.UnhallowedCombination','Model loading skipped']
+//
+#include "libdef.any"
+
+#ifndef TEST_NAME 
+  #define BM_ARM_LEFT 1
+  #define BM_ARM_RIGHT 1
+  #define BM_LEG_MODEL 0
+  #define BM_ARM_MUSCLES_LEFT OFF
+  #define BM_ARM_MUSCLES_RIGHT OFF
+  #define BM_TRUNK_MUSCLES OFF
+  #define BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_PROTRACTION_RIGHT OFF
+  #define BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_ELEVATION_RIGHT OFF
+  #define BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_AXIAL_ROTATION_RIGHT OFF
+  
+  #define BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_PROTRACTION_LEFT OFF
+  #define BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_ELEVATION_LEFT OFF
+  #define BM_MANNEQUIN_DRIVER_STERNOCLAVICULAR_AXIAL_ROTATION_LEFT OFF
+  
+#endif
+
+
+Main = 
+{
+  // #path HTML_DOC "<AMMR_PATH_DOC>/bm_config/index.html"
+  #include "<ANYBODY_PATH_BODY>\HumanModel.any"
+  
+  AnyBodyStudy study = {
+    Gravity= {0,1,0};
+    AnyFolder& BodyModel = .HumanModel.BodyModel;
+    AnyFolder& DefaultDrivers = .HumanModel.DefaultMannequinDrivers;
+    
+    #if 1
+    AnyKinMotion ShoulderDriverLeft = {
+       
+       AnyKinMeasure& SternoClavicularProtraction=.BodyModel.Interface.Left.SternoClavicularProtraction;
+       AnyKinMeasure& SternoClavicularElevation=.BodyModel.Interface.Left.SternoClavicularElevation;
+       AnyKinMeasure& SternoClavicularAxialRotation=.BodyModel.Interface.Left.SternoClavicularAxialRotation;
+       AnyKinMeasure& AcromioClavicularProtraction =.BodyModel.Interface.Left.AcromioClavicular.Protraction;
+       AnyKinMeasure& AcromioClavicularMedialRotation =.BodyModel.Interface.Left.AcromioClavicular.MedialRotation;
+       AnyKinMeasure& AcromioClavicularPosteriorTilt =.BodyModel.Interface.Left.AcromioClavicular.PosteriorTilt;
+       AnyFunConst Fun = 
+       {
+          Value = { -0.4014257, 0.2007129, -0.3490659, 0.592565, -0.3771196, 0.3216437};  
+          AnyVector ValueDeg = Value*180/pi;
+       };
+
+  };
+  
+    AnyKinMotion ShoulderDriverRight = {
+       
+       AnyKinMeasure& SternoClavicularProtraction=.BodyModel.Interface.Right.SternoClavicularProtraction;
+       AnyKinMeasure& SternoClavicularElevation=.BodyModel.Interface.Right.SternoClavicularElevation;
+       AnyKinMeasure& SternoClavicularAxialRotation=.BodyModel.Interface.Right.SternoClavicularAxialRotation;
+       AnyKinMeasure& AcromioClavicularProtraction =.BodyModel.Interface.Right.AcromioClavicular.Protraction;
+       AnyKinMeasure& AcromioClavicularMedialRotation =.BodyModel.Interface.Right.AcromioClavicular.MedialRotation;
+       AnyKinMeasure& AcromioClavicularPosteriorTilt =.BodyModel.Interface.Right.AcromioClavicular.PosteriorTilt;
+       AnyFunConst Fun = 
+       {
+          Value = { -0.4014257, 0.2007129, -0.3216437, 0.592565, -0.3771196, 0.3216437};  
+          AnyVector ValueDeg = Value*180/pi;
+       };
+
+  };  
+    AnyMechObjectExcluder Exclude =
+    {
+      Objects = arrcat(
+        ObjSearch("Main.HumanModel.BodyModel.*.ShoulderArm.Jnt.Clavicula*Driver","AnyKinEq"),
+        ObjSearch("Main.HumanModel.BodyModel.*.ShoulderArm.Jnt.Scapula*Driver","AnyKinEq"),
+        ObjSearch("Main.HumanModel.BodyModel.*.ShoulderArm.Jnt.ScapulaTSThoraxNodeDriver","AnyKinEq"),
+        ObjSearch("Main.HumanModel.BodyModel.*.ShoulderArm.Jnt.ConoideumLigamentDrv","AnyKinEq")
+      );
+    };
+      #endif
+  
+  };
+  
+  
+  AnyOperationDummy RunApplication = {};
+};
