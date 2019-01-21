@@ -689,6 +689,22 @@ All BodyModel parameters
 | 
 
 
+.. ammr:bm_statement:: BM_ARM_CLAVICULA_ROTATION_RHYTHM
+
+    Switch for the clavicula rotation rhythm. If enabled axial rotation of the clavicula will be distributed evenly between the sterno-clavicula and acromio-clavicula joint. Effectively removing clavicula axial rotation as an independent degree of freedom.resterno-clavicula axial rotation.
+
+
+    :Default: ``ON``
+    :Example: ``#define BM_ARM_CLAVICULA_ROTATION_RHYTHM ON``
+    :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
+
+
+|  
+|   
+| 
+| 
+
+
 .. ammr:bm_statement:: BM_ARM_DETAILED_HAND
 
     Switch for enabling the detailed hand.
