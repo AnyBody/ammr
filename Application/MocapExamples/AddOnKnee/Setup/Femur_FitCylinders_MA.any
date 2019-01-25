@@ -1,8 +1,3 @@
-//fit cylinder to point clouds
-#define FitCylinder(name,fixed) AnyRefNode name##_init = {sRel = test_cylinder_fit.sRel; ARel = test_cylinder_fit.ARel;AnyDrawNode drw={Visible=Off;ScaleXYZ={0,0,0}*0.001;}; AnySurfCylinderFit test_cylinder_fit = {Length = 0.00000;FixedDirection =fixed;Direction = {0.0, 0.0, 1.0}; Points = DesignVar(..CustomMarkerScaling(..name##_surf.points));AnyDrawParamSurf srf_##name={Visible = Off;RGB={0,1,1};Opacity=0.2;};};}; 
-// fit cylinder to point clouds with direction fixed to secondary PC of ptcl
-#define FitCylinder_PC(name,fixed,PC,deg,dir,nodeVis,check,cylVis) AnyRefNode name##_PC_fr = {sRel = .name##_init.test_cylinder_fit.sMean;ARel = .name##_init.test_cylinder_fit.AEig'; AnyDrawRefFrame fr = {Visible=Off;ScaleXYZ={1,1,1}*0.1;};}; AnyRefNode name = {sRel = test_cylinder_fit.sRel; ARel = (test_cylinder_fit.ARel)*RotMat(deg,dir);AnyDrawNode drw={Visible=nodeVis;ScaleXYZ={1,1,1}*0.002;}; AnyDrawRefFrame fr = {Visible=check;ScaleXYZ={1,1,1}*0.1;}; AnySurfCylinderFit test_cylinder_fit = {Length = 0.00000;FixedDirection =fixed;Direction = ..name##_init.test_cylinder_fit.AEig[PC]; Points = DesignVar(..CustomMarkerScaling(..name##_surf.points));AnyDrawParamSurf srf_##name={Visible = cylVis;RGB={0,1,1};Opacity=0.2;};};}; 
-
 Main.HumanModel.BodyModel.Right.Leg.Seg.Thigh = {
   AnyFunTransform3D &CustomMarkerScaling = Main.HumanModel.SubjectSpecificScaling.Right.Thigh.RegTransform;
   AnyVec3 rOffset= Main.HumanModel.BodyModel.Right.Leg.Seg.Thigh.KneeJointAnatomicalFrame.sRel;
@@ -71,29 +66,32 @@ Main.HumanModel.BodyModel.Right.Leg.Seg.Thigh = {
     AnyInt NumPoints = STL_Size(FileName, 1)[0];
     AnyFloat points = GetVertices(iarr(0, 1, NumPoints-1))*0.001;
   };
-  
-  //  AnyDrawPointCloud pts_Medial_TF = {Points = .CustomMarkerScaling(.Medial_TF_surf.points); PointStyle.Style = PointStyleSphere;Points3D = On;ShowNames = On;RGB={1, 0, 0};PointStyle.Size=0.0015;};
-  //  AnyDrawPointCloud pts_Lateral_TF = {Points = .CustomMarkerScaling(.Lateral_TF_surf.points); PointStyle.Style = PointStyleSphere;Points3D = On;ShowNames = On;RGB={1, 0, 0};PointStyle.Size=0.0015;};
-  //  AnyDrawPointCloud pts_Medial_TF_EFC = {Points = .CustomMarkerScaling(.Medial_TF_EFC_surf.points); PointStyle.Style = PointStyleSphere;Points3D = On;ShowNames = On;RGB={1, 0, 0};PointStyle.Size=0.0015;};
-  //  AnyDrawPointCloud pts_Lateral_TF_EFC = {Points = .CustomMarkerScaling(.Lateral_TF_EFC_surf.points); PointStyle.Style = PointStyleSphere;Points3D = On;ShowNames = On;RGB={1, 0, 0};PointStyle.Size=0.0015;};
-  //  AnyDrawPointCloud pts_Medial_TF_FFC = {Points = .CustomMarkerScaling(.Medial_TF_FFC_surf.points); PointStyle.Style = PointStyleSphere;Points3D = On;ShowNames = On;RGB={1, 0, 0};PointStyle.Size=0.0015;};
-  //  AnyDrawPointCloud pts_Lateral_TF_FFC = {Points = .CustomMarkerScaling(.Lateral_TF_FFC_surf.points); PointStyle.Style = PointStyleSphere;Points3D = On;ShowNames = On;RGB={1, 0, 0};PointStyle.Size=0.0015;};
-  
-  FitCylinder(Medial_TF,Off)
-  FitCylinder_PC(Medial_TF,On,0,0,x,Off,Off,Off)
-  FitCylinder(Lateral_TF,Off)
-  FitCylinder_PC(Lateral_TF,On,0,0,x,Off,Off,Off)
-  FitCylinder(Medial_TF_EFC,Off)
-  FitCylinder_PC(Medial_TF_EFC,On,1,0,x,Off,Off,Off)
-  FitCylinder(Lateral_TF_EFC,Off)
-  FitCylinder_PC(Lateral_TF_EFC,On,1,0,x,Off,Off,Off)
-  FitCylinder(Medial_TF_FFC,Off)
-  FitCylinder_PC(Medial_TF_FFC,On,1,pi,x,On,Off,Off)
-  FitCylinder(Lateral_TF_FFC,Off)
-  FitCylinder_PC(Lateral_TF_FFC,On,1,pi,z,On,Off,Off)
-  
+
+//Combine Points from Medial and Lateral TF surface selections 
+AnyFloat TF_points =arrcat(Medial_TF_surf.points, Lateral_TF_surf.points);
+AnyFloat TF_EFC_points =arrcat(Medial_TF_EFC_surf.points, Lateral_TF_EFC_surf.points);
+AnyFloat TF_FFC_points =arrcat(Medial_TF_FFC_surf.points, Lateral_TF_FFC_surf.points);
+
+#include "FitCylinder_both_condyles.any"
+FitCylinder(TF)
+FitCylinder(TF_EFC)
+FitCylinder(TF_FFC)
+
+#include "FitCylinder_condyle.any"
+FitCylinder_PC(TF,Medial_TF)
+FitCylinder_PC(TF,Lateral_TF)
+FitCylinder_PC(TF_EFC,Medial_TF_EFC)
+FitCylinder_PC(TF_EFC,Lateral_TF_EFC)
+FitCylinder_PC(TF_FFC,Medial_TF_FFC)
+FitCylinder_PC(TF_FFC,Lateral_TF_FFC)
   KneeJointAnatomicalFrame = {
-    AnyDrawRefFrame fr = {Visible=On;ScaleXYZ={1,1,1}*0.1;}; 
+    AnyDrawRefFrame fr = {Visible=On;ScaleXYZ={1,1,1}*0.1;};
+     AnyRefNode InvisibleFemurRotationNode = {
+        sRel = ...InvisibleFemur_TF.MA_AnatomicalFrame.sRel;
+        ARel = .ARel'*...InvisibleFemur_TF.MA_AnatomicalFrame.ARel;
+//        AnyDrawRefFrame fr = {Visible=On;ScaleXYZ={1,1,1}*0.1;}; 
+      };
+
   };
 };
 
