@@ -9,7 +9,7 @@
     #var AnyVar FatPercent = (-0.09 + 0.0149*BMI - 0.00009*BMI^2)*100;
     
     #var AnyVar BodyMass = DesignVar(75) ;
-    #var AnyVar BodyHeight = DesignVar(180 /100);
+    #var AnyVar BodyHeight = DesignVar(175 /100);
     
     AnyFolder SegmentMasses = {
     
@@ -44,38 +44,205 @@
     };   
   };
 
+  AnyFolder SegmentDimensions = {
+    #var AnyVar PelvisWidth = DesignVar(0.1705987*.SegmentScaleFactors.BodyScale); //distance between hip joints (0.16 for simple leg model)
+    #var AnyVar PelvisHeight = DesignVar(0.108*.BodyHeight/1.75); 
+    #var AnyVar PelvisDepth = DesignVar(0.1399611*.SegmentScaleFactors.BodyScale); 
+    
+    #var AnyVar HeadHeight = DesignVar(0.14*.BodyHeight/1.75);//height in neutral position from  C1HatNode to top of head
+    
+    #var AnyVar TrunkHeight = DesignVar(0.620233*.BodyHeight/1.75);//height in neautral position from  C1HatNode to L5SacrumJnt
+    #var AnyVar TrunkWidth = DesignVar(0.3881839*.SegmentScaleFactors.BodyScale);//Width between shoulder joints
+    
+    
+    // These two folders are used by the scaling laws
+    AnyFolder Right ={
+      #var AnyVar ThighLength = DesignVar(0.4098364*..BodyHeight/1.75);
+      #var AnyVar ShankLength = DesignVar(0.4210448*..BodyHeight/1.75);
+      #var AnyVar FootLength = DesignVar(0.2571425*..BodyHeight/1.75);
+      #var AnyVar FootHeight = DesignVar(0.0502*..BodyHeight/1.75);
+      
+      #var AnyVar UpperArmLength = DesignVar(0.340079*..BodyHeight/1.75);
+      #var AnyVar LowerArmLength = DesignVar(0.2690167*..BodyHeight/1.75);
+      #var AnyVar HandLength = DesignVar(0.182*..BodyHeight/1.75);
+      #var AnyVar HandBreadth = DesignVar(0.085*..BodyHeight/1.75);  
+    };
+    
+    AnyFolder Left ={
+      #var AnyVar ThighLength = DesignVar(0.4098364*..BodyHeight/1.75);
+      #var AnyVar ShankLength = DesignVar(0.4210448*..BodyHeight/1.75);
+      #var AnyVar FootLength = DesignVar(0.2571425*..BodyHeight/1.75);
+      #var AnyVar FootHeight = DesignVar(0.0502*..BodyHeight/1.75);
+
+      #var AnyVar UpperArmLength = DesignVar(0.340079*..BodyHeight/1.75);
+      #var AnyVar LowerArmLength = DesignVar(0.2690167*..BodyHeight/1.75);
+      #var AnyVar HandLength = DesignVar(0.182*..BodyHeight/1.75);
+      #var AnyVar HandBreadth = DesignVar(0.085*..BodyHeight/1.75);  
+    };
+
+    
+  };  
+
   AnyFolder SegmentScaleFactors = 
   {
+     /// Estimated overall scaling of the entire body. 
+     /// Calculated weighing the length scale factors. 
+     /// This factor is used for scaling certain body dimension
+     /// if they are not given explicitly by the user.
+     AnyVar BodyScale = 
+       Head.LengthScale*0.07552441
+       + Neck.LengthScale*0.0711439
+       + Trunk.LengthScale*0.1657206
+       + Lumbar.LengthScale*0.0851843
+       + Pelvis.LengthScale*0.0584573
+       + max({Right.Thigh.LengthScale*0.221090, Left.Thigh.LengthScale*0.221090})
+       + max({Right.Shank.LengthScale*0.227137,Left.Shank.LengthScale*0.227137})
+       + max({Right.Foot.DepthScale*0.037835, Left.Foot.DepthScale*0.037835});
+  
 
-    AnyFolder Pelvis = { #var AnyFloat LengthScale = DesignVar(1); #var AnyFloat DepthScale = DesignVar(1); #var AnyFloat WidthScale = DesignVar(1); };
-    AnyFolder Trunk = { #var AnyFloat LengthScale = DesignVar(1); #var AnyFloat DepthScale = DesignVar(1); #var AnyFloat WidthScale = DesignVar(1); };
-    AnyFolder Head = { #var AnyFloat LengthScale = DesignVar(1); #var AnyFloat DepthScale = DesignVar(1); #var AnyFloat WidthScale = DesignVar(1); };
-    AnyFolder Neck = { #var AnyFloat LengthScale = DesignVar(1); #var AnyFloat DepthScale = DesignVar(1); #var AnyFloat WidthScale = DesignVar(1); };
-    AnyFolder Lumbar = { #var AnyFloat LengthScale = DesignVar(1); #var AnyFloat DepthScale = DesignVar(1); #var AnyFloat WidthScale = DesignVar(1); };
+    AnyFolder Pelvis = 
+    {
+       #var AnyFloat LengthScale = ..SegmentDimensions.PelvisHeight / ...Scaling.StandardParameters.Pelvis.Height;
+       #var AnyFloat DepthScale = ..SegmentDimensions.PelvisDepth / ...Scaling.StandardParameters.Pelvis.Depth;
+       #var AnyFloat WidthScale = ..SegmentDimensions.PelvisWidth / ...Scaling.StandardParameters.Pelvis.Width;
+    };
+    AnyFolder Trunk = 
+    {
+      #var AnyFloat LengthScale = ..SegmentDimensions.TrunkHeight / ...Scaling.StandardParameters.Trunk.Height;
+      #var AnyFloat DepthScale = .BodyScale;
+      #var AnyFloat WidthScale = ..SegmentDimensions.TrunkWidth / ...Scaling.StandardParameters.Trunk.Width;
+    };
+    AnyFolder Head = 
+    {
+      #var AnyFloat LengthScale = ..SegmentDimensions.HeadHeight / ...Scaling.StandardParameters.Head.Height;
+      #var AnyFloat DepthScale = .BodyScale;
+      #var AnyFloat WidthScale = .BodyScale;
+    };
+    AnyFolder Neck = 
+    {
+      #var AnyFloat LengthScale = .Trunk.LengthScale;
+      #var AnyFloat DepthScale = .Trunk.DepthScale;
+      #var AnyFloat WidthScale = .Trunk.WidthScale;
+    };
+    AnyFolder Lumbar = {
+      #var AnyFloat LengthScale = .Trunk.LengthScale;
+      #var AnyFloat DepthScale = .Trunk.DepthScale;
+      #var AnyFloat WidthScale = .Trunk.WidthScale;
+    };
 
     AnyFolder Right = 
     {
-        AnyFolder Clavicula =  { #var AnyFloat LengthScale = DesignVar(1); #var AnyFloat DepthScale = DesignVar(1); #var AnyFloat WidthScale = DesignVar(1); };
-        AnyFolder Scapula =  { #var AnyFloat LengthScale = DesignVar(1); #var AnyFloat DepthScale = DesignVar(1); #var AnyFloat WidthScale = DesignVar(1); };
-        AnyFolder Humerus =  { #var AnyFloat LengthScale = DesignVar(1); #var AnyFloat DepthScale = DesignVar(1); #var AnyFloat WidthScale = DesignVar(1); };
-        AnyFolder Radius =  { #var AnyFloat LengthScale = DesignVar(1); #var AnyFloat DepthScale = DesignVar(1); #var AnyFloat WidthScale = DesignVar(1); };
-        AnyFolder Ulna  =  { #var AnyFloat LengthScale = DesignVar(1); #var AnyFloat DepthScale = DesignVar(1); #var AnyFloat WidthScale = DesignVar(1); };
-        AnyFolder Hand =  { #var AnyFloat LengthScale = DesignVar(1); #var AnyFloat DepthScale = DesignVar(1); #var AnyFloat WidthScale = DesignVar(1); };
-        AnyFolder Foot =  { #var AnyFloat LengthScale = DesignVar(1); #var AnyFloat DepthScale = DesignVar(1); #var AnyFloat WidthScale = DesignVar(1); };
-        AnyFolder Shank =  { #var AnyFloat LengthScale = DesignVar(1); #var AnyFloat DepthScale = DesignVar(1); #var AnyFloat WidthScale = DesignVar(1); };
-        AnyFolder Thigh =  { #var AnyFloat LengthScale = DesignVar(1); #var AnyFloat DepthScale = DesignVar(1); #var AnyFloat WidthScale = DesignVar(1); };
+        AnyFolder Clavicula =  
+        {
+          #var AnyFloat LengthScale = ..Trunk.WidthScale;
+          #var AnyFloat DepthScale = ..Trunk.DepthScale;
+          #var AnyFloat WidthScale = ..Trunk.LengthScale;
+        };
+        AnyFolder Scapula =  
+        {
+          #var AnyFloat LengthScale = ..Trunk.LengthScale;
+          #var AnyFloat DepthScale = ..Trunk.DepthScale;
+          #var AnyFloat WidthScale = ..Trunk.WidthScale;
+        };
+        AnyFolder Humerus =
+        {
+          #var AnyFloat LengthScale = ...SegmentDimensions.Right.UpperArmLength / ....Scaling.StandardParameters.Humerus.Length;
+          #var AnyFloat DepthScale = ..BodyScale;
+          #var AnyFloat WidthScale = ..BodyScale;
+        };
+        AnyFolder Radius =
+        {
+          #var AnyFloat LengthScale = ...SegmentDimensions.Right.LowerArmLength / ....Scaling.StandardParameters.Radius.Length;
+          #var AnyFloat DepthScale = ..BodyScale;
+          #var AnyFloat WidthScale = ..BodyScale;
+        };
+        AnyFolder Ulna =
+        {
+          #var AnyFloat LengthScale = ...SegmentDimensions.Right.LowerArmLength / ....Scaling.StandardParameters.Ulna.Length;
+          #var AnyFloat DepthScale = ..BodyScale;
+          #var AnyFloat WidthScale = ..BodyScale;
+        };
+        AnyFolder Hand =
+        {
+          #var AnyFloat LengthScale = ...SegmentDimensions.Right.HandLength / ....Scaling.StandardParameters.Hand.HandLength;
+          #var AnyFloat DepthScale = WidthScale;
+          #var AnyFloat WidthScale = ...SegmentDimensions.Right.HandBreadth / ....Scaling.StandardParameters.Hand.HandBreadth;
+        };
+        AnyFolder Foot =
+        {
+          #var AnyFloat LengthScale = ...SegmentDimensions.Right.FootLength / ....Scaling.StandardParameters.Right.Foot.Length;
+          #var AnyFloat DepthScale = ...SegmentDimensions.Right.FootHeight / 0.0502;
+          #var AnyFloat WidthScale = ..BodyScale;
+        };
+        AnyFolder Shank =  
+        {
+          #var AnyFloat LengthScale = ...SegmentDimensions.Right.ShankLength / ....Scaling.StandardParameters.Right.Shank.Length;
+          #var AnyFloat DepthScale = ..BodyScale;
+          #var AnyFloat WidthScale = ..BodyScale;
+        };
+        AnyFolder Thigh =  
+        {
+          #var AnyFloat LengthScale = ...SegmentDimensions.Right.ThighLength / ....Scaling.StandardParameters.Right.Thigh.Length;
+          #var AnyFloat DepthScale = ..BodyScale;
+          #var AnyFloat WidthScale = ..BodyScale;
+        };
     };
     AnyFolder Left = 
     {
-        AnyFolder Clavicula =  { #var AnyFloat LengthScale = DesignVar(1); #var AnyFloat DepthScale = DesignVar(1); #var AnyFloat WidthScale = DesignVar(1); };
-        AnyFolder Scapula =  { #var AnyFloat LengthScale = DesignVar(1); #var AnyFloat DepthScale = DesignVar(1); #var AnyFloat WidthScale = DesignVar(1); };
-        AnyFolder Humerus =  { #var AnyFloat LengthScale = DesignVar(1); #var AnyFloat DepthScale = DesignVar(1); #var AnyFloat WidthScale = DesignVar(1); };
-        AnyFolder Radius =  { #var AnyFloat LengthScale = DesignVar(1); #var AnyFloat DepthScale = DesignVar(1); #var AnyFloat WidthScale = DesignVar(1); };
-        AnyFolder Ulna  =  { #var AnyFloat LengthScale = DesignVar(1); #var AnyFloat DepthScale = DesignVar(1); #var AnyFloat WidthScale = DesignVar(1); };
-        AnyFolder Hand =  { #var AnyFloat LengthScale = DesignVar(1); #var AnyFloat DepthScale = DesignVar(1); #var AnyFloat WidthScale = DesignVar(1); };
-        AnyFolder Foot =  { #var AnyFloat LengthScale = DesignVar(1); #var AnyFloat DepthScale = DesignVar(1); #var AnyFloat WidthScale = DesignVar(1); };
-        AnyFolder Shank =  { #var AnyFloat LengthScale = DesignVar(1); #var AnyFloat DepthScale = DesignVar(1); #var AnyFloat WidthScale = DesignVar(1); };
-        AnyFolder Thigh =  { #var AnyFloat LengthScale = DesignVar(1); #var AnyFloat DepthScale = DesignVar(1); #var AnyFloat WidthScale = DesignVar(1); };
+        AnyFolder Clavicula =  
+        {
+          #var AnyFloat LengthScale = ..Trunk.WidthScale;
+          #var AnyFloat DepthScale = ..Trunk.DepthScale;
+          #var AnyFloat WidthScale = ..Trunk.LengthScale;
+        };
+        AnyFolder Scapula =  
+        {
+          #var AnyFloat LengthScale = ..Trunk.LengthScale;
+          #var AnyFloat DepthScale = ..Trunk.DepthScale;
+          #var AnyFloat WidthScale = ..Trunk.WidthScale;
+        };
+        AnyFolder Humerus =
+        {
+          #var AnyFloat LengthScale = ...SegmentDimensions.Left.UpperArmLength / ....Scaling.StandardParameters.Humerus.Length;
+          #var AnyFloat DepthScale = ..BodyScale;
+          #var AnyFloat WidthScale = ..BodyScale;
+        };
+        AnyFolder Radius =
+        {
+          #var AnyFloat LengthScale = ...SegmentDimensions.Left.LowerArmLength / ....Scaling.StandardParameters.Radius.Length;
+          #var AnyFloat DepthScale = ..BodyScale;
+          #var AnyFloat WidthScale = ..BodyScale;
+        };
+        AnyFolder Ulna =
+        {
+          #var AnyFloat LengthScale = ...SegmentDimensions.Left.LowerArmLength / ....Scaling.StandardParameters.Ulna.Length;
+          #var AnyFloat DepthScale = ..BodyScale;
+          #var AnyFloat WidthScale = ..BodyScale;
+        };
+        AnyFolder Hand =
+        {
+          #var AnyFloat LengthScale = ...SegmentDimensions.Left.HandLength / ....Scaling.StandardParameters.Hand.HandLength;
+          #var AnyFloat DepthScale = WidthScale;
+          #var AnyFloat WidthScale = ...SegmentDimensions.Left.HandBreadth / ....Scaling.StandardParameters.Hand.HandBreadth;
+        };
+        AnyFolder Foot =
+        {
+          #var AnyFloat LengthScale = ...SegmentDimensions.Left.FootLength / ....Scaling.StandardParameters.Left.Foot.Length;
+          #var AnyFloat DepthScale = ...SegmentDimensions.Left.FootHeight / 0.0502;
+          #var AnyFloat WidthScale = ..BodyScale;
+        };
+        AnyFolder Shank =  
+        {
+          #var AnyFloat LengthScale = ...SegmentDimensions.Left.ShankLength / ....Scaling.StandardParameters.Left.Shank.Length;
+          #var AnyFloat DepthScale = ..BodyScale;
+          #var AnyFloat WidthScale = ..BodyScale;
+        };
+        AnyFolder Thigh =  
+        {
+          #var AnyFloat LengthScale = ...SegmentDimensions.Left.ThighLength / ....Scaling.StandardParameters.Left.Thigh.Length;
+          #var AnyFloat DepthScale = ..BodyScale;
+          #var AnyFloat WidthScale = ..BodyScale;
+        };
     };
   };
 
@@ -99,7 +266,7 @@
   #var AnyVar FatPercent = (-0.09 + 0.0149*BMI - 0.00009*BMI^2)*100;
   
   #var AnyVar BodyMass = 75;
-  #var AnyVar BodyHeight = 180 /100;
+  #var AnyVar BodyHeight = 175 /100;
   
   
   AnyFolder SegmentMasses = {
