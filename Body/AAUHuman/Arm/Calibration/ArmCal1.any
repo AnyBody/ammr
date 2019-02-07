@@ -1,7 +1,8 @@
 /**This is the calibration1 file it will calibrate the lateral part of the deltoid muscles
  10 deg abduction -35 flexion */
 AnyFolder ArmCal1 ={
-  
+  AnyComponentDefinition obj = {};  
+
   
   AnyFolder &ThoraxSegs =  ...BodyModel.Trunk.SegmentsThorax;
   AnyFolder &LumbarSegs =  ...BodyModel.Trunk.SegmentsLumbar;
@@ -12,12 +13,26 @@ AnyFolder ArmCal1 ={
   
   AnyFolder &SegSideCal = .SideHumanFolderRef.ShoulderArm.Seg;
   AnyFolder &JointsSideCal = .SideHumanFolderRef.ShoulderArm.Jnt;
-  AnyFolder &DeltoidRakeRef = .SideHumanFolderRef.ShoulderArm.Mus.ArtificialRake;
-
+  
+  #if BM_ARM_DELTOID_WRAPPING == OFF
+  AnyFolder& DeltoidRakeRef = .SideHumanFolderRef.ShoulderArm.Mus.ArtificialRake; 
+  #else
+  AnyFolder& DeltoidWrappingPosteriorRef = .SideHumanFolderRef.ShoulderArm.Mus.DeltoidWrappingPosterior;
+  AnyFolder& DeltoidWrappingLateralRef = .SideHumanFolderRef.ShoulderArm.Mus.DeltoidWrappingLateral;
+  AnyFolder& DeltoidWrappingAnteriorRef = .SideHumanFolderRef.ShoulderArm.Mus.DeltoidWrappingAnterior;
+  #endif
+  
+  #if BM_ARM_DELTOID_WRAPPING == OFF
   AnyShortestPathMuscle &del1 =  .SideHumanFolderRef.ShoulderArm.Mus.deltoideus_scapular_part_1;
   AnyShortestPathMuscle &del2 =  .SideHumanFolderRef.ShoulderArm.Mus.deltoideus_scapular_part_2;
   AnyShortestPathMuscle &del3 =  .SideHumanFolderRef.ShoulderArm.Mus.deltoideus_scapular_part_3;
-  
+  #else
+  AnyShortestPathMuscle &del1 =  .SideHumanFolderRef.ShoulderArm.Mus.deltoideus_posterior_part_1;
+  AnyShortestPathMuscle &del2 =  .SideHumanFolderRef.ShoulderArm.Mus.deltoideus_posterior_part_2;
+  AnyShortestPathMuscle &del3 =  .SideHumanFolderRef.ShoulderArm.Mus.deltoideus_posterior_part_3;
+  AnyShortestPathMuscle &del4 =  .SideHumanFolderRef.ShoulderArm.Mus.deltoideus_posterior_part_4;
+  #endif
+
   AnyFolder &MusParCalSide =  .SideHumanFolderRef.ShoulderArm.MusPar;
   
   AnyFixedRefFrame ground = {
@@ -60,10 +75,13 @@ AnyFolder ArmCal1 ={
   
   #if !BM_ARM_SHOULDER_RHYTHM
   AnyKinEqSimpleDriver SCDriver ={
-    AnyKinRotational &SC =  ..SideInterfaceFolderRef.SternoClavicularProtraction.SCRot;  
-    DriverPos = {-0.3692286, 0.1123051, -0.3493471}; 
-    DriverVel = {0.0,0.0,0.0};
-    Reaction.Type={Off,Off,Off};
+    AnyKinMeasureOrg SC_measure = {
+      AnyKinMeasure& ref = ...SideInterfaceFolderRef.SternoClavicularProtraction.SCRot;
+      MeasureOrganizer = {0,1};
+    };
+    DriverPos = {-0.3692286, 0.1123051}; 
+    DriverVel = {0.0,0.0};
+    Reaction.Type={Off,Off};
   };
   #endif
   

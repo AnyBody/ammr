@@ -140,7 +140,7 @@ dynamic:
 
 * Direction of gravity is it specified correctly?  this needs to be correct in
   two places the Gravity property of the study in the LabSpecific.any data and in
-  the definition of the forceplates setting the variable ``NORMAL_DIRECTION``. 
+  the definition of the force plates setting the variable ``NORMAL_DIRECTION``. 
 
 * In the file Forceplate_GRFprediction.any try to increase the property ``LimitDistHigh``,
   this controls when contact can occur so if the number is higher the foot do
@@ -154,7 +154,7 @@ dynamic:
   in the model if the feet contact are not enough, this is defined in  the file
   "Tools/GRFPrediction/Weakresidual.any" here  you can increase the strength
   of the artificial muscles, but this will lead to higher residuals so be
-  carefull.
+  careful.
 
 
 A closer look at the GRF template

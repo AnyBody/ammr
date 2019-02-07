@@ -140,6 +140,23 @@ All BodyModel parameters
 | 
 
 
+.. ammr:bm_statement:: BM_FOOT_MODEL
+
+    Parameter defining the foot model used.
+
+
+    :Default: :ammr:bm_constant:`_FOOT_MODEL_DEFAULT_`
+    :Example: ``#define BM_FOOT_MODEL _FOOT_MODEL_DEFAULT_``
+    :Options: - :any:`_FOOT_MODEL_DEFAULT_`: Switch for using the default foot model
+              - :any:`_FOOT_MODEL_NONE_`: Switch for using the GM foot model"
+
+
+|  
+|   
+| 
+| 
+
+
 .. ammr:bm_statement:: BM_LEG_MODEL
 
     Parameter defining the Leg model used.
@@ -151,23 +168,6 @@ All BodyModel parameters
               - :any:`_LEG_MODEL_TLEM_`: Switch to use leg model: "TLEM 1"
               - :any:`_LEG_MODEL_TLEM2_`: Switch to use leg model: "TLEM 2"
               - :any:`_LEG_MODEL_LEG_`: Switch to use leg model: "Leg"
-
-
-|  
-|   
-| 
-| 
-
-
-.. ammr:bm_statement:: BM_FOOT_MODEL
-
-    Parameter defining the foot model used.
-
-
-    :Default: :ammr:bm_constant:`_FOOT_MODEL_DEFAULT_`
-    :Example: ``#define BM_FOOT_MODEL _FOOT_MODEL_DEFAULT_``
-    :Options: - :any:`_FOOT_MODEL_DEFAULT_`: Switch for using the default foot model
-              - :any:`_FOOT_MODEL_NONE_`: Switch for using the GM foot model"
 
 
 |  
@@ -455,6 +455,22 @@ All BodyModel parameters
 | 
 
 
+.. ammr:bm_statement:: BM_TRUNK_RHYTHM_SOFT
+
+    A switch to make rhythms in the spine as soft constraints.
+
+
+    :Default: ``ON``
+    :Example: ``#define BM_TRUNK_RHYTHM_SOFT ON``
+    :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
+
+
+|  
+|   
+| 
+| 
+
+
 .. ammr:bm_statement:: BM_TRUNK_LUMBAR_RHYTHM
 
     A switch to use a kinematic rhythm for the lumbar spine.
@@ -657,6 +673,38 @@ All BodyModel parameters
 | 
 
 
+.. ammr:bm_statement:: BM_ARM_SHOULDER_RHYTHM_SOFT
+
+    A switch to make shoulder rhythms a soft contraint.
+
+
+    :Default: ``ON``
+    :Example: ``#define BM_ARM_SHOULDER_RHYTHM_SOFT ON``
+    :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
+
+
+|  
+|   
+| 
+| 
+
+
+.. ammr:bm_statement:: BM_ARM_CLAVICULA_ROTATION_RHYTHM
+
+    Switch for the clavicula rotation rhythm. If enabled axial rotation of the clavicula will be distributed evenly between the sterno-clavicula and acromio-clavicula joint. Effectively removing clavicula axial rotation as an independent degree of freedom.resterno-clavicula axial rotation.
+
+
+    :Default: ``ON``
+    :Example: ``#define BM_ARM_CLAVICULA_ROTATION_RHYTHM ON``
+    :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
+
+
+|  
+|   
+| 
+| 
+
+
 .. ammr:bm_statement:: BM_ARM_DETAILED_HAND
 
     Switch for enabling the detailed hand.
@@ -664,6 +712,22 @@ All BodyModel parameters
 
     :Default: ``OFF``
     :Example: ``#define BM_ARM_DETAILED_HAND OFF``
+    :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
+
+
+|  
+|   
+| 
+| 
+
+
+.. ammr:bm_statement:: BM_ARM_DELTOID_WRAPPING
+
+    Switch enabling/disabling the deltoid wrapping. Setting this to OFF will revert to the older rake based implementation of the deltoid.
+
+
+    :Default: ``ON``
+    :Example: ``#define BM_ARM_DELTOID_WRAPPING ON``
     :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
 
 
@@ -749,7 +813,7 @@ All BodyModel parameters
 
 .. ammr:bm_statement:: BM_MANNEQUIN_FILE
 
-    File name of the mannequin definition file. By default this is no longer used, since the values in ``HumanModel.Mannequin`` can be assigned directly in your applicaiton ( E.g. ``Main.HumanModel.Mannequin.Posture.NeckExtension = 30;``). However, the parameter can still be used to set your own mannequin file. Just define your own mannequin file in your applicaiton like this: ``#path BM_MANNEQUIN_FILE "<ANYBODY_PATH_BODY>\BodyModels\GenericBodyModel\BodyModel.mannequin.any"``
+    File name of the mannequin definition file. By default this is no longer used, since the values in ``HumanModel.Mannequin`` can be assigned directly in your applicaiton ( E.g. ``Main.HumanModel.Mannequin.Posture.NeckExtension = 30;``). However, the parameter can still be used to set your own mannequin file. Just define your own mannequin file in your applicaiton like this: ``#path BM_MANNEQUIN_FILE "<ANYBODY_PATH_BODY>\BodyModels\GenericBodyModel\BodyModel.mannequin.any";``
 
 
 |  
@@ -781,22 +845,6 @@ All BodyModel parameters
 
     :Default: ``ON``
     :Example: ``#define BM_MANNEQUIN_DRIVER_WEAK_SWITCH ON``
-    :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
-
-
-|  
-|   
-| 
-| 
-
-
-.. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_INDIVIDUAL_WEIGHTS
-
-    Allows for individual weights if the BM mannequin drivers are soft. Weights are set by assigning the BM_MANNEQUIN_DRIVER_* switches a value instead of ON/OFF.
-
-
-    :Default: ``OFF``
-    :Example: ``#define BM_MANNEQUIN_DRIVER_INDIVIDUAL_WEIGHTS OFF``
     :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
 
 
@@ -958,7 +1006,57 @@ All BodyModel parameters
     :Example: ``#define BM_MANNEQUIN_DRIVER_NECK BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
-              - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+
+|  
+|   
+| 
+| 
+
+
+.. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_SKULL_THORAX_FLEXION
+
+    Switch for the mannequin driver being active or not
+
+
+    :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_NECK`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_SKULL_THORAX_FLEXION BM_MANNEQUIN_DRIVER_NECK``
+    :Options: - :any:`ON`: 
+              - :any:`OFF`: 
+
+
+|  
+|   
+| 
+| 
+
+
+.. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_SKULL_THORAX_LATERALBENDING
+
+    Switch for the mannequin driver being active or not
+
+
+    :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_NECK`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_SKULL_THORAX_LATERALBENDING BM_MANNEQUIN_DRIVER_NECK``
+    :Options: - :any:`ON`: 
+              - :any:`OFF`: 
+
+
+|  
+|   
+| 
+| 
+
+
+.. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_SKULL_THORAX_ROTATION
+
+    Switch for the mannequin driver being active or not
+
+
+    :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_NECK`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_SKULL_THORAX_ROTATION BM_MANNEQUIN_DRIVER_NECK``
+    :Options: - :any:`ON`: 
+              - :any:`OFF`: 
 
 
 |  

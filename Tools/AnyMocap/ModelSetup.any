@@ -26,27 +26,67 @@ ModelSetup = {
  };
  
  #if MOCAP_INPUT_DATA_TYPE == "C3D"
- AnyInputC3D C3DFileData =  {};
+ AnyInputC3D C3DFileData =  {
+    AnyComponentDefinition obj = {};
+ };
  #include "<MOCAP_C3DSETTINGS>"
  #endif
  
  #if MOCAP_INPUT_DATA_TYPE == "BVH"
  AnyFolder C3DFileData = { #include "BVH_C3dEmulation.any" };
- AnyInputBVH BVHFileData = {}; 
+ AnyInputBVH BVHFileData = {
+    AnyComponentDefinition obj = {
+      SubGroupRegexSearch = ".*\.([_[:alnum:]]+?)\.([_[:alnum:]]+?)";
+      SubGroupRegexReplace = "$1";
+    };
+ }; 
  #include "<MOCAP_BVHSETTINGS>" 
  #endif
  
  
  AnyFolder MocapExtraDrivers = {
+   AnyComponentDefinition obj = {};
    #include "<MOCAP_EXTRA_DRIVERS_FILE>" 
  };
  
  AnyFolder MocapDrivers = {
-   #include "<MOCAP_MARKER_PROTOCOL_FILE>"
+    AnyComponentDefinition obj = {
+      // regex pattern starts at the component level
+      SubGroupRegexSearch = "([_[:alnum:]]+)\.([_[:alnum:]]+?)";
+      SubGroupRegexReplace = "$1";
+    };
+    #include "<MOCAP_MARKER_PROTOCOL_FILE>"
  };
 
  AnyFolder ParameterIdentification = { };
  
+ #if MOCAP_FILTER_JOINT_ANGLES == ON
+   /// Filter for Joint Angles (Output of the marker tracking step).
+     DEFAULT_PARAMETER_FOLDER JointAngleFilter(
+         NPARAM = 4,
+         PARAM_1 = N, PARAM_1_TYPE = AnyInt,
+         PARAM_2 = Fs, PARAM_2_TYPE = AnyVar,
+         PARAM_3 = Fc, PARAM_3_TYPE = AnyVar,
+         PARAM_4 = FilterForwardBackwardOnOff, PARAM_4_TYPE = AnySwitchVar
+     ) = {
+       Default.N = 1;
+       Default.Fs = (Main.Studies.MarkerTracking.nStep-1)
+          /(Main.Studies.MarkerTracking.tEnd-Main.Studies.MarkerTracking.tStart);
+       Default.Fc = 10;
+       Default.FilterForwardBackwardOnOff = On;
+ 
+     AnyFunButterworthFilter FilterFun = 
+     {
+        AutomaticInitialConditionOnOff = On;
+        FilterForwardBackwardOnOff = .FilterForwardBackwardOnOff;
+        N = .N;
+        Fs = .Fs;
+        Fc = {.Fc};
+        Type = LowPass;
+     };
+  }; 
+
+  #endif   
 
  // Study for saving a loading the parameters from calibration trials 
  //(dynamic or standing refereces)
