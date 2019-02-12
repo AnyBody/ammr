@@ -38,7 +38,8 @@
       AnyFunTransform3DIdentity RegTransform = {
         PreTransforms = {&.CT2Seg, &....BodyModel.Right.Leg.Seg.Shank.Scale};
       };
-     
+           AnyFunTransform3D &TScale2SegFrame = ...BodyModel.Right.Leg.Seg.Shank.Scale.T0GT0Inv;
+
       AnyFunTransform3DLin2 CT2Seg = {
         AnyFileVar TargetSTL = "C:\Users\cmd\Documents\Projects\MovingAxisAddOnProject\ammr_addonknee\Application\MocapExamples\AddOnKnee\Setup\STLs\Tibia_target_R.stl";
         AnyFileVar SourceSTL = "C:\Users\cmd\Documents\Projects\MovingAxisAddOnProject\ammr_addonknee\Application\MocapExamples\AddOnKnee\Setup\STLs\Tibia_source_R.stl";
@@ -47,7 +48,21 @@
         Points0 = STL_Vertices(TargetSTL, iarr(0, 1, NumPoints1-1), 1)*0.001; 
         Points1 = STL_Vertices(SourceSTL, iarr(0, 1, NumPoints0-1), 1)*0.001;
         Mode = VTK_LANDMARK_RIGIDBODY;
-      };     
+      }; 
+      
+            //transformation from the segmental ref. frame to CT ref frame
+      AnyFunTransform3DLin2 Seg2CT = {
+        AnyFileVar SourceSTL = "C:\Users\cmd\Documents\Projects\MovingAxisAddOnProject\ammr_addonknee\Application\MocapExamples\AddOnKnee\Setup\STLs\Tibia_source_R.stl";
+        AnyFileVar TargetSTL = "C:\Users\cmd\Documents\Projects\MovingAxisAddOnProject\ammr_addonknee\Application\MocapExamples\AddOnKnee\Setup\STLs\Tibia_target_R.stl";
+        AnyMatrix Points0unscaled = STL_Vertices(SourceSTL, iarr(0, 1, NumPoints0 - 1), 1)*0.001;
+        //A transform to the segmental ref. frame from the unscaled anatomical frame
+        Points0 = .TScale2SegFrame(Points0unscaled);
+        Points1 = STL_Vertices(TargetSTL, iarr(0, 1, NumPoints1 - 1), 1)*0.001;
+        AnyInt NumPoints0 = STL_Size(SourceSTL, 1)[0];
+        AnyInt NumPoints1 = STL_Size(TargetSTL, 1)[0];
+        Mode = VTK_LANDMARK_AFFINE;
+      };
+      
     };
   }; // Right
 };
