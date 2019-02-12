@@ -1,0 +1,110 @@
+//This model is made for testing the configuration 
+//BM_ARM_THORAX_SCAPULA_CONTACT _MULTIPLE_POINT_CONTACT_
+//It takes the model trhough extreme postures for the shoulder while at the same
+//time moving the pelvis in space 
+//the model is meant for kin test only.
+
+#include "../libdef.any"
+
+#define TEST_KIN 
+#define BM_ARM_THORAX_SCAPULA_CONTACT _MULTIPLE_POINT_CONTACT_
+
+
+
+
+#ifdef TEST_KIN 
+  #define BM_TRUNK_MUSCLES OFF
+  #define BM_LEG_MUSCLES_BOTH OFF
+  #define BM_ARM_MUSCLES_BOTH OFF
+#endif
+
+//#define BM_ARM_LEFT OFF
+#define BM_LEG_RIGHT OFF
+#define BM_LEG_LEFT OFF
+
+
+
+
+#define BM_CALIBRATION_TYPE _CALIBRATION_TYPE_2PAR_
+Main = {
+  // ----------------------------------------------------------
+  // Model configuration:
+  // For more info on body model configuration options please load the model and double click on: 
+  // #path HTML_DOC "<AMMR_PATH_DOC>/bm_config/index.html"
+  // ----------------------------------------------------------  
+
+  //If you want to use your own draw settings, please outcomment the next line
+  //#path BM_DRAWSETTINGS_FILE "Model\DrawSettings.any"
+  
+  // Using your own Mannequin.any file in the Model folder of your model
+  #path BM_MANNEQUIN_FILE "Model\Mannequin.any"
+  
+  // Include default human model
+  #include "<ANYBODY_PATH_BODY>\HumanModel.any"
+  
+  AnyFolder Model = {  
+    // A link to the human model
+    AnyFolder &HumanModel=.HumanModel.BodyModelWithDefaultDrivers;
+    
+
+    //#include "Model/RibPointsThorax.any"
+    
+    
+    // Environment files are used to include objects surrounding human, e.g. global reference frame
+    #include "Model\Environment.any"   
+    
+//    AnyFolder ModelEnvironmentConnection = {
+//      // This file contains all joint and foot reaction forces to simulate standing human
+//      #include "Model\JointsAndDrivers.any"
+//    };
+  };
+  #ifdef TEST_KIN
+  AnyBodyStudy KinTestStudy = {
+    
+    Model ={
+    
+    AnyFolder ModelEnvironmentConnection = {
+      // This file contains all joint and foot reaction forces to simulate standing human
+      #include "Model\JointsAndDrivers.any"
+    };
+
+    };
+    AnyFolder &Model = .Model;  
+    Gravity={0.0, -9.81, 0.0};
+    nStep = 11;
+    
+    // these settings are needed for adding drivers without removing the default set 
+    Kinematics.SolverType = KinSolOverDeterminate;
+    InitialConditions.SolverType = Kinematics.SolverType ;
+    
+  };
+  
+#endif
+ 
+ #ifdef TEST_INV 
+ 
+   AnyBodyStudy InvStudy = {
+    
+    Model ={
+    
+    AnyFolder ModelEnvironmentConnection = {
+      // This file contains all joint and foot reaction forces to simulate standing human
+      #include "Model\JointsAndDrivers2.any"
+    };
+
+    };
+    AnyFolder &Model = .Model;  
+    Gravity={0.0, -9.81, 0.0};
+    nStep = 21;
+    
+    // these settings are needed for adding drivers without removing the default set 
+    Kinematics.SolverType = KinSolOverDeterminate;
+    InitialConditions.SolverType = Kinematics.SolverType ;
+    
+  };
+  #endif
+  
+  AnyOperation& RunTest = Main.KinTestStudy.Kinematics;
+
+}; //Main
+
