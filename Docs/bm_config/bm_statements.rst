@@ -176,6 +176,23 @@ All BodyModel parameters
 | 
 
 
+.. ammr:bm_statement:: BM_ARM_THORAX_SCAPULA_CONTACT
+
+    Parameter defining the contact type between Thorax and Scapula
+
+
+    :Default: :ammr:bm_constant:`_ELLIPSOID_CONTACT_`
+    :Example: ``#define BM_ARM_THORAX_SCAPULA_CONTACT _ELLIPSOID_CONTACT_``
+    :Options: - :any:`_ELLIPSOID_CONTACT_`: Switch for using ellipsoid contact between scapula and thorax
+              - :any:`_MULTIPLE_POINT_CONTACT_`: Switch for using multiple point contact between scapula and thorax"
+
+
+|  
+|   
+| 
+| 
+
+
 .. ammr:bm_statement:: BM_LEG_LEFT
 
     Parameter for switching the left leg On/Off. To control which leg model is used, please use the :any:`BM_LEG_MODEL` parameter.
