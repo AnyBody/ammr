@@ -1,0 +1,92 @@
+Main.HumanModel.BodyModel.Right.Leg.Seg = {
+        AnySeg InvisibleFemur_TF = {
+          AnyFunTransform3D &CustomMarkerScaling = Main.HumanModel.SubjectSpecificScaling.Right.Thigh.RegTransform;
+          AnyFunTransform3D &Scale = Main.HumanModel.BodyModel.Right.Leg.Seg.Thigh.Scale; 
+          Mass = 0;
+          Jii = {0,0,0}; 
+          r0 = .Thigh.r0+MA_AnatomicalFrame.rOffset*.Thigh.Axes0';
+          Axes0 = .Thigh.Axes0*MA_AnatomicalFrame.AOffset;
+          AnyDrawRefFrame fr = {Visible=On;ScaleXYZ={1,1,1}*0.1;RGB={1,0,0};}; 
+          
+          AnyRefNode MA_AnatomicalFrame = {
+            //this should be on the same ref frame as inv. femur
+            AnyDrawRefFrame fr = {Visible=On;ScaleXYZ={1,1,1}*0.1;}; 
+
+            AnyMat33 AOffset = RotMat(..Thigh.Medial_TF_EFC.sRel,..Thigh.Lateral_TF_EFC.sRel,..Thigh.HipJoint.sRel)*RotMat(pi/2,y);
+            AnyVec3 rOffset = (..Thigh.Medial_TF_EFC.sRel + ..Thigh.Lateral_TF_EFC.sRel)/2;
+            AnyRefNode Medial_TF_EFC = {
+              DEFINE_LOCAL_COORDINATE(...Thigh.Medial_TF_EFC.sRel)
+              AnyDrawNode drw ={ScaleXYZ=0.002*{1,1,1};RGB={0,0,1};};
+              
+//              AnyDrawRefFrame fr = {Visible=On;ScaleXYZ={1,1,1}*0.1;}; 
+            };
+            AnyRefNode Medial_TF_FFC = {
+              DEFINE_LOCAL_COORDINATE(...Thigh.Medial_TF_FFC.sRel)
+//              AnyDrawNode drw ={ScaleXYZ=0.002*{1,1,1};RGB={1,0,0};};
+            };
+            AnyRefNode Lateral_TF_EFC = {
+              DEFINE_LOCAL_COORDINATE(...Thigh.Lateral_TF_EFC.sRel)
+              AnyDrawNode drw ={ScaleXYZ=0.002*{1,1,1};RGB={0,0,1};};
+//              AnyDrawRefFrame fr = {Visible=On;ScaleXYZ={1,1,1}*0.1;}; 
+            };  
+            AnyRefNode Lateral_TF_FFC = {
+              DEFINE_LOCAL_COORDINATE(...Thigh.Lateral_TF_FFC.sRel)
+//              AnyDrawNode drw ={ScaleXYZ=0.002*{1,1,1};RGB={1,1,1};};
+            };
+//            AnyRefNode Lateral_TF_FFC = {
+//              AnyVec3 sRel_us= (...Thigh.Medial_TF_FFC.sRel)+(...Thigh.e1*...Thigh.L1);
+//              DEFINE_LOCAL_COORDINATE(sRel_us)
+////              AnyDrawNode drw ={ScaleXYZ=0.002*{1,1,1};RGB={1,0,0};};
+//            };
+          }; //MA Anatomical Frame node
+        }; // Close InvisibleFemur_TF Segment  
+
+      AnySeg InvisibleTibia = {
+        AnyFunTransform3D &CustomMarkerScaling = Main.HumanModel.SubjectSpecificScaling.Right.Shank.RegTransform;
+        AnyFunTransform3D &Scale =Main.HumanModel.BodyModel.Right.Leg.Seg.Shank.Scale;
+        AnyFunTransform3D &Femur_to_CT = Main.HumanModel.SubjectSpecificScaling.Right.Thigh.Seg2CT;
+
+        Mass = 0;
+        Jii = {0, 0, 0};
+        r0 = .Shank.r0+MA_AnatomicalFrame.rOffset*.Shank.Axes0';
+        Axes0 = .Shank.Axes0*MA_AnatomicalFrame.AOffset;
+        AnyDrawRefFrame fr = {Visible=On;ScaleXYZ={1,1,1}*0.1;RGB={0,1,0};}; 
+
+        AnyRefNode MA_AnatomicalFrame ={
+//          AnyDrawRefFrame fr = {Visible=On;ScaleXYZ={1,1,1}*0.1;}; 
+          AnyMat33 AOffset = RotMat(.CustomMarkerScaling(.Femur_to_CT(..Thigh.Medial_TF_EFC.sRel)),.CustomMarkerScaling(.Femur_to_CT(..Thigh.Lateral_TF_EFC.sRel)),.CustomMarkerScaling(.Femur_to_CT(..Thigh.HipJoint.sRel)))*RotMat(pi/2,y);
+          AnyVec3 rOffset = (.CustomMarkerScaling(.Femur_to_CT(..Thigh.Medial_TF_EFC.sRel))+.CustomMarkerScaling(.Femur_to_CT(..Thigh.Lateral_TF_EFC.sRel)))/2;         
+                   
+          AnyRefNode Medial_TF_EFC = {
+            AnyVec3 sRel_us=..CustomMarkerScaling(..Femur_to_CT(...Thigh.Medial_TF_EFC.sRel));
+                        DEFINE_LOCAL_COORDINATE(sRel_us)
+//            AnyDrawNode drw ={ScaleXYZ=0.02*{1,1,1};RGB={1,1,1};};
+         };
+          //This node needs to be in the Tibia Registration frame
+          AnyRefNode Medial_TF_FFC = {
+            DEFINE_LOCAL_COORDINATE(...Shank.Medial_TF_FFC.sRel)
+//            AnyDrawNode drw ={ScaleXYZ=0.02*{1,1,1};RGB={1,1,1};};
+          };
+          
+          
+           // this is fine with current position of Shank.Medial/Lateral_TF_EFC points. 
+          AnyRefNode Lateral_TF_EFC = {
+           AnyVec3 sRel_us=..CustomMarkerScaling(..Femur_to_CT(...Thigh.Lateral_TF_EFC.sRel));
+            DEFINE_LOCAL_COORDINATE(sRel_us)
+//              sRel=...Thigh.Lateral_TF_EFC.sRel;
+//            AnyDrawNode drw ={ScaleXYZ=0.02*{1,1,1};RGB={1,1,1};};
+          };  
+          //This node needs to be in the Tibia Registration frame
+          AnyRefNode Lateral_TF_FFC = {
+            DEFINE_LOCAL_COORDINATE(...Shank.Lateral_TF_FFC.sRel)
+//            AnyDrawNode drw ={ScaleXYZ=0.02*{1,1,1};RGB={1,1,1};};
+            };
+            
+//          AnyRefNode Lateral_TF_FFC = {
+//            AnyVec3 sRel_us = (...Shank.Medial_TF_FFC.sRel)+(...Shank.e3*...Shank.L3);
+//            DEFINE_LOCAL_COORDINATE(sRel_us)
+////              AnyDrawNode drw ={ScaleXYZ=0.02*{0,0,0};RGB={0,0,0};};
+//          }; 
+        };//MA AnatomicalFrame Node
+      }; // Close InvisibleTibia Segment
+    }; // Close Segment folder

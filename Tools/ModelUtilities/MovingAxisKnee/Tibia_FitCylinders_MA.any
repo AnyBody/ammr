@@ -1,0 +1,76 @@
+Main.HumanModel.BodyModel.Right.Leg.Seg.Shank = {
+  AnyFunTransform3D &CustomMarkerScaling = Main.HumanModel.SubjectSpecificScaling.Right.Shank.RegTransform;
+  AnyVec3 rOffset= Main.HumanModel.BodyModel.Right.Leg.Seg.Shank.KneeJointAnatomicalFrame.sRel;
+  AnyMat33 AOffset= Main.HumanModel.BodyModel.Right.Leg.Seg.Shank.KneeJointAnatomicalFrame.ARel;
+//  AnyDrawRefFrame fr = {Visible=On;ScaleXYZ={1,1,1}*0.1;}; 
+
+  // Need to fit the EFC points in the Tibia Reference Frame, So we know where these locations are with respect to Tibia before adding an offset to obtain FFC Tibia Registration.
+  // This node needs to be in the Tibia Registration frame.
+  
+//  AnySurfSTL Medial_TF_EFC_surf_obj = {
+//    FileName = .Medial_TF_EFC_surf.FileName;
+//    ScaleXYZ = .Medial_TF_EFC_surf.ScaleXYZ;
+//    AnyFunTransform3D &Scale = .Medial_TF_EFC_surf.Scale;
+//    AnyInt NumPoints = STL_Size(FileName, 1)[0];
+//    AnyFloat points = GetVertices(iarr(0, 1, NumPoints-1));
+//  };
+  
+  AnyDrawSurf Medial_TF_EFC_surf = {
+    FileName = "C:\Users\cmd\Documents\Projects\MovingAxisAddOnProject\ammr_addonknee\Application\MocapExamples\AddOnKnee\Setup\STLs\Medial_TF_EFC.stl";
+    Visible=Off;
+    ScaleXYZ = {1.0, 1.0, 1.0}*0.001;
+    RGB = {1,0,0};
+    AnyFunTransform3D &Scale =.CustomMarkerScaling;
+    Face=-1;
+    AnyInt NumPoints = STL_Size(FileName, 1)[0];
+    AnyFloat points = GetVertices(iarr(0, 1, NumPoints-1));
+  };
+  
+//  AnySurfSTL Lateral_TF_EFC_surf_obj = {
+//    FileName = .Lateral_TF_EFC_surf.FileName;
+//    ScaleXYZ = .Lateral_TF_EFC_surf.ScaleXYZ;
+//    AnyFunTransform3D &Scale = .Lateral_TF_EFC_surf.Scale;
+//    AnyInt NumPoints = STL_Size(FileName, 1)[0];
+//    AnyFloat points = GetVertices(iarr(0, 1, NumPoints-1));
+//  };
+  
+  // This node needs to be in the Tibia Registration frame.
+  AnyDrawSurf Lateral_TF_EFC_surf = {
+    FileName = "C:\Users\cmd\Documents\Projects\MovingAxisAddOnProject\ammr_addonknee\Application\MocapExamples\AddOnKnee\Setup\STLs\Lateral_TF_EFC.stl";
+    Visible=Off;
+    ScaleXYZ = {1.0, 1.0, 1.0}*0.001;
+    RGB = {1,0,0};
+    AnyFunTransform3D &Scale =.CustomMarkerScaling;
+    Face=-1;
+    AnyInt NumPoints = STL_Size(FileName, 1)[0];
+    AnyFloat points = GetVertices(iarr(0, 1, NumPoints-1));
+  };
+//  AnyFloat TF_EFC_points =arrcat(Medial_TF_EFC_surf_obj.points, Lateral_TF_EFC_surf_obj.points);
+  AnyFloat TF_EFC_points =arrcat(Medial_TF_EFC_surf.points, Lateral_TF_EFC_surf.points);
+  FitCylinder(TF_EFC)
+  FitCylinder_PC(TF_EFC,Medial_TF_EFC,Off,Off)
+  FitCylinder_PC(TF_EFC,Lateral_TF_EFC,Off,Off)
+  
+  
+  //Offset values need to be set with respect to the literature. What is the average translation and rotation of the knee from 0 to 90 degree TF flexion? And where do these points need to be in order to achieve that.
+  AnyRefNode Medial_TF_FFC = {
+    AnyVec3 offset ={-0.006,-0.015,0.000};
+    sRel=.Medial_TF_EFC.sRel+offset;
+    AnyDrawNode drw={ScaleXYZ={1,1,1}*0.002;RGB={1,0,0};};
+  };
+  
+  AnyRefNode Lateral_TF_FFC = {
+    AnyVec3 offset ={-0.015,-0.005,0.002};
+    sRel=.Lateral_TF_EFC.sRel+offset;
+//    AnyDrawNode drw={ScaleXYZ={1,1,1}*0.002;RGB={1,0,0};}; 
+  };
+  KneeJointAnatomicalFrame={
+//    AnyDrawRefFrame fr = {Visible=On;ScaleXYZ={1,1,1}*0.1;}; 
+          AnyRefNode InvisibleFemurRotationNode = {
+        sRel = ...InvisibleFemur_TF.MA_AnatomicalFrame.sRel;
+        ARel = .ARel'*...InvisibleFemur_TF.MA_AnatomicalFrame.ARel;
+//        AnyDrawRefFrame fr = {Visible=On;ScaleXYZ={1,1,1}*0.1;}; 
+      }; 
+  };
+};
+
