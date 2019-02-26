@@ -1,15 +1,10 @@
 Main.HumanModel.BodyModel.Right.Leg.Seg.Thigh = {
+  
   AnyFunTransform3D &CustomMarkerScaling = Main.HumanModel.SubjectSpecificScaling.Right.Thigh.RegTransform;
+  
   AnyVec3 rOffset= Main.HumanModel.BodyModel.Right.Leg.Seg.Thigh.KneeJointAnatomicalFrame.sRel;
   AnyMat33 AOffset= Main.HumanModel.BodyModel.Right.Leg.Seg.Thigh.KneeJointAnatomicalFrame.ARel;
-//  AnyDrawRefFrame fr = {Visible=On;ScaleXYZ={1,1,1}*0.1;}; 
-//  AnySurfSTL Medial_TF_surf_obj = {
-//    FileName = .Medial_TF_surf.FileName;
-//    ScaleXYZ = .Medial_TF_surf.ScaleXYZ;
-//    AnyFunTransform3D &Scale = .Medial_TF_surf.Scale;
-//    AnyInt NumPoints = STL_Size(FileName, 1)[0];
-//    AnyFloat points = GetVertices(iarr(0, 1, NumPoints-1));
-//  };
+  
   AnyDrawSurf Medial_TF_surf = {
     FileName = "..\..\..\Body\AAUHuman\LegTLEM\TLEM2.1\CT_RefFrame_STLs\Medial_TF.stl";
     Visible=Off;
@@ -75,31 +70,60 @@ Main.HumanModel.BodyModel.Right.Leg.Seg.Thigh = {
     AnyInt NumPoints = STL_Size(FileName, 1)[0];
     AnyFloat points = GetVertices(iarr(0, 1, NumPoints-1));
   };
-
-AnyFloat TF_points =arrcat(Medial_TF_surf.points, Lateral_TF_surf.points);
-AnyFloat TF_EFC_points =arrcat(Medial_TF_EFC_surf.points, Lateral_TF_EFC_surf.points);
-AnyFloat TF_FFC_points =arrcat(Medial_TF_FFC_surf.points, Lateral_TF_FFC_surf.points);
-
-#include "FitCylinder_both_condyles.any"
-FitCylinder(TF)
-FitCylinder(TF_EFC)
-FitCylinder(TF_FFC)
-
-#include "FitCylinder_condyle.any"
-FitCylinder_PC(TF,Medial_TF,Off,Off)
-FitCylinder_PC(TF,Lateral_TF,Off,Off)
-FitCylinder_PC(TF_EFC,Medial_TF_EFC,Off,Off)
-FitCylinder_PC(TF_EFC,Lateral_TF_EFC,Off,Off)
-FitCylinder_PC(TF_FFC,Medial_TF_FFC,On,Off)
-FitCylinder_PC(TF_FFC,Lateral_TF_FFC,Off,Off)
   
-KneeJointAnatomicalFrame = {
-//    AnyDrawRefFrame fr = {Visible=On;ScaleXYZ={1,1,1}*0.1;};
-     AnyRefNode InvisibleFemurRotationNode = {
-        sRel = ...InvisibleFemur_TF.MA_AnatomicalFrame.sRel;
-        ARel = .ARel'*...InvisibleFemur_TF.MA_AnatomicalFrame.ARel;
-
+  AnyFloat TF_points =arrcat(Medial_TF_surf.points, Lateral_TF_surf.points);
+  AnyFloat TF_EFC_points =arrcat(Medial_TF_EFC_surf.points, Lateral_TF_EFC_surf.points);
+  AnyFloat TF_FFC_points =arrcat(Medial_TF_FFC_surf.points, Lateral_TF_FFC_surf.points);
+  
+  #include "FitCylinder_both_condyles.any"
+  FitCylinder(TF)
+  FitCylinder(TF_EFC)
+  FitCylinder(TF_FFC)
+  
+  #include "FitCylinder_condyle.any"
+  FitCylinder_PC(TF,Medial_TF,Off,Off)
+  FitCylinder_PC(TF,Lateral_TF,Off,Off)
+  FitCylinder_PC(TF_EFC,Medial_TF_EFC,Off,Off)
+  FitCylinder_PC(TF_EFC,Lateral_TF_EFC,Off,Off)
+  FitCylinder_PC(TF_FFC,Medial_TF_FFC,Off,Off)
+  FitCylinder_PC(TF_FFC,Lateral_TF_FFC,Off,Off)
+  
+  KneeJointAnatomicalFrame = {
+    AnyVec3 rOffset= sRel;
+    AnyMat33 AOffset= ARel;
+    
+    // Length between Tibiofemoral ECFs m->l (Femur KneeJointAnatomicalFrame Registration)
+    // Unit Vector directed along Tibiofemoral FFCs m->l (Femur KneeJointAnatomicalFrame Registration)
+    AnyVar L1 = vnorm(Lateral_TF_EFC.sRel - Medial_TF_EFC.sRel,2.0);
+    AnyVec3 e1 = (TEMP_Lateral_TF_FFC.sRel - Medial_TF_FFC.sRel)/vnorm(TEMP_Lateral_TF_FFC.sRel - Medial_TF_FFC.sRel);
+    
+    AnyRefNode Lateral_TF_EFC = {
+      DEFINE_LOCAL_COORDINATE(..Lateral_TF_EFC.sRel)
+      AnyDrawNode drw={Visible=Off;ScaleXYZ={1,1,1}*0.002;};
+    };
+    AnyRefNode Medial_TF_EFC = {
+      DEFINE_LOCAL_COORDINATE(..Medial_TF_EFC.sRel)
+      AnyDrawNode drw={Visible=Off;ScaleXYZ={1,1,1}*0.002;};
+    }; 
+    AnyRefNode TEMP_Lateral_TF_FFC = {
+      DEFINE_LOCAL_COORDINATE(..Lateral_TF_FFC.sRel)
+    };
+    AnyRefNode Medial_TF_FFC = {
+      DEFINE_LOCAL_COORDINATE(..Medial_TF_FFC.sRel)
+      AnyDrawNode drw={Visible=On;ScaleXYZ={1,1,1}*0.002;};
+    };
+    
+    AnyRefNode Lateral_TF_FFC = {
+      AnyVec3 sRel_us = (..Medial_TF_FFC.sRel)+(.e1*.L1);
+      DEFINE_LOCAL_COORDINATE(sRel_us)
+      AnyDrawNode drw={Visible=On;ScaleXYZ={1,1,1}*0.002;};
+    };
+    
+    AnyRefNode InvisibleFemurRotationNode = {
+      sRel = ...InvisibleFemur_TF.MA_AnatomicalFrame.sRel;
+      ARel = .ARel'*...InvisibleFemur_TF.MA_AnatomicalFrame.ARel;  
     };
   };
 };
+
 
