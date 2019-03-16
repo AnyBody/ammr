@@ -1,35 +1,60 @@
-#include "../libdef.any"
+#include "libdef.any"
 
 Main = 
 {
-  
-  // Body Model configuration:
+  // BodyModel configuration:
+  // Specify which limb segments to include, the type of muscles, joints, scaling etc
   #include "Model/BodyModelConfiguration.any"
   
-  // Using your own Mannequin.any file in the Model folder of your model
-  #path BM_MANNEQUIN_FILE "Model\Mannequin.any"
-  
-  // Include default human model
+  // Include the Human model from AMMR
   #include "<ANYBODY_PATH_BODY>\HumanModel.any"
   
+  // Define desired posture or movement of the model
+  #include "Model\Mannequin.any"
+ 
+  // Compose the model used by the study
   AnyFolder Model = 
   {  
-    // A link to the human model
+     // Center of Mass (COM) position in the ground YZ plane
+     // COM balance driver can be excluded with:
+     // #define EXCLUDE_COM_BALANCE_DRIVERS
+     AnyVector CenterOfMassXZ = {0,0};
+     
+     // Positioning of the right and left feet. 
+     // Ground-foot constraints can be excluded with:
+      #define EXCLUDE_FOOT_CONSTRAINTS
+     Environment.GlobalRef.RightFootPrint = {
+        AnyVec3 HeelPosition = {-0.08, 0, 0.14};
+        AnyVec3 ToeDirection = {1, 0, 0.1}; 
+     };
+     Environment.GlobalRef.LeftFootPrint = {
+        AnyVec3 HeelPosition = {-0.08, 0, -0.14};
+        AnyVec3 ToeDirection = {1, 0, -0.1}; 
+     };
+    
+    // Include the body part of the Human model
     AnyFolder &BodyModel = .HumanModel.BodyModel;
+    
+    // Include the default mannequin drivers
     AnyFolder &DefaultMannequinDrivers = .HumanModel.DefaultMannequinDrivers;
  
-    // Environment files are used to include objects surrounding human, e.g. global reference frame
+    // Environment files are used to include objects surrounding human,
+    // e.g. global reference frame
     #include "Model\Environment.any"   
     
     AnyFolder ModelEnvironmentConnection = 
     {
-      // This file contains all joint and foot reaction forces to simulate standing human
-      #include "Model\JointsAndDrivers.any"
+      // This file contains all contraints to simulate the standing human
+      #include "Model/JointsAndDrivers.any"
+      
+      // Ground reaction force prediction
+      #include "Model/GRFPrediction.any"
     };
   };
-  
+  // Define Study for running kinematics and inverse dynamics simulation analyses
   AnyBodyStudy Study =
   {
+    // Include the Model within the Study
     AnyFolder &Model = .Model;  
     
     Gravity={0.0, -9.81, 0.0};
@@ -39,10 +64,9 @@ Main =
     // soft default mannequin drivers.
     Kinematics.SolverType = KinSolOverDeterminate;
     InitialConditions.SolverType = Kinematics.SolverType ;
-    
   };
-  
-    #include "Model\RunAppSequence.any"
+  // This is readymade simulation package including some pre-processing steps and the InverseDynamics analysis
+  #include "Model\RunAppSequence.any"
   
 }; //Main
 
