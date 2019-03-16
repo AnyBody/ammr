@@ -1,0 +1,59 @@
+AnyFolder Drivers = {
+  AnyVar KneeFlexion_Min_In_Deg = DEF_KNEE_FLEXION_MIN ;
+  AnyVar KneeFlexion_Max_In_Deg = DEF_KNEE_FLEXION_MAX ;
+  
+  AnyKinMeasureOrg CustomKneeFlexion = {
+    AnyKinMeasureLinComb lincomb = {
+      AnyKinMeasureOrg Org = {
+        AnyKinMeasure& ref = Main.KneeSimulatorStudy.Measures.Kinematics.Knee.Floating.Joints.Femur_Connect;
+        MeasureOrganizer = {1};
+      };
+      Coef = {{-1.0}};
+      OutDim = 1;
+    };
+  };
+  
+  AnyKinMeasure& RefKneeFlexion = CustomKneeFlexion;
+  
+  AnyKinEqFourierDriver KneeFlexion_Driver = {
+    AnyKinMeasureLinComb lincomb = {
+      AnyKinMeasure &ref = ..RefKneeFlexion;
+      Coef = {{1.0}};
+      Const = {-0.5*(..KneeFlexion_Max_In_Deg + ..KneeFlexion_Min_In_Deg)*pi/180};
+      OutDim = 1;
+    };
+    Type = Cos;
+    Freq = 1/DEF_GAIT_PERIOD;
+    A = {{0.0, -0.5*(.KneeFlexion_Max_In_Deg - .KneeFlexion_Min_In_Deg)*pi/180}};
+    B = {{0.0, 0.0}};
+    Reaction.Type = {Off};
+  };  
+  
+  AnyKinMeasureLinComb KneeFlexion_In_Degree = {
+    AnyKinMeasure& ref = .RefKneeFlexion ;
+    Coef = {{180/pi}};
+    OutDim = 1;
+  };
+};
+
+AnyFolder Loads = {
+  AnyVar HipAxialLoad_Min = DEF_HIP_AXIAL_LOAD_MIN ;
+  AnyVar HipAxialLoad_Max = DEF_HIP_AXIAL_LOAD_MAX ;
+  
+  AnyVar HipAxialLoad_Size = 
+  (cos(2*pi/DEF_GAIT_PERIOD*(Main.KneeSimulatorStudy.t - DEF_GAIT_PERIOD/2))+1.0)/2*(HipAxialLoad_Max-HipAxialLoad_Min)+HipAxialLoad_Min;
+  
+  AnyForce3D HipAxialLoad_Action = {
+    AnyRefFrame& target = Main.Model.Segs.FemurHipDummy;
+    Flocal = (-1.0) * .HipAxialLoad_Size * {0, 1, 0};
+    AnyDrawVector Drw = {
+      AnyRefFrame& ref = .target;
+      Vec = .Flocal * Main.DrawSettings.DrawSettingsSupport.Lin.ScaleFactor * 0.1;
+      Line.Thickness = 0.005;
+      Line.End.Style  = Line3DCapStyleArrow ;
+      Line.RGB = {0, 0, 1};
+      PointAway = Off;
+      GlobalCoord = Off;
+    };    
+  };  
+};
