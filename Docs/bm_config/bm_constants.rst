@@ -116,6 +116,11 @@ All BodyModel constants
 
     Constant to switch nonlinear disc spring on in the spine
 
+.. ammr:bm_constant:: _RHYTHM_SOFT_
+    :value: 2
+
+    Constant to switch kinematic rhythms as soft contraints
+
 .. ammr:bm_constant:: _SCALING_NONE_
     :value: 0
 
