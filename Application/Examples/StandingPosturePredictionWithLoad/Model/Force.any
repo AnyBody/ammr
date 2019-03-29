@@ -1,0 +1,51 @@
+
+AnyFolder Force ={   
+
+ AnyDrawWidgetLin DrwWidget = {
+    RefFrame = &Main.Model.Environment.GlobalRef.HandPoint;
+    Target = &Main.InputParameters.ForceDirection;
+    AxisOnOff = {On,On,On};
+    UpdateEvent = OnMouseRelease;
+    Operation = &Main.WidgetOperation;
+        MaxDrawSize=0.2;
+  };
+  
+  
+  //Creates an interpolation function based on force data
+  AnyFunInterpol ForceFunction ={
+  Type=Bspline;
+  Data=Main.InputParameters.HandForce;
+  T=Main.InputParameters.HandForceTime;
+  };
+  
+  
+  AnyForce3D ForceName={
+    AnyRefFrame &ref=.Main.Model.Environment.HandSeg;
+    #if  LoadInRightHand == 1
+    AnyVec3 temp= .ForceFunction(Main.Model.ModelEnvironmentConnection.Drivers.HandControlRight.Linear.t); //pick the time from somewhere... can not be directly in study because there are several
+    #else
+    AnyVec3 temp= .ForceFunction(Main.Model.ModelEnvironmentConnection.Drivers.HandControlLeft.Linear.t); //pick the time from somewhere... can not be directly in study because there are several
+    #endif
+    F=temp;
+  };
+  
+  
+  AnyDrawVector DrawForce = {
+    Vec = .ForceName.F/100; //divide by 100 not to have the force too long in view
+    GlobalCoord = On;
+    AnySeg &ref=.Main.Model.Environment.HandSeg;
+    Line.Thickness=0.015;
+    Line.RGB={0,0,1};
+    Line.End.Style = {5} ;
+    Line.End.Thickness = 3*Line.Thickness;  
+    Line.End.Length = 4*Line.Thickness;
+    Line.Start.Style = {0};
+    Line.Start.Thickness = 3*Line.Thickness;  
+    Line.Start.Length = 3*Line.Thickness;
+    Line.Start.RGB = {1,0,0};
+  };           
+};
+
+
+
+

@@ -1,0 +1,154 @@
+//This is a model which can predict the posture as a consequence of applied loads in hands. 
+//It does this by minimizing joint torques and apply balance drivers which account for external 
+//applied loads.
+//
+//
+//The model is driven by a combination of the following drivers:
+// * Drivers which minimize the joint moments (arising from gravity and applied loads in hands) in elbow, shoulder, L4L5 and knee
+// * Driver which tries to keep the CoP inside the foot stance area.
+// * Feets are on ground but the position can be controlled by widgets
+// * Hands are linked to an object which position can be altered using widgets
+//
+//Two type of loads can be applied, either a fixed weight of the object and/or a force vector 
+//
+//The current model has a force vector applied on the object being held between the hands with a zero weight of the object (this is editable)
+//
+//
+//To run the model
+// * Load the model
+// * Try to drag (click and drag) one of the widgets in the ModelView (seen as small coordinate systems)  
+// * When the widget is release the model will run the analysis
+
+#include "libdef.any"
+
+#include "jointlimit/Balance_template_foot_area.any"
+#include "MinTorqueClass/MinTorqueClass.any"
+
+
+
+//These swicthes can be used to determine if the load is applied in both hands or in a single hand. 
+//Three combinations allowed LoadInRightHand,LoadInLeftHand,LoadInRightHand+LoadInLeftHand
+#define LoadInRightHand 1   
+#define LoadInLeftHand  1
+
+
+Main = {
+  
+  #include "Model/BodyModelConfig.any"
+  
+  // Using your own Mannequin.any file in the Model folder of your model
+  #include "Model\Mannequin.any"
+  
+  // Include default human model
+  #include "<ANYBODY_PATH_BODY>\HumanModel.any"
+
+  AnyFolder InputParameters ={
+  
+    //Model can be loaded with both a force and a weight of an object
+    AnyVec3 ForceDirection = DesignVar({0,0.01,-1});  // this is the initial direction of the force it can be manipulated by widget (vertical blue line upon load)
+    AnyVar ForceMagnitude = 100; //this is the initial value of the force it can be manipulated by dragging the widget
+
+    //Initial value of handforce as a function of time, each element has corresponding timevar in HandForceTime
+    //These lines should generally not be changed, they are generic and made using ForceMagnitude and ForceDirection
+    AnyFloat HandForceTime ={-10,0,1,3,4,10}; //this time vector needs to be larger than tStart-tEnd
+    AnyFloat HandForce =  { ForceDirection[0]*ForceMagnitude*{1,1,1,1,1,1}, ForceDirection[1]*ForceMagnitude*{1,1,1,1,1,1},  ForceDirection[2]*ForceMagnitude*{1,1,1,1,1,1}};
+
+    //weight of object and location
+    AnyVar ObjectWeight = 0;   //weight of mass applied
+    AnyVec3 ObjectPoint = DesignVar({0.8,0,1.0});  //initial position of object, dragging the widget will change this
+    AnyMat33 ObjectOrientation = RotMat(0*pi/180,x)*RotMat(0*pi/180,y)*RotMat(0*pi/180,z); //initial orientation of object
+    AnyVec3 HandPosRight = {0,-0.1,0};  //position of the handle coordinates wrt CoM of Object
+    AnyVec3 HandPosLeft = {0,0.1,0};   //position of the handle coordinates wrt CoM of Object 
+    
+    AnyVec3 RightFootPoint =DesignVar({0.1,-0.1,0}); //initial position of the right foot
+    AnyVec3 LeftFootPoint =DesignVar({0.5,0.1,0}); //initial position of the left foot
+
+  };  
+  
+  AnyFolder Model = {  
+    
+    AnyFolder &InputParams=Main.InputParameters;
+    
+    //This file contains the balance and torque minimization drivers for the model
+    #include "Posture_Motion/ExternalForceBalanceControlSimpleWithClass.any"
+    
+    // A link to the human model
+    AnyFolder &HumanModel=.HumanModel.BodyModelWithDefaultDrivers;
+    
+    // Environment files are used to include objects surrounding human, e.g. global reference frame, widgets, box for visualization
+    #include "Model\Environment.any"   
+    
+    AnyFolder ModelEnvironmentConnection = {
+      // This file contains all joint and foot reaction forces to simulate the standing human
+      #include "Model\JointsAndDrivers.any"
+      #include "Model\Force.any"
+    };
+  };
+  
+  //This kin study runs before the normal study with a coarser kin tolerance and some drivers exluded
+  AnyBodyStudy Kinematic_Pre_Study= {
+    
+    AnyMechObjectExcluder ExcludeDrivers = {
+      //Exclude some drivers from this study to make it kinematically safer.
+      Objects = arrcat(
+        ObjSearch("Main.Model.OverallWeightBalanceControl.EquilibriumEq_Driver","AnyMechObject"),
+        ObjSearch("Main.Model.MinMomentOnL5SacrumJnt.EquilibriumEq_Driver","AnyMechObject")
+      );
+    };
+    
+    AnyFolder &Model = .Model;  
+    
+    tStart=.Study.tStart;
+    tEnd=.Study.tEnd;
+    
+    Gravity={0.0, 0.0,-9.81};
+    nStep = 1;
+    InitialConditions.MaxIteration=Kinematics.MaxIteration;
+    InitialConditions.Relax=1;
+    Kinematics.MaxIteration =5000;
+    //Note the high tolerance
+    Kinematics.KinematicTol=0.5;
+    InitialConditions.KinematicTol= Kinematics.KinematicTol;
+    Kinematics.SolverType = KinSolOverDeterminate;
+    InitialConditions.SolverType = Kinematics.SolverType ;
+    Kinematics.PosAnalysisOnlyOnOff =On;
+    InitialConditions.PosAnalysisOnlyOnOff=On;
+    
+    InitialConditions.UseStartGuessOnOff =Off;//Setting this to OFF makes model start from last solved frame, it does not use load positions 
+    Kinematics.UseStartGuessOnOff =Off;
+  };
+  
+  
+  
+  AnyBodyStudy Study = {
+    AnyFolder &Model = .Model;  
+    Gravity={0.0,0.0, -9.81};
+    nStep = 1;
+    tEnd=1;
+    Kinematics.SolverType = KinSolOverDeterminate;
+    InitialConditions.SolverType = Kinematics.SolverType ;
+    Kinematics.PosAnalysisOnlyOnOff =On;
+    InitialConditions.PosAnalysisOnlyOnOff=On;
+    Kinematics.MaxIteration =5000;
+    Kinematics.KinematicTol=5e-6;
+    
+    Kinematics.SmallStepAssumptionOnOff =Off;
+    
+    InitialConditions.UseStartGuessOnOff =Off; //Setting this to OFF makes model start from last solved frame, it does not use load positions 
+    Kinematics.UseStartGuessOnOff =Off;
+    
+  };
+  
+  AnyOperationSequence WidgetOperation = {
+    
+    AnyOperation &Ini=Main.Kinematic_Pre_Study.InitialConditions;
+    AnyOperation &Inv=Main.Study.InverseDynamics;
+    
+  };  
+  
+  
+  #include "Model\RunAppSequence.any"
+  
+}; //Main
+
+

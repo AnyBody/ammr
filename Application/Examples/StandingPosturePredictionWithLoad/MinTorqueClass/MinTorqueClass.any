@@ -1,0 +1,281 @@
+
+#class_template CreateTorqueDriver (CreateZeroMomentPointAsExtraSeg=0,
+                                    ForceApplicationPoint,
+                                    LevelForMeasurePlane,
+                                    TargetPointForZeroMoment
+                                    ){
+                             
+                                      
+
+  #var AnyVec3 InitialPositionForPointWithZeroMoment;
+  #var AnyVar  WeightOnSoftDriver;
+  #var AnyVec3 GravityVector ;
+  #var AnyVar  WeightOnEqFunction;
+  #var AnyFloat  ExternalForce_T;
+  #var AnyFloat  ExternalForce_Data;
+  #var AnyVar MassOfHumanSegments ;
+  AnyFolder HumanSegs ={};
+
+  //CreateZeroMomentPointAsExtraSeg can be used to let the model create a segment at the point of zero moment
+  //then this segment can be constrained to be always with the foot stance area, this is done in a different class
+  //by setting the   CreateZeroMomentPointAsExtraSeg =1 will be created which is following the ZMP 
+  //So the ZMP point is unconstrained until it is forced by something else to stay within some bounds or
+  //at a location
+  //The ZeroMomentPoint segment is carried by the global ref all six dof
+  //The motion drivers applied here has no reactions, 
+                      
+  AnyKinMeasureLinComb P_Vec = {
+    AnyKinCoM Human_CoM =   {      AnyFolder& Human = ..HumanSegs; };
+    
+    #if  CreateZeroMomentPointAsExtraSeg==1
+       AnyKinMeasure &ref = .PointWithZeroMoment_lin;
+    #else
+      AnyKinLinear lin ={
+           AnyRefFrame &ref2=..TargetPointForZeroMoment ;
+      };
+    #endif
+    Coef   = {{1,0,0, -1,0,0}, {0,1,0, 0,-1,0}, {0,0,1, 0,0,-1}};
+    Const  = {0,0,0};
+    OutDim = 3;
+  };
+
+  
+  //Force application point zero point
+  AnyKinMeasureLinComb R_Vec = {
+    AnyKinLinear forceapplicationpoint = {      AnyRefFrame& target = ..ForceApplicationPoint; };
+    #if  CreateZeroMomentPointAsExtraSeg==1
+    AnyKinMeasure &ref = .PointWithZeroMoment_lin;
+    #else
+       AnyKinLinear lin ={
+         AnyRefFrame &ref2=..TargetPointForZeroMoment ;
+       };
+    #endif
+    Coef   = {{1,0,0, -1,0,0}, {0,1,0, 0,-1,0}, {0,0,1, 0,0,-1}};
+    Const  = {0,0,0};
+    OutDim = 3;
+  };
+  
+
+  
+  AnyKinMeasureLinComb PCrossCoM =   {
+    AnyKinMeasureLinComb &ref=.P_Vec ;
+    
+    AnyFloat W = .MassOfHumanSegments*.GravityVector;
+    Coef = {
+      {0    ,W[2],-W[1]},
+      {-W[2],0   ,W[0] },
+      {W[1] ,-W[0],0    }
+      
+    }; 
+    OutDim = 3;
+  };
+  
+  AnyKinMeasureOrg Rx = {AnyKinMeasure &ref = .R_Vec; MeasureOrganizer = {0};};
+  AnyKinMeasureOrg Ry = {AnyKinMeasure &ref = .R_Vec; MeasureOrganizer = {1};};
+  AnyKinMeasureOrg Rz = {AnyKinMeasure &ref = .R_Vec; MeasureOrganizer = {2};};
+  
+  AnyFolder F_ext = {
+   
+    AnyFloat T =.ExternalForce_T;
+    AnyFloat Data= .ExternalForce_Data;
+  };
+  
+  #include "CrossProduct.any"
+
+ 
+  
+  //summation R x F + P x W    (W=CoM*Mass) 
+  AnyKinMeasureLinComb EquilibriumEq = {
+    AnyKinMeasureLinComb &ref=.RCrossF ;
+    AnyKinMeasureLinComb &ref2=.PCrossCoM ;
+    Coef   = .WeightOnEqFunction*{{1,0,0, 1,0,0}, {0,1,0, 0,1,0}, {0,0,1, 0,0,1}};
+    Const  = {0,0,0};
+    OutDim = 3;
+  };
+  
+  
+
+  
+  //This function drives PointwithZeroMoment into equilibrium point
+  //it moves the seg PointWithZeroMoment into a position where the moment is as close as possible to zero
+  //note that Z is not driven since Gravity compensation can not be used for reducing moments around Z 
+  AnyKinEqSimpleDriver EquilibriumEq_Driver ={
+    AnyKinMeasureLinComb &ref=.EquilibriumEq ;
+
+    DriverPos={0,0};
+    DriverVel={0,0};
+    CType={Soft,Soft}; //ideally should be hard
+    WeightFun={&wt};
+    MeasureOrganizer={0,1};
+    Reaction.Type= {Off,Off}; //we do not want reactions here... muscles are to do the work
+    AnyFunConst wt = {Value = ..WeightOnSoftDriver*{1,1}*1.0;};
+
+  };
+
+  
+  //this section introduces a new dummy segment which represents the zero moment point
+  //the segment is then driven to be located at the location which should have zero moment
+
+  #if  CreateZeroMomentPointAsExtraSeg==1
+
+      //this is the segment which is being driven to a point of zero moment
+      AnySeg PointWithZeroMoment =  {
+        Mass = 0.00;
+        Jii = 0.000*{1,1,1};
+        r0 = .InitialPositionForPointWithZeroMoment;
+        //make it visual
+        AnyDrawNode Sphere ={
+          RGB={1,0,0};
+          ScaleXYZ={1,1,1}*0.035;
+        };
+
+};
+      
+      //linear measure
+      AnyKinLinear PointWithZeroMoment_lin = {    AnyRefFrame &ref2 = .PointWithZeroMoment;  };
+      //rotational measure
+      AnyKinRotational PointWithZeroMoment_rot = {AnyRefFrame &ref = .PointWithZeroMoment; Type = PlanarAngles;};
+    
+      //lock rotational measure to zero
+      AnyKinEq lock_PointWithZeroMoment_rot = {AnyKinMeasure &ref = .PointWithZeroMoment_rot;};
+    
+      //lock moment in z plane wrt to jnt
+      AnyKinEq lock_PointWithZeroMoment_lin_z = {
+        AnyKinLinear PointWithZeroMoment_lin = {
+          AnyRefFrame &ref1 =  ..LevelForMeasurePlane;
+          AnyRefFrame &ref2 = ..PointWithZeroMoment;
+        };
+        MeasureOrganizer = {2};
+      };
+      
+      AnyReacForce  PointWithZeroMoment_lin_xy={
+        AnyKinMeasureOrg      PointWithZeroMoment_xy= {
+        AnyKinLinear PointWithZeroMoment_lin = {
+          AnyRefFrame &ref1 =  ...LevelForMeasurePlane;
+          AnyRefFrame &ref2 = ...PointWithZeroMoment;
+        };
+        MeasureOrganizer = {0,1};
+      };
+      };
+
+// The lines below can be used to force the moment point towards a specific location
+// if not used the model will only feel the bounds and not try to make the model have balance 
+// between the middle of the feet.
+
+//      //This function drives PointwithZeroMoment into the desired equilibrium point
+//      //if the driver is fullfilled the point of zero moment is in the joint center
+//      AnyKinEqSimpleDriver DriverBetween_PointWithZeroMoment_TargetPointForZeroMoment ={
+//        AnyKinLinear Lin ={
+//           AnySeg &ref1=..PointWithZeroMoment ;
+//           AnyRefFrame &ref2=..TargetPointForZeroMoment ;
+//        };
+//        DriverPos={0,0};
+//        DriverVel={0,0};
+//        MeasureOrganizer={0,1};
+//        CType={Soft,Soft};
+//        WeightFun={&wt};
+//       // AnyFunConst wt = {Value = ..WeightOnSoftDriver*{1,1};};
+//        AnyFunConst wt = {Value = {1,1};};
+//
+//      };
+
+  #endif
+  
+  
+  AnyFolder Visualizations ={
+    AnyFunInterpol Fexternal={
+      Data=..F_ext.Data;
+      T=..F_ext.T;
+      Type=PiecewiseLinear;
+    };
+    
+    AnyDrawVector DrawForce = {
+      Vec = 0.01*.Fexternal(..P_Vec.t) ; //just need a time val 
+      PointAway = On;
+      GlobalCoord = On;
+      AnySeg &ref =    .. ForceApplicationPoint;
+      Opacity=0.2;
+      Line.Thickness=0.01;
+      Line.RGB={0,1,0};
+      Line.End.Style = {5} ;
+      Line.End.Thickness = 3*Line.Thickness;  
+      Line.End.Length = 4*Line.Thickness;
+      Line.Start.Style = {0};
+      Line.Start.Thickness = 3*Line.Thickness;  
+      Line.Start.Length = 3*Line.Thickness;
+      Line.Start.RGB = {1,0,0};
+    };
+
+  
+  };
+
+  
+  //#include "VisualizeTruePointWithZeroMoment2.any"   //this file introduces dummy NO. segments to visualize the zero moment point ...No added complexity
+  
+ 
+  #if  CreateZeroMomentPointAsExtraSeg==1
+ 
+  //Draw sphere
+ // AnyDrawSphere PointWithZeroMoment_draw = {Position = .PointWithZeroMoment.r; ScaleXYZ = 0.05*{0,1,0};};
+    #endif
+ 
+ 
+  //Draw sphere
+  //AnyDrawSphere TargetPointForZeroMoment_draw = {Position = .TargetPointForZeroMoment.r; ScaleXYZ = 0.025*{1,1,1}; RGB={0,1,0};Opacity =0.3;};
+   
+  
+  AnyDrawLine RCrossF_Drawing ={
+    AnyRefFrame &ref=Main.Model.Environment.GlobalRef;
+    #if  CreateZeroMomentPointAsExtraSeg==1
+       p0= .PointWithZeroMoment_lin.Pos;
+    #else
+      p0=.TargetPointForZeroMoment.r ;
+    #endif
+    p1=p0+0.002*.RCrossF.Pos;
+    Line.Thickness=.007;
+    Line.RGB={0,0,1};
+ };
+  
+  AnyDrawLine PCrossCoM_Drawing ={
+    AnyRefFrame &ref=Main.Model.Environment.GlobalRef;
+    #if  CreateZeroMomentPointAsExtraSeg==1
+       p0= .PointWithZeroMoment_lin.Pos;
+    #else
+      p0=.TargetPointForZeroMoment.r ;
+    #endif
+    p1=p0+0.002*.PCrossCoM.Pos;
+    Line.Thickness=.007;
+    Line.RGB={0,0,0};
+    
+  };
+  
+  
+  
+  
+  //  AnyDrawLine P_Vec_Drawing ={
+  //    AnyRefFrame &ref=Main.Model.Environment.GlobalRef;
+  //    p0= .PointWithZeroMoment_lin.Pos;
+  //   p1=p0+.P_Vec.Pos;
+  //   Line.Thickness=.002;
+  //   Line.RGB={0,0,1};
+  //  
+  //  };
+  //
+  //AnyDrawLine R_Vec_Drawing ={
+  //    AnyRefFrame &ref=Main.Model.Environment.GlobalRef;
+  //    p0= .PointWithZeroMoment_lin.Pos;
+  //   p1=p0+.R_Vec.Pos;
+  //   Line.Thickness=.002;
+  //   Line.RGB={0,0,1};
+  //  
+  //  };
+  
+  
+
+  
+  
+  
+  
+};  
+  
+  
