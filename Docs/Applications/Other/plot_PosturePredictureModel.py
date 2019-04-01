@@ -62,7 +62,18 @@ In the following example a force vector is applied to only the right hand.
 .. figure:: /Applications/images/StandingPosturePredictionModel_Onearm.jpg
     :align: center
 
-!! INSERT WARNING HERE !! Please note that these postures are only predictions and care when executing.
+The following video shows an example of how you can manipulate the multiple widgets to achieve different predictive postures:
+
+.. raw:: html 
+
+    <video width="75%" style="display:block; margin: 0 auto;" controls autoplay loop>
+        <source src="../../_static/StandingPosturePrediction.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+    </video>
+
+
+
+
 
 """
 
