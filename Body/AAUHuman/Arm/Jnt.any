@@ -6,17 +6,13 @@
 //#define USE_OFFSET_NORM
 
 DEFAULT_PARAMETER_FOLDER ThoraxScapulaMultiPointContactSettings(
-    NPARAM = 4,
+    NPARAM = 2,
     PARAM_1 = Base, PARAM_1_TYPE = AnyVar,
-    PARAM_2 = Exponent, PARAM_2_TYPE = AnyVar,
-    PARAM_3 = Order, PARAM_3_TYPE = AnyVar,
-    PARAM_4 = Offset, PARAM_4_TYPE = AnyVar
+    PARAM_2 = Exponent, PARAM_2_TYPE = AnyVar
 ) = {
     Default = {
       Base = 1;
       Exponent = 4^120;
-      Order = 90.0; //relates to  USE_OFFSET_NORM
-      Offset = 0.7; //relates to  USE_OFFSET_NORM
     };
 };
 
@@ -219,32 +215,15 @@ AnyKinPointSurface ScapulaAIThoraxMeasure = {
   
   //RefFrames = ObjSearch("..Trunk.SegmentsThorax.ThoraxSeg.Right.RibNodes.*","AnyRefFrame"); 
   AnyFolder &surf3 =..Seg.Scapula.Ellipsoid_ai.ellipsoid;
-  
-  #ifdef USE_OFFSET_NORM
-  NormedMeasureOnOff = Off;
-  #else
+ 
   NormedMeasureOnOff = On;
-  #endif
+
   
 };
 
 AnyKinEqSimpleDriver ScapulaAIThoraxNodeDriver = {  
   
-  #ifndef USE_OFFSET_NORM
   AnyKinMeasure &Measure1=.ScapulaAIThoraxMeasure;
-  #else 
-  
-  
-  AnyKinMeasureNormComb Measure1=   {
-    Order = ..ThoraxScapulaMultiPointContactSettings.Order;
-    Offset = ..ThoraxScapulaMultiPointContactSettings.Offset;
-    AnyInt size =..ScapulaAIThoraxMeasure.nDim; 
-    Weight =-ones(size ,  1)';
-  
-    AnyKinMeasure &Measure1 =..ScapulaAIThoraxMeasure;
-  };
-  
-  #endif
   
   DriverPos = {0};
   DriverVel = {0};
@@ -276,15 +255,7 @@ AnyKinEqSimpleDriver ScapulaAIThoraxNodeDriver = {
 
 
   AnyReacForce ScapulaAIThorax_ContactReaction = {
-    #if BM_ARM_THORAX_SCAPULA_CONTACT == _MULTIPLE_POINT_CONTACT_
-      #ifdef USE_OFFSET_NORM
-      Type = NonPositive;
-      #else
-      Type = NonNegative;
-      #endif
-    #else
     Type = NonNegative;
-    #endif
     AnyKinMeasure &ref=.ScapulaAIThoraxNodeDriver.Measure1 ;
   };
 
@@ -322,20 +293,17 @@ AnyViaPointMuscle TrapezoidLigamentReaction = {
 
 #if BM_ARM_THORAX_SCAPULA_CONTACT == _MULTIPLE_POINT_CONTACT_
 
-AnyKinPointSurface ScapulaTSThoraxMeasureRaw = 
+
+AnyKinPointSurface ScapulaTSThoraxMeasure = 
 {
   Base =.ThoraxScapulaMultiPointContactSettings.Base;
   Exponent=.ThoraxScapulaMultiPointContactSettings.Exponent;
-  
+ 
   #include "ThoraxScapulaContactPoints.any"
     
   AnyFolder &surf3 =..Seg.Scapula.Ellipsoid_ts.ellipsoid;
-  #ifdef USE_OFFSET_NORM
-  NormedMeasureOnOff = Off;
-  #else
   NormedMeasureOnOff = On;
-  #endif
-  
+ 
 };
 
 
@@ -424,15 +392,6 @@ scapula ={
 };
 
 
-AnyKinMeasureNormComb ScapulaTSThoraxMeasure=   {
-  Order = .ThoraxScapulaMultiPointContactSettings.Order;
-  Offset = .ThoraxScapulaMultiPointContactSettings.Offset;
-  AnyInt size =.ScapulaTSThoraxMeasureRaw.nDim; 
-  Weight =-ones(size ,  1)';
-  
-  AnyKinMeasure &ref =.ScapulaTSThoraxMeasureRaw;
-};
-
 #endif
 
 
@@ -448,15 +407,7 @@ AnyKinPointSurface  ScapulaTSThoraxMeasure = {
 #endif
 
 AnyReacForce ScapulaTSThorax_ContactReaction = {
-  #if BM_ARM_THORAX_SCAPULA_CONTACT == _MULTIPLE_POINT_CONTACT_
-    #ifdef USE_OFFSET_NORM
-    Type = NonPositive;
-    #else
-    Type = NonNegative;
-    #endif
-  #else
   Type = NonNegative;
-  #endif
   AnyKinMeasure &ref=.ScapulaTSThoraxMeasure ;
 };  
 
