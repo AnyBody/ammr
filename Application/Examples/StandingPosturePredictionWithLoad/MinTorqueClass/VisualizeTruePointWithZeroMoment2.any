@@ -1,0 +1,68 @@
+AnyFolder VisualizeTruePointWithZeroMoment ={
+  
+  //P_vec global
+  AnyKinCoM P_Vec =   {      AnyFolder& Human = ..HumanSegs; };
+    
+  //Force application point global
+  AnyKinLinear R_Vec = {      AnyRefFrame& target = ..ForceApplicationPoint; };
+
+  //gravity vector
+  AnyFloat W = .MassOfHumanSegments*.GravityVector;
+    
+  AnyKinMeasureLinComb PCrossCoM =   {
+    AnyKinCoM &ref=.P_Vec ;
+    Coef = {
+      {0    ,.W[2],-.W[1]},
+      {-.W[2],0   ,.W[0] },
+      {.W[1] ,-.W[0],0    }
+    }; 
+    OutDim = 3;
+  };
+  
+  AnyKinMeasureOrg Rx = {AnyKinMeasure &ref = .R_Vec; MeasureOrganizer = {0};};
+  AnyKinMeasureOrg Ry = {AnyKinMeasure &ref = .R_Vec; MeasureOrganizer = {1};};
+  AnyKinMeasureOrg Rz = {AnyKinMeasure &ref = .R_Vec; MeasureOrganizer = {2};};
+  
+  AnyFolder F_ext = {
+    //Force Angle
+    AnyFloat T =..ExternalForce_T;
+    AnyFloat Data= ..ExternalForce_Data;
+  };
+  
+  AnyFunInterpol F_EXT_fun ={
+    T =..ExternalForce_T;
+    Data= ..ExternalForce_Data;
+    Type=Bspline; 
+  };
+  #include "CrossProduct.any"
+  
+  //summation R x F + P x W    (W=CoM*Mass) 
+  AnyKinMeasureLinComb EquilibriumEq = {
+    AnyKinMeasureLinComb &ref=.RCrossF ;
+    AnyKinMeasureLinComb &ref2=.PCrossCoM ;
+    Coef   = {{1,0,0, 1,0,0}, {0,1,0, 0,1,0}, {0,0,1, 0,0,1}};
+    Const  = {0,0,0};
+    OutDim = 3;
+  };
+  
+  AnyVec3 Temp =F_EXT_fun(.P_Vec.t)+W; //just need a time val
+  AnyVar  FW_x =iffun(eqfun(Temp[0],0.0),0.0000001,Temp[0]);  //if zero 
+  AnyVar  FW_y =iffun(eqfun(Temp[1],0.0),0.0000001,Temp[1]);  //if zero 
+  AnyVar  FW_z =iffun(eqfun(Temp[2],0.0),0.0000001,Temp[2]);  //if zero 
+  
+  AnyVar  ZMP_y=  (EquilibriumEq.Pos[0]+ZMP_z*FW_y)/FW_z;
+  AnyVar  ZMP_x=  (-EquilibriumEq.Pos[1]+ZMP_z*FW_x)/FW_z;
+  AnyVar  ZMP_z=  .LevelForMeasurePlane.r[2];
+  
+  //draw the true point of zero moment
+  AnyDrawSphere drw ={
+    Position ={.ZMP_x,.ZMP_y,.ZMP_z};
+    RGB={0,1,0};
+    ScaleXYZ={1,1,1}*0.026;
+  };
+
+  
+  
+  
+  
+};
