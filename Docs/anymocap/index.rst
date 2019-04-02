@@ -123,7 +123,7 @@ Description of Model folders
     ======================================= ==============================================================================================
     Folder name                             Description                                                                                  
     ======================================= ==============================================================================================
-    ``ModelSetup``                          Contains contains all the machinery of the AnyMoCap Frame (:doc:`see here for details <model-structure>`).    
+    ``ModelSetup``                          Contains contains all the machinery of the AnyMoCap Frame.
     ``HumanModel``                          Contain the Human model used. This is constructed automatically by the AnyMoCap framework.    
     ``Main.EnvironmentModel``               Contains the model parts which are not part of the Human model. (e.g.  force plate and environment) 
     ``Studies``                             Contains the three studies ``ParameterIdentification``, ``MarkerTracking``, and
