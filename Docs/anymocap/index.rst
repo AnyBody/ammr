@@ -135,6 +135,9 @@ Description of Model folders
     ``LoadAndReplay``                       This loads any previously saved data and starts the replay operation.
     ======================================= ==============================================================================================
 
+
+.. _anymocap_settings:
+
 .. rst-class:: emphasize-children
 
 Options and settings
