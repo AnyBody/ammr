@@ -152,7 +152,7 @@ if not re.match("^\d\.\d\.\d", ams_version):
 ams_version_short = ams_version.rpartition(".")[0]
 ams_version_x = ams_version_short + ".x"
 
-ammr_version = os.environ.get("AMMR_VERSION", "2.2.0-beta")
+ammr_version = os.environ.get("AMMR_VERSION", "2.2.0")
 if not re.match("^\d\.\d\.\d", ammr_version):
     raise ValueError("Wrong format for AMMR version, environment variable")
 ammr_version_short = ammr_version.rpartition(".")[0]
