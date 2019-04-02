@@ -123,7 +123,7 @@ Description of Model folders
     ======================================= ==============================================================================================
     Folder name                             Description                                                                                  
     ======================================= ==============================================================================================
-    ``ModelSetup``                          Contains contains all the machinery of the AnyMoCap Frame (:doc:`see here for details <model-structure>`).    
+    ``ModelSetup``                          Contains contains all the machinery of the AnyMoCap Frame.
     ``HumanModel``                          Contain the Human model used. This is constructed automatically by the AnyMoCap framework.    
     ``Main.EnvironmentModel``               Contains the model parts which are not part of the Human model. (e.g.  force plate and environment) 
     ``Studies``                             Contains the three studies ``ParameterIdentification``, ``MarkerTracking``, and
@@ -134,6 +134,9 @@ Description of Model folders
                                             tracking and finally 3. run inverse dynamics analysis, 4. save results to and HDF5 file for later replay.
     ``LoadAndReplay``                       This loads any previously saved data and starts the replay operation.
     ======================================= ==============================================================================================
+
+
+.. _anymocap_settings:
 
 .. rst-class:: emphasize-children
 
