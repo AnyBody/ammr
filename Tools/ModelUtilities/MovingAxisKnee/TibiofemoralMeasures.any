@@ -1,0 +1,37 @@
+AnyFolder Tibiofemoral_R = {     
+    //Femur translations relative to tibia
+    AnyKinLinear JCS_translation= {  
+      Ref = 0;       
+      AnyRefFrame &ShankNode = Main.HumanModel.BodyModel.Right.Leg.Seg.Shank.KneeJointAnatomicalFrame;    
+      AnyRefFrame &ThighNode = Main.HumanModel.BodyModel.Right.Leg.Seg.Thigh.KneeJointAnatomicalFrame;
+    };   
+    
+    AnyKinMeasureLinComb JCS_rotation = {  
+      //Tibia rotations relative to femur
+      AnyKinRotational rot = {     
+        Type = RotAxesAngles;
+        Axis1 = z;
+        Axis2 = x; 
+        Axis3 = y; 
+        AnyRefFrame &ThighNode = Main.HumanModel.BodyModel.Right.Leg.Seg.Thigh.KneeJointAnatomicalFrame;
+        AnyRefFrame &ShankNode = Main.HumanModel.BodyModel.Right.Leg.Seg.Shank.KneeJointAnatomicalFrame;  
+      }; 
+      Coef = {{1,0,0}, {0,1,0},{0,0,1}}*180/pi;
+      OutDim = 3;
+    };
+    
+    AnyFolder GS_measures = {
+      AnyVec3 H = Main.HumanModel.BodyModel.Right.Leg.Seg.Shank.KneeJointAnatomicalFrame.r-Main.HumanModel.BodyModel.Right.Leg.Seg.Thigh.KneeJointAnatomicalFrame.r;
+      AnyVec3 e1 = {Main.HumanModel.BodyModel.Right.Leg.Seg.Thigh.KneeJointAnatomicalFrame.Axes[0][0],Main.HumanModel.BodyModel.Right.Leg.Seg.Thigh.KneeJointAnatomicalFrame.Axes[1][0],Main.HumanModel.BodyModel.Right.Leg.Seg.Thigh.KneeJointAnatomicalFrame.Axes[2][0]}; // the x-axis of femur axis medial-lateral
+      AnyVec3 e3 = {Main.HumanModel.BodyModel.Right.Leg.Seg.Shank.KneeJointAnatomicalFrame.Axes[0][2],Main.HumanModel.BodyModel.Right.Leg.Seg.Shank.KneeJointAnatomicalFrame.Axes[1][2],Main.HumanModel.BodyModel.Right.Leg.Seg.Shank.KneeJointAnatomicalFrame.Axes[2][2]}; // the z-axis of the tibial axis superior-inferior 
+      AnyVec3 e2 = cross(e3,e1);
+      
+      AnyVar GS_q1 = H*e1';  // lateral tibial displacement
+      AnyVar GS_q2 = H*e2';  // anterior tibial drawer displacement
+      AnyVar GS_q3 = -H*e3'; // joint distraction
+      
+      AnyVar GS_FlexExt = -.JCS_rotation.Pos[0]; // multiply by (-) such that flexion values are positive
+      AnyVar GS_AbdAdd = .JCS_rotation.Pos[1];   // (pi/2 + Adduction, right knee  OR pi/2 - Adduction, left knee)
+      AnyVar GS_IntExt = .JCS_rotation.Pos[2];   // (- for right knee / + for left knee)
+    }; 
+  };

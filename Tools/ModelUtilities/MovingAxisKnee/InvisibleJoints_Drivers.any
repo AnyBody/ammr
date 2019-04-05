@@ -1,0 +1,123 @@
+BodyModel.Right.Leg.Jnt = {
+  // this joint allows only for relative rotation of invisible segments around the z-axis and constraining their origins to be at the same position in the global coordinate system
+  AnyRevoluteJoint Inv_TF = {
+    Axis = z;
+    AnyRefFrame &InvFemur = Main.HumanModel.BodyModel.Right.Leg.Seg.InvisibleFemur_TF;
+    AnyRefFrame &InvTibia= Main.HumanModel.BodyModel.Right.Leg.Seg.InvisibleTibia;
+  };
+  
+  // Function required for Moving-axis Knee Model  
+  AnyFunInterpol MovingAxisCutOffFunction = {
+    Type = PiecewiseLinear ;
+    // -50 should be replaced with actual flexion angle of TF joint in flexion position from bonepin dynamic trials CAD3 (TLEM 2.0)
+    T = {-180.0,-50.0,-3.58,180.0};
+    Data = {{-1.0,-1.0,0.0,0.0}};
+  };
+  //bodymodel.interface folder
+  //Taking the TF flexion directly from JointAngleOutputs.any
+  AnyKinMeasureFunComb1 CutOffKneeFlexion = {
+    Functions = {&.MovingAxisCutOffFunction};
+    AnyKinMeasureOrg knee_flexion = {
+      AnyKinMeasure &knee_angles = Main.HumanModel.BodyModel.Interface.Right.Tibiofemoral_R.JCS_rotation;
+      MeasureOrganizer = {0};
+    };
+  };
+  
+  //Re-establish knee.constraint.reactions based on drivers necessary to run moving-axis model
+  AnyKinMeasureOrg Knee = {
+    AnyKinEq Constraints = {
+      AnyKinMeasure &InvisibleFemurMedialEFCDriver = .InvisibleFemurMedialEFCDriver_LinComb;
+      AnyKinMeasure &InvisibleFemurLateralEFCDriver  = .InvisibleFemurLateralEFCDriver_LinComb;
+      AnyKinMeasure &InvisibleFemurZRot = .InvisibleFemurZRot_org; 
+      AnyKinMeasure &InvisibleTibiaMedialEFCDriver = .InvisibleTibiaMedialEFCDriver_LinComb; 
+      AnyKinMeasure &InvisibleTibiaLateralEFCDriver = .InvisibleTibiaLateralEFCDriver_LinComb; 
+      AnyKinMeasure &InvisibleTibiaZRot = .InvisibleTibiaZRot_org; 
+    };
+    
+    // this driver constrains a medial point on the invisible femur to a position in between the medial EFC and FFC nodes, dependent on the tibiofemoral flexion 
+    AnyKinMeasureLinComb InvisibleFemurMedialEFCDriver_LinComb = {
+      Coef = {{1.0,0.0,0.0,1.0/(1.0)*(...Seg.Thigh.KneeJointAnatomicalFrame.Medial_TF_FFC.sRel[0]-...Seg.Thigh.KneeJointAnatomicalFrame.Medial_TF_EFC.sRel[0])},{0.0,1.0,0.0,1.0/(1.0)*(...Seg.Thigh.KneeJointAnatomicalFrame.Medial_TF_FFC.sRel[1]-...Seg.Thigh.KneeJointAnatomicalFrame.Medial_TF_EFC.sRel[1])},{0.0,0.0,1.0,1.0/(1.0)*(...Seg.Thigh.KneeJointAnatomicalFrame.Medial_TF_FFC.sRel[2]-...Seg.Thigh.KneeJointAnatomicalFrame.Medial_TF_EFC.sRel[2])}};
+      Const ={0.0,0.0,0.0};
+      AnyKinLinear FemurTrans = {
+        Ref = 0;
+        AnyRefFrame &ref1 = ....Seg.Thigh.KneeJointAnatomicalFrame.Medial_TF_EFC;
+        AnyRefFrame &ref2 = ....Seg.InvisibleFemur_TF.MA_AnatomicalFrame.Medial_TF_EFC;
+      };
+      AnyKinMeasure &KneeFlexion = ..CutOffKneeFlexion;
+      OutDim = 3;  
+    };
+    
+    // this driver constrains the x and y coordinates of a lateral point on the invisible femur to a position between the lateral EFC and FFC nodes with respect to tibiofemoral flexion
+    AnyKinMeasureLinComb InvisibleFemurLateralEFCDriver_LinComb = {
+      Coef = {{1.0,0.0,1.0/(1.0)*(...Seg.Thigh.KneeJointAnatomicalFrame.Lateral_TF_FFC.sRel[0]-...Seg.Thigh.KneeJointAnatomicalFrame.Lateral_TF_EFC.sRel[0])},{0.0,1.0,1.0/(1.0)*(...Seg.Thigh.KneeJointAnatomicalFrame.Lateral_TF_FFC.sRel[1]-...Seg.Thigh.KneeJointAnatomicalFrame.Lateral_TF_EFC.sRel[1])}};
+      Const ={0.0,0.0};
+      AnyKinMeasureOrg org = {
+        AnyKinLinear FemurTrans = {
+          Ref = 0; 
+          AnyRefFrame &ref1 = .....Seg.Thigh.KneeJointAnatomicalFrame.Lateral_TF_EFC;
+          AnyRefFrame &ref2 = .....Seg.InvisibleFemur_TF.MA_AnatomicalFrame.Lateral_TF_EFC;
+        };
+        MeasureOrganizer = {0,1};
+      };
+      AnyKinMeasure &KneeFlexion = ..CutOffKneeFlexion;
+      OutDim = 2;  
+    };
+    
+    // this driver ensures that there will be zero rotation about the z-axis of the invisible femur relative to the femoral anatomical frame
+    AnyKinMeasureOrg InvisibleFemurZRot_org = {
+      AnyKinRotational rot = {
+        Type = RotAxesAngles;
+        Axis1 = z;
+        Axis2 = x;
+        Axis3 = y;
+        AnyRefFrame &ref1 = ....Seg.Thigh.KneeJointAnatomicalFrame.InvisibleFemurRotationNode;
+        AnyRefFrame &ref2 = ....Seg.InvisibleFemur_TF;          
+      };
+      MeasureOrganizer = {0};
+    };
+    
+    // this driver constrains a medial point on the invisible tibia to a position in between the medial EFC and FFC nodes, dependent on the tibiofemoral flexion    
+    AnyKinMeasureLinComb InvisibleTibiaMedialEFCDriver_LinComb = {
+      Coef = {{1.0,0.0,0.0,1.0/( 1.0)*(...Seg.Shank.KneeJointAnatomicalFrame.Medial_TF_FFC.sRel[0]-...Seg.Shank.KneeJointAnatomicalFrame.Medial_TF_EFC.sRel[0])},{0.0,1.0,0.0,1.0/( 1.0)*(...Seg.Shank.KneeJointAnatomicalFrame.Medial_TF_FFC.sRel[1]-...Seg.Shank.KneeJointAnatomicalFrame.Medial_TF_EFC.sRel[1])},{0.0,0.0,1.0,1.0/( 1.0)*(...Seg.Shank.KneeJointAnatomicalFrame.Medial_TF_FFC.sRel[2]-...Seg.Shank.KneeJointAnatomicalFrame.Medial_TF_EFC.sRel[2])}};
+      Const ={0.0,0.0,0.0};
+      AnyKinLinear TibiaTrans = {
+        Ref = 0;
+        AnyRefFrame &ref1 = ....Seg.Shank.KneeJointAnatomicalFrame.Medial_TF_EFC;
+        AnyRefFrame &ref2 = ....Seg.InvisibleTibia.MA_AnatomicalFrame.Medial_TF_EFC;
+      };
+      AnyKinMeasure &KneeFlexion = ..CutOffKneeFlexion;
+      OutDim = 3;  
+    };
+    
+    // this driver constrains the x and y coordinates of a lateral point on the invisible tibia to a position between the lateral EFC and FFC nodes with respect to tibiofemoral flexion
+    AnyKinMeasureLinComb InvisibleTibiaLateralEFCDriver_LinComb = {
+      Coef = {{1.0,0.0,1.0/( 1.0)*(...Seg.Shank.KneeJointAnatomicalFrame.Lateral_TF_FFC.sRel[0]-...Seg.Shank.KneeJointAnatomicalFrame.Lateral_TF_EFC.sRel[0])},{0.0,1.0,1.0/( 1.0)*(...Seg.Shank.KneeJointAnatomicalFrame.Lateral_TF_FFC.sRel[1]-...Seg.Shank.KneeJointAnatomicalFrame.Lateral_TF_EFC.sRel[1])}};
+      Const ={0.0,0.0};
+      AnyKinMeasureOrg org = {
+        AnyKinLinear TibiaTrans = {
+          Ref = 0; 
+          AnyRefFrame &ref1 = .....Seg.Shank.KneeJointAnatomicalFrame.Lateral_TF_EFC;
+          AnyRefFrame &ref2 = .....Seg.InvisibleTibia.MA_AnatomicalFrame.Lateral_TF_EFC;
+        };
+        MeasureOrganizer = {0,1};
+      };
+      AnyKinMeasure &KneeFlexion = ..CutOffKneeFlexion;
+      OutDim = 2;  
+    };
+    
+    // this driver ensures that there will be zero rotation about the z-axis of the invisible tibia relative to the tibial anatomical frame
+    AnyKinMeasureOrg InvisibleTibiaZRot_org = {
+      AnyKinRotational rot = {
+        Type = RotAxesAngles;
+        Axis1 = z;
+        Axis2 = x;
+        Axis3 = y;
+        AnyRefFrame &ref1 = ....Seg.Shank.KneeJointAnatomicalFrame.InvisibleFemurRotationNode;
+        AnyRefFrame &ref2 = ....Seg.InvisibleTibia;           
+      };
+      MeasureOrganizer = {0};
+    };
+  };
+};
+
+

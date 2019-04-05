@@ -1,0 +1,175 @@
+
+// This file contains the definition of the moving camera.
+// It create a serie of images like the clasic recorder.
+// the new feature of this recorder is that you can set it to 
+// have a particular motion in space.
+
+
+
+
+// ******** Folder with camera definitions **********
+
+// including reference frames for the cameras and recorders
+
+// Structure:
+
+// - Reference frame
+
+//   - Camera
+
+//      - Recorder
+
+
+AnyFolder CameraDefs = {
+  
+  
+  AnySwitch Perspective = On;
+  AnySwitch Trig = On;
+  AnySwitch ResetTrig = Off;
+  
+  
+  AnyStringVar ImagePath = "../Output/MovingCamera/"; // Name of the folder where are stored the images (remenber you have to crate the folder before doing the record).
+  AnyStringVar ImageExt = "png";
+  AnyIntVar pxWidth = 1000;
+  AnyIntVar pxHeight =1000;
+  
+  // The EyePoint is the point where is placed the camera in space,
+  // different strategies exit to drive it and can be combined:
+  
+ // AnyVec3 EyePoint = LookAtPoint + {0.2, 0.2, 0.55}; // Camera follows LookAtPoint.
+  AnyVec3 EyePoint = {0.7-0.07*Main.Study.t, 1.2-0.05*Main.Study.t, 0.55-0.05*Main.Study.t}; // coordinates changing in time.
+ //AnyVec3 EyePoint = .CamSeg.CamInsertNode.r; // Camera driven by segment, include seg and drivers below.
+  
+  // the LookAtPoint is the point the camera focus on, different strategies can be adopted:
+  
+ // AnyVec3 LookAtPoint = {0,1,0}; // Fixed point in space.
+ AnyVec3 LookAtPoint = Main.HumanModel.BodyModel.Right.Leg.Seg.Thigh.HipJoint.r; // Particular body part.
+  //AnyVec3 LookAtPoint = {0,1,0.5-10*Main.Study.t}; // coordinates changing in time.
+  
+  AnyVec3 UpPoint = LookAtPoint+ {0,10,0};
+  AnyVar  ViewHeight = 1.5;
+  AnyVar  CamDist = 1.0;
+  
+  
+  AnyScene scene = {
+    BackgroundColor = {0.9,0.9,0.94};
+  };
+  
+  
+  
+  //  camera
+  
+  AnyCameraLookAt Cam1 = {
+    
+    Perspective =. Perspective;
+    EyePoint = .EyePoint;
+    LookAtPoint = .LookAtPoint;
+    UpPoint = .UpPoint;
+    FocalDist = .CamDist;
+    FocalHeight = .ViewHeight*1.1;
+    
+    AnyScene &scene = .scene;
+    
+    AnyCamRecorder rec = {
+      
+      FileName = ..ImagePath + "Cam1." + strval(Counter,"%05i") + "." + ..ImageExt;
+      pxWidth = ..pxWidth ;
+      pxHeight = ..pxHeight;
+      Trig = ..Trig;
+      ResetTrig = ..ResetTrig;
+      
+    };
+    
+    AnyDrawCamera drw = {
+      ScaleXYZ = 0.1*{1,1,1};
+    };
+    
+  };
+  
+};
+
+
+
+
+
+// You can choose to drive the camera with a segment, it gives you the posibility
+// to make more complex motions of the camera in space.
+
+
+
+// ********** Segment for driving camera ***********
+// Choose at your convenience the size of the segment and the location
+// of its center of rotation in space.
+
+//Main.Model.EnvironmentModel.GlobalRef={
+//  AnyRefNode CamNode = {
+//    sRel={1.5, 0.7, 0};
+//  };
+//};
+//
+//AnySeg CamSeg = {
+//  r0=Main.Model.EnvironmentModel.GlobalRef.CamNode.sRel;
+//  Mass = 0;
+//  Jii = {0, 0, 0};
+//  
+//  AnyRefNode GroundNode = {
+//    sRel={0, 0, 0};
+//  };
+//  
+//  AnyRefNode CamInsertNode ={
+//    sRel={0, 0, 1.1};
+//  };
+//  
+////  AnyDrawNodes Drw = 
+////  {
+////    RGB = {0.65, 0.65, 0.65};
+////    ScaleXYZ = 2*{0.025, 0.025, 0.025};
+////  };
+//
+//}; // CamSeg
+
+
+
+
+// ********** Joint and drivers for the CamSeg ***********
+// Choose at your convenience a set of joint and drivers to
+// create your motion.
+//
+//AnyUniversalJoint CamJoint = 
+//{
+//  Axis1 = x;
+//  Axis2 = y;
+//  //  Ref = 1;
+//  AnyRefFrame &Ref1 = .CamSeg.GroundNode;
+//  AnyRefFrame &Ref2 = Main.Model.EnvironmentModel.GlobalRef.CamNode;
+//};
+//
+//
+//AnyKinEqSimpleDriver CamDriver = 
+//{
+//  AnyUniversalJoint &Jnt= .CamJoint;
+//  MeasureOrganizer = {1};
+//  //DriverPos = ;
+//  DriverVel = pi/180*{-30};
+//};
+//
+//
+//AnyKinLinear CamLin = 
+//{
+//  //Ref = -1;
+//  AnyRefFrame &Ref1 = Main.Model.EnvironmentModel.GlobalRef.CamNode;
+//  AnyRefFrame &Ref2 = .CamSeg.CamInsertNode;
+//};
+//
+//
+//AnyKinEqInterPolDriver CamDriver2 = 
+//{
+//  Type = Bspline;
+//  BsplineOrder = 4;
+//  T = 10*{0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1};
+//  Data = {{0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.4, 0.3, 0.2, 0.1, 0}};
+//  AnyKinMeasure& Lin = .CamLin;
+//  MeasureOrganizer = {1};
+//};
+
+
