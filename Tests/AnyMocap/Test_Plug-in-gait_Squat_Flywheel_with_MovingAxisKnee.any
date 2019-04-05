@@ -1,0 +1,64 @@
+//# Defintions for the python test framwork 
+//#ignore_errors = ['FileReader.FileName']
+//warnings_to_include = [
+//    "filter_transients_warning",
+//]
+//fatal_warnings = True
+
+#include "../libdef.any"
+
+#path MOCAP_PATH_MAINFILEDIR "<ANYMOCAP_EXAMPLES>/Plug-in-gait_MultiTrial_StandingRef/Subjects/S1/S1_FlywheelSquat/"
+
+#path MOCAP_PATH_MAINFILE "<MOCAP_PATH_MAINFILEDIR>/Main.any"
+#define MOCAP_NAME_MAINFILEDIR "S1_FlywheelSquat"
+
+
+
+
+#ifdef TEST_NAME
+  #define  MOCAP_TEST_FILENAME_PREFIX  "Test_"
+#else
+ #define  MOCAP_TEST_FILENAME_PREFIX  "TEST_"
+ #define BM_LEG_MODEL _LEG_MODEL_TLEM2_
+ //#define CREATE_IMAGE
+#endif
+
+
+#ifdef CREATE_IMAGE
+#undef MOCAP_TEST_FILENAME_PREFIX
+#path TEMP_PATH "<MOCAP_PATH_MAINFILEDIR>/../../Output"
+#endif
+
+
+
+// Run Analysis with a reduced number of time steps
+// to make test go faster. 
+#define N_STEP 30
+
+//-----------Have to insert code before <ANYMOCAP_MODEL>---------
+// Exclude right knee joint
+#define BM_JOINT_TYPE_KNEE_RIGHT _JOINT_TYPE_USERDEFINED_
+//Include right Moving-axis knee joint
+#include "<ANYBODY_PATH_MODELUTILS>/MovingAxisKnee/AddOnKnee.any"
+//---------------------------------------------------------------- 
+
+#include "<MOCAP_PATH_MAINFILE>"
+
+Main = 
+{
+  AnyOperation& TestRunApplication = Main.RunAnalysis;
+  
+  #ifndef CREATE_IMAGE
+    AnyOperation& RunTest = Main.TestRunApplication;
+  #else
+    #include "../Cameras.any"
+    AnyOperationSequence CameraInitPos = 
+    {
+      AnyOperation& ref1 = Main.RunAnalysis.LoadParameters;
+      AnyOperation& ref2 = Main.Studies.InverseDynamicStudy.InitialConditions;
+    };
+    LoadTimeCam.CameraLookAtPoint = Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.r+{0,0,-0.25};
+    LoadTimeCam.CameraFieldOfView = DesignVar(1.9);
+    LoadTimeCam.CameraDirection  = {0,-1,0.3};
+  #endif      
+};
