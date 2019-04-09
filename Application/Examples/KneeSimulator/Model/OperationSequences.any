@@ -1,0 +1,28 @@
+#if USE_LIGAMENT_CALIBRATION == 1
+AnyOperationSequence LigamentCalibrationSequence = {
+  AnyOperation& EvaluateLigamentLength = Main.EvaluateLigamentLength.UpdateDesign;
+  /// This operation updates the values based on the dependancies.
+  AnyOperationMacro UpdateValues = {
+    MacroStr = {
+      "classoperation Main" + strquote("Update Values")
+    };
+  };  
+};
+#endif
+
+AnyOperationSequence RunApplication = {      
+  #if USE_LIGAMENT_CALIBRATION == 1
+  AnyOperation& LigamentCalibrationSequence = .LigamentCalibrationSequence;
+  #endif
+  
+  AnyOperation &KneeSimulatorStudy=Main.KneeSimulatorStudy.InverseDynamics;
+  
+  #if SAVE_H5 == 1 
+  /// This operation saves the output of the study to an h5 file in the Output folder
+  AnyOperationMacro SaveResult = {
+    MacroStr={ 
+      "classoperation Main.KneeSimulatorStudy.Output" + strquote("Save data") + " --file="+ "../Output/" + OutputFileNamePrefix + "-Result.anydata.h5 " + "--type=Deep"
+    };
+  };
+  #endif
+};

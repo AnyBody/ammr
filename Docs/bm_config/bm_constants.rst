@@ -71,6 +71,16 @@ All BodyModel constants
 
     Switch for using the GM foot model"
 
+.. ammr:bm_constant:: _ELLIPSOID_CONTACT_
+    :value: 1
+
+    Switch for using ellipsoid contact between scapula and thorax
+
+.. ammr:bm_constant:: _MULTIPLE_POINT_CONTACT_
+    :value: 0
+
+    Switch for using multiple point contact between scapula and thorax"
+
 .. ammr:bm_constant:: _MORPH_NONE_
     :value: 0
 
@@ -115,6 +125,11 @@ All BodyModel constants
     :value: 2
 
     Constant to switch nonlinear disc spring on in the spine
+
+.. ammr:bm_constant:: _RHYTHM_SOFT_
+    :value: 2
+
+    Constant to switch kinematic rhythms as soft contraints
 
 .. ammr:bm_constant:: _SCALING_NONE_
     :value: 0

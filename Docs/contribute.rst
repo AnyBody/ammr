@@ -4,12 +4,18 @@ Contribute to Model Development
 The Model Repository is the product of collaboration between AnyBody Technology,
 and many academic institutions and research projects. 
 
-If you are interested in beta models/repositories that have not been integrated
-into the AMMR yet, please visit `the development repositories hosted on Github
-<https://github.com/anybody>`_. All contributions are most welcome. 
+If you are interested in beta models/repositories you can get access to the
+development version of the AMMR. Development takes place in a semi-closed
+repository. The repository is closed to protect academic contributors who also
+often need to publish their models before release.
 
-There is also a development version of the AMMR, which is not hosted publically.
-Please contact us if you need access to the development version of the AMMR.
+However, access to the repository is given on request. Visit the following site
+and press “Request Access”.
+
+https://gitlab.com/anybody/beta
+
+You can also view other freely available models and resources hosted on `GitHub
+<https://github.com/anybody`_.
 
 .. only:: draft
 

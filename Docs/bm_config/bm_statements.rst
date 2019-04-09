@@ -162,12 +162,29 @@ All BodyModel parameters
     Parameter defining the Leg model used.
 
 
-    :Default: :ammr:bm_constant:`_LEG_MODEL_TLEM_`
-    :Example: ``#define BM_LEG_MODEL _LEG_MODEL_TLEM_``
+    :Default: :ammr:bm_constant:`_LEG_MODEL_TLEM2_`
+    :Example: ``#define BM_LEG_MODEL _LEG_MODEL_TLEM2_``
     :Options: - :any:`OFF`: 
               - :any:`_LEG_MODEL_TLEM_`: Switch to use leg model: "TLEM 1"
               - :any:`_LEG_MODEL_TLEM2_`: Switch to use leg model: "TLEM 2"
               - :any:`_LEG_MODEL_LEG_`: Switch to use leg model: "Leg"
+
+
+|  
+|   
+| 
+| 
+
+
+.. ammr:bm_statement:: BM_ARM_THORAX_SCAPULA_CONTACT
+
+    Parameter defining the contact type between Thorax and Scapula
+
+
+    :Default: :ammr:bm_constant:`_ELLIPSOID_CONTACT_`
+    :Example: ``#define BM_ARM_THORAX_SCAPULA_CONTACT _ELLIPSOID_CONTACT_``
+    :Options: - :any:`_ELLIPSOID_CONTACT_`: Switch for using ellipsoid contact between scapula and thorax
+              - :any:`_MULTIPLE_POINT_CONTACT_`: Switch for using multiple point contact between scapula and thorax"
 
 
 |  
@@ -441,28 +458,14 @@ All BodyModel parameters
 
 .. ammr:bm_statement:: BM_TRUNK_RHYTHM
 
-    A switch to use a kinematic rhythm for the whole spine.
+    A switch to use a kinematic rhythm for the whole spine. ON indicate that the rhythm is a hard contraint while _RHYTHM_SOFT_ will make the rhythm as soft kinematic contraint.
 
 
     :Default: ``ON``
     :Example: ``#define BM_TRUNK_RHYTHM ON``
-    :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
-
-
-|  
-|   
-| 
-| 
-
-
-.. ammr:bm_statement:: BM_TRUNK_RHYTHM_SOFT
-
-    A switch to make rhythms in the spine as soft constraints.
-
-
-    :Default: ``ON``
-    :Example: ``#define BM_TRUNK_RHYTHM_SOFT ON``
-    :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
+    :Options: - :any:`OFF`: 
+              - :any:`ON`: 
+              - :any:`_RHYTHM_SOFT_`: Constant to switch kinematic rhythms as soft contraints
 
 
 |  
@@ -473,11 +476,15 @@ All BodyModel parameters
 
 .. ammr:bm_statement:: BM_TRUNK_LUMBAR_RHYTHM
 
-    A switch to use a kinematic rhythm for the lumbar spine.
+    A switch to use a kinematic rhythm for the lumbar spine. ON indicate that the rhythm is a hard contraint while _RHYTHM_SOFT_ will make the rhythm as soft kinematic contraint.
 
 
     :Default: :ammr:bm_statement:`BM_TRUNK_RHYTHM`
     :Example: ``#define BM_TRUNK_LUMBAR_RHYTHM BM_TRUNK_RHYTHM``
+    :Options: - :any:`OFF`: 
+              - :any:`ON`: 
+              - :any:`_RHYTHM_SOFT_`: Constant to switch kinematic rhythms as soft contraints
+
 
 |  
 |   
@@ -487,11 +494,15 @@ All BodyModel parameters
 
 .. ammr:bm_statement:: BM_TRUNK_CERVICAL_RHYTHM
 
-    A switch to use a kinematic rhythm for the cervical spine.
+    A switch to use a kinematic rhythm for the cervical spine. ON indicate that the rhythm is a hard contraint while _RHYTHM_SOFT_ will make the rhythm as soft kinematic contraint.
 
 
     :Default: :ammr:bm_statement:`BM_TRUNK_RHYTHM`
     :Example: ``#define BM_TRUNK_CERVICAL_RHYTHM BM_TRUNK_RHYTHM``
+    :Options: - :any:`OFF`: 
+              - :any:`ON`: 
+              - :any:`_RHYTHM_SOFT_`: Constant to switch kinematic rhythms as soft contraints
+
 
 |  
 |   
@@ -659,28 +670,14 @@ All BodyModel parameters
 
 .. ammr:bm_statement:: BM_ARM_SHOULDER_RHYTHM
 
-    Switch for the shoulder rhythm constraints.
+    Switch for the shoulder rhythm constraints. ON indicate that the rhythm is a hard contraint while _RHYTHM_SOFT_ will make the rhythm as soft kinematic contraint.
 
 
     :Default: ``OFF``
     :Example: ``#define BM_ARM_SHOULDER_RHYTHM OFF``
-    :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
-
-
-|  
-|   
-| 
-| 
-
-
-.. ammr:bm_statement:: BM_ARM_SHOULDER_RHYTHM_SOFT
-
-    A switch to make shoulder rhythms a soft contraint.
-
-
-    :Default: ``ON``
-    :Example: ``#define BM_ARM_SHOULDER_RHYTHM_SOFT ON``
-    :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
+    :Options: - :any:`OFF`: 
+              - :any:`ON`: 
+              - :any:`_RHYTHM_SOFT_`: Constant to switch kinematic rhythms as soft contraints
 
 
 |  
@@ -696,7 +693,9 @@ All BodyModel parameters
 
     :Default: ``ON``
     :Example: ``#define BM_ARM_CLAVICULA_ROTATION_RHYTHM ON``
-    :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
+    :Options: - :any:`OFF`: 
+              - :any:`ON`: 
+              - :any:`_RHYTHM_SOFT_`: Constant to switch kinematic rhythms as soft contraints
 
 
 |  

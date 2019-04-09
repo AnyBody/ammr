@@ -16,6 +16,9 @@
   <constant name="_FOOT_MODEL_DEFAULT_" default="0" valuetype="integer" descr="Switch for using the default foot model"></constant>
   <constant name="_FOOT_MODEL_NONE_" default="1" valuetype="integer" descr='Switch for using the GM foot model"'></constant>
 
+  <constant name="_ELLIPSOID_CONTACT_" default="1" valuetype="integer" descr="Switch for using ellipsoid contact between scapula and thorax"></constant>
+  <constant name="_MULTIPLE_POINT_CONTACT_" default="0" valuetype="integer" descr='Switch for using multiple point contact between scapula and thorax"'></constant>
+  
   <constant name="_MORPH_NONE_" default="0" valuetype="integer" descr="Constant for no-morphing between the upper and lower bodies." nicename="No interface"/>
   <constant name="_MORPH_TRUNK_TO_LEG_" default="1" valuetype="integer" descr="Constant for the trunk-to-leg morphing" nicename="Trunk to Leg"/>
   <constant name="_MORPH_LEG_TO_TRUNK_" default="2" valuetype="integer" descr="Constant for the leg-to-trunk morhping" nicename="Leg to Trunk"/>
@@ -28,6 +31,8 @@
   <constant name="_DISC_STIFFNESS_LINEAR_" default="1" valuetype="integer" descr="Constant to switch linear disc spring on in the spine" nicename="Linear Stiffness"/>
   <constant name="_DISC_STIFFNESS_NONLINEAR_" default="2" valuetype="integer" descr="Constant to switch nonlinear disc spring on in the spine" nicename="Nonlinear Stiffness"/>  
   
+  <constant name="_RHYTHM_SOFT_" default="2" valuetype="integer" descr="Constant to switch kinematic rhythms as soft contraints" nicename="Soft rhythm"/>  
+
   <constant name="_SCALING_NONE_" default="0" valuetype="integer" descr="A scaling law to use body part datasets as is without any scaling."/>
   <constant name="_SCALING_STANDARD_" default="1" valuetype="integer" descr="A default scaling law that corresponds to the 50th percentile European male."/>
   <constant name="_SCALING_UNIFORM_" default="2" valuetype="integer" descr="Uniform anthropometric scaling law to be used by the entire model."/>
@@ -111,11 +116,16 @@
   <opt>_FOOT_MODEL_NONE_</opt>
   </parameter>.
 
-  <parameter name="BM_LEG_MODEL" default="_LEG_MODEL_TLEM_" valuetype="integer" descr="Parameter defining the Leg model used.">
+  <parameter name="BM_LEG_MODEL" default="_LEG_MODEL_TLEM2_" valuetype="integer" descr="Parameter defining the Leg model used.">
   <opt>OFF</opt>
   <opt>_LEG_MODEL_TLEM_</opt>
   <opt>_LEG_MODEL_TLEM2_</opt>
   <opt>_LEG_MODEL_LEG_</opt>
+  </parameter>
+
+  <parameter name="BM_ARM_THORAX_SCAPULA_CONTACT" default="_ELLIPSOID_CONTACT_" valuetype="integer" descr="Parameter defining the contact type between Thorax and Scapula">
+  <opt>_ELLIPSOID_CONTACT_</opt>
+  <opt>_MULTIPLE_POINT_CONTACT_</opt>
   </parameter>
 
 
@@ -188,10 +198,25 @@
   <opt>BM_TRUNK_DISC_STIFNESS</opt>
   </parameter>
 
-  <parameter name="BM_TRUNK_RHYTHM" default="ON" valuetype="integer" descr="A switch to use a kinematic rhythm for the whole spine."/>
-  <parameter name="BM_TRUNK_RHYTHM_SOFT" default="ON" valuetype="integer" descr="A switch to make rhythms in the spine as soft constraints."/>
-  <parameter name="BM_TRUNK_LUMBAR_RHYTHM" default="BM_TRUNK_RHYTHM" valuetype="integer" descr="A switch to use a kinematic rhythm for the lumbar spine."/>
-  <parameter name="BM_TRUNK_CERVICAL_RHYTHM" default="BM_TRUNK_RHYTHM" valuetype="integer" descr="A switch to use a kinematic rhythm for the cervical spine."/>
+  <parameter name="BM_TRUNK_RHYTHM" default="ON" valuetype="integer" nicename="Trunk spine rhythm" descr="A switch to use a kinematic rhythm for the whole spine. ON indicate that the rhythm is a hard contraint while _RHYTHM_SOFT_ will make the rhythm as soft kinematic contraint.">
+   <opt>OFF</opt>
+  <opt>ON</opt>
+  <opt>_RHYTHM_SOFT_</opt>
+  </parameter>
+  
+  <parameter name="BM_TRUNK_LUMBAR_RHYTHM" default="BM_TRUNK_RHYTHM" valuetype="integer" nicename="Lumbar spine rhythm" descr="A switch to use a kinematic rhythm for the lumbar spine. ON indicate that the rhythm is a hard contraint while _RHYTHM_SOFT_ will make the rhythm as soft kinematic contraint.">
+  <opt>OFF</opt>
+  <opt>ON</opt>
+  <opt>_RHYTHM_SOFT_</opt>
+  </parameter>
+
+  <parameter name="BM_TRUNK_CERVICAL_RHYTHM" default="BM_TRUNK_RHYTHM" valuetype="integer" nicename="Cervical spine rhythm"  descr="A switch to use a kinematic rhythm for the cervical spine. ON indicate that the rhythm is a hard contraint while _RHYTHM_SOFT_ will make the rhythm as soft kinematic contraint.">
+  <opt>OFF</opt>
+  <opt>ON</opt>
+  <opt>_RHYTHM_SOFT_</opt>
+  </parameter>
+
+
 
   <parameter name="BM_TRUNK_LIGAMENTS" default="OFF" valuetype="integer" descr="A switch to control all the ligaments in the spine."/>
   <parameter name="BM_TRUNK_LUMBAR_LIGAMENTS" default="BM_TRUNK_LIGAMENTS" valuetype="integer" descr="A switch to control the lumbar spine ligaments."/>
@@ -205,9 +230,19 @@
   <parameter name="BM_ARM_RIGHT" default="ON" valuetype="integer" descr="Switch for the right arm model being present or not." nicename="Right Arm"/>
   <parameter name="BM_ARM_DETAIL_HAND_RIGHT" deprecated="true" default="OFF" valuetype="integer" descr="Keyword for the type of right hand."/>
   <parameter name="BM_ARM_SHOULDER_RHYTHM_RIGHT" deprecated="true" default="OFF" valuetype="integer" descr="Switch for the shoulder rhythm constraints for the right arm being present or not."/>
-  <parameter name="BM_ARM_SHOULDER_RHYTHM" default="OFF" valuetype="integer" descr="Switch for the shoulder rhythm constraints." nicename="Shoulder rhythm"/>
-  <parameter name="BM_ARM_SHOULDER_RHYTHM_SOFT" default="ON" valuetype="integer" descr="A switch to make shoulder rhythms a soft contraint."/>
-  <parameter name="BM_ARM_CLAVICULA_ROTATION_RHYTHM" default="ON" valuetype="integer" descr="Switch for the clavicula rotation rhythm. If enabled axial rotation of the clavicula will be distributed evenly between the sterno-clavicula and acromio-clavicula joint. Effectively removing clavicula axial rotation as an independent degree of freedom.resterno-clavicula axial rotation." nicename="Clavicula rotation rhythm"/>
+  <parameter name="BM_ARM_SHOULDER_RHYTHM" default="OFF" valuetype="integer" descr="Switch for the shoulder rhythm constraints. ON indicate that the rhythm is a hard contraint while _RHYTHM_SOFT_ will make the rhythm as soft kinematic contraint." nicename="Shoulder rhythm">
+    <opt>OFF</opt>
+    <opt>ON</opt>
+    <opt>_RHYTHM_SOFT_</opt>
+  </parameter>
+    
+  
+  <parameter name="BM_ARM_CLAVICULA_ROTATION_RHYTHM" default="ON" valuetype="integer" descr="Switch for the clavicula rotation rhythm. If enabled axial rotation of the clavicula will be distributed evenly between the sterno-clavicula and acromio-clavicula joint. Effectively removing clavicula axial rotation as an independent degree of freedom.resterno-clavicula axial rotation." nicename="Clavicula rotation rhythm">
+    <opt>OFF</opt>
+    <opt>ON</opt>
+    <opt>_RHYTHM_SOFT_</opt>
+  </parameter>
+
   <parameter name="BM_ARM_DETAILED_HAND" default="OFF" valuetype="integer" descr="Switch for enabling the detailed hand." nicename="Detailed hands"/>
   <parameter name="BM_ARM_DELTOID_WRAPPING" default="ON" valuetype="integer" descr="Switch enabling/disabling the deltoid wrapping. Setting this to OFF will revert to the older rake based implementation of the deltoid." nicename="Detailed hands"/>
   

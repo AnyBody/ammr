@@ -1,0 +1,177 @@
+AnyFolder Environment = {
+  AnyFixedRefFrame GlobalRef =  {
+    Origin = {0.0,0.0,0.0};
+
+    
+    AnyRefNode HandPoint ={
+      sRel=Main.InputParameters.ObjectPoint;
+    };
+    
+    AnyRefNode ObjectPoint ={
+      sRel=Main.InputParameters.ObjectPoint;
+      ARel=Main.InputParameters.ObjectOrientation;
+    };
+      
+    AnyRefNode RightFootPoint ={
+      sRel=Main.InputParameters.RightFootPoint;
+      AnyRefNode RotNode ={
+        ARel =RotMat(0.5*pi,x);
+      };
+    };
+    
+    AnyRefNode LeftFootPoint ={
+      sRel=Main.InputParameters.LeftFootPoint;
+      
+      AnyRefNode RotNode ={
+        ARel =RotMat(0.5*pi,x);
+      };
+      
+    };
+    
+    AnyRefNode FootCenterPoint=    {
+      sRel=0.5*(Main.InputParameters.RightFootPoint+Main.InputParameters.LeftFootPoint);  
+    };    
+  };
+  
+  //Changes location of box (or object being carried)
+  AnyDrawWidgetLin DrwWidgetObject = {
+    RefFrame = &.GlobalRef;
+    Target = &Main.InputParameters.ObjectPoint;
+    AxisOnOff = {On,On,On};
+    UpdateEvent = OnMouseRelease;
+    Operation = &Main.WidgetOperation;
+    MaxDrawSize=0.2;
+  };
+  
+  //Changes location of right foot
+  AnyDrawWidgetLin DrwWidgetRightFoot = {
+    RefFrame = &.GlobalRef;
+    Target = &Main.InputParameters.RightFootPoint;
+    AxisOnOff = {On,On,On};
+    UpdateEvent = OnMouseRelease;
+    Operation = &Main.WidgetOperation;
+    MaxDrawSize=0.2;
+  };
+  
+  //Changes location of left foot
+  AnyDrawWidgetLin DrwWidgetLeftFoot = {
+    RefFrame = &.GlobalRef;
+    Target = &Main.InputParameters.LeftFootPoint;
+    AxisOnOff = {On,On,On};
+    UpdateEvent = OnMouseRelease;
+    Operation = &Main.WidgetOperation;
+    MaxDrawSize=0.2;
+  };
+  
+ 
+  AnySeg HandSeg ={
+    Mass=Main.InputParameters.ObjectWeight;
+    Jii={0,0,0};
+    r0=Main.InputParameters.ObjectPoint;
+    AnyRefNode RightHandle ={
+      sRel =Main.InputParameters.HandPosRight;
+    };
+    
+    AnyRefNode LeftHandle ={
+      sRel =Main.InputParameters.HandPosLeft;
+    };
+    
+    // Draw a box midway between hands to better visualize object, 
+    AnyRefNode BoxMidpoint = {
+      sRel = (.LeftHandle.sRel+.RightHandle.sRel)/2;
+      AnyDrawSurf Box = {
+        Opacity=0.25;
+        RGB = {0.65, 0.65, 0.65};
+        ScaleXYZ = (0.195)*{1.0, 1.0, 1.0};
+        FileName = "..\Input\Box";
+      };
+    };  
+    // draw vector showing direction of box weight
+      AnyDrawVector ObjectWeight = {
+        Vec = (.Mass*Main.Study.Gravity)/100; //divide by 100 not to have the force too long in view
+        GlobalCoord = On;
+        Line.Thickness=0.015;
+        Line.RGB={1,0,0};
+        Line.End.Style = {5};
+        Line.End.Thickness = 3*Line.Thickness;  
+        Line.End.Length = 4*Line.Thickness;
+        Line.Start.Style = {0};
+        Line.Start.Thickness = 3*Line.Thickness;  
+        Line.Start.Length = 3*Line.Thickness;
+        Line.Start.RGB = {1,0,0};
+
+      };
+  };
+  
+  AnyStdJoint jnt ={
+    AnyRefFrame &ref=.GlobalRef.HandPoint; //This point is moved by the widget 
+    AnySeg &ref2=.HandSeg;
+    Constraints.Reaction.Type={Off,Off,Off,Off,Off,Off}; //the human model will need to carry the loads not this connection
+  };
+ 
+  
+  
+  
+  
+  // Defining Right force plate
+  
+  FootPlateConditionalContact RightFootForcePlate (
+  NORMAL_DIRECTION = "Z", NUMBER_OF_NODES = 25, 
+  NODES_FOLDER = FootNodes , PLATE_BASE_FRAME = Main.Model.Environment.GlobalRef.RightFootPoint, 
+  GLOBAL_REF = Main.Model.Environment.GlobalRef,
+  SHOW_TRIGGER_VOLUME = 1) =
+  
+  {
+    
+    // Default values for contact model parameters
+    Settings = 
+    {
+      LimitDistLow = -0.02;
+      LimitDistHigh = 0.12;   //This is to have heel contact at lift off     
+      LimitVelHigh = 0.8;
+      Radius = 0.3; 
+      Strength = 2500;
+      FrictionCoefficient = 0.95; 
+      ScaleFactor = 1;
+      ForceVectorDrawScaleFactor = 0.0005;
+    };
+    
+    CreateFootContactNodes25 FootNodes(foot_ref = Main.HumanModel.BodyModel.Right.Leg.Seg.Foot) = 
+    {
+      
+    };
+    
+  };
+  
+  
+  
+  FootPlateConditionalContact LeftFootForcePlate (
+  NORMAL_DIRECTION = "Z", NUMBER_OF_NODES = 25, 
+  NODES_FOLDER = FootNodes , PLATE_BASE_FRAME = Main.Model.Environment.GlobalRef.LeftFootPoint, 
+  GLOBAL_REF = Main.Model.Environment.GlobalRef,
+
+  SHOW_TRIGGER_VOLUME = 1) =
+  
+  {
+    
+    // Default values for contact model parameters
+    Settings = 
+    {
+      LimitDistLow = -0.02;
+      LimitDistHigh = 0.12;   //This is to have heel contact at lift off
+      LimitVelHigh = 0.8;
+      Radius = 0.3; 
+      Strength = 2500;
+      FrictionCoefficient = 0.95; 
+      ScaleFactor = 1;
+      ForceVectorDrawScaleFactor = 0.0005;
+    };
+    
+    CreateFootContactNodes25 FootNodes(foot_ref = Main.HumanModel.BodyModel.Left.Leg.Seg.Foot) = 
+    {
+      
+    };
+    
+  };
+  
+};

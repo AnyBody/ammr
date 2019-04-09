@@ -1,0 +1,113 @@
+AnyFolder Joints = {
+  
+};
+
+AnyFolder Drivers = {
+  
+  
+  //Move Pelvis to test if this will break kin
+  AnyKinEqSimpleDriver PelvisMover ={
+    AnyKinMeasureOrg &ref=.Main.HumanModel.BodyModel.Interface.Trunk.PelvisPosX;
+  DriverPos ={0};
+    DriverVel ={-10};
+
+  };
+  
+    //Move Pelvis to test if this will break kin
+  AnyKinEqSimpleDriver PelvisMoverRot ={
+    AnyKinMeasureOrg &ref=.Main.HumanModel.BodyModel.Interface.Trunk.PelvisRotY;
+  DriverPos ={0};
+    DriverVel ={3*pi};
+
+  };
+  
+
+  
+  
+  
+   #if BM_ARM_SHOULDER_RHYTHM == ON
+  #include "ExcludeShoulderRhythm.any"
+  #endif
+  
+  AnyFloat Neutral = {  0,  0,   0,  -23,  12} * pi/180;
+  
+  //                               GH Abd   GH Flex      GH ext       SC Pro    SC Elev 
+  AnyFloat Abduction         = {       178,       0,          0,         -35,         20} * pi/180;
+  AnyFloat ExternalRotation   ={        89,       0,         89,         -36,         15} * pi/180;
+  AnyFloat InternalRotation  = {        89,       0,        -70,         -23,         15} * pi/180;
+  AnyFloat HorizontalFlexion = {        89,     120,          0,          10,          9} * pi/180;
+  AnyFloat Adduction         = {       -44,      25,        -25,          15,         -5} * pi/180;
+  AnyFloat VertivalExtension = {         0,     -60,          0,         -28,         15} * pi/180;
+  AnyFloat VerticalFlexion   = {         0,     160,        -15,         -10,         35} * pi/180;
+  AnyFloat ArmsFront1        = {         0,      80,        -15,          35,         25} * pi/180;
+  AnyFloat ArmsFront2        = {         0,      80,        -15,          40,          0} * pi/180;
+
+     
+  AnyFloat ElbowFlexPosData  = {0,90,90,0,0,0,0} * pi/180;
+  
+  AnyFloat GHPosData         = repmat(1,{
+      Abduction,
+      ExternalRotation,
+      InternalRotation,
+      HorizontalFlexion,
+      Adduction,
+      VertivalExtension,
+      Neutral,
+      VerticalFlexion,
+      ArmsFront1,
+      ArmsFront2
+  }');
+
+  
+  #if BM_ARM_RIGHT
+  AnyKinEqInterPolDriver GHDriverRight ={
+    AnyKinMeasure& GHAbduction = ...HumanModel.BodyModel.Interface.Right.GlenohumeralAbduction;
+    AnyKinMeasure& GHFlexion = ...HumanModel.BodyModel.Interface.Right.GlenohumeralFlexion;
+    AnyKinMeasure& GHExtRot = ...HumanModel.BodyModel.Interface.Right.GlenohumeralExternalRotation;
+    AnyKinMeasure& SCProtraction = ...HumanModel.BodyModel.Interface.Right.SternoClavicularProtraction;
+    AnyKinMeasure& SCElevation = ...HumanModel.BodyModel.Interface.Right.SternoClavicularElevation;
+    Type = PiecewiseLinear;
+    T = linspace(0,1,SizesOf(Data)[1]);
+    Data = .GHPosData;
+    Reaction.Type = repmat(nDim,{Off});
+  };
+#endif
+  
+    #if BM_ARM_LEFT
+  AnyKinEqInterPolDriver GHDriverLeft ={
+    AnyKinMeasure& GHAbduction = ...HumanModel.BodyModel.Interface.Left.GlenohumeralAbduction;
+    AnyKinMeasure& GHFlexion = ...HumanModel.BodyModel.Interface.Left.GlenohumeralFlexion;
+    AnyKinMeasure& GHExtRot = ...HumanModel.BodyModel.Interface.Left.GlenohumeralExternalRotation;
+    AnyKinMeasure& SCProtraction = ...HumanModel.BodyModel.Interface.Left.SternoClavicularProtraction;
+    AnyKinMeasure& SCElevation = ...HumanModel.BodyModel.Interface.Left.SternoClavicularElevation;
+    Type = PiecewiseLinear;
+    T = linspace(0,1,SizesOf(Data)[1]);
+    Data = .GHPosData;
+    Reaction.Type = repmat(nDim,{Off});
+  };
+#endif
+  
+
+  
+  
+  
+//  //Constraint the collective CoM to be right above the GlobalRef
+//  AnyKinEqSimpleDriver CoMDriver = {
+//    AnyKinCoM CoM = {
+//      AnyFolder &Body = ....HumanModel;
+//    };
+//    MeasureOrganizer = {0,2};  // Only the x and z directions
+//    DriverPos = {0.0,0.0};
+//    DriverVel = {0.0,0.0};
+//    Reaction.Type = {Off,Off};
+//  };  
+  
+  #if BM_LEG_RIGHT
+    #include "RightFootDrivers.any"
+  #endif
+  
+  #if BM_LEG_LEFT
+    #include "LeftFootDrivers.any"
+  #endif
+  
+};
