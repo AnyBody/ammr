@@ -70,7 +70,9 @@ The following video shows an example of how you can manipulate the multiple widg
         <source src="../../_static/StandingPosturePrediction.mp4" type="video/mp4">
     Your browser does not support the video tag.
     </video>
+
 |
+
 **Please note the speed of the video was increased for viewing purposes.**
 
 |
@@ -78,6 +80,7 @@ The following video shows an example of how you can manipulate the multiple widg
 |
 |
 |
+
 """
 
 

@@ -262,8 +262,8 @@ class AMMRDomain(Domain):
     data_version = 2
 
     object_types = {
-        "bm_statement": ObjType(l_("Body Model Statement"), "bm_statement"),
-        "bm_constant": ObjType(l_("Body Model Constant"), "bm_constant"),
+        "bm_statement": ObjType(_("Body Model Statement"), "bm_statement"),
+        "bm_constant": ObjType(_("Body Model Constant"), "bm_constant"),
     }
 
     directives = {"bm_statement": AMMR_BMStatement, "bm_constant": AMMR_BMConstant}
