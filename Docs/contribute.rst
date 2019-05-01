@@ -15,7 +15,7 @@ and press “Request Access”.
 https://gitlab.com/anybody/beta
 
 You can also view other freely available models and resources hosted on `GitHub
-<https://github.com/anybody`_.
+<https://github.com/anybody>`_.
 
 .. only:: draft
 
