@@ -14,10 +14,10 @@ class AMSContext:
     call_location_file: str
 
 
-ACtx = Tuple[str, str, str, str, int, str]
+Ctx = Tuple[str, str, str, str, int, str]
 
 
-def os_path_exists(context: ACtx, fpath: str) -> int:
+def os_path_exists(context: Ctx, fpath: str) -> int:
     context = AMSContext(*context)
     fpath = Path(fpath)
     if not fpath.is_absolute():
@@ -25,13 +25,21 @@ def os_path_exists(context: ACtx, fpath: str) -> int:
     return int(os.path.exists(fpath))
 
 
-def os_path_dirname(context: ACtx, fpath: str) -> str:
+def os_path_dirname(context: Ctx, fpath: str) -> str:
     return os.path.dirname(fpath)
 
 
-def os_path_abspath(context: ACtx, fpath: str) -> str:
+def os_path_abspath(context: Ctx, fpath: str) -> str:
+    context = AMSContext(*context)
+    fpath = Path(fpath)
+    if not fpath.is_absolute():
+        fpath = Path(context.call_location_file).parent.joinpath(fpath)
     return os.path.abspath(fpath)
 
 
-def os_path_basename(context: ACtx, fpath: str) -> str:
+def os_path_basename(context: Ctx, fpath: str) -> str:
     return os.path.basename(fpath)
+
+def get_current_file(context: Ctx) -> str:
+    context = AMSContext(*context)
+    return context.call_location_file
