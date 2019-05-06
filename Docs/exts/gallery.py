@@ -28,6 +28,8 @@ def plot(image_name, dpi=200, size=None):
 
 
 def show():
+    import warnings
+    warnings.filterwarnings("ignore", category=UserWarning)
     plt.show()
 
 
