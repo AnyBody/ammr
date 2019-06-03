@@ -1,12 +1,11 @@
 
 variables:
   GIT_STRATEGY: fetch
+  NUM_PROC: 4  
 
-other_tests:
+
+.job_template: &AMMR_test_definition  # Hidden key that defines an anchor named 'job_definition'
   stage: test
-  script:
-    - mkdir Documentation
-    - pytest "--ignore=Tests/Applications" -n 4 --anybody_debug_mode=1
   only: 
     changes:
       - Application/**/*
@@ -19,21 +18,18 @@ other_tests:
   tags:
     - ams
 
-Application_tests:
-  stage: test
+
+other_tests:
+  <<: *AMMR_test_definition
   script:
-    - mkdir Documentation
-    - pytest Tests/Applications -n 4 --timeout=1700 --anybody_debug_mode=1
-  only: 
-    changes:
-      - Application/**/*
-      - Body/**/*
-      - Tests/**/*
-      - Tools/**/*
-  except:
-    - master@anybody/github-mirror/ammr
-  tags:
-    - ams
+    - pytest "--ignore=Tests/Applications" -n %NUM_PROC%
+
+Application_tests:
+  <<: *AMMR_test_definition
+  script:
+    - pytest Tests/Applications -n %NUM_PROC%
+
+
 
 
 test_docs:
