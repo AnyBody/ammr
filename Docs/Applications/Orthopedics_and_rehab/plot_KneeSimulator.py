@@ -59,12 +59,11 @@ and the femoral component and tibia insert (medial side).
 
 Settings
 -------------------------
-Model settings can be added and removed here: ``UserDefinedSettings.Main.any`` to apply FDK to the tibiofemoral joint, patellofemoral joint, or both together.
+Model settings can be added and removed here: ``UserDefinedSettings.Main.any`` to use FDK define:
 
 .. code-block:: AnyScriptDoc
 
-      #define USE_FDK_TIBIOFEMORAL
-      #define USE_FDK_PATELLOFEMORAL
+      #define USE_FDK 1
 
 Other adjustable settings include: ligament parameters, femur and tibia mass ratios, load applied to the hip fixture, and desired knee flexion. 
 
