@@ -359,3 +359,6 @@ else:
     else:
         intersphinx_mapping["tutorials"] = ("https://anyscript.org/tutorials/", None)
 
+
+def setup(app):
+    app.add_stylesheet("custom.css")
