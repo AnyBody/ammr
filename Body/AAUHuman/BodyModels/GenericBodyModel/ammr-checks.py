@@ -104,6 +104,9 @@ def is_file_writeable(context, fpath):
     """ Check if fpath is a writeable file """
     return int(os.access(fpath, os.W_OK))
 
+def endswith(context, string:str, arg:str):
+    return int(string.endswith(arg))
+
 
 # @save_arguments
 def hash_directory(context, dirpath, subsearch="**/*.any"):

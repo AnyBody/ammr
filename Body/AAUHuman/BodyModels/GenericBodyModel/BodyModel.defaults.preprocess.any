@@ -102,9 +102,9 @@
   };
   
   
- AnyInt MainFileIsReadOnly = notice(IsFileWriteable(ANYBODY_PATH_MAINFILE), strformat("\n"+
+ AnyInt MainFileIsReadOnlyNotice = notice(IsFileWriteable(ANYBODY_PATH_MAINFILE), strformat("\n"+
   "\n------------------------------------------------------------------------------------------------------\n"+
-  "                 Note: Your Main-file appears to be read-only. \n"+
+  "                       Note: Your Main-file appears to be read-only. \n"+
   " \n"+ 
   "  Are you running models directly from the install direcotry?\n"+
   "  It is good practice to copy models to for example your documents folder.\n"+
@@ -112,6 +112,20 @@
   "-------------------------------------------------------------------------------------------------------\n"));
 
 #endif
+
+ AnyFunEx EndsWith = 
+  {
+    AnyIntVar Return = 0;
+    AnyFunExMonoPy endswith =
+    {
+     ModuleFile = "ammr-checks.py";
+     ArgList = {
+       AnyStringVar string = "";
+       AnyStringVar argument = "";
+     };
+    };
+  };
+  
   
  #ifndef ANYBODY_DISMISS_MODIFIED_AMMR_NOTICE
  
@@ -129,13 +143,18 @@
  
  AnyStringVar HashBodyModel = DirectoryHash(ANYBODY_PATH_BODY);
  
- AnyIntVar ModifiedAMMRCheck = orfun(not(HashBodyModel), eqfun( ANYBODY_HASH_BODY , HashBodyModel));
+ AnyInt ModifiedAMMRChecks = {
+     not(HashBodyModel), // Don't trigger on missing hash value
+     eqfun( ANYBODY_HASH_BODY, HashBodyModel), // Don't trigger if hash value matches
+     EndsWith(AMMR_VERSION, "beta") // Don't trigger if we are using the beta version
+   }; 
  
- AnyInt BodyModelIsModified = notice( ModifiedAMMRCheck, strformat("\n"+
+ AnyInt BodyModelIsModifiedNotice= notice(sum(ModifiedAMMRChecks), strformat("\n"+
    "\n------------------------------------------------------------------------------------------------------\n"+
-   "           You are using a modified or beta version of the Body Model  in the AMMR repository.\n"+
+   "                 Note: You appear to be using a modified version of the Body Model. \n"+
    "\n"+
-   "        You may disable this notice with #define ANYBODY_DISMISS_MODIFIED_AMMR_NOTICE                      \n"+
+   "  Some files in the folder 'AMMR/Body/AAUHuman' have been modified.\n"+
+   "  You may disable this notice with #define ANYBODY_DISMISS_MODIFIED_AMMR_NOTICE                      \n"+
    "-------------------------------------------------------------------------------------------------------\n"));
 
 #endif
