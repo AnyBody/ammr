@@ -102,7 +102,12 @@ def load_arguments(name):
 # @save_arguments
 def is_file_writeable(context, fpath):
     """ Check if fpath is a writeable file """
-    return int(os.access(fpath, os.W_OK))
+    try:
+        with open(fpath, "r+"):
+            pass
+    except PermissionError:
+        return False
+    return True
 
 def endswith(context, string:str, arg:str):
     return int(string.endswith(arg))
