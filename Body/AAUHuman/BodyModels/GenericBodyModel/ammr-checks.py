@@ -112,12 +112,15 @@ def debug_context(fun):
 # @save_arguments
 def is_file_writeable(context, fpath):
     """ Check if fpath is a writeable file """
+    is_writeable = True
     try:
         with open(fpath, "r+"):
             pass
     except PermissionError:
-        return False
-    return True
+        is_writeable = False
+    finally:
+        return is_writeable
+
 
 def endswith(context, string:str, arg:str):
     return int(string.endswith(arg))
