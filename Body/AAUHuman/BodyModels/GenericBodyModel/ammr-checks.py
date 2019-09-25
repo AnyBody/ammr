@@ -122,11 +122,11 @@ def is_file_writeable(context, fpath):
         return is_writeable
 
 
-def endswith(context, string:str, arg:str):
+def endswith(context, string: str, arg: str):
     return int(string.endswith(arg))
 
 
-#@save_arguments
+# @save_arguments
 def hash_directory(context, dirpath, subsearch="**/*.any"):
     """ Compute an md5 hash of all files matching a `subsearch` globbing expression
         defaults is recursive search for anyscript files (**/*.any"). 
@@ -138,7 +138,9 @@ def hash_directory(context, dirpath, subsearch="**/*.any"):
         for fpath in sorted(dirpath.glob(subsearch)):
             # Hash relative path of file. To handle empty files and renames
             digest.update(
-                hashlib.md5(str(fpath.relative_to(dirpath)).encode('utf-8')).digest()
+                hashlib.md5(
+                    str(fpath.relative_to(dirpath)).upper().encode("utf-8")
+                ).digest()
             )
             with open(fpath, "rb") as fh:
                 while True:
@@ -149,8 +151,7 @@ def hash_directory(context, dirpath, subsearch="**/*.any"):
         hashval = digest.hexdigest()
     except Exception:
         # Errors must not prevent AnyBody from loading.
-        pass
-        # logger.exception(f"There was an exception in hash_directory()")
+        hashval = ""
     finally:
         return hashval
 
