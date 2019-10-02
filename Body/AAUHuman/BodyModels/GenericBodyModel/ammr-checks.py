@@ -1,9 +1,10 @@
 import os
-import pickle
+import json
+import logging
 import hashlib
 import inspect
 import functools
-import logging
+from contextlib import contextmanager
 
 from glob import iglob
 
@@ -81,50 +82,65 @@ def save_arguments(func):
 
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
+        global __name__
+        if __name__ == "__main__":
+            # Disable save not called externally.
+            return func(*args, **kwargs)
         curent_file = Path(__file__)
-        filename = curent_file.parent / f"{curent_file.stem}_{func.__name__}.txt"
-        with open(filename, "wb") as fh:
-            pickle.dump(args, fh)
+        filename = curent_file.parent / f"{curent_file.stem}_{func.__name__}.json"
+        with open(filename, "w+") as fh:
+            fh.write(json.dumps({"args": args, "cwd": os.getcwd()}, indent=4))
         return func(*args, **kwargs)
 
     return wrapper
 
 
-def load_arguments(name):
-    """ Helper function for loading arguments from a pickled file"""
-    curent_file = Path(__file__)
-    filename = curent_file.parent / f"{curent_file.stem}_{name}.txt"
-    with open(filename, "rb") as fh:
-        return pickle.load(fh)
+@contextmanager
+def debug_context(fun):
+    context_file = Path(__file__).parent / f"{Path(__file__).stem}_{fun.__name__}.json"
+    if not context_file.exists():
+        raise FileNotFoundError("No file saved data for debugging")
+    with open(context_file, "r+") as fh:
+        data = json.load(fh)
+    olddir = Path.cwd()
+    os.chdir(data["cwd"])
+    yield data["args"]
+    os.chdir(olddir)
 
 
 # @log_exception(logger)
 # @save_arguments
 def is_file_writeable(context, fpath):
     """ Check if fpath is a writeable file """
+    is_writeable = True
     try:
         with open(fpath, "r+"):
             pass
     except PermissionError:
-        return False
-    return True
+        is_writeable = False
+    finally:
+        return is_writeable
 
-def endswith(context, string:str, arg:str):
+
+def endswith(context, string: str, arg: str):
     return int(string.endswith(arg))
 
 
 # @save_arguments
 def hash_directory(context, dirpath, subsearch="**/*.any"):
-    """ Compute an md5 hash of all "*.any" files in directory  
+    """ Compute an md5 hash of all files matching a `subsearch` globbing expression
+        defaults is recursive search for anyscript files (**/*.any"). 
     """
     hashval = ""
     try:
         digest = hashlib.md5()
         dirpath = Path(dirpath)
-        for fpath in dirpath.glob(subsearch):
+        for fpath in sorted(dirpath.glob(subsearch)):
             # Hash relative path of file. To handle empty files and renames
             digest.update(
-                hashlib.md5(str(fpath.relative_to(dirpath)).encode()).digest()
+                hashlib.md5(
+                    str(fpath.relative_to(dirpath)).upper().encode("utf-8")
+                ).digest()
             )
             with open(fpath, "rb") as fh:
                 while True:
@@ -135,14 +151,13 @@ def hash_directory(context, dirpath, subsearch="**/*.any"):
         hashval = digest.hexdigest()
     except Exception:
         # Errors must not prevent AnyBody from loading.
-        pass
-        # logger.exception(f"There was an exception in hash_directory()")
+        hashval = ""
     finally:
         return hashval
 
 
 if __name__ == "__main__":
-    context, *args = load_arguments("hash_directory")
-    print(context)
-    hashval = hash_directory(context, *args)
-    print(hashval)
+    with debug_context(hash_directory) as args:
+        print(AMSContext(*args[0]))
+        hashcode = hash_directory(*args)
+    print(hashcode)
