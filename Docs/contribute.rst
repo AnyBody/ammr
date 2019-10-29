@@ -15,7 +15,7 @@ and press “Request Access”.
 https://gitlab.com/anybody/beta
 
 You can also view other freely available models and resources hosted on `GitHub
-<https://github.com/anybody>`_.
+<https://github.com/anybody>`__.
 
 .. only:: draft
 
@@ -29,7 +29,7 @@ You can also view other freely available models and resources hosted on `GitHub
 
    # Update any  AMS version number in ``Docs/conf.py`` (only used when building locally)
 
-   # Create new version of AMMR on Zenodo (`https://zenodo.org/record/3404750`__).
+   # Create new version of AMMR on Zenodo (`<https://zenodo.org/record/3404750>`__).
     
       # Click ``New version`` button
 
