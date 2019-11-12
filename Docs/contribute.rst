@@ -21,15 +21,49 @@ You can also view other freely available models and resources hosted on `GitHub
 
    .. rubric:: Release checklist
 
-   # Update version numbers in `AMMR.version.any``.
+   # Update ``AMMR.version.any``.
 
-   # Update version numbers in ``Docs/conf.py`` (only used when building locally)
+      # Update with the new version numbers
+
+      # Fill the ``ANYBODY_HASH_BODY``. The new value can be found in ``Main.HumanModel.Config.HashBodyModel``. 
+
+   # Update any  AMS version number in ``Docs/conf.py`` (only used when building locally)
+
+   # Create new version of AMMR on Zenodo (`https://zenodo.org/record/3404750`__).
+    
+      # Click ``New version`` button
+
+      # Fill the neccessary fields. Authors are those who contributed since last Release
+
+      # Note the draft DOI which zenodo reserves
+
+      # Save the draft but do **not** publish it. 
 
    # Clean up, and update ``Docs/changelog.rst``
+
+      # Prof read and check that all changes are documented. 
+
+      # Add Zenodo DOI url to the new release, and fill the date
 
    # Check that the docs can build, and that the tests pass. 
 
    # Merge the branch and add a git tag. 
+
+   # Upload ammr zip file to Zenodo
+
+     # Either use the AMMR zip file created by the AMS build. This  (it con or create a
+       released zip file by running:
+
+       .. code-block::
+       
+            cd Docs
+            make release
+            mv release.zip ammr-X.Y.Z.zip
+
+       This creates a zip file with the built documentation. 
+       
+     # Edit the draft Zenodo release to upload a zip file with AMMR.  
+
 
    .. rubric:: To do list
 
