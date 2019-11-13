@@ -29,7 +29,7 @@ You can also view other freely available models and resources hosted on `GitHub
 
    # Update any  AMS version number in ``Docs/conf.py`` (only used when building locally)
 
-   # Create new version of AMMR on Zenodo (`<https://zenodo.org/record/3404750>`__).
+   # Create new version of AMMR on Zenodo (https://zenodo.org/record/3404750).
     
       # Click ``New version`` button
 
