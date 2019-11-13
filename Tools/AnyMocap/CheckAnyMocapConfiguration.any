@@ -73,41 +73,75 @@ AnyMessage AnyMoCap_msg1=
 
 #if MOCAP_INPUT_DATA_TYPE == "C3D"
 C3DFileData = {
- AnyInt filter_transients_warning = warn(
-   orfun(
-     andfun(
-        ltfun(
-           Main.ModelSetup.C3DFileData.Header.FirstFrameNo/Main.ModelSetup.C3DFileData.Header.VideoFrameRate + 0.04,
-           Main.Studies.MarkerTracking.tArray[0]
-        ),
-        gtfun(
-          Main.ModelSetup.C3DFileData.Header.LastFrameNo/Main.ModelSetup.C3DFileData.Header.VideoFrameRate - 0.04,
-          Main.Studies.MarkerTracking.tArray[0]
-        )
-     ),
+ AnyFolder  config_warnings = {
+   AnyInt filter_transients_warning = warn(
      orfun(
-         ltfun(
-            (Main.ModelSetup.C3DFileData.Header.LastFrameNo-Main.ModelSetup.C3DFileData.Header.FirstFrameNo)
-            /Main.ModelSetup.C3DFileData.Header.VideoFrameRate,
-            0.1
-         ),
-         eqfun(Main.ModelSetup.TrialSpecificData.nStep, 1)
-     )
-    ),
-    strformat("\n"+
-    "------------------------------------------------------------------------------------------------------\n"+
-    "    The tStart/tEnd are very close to the start/end times of the data in the C3D file. \n"+
-    "    This can cause inaccurate kinematics at the very start/end of the simulation due to \n"+
-    "    low-pass filter transients. Consider changing the start/end times of the simulation. \n"+
-    "-------------------------------------------------------------------------------------------------------\n"));
+       andfun(
+          ltfun(
+             Main.ModelSetup.C3DFileData.Header.FirstFrameNo/Main.ModelSetup.C3DFileData.Header.VideoFrameRate + 0.04,
+             Main.Studies.MarkerTracking.tArray[0]
+          ),
+          gtfun(
+            Main.ModelSetup.C3DFileData.Header.LastFrameNo/Main.ModelSetup.C3DFileData.Header.VideoFrameRate - 0.04,
+            Main.Studies.MarkerTracking.tArray[0]
+          )
+       ),
+       orfun(
+           ltfun(
+              (Main.ModelSetup.C3DFileData.Header.LastFrameNo-Main.ModelSetup.C3DFileData.Header.FirstFrameNo)
+              /Main.ModelSetup.C3DFileData.Header.VideoFrameRate,
+              0.1
+           ),
+           eqfun(Main.ModelSetup.TrialSpecificData.nStep, 1)
+       )
+      ),
+      strformat("\n"+
+      "------------------------------------------------------------------------------------------------------\n"+
+      "    The tStart/tEnd are very close to the start/end times of the data in the C3D file. \n"+
+      "    This can cause inaccurate kinematics at the very start/end of the simulation due to \n"+
+      "    low-pass filter transients. Consider changing the start/end times of the simulation. \n"+
+      "-------------------------------------------------------------------------------------------------------\n"));
+  
+
+   AnyMessage short_c3d_file_warning1 = 
+   {
+     Type = MSG_Warning;
+     TriggerPreProcess = andfun(
+       ltfun(
+          Main.ModelSetup.C3DFileData.Header.LastFrameNo-Main.ModelSetup.C3DFileData.Header.FirstFrameNo+1,
+          8
+       ),
+       gtfun(
+         Main.ModelSetup.C3DFileData.Header.LastFrameNo-Main.ModelSetup.C3DFileData.Header.FirstFrameNo+1,
+         1
+       )
+     );
+    
+     Message = strformat("\n"+
+     "------------------------------------------------------------------------------------------------------\n"+
+     "    The number of frames in the C3D files is less than 8. This causes problems with both lowpass filters\n"+
+     "    and b-spline interpolation. \n"+
+     "    \n"+
+     "    Note: It is still possible to use C3D files with exactly one frame if low-pass filters are disabled.\n"+
+     "-------------------------------------------------------------------------------------------------------\n");
   };
-
+  
+  AnyMessage short_c3d_file_warning2 = 
+  {
+    Type = MSG_Warning;
+    TriggerConst = andfun(
+       gteqfun(Main.ModelSetup.C3DFileData.MarkerFilterIndex,0),
+       eqfun(Main.ModelSetup.C3DFileData.Header.LastFrameNo-Main.ModelSetup.C3DFileData.Header.FirstFrameNo+1, 1)
+    );
+    Message = strformat("\n"+
+    "------------------------------------------------------------------------------------------------------\n"+
+    "    Marker filters must be disabled when using files with only a single frame.\n"+
+    "    I.e. set: ``C3DFileData.MarkerFilterIndex = -1;``\n"+
+    "-------------------------------------------------------------------------------------------------------\n");
+  };
+};
+};
 #endif
-
-
-
-
-
 
 
 #ifndef MOCAP_FORCE_PLATE_FILE 
