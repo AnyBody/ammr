@@ -27,12 +27,15 @@ The remaining parts of the model are equvilent to other :ref:`MoCap model <anymo
 Updating old (ammr < 2.2.3) BVH based models
 -------------------------------------------------
 
-The safest approch is to reimplement your model based on the newest BVH example. 
+The safest approch is to reimplement your model based on the newest BVH example and AMMR v.2.2.3. 
 
 However, it is also posible to change a few files in existing models to utilize the 
 new BVH improvments in AnyBody v.7.2.3. 
 
-1.  Add following to the ``libdef.any`` file to enable new features: 
+1.  **Important**: Make sure your use the new AMMR (>=2.2.3) and new AnyBody Modeling System (>=7.2.3).
+    You can copy your existing model folder into the new AMMR, or edit the local ``libdef.any`` file to point to the new AMMR.
+
+2.  Add following to the local ``libdef.any`` file to enable new features: 
 
     .. code-block:: AnyScriptDoc
 
