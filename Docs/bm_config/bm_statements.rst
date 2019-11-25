@@ -722,12 +722,14 @@ All BodyModel parameters
 
 .. ammr:bm_statement:: BM_ARM_DELTOID_WRAPPING
 
-    Switch enabling/disabling the deltoid wrapping. Setting this to OFF will revert to the older rake based implementation of the deltoid.
+    Switch for deltoid wrapping. Setting this to OFF or _DELTOID_WRAPPING_RAKE will revert to the older rake based implementation of the deltoid.
 
 
-    :Default: ``ON``
-    :Example: ``#define BM_ARM_DELTOID_WRAPPING ON``
-    :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
+    :Default: :ammr:bm_constant:`_DELTOID_WRAPPING_ELIPSOIDS`
+    :Example: ``#define BM_ARM_DELTOID_WRAPPING _DELTOID_WRAPPING_ELIPSOIDS``
+    :Options: - :any:`_DELTOID_WRAPPING_RAKE`: Switch for using pre AMMR 2.2. rake implementation for deltoid wrapping
+              - :any:`_DELTOID_WRAPPING_ELIPSOIDS`: Switch for using multiple elipsoids in the deltoid wrapping"
+              - :any:`_DELTOID_WRAPPING_CYLINDERS`: Switch for using mulitple cylinder in the deltroid wrapping
 
 
 |  
