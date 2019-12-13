@@ -880,6 +880,7 @@ All BodyModel parameters
     :Example: ``#define BM_CALIBRATION_TYPE _CALIBRATION_TYPE_1PAR_``
     :Options: - :any:`_CALIBRATION_TYPE_1PAR_`: Constant to use 1 parameter muscle tendon calibration
               - :any:`_CALIBRATION_TYPE_2PAR_`: Constant to use 2 parameter muscle tendon calibration
+              - :any:`_CALIBRATION_TYPE_CUSTOM_`: Use custom calibration. I.e. diables calibration so the user can add their own code.
 
 
 |  
