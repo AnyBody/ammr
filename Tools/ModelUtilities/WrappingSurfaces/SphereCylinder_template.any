@@ -1,4 +1,9 @@
-#class_template MultiWrapSurfs_SINGLE (AnyFolder& REF, NUMBER, _TYPE="CYLINDER", DEBUG = 0) {
+
+#define MULTIWRAPSURFS_CYLINDER 1
+#define MULTIWRAPSURFS_ELIPSOID 2
+
+#class_template MultiWrapSurfs_SINGLE (AnyFolder& REF, NUMBER, _TYPE = 1, DEBUG = 0) {
+  
     #var AnyVar angle = .Angles[NUMBER-1]*pi/180;
     AnyVec3 Tangent_sRel = {.RadiusX*sin(angle), 0, .RadiusZ*cos(angle)};  
     
@@ -13,14 +18,20 @@
     {
       AnyRefNode Wrapping_##NUMBER = 
       {
-      #if _TYPE == "CYLINDER"
-        sRel = (1-...RadiusHeight/vnorm(..Tangent_sRel)) *..Tangent_sRel +
-                ...WrapSurfLength*{0,0,-0.5}*..Tangent_ARel';
+      
+      // TYPE == CYLINDER
+      #if _TYPE == 1
+      
+//        sRel = (1-...RadiusHeight/vnorm(..Tangent_sRel)) *..Tangent_sRel +
+//                ...WrapSurfLength*{0,0,-0.5}*..Tangent_ARel';
+        AnyVec3 CylinderOffset = ...WrapSurfLength*{0, 0, -0.5};
+        sRel =  ..Tangent_sRel - ..normal_vector + CylinderOffset*..Tangent_ARel';
         ARel = ..Tangent_ARel;
         AnySurfCylinder Surf =
         {
-          Radius = ....RadiusHeight;
-          Length = ....WrapSurfLength;
+          AnyFloat Sizes = {vnorm(...Tangent_sRel),....RadiusHeight,  ....WrapSurfLength/2};
+          Radius = min({Sizes[0], Sizes[1]});
+          Length = Sizes[2]*2;
           #if DEBUG
           AnyDrawParamSurf drw=
           {
@@ -30,16 +41,20 @@
           };
           #endif
         };
+        AnyRefNode Center = {sRel = -.CylinderOffset; };  
       #endif
       
-      #if _TYPE == "ELIPSOID"
+      
+      // TYPE == ELIPSOID
+      #if _TYPE == 2
         sRel =  ..Tangent_sRel - ..normal_vector;// (1-...RadiusHeight/vnorm(..Tangent_sRel)) *..Tangent_sRel +
         //        ...WrapSurfLength*{0,0,-0.5}*..Tangent_ARel';
 
         ARel = ..Tangent_ARel;
         AnySurfEllipsoid Surf =
         {
-          Radius = { vnorm(...Tangent_sRel), ....RadiusHeight, ....WrapSurfLength/2 };
+          AnyFloat Sizes = {vnorm(...Tangent_sRel),....RadiusHeight,  ....WrapSurfLength/2};
+          Radius = Sizes;
           #if DEBUG
           AnyDrawParamSurf drw=
           {
@@ -49,6 +64,7 @@
           };
           #endif
         };
+        AnyRefNode Center = {};  
       #endif
       
       };
@@ -91,7 +107,7 @@
 #class_template MultiWrapSurfs (
 AnyRefFrame& BASE_FRAME,
 NUMBER_OF_CYLINDERS = 10,
-TYPE = "CYLINDER",
+TYPE = 1,
 DEBUG=1
 ) 
 {

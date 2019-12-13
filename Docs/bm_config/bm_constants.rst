@@ -81,6 +81,21 @@ All BodyModel constants
 
     Switch for using multiple point contact between scapula and thorax"
 
+.. ammr:bm_constant:: _DELTOID_WRAPPING_RAKE_
+    :value: 0
+
+    Switch for using pre AMMR 2.2. rake implementation for deltoid wrapping
+
+.. ammr:bm_constant:: _DELTOID_WRAPPING_CYLINDERS_
+    :value: 1
+
+    Switch for using mulitple cylinder in the deltroid wrapping
+
+.. ammr:bm_constant:: _DELTOID_WRAPPING_ELIPSOIDS_
+    :value: 2
+
+    Switch for using multiple elipsoids in the deltoid wrapping"
+
 .. ammr:bm_constant:: _MORPH_NONE_
     :value: 0
 
