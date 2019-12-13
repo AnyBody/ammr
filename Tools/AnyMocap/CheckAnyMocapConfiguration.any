@@ -191,6 +191,30 @@ Macros =
        "    since it causes a group delay in the marker data. Consider switching this setting to On.\n"+
        "-------------------------------------------------------------------------------------------------------\n")
     );
+    
+    #ifndef MOCAP_DISABLE_GRAVITY_CHECK
+    
+    AnyVec3 GravityDirection = Main.Studies.InverseDynamicStudy.Gravity/vnorm(Main.Studies.InverseDynamicStudy.Gravity);
+    AnyObjectPtrArray ptrForcePlateDir = DesignVar(ObjSearchRecursive("Main.EnvironmentModel.ForcePlates","*.Corners.DownDirection"));
+    AnyInt nFP = NumElemOf(ptrForcePlateDir);
+
+    // Difference between forceplate down directions and gravity
+    // This is implemented a bit complicated to handle the case of no forceplates
+    AnyFloat GravityDiff = reshape(flatten(Obj2Num(ptrForcePlateDir)),{3, nFP})
+                        - reshape(repmat(nFP, GravityDirection),{3, nFP});
+    AnyFloat AbsDiff =  max( arrcat( abs(flatten(GravityDiff)),  {0.0}));
+    AnySwitchVar Gravity_direction = warn(ltfun(AbsDiff, 0.5),
+       strformat("\n"+
+       "------------------------------------------------------------------------------------------------------\n"+
+       "    Gravity appears inconsistant with one or more of the force plates. This might be an error.        \n"+
+       "                            \n"+
+       "     Please check that Main.ModelSetup.LabSpecificData.Gravity is specified correctly.                           \n"+
+       "     Set ``#define MOCAP_DISABLE_GRAVITY_CHECK`` to suppress this check.                     \n"+
+       "-------------------------------------------------------------------------------------------------------\n")
+    );
+    #endif
+
   };
+    
     
 };
