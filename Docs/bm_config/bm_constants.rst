@@ -219,7 +219,7 @@ All BodyModel constants
     Constant to use 2 parameter muscle tendon calibration
 
 .. ammr:bm_constant:: _CALIBRATION_TYPE_CUSTOM_
-    :value: 3
+    :value: 0
 
     Use custom calibration. I.e. diables calibration so the user can add their own code.
 
