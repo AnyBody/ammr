@@ -1,0 +1,1 @@
+pytest test_compare.py --h5compare-target=anytest-output\target --h5compare-reference=anytest-output\reference
