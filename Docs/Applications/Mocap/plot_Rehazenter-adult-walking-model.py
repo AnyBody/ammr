@@ -142,5 +142,5 @@ import gallery
 gallery.anymocap()
 
 
-gallery.plot("../images/rahazenter-adult-walking-model.jpg")
+gallery.plot("../images/Rehazenter-adult-walking-model.jpg")
 gallery.show()
