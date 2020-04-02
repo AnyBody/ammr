@@ -20,9 +20,10 @@ standing reference trial is used to indentify a number parameters:
 
 These parameters are then loaded in the matching dynamic trials. 
 
-.. warning:: The model is meant as a starting point for analysing the "Rehazenter adult walking dataset". 
-    The model has not been through any kind of validation, and is not likely to produce correct results 
-    without futher adjustments.
+.. warning:: The model is a starting point for analysing the 
+   "`Rehazenter adult walking dataset <https://doi.org/10.1038/s41597-019-0124-4>`__". 
+   The model has not been through any kind of validation or publication. It is likely that 
+   some results will not be correct without further adjustments.
     
 Choises of model parameters are in some cases arbitrary as this model is a work in progress. If you come up 
 with improvements to the model please share them back. 
