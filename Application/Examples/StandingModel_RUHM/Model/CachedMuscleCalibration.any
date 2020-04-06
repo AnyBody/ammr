@@ -1,0 +1,42 @@
+AnyFolder CachedMuscleCalibration = 
+{
+  AnyFileVar SavePath = ANYBODY_PATH_OUTPUT;
+  /*CalibrationStart*/ AnyStringVar FileName = "subject_01_CachedCalibrationResults";/*CalibrationEnd*/
+  
+  AnyOperationSetValue MarkMuscleParametersAsChanged = 
+  {
+    Source = ObjSearch("Main.HumanModel.BodyModel.*.*.MusPar.*.Lt0");
+    Target = Source;
+  };     
+  
+  AnyOperation& RunCalibration = Main.HumanModel.Calibration.CalibrationSequence;
+  
+  AnyOperationMacro SaveToFile = {
+    MacroStr  = {"classoperation Main" + strquote("Save Values") +"--file=" + 
+      strquote(FilePathCompleteOf(.SavePath) +"/"+ .FileName +".anyset" )
+    };
+  };
+  
+  AnyOperationMacro LoadFromFile = {
+    MacroStr  = {"classoperation Main" + strquote("Load Values") +"--file=" + 
+      strquote(FilePathCompleteOf(.SavePath) +"/"+ .FileName +".anyset" )
+    };
+  };
+  
+};
+
+
+// Create Links to operations under the Main
+Main = 
+{
+  AnyOperationSequence RunAndSaveCalibration = 
+  {
+    AnyOperation& MarkAsChanged = Main.CachedMuscleCalibration.MarkMuscleParametersAsChanged;
+    AnyOperation& RunCalibration = Main.HumanModel.Calibration.CalibrationSequence;
+    AnyOperation& Save = Main.CachedMuscleCalibration.SaveToFile ;
+  };  
+  AnyOperationSequence LoadCalibration = 
+  {
+    AnyOperation& Load = Main.CachedMuscleCalibration.LoadFromFile ;
+  };
+};
