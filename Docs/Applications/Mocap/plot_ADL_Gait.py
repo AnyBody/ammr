@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 r"""
-Rehazenter adult walking model
+ADL Gait (beta)
 ===============================
 
 Fullbody MoCap model with multple subjects and trials based on the 
-large dataset by `Schreiber and Moissenet (2019) <https://doi.org/10.1038/s41597-019-0124-4>`__.
+"Rehazenter-Adult-Walking-Dataset" by `Schreiber and Moissenet (2019) <https://doi.org/10.1038/s41597-019-0124-4>`__.
 
 The model has 50 subjects and 1145 trials. Subjects walk at five different
 speeds (conditions) C1: 0–0.4 m/s, C2: 0.4–0.8 m/s, C3: 0.8–1.2 m/s, C4: a 
