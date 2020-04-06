@@ -1,0 +1,655 @@
+ 
+AnyFolder Seg={
+  
+  AnyFolder &Data = ..ModelParameters.Thumb;
+  AnyMat33 Mirror ={{1,0,0},{0,1,0},{0,0,....Sign}};
+  
+  AnySeg DistalPhalanx={
+    //    Mass=..Mass4;
+    //    Jii={0,0,0};
+    #include "HandData/RUHM/Distal.any"
+    #include "HandData/RUHM/FingerInertia.any"
+    Mass=PhalanxMass;//..Mass4;
+    Jii={I_xx,I_yy,I_zz};
+    r0= .ProximalPhalanx.IPFlexionExtensionAxis.sRel*.ProximalPhalanx.Axes0'+.ProximalPhalanx.r0-IPFlexionExtensionAxis.sRel*Axes0';    
+    Axes0 =.ProximalPhalanx.Axes0*
+    IPFlexionExtensionAxis.ARel*
+    RotMat((pi/180)*..JntPos.DIPFlexion,z)*
+    IPFlexionExtensionAxis.ARel';
+    
+    
+    
+    AnyRefNode EllipsoidNode={
+      AnySurfEllipsoid Ellipsoid={
+        AnyVar BoneLength= vnorm(..ProximalJointSurfaceNode.sRel-..DistalJointSurfaceNode.sRel,2);
+        Radius =..Scale({0.005,0,0.005}+{0,a,0}); //the bonelength is already scaled..
+        //definition of focus points for the ellipsoid these are used for defining contact
+        AnyVar a =BoneLength/2;
+        AnyVar c = sqrt(Radius[1]^2-Radius[0]^2);   //distance for center of ellipsoid to focus point
+        //AnyDrawParamSurf drw ={ RGB=...BoneSurf.RGB; Opacity = ........BonesOpacity.Hand;};
+      };
+      //definition of focus points
+      AnyRefNode F1 ={      sRel={0,.Ellipsoid.c,0};    };
+      AnyRefNode F2 ={      sRel={0,-.Ellipsoid.c,0};    };      
+    };
+    
+    AnyDrawSurf  BoneSurf = {  
+      RGB=Main.DrawSettings.Colors.Segments;
+      #if _ARM_DETAILED_HAND_WHICH == "RUHM"
+      FileName = "HandData/STL/Plzen-DistalPhalanx1";
+      #else
+      FileName = "HandData/STL/DistalPhalanx1";
+      #endif
+      ScaleXYZ={1,1,......Sign*1};
+      Opacity = ......BonesOpacity.Hand;
+      AnyFunTransform3D& Scale = .Scale;
+    };
+    
+    AnyVar StdSegmentLength= 0.022;// unscaled segment length
+    AnyFunTransform3D &Scale= ..GeomScaleDP;//...SegmentLengthTable[0][3]/StdSegmentLength;
+    
+    AnyFunTransform3D &GeomScale= Scale;//...GScaling.Hand.ScaleFunction;
+    AnyRefNode AnatomicalFrame = {};
+    #if (_ARM_DETAILED_HAND_WHICH == "LOOPLUC" | _ARM_DETAILED_HAND_WHICH =="RUHM")
+//    #include "HandData/RUHM/PalmarTorusDIP_Thumb_Distal.any"
+    #endif
+    
+    AnyRefNode ProximalJointNode                     = {sRel=.Scale(..Data.DistalPhalanx.ProximalJointNode_pos*..Mirror);};
+    AnyRefNode ProximalJointSurfaceNode              = {sRel=.Scale(..Data.DistalPhalanx.ProximalJointSurfaceNode_pos*..Mirror);};
+    AnyRefNode DistalJointSurfaceNode                = {sRel=.Scale(..Data.DistalPhalanx.DistalJointSurfaceNode_pos*..Mirror);   };
+    //Flexion extension axis for Interphalangeal joint
+    AnyRefNode IPFlexionExtensionAxis                = {sRel=.Scale(..Data.DistalPhalanx.IPFlexionExtensionAxis_pos*..Mirror);
+                                                        ARel= RotMat(......Sign*-(90-83)*pi/180,x);};
+      
+  }; //DistalPhalanx3 Seg definition (Finger's tip)
+  
+  
+  
+  AnySeg ProximalPhalanx={
+    //    Mass=..Mass2;
+    //    Jii={0,0,0};
+    #include "HandData/RUHM/Proximal.any"
+    #include "HandData/RUHM/FingerInertia.any"
+    Mass=PhalanxMass;//..Mass2;
+    Jii={I_xx,I_yy,I_zz};
+    //    AnyDrawRefFrame drw={};
+    r0=.MCPJointSeg.r0+.MCPJointSeg.AbductionAdductionAxis.sRel*.MCPJointSeg.Axes0'-MCPAbductionAdductionAxis.sRel*Axes0';
+    Axes0=.MCPJointSeg.Axes0*.MCPJointSeg.AbductionAdductionAxis.ARel*
+    RotMat((.....Sign*pi/180)*..JntPos.MCPAbduction,x)*MCPAbductionAdductionAxis.ARel';
+    
+    
+    AnyRefNode EllipsoidNode={
+      
+      AnySurfEllipsoid Ellipsoid={
+        AnyVar BoneLength= vnorm(..ProximalJointSurfaceNode.sRel-..DistalJointNode.sRel,2);
+        Radius =..Scale({0.006,0,0.006}+{0,a,0}); //the bonelength is already scaled..
+        //definition of focus points for the ellipsoid these are used for defining contact
+        AnyVar a =BoneLength/2;
+        AnyVar c = sqrt(Radius[1]^2-Radius[0]^2);   //distance for center of ellipsoid to focus point
+        
+        //AnyDrawParamSurf drw ={ RGB=...BoneSurf.RGB; Opacity = ........BonesOpacity.Hand;};
+      };
+      //definition of focus points
+      AnyRefNode F1 ={      sRel={0,.Ellipsoid.c,0};    };
+      AnyRefNode F2 ={      sRel={0,-.Ellipsoid.c,0};    };      
+    };
+
+    AnyVar StdSegmentLength= 0.034;// unscaled segment length
+    AnyFunTransform3D &Scale=  ..GeomScalePP;//...SegmentLengthTable[0][2]/ StdSegmentLength;
+    
+    AnyFunTransform3D &GeomScale= Scale;//...GScaling.Hand.ScaleFunction;
+    AnyRefNode AnatomicalFrame = {};
+    #if (_ARM_DETAILED_HAND_WHICH == "LOOPLUC" | _ARM_DETAILED_HAND_WHICH =="RUHM")
+//    #include "HandData/RUHM/PalmarTorusMCP_Thumb_Distal.any"
+    #include "HandData/RUHM/PalmarTorusDIP_Thumb_Proximal.any"
+    #endif
+    
+    AnyDrawSurf  BoneSurf = {   
+      RGB=Main.DrawSettings.Colors.Segments;
+      #if _ARM_DETAILED_HAND_WHICH == "RUHM"
+      FileName = "HandData/STL/Plzen-ProximalPhalanx1"; 
+      #else
+      FileName = "HandData/STL/ProximalPhalanx1"; 
+      #endif
+      ScaleXYZ= {1,1,......Sign*1};
+      Opacity = ......BonesOpacity.Hand;
+      AnyFunTransform3D& Scale = .Scale;
+    };
+    
+    //AnyVar Length=0.1;//.MiddlePhalanx.O2O3*1.608;
+    //O6
+    AnyRefNode ProximalJointNode               = {sRel=.Scale(..Data.ProximalPhalanx.ProximalJointNode_pos*..Mirror);};
+    //O5
+    AnyRefNode ProximalJointSurfaceNode        = {sRel=.Scale(..Data.ProximalPhalanx.ProximalJointSurfaceNode_pos*..Mirror);};
+    //O4
+    AnyRefNode DistalJointNode                 = {sRel=.Scale(..Data.ProximalPhalanx.DistalJointNode_pos*..Mirror);
+      #if (_ARM_DETAILED_HAND_WHICH == "LOOPLUC" | _ARM_DETAILED_HAND_WHICH =="RUHM")
+//      #include "HandData/RUHM/JointSphereDIP.any"
+//      #include "HandData/RUHM/DorsalTorusDIP_Thumb.any"
+      #endif
+    };
+    AnyRefNode DistalJointSurfaceNode          = {sRel=.Scale(..Data.ProximalPhalanx.DistalJointSurfaceNode_pos*..Mirror);};
+    //This is the Abduction adduction axis for the MCP joint
+    AnyRefNode MCPAbductionAdductionAxis       = {sRel=.Scale(..Data.ProximalPhalanx.MCPAbductionAdductionAxis_pos*..Mirror); 
+                                                  ARel=RotMat(-0.175,z)*RotMat(......Sign*-0.087,y);}; //these numbers are taken from measures...
+    //Bone lenght
+    AnyVar BL                                   = ProximalJointSurfaceNode.sRel[1]-DistalJointSurfaceNode.sRel[1];
+  
+    //Flexion extension axis for Interphalangeal joint
+    AnyRefNode IPFlexionExtensionAxis          = {sRel=.ProximalJointSurfaceNode.sRel-{0,0.9*.BL,......Sign*0};
+                                                  ARel=RotMat(......Sign*-(90-83)*pi/180,x);};
+ }; //ProximalPhalanx Seg definition (Thumb Middle part)
+  
+  AnySeg Metacarpal={
+    //    Mass=..Mass1;
+    //    Jii={0,0,0};
+    #include "HandData/RUHM/Metacarpal.any"
+    #include "HandData/RUHM/FingerInertia.any"
+    Mass=PhalanxMass;//..Mass1;
+    Jii={I_xx,I_yy,I_zz};
+    //      AnyDrawRefFrame drw={ScaleXYZ={1,1,1}*0.15;};
+    r0=.CMCJointSeg.r0 +.CMCJointSeg.AbductionAdductionJointNode.sRel*.CMCJointSeg.Axes0'+-CMCAbductionAdductionAxis.sRel*Axes0';
+    
+    //    Axes0=.CMCJointSeg.Axes0'*.CMCJointSeg.AbductionAdductionJointNode.ARel*
+    //    RotMat((....Sign*pi/180)*..JntPos.CMCAbduction,x)*CMCAbductionAdductionAxis.ARel';
+    
+    Axes0 =  ...Carpals.Axes0*...Carpals.CMC1.ARel* RotMat((pi/180)*..JntPos.CMCFlexion,z)*RotMat((.....Sign*pi/180)*..JntPos.CMCAbduction,x);
+    
+    #include "HandData/RUHM/DorsalTorusPIP_Thumb.any"
+    AnyRefNode EllipsoidNode={
+      
+      AnySurfEllipsoid Ellipsoid={
+        AnyVar BoneLength= vnorm(..ProximalJointNode.sRel-..DistalJointNode.sRel,2);
+        Radius =..Scale({0.006,0,0.006}+{0,a,0}); //the bonelength is already scaled..
+        //definition of focus points for the ellipsoid these are used for defining contact
+        AnyVar a =BoneLength/2;
+        AnyVar c = sqrt(Radius[1]^2-Radius[0]^2);   //distance for center of ellipsoid to focus point
+        
+        //AnyDrawParamSurf drw ={ RGB=...BoneSurf.RGB; Opacity = ........BonesOpacity.Hand;};
+      };
+      //definition of focus points
+      AnyRefNode F1 ={      sRel={0,.Ellipsoid.c,0};    };
+      AnyRefNode F2 ={      sRel={0,-.Ellipsoid.c,0};    };      
+    };
+    
+    
+    AnyVar StdSegmentLength= 0.049;// unscaled segment length
+    AnyFunTransform3D &Scale= ..GeomScaleMC;//...SegmentLengthTable[0][1]/StdSegmentLength;
+    
+    AnyFunTransform3D &GeomScale= Scale;//...GScaling.Hand.ScaleFunction;
+    AnyRefNode AnatomicalFrame = {};
+    
+    AnyDrawSurf  BoneSurf = {  
+      RGB=Main.DrawSettings.Colors.Segments;
+      #if _ARM_DETAILED_HAND_WHICH == "RUHM"
+      FileName = "HandData/STL/Plzen-MetacarpalBase1";
+      #else
+      FileName = "HandData/STL/MetacarpalBase1";
+      #endif
+      ScaleXYZ={1,1,......Sign*1};
+      Opacity = ......BonesOpacity.Hand;
+      AnyFunTransform3D& Scale = .Scale;
+    };
+    
+    AnyRefNode ProximalJointNode                  = {sRel=.Scale(..Data.MetaCarpal.ProximalJointNode_pos*..Mirror);};
+    AnyRefNode ProximalSurfaceNode                = {sRel=.Scale(..Data.MetaCarpal.ProximalSurfaceNode_pos*..Mirror);    }; 
+    //node on the ulna side of the bone used onluy for the location of the abduction/adduction axis
+    AnyRefNode ProximalSurfaceUlnaSide            = {sRel=.Scale(..Data.MetaCarpal.ProximalSurfaceUlnaSide_pos*..Mirror);}; 
+    //node on the ulna side of the bone used onluy for the location of the abduction/adduction axis
+    AnyRefNode ProximalSurfaceRadialSide          = {sRel=.Scale(..Data.MetaCarpal.ProximalSurfaceRadialSide_pos*..Mirror);};
+    //06
+    AnyRefNode DistalJointNode                     = {sRel=.Scale(..Data.MetaCarpal.DistalJointNode_pos*..Mirror);
+      #if (_ARM_DETAILED_HAND_WHICH == "LOOPLUC" | _ARM_DETAILED_HAND_WHICH =="RUHM")
+      #include "HandData/RUHM/Thumb_JointSpherePIP.any"
+      
+AnySurfEllipsoid Jointsphere_Abduction= {
+  Radius = ..Scale({0.06, 0.006, 0.006});
+  #if SHOW_HAND_WRAP_EX == ON
+  AnyDrawParamSurf drw = {
+    RGB = {1, 1, 1};
+    Opacity  =0.8; 
+  };
+  #endif
+};
+      
+      #endif
+    };
+
+    AnyRefNode DistalSurfaceNode                   = {sRel=.Scale(..Data.MetaCarpal.DistalSurfaceNode_pos*..Mirror);};
+    
+    //BoneLength 
+    AnyVar BL                                      = vnorm((DistalSurfaceNode.sRel[1]-ProximalSurfaceNode.sRel[1]),2);
+    //BoneWidth 
+    AnyVar T                                       = vnorm((ProximalSurfaceRadialSide.sRel[2]-ProximalSurfaceUlnaSide.sRel[2]),2);
+    
+    
+    AnyRefNode CMCAbductionAdductionAxis           = {sRel=.ProximalSurfaceNode.sRel-{0,0.12*.BL,......Sign*0.595*.T+.ProximalSurfaceUlnaSide.sRel[2]};//hollister1992 fig. 5
+                                                      ARel=RotMat((-90+86)*pi/180,z)*RotMat(......Sign*(90-78.3)*pi/180,y);}; //Hollister1992 fig.5 
+ 
+    //Definition of MCP Flexion extension axis    using Hollister1995 fig 2b     
+    AnyRefNode DistalDorsalNode                    = {sRel=.DistalSurfaceNode.sRel+.Scale(..Data.MetaCarpal.DistalDorsalNode_pos*..Mirror);};
+    AnyRefNode DistalVolarNode                     = {sRel=.DistalSurfaceNode.sRel+.Scale(..Data.MetaCarpal.DistalVolarNode_pos*..Mirror);};
+    
+    AnyVar TDistal                                 = vnorm(DistalVolarNode.sRel-DistalDorsalNode.sRel,2);
+    
+    AnyRefNode MCPFlexionExtensionAxis             = {sRel={.DistalDorsalNode.sRel[0]+0.44*.TDistal,0.10*.BL+.DistalSurfaceNode.sRel[1],......Sign*0};//hollister1992 fig. 2b and table 1
+                                                      ARel=RotMat(......Sign*(-90+101)*pi/180,x);}; //Hollister1995 fig.2b 
+      
+    
+                                                    
+      //Tori for Opponens Pollicis 1-6                                                    
+    AnyRefNode Torus_Opponens_Pollicis_1 = {
+      sRel = {0,0.00001,0} + .......ShoulderArm.Seg.Hand.ModelParameters.MuscleNodes.Finger1.Metacarpal.Via_Opponens_Pollicis_pos_1;
+      #include "HandData/RUHM/Torus_Opponens_Pollicis.any"
+//      AnyDrawNode drw = {
+//        ScaleXYZ = {0.001, 0.001, 0.001};};
+    };
+    AnyRefNode Torus_Opponens_Pollicis_2 = {
+      sRel = {0,0.00001,0} + .......ShoulderArm.Seg.Hand.ModelParameters.MuscleNodes.Finger1.Metacarpal.Via_Opponens_Pollicis_pos_2;
+      #include "HandData/RUHM/Torus_Opponens_Pollicis.any"
+//      AnyDrawNode drw = {
+//        ScaleXYZ = {0.001, 0.001, 0.001};};
+    };
+    AnyRefNode Torus_Opponens_Pollicis_3 = {
+      sRel = {0,0.00001,0} +.......ShoulderArm.Seg.Hand.ModelParameters.MuscleNodes.Finger1.Metacarpal.Via_Opponens_Pollicis_pos_3;
+      #include "HandData/RUHM/Torus_Opponens_Pollicis.any"
+//      AnyDrawNode drw = {
+//        ScaleXYZ = {0.001, 0.001, 0.001};};
+    };
+    AnyRefNode Torus_Opponens_Pollicis_4 = {
+      sRel = {0,0.00001,0} +.......ShoulderArm.Seg.Hand.ModelParameters.MuscleNodes.Finger1.Metacarpal.Via_Opponens_Pollicis_pos_4;
+      #include "HandData/RUHM/Torus_Opponens_Pollicis.any"
+//      AnyDrawNode drw = {
+//        ScaleXYZ = {0.001, 0.001, 0.001};};
+    };
+    
+    //Tori for Flexor_Pollicis_Brevis                                                   
+    AnyRefNode Flexor_Pollicis_Brevis_Caput_Profundum = {
+      sRel = {0,0.00001,0} + .......ShoulderArm.Seg.Hand.ModelParameters.MuscleNodes.Finger1.Metacarpal.Via_Flexor_Pollicis_Brevis_Caput_Profundum;
+      #include "HandData/RUHM/Torus_Flexor_Pollicis_Brevis.any"
+//      AnyDrawNode drw = {
+//        ScaleXYZ = {0.001, 0.001, 0.001};};
+    };
+    AnyRefNode Flexor_Pollicis_Brevis_Caput_Superficiale_1 = {
+      sRel = {0,0.00001,0} + .......ShoulderArm.Seg.Hand.ModelParameters.MuscleNodes.Finger1.Metacarpal.Via_Flexor_Pollicis_Brevis_Caput_Superficiale_1;
+      #include "HandData/RUHM/Torus_Flexor_Pollicis_Brevis.any"
+//      AnyDrawNode drw = {
+//        ScaleXYZ = {0.001, 0.001, 0.001};};
+    };
+    AnyRefNode Flexor_Pollicis_Brevis_Caput_Superficiale_2 = {
+      sRel = {0,0.00001,0} + .......ShoulderArm.Seg.Hand.ModelParameters.MuscleNodes.Finger1.Metacarpal.Via_Flexor_Pollicis_Brevis_Caput_Superficiale_2;
+      #include "HandData/RUHM/Torus_Flexor_Pollicis_Brevis.any"
+//      AnyDrawNode drw = {
+//        ScaleXYZ = {0.001, 0.001, 0.001};};
+    };
+    
+    //Tori for Abductor_Pollicis_Brevis                                                  
+    AnyRefNode Abductor_Pollicis_Brevis_1 = {
+      sRel = {0,0.00001,0} + .......ShoulderArm.Seg.Hand.ModelParameters.MuscleNodes.Finger1.Metacarpal.Via_Abductor_Pollicis_Brevis_1;
+      #include "HandData/RUHM/Torus_Abductor_Pollicis_Brevis.any"
+//      AnyDrawNode drw = {
+//        ScaleXYZ = {0.001, 0.001, 0.001};};
+    };
+        AnyRefNode Abductor_Pollicis_Brevis_2 = {
+      sRel = {0,0.00001,0} + .......ShoulderArm.Seg.Hand.ModelParameters.MuscleNodes.Finger1.Metacarpal.Via_Abductor_Pollicis_Brevis_2;
+      #include "HandData/RUHM/Torus_Abductor_Pollicis_Brevis.any"
+//      AnyDrawNode drw = {
+//        ScaleXYZ = {0.001, 0.001, 0.001};};
+    };
+    AnyRefNode Abductor_Pollicis_Brevis_3 = {
+      sRel = {0,0.00001,0} + .......ShoulderArm.Seg.Hand.ModelParameters.MuscleNodes.Finger1.Metacarpal.Via_Abductor_Pollicis_Brevis_3;
+      #include "HandData/RUHM/Torus_Abductor_Pollicis_Brevis.any"
+//      AnyDrawNode drw = {
+//        ScaleXYZ = {0.001, 0.001, 0.001};};
+    };
+    AnyRefNode Abductor_Pollicis_Brevis_4 = {
+      sRel = {0.0005,0.00001,0} + .......ShoulderArm.Seg.Hand.ModelParameters.MuscleNodes.Finger1.Metacarpal.Via_Abductor_Pollicis_Brevis_4;
+      #include "HandData/RUHM/Torus_Abductor_Pollicis_Brevis.any"
+//      AnyDrawNode drw = {
+//        ScaleXYZ = {0.001, 0.001, 0.001};};
+    };
+    AnyRefNode Abductor_Pollicis_Brevis_5 = {
+      sRel = {0,0.00001,0} + .......ShoulderArm.Seg.Hand.ModelParameters.MuscleNodes.Finger1.Metacarpal.Via_Abductor_Pollicis_Brevis_5;
+      #include "HandData/RUHM/Torus_Abductor_Pollicis_Brevis.any"
+//      AnyDrawNode drw = {
+//        ScaleXYZ = {0.001, 0.001, 0.001};};
+    };
+
+    //Tori for Abductor_Pollicis_Brevis                                                  
+    AnyRefNode Interossei_Dorsales_I_Finger1_1 = {
+      sRel = {0,0.00001,0} + .......ShoulderArm.Seg.Hand.ModelParameters.MuscleNodes.Finger1.Metacarpal.Via_Interossei_I_Dorsales_Finger1_1;
+//      #include "HandData/RUHM/Torus_Interossei_Dorsales.any"
+//      AnyDrawNode drw = {
+//        ScaleXYZ = {0.001, 0.001, 0.001};};
+    };
+    AnyRefNode Interossei_Dorsales_I_Finger1_2 = {
+      sRel = {0,0.00001,0} + .......ShoulderArm.Seg.Hand.ModelParameters.MuscleNodes.Finger1.Metacarpal.Via_Interossei_I_Dorsales_Finger1_2;
+//      #include "HandData/RUHM/Torus_Interossei_Dorsales.any"
+//      AnyDrawNode drw = {
+//        ScaleXYZ = {0.001, 0.001, 0.001};};
+    };                                              
+          
+  }; //Metacarpal seg definition (Thumb's base)
+  
+  //this is segment connects the flexion and the abduction/adduction axis in the CMC joint.
+  AnySeg CMCJointSeg ={
+    //AnyDrawRefFrame drw={ScaleXYZ={0.19,0.19,0.19};RGB={1,0,0};};
+   // AnyDrawRefFrame drws = {RGB= {1,0,0};ScaleXYZ={1,1,1}*0.15;};
+
+    r0= ...Carpals.CMC1.sRel* ...Carpals.Axes0'+...Carpals.r0;
+    Axes0 = ...Carpals.Axes0*...Carpals.CMC1.ARel* RotMat((pi/180)*..JntPos.CMCFlexion,z);
+   
+    //    r0= .Metacarpal.r0- .Metacarpal.MCPFlexionExtensionAxis.sRel*.Metacarpal.Axes0';
+    //    Axes0 =.Metacarpal.Axes0*.Metacarpal.MCPFlexionExtensionAxis.ARel;
+    //
+    Mass=0;
+    Jii={0,0,0};
+    AnyRefNode FlexionExtensionJointNode            ={viewRefFrame.Visible =Off;  };
+     
+    #include "HandData/RUHM/Torus_Flexor_Pollicis_Longus_CMC.any"
+    
+AnyRefNode JointCyl={  
+  //sRel={-0.02,0.010,0.019};
+  sRel={-0.0,-0.0,-0.0};
+  ARel=RotMat(0*pi/180,y);//*RotMat((30*pi/180),y);
+  AnySurfEllipsoid Jointsphere = {
+    Radius = ...Metacarpal.Scale({0.016, 0.016, 0.016});
+    #if SHOW_HAND_WRAP_EX == ON
+    AnyDrawParamSurf drw = {
+      RGB = {1, 1, 1};
+      Opacity  =0.8; 
+    };
+    #endif 
+  };
+
+AnySurfEllipsoid Jointsphere_ADPo = {
+  Radius = ...Metacarpal.Scale({0.05, 0.006, 0.006});
+  #if SHOW_HAND_WRAP_EX == ON
+  AnyDrawParamSurf drw = {
+    RGB = {1, 1, 1};
+    Opacity  =0.8; 
+  };
+  #endif 
+};
+ 
+  };
+//      AnyRefNode JointCyl2={  
+//    //sRel={-0.02,0.010,0.019};
+//    sRel={-0.0,-0.0,-0.0};
+//    ARel=RotMat(90*pi/180,y);//*RotMat((30*pi/180),y);
+//   AnySurfCylinder cyl = { 
+//      Radius=0.013;
+//      Length= 0.04;
+//      CapRatio = 0.0;
+//      #if SHOW_HAND_WRAP_EX == OFF
+//      AnyDrawParamSurf drw={RGB={1,0,0.5};Opacity = 0.5;};
+//      #endif
+//    };
+//    
+//  };
+    AnyRefNode AbductionAdductionJointNode         = {sRel=..Metacarpal.Scale(..Data.CMCJointSeg.AbductionAdductionJointNode_pos)*..Mirror;
+                                                      ARel=RotMat(-0.06981316,z)*RotMat(......Sign*0.2042035,y);};
+  };
+  
+  // These two folling measured was used to obtain the position and orientation of the 
+  // AbductionAdductionJointNode for a neutral position
+  //  AnyKinLinear lin={
+  //    Ref=0;
+  //    AnyRefNode &ref1=.CMCJointSeg.FlexionExtensionJointNode;
+  //    
+  //    AnyRefNode &ref2=.Metacarpal.CMCAbductionAdductionAxis;
+  //    
+  //  };
+  //  AnyKinRotational rot={
+  //    Ref=0;
+  //    AnyRefNode &ref1=.CMCJointSeg.FlexionExtensionJointNode;
+  //    
+  //    AnyRefNode &ref2=.Metacarpal.CMCAbductionAdductionAxis;
+  //    Type=RotAxesAngles;
+  //  };
+  
+  
+  
+  
+  
+  //This is segment connects the flexion and the abduction/adduction axis in the CMC joint
+  //Definition of MCP abduction adduction axis  using Hollister1995 fig 2c     
+  //this axis is positioned wrt to metacarpal bone but moves with proximal phalanx 
+  //the positioning is done with the MCP flexion extenion in neutral posiotion
+  
+  AnySeg MCPJointSeg ={
+    
+    r0= .Metacarpal.r0+.Metacarpal.MCPFlexionExtensionAxis.sRel*.Metacarpal.Axes0'-FlexionExtensionAxis.sRel;
+    Axes0 =.Metacarpal.Axes0*.Metacarpal.MCPFlexionExtensionAxis.ARel*
+    RotMat((pi/180)*..JntPos.MCPFlexion,z)*FlexionExtensionAxis.ARel';
+    
+    Mass=0;
+    Jii={0,0,0};
+    AnyRefNode FlexionExtensionAxis={
+      ARel=RotMat(......Sign*(-90+101)*pi/180,x); //Hollister1995 fig.2b  Rotate back again so the finger remains straight 
+      //this means that with flexion extension in neutral posiotion the coordinate system of this segment is 
+      //allignet with metacarpal bone
+      
+    };
+    
+    AnyRefNode AbductionAdductionAxis={
+      //for the y position subtract the y position used by the flexion extension axis 
+      sRel=..Metacarpal.Scale({0,(0.87-0.83),0})*..Metacarpal.BL+{0,0,......Sign*0};//hollister1995 fig. 2a and 2b and table 1 
+      ARel=RotMat(-(90-80)*pi/180,z)*RotMat(......Sign*-5*pi/180,y); //Hollister1995 fig.c 
+      
+      //AnyDrawRefFrame drw={
+      //  ScaleXYZ={0.05,0.05,0.05}; RGB={0,0,0};     
+      //};
+    };
+  };
+  
+  //  // These two folling measured was used to obtain the position and orientation of the 
+  //  // AbductionAdductionJointNode for a neutral position
+//    AnyKinLinear lin={
+//      Ref=0;
+//      AnyRefNode &ref2=.ProximalPhalanx;
+//      
+//      AnyRefNode &ref1=.MCPJointSeg.AbductionAdductionAxis;
+//      
+//    };
+//    AnyKinRotational rot={
+//      Ref=0;
+//      AnyRefNode &ref2=.ProximalPhalanx;
+//      
+//      AnyRefNode &ref1=.MCPJointSeg.AbductionAdductionAxis;
+//      Type=RotAxesAngles;
+//    };
+//  //  
+//  
+  
+  // These two folling measured was used to obtain the position and orientation of the 
+  // AbductionAdductionJointNode for a neutral position
+  AnyKinLinear lin={
+    Ref=0;
+    AnySeg &ref2=.DistalPhalanx;
+    
+    AnyRefNode &ref1=.ProximalPhalanx.IPFlexionExtensionAxis;
+    
+  };
+  AnyKinRotational rot={
+    AnySeg &ref2=.ProximalPhalanx;
+    AnyRefNode &ref1=.ProximalPhalanx.IPFlexionExtensionAxis;
+    Type=RotAxesAngles;
+  };
+  
+}; //Segs
+
+
+
+
+AnyFolder Jnt ={
+  
+  //    //Carpometacarpal Flexion joint  
+  //    AnyUniversalJoint CMC={
+  //      
+  //      AnyRefNode &ref1=...Carpals.CMC1;
+  //      AnyRefNode &ref2=..Seg.Metacarpal.ProximalJointNode;
+  //      Axis1=z;
+  //      Axis2=x;
+  //      
+  //    };
+  
+  //    AnyKinEqSimpleDriver CMCdriver ={
+  //    AnyRevoluteJoint &ref=.CMCFlexion;
+  //    DriverPos={0};
+  //    DriverVel={0};
+  // 
+  //    
+  //    };
+  AnyRevoluteJoint CMCFlexion={
+    
+    AnyRefNode &ref1=...Carpals.CMC1;
+    
+    AnyRefNode &ref2=..Seg.CMCJointSeg.FlexionExtensionJointNode;
+    //
+//        ref1={AnyDrawRefFrame drw= {};};
+//       ref2={AnyDrawRefFrame drw= {};};
+    Axis=z;
+    //#include "DrawJointAxisZ.any"
+  };
+  
+  
+  
+  // Carpometacarpal abduction adduction joint
+  AnyRevoluteJoint CMCAbduction={
+    AnyRefNode &ref1=..Seg.CMCJointSeg.AbductionAdductionJointNode; //oMetacarpal.ProximalJointNode;
+    AnyRefNode &ref2=..Seg.Metacarpal.CMCAbductionAdductionAxis;
+      //ref1={AnyDrawRefFrame drw3={RGB={1,0,1};};};  
+     //ref2={AnyDrawRefFrame drw= {};};
+    Axis=x;
+//    #include "DrawJointAxisX.any"
+  };
+  
+//        //Metacarpophalangeal joint
+//        AnyRevoluteJoint MCP={
+//          AnyRefNode &ref1=..Seg.Metacarpal.DistalJointNode;
+//          AnyRefNode &ref2=..Seg.ProximalPhalanx.ProximalJointNode;
+//          Axis=z;
+//        };
+  //      
+
+  //Metacarpophalangeal joint flexion extension (along the blue axis)
+  AnyRevoluteJoint MCPFlexion={
+    AnyRefNode &ref1=..Seg.Metacarpal.MCPFlexionExtensionAxis;
+    AnyRefNode &ref2=..Seg.MCPJointSeg.FlexionExtensionAxis;
+    Axis=z;
+    //#include "DrawJointAxisZ.any"
+    //ref1={AnyDrawRefFrame drw= {};};
+      // ref2={AnyDrawRefFrame drw= {};};
+
+    
+  };
+  
+  
+  //Metacarpophalangeal joint abduction adduction (along the black axis)
+  //MCP joint is at the middle of thumb
+  AnyRevoluteJoint MCPAbduction={
+    AnyRefNode &ref1=..Seg.MCPJointSeg.AbductionAdductionAxis;
+    AnyRefNode &ref2=..Seg.ProximalPhalanx.MCPAbductionAdductionAxis;
+    Axis=x;
+//    #include "DrawJointAxisX.any"
+  };
+
+  //Distalinterphalangeal joint
+  AnyRevoluteJoint DIP={
+    AnyRefNode &ref1=..Seg.ProximalPhalanx.IPFlexionExtensionAxis;
+    AnyRefNode &ref2=..Seg.DistalPhalanx.IPFlexionExtensionAxis;
+    Axis=z;
+    //#include "DrawJointAxisZ.any"
+  };
+}; //jnt  
+
+
+// Muscles Definition of the Thumb:
+AnyFolder JntMus = {
+  
+  //Two muscles for the CMC joint - Flexion/Extension motion (base of thumb):
+  AnyGeneralMuscle CMCflexion = {
+    AnyMuscleModel MuscleModel = {
+      F0 =  ...CMCMusForceFlex;
+    };
+    AnyRevoluteJoint &jnt = ..Jnt.CMCFlexion;
+    ForceDirection = 1;
+  };
+  
+  AnyGeneralMuscle CMCextension = {
+    AnyMuscleModel MuscleModel = {
+      F0 = ...CMCMusForceExten;
+    };
+    AnyRevoluteJoint &jnt = ..Jnt.CMCFlexion;
+    ForceDirection = -1;
+  };
+    //Two muscles for the CMC joint - Abduction/Adduction motion (base of thumb):
+  AnyGeneralMuscle CMCAdduction = {
+    AnyMuscleModel MuscleModel = {
+      F0 = ...CMCMusForceAdduc;
+    };
+    AnyRevoluteJoint &jnt = ..Jnt.CMCAbduction;
+    ForceDirection = 1;
+  };
+  
+  AnyGeneralMuscle CMCAbduction = {
+    AnyMuscleModel MuscleModel = {
+      F0 = ...CMCMusForceAbduc;
+    };
+    AnyRevoluteJoint &jnt = ..Jnt.CMCAbduction;
+    ForceDirection = -1;
+  };
+    //Two muscles for the MCP joint - Flexion/Extension motion (base of thumb):
+  AnyGeneralMuscle MCPflexion = {
+    AnyMuscleModel MuscleModel = {
+      F0 = ...MCPMusForceFlex;
+    };
+    AnyRevoluteJoint &jnt = ..Jnt.MCPFlexion;
+    ForceDirection = 1;
+  };
+  
+  AnyGeneralMuscle MCPextension = {
+    AnyMuscleModel MuscleModel = {
+      F0 = ...MCPMusForceExten;
+    };
+    AnyRevoluteJoint &jnt = ..Jnt.MCPFlexion;
+    ForceDirection = -1;
+  };
+  //Two muscles for the MCP joint  - Abduction/Adduction motion (middle of thumb):
+  AnyGeneralMuscle MCPAdduction = {
+    AnyMuscleModel MuscleModel = {
+      F0 = ...MCPMusForceAdduc;
+    };
+    AnyRevoluteJoint &jnt = ..Jnt.MCPAbduction;
+    ForceDirection = 1;
+  };
+  
+  AnyGeneralMuscle MCPAbduction = {
+    AnyMuscleModel MuscleModel = {
+      F0 = ...MCPMusForceAbduc;
+    };
+    AnyRevoluteJoint &jnt = ..Jnt.MCPAbduction;
+    ForceDirection = -1;
+  };
+  
+  //Two muscles for the DIP joint - Flexion/Extension motion (base of thumb):
+  AnyGeneralMuscle DIPflexion = {
+    AnyMuscleModel MuscleModel = {
+      F0 = ...DIPMusForceFlex;
+    };
+    AnyRevoluteJoint &jnt = ..Jnt.DIP;
+    ForceDirection = 1;
+  };
+  
+  AnyGeneralMuscle DIPextension = {
+    AnyMuscleModel MuscleModel = {
+      F0 = ...DIPMusForceExten;
+    };
+    AnyRevoluteJoint &jnt = ..Jnt.DIP;
+    ForceDirection = -1;
+  };
+  
+  
+}; // End muscles definition
+

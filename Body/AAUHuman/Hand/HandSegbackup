@@ -1,0 +1,891 @@
+
+//References
+
+//Buchholz1992
+//Bryan Buchholz, Thomas J. Armstrong, Steven A. Goldstein
+//"Anthropometric data for describing the kinematics of the human hand"
+// Ergonomics, Vol. 35, No. 3, 1992, pp. 261-274
+
+//Chao1989
+//"Biomechanics of the hand"
+//Edmund Y S Chao, Kai-Nan An, Wiliam P Cooney III, Ronald L Linscheid
+//ISBN 9971-50-103-1
+
+
+//ISB2005
+//ISB recommendation on definitions of joint coordinate systems of
+//various joints for the reporting of human joint motion-Part II:
+//shoulder, elbow, wrist and hand
+//Ge Wua, Frans C.T. van der Helm, H.E.J. (DirkJan) Veeger, Mohsen Makhsouse,
+//Peter Van Royf, Carolyn Angling, Jochem Nagelsh, Andrew R. Kardunai,
+//Kevin McQuadej, Xuguang Wangk, Frederick W. Wernerl Bryan Buchholzm,
+//Journal of Biomechanics 38 (2005) 981-992
+
+//Hollister1992
+//The axes of rotation of the thumb carpometacarpal joint
+//Journal of orthopaedic research, vol 10 pp. 454-460
+//1992
+
+//Hollister1995
+//The axes of rotation of the thumb interphalangeal and metacarpophalangeal joints
+//JClinical orthopaedics and related research, no. 320, pp. 188-193
+//1995
+
+//Moment data for index, middle, ring, & little finger:
+//Note: MCP, PIP, & DIP data in flexion (grasping) only.
+//CMC data is missing.
+//Reference: Li2000
+//Source: Z.M. Li, V.M. Zatsiorsky, M.L. Latash, "Contribution of the extrinsic and 
+//intrinsic hand muscles to the moments in finger joints", Clinical Biomechanics,
+//pp. 203-211, 2000
+
+//Moment data for Thumb:
+//Note: MP, CMC joint moment data in all directions: Flexion, Extension, Adduction
+//& Abduction. Note: Data estimated from Figure 2. DIP data missing.
+//Reference: Smutz1998
+//Source: W. Paul Smutz, Apichai Kongsayreepong, Richard E. Hughes, Glen Niebur
+//William P. Cooney, Kai-Nan An,"Mechanical advantage of the thumb muscles"
+//(Technical paper), Journal of Biomechanics, Vol 31, pp 565-570, 1998.
+
+//Include nodes for muscles
+
+
+CarpalsRef = {
+  //It is used for wrapping of the flexor muscles.
+  AnyFunTransform3D &Scale=.GScaling.Hand.ScaleFunction;
+  //AnyDrawRefFrame drws={RGB={0,0,1};ScaleXYZ={1,1,1}*0.2;};
+  
+  AnyRefNode FlexorMuscleCyl = { 
+    
+    sRel = ..Carpals.wj.sRel-.Scale({0,0.07,....Sign*0})-...WristJointSeg.RadialUlnarDeviation.sRel*{{1,0,0},{0,1,0},{0,0,....Sign*1}};
+    
+    AnyVec3 P1= sRel;
+    AnyVec3 P3 =P1+ .Scale({0.0,0.0,....Sign*0.0115});//*...Sign;
+    AnyVec3 P2 =P1+ .Scale({0.0, 0.14,....Sign*0.0});//*...Sign;
+    
+    
+    //Calculate orientation of the cylinder
+    ARel=RotMat(sRel,P3,P2)*RotMat(-90/180*pi, z)*RotMat(-90/180*pi, y);          
+         
+    
+    AnySurfCylinder cyl = { 
+      Radius= vnorm(.sRel-.P3);
+      Length= vnorm(.sRel-.P2);
+    };
+    
+  };//End FlexorMuscleCyl
+
+};
+
+AnyFunTransform3D &Scale= GScaling.Hand.ScaleFunction;
+
+
+Finger1MetaRef = {
+  AnyRefNode I_Abductor_Pollicis_Longus = {
+//     AnyDrawRefFrame drw={RGB={1,0,0};};
+    sRel = ..Scale({-0.01, 0.007, ....Sign*0}); //guesstimate
+    
+  }; 
+  
+  
+  
+  AnyRefNode I_Extensor_Pollicis_Brevis = {
+    //   AnyDrawRefFrame drw={};
+    sRel = ..Scale({-0.01, -0.02, 0}); //guesstimate
+  }; 
+  
+  AnyRefNode Via1_Extensor_Pollicis_Brevis = {
+    //   AnyDrawRefFrame drw={};
+    sRel = ..Scale({-0.01, 0.0, 0}); //guesstimate
+  }; 
+  
+  
+  AnyRefNode Via1_Extensor_Pollicis_Longus= {
+    //   AnyDrawRefFrame drw={};
+    sRel = ..Scale({-0.01, 0.0, 0}); //guesstimate
+  }; 
+  AnyRefNode I_Extensor_Pollicis_Longus= {
+    //   AnyDrawRefFrame drw={};
+    sRel = ..Scale({-0.01, -0.02, 0}); //guesstimate
+  }; 
+  
+  AnyRefNode Via_Flexor_Pollicis_Longus = {
+    // AnyDrawRefFrame drw={};
+    sRel = ..Scale({0.008, 0.0, 0}); //guesstimate
+    ARel = RotMat(-....Sign*pi/2,x)*RotMat(-....Sign*pi/2,y);  // used for the SPLine.InitWrapPosVectors 
+  }; 
+  AnyRefNode I_Flexor_Pollicis_Longus = {
+    // AnyDrawRefFrame drw={};
+    sRel = ..Scale({0.008, -0.015, 0}); //guesstimate
+  }; 
+  
+};//End Finger1MetaRef
+
+
+Finger2MetaRef = {
+  AnyRefNode Via1_Extensor_Indicis = {
+    //AnyDrawRefFrame drw={RGB={0,1,1};};
+    sRel = ..Scale({-0.007,0.02,0.0}); //guesstimate
+  };
+  
+  
+  AnyRefNode I_Extensor_Indicis = {
+    //AnyDrawRefFrame drw={RGB={0,1,1};};
+    sRel = ..Scale({-0.01,-0.02,0.0}); //guesstimate
+  };
+  
+  AnyRefNode I_Extensor_Carpi_Radialis_Longus= {
+    //AnyDrawRefFrame drw={RGB={0,1,1};};
+    sRel = ..Scale({-0.006,-0.01,0.0}); //guesstimate
+  };
+  
+  AnyRefNode I_Flexor_Carpi_Radialis= {
+    //AnyDrawRefFrame drw={RGB={0,1,1};};
+    sRel = ..Scale({0.006,0.03,0.0}); //guesstimate
+  };
+  
+  AnyRefNode Via_Flexor_Digitorum_Superficialis_Digit2 = {
+    //AnyDrawRefFrame drw={RGB={0,1,1};};
+    sRel = ..Scale({0.008,0.01,0.0}); //guesstimate
+    ARel = RotMat(-....Sign*pi/2,x)*RotMat(-....Sign*pi/2,y);  // used for the SPLine.InitWrapPosVectors 
+  };
+  
+  AnyRefNode I_Flexor_Digitorum_Superficialis_Digit2 = {
+    //AnyDrawRefFrame drw={RGB={0,1,1};};
+    sRel = ..Scale({0.007,-0.025,0.0}); //guesstimate
+  };
+  
+  AnyRefNode Via_Flexor_Digitorum_Profundus_Digit2 = {
+    //AnyDrawRefFrame drw={RGB={0,1,1};};
+    sRel = ..Scale({0.009,0.01,0.0}); //guesstimate
+    ARel = RotMat(-....Sign*pi/2,x)*RotMat(-....Sign*pi/2,y);  // used for the SPLine.InitWrapPosVectors 
+  };
+  
+  AnyRefNode I_Flexor_Digitorum_Profundus_Digit2 = {
+    //AnyDrawRefFrame drw={RGB={0,1,1};};
+    sRel = ..Scale({0.009,-0.02,0.0}); //guesstimate
+  };
+  AnyRefNode Via_Extensor_Digitorum_Digit2 = {
+    //AnyDrawRefFrame drw={RGB={0,1,1};};
+    sRel = ..Scale({-0.009,0.01,0.0}); //guesstimate
+  };
+  
+  AnyRefNode I_Extensor_Digitorum_Digit2 = {
+    //AnyDrawRefFrame drw={RGB={0,1,1};};
+    sRel = ..Scale({-0.009,-0.02,0.0}); //guesstimate
+  };
+  
+};//End Finger2MetaRef
+
+
+Finger3MetaRef={
+  
+  AnyRefNode Via_Extensor_Carpi_Radialis_Brevis = {
+    //AnyDrawRefFrame drw={RGB={0,1,1};};
+    sRel = ..Scale({-0.006,0.027,0.0}); //guesstimate
+  };
+  
+  AnyRefNode I_Extensor_Carpi_Radialis_Brevis = {
+    //AnyDrawRefFrame drw={RGB={0,1,1};};
+    sRel = ..Scale({-0.006,0.025,0.0}); //guesstimate
+  };
+  
+  AnyRefNode Via_Flexor_Digitorum_Superficialis_Digit3 = {
+    //AnyDrawRefFrame drw={RGB={0,1,1};};
+    sRel = ..Scale({0.008,0.01,0.0}); //guesstimate
+    ARel = RotMat(-....Sign*pi/2,x)*RotMat(-....Sign*pi/2,y);  // used for the SPLine.InitWrapPosVectors 
+  };
+  
+  AnyRefNode I_Flexor_Digitorum_Superficialis_Digit3 = {
+    //AnyDrawRefFrame drw={RGB={0,1,1};};
+    sRel = ..Scale({0.007,-0.025,0.0}); //guesstimate
+  };
+  
+  AnyRefNode Via_Flexor_Digitorum_Profundus_Digit3 = {
+    //AnyDrawRefFrame drw={RGB={0,1,1};};
+    sRel = ..Scale({0.009,0.01,0.0}); //guesstimate
+    ARel = RotMat(-....Sign*pi/2,x)*RotMat(-....Sign*pi/2,y);  // used for the SPLine.InitWrapPosVectors 
+  };
+  
+  AnyRefNode I_Flexor_Digitorum_Profundus_Digit3 = {
+    //AnyDrawRefFrame drw={RGB={0,1,1};};
+    sRel = ..Scale({0.009,-0.02,0.0}); //guesstimate
+  };
+  AnyRefNode Via_Extensor_Digitorum_Digit3 = {
+    //AnyDrawRefFrame drw={RGB={0,1,1};};
+    sRel = ..Scale({-0.009,0.01,0.0}); //guesstimate
+  };
+  
+  AnyRefNode I_Extensor_Digitorum_Digit3 = {
+    //AnyDrawRefFrame drw={RGB={0,1,1};};
+    sRel = ..Scale({-0.009,-0.02,0.0}); //guesstimate
+  };
+  
+  
+  
+};//End Finger3MetaRef
+
+Finger4MetaRef = {
+  
+  AnyRefNode I_Palmaris_Longus= {
+    //AnyDrawRefFrame drw={RGB={0,1,1};};
+    sRel = ..Scale({0.004,0.02,0.0}); //guesstimate
+  };
+  
+  AnyRefNode Via_Flexor_Digitorum_Superficialis_Digit4 = {
+    //AnyDrawRefFrame drw={RGB={0,1,1};};
+    sRel = ..Scale({0.008,0.01,0.0}); //guesstimate
+    ARel = RotMat(-....Sign*pi/2,x)*RotMat(-....Sign*pi/2,y);  // used for the SPLine.InitWrapPosVectors 
+  };
+  
+  AnyRefNode I_Flexor_Digitorum_Superficialis_Digit4 = {
+    //AnyDrawRefFrame drw={RGB={0,1,1};};
+    sRel = ..Scale({0.007,-0.025,0.0}); //guesstimate
+  };
+  
+  
+  AnyRefNode Via_Flexor_Digitorum_Profundus_Digit4 = {
+    //AnyDrawRefFrame drw={RGB={0,1,1};};
+    sRel = ..Scale({0.009,0.01,0.0}); //guesstimate
+    ARel = RotMat(-....Sign*pi/2,x)*RotMat(-....Sign*pi/2,y);  // used for the SPLine.InitWrapPosVectors 
+  };
+  
+  AnyRefNode I_Flexor_Digitorum_Profundus_Digit4 = {
+    //AnyDrawRefFrame drw={RGB={0,1,1};};
+    sRel = ..Scale({0.009,-0.02,0.0}); //guesstimate
+  };
+  AnyRefNode Via_Extensor_Digitorum_Digit4 = {
+    //AnyDrawRefFrame drw={RGB={0,1,1};};
+    sRel = ..Scale({-0.009,0.01,0.0}); //guesstimate
+  };
+  
+  AnyRefNode I_Extensor_Digitorum_Digit4 = {
+    //AnyDrawRefFrame drw={RGB={0,1,1};};
+    sRel = ..Scale({-0.009,-0.02,0.0}); //guesstimate
+  };
+  
+};//End Finger4MetaRef
+
+
+Finger5MetaRef = {
+  
+  AnyRefNode I_Extensor_Carpi_Ulnaris = {
+    //AnyDrawRefFrame drw={RGB={0,1,1};};
+    sRel = ..Scale({-0.002,0.02,....Sign*-0.007}); //guesstimate
+  };
+  
+  AnyRefNode I_Flexor_Carpi_Ulnaris = {
+    //AnyDrawRefFrame drw={RGB={0,1,1};};
+    sRel = ..Scale({0.009,0.02,....Sign*0.007}); //guesstimate
+    ARel = RotMat(-....Sign*pi/2,x)*RotMat(-....Sign*pi/2,y);  // used for the SPLine.InitWrapPosVectors 
+  };
+  
+  
+  AnyRefNode Via_Flexor_Digitorum_Superficialis_Digit5 = {
+    //AnyDrawRefFrame drw={RGB={0,1,1};};
+    sRel = ..Scale({0.009,0.01,0.0}); //guesstimate
+    ARel = RotMat(-....Sign*pi/2,x)*RotMat(-....Sign*pi/2,y);  // used for the SPLine.InitWrapPosVectors 
+  };
+  
+  AnyRefNode I_Flexor_Digitorum_Superficialis_Digit5 = {
+    //AnyDrawRefFrame drw={RGB={0,1,1};};
+    sRel = ..Scale({0.009,-0.02,0.0}); //guesstimate
+  };
+  
+  
+  
+  AnyRefNode Via_Flexor_Digitorum_Profundus_Digit5 = {
+    //AnyDrawRefFrame drw={RGB={0,1,1};};
+    sRel = ..Scale({0.009,0.01,0.0}); //guesstimate
+    ARel = RotMat(-....Sign*pi/2,x)*RotMat(-....Sign*pi/2,y);  // used for the SPLine.InitWrapPosVectors 
+  };
+  
+  AnyRefNode I_Flexor_Digitorum_Profundus_Digit5 = {
+    //AnyDrawRefFrame drw={RGB={0,1,1};};
+    sRel = ..Scale({0.009,-0.02,0.0}); //guesstimate
+  };
+  
+  AnyRefNode Via_Extensor_Digitorum_Digit5 = {
+    //AnyDrawRefFrame drw={RGB={0,1,1};};
+    sRel = ..Scale({-0.009,0.01,0.0}); //guesstimate
+  };
+  
+  AnyRefNode I_Extensor_Digitorum_Digit5 = {
+    //AnyDrawRefFrame drw={RGB={0,1,1};};
+    sRel = ..Scale({-0.009,-0.02,0.0}); //guesstimate
+  };
+  
+  AnyRefNode Via_Extensor_Digiti_Minimi= {
+    //AnyDrawRefFrame drw={RGB={0,1,1};};
+    sRel = ..Scale({-0.009,0.01,0.0}); //guesstimate
+  };
+  
+  AnyRefNode I_Extensor_Digiti_Minimi= {
+    //AnyDrawRefFrame drw={RGB={0,1,1};};
+    sRel = ..Scale({-0.009,-0.02,0.0}); //guesstimate
+  };
+  
+};//End Finger5MetaRef
+
+///////////New folder including all origin oints of intrinsic hand muscles/////////////////////
+
+AnyFolder IntrinsicMusclePoints = {  
+  AnyFolder Lum1= {
+    AnyRefFrame &OrObj = ..Finger5MetaRef.I_Extensor_Carpi_Ulnaris;
+    AnyRefFrame &InObj = ....Seg.Radius.Via_Extensor_Carpi_Ulnaris;
+    AnyRefFrame &Global = ..Finger5.Seg.Metacarpal;
+    // Dist is the distance between OrObj and InObj in relation to the total distance. 
+    //Dist=0 means that the intrinsic muscle point would be OrObj and Dist=1 means that the intrinsic muscle point would be InObj
+    AnyVar Dist= 0.5;
+    #include "CreateMusclePoint.any"
+  };
+  
+};
+/////////////////////////////////////////////////////////////////////////////////
+//----------------------------------------------------------
+//AnyFolder Carpals = {
+//  AnyFolder Seg = {
+
+  AnyVar MassS = MassScaling.Hand.MassScale;
+  AnyVar MassStandard = ..StandardParameters.Hand.Mass; 
+  AnyVar HandMass = MassS*MassStandard;
+  AnyVar Mass = HandMass;
+
+    AnySeg Carpals={
+      Mass= .HandMass/6;
+      Jii={0,0,0};
+      r0 = ..WristJointSeg.RadialUlnarDeviation.sRel*..WristJointSeg.Axes0'+..WristJointSeg.r0; 
+     
+//      Axes0 = .WristJointSeg.Axes0*RotMat(90/180*pi,x)*RotMat(..Sign*15/180*pi,y)*RotMat(-90/180*pi,z);
+      //AnyDrawRefFrame drw1={RGB={0,0,1}; ScaleXYZ={0.15,0.15,0.15};};
+      
+//       AnyVar Scale=..Scaling.GeometricalScaling.Hand.LengthScale;
+       AnyFunTransform3D &Scale=.GScaling.Hand.ScaleFunction;
+       AnyFunTransform3D &GeomScale=Scale;
+       AnyRefNode AnatomicalFrame = {};
+      
+//      AnyDrawRefFrame drw2={RGB={1,0,0};};
+      AnyDrawSurf      carpals = {
+        FileName = "Carpals";
+        Opacity = ....BonesOpacity.Hand;
+        
+        RGB=Main.DrawSettings.Colors.Segments;
+        ScaleXYZ = Scale({1.0, 1.0, ....Sign*1.0});
+        //RGB = ...ColorRef.Segments;
+        AnyFunTransform3D &Scale =.Scale;
+      };
+      
+      
+      
+      AnyRefNode wj={ 
+        sRel=.Scale({-0.005,0.005,....Sign*-0.005} + {0.005, -0.001433, ....Sign*0.001099}); //corrected
+        
+        
+       // AnyVar L= iffun(ltfun(...Sign,0),1.0,0.0); 
+
+        ARel=RotMat(-90/180*pi,x)*RotMat(-90/180*pi,y)*RotMat(....Sign*-15/180*pi,z);//*RotMat(L*pi,x);
+        //Note:STC Issue for scaling 
+        //    ARel = {{1,0,0},
+        //      {0,...Sign*1,0},
+        //      {0,0,...Sign*1}
+        //    }; 
+      // AnyDrawRefFrame drw = {RGB={0,0,1};};
+      };
+      
+      
+      AnyRefNode PalmJoint={ sRel=.Scale({0.0, -0.045, ....Sign*0.0});};
+      
+      
+      AnyRefNode CarpalsRef = {
+        sRel = .Scale({0,0,0.0});
+        AnyVar L= iffun(ltfun(....Sign,0),1.0,0.0); 
+
+        ARel=RotMat(-90/180*pi,x)*RotMat(....Sign*-90/180*pi,y)*RotMat(-15/180*pi,z)*RotMat(L*pi,z);
+        
+        //ARel = ....WristJointSeg.Axes0*RotMat(90/180*pi,x)*RotMat(-15/180*pi,y)*RotMat(180/180*pi,z)*RotMat(-90/180*pi,y);
+        //AnyDrawRefFrame drw ={RGB={0,0,1};};
+        
+      };
+      
+      AnyRefNode CarpometacarpalJointNode1={
+        sRel=.Scale({0.0,-0.015,....Sign*0.015});
+        //                    AnyDrawRefFrame drw={          ScaleXYZ={0.1,0.1,0.1};        };
+      };
+      
+      AnyRefNode HandCylRotNode ={
+        sRel=.Scale({0,0,0.0});
+        ARel=RotMat(-65*pi/180,z)*RotMat(....Sign*30*pi/180,x)*RotMat(....Sign*20*pi/180,y);
+         //AnyDrawRefFrame drw = {RGB={1,0,1};};
+      };
+      
+      
+      AnyRefNode CMC1 ={
+        sRel=.Scale({0,..JointPositions[0][0],....Sign*..JointPositions[0][1]});
+        //     ARel=RotMat((-90+30)*pi/180,x)*RotMat(14.7*pi/180,y);
+
+        ARel=RotMat(....Sign*(-90+30)*pi/180,x)*RotMat(....Sign*3*14.7*pi/180,y);
+        
+           //AnyDrawRefFrame drw1={RGB={0,0,1}; ScaleXYZ={0.15,0.15,0.15};};
+      };
+      
+      AnyRefNode CMC2={
+        
+        AnyVar Angle =-atan((sRel[0]-.MCP2.sRel[0])/(sRel[1]-.MCP2.sRel[1]));
+        ARel =RotMat(sRel,sRel+{cos(Angle),sin(Angle),0},.MCP2.sRel)*RotMat(pi,x);
+        sRel=.Scale({-0.004,-0.016,....Sign*0.006});
+               //AnyDrawRefFrame drw={RGB={0,1,1}; ScaleXYZ={0.15,0.15,0.15};};
+      };
+      
+      
+      AnyRefNode CMC3={
+        AnyVar Angle =-atan((sRel[0]-.MCP3.sRel[0])/(sRel[1]-.MCP3.sRel[1]));
+        ARel =RotMat(sRel,sRel+{cos(Angle),sin(Angle),0},.MCP3.sRel)*RotMat(pi,x);
+        sRel=.Scale({-0.003,-0.020,-....Sign*0.008});
+        //        AnyDrawRefFrame drw={RGB={0,1,1}; ScaleXYZ={0.05,0.05,0.05};};
+      };
+      
+      AnyRefNode CMC4={
+        AnyVar Angle =-atan((sRel[0]-.MCP4.sRel[0])/(sRel[1]-.MCP4.sRel[1]));
+        ARel =RotMat(sRel,sRel+{cos(Angle),sin(Angle),0},.MCP4.sRel)*RotMat(pi,x);
+        sRel=.Scale({-0.00,-0.020,....Sign*-0.02});
+        //        AnyDrawRefFrame drw={RGB={0,1,1}; ScaleXYZ={0.5,0.5,0.5};};
+      };
+      
+      AnyRefNode CMC5={
+        AnyVar Angle =-atan((sRel[0]-.MCP5.sRel[0])/(sRel[1]-.MCP5.sRel[1]));
+        ARel =RotMat(sRel,sRel+{cos(Angle),sin(Angle),0},.MCP5.sRel)*RotMat(pi,x);
+        sRel=.Scale({0.004,-0.018,....Sign*-0.025});
+        //        AnyDrawRefFrame drw={RGB={0,1,0}; ScaleXYZ={0.5,0.5,0.5};};
+      };
+      
+      
+      
+      AnyRefNode MCP2 ={
+        //        AnyDrawRefFrame drw={};
+        sRel=.Scale({0,..JointPositions[1][0],....Sign*..JointPositions[1][1]});
+        //        AnyDrawRefFrame drw1={RGB={0,0,1}; ScaleXYZ={0.15,0.15,0.15};};
+      };
+      
+      AnyRefNode MCP3 ={
+        sRel=.Scale({0,..JointPositions[2][0],....Sign*..JointPositions[2][1]});
+        //        AnyDrawRefFrame drw1={RGB={0,0,1}; ScaleXYZ={0.15,0.15,0.15};};
+      };
+      
+      
+      AnyRefNode MCP4 ={
+        sRel=.Scale({0,..JointPositions[3][0],....Sign*..JointPositions[3][1]});
+        //        AnyDrawRefFrame drw1={RGB={0,0,1}; ScaleXYZ={0.15,0.15,0.15};};
+      };
+      
+      AnyRefNode MCP5 ={
+        sRel=.Scale({0,..JointPositions[4][0],....Sign*..JointPositions[4][1]});
+        //        AnyDrawRefFrame drw1={RGB={0,1,0}; ScaleXYZ={0.15,0.15,0.15};};
+      };
+      AnyKinPLine HandBreadthTest={
+        AnyDrawPLine drw={RGB={0,1,0}; Thickness=0.0005;};
+        AnyRefFrame &ref1=.MCP5;
+        AnyRefFrame &ref2=.MCP2;
+        
+      };
+      
+      //  Calculation of Metacarpal lenghts
+      AnyVar LM2 = vnorm((MCP2.sRel-CMC2.sRel),2);
+      AnyVar LM3 = vnorm((MCP3.sRel-CMC3.sRel),2);
+      AnyVar LM4 = vnorm((MCP4.sRel-CMC4.sRel),2);
+      AnyVar LM5 = vnorm((MCP5.sRel-CMC5.sRel),2);
+    };
+//  };
+//};
+//
+
+//The hand can be scaled as a function of the following two propties
+//Handlength: Measured as distance from distal wrist crease to te tip of the long finger with the hand extended
+//the tip of the long finder with the hand extended
+//AnyVar HandLength=0.195;  //this is roughly 50% percentile
+//AnyVar HandLength=0.195;
+
+//Handbreadth: Measured as the distance across the back of the hand between 
+//MCP 2 and 5.
+//AnyVar HandBreadth=0.09;  //this is roughly 50% percentile
+//AnyVar HandBreadth=0.085;
+
+//this table is from  Buchholz1990, table 4 in the paper
+//it gives the relation between segments lengths as a function of Handlenght (see definition above)
+// AnyVar HandBreadth = Main.HumanModel.BodyModel.Right.ShoulderArm.StandardParameters.Hand.HandBreadth; 
+// AnyVar HandLength = Main.HumanModel.BodyModel.Right.ShoulderArm.StandardParameters.Hand.HandLength; 
+
+#if BM_SCALING == _SCALING_XYZ_
+AnyVar HandLength  = GScaling.Hand.LengthScale*..StandardParameters.Hand.HandLength;
+AnyVar HandBreadth = GScaling.Hand.WidthScale*..StandardParameters.Hand.HandBreadth;
+#else
+AnyVar HandLength  = GScaling.Hand.HandLength;
+AnyVar HandBreadth = GScaling.Hand.HandBreadth;
+#endif
+
+AnyMatrix SegmentLengthTable=    HandLength*{
+  //segment 1, segment 2, segment3, segment4
+  //combination of carpal and metacarpal, proximal phalanx,middle phalaxn, distal phalanx
+  {0.118,0.251,0.196,0.158}, //Finger 1 Thumb
+  {0.463,0.245,0.143,0.097}, //Finger 2 Index
+  {0.446,0.266,0.170,0.108}, //Finger 3 Middle
+  {0.421,0.244,0.165,0.107}, //Finger 4 Ring
+  {0.414,0.204,0.117,0.093}  //Finger 5 Little
+};
+//this table is from  Buchholz1990, table 5 in the paper
+//this gives the CMC positions as a function of hand length and breadth 
+//as a function of the wrist joint center 
+AnyMatrix JointPositionRelTableXZ={
+  //Y,Z coordinate system has been changed to follow ISB2005
+  {-0.073,0.196},   //Finger 1 Thumb  CMC
+  {-0.447,0.251},   //Finger 2 Index  MCP
+  {-0.446,-0},      //Finger 3 Middle  MCP
+  {-0.409,-0.206},  //Finger 4 Ring    MCP
+  {-0.368,-0.402}   //Finger 5 Little  MCP
+};
+
+
+////Can be used for testing the length of the hand
+//AnyKinPLine test={
+//  AnyRefNode &ref1=Main.Model.HumanModel.BodyModel.Right.ShoulderArm.Seg.Finger3.Seg.DistalPhalanx.DistalJointSurfaceNode;
+//  AnyRefNode &ref2=Main.Model.HumanModel.BodyModel.Right.ShoulderArm.Seg.Carpals.wj;
+//  AnyDrawPLine drw={RGB={0,0,1};Thickness=0.0015;};
+//};
+
+AnyMatrix JointPositions= JointPositionRelTableXZ*{{HandLength,0},{0,HandBreadth}};
+
+//Metacarpal length calculation
+AnyVar Y = Carpals.CarpometacarpalJointNode1.sRel[1]-JointPositions[1][0];
+AnyVar Z = Carpals.CarpometacarpalJointNode1.sRel[2]-JointPositions[2][0];
+AnyVar Dist =(Y^2+Z^2)^0.5;
+
+
+
+//this table is from  the book "Biomechanics of the hand" by Edmund Y S Chao, Kai-Nan An, Wiliam P Cooney III, Ronald L Linscheid
+//it gives distances between coordinate systems see fig 1-6.
+AnyMatrix SizeTable={
+  //O1O2, O2O3, O3O4, O4O5 , O5O6
+  {0.243, 1, 0.338, 1.424, 0.333}, //Finger 1 Thumb
+  {0.224, 1, 0.288, 1.919, 0.432}, //Finger 2 Index
+  {0.184, 1, 0.233, 1.608, 0.365}, //Finger 3 Middle
+  {0.166, 1, 0.224, 1.576, 0.346}, //Finger 4 Ring
+  {0.230, 1, 0.304, 1.797, 0.506}  //Finger 5 Little
+};
+
+//
+AnyFolder Finger1={
+  //
+  //AnyFolder &JntPos=Main.Model.Mannequin.Posture.Right.Finger1; //link to initial joint angles for this finger
+  //AnyFolder &JntPos=..MannequinValues.Finger1;
+  AnyFolder &JntPos = ....JointPos.Finger1;
+  // Finger segment masses proximal to distal
+  AnyVar Mass1=.HandMass/18;
+  AnyVar Mass2=.HandMass/18;
+  AnyVar Mass4=.HandMass/18;
+  
+  AnyVar S=2*.StrengthScaling.Hand.StrengthScale;
+  
+  AnyVector Lengths = {.SegmentLengthTable[0][0], .SegmentLengthTable[0][1], 0, .SegmentLengthTable[0][3]};
+    
+  // Finger joint muscle forces
+  AnyVar CMCMusForceFlex =S* 8.9;   //Smutz1998, Figure 2, Sum.
+  AnyVar CMCMusForceExten =S* 2.0;  //Smutz1998, Figure 2, Sum.
+  AnyVar CMCMusForceAdduc =S* 3.23; //Smutz1998, Figure 2, Sum.
+  AnyVar CMCMusForceAbduc =S* 3.45; //Smutz1998, Figure 2, Sum.
+  
+  AnyVar MCPMusForceFlex =S* 3.55;  //Smutz1998, Figure 2, Sum.
+  AnyVar MCPMusForceExten = S*0.9;  //Smutz1998, Figure 2, Sum.
+  AnyVar MCPMusForceAdduc = S*1.03; //Smutz1998, Figure 2, Sum.
+  AnyVar MCPMusForceAbduc = S*1.18; //Smutz1998, Figure 2, Sum.
+  
+  AnyVar DIPMusForceFlex = S*0.5;  //Estimated - need more data
+  AnyVar DIPMusForceExten = S*0.2; //Estimated - need more data
+  
+  
+  #include "Thumb.any"
+};
+//
+//
+AnyFolder Finger2={
+    AnyVar S=2*.StrengthScaling.Hand.StrengthScale;    
+  
+  //SegmentLength vector joint center to joint center!
+  //Metacarpal, ProximalPhalanx, Middel Phalanx, Distal phalanx
+  
+  AnyVector Lengths={.Carpals.LM2,.SegmentLengthTable[FingerIndex][1],.SegmentLengthTable[FingerIndex][2],.SegmentLengthTable[FingerIndex][3]};  
+  //Overall Finger lenght measured from CMC to fingertip
+  
+  
+  //Index of the finger, must be interger between 2 and 5  thumb is made differently
+  AnyInt FingerNR=2;
+  AnyInt FingerIndex =FingerNR-1;  //because index starts alway from zero..
+  
+  //reference to the finger insertation node
+  AnyRefNode &InsertationNode=.Carpals.CMC2;
+  
+  //reference to the MCP node (this is a fixed node on carpal seg)
+  AnyRefNode &MCPNode=.Carpals.MCP2;
+  
+  // Finger segment masses proximal to distal
+  AnyVar Mass1=.HandMass/24;  //Estimated - need more data
+  AnyVar Mass2=.HandMass/24;  //Estimated - need more data
+  AnyVar Mass3=.HandMass/24;  //Estimated - need more data
+  AnyVar Mass4=.HandMass/24;  //Estimated - need more data
+  
+  // Finger joint muscle forces
+  AnyVar Scale2 = 0.2;  //Estimate the Extension force is 20% of Flexion
+  AnyVar CMCMusForceFlex = S*5;      //Estimated - need more data
+  AnyVar CMCMusForceExten = S*CMCMusForceFlex*Scale2; //Estimated - need more data
+  AnyVar CMCMusForceAdduc = S*3;     //Estimated - need more data
+  AnyVar CMCMusForceAbduc = S*3;     //Estimated - need more data
+  
+  AnyVar MCPMusForceFlex = S*2.513;  //Li2000, Table3, Lowest value
+  AnyVar MCPMusForceExten = S*MCPMusForceFlex*Scale2; //Estimated - need more data
+  AnyVar MCPMusForceAdduc = S*3;     //Estimated - need more data
+  AnyVar MCPMusForceAbduc = S*3;     //Estimated - need more data
+  
+  AnyVar PIPMusForceFlex = S*1.293;  //Li2000, Table3, Lowest value
+  AnyVar PIPMusForceExten =S* PIPMusForceFlex*Scale2; //Estimated - need more data
+  
+  AnyVar DIPMusForceFlex = S*0.431;  //Li2000, Table3
+  AnyVar DIPMusForceExten = S*DIPMusForceFlex*Scale2; //Estimated - need more data
+  
+  //AnyFolder &JntPos=Main.Model.Mannequin.Posture.Right.Finger2; //link to initial joint angles for this finger
+  AnyFolder &JntPos = ....JointPos.Finger2;
+  
+  AnyFolder MiddlePhalanxParameters ={
+    AnyVar Radius = 0.006;
+    AnyVar BoneLengthCoef = 0.5;
+  };
+  
+  AnyFolder ProximalPhalanxParameters ={
+    AnyVar Radius = 0.0045;
+    AnyVar BoneLengthCoef = 0.56;
+  };
+  
+  AnyFolder MetacarpalParameters ={
+    AnyVar Radius = 0.007;
+    AnyVar BoneLengthCoef = 0.6;
+    AnyVec3 Offset = {0, 0, 0};
+    AnyVar RotAngle = 0;
+  };
+  
+
+    #include "Finger.any"
+  
+};//finger2
+
+
+
+AnyFolder Finger3={
+    AnyVar S=2*.StrengthScaling.Hand.StrengthScale;    
+  
+  //SegmentLength vector joint center to joint center!
+  //Metacarpal, ProximalPhalanx, Middel Phalanx, Distal phalanx
+  
+  AnyVector Lengths={.Carpals.LM3,.SegmentLengthTable[FingerIndex][1],.SegmentLengthTable[FingerIndex][2],.SegmentLengthTable[FingerIndex][3]};  
+  //Overall Finger lenght measured from CMC to fingertip
+  AnyVar Lenght=0.1;
+  
+  //Index of the finger, must be interger between 2 and 5  thumb is made differently
+  AnyInt FingerNR=3;
+  AnyInt FingerIndex =FingerNR-1;  //because index starts alway from zero..
+  
+  //reference to the finger insertation node
+  AnyRefNode &InsertationNode=.Carpals.CMC3;
+  
+  //reference to the MCP node (this is a fixed node on carpal seg)
+  AnyRefNode &MCPNode=.Carpals.MCP3;
+  
+ // AnyFolder &JntPos=Main.Model.Mannequin.Posture.Right.Finger3; //link to initial joint angles for this finger
+  AnyFolder &JntPos = ....JointPos.Finger3;
+
+  // Finger segment masses proximal to distal
+  AnyVar Scale3 = 0.2;  //Estimate the Extension force is 20% of Flexion
+  AnyVar Mass1=.HandMass/24; //Estimated - need more data
+  AnyVar Mass2=.HandMass/24; //Estimated - need more data
+  AnyVar Mass3=.HandMass/24; //Estimated - need more data
+  AnyVar Mass4=.HandMass/24; //Estimated - need more data
+  
+  // Finger joint muscle forces
+  AnyVar CMCMusForceFlex = S*5;      //Estimated - need more data
+  AnyVar CMCMusForceExten = S*CMCMusForceFlex*Scale3; //Estimated - need more data  
+  AnyVar CMCMusForceAdduc = S*3;     //Estimated - need more data
+  AnyVar CMCMusForceAbduc = S*3;     //Estimated - need more data
+  
+  AnyVar MCPMusForceFlex = S*2.664;  //Li2000, Table3, Lowest value
+  AnyVar MCPMusForceExten = S*MCPMusForceFlex*Scale3; //Estimated - need more data
+  AnyVar MCPMusForceAdduc = S*3;     //Estimated - need more data
+  AnyVar MCPMusForceAbduc = S*3;     //Estimated - need more data
+  
+  AnyVar PIPMusForceFlex = S*1.457;  //Li2000, Table3, Lowest value
+  AnyVar PIPMusForceExten =S* PIPMusForceFlex*Scale3; //Estimated - need more data
+  
+  AnyVar DIPMusForceFlex = S*0.417;  //Li2000, Table3 
+  AnyVar DIPMusForceExten = S*DIPMusForceFlex*Scale3; //Estimated - need more data
+  
+  AnyFolder MiddlePhalanxParameters ={
+    AnyVar Radius = 0.005;
+    AnyVar BoneLengthCoef = 0.5;
+  };
+  
+  AnyFolder ProximalPhalanxParameters ={
+    AnyVar Radius = 0.006;
+    AnyVar BoneLengthCoef = 0.5;
+  };
+  
+  AnyFolder MetacarpalParameters ={
+    AnyVar Radius = 0.006;
+    AnyVar BoneLengthCoef = 0.5;
+    AnyVec3 Offset = {0, 0, 0};
+    AnyVar RotAngle = 0;
+  };
+  
+  #include "Finger.any"
+  
+  
+  
+};//finger3
+
+
+AnyFolder Finger4={
+    AnyVar S=2*.StrengthScaling.Hand.StrengthScale;    
+  
+  //SegmentLength vector joint center to joint center!
+  //Metacarpal, ProximalPhalanx, Middel Phalanx, Distal phalanx
+  
+  AnyVector Lengths={.Carpals.LM4,.SegmentLengthTable[FingerIndex][1],.SegmentLengthTable[FingerIndex][2],.SegmentLengthTable[FingerIndex][3]};  
+  //Overall Finger lenght measured from CMC to fingertip
+  AnyVar Lenght=0.1;
+  
+  //Index of the finger, must be interger between 2 and 5  thumb is made differently
+  AnyInt FingerNR=4;
+  AnyInt FingerIndex =FingerNR-1;  //because index starts alway from zero..
+  
+  //reference to the finger insertation node
+  AnyRefNode &InsertationNode=.Carpals.CMC4;
+  
+  //reference to the MCP node (this is a fixed node on carpal seg)
+  AnyRefNode &MCPNode=.Carpals.MCP4;
+  //AnyFolder &JntPos=Main.Model.Mannequin.Posture.Right.Finger4; //link to initial joint angles for this finger
+  AnyFolder &JntPos = ....JointPos.Finger4;
+
+  // Finger segment masses proximal to distal
+  AnyVar Mass1=.HandMass/24; //Estimated - need more data
+  AnyVar Mass2=.HandMass/24; //Estimated - need more data
+  AnyVar Mass3=.HandMass/24; //Estimated - need more data
+  AnyVar Mass4=.HandMass/24; //Estimated - need more data
+  
+  // Finger joint muscle forces
+  AnyVar Scale4 = 0.2;  //Estimate the Extension force is 20% of Flexion
+  AnyVar CMCMusForceFlex = S*5;     //Estimated - need more data
+  AnyVar CMCMusForceExten = S*CMCMusForceFlex*Scale4; //Estimated - need more data
+  AnyVar CMCMusForceAdduc = S*3;     //Estimated - need more data
+  AnyVar CMCMusForceAbduc = S*3;     //Estimated - need more data
+  
+  AnyVar MCPMusForceFlex = S*1.869; //Li2000, Table3, Lowest value
+  AnyVar MCPMusForceExten = S*MCPMusForceFlex*Scale4; //Estimated - need more data
+  AnyVar MCPMusForceAdduc = S*3;     //Estimated - need more data
+  AnyVar MCPMusForceAbduc = S*3;     //Estimated - need more data
+  
+  AnyVar PIPMusForceFlex = S*0.908; //Li2000, Table3, Lowest value
+  AnyVar PIPMusForceExten = S*PIPMusForceFlex*Scale4; //Estimated - need more data
+  
+  AnyVar DIPMusForceFlex = S*0.287; //Li2000, Table3
+  AnyVar DIPMusForceExten = S*DIPMusForceFlex*Scale4; //Estimated - need more data
+  
+  AnyFolder MiddlePhalanxParameters ={
+    AnyVar Radius = 0.005;
+    AnyVar BoneLengthCoef = 0.5;
+  };
+  
+  AnyFolder ProximalPhalanxParameters ={
+    AnyVar Radius = 0.006;
+    AnyVar BoneLengthCoef = 0.5;
+  };
+  
+  AnyFolder MetacarpalParameters ={
+    AnyVar Radius = 0.006;
+    AnyVar BoneLengthCoef = 0.5;
+    AnyVec3 Offset = {0, 0, 0};
+    AnyVar RotAngle = 0;
+  };
+  
+  #include "Finger.any"
+  
+};//finger4
+
+
+AnyFolder Finger5={
+   AnyVar S=2*.StrengthScaling.Hand.StrengthScale;
+   
+  //SegmentLength vector joint center to joint center!
+  //Metacarpal, ProximalPhalanx, Middel Phalanx, Distal phalanx
+  
+  AnyVector Lengths={.Carpals.LM5,.SegmentLengthTable[FingerIndex][1],.SegmentLengthTable[FingerIndex][2],.SegmentLengthTable[FingerIndex][3]};  
+  //Overall Finger lenght measured from CMC to fingertip
+  AnyVar Lenght=0.1;
+  
+  //Index of the finger, must be interger between 2 and 5  thumb is made differently
+  AnyInt FingerNR=5;
+  AnyInt FingerIndex =FingerNR-1;  //because index starts alway from zero..
+  
+  //reference to the finger insertation node
+  AnyRefNode &InsertationNode=.Carpals.CMC5;
+  //reference to the MCP node (this is a fixed node on carpal seg)
+  
+  AnyRefNode &MCPNode=.Carpals.MCP5;
+  
+  
+  //AnyFolder &JntPos=Main.Model.Mannequin.Posture.Right.Finger5; //link to initial joint angles for this finger
+  AnyFolder &JntPos = ....JointPos.Finger5;
+
+  // Finger segment masses proximal to distal
+  AnyVar Mass1=.HandMass/24; //Estimated - need more data
+  AnyVar Mass2=.HandMass/24; //Estimated - need more data
+  AnyVar Mass3=.HandMass/24; //Estimated - need more data
+  AnyVar Mass4=.HandMass/24; //Estimated - need more data
+  
+  // Finger joint muscle forces
+  AnyVar Scale5 = 0.2;  //Estimate the Extension force is 20% of Flexion
+  AnyVar CMCMusForceFlex = S*4;     //Estimated - need more data
+  AnyVar CMCMusForceExten = S*CMCMusForceFlex*Scale5; //Estimated - need more data
+  AnyVar CMCMusForceAdduc = S*2;     //Estimated - need more data
+  AnyVar CMCMusForceAbduc = S*2;     //Estimated - need more data
+  
+  
+  AnyVar MCPMusForceFlex = S*1.304; //Li2000, Table3, Lowest value
+  AnyVar MCPMusForceExten = S*MCPMusForceFlex*Scale5; //Estimated - need more data
+  AnyVar MCPMusForceAdduc = S*2;     //Estimated - need more data
+  AnyVar MCPMusForceAbduc = S*2;     //Estimated - need more data
+  
+  AnyVar PIPMusForceFlex = S*0.475; //Li2000, Table3, Lowest value
+  AnyVar PIPMusForceExten = S*PIPMusForceFlex*Scale5; //Estimated - need more data
+  
+  AnyVar DIPMusForceFlex = S*0.206; //Li2000, Table3
+  AnyVar DIPMusForceExten = S*DIPMusForceFlex*Scale5; //Estimated - need more data
+  
+  AnyFolder MiddlePhalanxParameters ={
+    AnyVar Radius = 0.004; // 2 diff radius before, see Finger5
+    AnyVar BoneLengthCoef = 0.6;
+  };
+  
+  AnyFolder ProximalPhalanxParameters ={
+    AnyVar Radius = 0.006;
+    AnyVar BoneLengthCoef = 0.6;
+  };
+  
+  AnyFolder MetacarpalParameters ={
+    AnyVar Radius = 0.0085;
+    AnyVar BoneLengthCoef = 0.7;
+    AnyVec3 Offset = {0.004, 0.005, 0};
+    AnyVar RotAngle = -7*pi/180;
+  };
+  
+    #include "Finger.any"
+//  #include "Finger5.any"
+  
+};//finger5
+
+
+
+

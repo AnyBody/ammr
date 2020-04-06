@@ -6,31 +6,32 @@ AnyStringVar answer3 = iffun(eqfun(FingerNR,3),"3","");
 AnyStringVar answer4 = iffun(eqfun(FingerNR,4),"4","");
 AnyStringVar answer5 = iffun(eqfun(FingerNR,5),"5","");
 
-AnyString MetacarpalString="MetacarpalBase"+answer2+answer3+answer4+answer5;
-AnyString ProximalPhalanxString="ProximalPhalanxBase";//+answer2+answer3+answer4+answer5;
-AnyString MiddlePhalanxString="MiddlePhalanxBase";//+answer2+answer3+answer4+answer5;
-AnyString DistalPhalanxString="DistalPhalanxBase";//+answer2+answer3+answer4+answer5;
+AnyString MetacarpalString="....HandData\STL\MetacarpalBase"+answer2+answer3+answer4+answer5;
+AnyString ProximalPhalanxString="....HandData\STL\ProximalPhalanx"+answer2+answer3+answer4+answer5;
+AnyString MiddlePhalanxString="....HandData\STL\MiddlePhalanx"+answer2+answer3+answer4+answer5;
+AnyString DistalPhalanxString="....HandData\STL\DistalPhalanx"+answer2+answer3+answer4+answer5;
 
 AnyFolder Seg={
   
   AnySeg DistalPhalanx={
-    Mass=..Mass4;
-    Jii={0,0,0};
-//     r0= .ProximalPhalanx.DistalJointNode.sRel*.ProximalPhalanx.Axes0'+.ProximalPhalanx.r0-ProximalJointNode.sRel*Axes0';
-//     Axes0 =.ProximalPhalanx.Axes0*
-//    ProximalJointNode.ARel*
-//    RotMat((pi/180)*..JntPos.PIPFlexion,z)*
-//    ProximalJointNode.ARel';
-
-
+    //    Mass=..Mass4;
+    //    Jii={0,0,0};
+    #include "Distal.any"
+    #include "FingerInertia.any"
+    Mass=PhalanxMass;//..Mass4;
+    Jii={I_xx,I_yy,I_zz};
+    //     r0= .ProximalPhalanx.DistalJointNode.sRel*.ProximalPhalanx.Axes0'+.ProximalPhalanx.r0-ProximalJointNode.sRel*Axes0';
+    //     Axes0 =.ProximalPhalanx.Axes0*
+    //    ProximalJointNode.ARel*
+    //    RotMat((pi/180)*..JntPos.PIPFlexion,z)*
+    //    ProximalJointNode.ARel';
+    
+    
     r0= .MiddlePhalanx.DistalJointNode.sRel*.MiddlePhalanx.Axes0'+.MiddlePhalanx.r0-ProximalJointNode.sRel*Axes0';
     Axes0 =.MiddlePhalanx.Axes0*
     ProximalJointNode.ARel*
     RotMat((pi/180)*..JntPos.DIPFlexion,z)*
     ProximalJointNode.ARel';
-
-
-
 
     AnyDrawSurf  BoneSurf = {  
       RGB=Main.DrawSettings.Colors.Segments;
@@ -58,10 +59,19 @@ AnyFolder Seg={
     AnyVar StdSegmentLength= 0.022;// unscaled segment length
     AnyVar Scale=    ..Lengths[3]/StdSegmentLength;
     
+    AnyFunTransform3D &GeomScale=...GScaling.Hand.ScaleFunction;
+    AnyRefNode AnatomicalFrame = {};
+    
+    AnyVar O0O1 = vnorm(DistalJointSurfaceNode.sRel-ProximalJointSurfaceNode.sRel,2);
+
+    #if (_ARM_DETAILED_HAND_WHICH == "LOOPLUC" | _ARM_DETAILED_HAND_WHICH =="RUHM")
+    #include "HandData/PalmarTorusDIP_Distal.any"
+    #endif
   //O2
     AnyRefNode ProximalJointNode={
       sRel=.Scale*{0.0,0.012+0,0};
       //AnyDrawRefFrame drw={        ScaleXYZ={0.05,0.05,0.05}; RGB={1,0,0};      };
+
     };
     //O1
     AnyRefNode ProximalJointSurfaceNode={
@@ -79,11 +89,15 @@ AnyFolder Seg={
   
   
   AnySeg MiddlePhalanx={
-    Mass=..Mass3;
-    Jii={0,0,0};
-//     r0=.ProximalPhalanx.r0+.ProximalPhalanx.DistalJointNode.sRel-ProximalJointNode.sRel;
-  r0=.ProximalPhalanx.DistalJointNode.sRel*.ProximalPhalanx.Axes0'+.ProximalPhalanx.r0-ProximalJointNode.sRel*Axes0';
-     Axes0 =.ProximalPhalanx.Axes0*
+    //    Mass=..Mass3;
+    //    Jii={0,0,0};
+    #include "Middle.any"
+    #include "FingerInertia.any"
+    Mass=PhalanxMass;//..Mass3;
+    Jii={I_xx,I_yy,I_zz};
+    //     r0=.ProximalPhalanx.r0+.ProximalPhalanx.DistalJointNode.sRel-ProximalJointNode.sRel;
+    r0=.ProximalPhalanx.DistalJointNode.sRel*.ProximalPhalanx.Axes0'+.ProximalPhalanx.r0-ProximalJointNode.sRel*Axes0';
+    Axes0 =.ProximalPhalanx.Axes0*
     ProximalJointNode.ARel*
     RotMat((pi/180)*..JntPos.PIPFlexion,z)*
     ProximalJointNode.ARel';
@@ -102,6 +116,9 @@ AnyFolder Seg={
     AnyVar StdSegmentLength= 0.03;// unscaled segment length
     AnyVar Scale=    ..Lengths[2]/StdSegmentLength;
     
+    AnyFunTransform3D &GeomScale=...GScaling.Hand.ScaleFunction;
+    AnyRefNode AnatomicalFrame = {};    
+    
     AnyDrawSurf  BoneSurf = { 
            RGB=Main.DrawSettings.Colors.Segments;
 
@@ -109,8 +126,10 @@ AnyFolder Seg={
       ScaleXYZ=.Scale*{1,1,......Sign*1};
       Opacity = ......BonesOpacity.Hand;
     };
-    
-    
+    #if (_ARM_DETAILED_HAND_WHICH == "LOOPLUC" | _ARM_DETAILED_HAND_WHICH =="RUHM")
+    #include "HandData/PalmarTorusDIP_Proximal.any"
+    #include "HandData/PalmarTorusPIP_Distal.any"
+    #endif
         
     AnyRefNode EllipsoidNode={
       AnySurfEllipsoid Ellipsoid={
@@ -126,12 +145,17 @@ AnyFolder Seg={
       AnyRefNode F1 ={      sRel={0,.Ellipsoid.c,0};    };
       AnyRefNode F2 ={      sRel={0,-.Ellipsoid.c,0};    };      
     };
-
+    
+    AnyVar O2O3J = vnorm(ProximalJointNode.sRel-DistalJointNode.sRel,2);
     AnyVar O2O3 = vnorm(ProximalJointSurfaceNode.sRel-DistalJointNode.sRel,2);
+    AnyVar O3O4 = vnorm(ProximalJointNode.sRel-ProximalJointSurfaceNode.sRel,2);
     //O4
     AnyRefNode ProximalJointNode={
       sRel=.Scale*{0,0.02,0}; 
-      //      AnyDrawRefFrame drw={        ScaleXYZ={0.05,0.05,0.05}; RGB={1,0,0};      };
+      //      AnyDrawRefFrame drw={        ScaleXYZ={0.05,0.05,0.05}; RGB={1,1,0};      };
+      #if (_ARM_DETAILED_HAND_WHICH == "LOOPLUC" | _ARM_DETAILED_HAND_WHICH =="RUHM")
+      #include "HandData/DorsalTorusPIP.any"
+      #endif
     };
     //O3
     AnyRefNode ProximalJointSurfaceNode={
@@ -142,15 +166,21 @@ AnyFolder Seg={
     AnyRefNode DistalJointNode={
       sRel=.Scale*{0.0,-0.01,0};
       //      AnyDrawRefFrame drw={        ScaleXYZ={0.05,0.05,0.05}; RGB={1,0,0};      };
+      #if (_ARM_DETAILED_HAND_WHICH == "LOOPLUC" | _ARM_DETAILED_HAND_WHICH =="RUHM")
+      #include "HandData/JointSphereDIP.any"
+      #endif
     };
     
   }; //MiddlePhalanx
   
   //  
   AnySeg ProximalPhalanx={
-    Mass=..Mass2;
-    Jii={0,0,0};
-   
+    //    Mass=..Mass2;
+    //    Jii={0,0,0};
+    #include "Proximal.any"
+    #include "FingerInertia.any"
+    Mass=PhalanxMass;//..Mass2;
+    Jii={I_xx,I_yy,I_zz};
     r0= .Metacarpal.DistalJointNode.sRel*.Metacarpal.Axes0'+.Metacarpal.r0-ProximalJointNode.sRel*Axes0';
     Axes0 =.Metacarpal.Axes0*
     ProximalJointNode.ARel*
@@ -161,6 +191,8 @@ AnyFolder Seg={
     AnyVar StdSegmentLength= 0.0521;// unscaled segment length
     AnyVar Scale=  ..Lengths[1]/ StdSegmentLength;
     
+    AnyFunTransform3D &GeomScale=...GScaling.Hand.ScaleFunction;
+    AnyRefNode AnatomicalFrame = {};
     
     AnyDrawSurf  BoneSurf = {   
           RGB=Main.DrawSettings.Colors.Segments;
@@ -169,7 +201,11 @@ AnyFolder Seg={
       ScaleXYZ=.Scale*{1,1,......Sign*1};
       Opacity = ......BonesOpacity.Hand;
     };
-        
+    #if (_ARM_DETAILED_HAND_WHICH == "LOOPLUC" | _ARM_DETAILED_HAND_WHICH =="RUHM")
+    #include "HandData/PalmarTorusPIP_Proximal.any"
+    #include "HandData/PalmarTorusMCP_Distal.any"
+    #endif
+    
     AnyRefNode EllipsoidNode={
       AnySurfEllipsoid Ellipsoid={
         AnyVar BoneLength= vnorm(..ProximalJointSurfaceNode.sRel-..DistalJointNode.sRel,2);
@@ -199,23 +235,33 @@ AnyFolder Seg={
     AnyRefNode DistalJointNode={
       sRel=.Scale*{0.00,-0.02,0};
       //      AnyDrawRefFrame drw={        ScaleXYZ={0.05,0.05,0.05}; RGB={1,0,0};      };
+      #if (_ARM_DETAILED_HAND_WHICH == "LOOPLUC" | _ARM_DETAILED_HAND_WHICH =="RUHM")
+      #include "HandData/JointSpherePIP.any"
+      #endif
     };
     
     
   }; //ProximalPhalanx
   
   AnySeg Metacarpal={
-    Mass=..Mass1;
-    Jii={0,0,0};
+    //    Mass=..Mass1;
+    //    Jii={0,0,0};
+    #include "Metacarpal.any"
+    #include "FingerInertia.any"
+    Mass=PhalanxMass;//..Mass1;
+    Jii={I_xx,I_yy,I_zz};
     #include "../DrawSettings/Nodes.any"
     r0= ..InsertationNode.sRel*...Carpals.Axes0'+ ...Carpals.r0-ProximalJointNode.sRel*Axes0';
     Axes0 = ...Carpals.Axes0* ..InsertationNode.ARel*
-//    RotMat((pi/180)*..JntPos.CMCFlexion,z)*
+    //    RotMat((pi/180)*..JntPos.CMCFlexion,z)*
     ProximalJointNode.ARel';
-
     
-AnyVar StdSegmentLength= 0.07;// unscaled segment length
+    
+    AnyVar StdSegmentLength= 0.07;// unscaled segment length
     AnyVar Scale=   ..Lengths[0]/StdSegmentLength;
+    
+    AnyFunTransform3D &GeomScale=...GScaling.Hand.ScaleFunction;
+    AnyRefNode AnatomicalFrame = {}; 
     
     AnyDrawSurf  BoneSurf = {        RGB=Main.DrawSettings.Colors.Segments;
 
@@ -223,7 +269,9 @@ AnyVar StdSegmentLength= 0.07;// unscaled segment length
       ScaleXYZ=.Scale*{1,1,......Sign*1};
       Opacity = ......BonesOpacity.Hand;
     };
-        
+    #if (_ARM_DETAILED_HAND_WHICH == "LOOPLUC" | _ARM_DETAILED_HAND_WHICH =="RUHM")
+    #include "HandData/PalmarTorusMCP_Proximal.any"
+    #endif    
     AnyRefNode EllipsoidNode={
       sRel= ...MetacarpalParameters.Offset;
       ARel= RotMat(...MetacarpalParameters.RotAngle,z);
@@ -255,6 +303,11 @@ AnyVar StdSegmentLength= 0.07;// unscaled segment length
     AnyRefNode DistalJointNode={
       sRel=.Scale*{0.00,-0.03,0};
       //      AnyDrawRefFrame drw={        ScaleXYZ={0.05,0.05,0.05}; RGB={1,0,0};      };
+      #if (_ARM_DETAILED_HAND_WHICH == "LOOPLUC" | _ARM_DETAILED_HAND_WHICH =="RUHM")
+      #include "HandData/DorsalTorus1MCP.any"
+      #include "HandData/DorsalTorus2MCP.any"
+      #include "HandData/JointSphereMCP.any"
+      #endif
     };
     
     
@@ -293,11 +346,12 @@ AnyFolder Jnt ={
   };
   
   //Metacarpophalangeal joint
-  AnyRevoluteJoint MCP={
+  AnyUniversalJoint MCP={
     AnyRefNode &ref1=..Seg.Metacarpal.DistalJointNode;
     AnyRefNode &ref2=..Seg.ProximalPhalanx.ProximalJointNode;
-    Axis=z;
-    #include "DrawJointAxisZ.any"
+    Axis1=z;
+    Axis2=x;
+    //#include "DrawJointAxisZ.any"
     
   };
   
@@ -307,7 +361,7 @@ AnyFolder Jnt ={
     AnyRefNode &ref1=..Seg.ProximalPhalanx.DistalJointNode;
     AnyRefNode &ref2=..Seg.MiddlePhalanx.ProximalJointNode;
     Axis=z;
-    #include "DrawJointAxisZ.any"
+    //#include "DrawJointAxisZ.any"
     
   };
   
@@ -316,7 +370,7 @@ AnyFolder Jnt ={
     AnyRefNode &ref1=..Seg.MiddlePhalanx.DistalJointNode;
     AnyRefNode &ref2=..Seg.DistalPhalanx.ProximalJointNode;
     Axis=z;
-    #include "DrawJointAxisZ.any"
+    //#include "DrawJointAxisZ.any"
   };
   
 
@@ -395,12 +449,15 @@ AnyFolder JntMus = {
 
 
   
-  //Two muscles for the MCP joint - Flexion/Extension motion (base of thumb):
+  //Four muscles for the MCP joint - Flexion/Extension & Adduction/Abduction motion (base of thumb):
   AnyGeneralMuscle MCPflexion = {
     AnyMuscleModel MuscleModel = {
       F0 = ...MCPMusForceFlex;
     };
-    AnyRevoluteJoint &jnt = ..Jnt.MCP;
+    AnyKinMeasureOrg Org = {
+      AnyUniversalJoint &jnt = ...Jnt.MCP;
+      MeasureOrganizer = {0};
+    };
     ForceDirection = 1;
   };
   
@@ -408,10 +465,35 @@ AnyFolder JntMus = {
     AnyMuscleModel MuscleModel = {
       F0 = ...MCPMusForceExten;
     };
-    AnyRevoluteJoint &jnt = ..Jnt.MCP;
+    AnyKinMeasureOrg Org = {
+      AnyUniversalJoint &jnt = ...Jnt.MCP;
+      MeasureOrganizer = {0};
+    };
     ForceDirection = -1;
   };
   
+  AnyGeneralMuscle MCPAdduction = {
+    AnyMuscleModel MuscleModel = {
+      F0 = ...MCPMusForceAdduc;
+    };
+    AnyKinMeasureOrg Org = {
+      AnyUniversalJoint &jnt = ...Jnt.MCP;
+      MeasureOrganizer = {1};
+    };
+    ForceDirection = 1;
+  };
+  
+  AnyGeneralMuscle MCPAbduction = {
+    AnyMuscleModel MuscleModel = {
+      F0 = ...MCPMusForceAbduc;
+    };
+    AnyKinMeasureOrg Org = {
+      AnyUniversalJoint &jnt = ...Jnt.MCP;
+      MeasureOrganizer = {1};
+    };
+    ForceDirection = -1;
+  };
+
   //Two muscles for the PIP joint - Flexion/Extension motion (middle of thumb):
   AnyGeneralMuscle PIPflexion = {
     AnyMuscleModel MuscleModel = {

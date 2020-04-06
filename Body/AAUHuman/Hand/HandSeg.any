@@ -50,20 +50,40 @@
 //Include nodes for muscles
 
 
+#ifndef BM_HAND_DATASET
+  // default dataset
+  #define BM_HAND_DATASET "HandData"
+#endif
+
+#ifndef BM_HAND_DATASET_PATH
+  #path BM_HAND_DATASET_PATH "../Hand/"+BM_HAND_DATASET
+#endif
+
+//The end file with all anatomical parameters
+
+
+
+
+AnyFolder ModelParameters = {
+  #if _ARM_DETAILED_HAND_WHICH == "RUHM"
+  #include "<BM_HAND_DATASET_PATH>/RUHM/Plzen-HandModelParameters.any"
+  #else
+  #include "<BM_HAND_DATASET_PATH>/HandModelParameters.any"
+  #endif
+};
+
+
 CarpalsRef = {
   //It is used for wrapping of the flexor muscles.
   AnyFunTransform3D &Scale=.GScaling.Hand.ScaleFunction;
   //AnyDrawRefFrame drws={RGB={0,0,1};ScaleXYZ={1,1,1}*0.2;};
   
-  AnyRefNode FlexorMuscleCyl = { 
-    
+  AnyRefNode FlexorMuscleCyl = {   
     sRel = ..Carpals.wj.sRel-.Scale({0,0.07,....Sign*0})-...WristJointSeg.RadialUlnarDeviation.sRel*{{1,0,0},{0,1,0},{0,0,....Sign*1}};
-    
     AnyVec3 P1= sRel;
     AnyVec3 P3 =P1+ .Scale({0.0,0.0,....Sign*0.0115});//*...Sign;
     AnyVec3 P2 =P1+ .Scale({0.0, 0.14,....Sign*0.0});//*...Sign;
-    
-    
+
     //Calculate orientation of the cylinder
     ARel=RotMat(sRel,P3,P2)*RotMat(-90/180*pi, z)*RotMat(-90/180*pi, y);          
          
@@ -77,258 +97,59 @@ CarpalsRef = {
 
 };
 
+AnyMat33 Mirror={{1,0,0},{0,1,0},{0,0,..Sign}};
 AnyFunTransform3D &Scale= GScaling.Hand.ScaleFunction;
 
 
-Finger1MetaRef = {
-  AnyRefNode I_Abductor_Pollicis_Longus = {
-//     AnyDrawRefFrame drw={RGB={1,0,0};};
-    sRel = ..Scale({-0.01, 0.007, ....Sign*0}); //guesstimate
+#if ((_ARM_DETAILED_HAND_WHICH == "ANYBODY" ) | (_ARM_DETAILED_HAND_WHICH =="LOOPLUC") | (_ARM_DETAILED_HAND_WHICH == "RUHM"))
+
+#if _ARM_DETAILED_HAND_WHICH == "ANYBODY"
+  #include "HandData/AAU/Finger1.any"  
+  #include "HandData/AAU/Finger2.any"
+  #include "HandData/AAU/Finger3.any"
+  #include "HandData/AAU/Finger4.any"
+  #include "HandData/AAU/Finger5.any"
+
+#endif
+
+
+#if(_ARM_DETAILED_HAND_WHICH == "LOOPLUC")
+  #include "HandData/LOOPLUC/Finger1.any"  
+  #include "HandData/LOOPLUC/Finger2.any"
+  #include "HandData/LOOPLUC/Finger3.any"
+  #include "HandData/LOOPLUC/Finger4.any"
+  #include "HandData/LOOPLUC/Finger5.any"
+#endif
+
+//Handmuscles RUHM
+
+#if (_ARM_DETAILED_HAND_WHICH =="RUHM")
     
-  }; 
+  #include "HandData/RUHM/Finger1.any"  
+  #include "HandData/RUHM/Finger2.any"
+  #include "HandData/RUHM/Finger3.any"
+  #include "HandData/RUHM/Finger4.any"
+  #include "HandData/RUHM/Finger5.any"
+  #include "HandData/RUHM/Finger2MuscleNodes.any"
+  #include "HandData/RUHM/Finger3MuscleNodes.any"
+  #include "HandData/RUHM/Finger4MuscleNodes.any"
+  #include "HandData/RUHM/Finger5MuscleNodes.any"
+
+  #include "HandData/RUHM/SkinLigaments.any"
+#endif
+
   
-  
-  
-  AnyRefNode I_Extensor_Pollicis_Brevis = {
-    //   AnyDrawRefFrame drw={};
-    sRel = ..Scale({-0.01, -0.02, 0}); //guesstimate
-  }; 
-  
-  AnyRefNode Via1_Extensor_Pollicis_Brevis = {
-    //   AnyDrawRefFrame drw={};
-    sRel = ..Scale({-0.01, 0.0, 0}); //guesstimate
-  }; 
-  
-  
-  AnyRefNode Via1_Extensor_Pollicis_Longus= {
-    //   AnyDrawRefFrame drw={};
-    sRel = ..Scale({-0.01, 0.0, 0}); //guesstimate
-  }; 
-  AnyRefNode I_Extensor_Pollicis_Longus= {
-    //   AnyDrawRefFrame drw={};
-    sRel = ..Scale({-0.01, -0.02, 0}); //guesstimate
-  }; 
-  
-  AnyRefNode Via_Flexor_Pollicis_Longus = {
-    // AnyDrawRefFrame drw={};
-    sRel = ..Scale({0.008, 0.0, 0}); //guesstimate
-    ARel = RotMat(-....Sign*pi/2,x)*RotMat(-....Sign*pi/2,y);  // used for the SPLine.InitWrapPosVectors 
-  }; 
-  AnyRefNode I_Flexor_Pollicis_Longus = {
-    // AnyDrawRefFrame drw={};
-    sRel = ..Scale({0.008, -0.015, 0}); //guesstimate
-  }; 
-  
-};//End Finger1MetaRef
+
+#else
+ AnyInt warn_detailed_type= warn(0, strformat("\n"+
+      "------------------------------------------------------------------------------------------------------\n"+
+      "    `_ARM_DETAILED_HAND_WHICH` is not set."+
+      "    Define it with either 'ANYBODY' 'LOOPLUC' or 'RUHM' "+
+      "-------------------------------------------------------------------------------------------------------"));
+#endif
 
 
-Finger2MetaRef = {
-  AnyRefNode Via1_Extensor_Indicis = {
-    //AnyDrawRefFrame drw={RGB={0,1,1};};
-    sRel = ..Scale({-0.007,0.02,0.0}); //guesstimate
-  };
-  
-  
-  AnyRefNode I_Extensor_Indicis = {
-    //AnyDrawRefFrame drw={RGB={0,1,1};};
-    sRel = ..Scale({-0.01,-0.02,0.0}); //guesstimate
-  };
-  
-  AnyRefNode I_Extensor_Carpi_Radialis_Longus= {
-    //AnyDrawRefFrame drw={RGB={0,1,1};};
-    sRel = ..Scale({-0.006,-0.01,0.0}); //guesstimate
-  };
-  
-  AnyRefNode I_Flexor_Carpi_Radialis= {
-    //AnyDrawRefFrame drw={RGB={0,1,1};};
-    sRel = ..Scale({0.006,0.03,0.0}); //guesstimate
-  };
-  
-  AnyRefNode Via_Flexor_Digitorum_Superficialis_Digit2 = {
-    //AnyDrawRefFrame drw={RGB={0,1,1};};
-    sRel = ..Scale({0.008,0.01,0.0}); //guesstimate
-    ARel = RotMat(-....Sign*pi/2,x)*RotMat(-....Sign*pi/2,y);  // used for the SPLine.InitWrapPosVectors 
-  };
-  
-  AnyRefNode I_Flexor_Digitorum_Superficialis_Digit2 = {
-    //AnyDrawRefFrame drw={RGB={0,1,1};};
-    sRel = ..Scale({0.007,-0.025,0.0}); //guesstimate
-  };
-  
-  AnyRefNode Via_Flexor_Digitorum_Profundus_Digit2 = {
-    //AnyDrawRefFrame drw={RGB={0,1,1};};
-    sRel = ..Scale({0.009,0.01,0.0}); //guesstimate
-    ARel = RotMat(-....Sign*pi/2,x)*RotMat(-....Sign*pi/2,y);  // used for the SPLine.InitWrapPosVectors 
-  };
-  
-  AnyRefNode I_Flexor_Digitorum_Profundus_Digit2 = {
-    //AnyDrawRefFrame drw={RGB={0,1,1};};
-    sRel = ..Scale({0.009,-0.02,0.0}); //guesstimate
-  };
-  AnyRefNode Via_Extensor_Digitorum_Digit2 = {
-    //AnyDrawRefFrame drw={RGB={0,1,1};};
-    sRel = ..Scale({-0.009,0.01,0.0}); //guesstimate
-  };
-  
-  AnyRefNode I_Extensor_Digitorum_Digit2 = {
-    //AnyDrawRefFrame drw={RGB={0,1,1};};
-    sRel = ..Scale({-0.009,-0.02,0.0}); //guesstimate
-  };
-  
-};//End Finger2MetaRef
 
-
-Finger3MetaRef={
-  
-  AnyRefNode Via_Extensor_Carpi_Radialis_Brevis = {
-    //AnyDrawRefFrame drw={RGB={0,1,1};};
-    sRel = ..Scale({-0.006,0.027,0.0}); //guesstimate
-  };
-  
-  AnyRefNode I_Extensor_Carpi_Radialis_Brevis = {
-    //AnyDrawRefFrame drw={RGB={0,1,1};};
-    sRel = ..Scale({-0.006,0.025,0.0}); //guesstimate
-  };
-  
-  AnyRefNode Via_Flexor_Digitorum_Superficialis_Digit3 = {
-    //AnyDrawRefFrame drw={RGB={0,1,1};};
-    sRel = ..Scale({0.008,0.01,0.0}); //guesstimate
-    ARel = RotMat(-....Sign*pi/2,x)*RotMat(-....Sign*pi/2,y);  // used for the SPLine.InitWrapPosVectors 
-  };
-  
-  AnyRefNode I_Flexor_Digitorum_Superficialis_Digit3 = {
-    //AnyDrawRefFrame drw={RGB={0,1,1};};
-    sRel = ..Scale({0.007,-0.025,0.0}); //guesstimate
-  };
-  
-  AnyRefNode Via_Flexor_Digitorum_Profundus_Digit3 = {
-    //AnyDrawRefFrame drw={RGB={0,1,1};};
-    sRel = ..Scale({0.009,0.01,0.0}); //guesstimate
-    ARel = RotMat(-....Sign*pi/2,x)*RotMat(-....Sign*pi/2,y);  // used for the SPLine.InitWrapPosVectors 
-  };
-  
-  AnyRefNode I_Flexor_Digitorum_Profundus_Digit3 = {
-    //AnyDrawRefFrame drw={RGB={0,1,1};};
-    sRel = ..Scale({0.009,-0.02,0.0}); //guesstimate
-  };
-  AnyRefNode Via_Extensor_Digitorum_Digit3 = {
-    //AnyDrawRefFrame drw={RGB={0,1,1};};
-    sRel = ..Scale({-0.009,0.01,0.0}); //guesstimate
-  };
-  
-  AnyRefNode I_Extensor_Digitorum_Digit3 = {
-    //AnyDrawRefFrame drw={RGB={0,1,1};};
-    sRel = ..Scale({-0.009,-0.02,0.0}); //guesstimate
-  };
-  
-  
-  
-};//End Finger3MetaRef
-
-Finger4MetaRef = {
-  
-  AnyRefNode I_Palmaris_Longus= {
-    //AnyDrawRefFrame drw={RGB={0,1,1};};
-    sRel = ..Scale({0.004,0.02,0.0}); //guesstimate
-  };
-  
-  AnyRefNode Via_Flexor_Digitorum_Superficialis_Digit4 = {
-    //AnyDrawRefFrame drw={RGB={0,1,1};};
-    sRel = ..Scale({0.008,0.01,0.0}); //guesstimate
-    ARel = RotMat(-....Sign*pi/2,x)*RotMat(-....Sign*pi/2,y);  // used for the SPLine.InitWrapPosVectors 
-  };
-  
-  AnyRefNode I_Flexor_Digitorum_Superficialis_Digit4 = {
-    //AnyDrawRefFrame drw={RGB={0,1,1};};
-    sRel = ..Scale({0.007,-0.025,0.0}); //guesstimate
-  };
-  
-  
-  AnyRefNode Via_Flexor_Digitorum_Profundus_Digit4 = {
-    //AnyDrawRefFrame drw={RGB={0,1,1};};
-    sRel = ..Scale({0.009,0.01,0.0}); //guesstimate
-    ARel = RotMat(-....Sign*pi/2,x)*RotMat(-....Sign*pi/2,y);  // used for the SPLine.InitWrapPosVectors 
-  };
-  
-  AnyRefNode I_Flexor_Digitorum_Profundus_Digit4 = {
-    //AnyDrawRefFrame drw={RGB={0,1,1};};
-    sRel = ..Scale({0.009,-0.02,0.0}); //guesstimate
-  };
-  AnyRefNode Via_Extensor_Digitorum_Digit4 = {
-    //AnyDrawRefFrame drw={RGB={0,1,1};};
-    sRel = ..Scale({-0.009,0.01,0.0}); //guesstimate
-  };
-  
-  AnyRefNode I_Extensor_Digitorum_Digit4 = {
-    //AnyDrawRefFrame drw={RGB={0,1,1};};
-    sRel = ..Scale({-0.009,-0.02,0.0}); //guesstimate
-  };
-  
-};//End Finger4MetaRef
-
-
-Finger5MetaRef = {
-  
-  AnyRefNode I_Extensor_Carpi_Ulnaris = {
-    //AnyDrawRefFrame drw={RGB={0,1,1};};
-    sRel = ..Scale({-0.002,0.02,....Sign*-0.007}); //guesstimate
-  };
-  
-  AnyRefNode I_Flexor_Carpi_Ulnaris = {
-    //AnyDrawRefFrame drw={RGB={0,1,1};};
-    sRel = ..Scale({0.009,0.02,....Sign*0.007}); //guesstimate
-    ARel = RotMat(-....Sign*pi/2,x)*RotMat(-....Sign*pi/2,y);  // used for the SPLine.InitWrapPosVectors 
-  };
-  
-  
-  AnyRefNode Via_Flexor_Digitorum_Superficialis_Digit5 = {
-    //AnyDrawRefFrame drw={RGB={0,1,1};};
-    sRel = ..Scale({0.009,0.01,0.0}); //guesstimate
-    ARel = RotMat(-....Sign*pi/2,x)*RotMat(-....Sign*pi/2,y);  // used for the SPLine.InitWrapPosVectors 
-  };
-  
-  AnyRefNode I_Flexor_Digitorum_Superficialis_Digit5 = {
-    //AnyDrawRefFrame drw={RGB={0,1,1};};
-    sRel = ..Scale({0.009,-0.02,0.0}); //guesstimate
-  };
-  
-  
-  
-  AnyRefNode Via_Flexor_Digitorum_Profundus_Digit5 = {
-    //AnyDrawRefFrame drw={RGB={0,1,1};};
-    sRel = ..Scale({0.009,0.01,0.0}); //guesstimate
-    ARel = RotMat(-....Sign*pi/2,x)*RotMat(-....Sign*pi/2,y);  // used for the SPLine.InitWrapPosVectors 
-  };
-  
-  AnyRefNode I_Flexor_Digitorum_Profundus_Digit5 = {
-    //AnyDrawRefFrame drw={RGB={0,1,1};};
-    sRel = ..Scale({0.009,-0.02,0.0}); //guesstimate
-  };
-  
-  AnyRefNode Via_Extensor_Digitorum_Digit5 = {
-    //AnyDrawRefFrame drw={RGB={0,1,1};};
-    sRel = ..Scale({-0.009,0.01,0.0}); //guesstimate
-  };
-  
-  AnyRefNode I_Extensor_Digitorum_Digit5 = {
-    //AnyDrawRefFrame drw={RGB={0,1,1};};
-    sRel = ..Scale({-0.009,-0.02,0.0}); //guesstimate
-  };
-  
-  AnyRefNode Via_Extensor_Digiti_Minimi= {
-    //AnyDrawRefFrame drw={RGB={0,1,1};};
-    sRel = ..Scale({-0.009,0.01,0.0}); //guesstimate
-  };
-  
-  AnyRefNode I_Extensor_Digiti_Minimi= {
-    //AnyDrawRefFrame drw={RGB={0,1,1};};
-    sRel = ..Scale({-0.009,-0.02,0.0}); //guesstimate
-  };
-  
-};//End Finger5MetaRef
-
-
-//----------------------------------------------------------
 //AnyFolder Carpals = {
 //  AnyFolder Seg = {
 
@@ -338,148 +159,199 @@ Finger5MetaRef = {
   AnyVar Mass = HandMass;
 
     AnySeg Carpals={
+      
+      AnyFolder &Data  = .ModelParameters.Carpals;
+      AnyFolder &DataM = .ModelParameters.MuscleNodes;
       Mass= .HandMass/6;
-      Jii={0,0,0};
+      // Jii and according variables are taken from Dominik Vogelaar (Bachelor thesis: "Muskulo-skelettales, invers-dynamisches Modell feur eineklinische Greifeubung von Unterarm und Hand")
+      Jii= Mass*{a^2+c^2,b^2+c^2 ,a^2+b^2 };
+      AnyVar a=0.038/2;
+      AnyVar b=0.01/2;
+      AnyVar c=0.044/2;
       r0 = ..WristJointSeg.RadialUlnarDeviation.sRel*..WristJointSeg.Axes0'+..WristJointSeg.r0; 
      
 //      Axes0 = .WristJointSeg.Axes0*RotMat(90/180*pi,x)*RotMat(..Sign*15/180*pi,y)*RotMat(-90/180*pi,z);
       //AnyDrawRefFrame drw1={RGB={0,0,1}; ScaleXYZ={0.15,0.15,0.15};};
-      
-//       AnyVar Scale=..Scaling.GeometricalScaling.Hand.LengthScale;
-       AnyFunTransform3D &Scale=.GScaling.Hand.ScaleFunction;
 
       
+      AnyFunTransform3D &Scale=.GScaling.Hand.Carpals.ScaleFunction;
+      
+      
+       AnyFunTransform3D &GeomScale=Scale;
+       AnyRefNode AnatomicalFrame = {};
+       
 //      AnyDrawRefFrame drw2={RGB={1,0,0};};
       AnyDrawSurf      carpals = {
-        FileName = "Carpals";
+        #if _ARM_DETAILED_HAND_WHICH == "RUHM"
+        FileName = "HandData/STL/Plzen-Carpals";
+        #else
+        FileName = "HandData/STL/Carpals";
+        #endif
         Opacity = ....BonesOpacity.Hand;
         
         RGB=Main.DrawSettings.Colors.Segments;
-        ScaleXYZ = Scale({1.0, 1.0, ....Sign*1.0});
+        //ScaleXYZ = Scale({1.0, 1.0, ....Sign*1.0});
         //RGB = ...ColorRef.Segments;
         AnyFunTransform3D &Scale =.Scale;
       };
       
       
-      
-      AnyRefNode wj={ 
-        sRel=.Scale({-0.005,0.005,....Sign*-0.005} + {0.005, -0.001433, ....Sign*0.001099}); //corrected
-        
-        
-       // AnyVar L= iffun(ltfun(...Sign,0),1.0,0.0); 
+      #if (_ARM_DETAILED_HAND_WHICH =="RUHM")
+      AnyRefNode wj=                              {sRel=.Scale(.Data.wj_pos)*..Mirror; //corrected // AnyVar L= iffun(ltfun(...Sign,0),1.0,0.0);  
+                                                   ARel= .Data.wj_ARel; };//*RotMat(L*pi,x); //Note:STC Issue for scaling ARel = {{1,0,0},{0,...Sign*1,0},{0,0,...Sign*1}};
+      AnyRefNode PalmJoint                      = {sRel=.Scale(.Data.PalmJoint_pos)*..Mirror;};
+      AnyRefNode CarpalsRef                     = {sRel = .Scale(.Data.CarpalsRef_pos)*..Mirror;
+                                                   AnyVar L= .Data.L;
+                                                   ARel=.Data.CarpalsRef_ARel;};//ARel = ....WristJointSeg.Axes0*RotMat(90/180*pi,x)*RotMat(-15/180*pi,y)*RotMat(180/180*pi,z)*RotMat(-90/180*pi,y);
+      AnyRefNode CarpometacarpalJointNode1      = {sRel=.Scale(.Data.CarpometacarpalJointNode1_pos)*..Mirror;};   
+      AnyRefNode HandCylRotNode                 = {sRel=.Scale(.Data.HandCylRotNode_pos)*..Mirror;
+                                                   ARel=.Data.HandCylRotNode_ARel;};
+      AnyRefNode CMC1                           = {sRel=.Scale(.Data.CMC1_pos)*..Mirror;                                            
+                                                   ARel=.Data.CMC1_ARel;}; //ARel=RotMat((-90+30)*pi/180,x)*RotMat(14.7*pi/180,y);
+      AnyRefNode CMC2                           = {AnyVar Angle =-atan((sRel[0]-.MCP2.sRel[0])/(sRel[1]-.MCP2.sRel[1]));
+                                                   ARel = RotMat(sRel,sRel+{cos(Angle),sin(Angle),0},.MCP2.sRel)*RotMat(pi,x);
+                                                   sRel=.Scale(.Data.CMC2_pos)*..Mirror;};     
+      AnyRefNode CMC3                           = {AnyVar Angle =-atan((sRel[0]-.MCP3.sRel[0])/(sRel[1]-.MCP3.sRel[1]));
+                                                   ARel = RotMat(sRel,sRel+{cos(Angle),sin(Angle),0},.MCP3.sRel)*RotMat(pi,x);
+                                                   sRel=.Scale(.Data.CMC3_pos)*..Mirror;};    
+      AnyRefNode CMC4                           = {AnyVar Angle =-atan((sRel[0]-.MCP4.sRel[0])/(sRel[1]-.MCP4.sRel[1]));
+                                                   ARel = RotMat(sRel,sRel+{cos(Angle),sin(Angle),0},.MCP4.sRel)*RotMat(pi,x);
+                                                   sRel=.Scale(.Data.CMC4_pos)*..Mirror;}; 
+      AnyRefNode CMC5                           = {AnyVar Angle =-atan((sRel[0]-.MCP5.sRel[0])/(sRel[1]-.MCP5.sRel[1]));
+                                                   ARel = RotMat(sRel,sRel+{cos(Angle),sin(Angle),0},.MCP5.sRel)*RotMat(pi,x);
+                                                   sRel=.Scale(.Data.CMC5_pos)*..Mirror;};     
+      AnyRefNode MCP2                            = {sRel=.Scale(.Data.MCP2_pos)*..Mirror;};
+      AnyRefNode MCP3                            = {sRel=.Scale(.Data.MCP3_pos)*..Mirror;};
+      AnyRefNode MCP4                            = {sRel=.Scale(.Data.MCP4_pos)*..Mirror;};  
+      AnyRefNode MCP5                            = {sRel=.Scale(.Data.MCP5_pos)*..Mirror;};
+    
+    //Carpal Insertions of Muscles by loopluc
+    
+      AnyRefNode O_Abductor_Pollicis_Brevis      = {sRel = ..Scale(.DataM.O_Abductor_Pollicis_Brevis_pos)*..Mirror;};//guesstimate {-0.009, 0.045, 0.016}
+      AnyRefNode O_Abductor_Pollicis             = {sRel = ..Scale(.DataM.O_Abductor_Pollicis_pos)*..Mirror;}; //guesstimate {-0.009, 0.045, 0.016}
+      AnyRefNode O_Flexor_Pollicis_Brevis        = {sRel = ..Scale(.DataM.O_Flexor_Pollicis_Brevis_pos)*..Mirror;}; //guesstimate {-0.009, 0.045, 0.016}
 
-        ARel=RotMat(-90/180*pi,x)*RotMat(-90/180*pi,y)*RotMat(....Sign*-15/180*pi,z);//*RotMat(L*pi,x);
-        //Note:STC Issue for scaling 
-        //    ARel = {{1,0,0},
-        //      {0,...Sign*1,0},
-        //      {0,0,...Sign*1}
-        //    }; 
-      // AnyDrawRefFrame drw = {RGB={0,0,1};};
-      };
-      
-      
-      AnyRefNode PalmJoint={ sRel=.Scale({0.0, -0.045, ....Sign*0.0});};
-      
-      
-      AnyRefNode CarpalsRef = {
-        sRel = .Scale({0,0,0.0});
-        AnyVar L= iffun(ltfun(....Sign,0),1.0,0.0); 
+      AnyRefNode O_Opponens_Pollicis_1             = {sRel = ..Scale(.DataM.O_Opponens_Pollicis_pos_1)*..Mirror;}; //guesstimate {-0.009, 0.045, 0.016}
+      AnyRefNode O_Opponens_Pollicis_2             = {sRel = ..Scale(.DataM.O_Opponens_Pollicis_pos_2)*..Mirror;};
+      AnyRefNode O_Opponens_Pollicis_3             = {sRel = ..Scale(.DataM.O_Opponens_Pollicis_pos_3)*..Mirror;};
+      AnyRefNode O_Opponens_Pollicis_4             = {sRel = ..Scale(.DataM.O_Opponens_Pollicis_pos_4)*..Mirror;};
 
-        ARel=RotMat(-90/180*pi,x)*RotMat(....Sign*-90/180*pi,y)*RotMat(-15/180*pi,z)*RotMat(L*pi,z);
-        
-        //ARel = ....WristJointSeg.Axes0*RotMat(90/180*pi,x)*RotMat(-15/180*pi,y)*RotMat(180/180*pi,z)*RotMat(-90/180*pi,y);
-        //AnyDrawRefFrame drw ={RGB={0,0,1};};
-        
-      };
-      
-      AnyRefNode CarpometacarpalJointNode1={
-        sRel=.Scale({0.0,-0.015,....Sign*0.015});
-        //                    AnyDrawRefFrame drw={          ScaleXYZ={0.1,0.1,0.1};        };
-      };
-      
-      AnyRefNode HandCylRotNode ={
-        sRel=.Scale({0,0,0.0});
-        ARel=RotMat(-65*pi/180,z)*RotMat(....Sign*30*pi/180,x)*RotMat(....Sign*20*pi/180,y);
-         //AnyDrawRefFrame drw = {RGB={1,0,1};};
-      };
-      
-      
-      AnyRefNode CMC1 ={
-        sRel=.Scale({0,..JointPositions[0][0],....Sign*..JointPositions[0][1]});
-        //     ARel=RotMat((-90+30)*pi/180,x)*RotMat(14.7*pi/180,y);
+      AnyRefNode O_Adductor_Pollicis_Caput_Obliquum_1             = {sRel = ..Scale(.DataM.O_Adductor_Pollicis_Caput_Obliquum_1)*..Mirror;};
+      AnyRefNode O_Adductor_Pollicis_Caput_Obliquum_2             = {sRel = ..Scale(.DataM.O_Adductor_Pollicis_Caput_Obliquum_2)*..Mirror;};
+      AnyRefNode O_Adductor_Pollicis_Caput_Obliquum_3             = {sRel = ..Scale(.DataM.O_Adductor_Pollicis_Caput_Obliquum_3)*..Mirror;};
 
-        ARel=RotMat(....Sign*(-90+30)*pi/180,x)*RotMat(....Sign*3*14.7*pi/180,y);
-        
-           //AnyDrawRefFrame drw1={RGB={0,0,1}; ScaleXYZ={0.15,0.15,0.15};};
-      };
+      AnyRefNode O_Flexor_Pollicis_Brevis_Caput_Profundum             = {sRel = ..Scale(.DataM.O_Flexor_Pollicis_Brevis_Caput_Profundum)*..Mirror;};
+      AnyRefNode O_Flexor_Pollicis_Brevis_Caput_Superficiale_1             = {sRel = ..Scale(.DataM.O_Flexor_Pollicis_Brevis_Caput_Superficiale_1)*..Mirror;};
+      AnyRefNode O_Flexor_Pollicis_Brevis_Caput_Superficiale_2             = {sRel = ..Scale(.DataM.O_Flexor_Pollicis_Brevis_Caput_Superficiale_2)*..Mirror;};
+     
+      #if RUHM_DETAILED_MODEL == ON
+      AnyRefNode O_Abductor_Digiti_Minimi_1             = {sRel = ..Scale(.DataM.O_Abductor_Digiti_Minimi_1)*..Mirror;};
+      AnyRefNode O_Abductor_Digiti_Minimi_2             = {sRel = ..Scale(.DataM.O_Abductor_Digiti_Minimi_2)*..Mirror;};
+      AnyRefNode O_Abductor_Digiti_Minimi_3             = {sRel = ..Scale(.DataM.O_Abductor_Digiti_Minimi_3)*..Mirror;};
+      AnyRefNode O_Abductor_Digiti_Minimi_4             = {sRel = ..Scale(.DataM.O_Abductor_Digiti_Minimi_4)*..Mirror;};
+      AnyRefNode O_Abductor_Digiti_Minimi_5             = {sRel = ..Scale(.DataM.O_Abductor_Digiti_Minimi_5)*..Mirror;};
+      AnyRefNode O_Abductor_Digiti_Minimi_6             = {sRel = ..Scale(.DataM.O_Abductor_Digiti_Minimi_6)*..Mirror;};
+      #else
+      AnyRefNode O_Abductor_Digiti_Minimi_1             = {sRel = ..Scale(.DataM.O_Abductor_Digiti_Minimi_1)*..Mirror;};
+      #endif
       
-      AnyRefNode CMC2={
-        
-        AnyVar Angle =-atan((sRel[0]-.MCP2.sRel[0])/(sRel[1]-.MCP2.sRel[1]));
-        ARel =RotMat(sRel,sRel+{cos(Angle),sin(Angle),0},.MCP2.sRel)*RotMat(pi,x);
-        sRel=.Scale({-0.004,-0.016,....Sign*0.006});
-               //AnyDrawRefFrame drw={RGB={0,1,1}; ScaleXYZ={0.15,0.15,0.15};};
-      };
+      AnyRefNode O_Abductor_Pollicis_Brevis_1             = {sRel = ..Scale(.DataM.O_Abductor_Pollicis_Brevis_1)*..Mirror;};
+      AnyRefNode O_Abductor_Pollicis_Brevis_2             = {sRel = ..Scale(.DataM.O_Abductor_Pollicis_Brevis_2)*..Mirror;};
+      AnyRefNode O_Abductor_Pollicis_Brevis_3             = {sRel = ..Scale(.DataM.O_Abductor_Pollicis_Brevis_3)*..Mirror;};
+      AnyRefNode O_Abductor_Pollicis_Brevis_4             = {sRel = ..Scale(.DataM.O_Abductor_Pollicis_Brevis_4)*..Mirror;};
+      AnyRefNode O_Abductor_Pollicis_Brevis_5             = {sRel = ..Scale(.DataM.O_Abductor_Pollicis_Brevis_5)*..Mirror;};
+
+      AnyRefNode O_Flexor_Digiti_Minimi_Brevis             = {sRel = ..Scale(.DataM.O_Flexor_Digiti_Minimi_Brevis)*..Mirror;};
+
+      AnyRefNode O_Opponens_Digiti_Minimi_1             = {sRel = ..Scale(.DataM.O_Opponens_Digiti_Minimi_1)*..Mirror;};
+      AnyRefNode O_Opponens_Digiti_Minimi_2             = {sRel = ..Scale(.DataM.O_Opponens_Digiti_Minimi_2)*..Mirror;};
+    
+      #if RUHM_DETAILED_MODEL == ON
+      AnyRefNode I_Flexor_Carpi_Ulnaris_1             = {sRel = ..Scale(.DataM.I_Flexor_Carpi_Ulnaris_1)*..Mirror;};
+      AnyRefNode I_Flexor_Carpi_Ulnaris_2             = {sRel = ..Scale(.DataM.I_Flexor_Carpi_Ulnaris_2)*..Mirror;};
+      AnyRefNode I_Flexor_Carpi_Ulnaris_3             = {sRel = ..Scale(.DataM.I_Flexor_Carpi_Ulnaris_3)*..Mirror;};
+      AnyRefNode I_Flexor_Carpi_Ulnaris_4             = {sRel = ..Scale(.DataM.I_Flexor_Carpi_Ulnaris_4)*..Mirror;};
+      AnyRefNode I_Flexor_Carpi_Ulnaris_5             = {sRel = ..Scale(.DataM.I_Flexor_Carpi_Ulnaris_5)*..Mirror;};
+      AnyRefNode I_Flexor_Carpi_Ulnaris_6             = {sRel = ..Scale(.DataM.I_Flexor_Carpi_Ulnaris_6)*..Mirror;};
+      AnyRefNode I_Flexor_Carpi_Ulnaris_7             = {sRel = ..Scale(.DataM.I_Flexor_Carpi_Ulnaris_7)*..Mirror;};
+      #else
+      AnyRefNode I_Flexor_Carpi_Ulnaris_1             = {sRel = ..Scale(.DataM.I_Flexor_Carpi_Ulnaris_1)*..Mirror;};
+      #endif
       
+      AnyRefNode I_Palmaris_Longus                    = {sRel = ..Scale(.DataM.I_Palmaris_Longus)*..Mirror;};
+      #endif 
       
-      AnyRefNode CMC3={
-        AnyVar Angle =-atan((sRel[0]-.MCP3.sRel[0])/(sRel[1]-.MCP3.sRel[1]));
-        ARel =RotMat(sRel,sRel+{cos(Angle),sin(Angle),0},.MCP3.sRel)*RotMat(pi,x);
-        sRel=.Scale({-0.003,-0.020,-....Sign*0.008});
-        //        AnyDrawRefFrame drw={RGB={0,1,1}; ScaleXYZ={0.05,0.05,0.05};};
-      };
+      #if (_ARM_DETAILED_HAND_WHICH =="ANYBODY")
+      AnyRefNode wj                                   = { sRel=.Scale({-0.005,0.005,....Sign*-0.005} + {0.005, -0.001433, ....Sign*0.001099}); //corrected
+                                                         ARel=RotMat(-90/180*pi,x)*RotMat(-90/180*pi,y)*RotMat(....Sign*-15/180*pi,z);};//*RotMat(L*pi,x);};
+      AnyRefNode PalmJoint                            = { sRel=.Scale({0.0, -0.045, ....Sign*0.0});};
+      AnyRefNode CarpalsRef                           = {sRel = .Scale({0,0,0.0});
+                                                        AnyVar L= iffun(ltfun(....Sign,0),1.0,0.0); 
+                                                        ARel=RotMat(-90/180*pi,x)*RotMat(....Sign*-90/180*pi,y)*RotMat(-15/180*pi,z)*RotMat(L*pi,z); };
+      AnyRefNode CarpometacarpalJointNode1            = { sRel=.Scale({0.0,-0.015,....Sign*0.015});};
       
-      AnyRefNode CMC4={
-        AnyVar Angle =-atan((sRel[0]-.MCP4.sRel[0])/(sRel[1]-.MCP4.sRel[1]));
-        ARel =RotMat(sRel,sRel+{cos(Angle),sin(Angle),0},.MCP4.sRel)*RotMat(pi,x);
-        sRel=.Scale({-0.00,-0.020,....Sign*-0.02});
-        //        AnyDrawRefFrame drw={RGB={0,1,1}; ScaleXYZ={0.5,0.5,0.5};};
-      };
+      AnyRefNode HandCylRotNode                       = {sRel=.Scale({0,0,0.0});
+                                                         ARel=RotMat(-65*pi/180,z)*RotMat(....Sign*30*pi/180,x)*RotMat(....Sign*20*pi/180,y);};
+      AnyRefNode CMC1                                 = {sRel=.Scale({0,..JointPositions[0][0],....Sign*..JointPositions[0][1]});
+                                                        ARel=RotMat(....Sign*(-90+30)*pi/180,x)*RotMat(....Sign*3*14.7*pi/180,y);};
+      AnyRefNode CMC2                                 = {AnyVar Angle =-atan((sRel[0]-.MCP2.sRel[0])/(sRel[1]-.MCP2.sRel[1]));
+                                                        ARel =RotMat(sRel,sRel+{cos(Angle),sin(Angle),0},.MCP2.sRel)*RotMat(pi,x);
+                                                        sRel=.Scale({-0.004,-0.016,....Sign*0.006});};
+      AnyRefNode CMC3                                 = {AnyVar Angle =-atan((sRel[0]-.MCP3.sRel[0])/(sRel[1]-.MCP3.sRel[1]));
+                                                        ARel =RotMat(sRel,sRel+{cos(Angle),sin(Angle),0},.MCP3.sRel)*RotMat(pi,x);
+                                                        sRel=.Scale({-0.003,-0.020,-....Sign*0.008});}; 
+      AnyRefNode CMC4                                 = {AnyVar Angle =-atan((sRel[0]-.MCP4.sRel[0])/(sRel[1]-.MCP4.sRel[1]));
+                                                        ARel =RotMat(sRel,sRel+{cos(Angle),sin(Angle),0},.MCP4.sRel)*RotMat(pi,x);
+                                                        sRel=.Scale({-0.00,-0.020,....Sign*-0.02});};
       
-      AnyRefNode CMC5={
-        AnyVar Angle =-atan((sRel[0]-.MCP5.sRel[0])/(sRel[1]-.MCP5.sRel[1]));
-        ARel =RotMat(sRel,sRel+{cos(Angle),sin(Angle),0},.MCP5.sRel)*RotMat(pi,x);
-        sRel=.Scale({0.004,-0.018,....Sign*-0.025});
-        //        AnyDrawRefFrame drw={RGB={0,1,0}; ScaleXYZ={0.5,0.5,0.5};};
-      };
-      
-      
-      
-      AnyRefNode MCP2 ={
-        //        AnyDrawRefFrame drw={};
-        sRel=.Scale({0,..JointPositions[1][0],....Sign*..JointPositions[1][1]});
-        //        AnyDrawRefFrame drw1={RGB={0,0,1}; ScaleXYZ={0.15,0.15,0.15};};
-      };
-      
-      AnyRefNode MCP3 ={
-        sRel=.Scale({0,..JointPositions[2][0],....Sign*..JointPositions[2][1]});
-        //        AnyDrawRefFrame drw1={RGB={0,0,1}; ScaleXYZ={0.15,0.15,0.15};};
-      };
-      
-      
-      AnyRefNode MCP4 ={
-        sRel=.Scale({0,..JointPositions[3][0],....Sign*..JointPositions[3][1]});
-        //        AnyDrawRefFrame drw1={RGB={0,0,1}; ScaleXYZ={0.15,0.15,0.15};};
-      };
-      
-      AnyRefNode MCP5 ={
-        sRel=.Scale({0,..JointPositions[4][0],....Sign*..JointPositions[4][1]});
-        //        AnyDrawRefFrame drw1={RGB={0,1,0}; ScaleXYZ={0.15,0.15,0.15};};
-      };
-      AnyKinPLine HandBreadthTest={
-        AnyDrawPLine drw={RGB={0,1,0}; Thickness=0.0005;};
-        AnyRefFrame &ref1=.MCP5;
-        AnyRefFrame &ref2=.MCP2;
-        
-      };
+      AnyRefNode CMC5                                 = {AnyVar Angle =-atan((sRel[0]-.MCP5.sRel[0])/(sRel[1]-.MCP5.sRel[1]));
+                                                        ARel =RotMat(sRel,sRel+{cos(Angle),sin(Angle),0},.MCP5.sRel)*RotMat(pi,x);
+                                                        sRel=.Scale({0.004,-0.018,....Sign*-0.025});};
+
+      AnyRefNode MCP2                                 = {sRel=.Scale({0,..JointPositions[1][0],....Sign*..JointPositions[1][1]});};
+      AnyRefNode MCP3                                 = {sRel=.Scale({0,..JointPositions[2][0],....Sign*..JointPositions[2][1]});};
+      AnyRefNode MCP4                                 = {sRel=.Scale({0,..JointPositions[3][0],....Sign*..JointPositions[3][1]});};
+      AnyRefNode MCP5                                 = {sRel=.Scale({0,..JointPositions[4][0],....Sign*..JointPositions[4][1]});};
+      #endif 
+  
       
       //  Calculation of Metacarpal lenghts
+      #if BM_HANDLENGTH_ULM == 0
       AnyVar LM2 = vnorm((MCP2.sRel-CMC2.sRel),2);
       AnyVar LM3 = vnorm((MCP3.sRel-CMC3.sRel),2);
       AnyVar LM4 = vnorm((MCP4.sRel-CMC4.sRel),2);
       AnyVar LM5 = vnorm((MCP5.sRel-CMC5.sRel),2);
-    };
-//  };
+      #else
+      AnyVar LM2 = .SegmentLengthTable[1][0];
+      AnyVar LM3 = .SegmentLengthTable[2][0];
+      AnyVar LM4 = .SegmentLengthTable[3][0];
+      AnyVar LM5 = .SegmentLengthTable[4][0];
+      #endif
+      
+
+     #if _ARM_DETAILED_HAND_WHICH == "RUHM"
+     AnyRefNode DorsalWristCyl = { 
+     AnyVar length = 4.3*vnorm(P1-P2)-cyl.CapRatio*2*cyl.Radius;
+     sRel = (P1+length/2*(P1-P2)/vnorm(P1-P2)+{-vnorm(P1-P3)*2.0,vnorm(..Scale({0.03,0,0})),vnorm(..Scale({0.025,0,0}))*2})*..Mirror;
+     AnyVec3 P1 = .Scale(.Data.DorsalWristCyl_pos)*..Mirror;
+     AnyVec3 P3 = .Scale(.Data.DorsalWristCyl_P3_pos)*..Mirror;
+     AnyVec3 P2 = .Scale(.Data.DorsalWristCyl_P2_pos)*..Mirror;
+     //Calculate orientation of the cylinder
+     ARel=RotMat(P1,P3,P2)*RotMat(90/180*pi, z)*RotMat(-90/180*pi, x);            
+     
+     AnySurfCylinder cyl = { 
+       Radius=vnorm(.P1-.P3)*1.1;
+       Length= .length;
+       CapRatio = 0.5;
+       #if SHOW_HAND_WRAP_EX == ON
+       AnyDrawParamSurf drw={RGB={1,1,0.5};Opacity = 0.5;};
+       #endif
+     };
+   };
+   #endif
+     
+ };
+    //};
 //};
 //
 
@@ -496,8 +368,7 @@ Finger5MetaRef = {
 
 //this table is from  Buchholz1990, table 4 in the paper
 //it gives the relation between segments lengths as a function of Handlenght (see definition above)
-// AnyVar HandBreadth = Main.HumanModel.BodyModel.Right.ShoulderArm.StandardParameters.Hand.HandBreadth; 
-// AnyVar HandLength = Main.HumanModel.BodyModel.Right.ShoulderArm.StandardParameters.Hand.HandLength; 
+
 
 #if BM_SCALING == _SCALING_XYZ_
 AnyVar HandLength  = GScaling.Hand.LengthScale*..StandardParameters.Hand.HandLength;
@@ -507,6 +378,11 @@ AnyVar HandLength  = GScaling.Hand.HandLength;
 AnyVar HandBreadth = GScaling.Hand.HandBreadth;
 #endif
 
+#ifndef BM_HANDLENGTH_ULM 
+#define BM_HANDLENGTH_ULM OFF
+#endif
+
+#if BM_HANDLENGTH_ULM == 0
 AnyMatrix SegmentLengthTable=    HandLength*{
   //segment 1, segment 2, segment3, segment4
   //combination of carpal and metacarpal, proximal phalanx,middle phalaxn, distal phalanx
@@ -516,6 +392,40 @@ AnyMatrix SegmentLengthTable=    HandLength*{
   {0.421,0.244,0.165,0.107}, //Finger 4 Ring
   {0.414,0.204,0.117,0.093}  //Finger 5 Little
 };
+#endif
+
+#if BM_HANDLENGTH_ULM  == 1
+//Segementlength by Ulm study with 47 patients
+AnyMatrix SegmentLengthTable=    HandLength*{
+//  segment 1, segment 2, segment3, segment4
+//  combination of carpal and metacarpal, proximal phalanx,middle phalaxn, distal phalanx
+  {0.000000, 0.260844, 0.180002, 0.138805}, 
+  {0.375286, 0.253760, 0.159697, 0.104295}, 
+  {0.360913, 0.280868, 0.194885, 0.111260}, 
+  {0.319616, 0.261700, 0.185207, 0.113941}, 
+  {0.292675, 0.208756, 0.129041, 0.099599} 
+};
+//MOMENTARMS LENGTH IN INDEX AnyMatrix SegmentLengthTable= 
+//{{0.0, 0.04747361, 0.03276036, 0.02526251},
+//{0.07157, 0.04357, 0.02467, 0.01967},
+//{0.06568617, 0.05111798, 0.03546907, 0.02024932},
+//{0.05817011, 0.0476294, 0.03370767, 0.02073726},
+//{0.05326685, 0.03799359, 0.02348546, 0.01812702}};
+
+#endif
+
+
+AnyMatrix SegmentLengthTableNom={
+  //Nominate to middle phalanx as by chao
+  //segment 1, segment 2, segment3, segment4
+  //combination of carpal and metacarpal, proximal phalanx,middle phalaxn, distal phalanx
+  {0.118,0.251,0.196,0.158}/0.196, //Finger 1 Thumb
+  {0.463,0.245,0.143,0.097}/0.143, //Finger 2 Index
+  {0.446,0.266,0.170,0.108}/0.170, //Finger 3 Middle
+  {0.421,0.244,0.165,0.107}/0.165, //Finger 4 Ring
+  {0.414,0.204,0.117,0.093}/0.117  //Finger 5 Little
+};
+
 //this table is from  Buchholz1990, table 5 in the paper
 //this gives the CMC positions as a function of hand length and breadth 
 //as a function of the wrist joint center 
@@ -567,9 +477,10 @@ AnyFolder Finger1={
   AnyVar Mass2=.HandMass/18;
   AnyVar Mass4=.HandMass/18;
   
-    AnyVar S=2*.StrengthScaling.Hand.StrengthScale;
+  AnyVar S=2*.StrengthScaling.Hand.StrengthScale;
   
-  
+  AnyVector Lengths = {.SegmentLengthTable[0][1], .SegmentLengthTable[0][2], 0, .SegmentLengthTable[0][3]};
+    
   // Finger joint muscle forces
   AnyVar CMCMusForceFlex =S* 8.9;   //Smutz1998, Figure 2, Sum.
   AnyVar CMCMusForceExten =S* 2.0;  //Smutz1998, Figure 2, Sum.
@@ -584,8 +495,18 @@ AnyFolder Finger1={
   AnyVar DIPMusForceFlex = S*0.5;  //Estimated - need more data
   AnyVar DIPMusForceExten = S*0.2; //Estimated - need more data
   
+  #if _ARM_DETAILED_HAND_WHICH == "RUHM"
+  #include "ThumbRUHM.any"
   
+  AnyFunTransform3D &GeomScaleMC= .GScaling.Hand.Thumb_MC.ScaleFunction;
+  AnyFunTransform3D &GeomScalePP= .GScaling.Hand.Thumb_PP.ScaleFunction;
+  AnyFunTransform3D &GeomScaleDP= .GScaling.Hand.Thumb_DP.ScaleFunction;
+  #else
   #include "Thumb.any"
+  #endif
+  
+
+
 };
 //
 //
@@ -624,6 +545,8 @@ AnyFolder Finger2={
   
   AnyVar MCPMusForceFlex = S*2.513;  //Li2000, Table3, Lowest value
   AnyVar MCPMusForceExten = S*MCPMusForceFlex*Scale2; //Estimated - need more data
+  AnyVar MCPMusForceAdduc = S*3;     //Estimated - need more data
+  AnyVar MCPMusForceAbduc = S*3;     //Estimated - need more data
   
   AnyVar PIPMusForceFlex = S*1.293;  //Li2000, Table3, Lowest value
   AnyVar PIPMusForceExten =S* PIPMusForceFlex*Scale2; //Estimated - need more data
@@ -651,8 +574,24 @@ AnyFolder Finger2={
     AnyVar RotAngle = 0;
   };
   
+    #if (_ARM_DETAILED_HAND_WHICH =="RUHM" | _ARM_DETAILED_HAND_WHICH == "LOOPLUC")
+      #if _ARM_DETAILED_HAND_WHICH =="RUHM"
+        #include "FingerRUHM.any"
+           AnyFunTransform3D &GeomScaleDP= .GScaling.Hand.Finger_DP.ScaleFunction2;
+           AnyFunTransform3D &GeomScaleMP= .GScaling.Hand.Finger_MP.ScaleFunction2;
+           AnyFunTransform3D &GeomScalePP= .GScaling.Hand.Finger_PP.ScaleFunction2;
+           AnyFunTransform3D &GeomScaleMC= .GScaling.Hand.Finger_MC.ScaleFunction2;  
 
-    #include "Finger.any"
+
+      #endif
+      #if _ARM_DETAILED_HAND_WHICH == "LOOPLUC" 
+        #include "FingerLOOPLUC.any"
+      #endif
+    #else
+      #include "Finger.any"
+    #endif
+    
+    
   
 };//finger2
 
@@ -696,6 +635,8 @@ AnyFolder Finger3={
   
   AnyVar MCPMusForceFlex = S*2.664;  //Li2000, Table3, Lowest value
   AnyVar MCPMusForceExten = S*MCPMusForceFlex*Scale3; //Estimated - need more data
+  AnyVar MCPMusForceAdduc = S*3;     //Estimated - need more data
+  AnyVar MCPMusForceAbduc = S*3;     //Estimated - need more data
   
   AnyVar PIPMusForceFlex = S*1.457;  //Li2000, Table3, Lowest value
   AnyVar PIPMusForceExten =S* PIPMusForceFlex*Scale3; //Estimated - need more data
@@ -720,7 +661,20 @@ AnyFolder Finger3={
     AnyVar RotAngle = 0;
   };
   
-  #include "Finger.any"
+    #if (_ARM_DETAILED_HAND_WHICH =="RUHM" | _ARM_DETAILED_HAND_WHICH == "LOOPLUC")
+      #if _ARM_DETAILED_HAND_WHICH =="RUHM"
+        #include "FingerRUHM.any"
+           AnyFunTransform3D &GeomScaleDP= .GScaling.Hand.Finger_DP.ScaleFunction3;
+           AnyFunTransform3D &GeomScaleMP= .GScaling.Hand.Finger_MP.ScaleFunction3;
+           AnyFunTransform3D &GeomScalePP= .GScaling.Hand.Finger_PP.ScaleFunction3;
+           AnyFunTransform3D &GeomScaleMC= .GScaling.Hand.Finger_MC.ScaleFunction3;          
+      #endif
+      #if _ARM_DETAILED_HAND_WHICH == "LOOPLUC" 
+        #include "FingerLOOPLUC.any"
+      #endif
+    #else
+      #include "Finger.any"
+    #endif
   
   
   
@@ -764,6 +718,8 @@ AnyFolder Finger4={
   
   AnyVar MCPMusForceFlex = S*1.869; //Li2000, Table3, Lowest value
   AnyVar MCPMusForceExten = S*MCPMusForceFlex*Scale4; //Estimated - need more data
+  AnyVar MCPMusForceAdduc = S*3;     //Estimated - need more data
+  AnyVar MCPMusForceAbduc = S*3;     //Estimated - need more data
   
   AnyVar PIPMusForceFlex = S*0.908; //Li2000, Table3, Lowest value
   AnyVar PIPMusForceExten = S*PIPMusForceFlex*Scale4; //Estimated - need more data
@@ -788,7 +744,20 @@ AnyFolder Finger4={
     AnyVar RotAngle = 0;
   };
   
-  #include "Finger.any"
+    #if (_ARM_DETAILED_HAND_WHICH =="RUHM" | _ARM_DETAILED_HAND_WHICH == "LOOPLUC")
+      #if _ARM_DETAILED_HAND_WHICH =="RUHM"
+           AnyFunTransform3D &GeomScaleDP= .GScaling.Hand.Finger_DP.ScaleFunction4;
+           AnyFunTransform3D &GeomScaleMP= .GScaling.Hand.Finger_MP.ScaleFunction4;
+           AnyFunTransform3D &GeomScalePP= .GScaling.Hand.Finger_PP.ScaleFunction4;
+           AnyFunTransform3D &GeomScaleMC= .GScaling.Hand.Finger_MC.ScaleFunction4;        
+        #include "FingerRUHM.any"
+      #endif
+      #if _ARM_DETAILED_HAND_WHICH == "LOOPLUC" 
+        #include "FingerLOOPLUC.any"
+      #endif
+    #else
+      #include "Finger.any"
+    #endif
   
 };//finger4
 
@@ -833,6 +802,8 @@ AnyFolder Finger5={
   
   AnyVar MCPMusForceFlex = S*1.304; //Li2000, Table3, Lowest value
   AnyVar MCPMusForceExten = S*MCPMusForceFlex*Scale5; //Estimated - need more data
+  AnyVar MCPMusForceAdduc = S*2;     //Estimated - need more data
+  AnyVar MCPMusForceAbduc = S*2;     //Estimated - need more data
   
   AnyVar PIPMusForceFlex = S*0.475; //Li2000, Table3, Lowest value
   AnyVar PIPMusForceExten = S*PIPMusForceFlex*Scale5; //Estimated - need more data
@@ -857,8 +828,22 @@ AnyFolder Finger5={
     AnyVar RotAngle = -7*pi/180;
   };
   
-    #include "Finger.any"
-//  #include "Finger5.any"
+    #if (_ARM_DETAILED_HAND_WHICH =="RUHM" | _ARM_DETAILED_HAND_WHICH == "LOOPLUC")
+      #if _ARM_DETAILED_HAND_WHICH =="RUHM"
+        #include "FingerRUHM.any"
+           AnyFunTransform3D &GeomScaleDP= .GScaling.Hand.Finger_DP.ScaleFunction5;
+           AnyFunTransform3D &GeomScaleMP= .GScaling.Hand.Finger_MP.ScaleFunction5;
+           AnyFunTransform3D &GeomScalePP= .GScaling.Hand.Finger_PP.ScaleFunction5;
+           AnyFunTransform3D &GeomScaleMC= .GScaling.Hand.Finger_MC.ScaleFunction5;  
+       
+      #endif
+      #if _ARM_DETAILED_HAND_WHICH == "LOOPLUC" 
+        #include "FingerLOOPLUC.any"
+      #endif
+    #else
+      #include "Finger.any"
+    #endif
+
   
 };//finger5
 

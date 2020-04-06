@@ -1,0 +1,538 @@
+//prepared for using different filenames for each bone...   
+AnyStringVar answer2 = iffun(eqfun(FingerNR,2),"2","");
+AnyStringVar answer3 = iffun(eqfun(FingerNR,3),"3","");
+AnyStringVar answer4 = iffun(eqfun(FingerNR,4),"4","");
+AnyStringVar answer5 = iffun(eqfun(FingerNR,5),"5","");
+
+AnyString MetacarpalString="....HandData\STL\MetacarpalBase"+answer2+answer3+answer4+answer5;
+AnyString ProximalPhalanxString="....HandData\STL\ProximalPhalanx"+answer2+answer3+answer4+answer5;
+AnyString MiddlePhalanxString="....HandData\STL\MiddlePhalanx"+answer2+answer3+answer4+answer5;
+AnyString DistalPhalanxString="....HandData\STL\DistalPhalanx"+answer2+answer3+answer4+answer5;
+
+
+AnyFolder Seg={
+  
+  AnySeg DistalPhalanx={
+    Mass=..Mass4;
+    Jii={0,0,0};
+//    r0= .ProximalPhalanx.DistalJointNode.sRel*.ProximalPhalanx.Axes0'+.ProximalPhalanx.r0-ProximalJointNode.sRel*Axes0';
+//    Axes0 =.ProximalPhalanx.Axes0*
+//    ProximalJointNode.ARel*
+//    RotMat((pi/180)*..JntPos.PIPFlexion,z)*
+//    ProximalJointNode.ARel';
+
+
+    r0= .MiddlePhalanx.DistalJointNode.sRel*.MiddlePhalanx.Axes0'+.MiddlePhalanx.r0-ProximalJointNode.sRel*Axes0';
+    Axes0 =.MiddlePhalanx.Axes0*
+    ProximalJointNode.ARel*
+    RotMat((pi/180)*..JntPos.DIPFlexion,z)*
+    ProximalJointNode.ARel';
+    
+
+    AnySurfSTL Bone = 
+    {
+      FileName = ...DistalPhalanxString;
+      ScaleXYZ = .Scale*{1,1,......Sign*1};
+
+      AnyDrawSurf  BoneSurf = {   
+        RGB=Main.DrawSettings.Colors.Segments;
+        
+        FileName = .FileName; 
+        ScaleXYZ=.ScaleXYZ;
+        Opacity = .......BonesOpacity.Hand;
+      };
+    };
+
+    AnyDrawSurf  BoneSurf = {  
+      RGB=Main.DrawSettings.Colors.Segments;
+      FileName = ...DistalPhalanxString;
+      ScaleXYZ=.Scale*{1,1,......Sign*1};
+      Opacity = ......BonesOpacity.Hand*0.5;
+    };
+    
+    AnyRefNode EllipsoidNode={
+      AnySurfEllipsoid Ellipsoid={
+        AnyVar BoneLength= vnorm(..ProximalJointSurfaceNode.sRel-..DistalJointSurfaceNode.sRel,2);
+        Radius =..Scale*{0.002,0,0.003}+{0,a,0}; //the bonelength is already scaled..
+        //definition of focus points for the ellipsoid these are used for defining contact
+        AnyVar a =BoneLength/2;
+        AnyVar c = sqrt(Radius[1]^2-Radius[0]^2);   //distance for center of ellipsoid to focus point
+        
+        //AnyDrawParamSurf drw ={ RGB=...BoneSurf.RGB; Opacity = ...BoneSurf.Opacity;};
+
+
+      };
+      //definition of focus points
+      AnyRefNode F1 ={      sRel={0,.Ellipsoid.c,0};    };
+      AnyRefNode F2 ={      sRel={0,-.Ellipsoid.c,0};    };      
+    };
+
+    
+    AnyVar StdSegmentLength= 0.022;// unscaled segment length
+    AnyVar Scale=    ..Lengths[3]/StdSegmentLength;
+    
+  //O2
+    AnyRefNode ProximalJointNode={
+      sRel=.Scale*{0.0,0.012+0,0};
+      //AnyDrawRefFrame drw={        ScaleXYZ={0.05,0.05,0.05}; RGB={1,0,0};      };
+      #include "HandData/LOOPLUC/torussimpleDIP.any"
+    };
+    //O1
+    AnyRefNode ProximalJointSurfaceNode={
+      sRel=.Scale*{0.0,0.008,0};
+      //AnyDrawRefFrame drw={        ScaleXYZ={0.05,0.05,0.05}; RGB={1,0,0};      };
+    };
+    
+    //Na
+    AnyRefNode DistalJointSurfaceNode={
+      sRel=.Scale*{0.0,-0.01,0};
+      //AnyDrawRefFrame drw={        ScaleXYZ={0.05,0.05,0.05}; RGB={1,0,0};      };
+ 
+    };
+  
+  }; //DistalPhalanx3    
+  
+  
+  AnySeg MiddlePhalanx={
+    Mass=..Mass3;
+    Jii={0,0,0};
+//     r0=.ProximalPhalanx.r0+.ProximalPhalanx.DistalJointNode.sRel-ProximalJointNode.sRel;
+  r0=.ProximalPhalanx.DistalJointNode.sRel*.ProximalPhalanx.Axes0'+.ProximalPhalanx.r0-ProximalJointNode.sRel*Axes0';
+     Axes0 =.ProximalPhalanx.Axes0*
+    ProximalJointNode.ARel*
+    RotMat((pi/180)*..JntPos.PIPFlexion,z)*
+    ProximalJointNode.ARel';
+
+
+//       r0= .ProximalPhalanx.DistalJointNode.sRel*.ProximalPhalanx.Axes0'+.ProximalPhalanx.r0-ProximalJointNode.sRel*Axes0';
+//    Axes0 =HumanModel.BodyModel.Hand.Carpals.Axes0*
+//    ..InsertationNode.ARel*
+//    RotMat((pi/180)*..JntPos.CMCDeviation,x)*
+//    RotMat((pi/180)*..JntPos.CMCFlexion,z)*
+//    ProximalJointNode.ARel';
+//
+//
+
+     
+    AnyVar StdSegmentLength= 0.03;// unscaled segment length
+    AnyVar Scale=    ..Lengths[2]/StdSegmentLength;
+    
+    
+    AnySurfSTL Bone = 
+    {
+      FileName = ...MiddlePhalanxString;
+      ScaleXYZ = .Scale*{1,1,......Sign*1};
+      //AnyFunTransform3D &<Insert name0> = <Insert object reference (or full object definition)>;
+    
+
+    AnyDrawSurf  BoneSurf = { 
+           RGB=Main.DrawSettings.Colors.Segments;
+
+      FileName = .FileName; 
+      ScaleXYZ= .ScaleXYZ;
+      Opacity = .......BonesOpacity.Hand;
+    };
+    };
+    AnyDrawSurf  BoneSurf = { 
+           RGB=Main.DrawSettings.Colors.Segments;
+
+      FileName = ...MiddlePhalanxString; 
+      ScaleXYZ=.Scale*{1,1,......Sign*1};
+      Opacity = ......BonesOpacity.Hand*0.5;
+    };
+
+    
+    
+    
+        
+    AnyRefNode EllipsoidNode={
+      AnySurfEllipsoid Ellipsoid={
+        AnyVar BoneLength= vnorm(..ProximalJointSurfaceNode.sRel-..DistalJointNode.sRel,2);
+        Radius =..Scale*....MiddlePhalanxParameters.Radius*{1,0,1}+{0,a,0}; //the bonelength is already scaled..
+        //definition of focus points for the ellipsoid these are used for defining contact
+        AnyVar a =BoneLength*....MiddlePhalanxParameters.BoneLengthCoef;
+        AnyVar c = sqrt(Radius[1]^2-Radius[0]^2);   //distance for center of ellipsoid to focus point
+                //AnyDrawParamSurf drw ={ RGB=...BoneSurf.RGB; Opacity = ...BoneSurf.Opacity;};
+      };
+      //definition of focus points
+      AnyRefNode F1 ={      sRel={0,.Ellipsoid.c,0};    };
+      AnyRefNode F2 ={      sRel={0,-.Ellipsoid.c,0};    };      
+    };
+
+    AnyVar O2O3 = vnorm(ProximalJointSurfaceNode.sRel-DistalJointNode.sRel,2);
+    //O4
+    AnyRefNode ProximalJointNode={
+      sRel=.Scale*{0,0.02,0}; 
+      #include "HandData/LOOPLUC/torussimplePIP.any"
+      //      AnyDrawRefFrame drw={        ScaleXYZ={0.05,0.05,0.05}; RGB={1,0,0};      };
+    };
+    //O3
+    AnyRefNode ProximalJointSurfaceNode={
+      sRel=.Scale*{0.0,0.01,0};
+      //      AnyDrawRefFrame drw={        ScaleXYZ={0.05,0.05,0.05}; RGB={1,0,0};      };
+    };
+    //O2
+    AnyRefNode DistalTorusNode={
+     sRel=.DistalJointNode.sRel; 
+    };
+    
+    AnyRefNode DistalJointNode={
+      sRel=.Scale*{0.0,-0.01,0};
+      //      AnyDrawRefFrame drw={        ScaleXYZ={0.05,0.05,0.05}; RGB={1,0,0};      };
+
+    #include "HandData/LOOPLUC/jointsphereDIP.any"
+    //AnyObjectPtrVar Joint = &...Jnt.DIP;
+    //AnyVar JointPos = ...Jnt.DIP.Pos[0];
+    //AnyVar JointVel=iffun(gtfun(Torus.t,0.0),...Jnt.DIP.Vel,0.0);
+    //AnyVar JointVel = ...Jnt.DIP.Vel; //Does not work, need Interpolation Vel of Driver:
+    //AnyVar JointVel = Main.Model.ModelEnvironmentConnection.Drivers.Right.DIP2.Vel;
+    //#include "torus.any"
+    //move one bone distal: #include "torussimpleDIP.any"
+    };
+    
+
+    
+    
+  }; //MiddlePhalanx
+  
+  //  
+  AnySeg ProximalPhalanx={
+    Mass=..Mass2;
+    Jii={0,0,0};
+   
+    r0= .Metacarpal.DistalJointNode.sRel*.Metacarpal.Axes0'+.Metacarpal.r0-ProximalJointNode.sRel*Axes0';
+    Axes0 =.Metacarpal.Axes0*
+    ProximalJointNode.ARel*
+    RotMat((pi/180)*..JntPos.MCPFlexion,z)*
+    ProximalJointNode.ARel';
+
+
+    AnyVar StdSegmentLength= 0.0521;// unscaled segment length
+    AnyVar Scale=  ..Lengths[1]/ StdSegmentLength;
+    
+    AnySurfSTL Bone = 
+    {
+      FileName = ...ProximalPhalanxString;
+      ScaleXYZ = .Scale*{1,1,......Sign*1};
+
+      AnyDrawSurf  BoneSurf = {   
+        RGB=Main.DrawSettings.Colors.Segments;
+        
+        FileName = .FileName; 
+        ScaleXYZ=.ScaleXYZ;
+        Opacity = .......BonesOpacity.Hand;
+      };
+    };
+//    AnyDrawSurf  BoneSurf = {   
+//          RGB=Main.DrawSettings.Colors.Segments;
+//
+//      FileName = ...ProximalPhalanxString; 
+//      ScaleXYZ=.Scale*{1,1,......Sign*1};
+//      Opacity = ......BonesOpacity.Hand;
+//    };
+
+        
+    AnyRefNode EllipsoidNode={
+      AnySurfEllipsoid Ellipsoid={
+        AnyVar BoneLength= vnorm(..ProximalJointSurfaceNode.sRel-..DistalJointNode.sRel,2);
+        Radius =..Scale*....ProximalPhalanxParameters.Radius*{1,0,1}+{0,a,0}; //the bonelength is already scaled..
+        //definition of focus points for the ellipsoid these are used for defining contact
+        AnyVar a =BoneLength*....ProximalPhalanxParameters.BoneLengthCoef;
+        AnyVar c = sqrt(Radius[1]^2-Radius[0]^2);   //distance for center of ellipsoid to focus point
+         //AnyDrawParamSurf drw ={ RGB=...BoneSurf.RGB; Opacity = ........BonesOpacity.Hand;};
+         
+      };
+      //definition of focus points
+      AnyRefNode F1 ={      sRel={0,.Ellipsoid.c,0};    };
+      AnyRefNode F2 ={      sRel={0,-.Ellipsoid.c,0};    };      
+    };
+
+    AnyVar Length=.MiddlePhalanx.O2O3*1.608;
+    //O6
+    AnyRefNode ProximalJointNode={
+      sRel=.Scale*{0.0,0.0321,0};
+      //      AnyDrawRefFrame drw={        ScaleXYZ={0.05,0.05,0.05}; RGB={1,0,0};      };
+    };
+    //O5
+    AnyRefNode ProximalJointSurfaceNode={
+      sRel=.Scale*{0.0,0.02,0};
+      //      AnyDrawRefFrame drw={        ScaleXYZ={0.05,0.05,0.05}; RGB={1,0,0};      };
+    };
+    //O4
+    AnyRefNode DistalJointNode={
+      sRel=.Scale*{0.00,-0.02,0};
+      //      AnyDrawRefFrame drw={        ScaleXYZ={0.05,0.05,0.05}; RGB={1,0,0};      };
+  
+        #include "HandData/LOOPLUC/jointspherePIP.any"
+    };
+    
+    
+  }; //ProximalPhalanx
+  
+  AnySeg Metacarpal={
+    Mass=..Mass1;
+    Jii={0,0,0};
+    #include "../DrawSettings/Nodes.any"
+    r0= ..InsertationNode.sRel*...Carpals.Axes0'+ ...Carpals.r0-ProximalJointNode.sRel*Axes0';
+    Axes0 = ...Carpals.Axes0* ..InsertationNode.ARel*
+//    RotMat((pi/180)*..JntPos.CMCFlexion,z)*
+    ProximalJointNode.ARel';
+  
+    AnyRefNode Center={
+      sRel={0,0,0};
+       //AnyDrawRefFrame drw={        ScaleXYZ={0.05,0.05,0.05}; RGB={1,0,0};      };
+
+    };
+    
+       
+AnyVar StdSegmentLength= 0.07;// unscaled segment length
+    AnyVar Scale=   ..Lengths[0]/StdSegmentLength;
+    
+    AnyDrawSurf  BoneSurf = {        RGB=Main.DrawSettings.Colors.Segments;
+
+      FileName = ...MetacarpalString;  
+      ScaleXYZ=.Scale*{1,1,......Sign*1};
+      Opacity = ......BonesOpacity.Hand;
+    };
+    
+    AnyRefNode EllipsoidNode={
+      sRel= ...MetacarpalParameters.Offset;
+      ARel= RotMat(...MetacarpalParameters.RotAngle,z);
+      AnySurfEllipsoid Ellipsoid={
+        AnyVar BoneLength= vnorm(..ProximalJointSurfaceNode.sRel-..DistalJointNode.sRel,2);
+        Radius =..Scale*....MetacarpalParameters.Radius*{1,0,1}+{0,a,0}; //the bonelength is already scaled..
+        //definition of focus points for the ellipsoid these are used for defining contact
+        AnyVar a =BoneLength*....MetacarpalParameters.BoneLengthCoef;
+        AnyVar c = sqrt(Radius[1]^2-Radius[0]^2);   //distance for center of ellipsoid to focus point
+        
+        //AnyDrawParamSurf drw ={ RGB=...BoneSurf.RGB; Opacity = ........BonesOpacity.Hand;};
+      };
+      //definition of focus points
+      AnyRefNode F1 ={      sRel={0,.Ellipsoid.c,0};    };
+      AnyRefNode F2 ={      sRel={0,-.Ellipsoid.c,0};    };      
+    };
+    
+ 
+    
+
+    AnyRefNode ProximalJointNode={
+      sRel=.Scale*{0.00,0.035+0.005,0};
+      //      AnyDrawRefFrame drw={        ScaleXYZ={0.05,0.05,0.05}; RGB={1,0,0};      };
+    };
+    
+    AnyRefNode ProximalJointSurfaceNode={
+      sRel=.Scale*{0.00,0.035,0};
+      //      AnyDrawRefFrame drw={        ScaleXYZ={0.05,0.05,0.05}; RGB={1,0,0};      };
+    };
+    
+    //06
+    AnyRefNode DistalJointNode={
+      sRel=.Scale*{0.00,-0.03,0};
+            //AnyDrawRefFrame drw={        ScaleXYZ={0.05,0.05,0.05}; RGB={1,0,0};      };
+     #include "HandData/LOOPLUC/jointsphereMCP.any"
+      #include "HandData/LOOPLUC/torussimpleMCP.any"
+     #include "HandData/LOOPLUC/secondtorussimpleMCP.any"
+          };
+    
+      
+    
+    
+  }; //Metacarpal
+  
+}; //Segs
+
+
+
+
+AnyFolder Jnt ={
+//  
+//  //Carpometacarpal joint
+  AnyUniversalJoint CMC={
+    AnyRefNode &ref1=..InsertationNode;
+    AnyRefNode &ref2=..Seg.Metacarpal.ProximalJointNode;
+    Axis1=z;
+    Axis2=x;
+  };
+//  
+//  //Drive the CMC joint so that it points at MCP joint 
+  AnyFolder CMCDriver ={
+    
+    AnyKinEqSimpleDriver Driver ={
+      AnyKinLinear Lin={
+        Ref=0;
+        AnyRefNode &ref1=....Seg.Metacarpal.DistalJointNode;
+              // ref1={AnyDrawRefFrame drw2={RGB={1,1,1};};};
+        AnyRefNode  &ref2= ....MCPNode;
+      };
+      MeasureOrganizer={0,2};  //x and z, y is longitudinal
+      DriverPos={0,0};
+      DriverVel={0,0};
+      Reaction.Type ={Off,Off};
+    };
+  };
+  
+  //Metacarpophalangeal joint
+  AnyUniversalJoint MCP={
+    AnyRefNode &ref1=..Seg.Metacarpal.DistalJointNode;
+    AnyRefNode &ref2=..Seg.ProximalPhalanx.ProximalJointNode;
+    Axis1=z;
+    Axis2=x;
+    //#include "DrawJointAxisZ.any"
+    
+  };
+  
+  
+  //Proximalinterphalangeal joint
+  AnyRevoluteJoint PIP={
+    AnyRefNode &ref1=..Seg.ProximalPhalanx.DistalJointNode;
+    AnyRefNode &ref2=..Seg.MiddlePhalanx.ProximalJointNode;
+    Axis=z;
+    //#include "DrawJointAxisZ.any"
+    
+  };
+  
+  //Distalinterphalangeal joint
+   AnyRevoluteJoint DIP={
+    AnyRefNode &ref1=..Seg.MiddlePhalanx.DistalJointNode;
+    AnyRefNode &ref2=..Seg.DistalPhalanx.ProximalJointNode;
+    Axis=z;
+    //Constraints.Reaction.Type ={Off,Off,Off,Off,Off};
+    //#include "DrawJointAxisZ.any"
+  };
+
+
+
+ 
+  //Make a linear combination measure which links DIP motion with PIP motion
+  //Rijpkema1991
+  //Hans Rijpkema and Michael Girad
+  //Computer animation of knowledge-based human grasping
+  //Computer grahics Vol. 25, no. 4, July 1991
+//   AnyKinEq PIPJointDIPJointLink={
+//    AnyKinMeasureLinComb PIPDIP={
+//      
+//      //Proximalinterphalangeal joint
+//      AnyRevoluteJoint &ref1=..DIP;
+//      
+//      //Proximalinterphalangeal joint
+//      AnyRevoluteJoint &ref2=..PIP;
+//      
+//      Coef={{1,-2/3}};
+//      
+//      
+//    };
+//  };
+  
+  
+};   // End Jnt definition
+
+// Muscles Definition of the fingers:
+AnyFolder JntMus = {
+  
+  //Four muscles for the CMC joint - Flexion/Extension & Adduction/Abduction motion (base of thumb):
+  AnyGeneralMuscle CMCflexion = {
+    AnyMuscleModel MuscleModel = {
+      F0 = ...CMCMusForceFlex;
+    };
+    AnyKinMeasureOrg Org = {
+      AnyUniversalJoint &jnt = ...Jnt.CMC;
+      MeasureOrganizer = {0};
+    };
+    ForceDirection = 1;
+  };
+  
+  AnyGeneralMuscle CMCextesion = {
+    AnyMuscleModel MuscleModel = {
+      F0 = ...CMCMusForceExten;
+    };
+    AnyKinMeasureOrg Org = {
+      AnyUniversalJoint &jnt = ...Jnt.CMC;
+      MeasureOrganizer = {0};
+    };
+    ForceDirection = -1;
+  };
+    AnyGeneralMuscle CMCAdduction = {
+    AnyMuscleModel MuscleModel = {
+      F0 = ...CMCMusForceAdduc;
+    };
+    AnyKinMeasureOrg Org = {
+      AnyUniversalJoint &jnt = ...Jnt.CMC;
+      MeasureOrganizer = {1};
+    };
+    ForceDirection = 1;
+  };
+  
+  AnyGeneralMuscle CMCAbduction = {
+    AnyMuscleModel MuscleModel = {
+      F0 = ...CMCMusForceAbduc;
+    };
+    AnyKinMeasureOrg Org = {
+      AnyUniversalJoint &jnt = ...Jnt.CMC;
+      MeasureOrganizer = {1};
+    };
+    ForceDirection = -1;
+  };
+
+
+  
+  //Two muscles for the MCP joint - Flexion/Extension motion (base of thumb):
+  AnyGeneralMuscle MCPflexion = {
+    AnyMuscleModel MuscleModel = {
+      F0 = ...MCPMusForceFlex;
+    };
+    AnyKinMeasureOrg Org = {
+      AnyUniversalJoint &jnt = ...Jnt.MCP;
+      MeasureOrganizer = {0};
+     };
+    ForceDirection = 1;
+  };
+  
+  AnyGeneralMuscle MCPextension = {
+    AnyMuscleModel MuscleModel = {
+      F0 = ...MCPMusForceExten;
+    };
+    AnyKinMeasureOrg Org = {
+      AnyUniversalJoint &jnt = ...Jnt.MCP;
+      MeasureOrganizer = {0};
+     };
+        ForceDirection = -1;
+  };
+  
+  //Two muscles for the PIP joint - Flexion/Extension motion (middle of thumb):
+  AnyGeneralMuscle PIPflexion = {
+    AnyMuscleModel MuscleModel = {
+      F0 = ...PIPMusForceFlex;
+    };
+    AnyRevoluteJoint &jnt = ..Jnt.PIP;
+    ForceDirection = 1;
+  };
+  
+  AnyGeneralMuscle PIPextension = {
+    AnyMuscleModel MuscleModel = {
+      F0 = ...PIPMusForceExten;
+    };
+    AnyRevoluteJoint &jnt = ..Jnt.PIP;
+    ForceDirection = -1;
+  };
+
+  //Two muscles for the DIP joint - Flexion/Extension motion (tip of thumb):
+  AnyGeneralMuscle DIPflexion = {
+    AnyMuscleModel MuscleModel = {
+      F0 = ...DIPMusForceFlex;
+    };
+    AnyRevoluteJoint &jnt = ..Jnt.DIP;
+    ForceDirection = 1;
+  };
+  
+  AnyGeneralMuscle DIPextension = {
+    AnyMuscleModel MuscleModel = {
+      F0 = ...DIPMusForceExten;
+    };
+    AnyRevoluteJoint &jnt = ..Jnt.DIP;
+    ForceDirection = -1;
+  };
+
+  
+}; // End Jnt Mus definition
+
+
