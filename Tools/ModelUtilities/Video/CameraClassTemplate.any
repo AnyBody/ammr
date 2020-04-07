@@ -1,12 +1,12 @@
 /* 
 HOW TO USE:
 
-Add `#include "../path/to/CameraClassTemplate.any"`in the beginning
+Add `#include "<ANYBODY_PATH_MODELUTILS>/Video/CameraClassTemplate.any"`in the beginning
 of your main file. Then create the camera class anywhere inside Main:
 
 EXAMPLE:
 ```
-#include "../path/to/CameraClassTemplate.any"
+#include "<ANYBODY_PATH_MODELUTILS>/Video/CameraClassTemplate.any"
 
 Main = {
 
@@ -48,7 +48,8 @@ Main = {
   _DEBUG = 0,
   _CLEAN_UP_IMAGES = 1,
   _AUTO_OPEN_PREVIEW_ = 1,
-  FFMPEG_ON_PATH = 1
+  FFMPEG_ON_PATH = 1,
+  ENABLE_SAVE_SETTINGS=0
   ) 
 {
     
@@ -83,7 +84,7 @@ Main = {
   #if FFMPEG_ON_PATH == 0
   /// The path to the ffmpeg binary. 
   #var AnyFileVar RelativeFFMPEGPath = "ffmpeg.exe";
-  #var AnyStringVar VideoPathFFMPEG = FilePathCompleteOf(RelativeFFMPEGPath);
+  #var AnyStringVar VideoPathFFMPEG = FilePathRelativeOf(RelativeFFMPEGPath);
   #else
   #var AnyStringVar VideoPathFFMPEG = "ffmpeg.exe";
   #endif
@@ -144,6 +145,7 @@ Main = {
   /// Operation to show a preview of what the camera sees. 
   AnyOperationSequence Preview =  
   {
+    OPERATION_DISPLAY_PRIORITY(PriorityHigh);
     #var AnyStringVar FileName = .VideoName + "_Preview.png";
 
     AnyFileVar preview_file = .VideoOutputPath +"/" + FileName;  
@@ -170,6 +172,9 @@ Main = {
   
   AnyOperationSequence Create_Video =  
   {
+    OPERATION_DISPLAY_PRIORITY(PriorityHigh);
+    AnyOperationSequence &PreAnalysis = .PreAnalysis;
+    
     AnyOperation& Reset = .Operations.Reset;
     
     AnyOperation &StartTrigger = .Operations.StartTrigger;
@@ -257,7 +262,7 @@ Main = {
       
     };
     
-    
+#if ENABLE_SAVE_SETTINGS
     AnyOperationSequence Save_Settings= {
       AnyOperationSetValue TouchSettings = 
       {
@@ -282,7 +287,7 @@ Main = {
     {
       MacroStr = {"classoperation Main "+strquote("Load Values")+ " --file=" + strquote(..VideoName+"_Camera_Settings.anyset") };
     };  
-    
+#endif
     
     
   };
@@ -456,7 +461,13 @@ Main = {
 
   };
   
+  /// Operations which will be executed before recording starts
+  AnyOperationSequence PreAnalysis = 
+  {
+    AnyOperationDummy no_op = {};
+  }; 
   
+  /// Operations which will be recorded
   AnyOperationSequence Analysis = 
   {
     AnyOperationDummy no_op = {};

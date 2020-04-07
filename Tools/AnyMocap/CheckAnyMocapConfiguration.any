@@ -47,6 +47,11 @@ Main.Studies.ParameterIdentification = {AnyDesVar dummy = {Val = 0;};};
 #endif
 
 
+#ifndef MOCAP_FILTER_JOINT_ANGLES
+  #define MOCAP_FILTER_JOINT_ANGLES OFF
+#endif
+
+
 #ifndef MOCAP_HUMAN_GROUND_RESIDUALS
  #if (MOCAP_USE_GRF_PREDICTION == ON)
    #define MOCAP_HUMAN_GROUND_RESIDUALS "PelvisWeak"
@@ -62,6 +67,79 @@ AnyMessage AnyMoCap_msg1=
   TriggerPreProcess  = 1; 
   Type = MSG_Error;
   Message = strformat("Do NOT manually define value for MOCAP_HUMAN_GROUND_RESIDUALS when using GRF prediction");
+};
+#endif
+
+
+#if MOCAP_INPUT_DATA_TYPE == "C3D"
+C3DFileData = {
+ AnyFolder  config_warnings = {
+   AnyInt filter_transients_warning = warn(
+     orfun(
+       andfun(
+          ltfun(
+             Main.ModelSetup.C3DFileData.Header.FirstFrameNo/Main.ModelSetup.C3DFileData.Header.VideoFrameRate + 0.04,
+             Main.Studies.MarkerTracking.tArray[0]
+          ),
+          gtfun(
+            Main.ModelSetup.C3DFileData.Header.LastFrameNo/Main.ModelSetup.C3DFileData.Header.VideoFrameRate - 0.04,
+            Main.Studies.MarkerTracking.tArray[0]
+          )
+       ),
+       orfun(
+           ltfun(
+              (Main.ModelSetup.C3DFileData.Header.LastFrameNo-Main.ModelSetup.C3DFileData.Header.FirstFrameNo)
+              /Main.ModelSetup.C3DFileData.Header.VideoFrameRate,
+              0.1
+           ),
+           eqfun(Main.ModelSetup.TrialSpecificData.nStep, 1)
+       )
+      ),
+      strformat("\n"+
+      "------------------------------------------------------------------------------------------------------\n"+
+      "    The tStart/tEnd are very close to the start/end times of the data in the C3D file. \n"+
+      "    This can cause inaccurate kinematics at the very start/end of the simulation due to \n"+
+      "    low-pass filter transients. Consider changing the start/end times of the simulation. \n"+
+      "-------------------------------------------------------------------------------------------------------\n"));
+  
+
+   AnyMessage short_c3d_file_warning1 = 
+   {
+     Type = MSG_Warning;
+     TriggerPreProcess = andfun(
+       ltfun(
+          Main.ModelSetup.C3DFileData.Header.LastFrameNo-Main.ModelSetup.C3DFileData.Header.FirstFrameNo+1,
+          8
+       ),
+       gtfun(
+         Main.ModelSetup.C3DFileData.Header.LastFrameNo-Main.ModelSetup.C3DFileData.Header.FirstFrameNo+1,
+         1
+       )
+     );
+    
+     Message = strformat("\n"+
+     "------------------------------------------------------------------------------------------------------\n"+
+     "    The number of frames in the C3D files is less than 8. This causes problems with both lowpass filters\n"+
+     "    and b-spline interpolation. \n"+
+     "    \n"+
+     "    Note: It is still possible to use C3D files with exactly one frame if low-pass filters are disabled.\n"+
+     "-------------------------------------------------------------------------------------------------------\n");
+  };
+  
+  AnyMessage short_c3d_file_warning2 = 
+  {
+    Type = MSG_Warning;
+    TriggerConst = andfun(
+       gteqfun(Main.ModelSetup.C3DFileData.MarkerFilterIndex,0),
+       eqfun(Main.ModelSetup.C3DFileData.Header.LastFrameNo-Main.ModelSetup.C3DFileData.Header.FirstFrameNo+1, 1)
+    );
+    Message = strformat("\n"+
+    "------------------------------------------------------------------------------------------------------\n"+
+    "    Marker filters must be disabled when using files with only a single frame.\n"+
+    "    I.e. set: ``C3DFileData.MarkerFilterIndex = -1;``\n"+
+    "-------------------------------------------------------------------------------------------------------\n");
+  };
+};
 };
 #endif
 
@@ -88,5 +166,55 @@ Main.ModelSetup.TrialSpecificData.TrialFileName = "C3D_ExampleFile";
 #define BM_CONFIG_VALUES ON
 #endif
 
+Macros = 
+{
+  
+  AnyFolder AnyMoCapWarnings = 
+  {
+    // Hack to delay some expression evaluations. 
+    AnyInt DelayHack = DesignVar(0);
 
+    AnySwitchVar filter_analog_zero_phase_warning = warn(
+       GET_INT_DEFAULT("Main.ModelSetup.C3DFileData.LowPassFilter.FilterForwardBackwardOnOff", 1)+ DelayHack,
+       strformat("\n"+
+       "------------------------------------------------------------------------------------------------------\n"+
+       "    C3DFileData.LowPassFilter.FilterForwardBackwardOnOff is set to Off. This is probably not wanted   \n"+
+       "    since it causes a group delay in the force data. Consider switching this setting to On \n"+
+       "-------------------------------------------------------------------------------------------------------\n")
+    );
+   
+    AnySwitchVar filter_marker_zero_phase_warning = warn(
+       GET_INT_DEFAULT("Main.ModelSetup.C3DFileData.Filter.FilterForwardBackwardOnOff", 1) + DelayHack,
+       strformat("\n"+
+       "------------------------------------------------------------------------------------------------------\n"+
+       "    C3DFileData.Filter.FilterForwardBackwardOnOff is set to Off. This is probably not wanted   \n"+
+       "    since it causes a group delay in the marker data. Consider switching this setting to On.\n"+
+       "-------------------------------------------------------------------------------------------------------\n")
+    );
+    
+    #ifndef MOCAP_DISABLE_GRAVITY_CHECK
+    
+    AnyVec3 GravityDirection = Main.Studies.InverseDynamicStudy.Gravity/vnorm(Main.Studies.InverseDynamicStudy.Gravity);
+    AnyObjectPtrArray ptrForcePlateDir = DesignVar(ObjSearchRecursive("Main.EnvironmentModel.ForcePlates","*.Corners.DownDirection"));
+    AnyInt nFP = NumElemOf(ptrForcePlateDir);
 
+    // Difference between forceplate down directions and gravity
+    // This is implemented a bit complicated to handle the case of no forceplates
+    AnyFloat GravityDiff = reshape(flatten(Obj2Num(ptrForcePlateDir)),{3, nFP})
+                        - reshape(repmat(nFP, GravityDirection),{3, nFP});
+    AnyFloat AbsDiff =  max( arrcat( abs(flatten(GravityDiff)),  {0.0}));
+    AnySwitchVar Gravity_direction = warn(ltfun(AbsDiff, 0.5),
+       strformat("\n"+
+       "------------------------------------------------------------------------------------------------------\n"+
+       "    Gravity appears inconsistant with one or more of the force plates. This might be an error.        \n"+
+       "                            \n"+
+       "     Please check that Main.ModelSetup.LabSpecificData.Gravity is specified correctly.                           \n"+
+       "     Set ``#define MOCAP_DISABLE_GRAVITY_CHECK`` to suppress this check.                     \n"+
+       "-------------------------------------------------------------------------------------------------------\n")
+    );
+    #endif
+
+  };
+    
+    
+};

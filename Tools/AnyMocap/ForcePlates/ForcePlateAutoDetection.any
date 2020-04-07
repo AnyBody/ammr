@@ -95,7 +95,7 @@
     DRAW_RAW_FORCES = 1
     )
 {
-  
+  AnyComponentDefinition obj = {};  
   AnyFolder ForcePlateInfo = 
   {
     #var AnyInt USED = reshape(C3D_OBJECT.Groups.FORCE_PLATFORM.USED.Data, repmat(0,0));
@@ -181,15 +181,21 @@
   #var AnyVec3 SurfaceCorner_c04 = Corners.Origin + Corners.c04.sRel * Corners.Axes' + SurfaceOffset;
   
   AnyFixedRefFrame Corners ={
+    /// Used by AnyMoCap to check that gravity is consistant with the plate
+    AnyVec3 DownDirection = RotMat(
+       0.25*(c01.cpoint+ c02.cpoint+ c03.cpoint+ c04.cpoint),
+       0.5*(c01.cpoint+c04.cpoint),
+       0.5*(c01.cpoint+c02.cpoint))'[2];
     AnyVar CoordinateSystemSize= 0.1;
     #var AnyInt plate_idx=PLATE_NO-1;
     AnyRefNode c01={
       #var AnyInt i=0;
-      #var sRel=C3D_OBJECT.PointsScaleFactor*{
+      AnyVec3 cpoint = C3D_OBJECT.PointsScaleFactor*{
           ..ForcePlateInfo.CORNERS[.plate_idx][i][0],
           ..ForcePlateInfo.CORNERS[.plate_idx][i][1],
           ..ForcePlateInfo.CORNERS[.plate_idx][i][2]
       };
+      #var sRel = cpoint;
       AnyDrawNode drw={ScaleXYZ=0.01*{1,1,1};RGB={1,0,0};};
       AnyDrawVector  DrawName = {
         Vec = {0.0,0,0};  //use zero length
@@ -202,11 +208,12 @@
     
     AnyRefNode c02={
       #var AnyInt i=1;
-      #var sRel=C3D_OBJECT.PointsScaleFactor*{
+      AnyVec3 cpoint = C3D_OBJECT.PointsScaleFactor*{
           ..ForcePlateInfo.CORNERS[.plate_idx][i][0],
           ..ForcePlateInfo.CORNERS[.plate_idx][i][1],
           ..ForcePlateInfo.CORNERS[.plate_idx][i][2]
       };
+      #var sRel=cpoint;
       AnyDrawNode drw={ScaleXYZ=0.01*{1,1,1};RGB={1,0,0};};
       AnyDrawVector  DrawName = {
         Vec = {0.0,0,0};  //use zero length
@@ -219,11 +226,12 @@
     
     AnyRefNode c03={
       #var AnyInt i=2;
-      #var sRel=C3D_OBJECT.PointsScaleFactor*{
+      AnyVec3 cpoint = C3D_OBJECT.PointsScaleFactor*{
           ..ForcePlateInfo.CORNERS[.plate_idx][i][0],
           ..ForcePlateInfo.CORNERS[.plate_idx][i][1],
           ..ForcePlateInfo.CORNERS[.plate_idx][i][2]
       };
+      #var sRel = cpoint;
       AnyDrawNode drw={ScaleXYZ=0.01*{1,1,1};RGB={1,0,0};};
       
       AnyDrawVector  DrawName = {
@@ -237,11 +245,12 @@
     
     AnyRefNode c04={
       #var AnyInt i=3;
-      #var sRel=C3D_OBJECT.PointsScaleFactor*{
+      AnyVec3 cpoint = C3D_OBJECT.PointsScaleFactor*{
           ..ForcePlateInfo.CORNERS[.plate_idx][i][0],
           ..ForcePlateInfo.CORNERS[.plate_idx][i][1],
           ..ForcePlateInfo.CORNERS[.plate_idx][i][2]
       };
+      #var sRel = cpoint;
       AnyDrawNode drw={ScaleXYZ=0.01*{1,1,1};RGB={1,0,0};};
       AnyDrawVector  DrawName = {
         Vec = {0.0,0,0};  //use zero length
@@ -421,6 +430,10 @@
   
   
   AnyFolder ContactDetectionLimb1 ={
+    AnyComponentDefinition obj = {
+      SubGroupRegexSearch = "([_[:alnum:]]+?)\.([_[:alnum:]]+?)";
+      SubGroupRegexReplace = "$1";
+    };  
     AnyVec3 P1= .Limb1.CONTACT_NODE1.r;
     AnyVar P1Vel= vnorm(.Limb1.CONTACT_NODE1.rDot-.GroundVelocity,2);
     
@@ -464,6 +477,10 @@
   };
  
   AnyFolder ContactDetectionLimb2 = {
+    AnyComponentDefinition obj = {
+      SubGroupRegexSearch = "([_[:alnum:]]+?)\.([_[:alnum:]]+?)";
+      SubGroupRegexReplace = "$1";
+    };  
     AnyVec3 P1= .Limb2.CONTACT_NODE1.r;
     AnyVar P1Vel= vnorm(.Limb2.CONTACT_NODE1.rDot-.GroundVelocity,2);
     
@@ -661,6 +678,11 @@
       CType = {Hard, Hard};
     };  
   } ;
-  #endif
+  #endif  
+  
+  
+  
+  
+  
   
 };

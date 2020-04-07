@@ -1,3 +1,5 @@
+.. _tlem1:
+
 Twente Lower Extremity Model v.1.2
 ==================================
 

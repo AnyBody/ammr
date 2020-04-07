@@ -79,9 +79,8 @@
 
   
   
-  AnyFolder &Macro=  Main.ModelSetup.Macros ;
-  Macro={
-    AnyStringVar Set##MarkerName = ("classoperation "+  CompleteNameOf(.sRelOptEdit) + " " + strquote("Set Value") +  strformat ("\n")+ "classoperation Main " + strquote("Update Values") + strformat ("\n"));
+  Main.ModelSetup.Macros={
+    AnyStringVar Set##MarkerName = ("classoperation "+  CompleteNameOf(...sRelOptEdit) + " " + strquote("Set Value") +  strformat ("\n")+ "classoperation Main " + strquote("Update Values") + strformat ("\n"));
   };
 
   
@@ -169,8 +168,12 @@
       
       AnyKinDriverMarker Driver = {
         AnyDrawKinMeasure Draw = {
+          #if UseC3DWeightResiduals
+          #var Visible = iffun(bool(sum(.WeightPos)), On, Off);
+          #else
           #var Visible = On;
-          #var Opacity = 1;
+          #endif
+          #var Opacity = iffun(bool(sum(.WeightPos)), 1.0, 0.2);
           #var Label = Off;
           #var Size = DRAW_SCALE*0.01;
           #if USE_BVH_INPUT
@@ -179,6 +182,16 @@
           #var Line = On;
           #endif
         };
+        #if UseC3DWeightResiduals
+        AnyDrawKinMeasure DrawDroppedOutMarker = {
+          #var Visible = iffun(bool(sum(.WeightPos)), Off, On);
+          #var Label = Off;
+          #var Size = DRAW_SCALE*0.01;
+          #var Opacity = 0.5;
+          RGB1 = {0.4, 0.4, 0.4};
+          RGB3 = {0.4, 0.4, 0.4};
+        };
+        #endif
         Linear.Ref=0;
         AnyRefFrame &MarkerRef = BODY_MODEL_FOLDER.MarkerPlacement.MarkerName;
         //AnyFolder &MarkerName = C3D_OBJECT.Points.Markers.MarkerName;
@@ -201,7 +214,11 @@
             BsplineOrder =4;
             #if USE_BVH_INPUT
             T = C3D_OBJECT.Points.Markers.MarkerName.FromBVH.val_T;
-            Data = .LowPassFilter(C3D_OBJECT.Points.Markers.MarkerName.FromBVH.Data);
+            Data = {
+               .LowPassFilter(C3D_OBJECT.Points.Markers.MarkerName.FromBVH.val_X),
+               .LowPassFilter(C3D_OBJECT.Points.Markers.MarkerName.FromBVH.val_Y),
+               .LowPassFilter(C3D_OBJECT.Points.Markers.MarkerName.FromBVH.val_Z)
+            };
             #else
             T = C3D_OBJECT.Points.Markers.MarkerName.PosInterpol.T;
             Data = .LowPassFilter(C3D_OBJECT.Points.Markers.MarkerName.Pos');
@@ -234,37 +251,44 @@
 
 #if USE_BVH_INPUT
 //-->Test
-  AnyFolder Test_Visual = 
-  {
-    AnyFunInterpol UnfilteredPosInterpol = 
-    {
-      Type = PiecewiseLinear ;
-      T = C3D_OBJECT.Points.Markers.MarkerName.FromBVH.val_T ;
-      Data = C3D_OBJECT.Points.Markers.MarkerName.FromBVH.Data ;
-    };
-    AnyDrawSphere UnfilteredTest ={
-      RGB={0.8,0.2,0.8};
-      Opacity = 0.5;
-      ScaleXYZ={1,1,1}*0.01;
-      Position = .UnfilteredPosInterpol(..Driver.t);
-    };        
-  };
+//  AnyFolder Test_Visual = 
+//  {
+//    AnyFunInterpol UnfilteredPosInterpol = 
+//    {
+//      Type = PiecewiseLinear ;
+//      T = C3D_OBJECT.Points.Markers.MarkerName.FromBVH.val_T ;
+//      Data = {
+//        C3D_OBJECT.Points.Markers.MarkerName.FromBVH.val_X,
+//        C3D_OBJECT.Points.Markers.MarkerName.FromBVH.val_Y,
+//        C3D_OBJECT.Points.Markers.MarkerName.FromBVH.val_Z
+//      };
+//    };
+//    AnyDrawSphere UnfilteredTest ={
+//      RGB={0.8,0.2,0.8};
+//      Opacity = 0.5;
+//      ScaleXYZ={1,1,1}*0.01;
+//      Position = .UnfilteredPosInterpol(..Driver.t);
+//    };        
+//  };
   //<--Test
     
   C3D_OBJECT.Points.Markers = 
   {
     AnyFolder MarkerName = 
     {
-      AnyFunction& FilterRef = C3D_OBJECT.Filter;
-      AnyFloat Pos = FromBVH.Data';
-      AnyFloat PosFiltered = FilterRef(FromBVH.Data)';
+
       AnyFunInterpol PosInterpol = 
       {
         #var Type = Bspline;
         BsplineOrder =4;
         
         T = .FromBVH.val_T;
-        Data = (.PosFiltered)';
+        Data = {
+          C3D_OBJECT.Filter(.FromBVH.val_X),
+          C3D_OBJECT.Filter(.FromBVH.val_Y),
+          C3D_OBJECT.Filter(.FromBVH.val_Z) 
+        };
+
       };         
       AnyFolder FromBVH = 
       {
@@ -272,7 +296,6 @@
         AnyVector val_Y =DesignVar(zeros(Main.Studies.BVH_CreateMarkerTrajectoriesStudy.nStep,1)');
         AnyVector val_Z =DesignVar(zeros(Main.Studies.BVH_CreateMarkerTrajectoriesStudy.nStep,1)');
         AnyVector val_T=DesignVar(iarr(0, Main.Studies.BVH_CreateMarkerTrajectoriesStudy.nStep-1));
-        AnyFloat  Data= DesignVar({val_X,val_Y,val_Z});        
       };
     };
   };  

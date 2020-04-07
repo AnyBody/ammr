@@ -6,8 +6,8 @@ AnyFolder &JntVel=..Mannequin.PostureVel;
  /** Support both ankles in pronation/supination. This alleviates problems
  due to insufficient muscles in the ankle region */
  AnyReacForce SubTalarEversion={
-   AnyKinMeasureOrg &Right = Main.HumanModel.BodyModel.Interface.Right.SubTalarEversion;
-   AnyKinMeasureOrg &Left = Main.HumanModel.BodyModel.Interface.Left.SubTalarEversion;
+   AnyKinMeasure& Right = Main.HumanModel.BodyModel.Interface.Right.SubTalarEversion;
+   AnyKinMeasure& Left = Main.HumanModel.BodyModel.Interface.Left.SubTalarEversion;
  };
 
 /// Support of the upper body to compensate for lack of arms resting on the handlebar
@@ -34,7 +34,7 @@ Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg =
 a contact condition instead. */
 AnyKinEq SaddleLinear = {
   AnyKinLinear SaddleJointLin = {
-    AnyRefNode &Sacrum= ....HumanModel.Trunk.SegmentsLumbar.PelvisSeg.HipJoints_Midpoint;
+    AnyRefNode &Sacrum= ....BodyModel.Trunk.SegmentsLumbar.PelvisSeg.HipJoints_Midpoint;
     AnyRefNode & Saddle = ....BikeModel.BikeFrame.SaddlePos;
   };
   Reaction.Type={Off,Off,Off};
@@ -43,7 +43,7 @@ AnyKinEq SaddleLinear = {
 /// Constrain the pelvis segment from rotation on the saddle.
 AnyKinEqSimpleDriver SaddleRotation = {
   AnyKinRotational SaddleJointRot = {
-    AnyRefNode & Sacrum= ....HumanModel.Trunk.SegmentsLumbar.PelvisSeg.HipJoints_Midpoint;
+    AnyRefNode & Sacrum= ....BodyModel.Trunk.SegmentsLumbar.PelvisSeg.HipJoints_Midpoint;
     AnyRefNode & Saddle = ....BikeModel.BikeFrame.SaddlePos;
     Type=RotAxesAngles;
   };
@@ -61,9 +61,9 @@ AnyKinEqSimpleDriver SaddleRotation = {
 //  
 //Neck driver 
 AnyKinEqSimpleDriver NeckJntDriver = {
-  AnyKinMeasure &lb = ...HumanModel.Interface.Trunk.SkullThoraxLateralBending;
-  AnyKinMeasure &ar = ...HumanModel.Interface.Trunk.SkullThoraxRotation;
-  AnyKinMeasure &fe = ...HumanModel.Interface.Trunk.SkullThoraxFlexion;
+  AnyKinMeasure& lb = ...BodyModel.Interface.Trunk.SkullThoraxLateralBending;
+  AnyKinMeasure& ar = ...BodyModel.Interface.Trunk.SkullThoraxRotation;
+  AnyKinMeasure& fe = ...BodyModel.Interface.Trunk.SkullThoraxFlexion;
   DriverPos = pi/180*{.JntPos.NeckLateralBending, .JntPos.NeckRotation, .JntPos.NeckExtension};
   DriverVel = pi/180*{.JntPos.NeckLateralBending, .JntVel.NeckRotation, .JntVel.NeckExtension};
   Reaction.Type = {Off, Off, Off};
@@ -71,9 +71,9 @@ AnyKinEqSimpleDriver NeckJntDriver = {
 
 //Thorax pelvis rotation driver
 AnyKinEqSimpleDriver PostureDriver ={
-  AnyKinMeasureOrg &Ref2 = ...HumanModel.Interface.Trunk.PelvisThoraxLateralBending;        
-  AnyKinMeasureOrg &Ref3 = ...HumanModel.Interface.Trunk.PelvisThoraxRotation;   
-  AnyKinMeasureOrg &Ref1 = ...HumanModel.Interface.Trunk.PelvisThoraxExtension;
+  AnyKinMeasure& Ref2 = ...BodyModel.Interface.Trunk.PelvisThoraxLateralBending;        
+  AnyKinMeasure& Ref3 = ...BodyModel.Interface.Trunk.PelvisThoraxRotation;   
+  AnyKinMeasure& Ref1 = ...BodyModel.Interface.Trunk.PelvisThoraxExtension;
   
   DriverPos = pi/180*{
     .JntPos.PelvisThoraxLateralBending,
@@ -94,7 +94,7 @@ AnyFolder Right={
   
   AnySphericalJoint PedalFootJoint = {
     AnyRefNode &ref1= ....BikeModel.Crank.RPedal;
-    AnyRefNode &ref2 = ...ModelFolder.Right.Leg.Seg.Foot.ToeJoint;
+    AnyRefNode &ref2 = ...ModelFolder.Right.Leg.Seg.Foot.PedalConnectNode;
     #include "<ANYBODY_PATH_MODELUTILS>/JointReactions/DrawJointReactions.any"
     AnyFolder &DrawRef=Main.DrawSettings;
   };
@@ -102,11 +102,8 @@ AnyFolder Right={
   Ref_Foot = 
   {
     AnyRefNode PedalConnectNode = 
-    {
-      AnyVec3 ToeNode_Avg = (.BigToeNode.sRel+
-     .ToeLateralContactNode.sRel+
-     .ToeMedialContactNode.sRel)/3;      
-      sRel = ToeNode_Avg;
+    {     
+      sRel = .Metatarsal2Contact.sRel;
       ARel = .AnatomicalFrame.ARel;
       AnyDrawRefFrame drw = 
       {
@@ -166,14 +163,14 @@ of the knee when the pedal width is increased. */
   
   // Spherical joint between the datum and the hip joint
   AnySphericalJoint DatumJoint1 = {
-    AnyRefFrame &Thigh = Main.Model.HumanModel.Right.Leg.Seg.Thigh.DatumPoint;
+    AnyRefFrame &Thigh = Main.Model.BodyModel.Right.Leg.Seg.Thigh.DatumPoint;
     AnyRefFrame &Datum = .Datum;
   };
   
   // The datum must touch the ankle
   AnyKinEq AnkleContact = {
     AnyKinLinear lin = {
-      AnyRefFrame &Ankle = Main.Model.HumanModel.Right.Leg.Seg.Shank.AnkleJoint;
+      AnyRefFrame &Ankle = Main.Model.BodyModel.Right.Leg.Seg.Shank.AnkleJoint;
       AnyRefFrame &Datum = ..Datum.Ankle;
       Ref = 1;
     };
@@ -204,7 +201,7 @@ of the knee when the pedal width is increased. */
   }; 
   
   AnyKinEqFourierDriver PedalRRotationFourier  ={
-    AnyKinMeasureOrg &Jnt = .FootRMovement;
+    AnyKinMeasure& Jnt = .FootRMovement;
     Type = CosSin;
     AnyVar a0 = -0.3797-0.5*pi;
     AnyVar a1 = -0.0205;
@@ -235,7 +232,7 @@ AnyFolder Left = {
   
   AnySphericalJoint PedalFootJoint = {
     AnyRefNode &ref1= ....BikeModel.Crank.LPedal;
-    AnyRefNode &ref2 = ...ModelFolder.Left.Leg.Seg.Foot.ToeJoint;
+    AnyRefNode &ref2 = ...ModelFolder.Left.Leg.Seg.Foot.PedalConnectNode;
     //    AnyDrawRefFrame Drw={}; //this lines adds a visible coordinate system in the ref2 node, and since the ref2 node points at the groundjoint at the foot it will display it there .. you could also have inserted it directly where the GroundJointNode was created 
     #include "<ANYBODY_PATH_MODELUTILS>/JointReactions/DrawJointReactions.any"
     AnyFolder &DrawRef=Main.DrawSettings;
@@ -245,10 +242,7 @@ AnyFolder Left = {
   {
     AnyRefNode PedalConnectNode = 
     {
-      AnyVec3 ToeNode_Avg = (.BigToeNode.sRel+
-     .ToeLateralContactNode.sRel+
-     .ToeMedialContactNode.sRel)/3;      
-      sRel = ToeNode_Avg;
+      sRel = .Metatarsal2Contact.sRel;
       ARel = .AnatomicalFrame.ARel;
       AnyDrawRefFrame drw = 
       {
@@ -316,14 +310,14 @@ of the knee when the pedal width is increased. */
   
   // Spherical joint between the datum and the hip joint
   AnySphericalJoint DatumJoint1 = {
-    AnyRefFrame &Thigh = Main.Model.HumanModel.Left.Leg.Seg.Thigh.DatumPoint;
+    AnyRefFrame &Thigh = Main.Model.BodyModel.Left.Leg.Seg.Thigh.DatumPoint;
     AnyRefFrame &Datum = .Datum;
   };
   
   // The datum must touch the ankle
   AnyKinEq AnkleContact = {
     AnyKinLinear lin = {
-      AnyRefFrame &Ankle = Main.Model.HumanModel.Left.Leg.Seg.Shank.AnkleJoint;
+      AnyRefFrame &Ankle = Main.Model.BodyModel.Left.Leg.Seg.Shank.AnkleJoint;
       AnyRefFrame &Datum = ..Datum.Ankle;
       Ref = 1;
     };
@@ -354,7 +348,7 @@ of the knee when the pedal width is increased. */
   }; 
   
   AnyKinEqFourierDriver PedalLRotationFourier ={  
-    AnyKinMeasureOrg &Jnt = .FootLMovement;
+    AnyKinMeasure& Jnt = .FootLMovement;
     Type = CosSin;
     AnyVar a0 = -0.3797-0.5*pi;
     AnyVar a1 = 0.0205;
@@ -412,34 +406,31 @@ MeasureOrganizer={0,1};
   
   //Sterno clavicular joint driver
   AnyKinEqSimpleDriver SCDriverRight ={
-    AnyKinMeasureOrg &ref1 =....HumanModel.Interface.Right.SternoClavicularProtraction;
-    AnyKinMeasureOrg &ref2 =....HumanModel.Interface.Right.SternoClavicularElevation;
-    AnyKinMeasureOrg &ref3 =....HumanModel.Interface.Right.SternoClavicularAxialRotation;
+    AnyKinMeasure& ref1 =....BodyModel.Interface.Right.SternoClavicularProtraction;
+    AnyKinMeasure& ref2 =....BodyModel.Interface.Right.SternoClavicularElevation;
     DriverPos = pi/180*{
       ..JntPos.Right.SternoClavicularProtraction,
-      ..JntPos.Right.SternoClavicularElevation,
-      ..JntPos.Right.SternoClavicularAxialRotation
+      ..JntPos.Right.SternoClavicularElevation
     };
     DriverVel = {
       ..JntVel.Right.SternoClavicularProtraction,
-      ..JntVel.Right.SternoClavicularElevation,
-      ..JntVel.Right.SternoClavicularAxialRotation
-};
-    Reaction.Type={Off,Off,Off};
-  };//Wrist driver 
+      ..JntVel.Right.SternoClavicularElevation
+    };
+    Reaction.Type={Off,Off};
+  }; 
+  
   AnyKinEqSimpleDriver WristDriverRight ={
-    AnyKinMeasureOrg &ref1 =....HumanModel.Interface.Right.WristFlexion;
-    AnyKinMeasureOrg &ref2 =....HumanModel.Interface.Right.WristAbduction;
+    AnyKinMeasure& ref1 =....BodyModel.Interface.Right.WristFlexion;
+    AnyKinMeasure& ref2 =....BodyModel.Interface.Right.WristAbduction;
     DriverPos = pi/180*{
          ..JntPos.Right.WristFlexion,
          ..JntPos.Right.WristAbduction
-       };
-
+    };
     DriverVel = pi/180*{
          ..JntVel.Right.WristFlexion,
          ..JntVel.Right.WristAbduction};
     Reaction.Type={Off,Off};
-  };
+  };//Wrist driver
 
 };//Right
 
@@ -485,30 +476,26 @@ MeasureOrganizer={0,1};
   
   //Sterno clavicular joint driver
   AnyKinEqSimpleDriver SCDriverLeft ={
-    AnyKinMeasureOrg &ref1 =....HumanModel.Interface.Left.SternoClavicularProtraction;
-    AnyKinMeasureOrg &ref2 =....HumanModel.Interface.Left.SternoClavicularElevation;
-    AnyKinMeasureOrg &ref3 =....HumanModel.Interface.Left.SternoClavicularAxialRotation;
+    AnyKinMeasure& ref1 =....BodyModel.Interface.Left.SternoClavicularProtraction;
+    AnyKinMeasure& ref2 =....BodyModel.Interface.Left.SternoClavicularElevation;
     
     DriverPos = pi/180*{
       ..JntPos.Left.SternoClavicularProtraction,
-      ..JntPos.Left.SternoClavicularElevation,
-      ..JntPos.Left.SternoClavicularAxialRotation
+      ..JntPos.Left.SternoClavicularElevation
     };
     
     DriverVel = pi/180*{
       ..JntVel.Left.SternoClavicularProtraction,
-      ..JntVel.Left.SternoClavicularElevation,
-      ..JntVel.Left.SternoClavicularAxialRotation
+      ..JntVel.Left.SternoClavicularElevation
     };
-
-    Reaction.Type={Off,Off,Off};
+    Reaction.Type={Off,Off};
   };
  
   
   //Wrist driver
   AnyKinEqSimpleDriver WristDriverLeft ={
-    AnyKinMeasureOrg &ref1 =....HumanModel.Interface.Left.WristFlexion;
-    AnyKinMeasureOrg &ref2 =....HumanModel.Interface.Left.WristAbduction;
+    AnyKinMeasure& ref1 =....BodyModel.Interface.Left.WristFlexion;
+    AnyKinMeasure& ref2 =....BodyModel.Interface.Left.WristAbduction;
     DriverPos = pi/180*{
          ..JntPos.Left.WristFlexion,
          ..JntPos.Left.WristAbduction};

@@ -1,46 +1,47 @@
-#include "../libdef.any"
+#include "libdef.any"
 
-Main = {  
-  // ----------------------------------------------------------
-  // Model configuration:
-  // For more info on body model configuration options please load the model and double click on: 
-  // #path HTML_DOC "<AMMR_PATH_DOC>/bm_config/index.html"
-  // ----------------------------------------------------------
-  
-  //If you want to use your own draw settings, please outcomment the next line
-  //#path BM_DRAWSETTINGS_FILE "Model\DrawSettings.any"
-  
+Main = 
+{  
+
+  // Body Model configuration:
+  #include "Model/BodyModelConfiguration.any"
+
   // Using your own Mannequin.any file in the Model folder of your model
-  #path BM_MANNEQUIN_FILE "Model\Mannequin.any"
-  
+  #include "Model\Mannequin.any"
+
   // Include default human model
   #include "<ANYBODY_PATH_BODY>\HumanModel.any"
-  
-  AnyFolder Model = {  
+
+  AnyFolder Model = 
+  {
     // A link to the human model
-    AnyFolder &HumanModel=.HumanModel.BodyModelWithDefaultDrivers;
-    
+    AnyFolder &BodyModel = .HumanModel.BodyModel;
+    AnyFolder &DefaultMannequinDrivers = .HumanModel.DefaultMannequinDrivers;
+ 
     // Environment files are used to include objects surrounding human
     #include "Model\Environment.any"   
-    
-    AnyFolder ModelEnvironmentConnection = {
+ 
+    AnyFolder ModelEnvironmentConnection = 
+    {
       //'JointsAndDrivers.any' file can include all kinematic constraints such as joints and drivers
       #include "Model\JointsAndDrivers.any"
       // Additional reactions which are required to run the inverse dynamics analysis
       #include "Model\Reactions.any"
     };
   };
-  
-  AnyBodyStudy Study = {
+ 
+  AnyBodyStudy Study = 
+  {
     AnyFolder &Model = .Model;  
+    
     Gravity={0.0, -9.81, 0.0};
     nStep = 11;
-    
-    // these settings are needed for adding drivers without removing the default set 
+    // Overdeterminate solver is needed while using the 
+    // soft default mannequin drivers.
     Kinematics.SolverType = KinSolOverDeterminate;
     InitialConditions.SolverType = Kinematics.SolverType ;
   };
-  
+
     #include "Model\RunAppSequence.any"
 }; //Main
 

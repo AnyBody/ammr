@@ -1,32 +1,34 @@
 
 variables:
   GIT_STRATEGY: fetch
+  NUM_PROC: 4  
+
+
+.job_template: &AMMR_test_definition  # Hidden key that defines an anchor named 'job_definition'
+  stage: test
+  only: 
+    changes:
+      - Application/**/*
+      - Body/**/*
+      - Tests/**/*
+      - Tools/**/*
+  except:
+    refs:
+      - tags@anybody/beta/ammr
+      - master@anybody/github-mirror/ammr
+  tags:
+    - ams
 
 
 other_tests:
-  stage: test
+  <<: *AMMR_test_definition
   script:
-    - mkdir Documentation
-    - pytest "--ignore=Tests/Applications" -n 4 --dist=loadfile
-  only: 
-      - branches@anybody/beta/ammr
-  except:
-    -  /^docs.*$/
-  tags:
-    - ams
+    - pytest "--ignore=Tests/Applications" -n %NUM_PROC%
 
 Application_tests:
-  stage: test
+  <<: *AMMR_test_definition
   script:
-    - mkdir Documentation
-    - pytest Tests/Applications -n 4 --timeout=1700 --dist=loadfile
-  only: 
-      - branches@anybody/beta/ammr
-  except:
-    -  /^docs.*$/
-  tags:
-    - ams
-
+    - pytest Tests/Applications -n %NUM_PROC%
 
 
 test_docs:
@@ -44,8 +46,8 @@ test_docs:
     - cd Docs
     - make html-dev
     - cd ..
-    - mkdir -p public/dev
-    - cp -rT Docs/_build/html public/dev
+    - mkdir -p public/beta
+    - cp -rT Docs/_build/html public/beta
     - git checkout $(git describe --tags `git rev-list --tags --max-count=1`);
     - cd Docs
     - make clean
@@ -53,9 +55,10 @@ test_docs:
     - cd ..
     - cp -rT Docs/_build/html public
   only:
-    - /^docs.*$/
-    - master
-    - tags
+    changes:
+      - .gitlab-ci.yml
+      - CHANGELOG.txt
+      - Docs/**/*
   cache:
     paths:
       - /conda-cache
@@ -70,12 +73,13 @@ deploy_docs:
   stage: deploy
   environment:
     name: staging
-    url: https://anyscript.org/ammr-doc/dev
+    url: https://anyscript.org/ammr-doc/
   before_script:
     - gem install dpl
   only:
-    - master@anybody/beta/ammr
-    - tags@anybody/beta/ammr
+    refs:
+      - master@anybody/beta/ammr
+      - tags@anybody/beta/ammr
   script:
     - touch public/.nojekyll
     - ls public
@@ -86,20 +90,4 @@ deploy_docs:
   tags:
     - docker
     - ruby
-
-
-
-
-# deploy_docs:
-#   stage: deploy
-#   script:
-#     - cd Docs/_build/html
-#     - ls
-#   only: 
-#     - tags
-#   except:
-#     - branches
-#   tags:
-#     - docker
-#     - linux
 

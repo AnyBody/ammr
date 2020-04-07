@@ -1,5 +1,5 @@
 // Main.Studies:
-
+#ifndef MOCAP_FUTURE_BVH_READER_73
 
 AnyKinStudy BVH_CreateMarkerTrajectoriesStudy = 
 {  
@@ -22,12 +22,14 @@ AnyKinStudy BVH_CreateMarkerTrajectoriesStudy =
 
       AnyFloat _FrameOffset = 100*Main.ModelSetup.BVHFileData.Header.FrameTime;
       AnyFloat _tStart = max({0, ..ModelSetup.TrialSpecificData.tStart-_FrameOffset});
-      AnyFloat _tEnd = min({..ModelSetup.TrialSpecificData.tEnd+_FrameOffset, LastFrame * Main.ModelSetup.BVHFileData.Header.FrameTime});
+      AnyFloat _tEnd = min({..ModelSetup.TrialSpecificData.tEnd+_FrameOffset, (LastFrame+1) * Main.ModelSetup.BVHFileData.Header.FrameTime});
       AnyInt _nStep = round( (_tEnd - _tStart) / Main.ModelSetup.BVHFileData.Header.FrameTime);
       nStep   = _nStep;
       tStart = _tStart;
       tEnd   = _tEnd;      
       
+  Kinematics.OPERATION_DISPLAY_PRIORITY(PriorityLow);
+  
 };//BVH_CreateMarkerTrajectoriesStudy    
     
 
@@ -72,6 +74,7 @@ Main.ModelSetup.Macros = {
     //Dummy study used for transfer of values
     AnyKinStudy OutputFunStudy = 
     {
+      Kinematics = {};
       nStep = 1;
       Gravity = {0.0, -9.81, 0.0};  
     };  
@@ -79,6 +82,7 @@ Main.ModelSetup.Macros = {
     //Setvalue operations
     AnyOperationSequence BVH_SetValueOperation = 
     {
+      OPERATION_DISPLAY_PRIORITY(PriorityLow);
       AnyOperation& update_outputfuns = .OutputFunStudy.InitialConditions;
       AnyOperationSetValue copy = {
         Source = ObjSearch("..OutputFunStudy.*Val_*");
@@ -88,11 +92,13 @@ Main.ModelSetup.Macros = {
     
     AnyOperationMacro BVH_UpdateValuesOperation =   
     {  
+      OPERATION_DISPLAY_PRIORITY(PriorityLow);
       MacroStr = ({ "classoperation Main" + strquote("Update Values") });  
     };//BVH_UpdateValuesOperation   
     
     AnyOperationMacro Save_BVH_Trajectories = 
     {
+      OPERATION_DISPLAY_PRIORITY(PriorityLow);
       AnyFileVar SavePath = TEMP_PATH;
       MacroStr  = {
         "classoperation Main" + strquote("Save Values") +"--file=" + 
@@ -100,6 +106,7 @@ Main.ModelSetup.Macros = {
       };
     };
     AnyOperationMacro Load_BVH_Trajectories = {
+      OPERATION_DISPLAY_PRIORITY(PriorityLow);
       AnyFileVar SavePath = TEMP_PATH;
       MacroStr  = {"classoperation Main" + strquote("Load Values") +"--file=" + 
         strquote(FilePathCompleteOf(SavePath) +"/"+  MOCAP_TEST_FILENAME_PREFIX +MOCAP_OUTPUT_FILENAME_PREFIX + Main.ModelSetup.TrialSpecificData.TrialFileName +"_BVH_Trajectories.anyset"),
@@ -124,9 +131,10 @@ Main.ModelSetup.Views =
     AnyDrawGroup All_BVH ={Objects = ObjSearchRecursive("Main.ModelSetup.BVHFileData","*", "AnyDrawObject"); };      
   };
   
-  SetViewMacros = 
+  SetViewMacros =
   {
     AnyOperationMacro BVHView = {
+      OPERATION_DISPLAY_PRIORITY(PriorityLow);
       MacroStr = {"classoperation "+ CompleteNameOf(&Main.ModelSetup.Views.BVHView) + strquote("Set View") };
     };       
   };
@@ -141,3 +149,28 @@ Main.ModelSetup.Views =
   };      
 };
 
+
+#else
+
+AnyKinStudy BVH_StickFigure = 
+{  
+  Kinematics.PosAnalysisOnlyOnOff = Off;
+  
+  AnyFolder &BVHData= Main.ModelSetup.BVHFileData.Model ;
+    
+  Gravity = Main.ModelSetup.LabSpecificData.Gravity; 
+  
+  AnyVar FirstFrame = Main.ModelSetup.BVHFileData.Header.FirstFrameNo;
+  AnyVar LastFrame  = Main.ModelSetup.BVHFileData.Header.LastFrameNo;
+  AnyVar FrameTime = Main.ModelSetup.BVHFileData.Header.FrameTime;
+
+      tStart = FirstFrame*FrameTime;
+      tEnd = LastFrame*FrameTime;
+      nStep = round(LastFrame-FirstFrame+1);
+      
+  Kinematics.OPERATION_DISPLAY_PRIORITY(PriorityLow);
+  
+};
+   
+
+#endif

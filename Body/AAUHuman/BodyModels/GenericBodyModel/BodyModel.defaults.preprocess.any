@@ -30,9 +30,9 @@
 #define BM_ARM_SHOULDER_RHYTHM BM_ARM_SHOULDER_RHYTHM_RIGHT
    AnyInt deprecated_left_right_rythm= warn(0, strformat("\n"+
       "------------------------------------------------------------------------------------------------------\n"+
-      "    `BM_ARM_SHOULDER_RYTHM_LEFT` is deprecated."+
-      "    The single statement `BM_ARM_SHOULDER_RYTHM` sets the shoulder rythm for both sides."+
-      "-------------------------------------------------------------------------------------------------------"));
+      "    `BM_ARM_SHOULDER_RYTHM_LEFT` is deprecated.\n"+
+      "    The single statement `BM_ARM_SHOULDER_RYTHM` sets the shoulder rythm for both sides.\n"+
+      "-------------------------------------------------------------------------------------------------------\n"));
 #endif
 #endif
 
@@ -42,8 +42,8 @@
 #define BM_ARM_SHOULDER_RHYTHM BM_ARM_SHOULDER_RHYTHM_LEFT
    AnyInt deprecated_left_right_rythm= warn(0, strformat("\n"+
       "------------------------------------------------------------------------------------------------------\n"+
-      "    `BM_ARM_SHOULDER_RYTHM_RIGHT` is deprecated."+
-      "    The single statement `BM_ARM_SHOULDER_RYTHM` sets the shoulder rythm for both sides."+
+      "    `BM_ARM_SHOULDER_RYTHM_RIGHT` is deprecated.\n"+
+      "    The single statement `BM_ARM_SHOULDER_RYTHM` sets the shoulder rythm for both sides.\n"+
       "-------------------------------------------------------------------------------------------------------"));
 #endif
 #endif
@@ -55,8 +55,8 @@
 #define BM_ARM_DETAILED_HAND BM_ARM_DETAIL_HAND_RIGHT
    AnyInt deprecated_left_right_detail_hand= warn(0, strformat("\n"+
       "------------------------------------------------------------------------------------------------------\n"+
-      "    `BM_ARM_DETAIL_HAND_RIGHT` is deprecated."+
-      "    The single statement `BM_ARM_DETAILED_HAND` sets hand model for both sides."+
+      "    `BM_ARM_DETAIL_HAND_RIGHT` is deprecated.\n"+
+      "    The single statement `BM_ARM_DETAILED_HAND` sets hand model for both sides.\n"+
       "-------------------------------------------------------------------------------------------------------"));
 #endif
 #endif
@@ -67,8 +67,8 @@
 #define BM_ARM_DETAILED_HAND BM_ARM_DETAIL_HAND_LEFT
    AnyInt deprecated_left_right_detail_hand= warn(0, strformat("\n"+
       "------------------------------------------------------------------------------------------------------\n"+
-      "    `BM_ARM_DETAIL_HAND_LEFT` is deprecated."+
-      "    The single statement `BM_ARM_DETAILED_HAND` sets hand model for both sides."+
+      "    `BM_ARM_DETAIL_HAND_LEFT` is deprecated.\n"+
+      "    The single statement `BM_ARM_DETAILED_HAND` sets hand model for both sides.\n"+
       "-------------------------------------------------------------------------------------------------------"));
 #endif
 #endif
@@ -78,10 +78,90 @@
 #ifdef BM_SCALING_MY_FILE
    AnyInt deprecated_BM_SCALING_MY_FILE = warn(0, strformat("\n"+
       "------------------------------------------------------------------------------------------------------\n"+
-      "    `BM_SCALING_MY_FILE is deprecated, and renamed to `BM_SCALING_FILE`"+
+      "    `BM_SCALING_MY_FILE is deprecated, and renamed to `BM_SCALING_FILE`\n"+
       "-------------------------------------------------------------------------------------------------------")); 
   #ifndef BM_SCALING_FILE
     #define BM_SCALING_FILE BM_SCALING_MY_FILE
   #endif
 #endif
+
+
+ #ifndef ANYBODY_DISMISS_READONLY_NOTICE
+
+  // use of a python function
+  AnyFunEx IsFileWriteable = 
+  {
+    AnyIntVar Return = 0;
+    AnyFunExMonoPy is_file_writeable =
+    {
+     ModuleFile = "ammr-checks.py";
+     ArgList = {
+       AnyStringVar MainFile = ANYBODY_PATH_MAINFILE;
+     };
+    };
+  };
+  
+  
+ AnyInt MainFileIsReadOnlyNotice = notice(IsFileWriteable(ANYBODY_PATH_MAINFILE), strformat("\n"+
+  "\n------------------------------------------------------------------------------------------------------\n"+
+  "                       Note: Your Main-file appears to be read-only. \n"+
+  " \n"+ 
+  "  Are you running models directly from the install direcotry?\n"+
+  "  It is good practice to copy models to for example your documents folder.\n"+
+  "  This notice can be disable with: #define ANYBODY_DISMISS_READONLY_NOTICE \n"+
+  "-------------------------------------------------------------------------------------------------------\n"));
+
+#endif
+
+ AnyFunEx EndsWith = 
+  {
+    AnyIntVar Return = 0;
+    AnyFunExMonoPy endswith =
+    {
+     ModuleFile = "ammr-checks.py";
+     ArgList = {
+       AnyStringVar string = "";
+       AnyStringVar argument = "";
+     };
+    };
+  };
+  
+ #ifdef ANYBODY_ENABLE_MODIFIED_AMMR_NOTICE
+ 
+ AnyFunEx DirectoryHash = 
+  {
+    AnyStringVar Return = "";
+    AnyFunExMonoPy hash_directory =
+    {
+     ModuleFile = "ammr-checks.py";
+     ArgList = {
+       AnyStringVar Directory = ANYBODY_PATH_BODY;
+     };
+    };
+  };
+ 
+ AnyStringVar HashBodyModel = DirectoryHash(ANYBODY_PATH_BODY);
+ 
+ AnyInt ModifiedAMMRChecks = {
+     not(HashBodyModel), // Don't trigger on missing hash value
+     eqfun( ANYBODY_HASH_BODY, HashBodyModel), // Don't trigger if hash value matches
+     EndsWith(AMMR_VERSION, "beta") // Don't trigger if we are using the beta version
+   }; 
+ 
+ AnyInt BodyModelIsModifiedNotice= notice(sum(ModifiedAMMRChecks), strformat("\n"+
+   "\n------------------------------------------------------------------------------------------------------\n"+
+   "                 Note: You appear to be using a modified version of the Body Model. \n"+
+   "\n"+
+   "  Some files in the folder 'AMMR/Body/AAUHuman' have been modified.\n"+
+   "  You may disable this notice by removing the switch ``#define ANYBODY_ENABLE_MODIFIED_AMMR_NOTICE``                     \n"+
+   "-------------------------------------------------------------------------------------------------------\n"));
+
+#endif
+
+
+
+
+
+
+
 

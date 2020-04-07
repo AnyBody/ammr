@@ -1,0 +1,176 @@
+#define NONE_ZERO_DIVISION(A, B, Threshold) A/iffun(gteqfun(B, Threshold), B, 1e10)
+
+#class_template CREATE_LIGAMENT(AnyFolder& ParamFolder, LIGAMENT_NAME, WRAPPING)
+{
+  #var AnyVar NumStringMesh = 20;
+  #var AnySwitch VisibleOnOff = On;
+  #var AnyVar NumAugLagCoef = 1000;
+  
+  AnyFolder& RefParam = ParamFolder.LIGAMENT_NAME;
+  
+  RefParam = {
+    RefSeg0  = {
+      AnyRefNode LIGAMENT_NAME = {
+        sRel = ..PosInSeg0;
+      };        
+    };
+    RefSeg1  = {
+      AnyRefNode LIGAMENT_NAME = {
+        sRel = ..PosInSeg1;
+      };        
+    };      
+  };    
+  
+  #if WRAPPING > 0
+  AnyKinSPLine PLine =  {
+    AnyRefFrame& ref0 = .RefParam.RefSeg0.LIGAMENT_NAME;
+    AnyRefFrame& ref1 = .RefParam.RefSeg1.LIGAMENT_NAME;
+    StringMesh = .NumStringMesh;
+    AugLagCoef = .NumAugLagCoef;
+    InitWrapPosVectors = .RefParam.InitWrapPosVectors ;
+    
+    #if WRAPPING >= 1
+    AnyParamSurf& surf0 = .RefParam.RefSurf0 ;
+    #endif
+    #if WRAPPING >= 2
+    AnyParamSurf& surf1 = .RefParam.RefSurf1 ;
+    #endif
+    #if WRAPPING >= 3
+    AnyParamSurf& surf2 = .RefParam.RefSurf2 ;
+    #endif         
+    
+    AnyDrawPLine Drw = {
+      Thickness = 0.0025;
+      RGB = Main.DrawSettings.Colors.Ligaments;
+      Visible = ..VisibleOnOff  ;
+      
+      AnyStyleDrawMaterial1 DrawStyle = {
+        AnyVar ColorSwitch = iffun(ltfun(...Force.F[0], 0.0), 1.0, 0.0); 
+        RGB = ColorSwitch*Main.DrawSettings.Colors.Ligaments + (1-ColorSwitch)*{1, 1, 1};
+        DiffuseRGB = 0.8*RGB ;
+        SpecularRGB = {1, 1, 1};
+        EmissionRGB = 0.1*{1, 1, 1};
+      };       
+    };
+  };   
+  
+  #else
+  
+  AnyKinPLine PLine = {
+    AnyRefFrame& ref0 = .RefParam.RefSeg0.LIGAMENT_NAME;
+    AnyRefFrame& ref1 = .RefParam.RefSeg1.LIGAMENT_NAME;
+    AnyDrawPLine Drw = {
+      Thickness = 0.0025;
+      RGB = Main.DrawSettings.Colors.Ligaments;
+      Visible = ..VisibleOnOff  ;
+      
+      AnyStyleDrawMaterial1 DrawStyle = {
+        AnyVar ColorSwitch = iffun(ltfun(...Force.F[0], 0.0), 1.0, 0.0);
+        RGB = ColorSwitch*Main.DrawSettings.Colors.Ligaments + (1-ColorSwitch)*{1, 1, 1};
+        DiffuseRGB = 0.8*RGB ;
+        SpecularRGB = {1, 1, 1};
+        EmissionRGB = 0.1*{1, 1, 1};
+      };        
+    };     
+  };    
+  #endif
+  
+  AnyForce Force = {
+    AnyVar k = .RefParam.Stiffness;
+    AnyVar lr = .RefParam.RefLength;
+    AnyVar er = .RefParam.RefStrain;
+    AnyKinMeasure & meas = .PLine;
+    #include "LigamentModel.any"
+    F = Val;
+  };
+  
+  Main.EvaluateLigamentLength.InitStudyForLigamentLengthEvaluation.OutputFunctions_Length = {
+    AnyOutputFun LIGAMENT_NAME = {
+      Val = Main.Model.Ligaments.LIGAMENT_NAME.PLine.Pos[0];
+    };
+  };
+  
+  Main.EvaluateLigamentLength ={
+    AnyDesVar RefLength_##LIGAMENT_NAME = {
+      Val = Main.Parameters.Ligaments.LIGAMENT_NAME.RefLength;
+    };
+    
+    AnyDesMeasure Measure_##LIGAMENT_NAME = {
+      Val = max(Main.EvaluateLigamentLength.InitStudyForLigamentLengthEvaluation.OutputFunctions_Length.LIGAMENT_NAME());
+      Type = OutputFun;
+    };
+  };
+}; // CREATE_LIGAMENT
+
+#class_template CREATE_TENDON(AnyFolder& ParamFolder, TENDON_NAME, WRAPPING)
+{
+  AnyFolder& RefParam = Main.Parameters.Tendons.TENDON_NAME;
+  
+  RefParam =  {
+    RefSeg0  = {
+      AnyRefNode TENDON_NAME = {
+        sRel = ..PosInSeg0;
+      };        
+    };
+    RefSeg1  = {
+      AnyRefNode TENDON_NAME = {
+        sRel = ..PosInSeg1;
+      };        
+    };      
+  };    
+  
+  #if WRAPPING == "On"
+  
+  AnyKinSPLine PLine = {
+    AnyRefFrame& ref0 = .RefParam.RefSeg0.TENDON_NAME;
+    AnyRefFrame& ref1 = .RefParam.RefSeg1.TENDON_NAME;
+    AnyParamSurf& surf = .RefParam.RefSurf ;
+    StringMesh = 50;
+    InitWrapPosVectors = .RefParam.InitWrapPosVectors ;
+    
+    AnyDrawPLine Drw = {
+      Thickness = 0.0025;
+      RGB = Main.DrawSettings.Colors.Tendons;
+    };
+  };       
+  
+  AnyForce Force = {
+    AnyKinMeasure &meas = .PLine;
+    F = -1e20 * (meas.Pos - .RefParam.InitLength);
+  };    
+  
+  AnyKinPLine FDK_PLine = {
+    AnyRefFrame& ref0 = .RefParam.RefSeg0.TENDON_NAME;
+    AnyRefFrame& ref1 = .RefParam.RefSeg1.TENDON_NAME;
+  }; 
+  
+  AnyKinEqSimpleDriver FDK_Length_Driver = {
+    AnyKinMeasure & ref = .FDK_PLine;
+    DriverPos = {.RefParam.InitLength};
+    DriverVel = {0.0};
+    Reaction.Type = {Off};
+    CType = {ForceDep};
+  };     
+  
+  #else
+  
+  AnyKinPLine PLine = {
+    AnyRefFrame& ref0 = .RefParam.RefSeg0.TENDON_NAME;
+    AnyRefFrame& ref1 = .RefParam.RefSeg1.TENDON_NAME;
+    
+    AnyDrawPLine Drw = {
+      Thickness = 0.0025;
+      RGB = Main.DrawSettings.Colors.Tendons;
+    };
+  };
+  
+  AnyKinEqSimpleDriver Length_Driver = {
+    AnyKinMeasure & ref = .PLine;
+    DriverPos = {.RefParam.InitLength};
+    DriverVel = {0.0};
+    Reaction.Type = {On};
+  };    
+  
+  #endif
+  
+};

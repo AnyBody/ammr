@@ -140,13 +140,30 @@ All BodyModel parameters
 | 
 
 
+.. ammr:bm_statement:: BM_FOOT_MODEL
+
+    Parameter defining the foot model used.
+
+
+    :Default: :ammr:bm_constant:`_FOOT_MODEL_DEFAULT_`
+    :Example: ``#define BM_FOOT_MODEL _FOOT_MODEL_DEFAULT_``
+    :Options: - :any:`_FOOT_MODEL_DEFAULT_`: Switch for using the default foot model
+              - :any:`_FOOT_MODEL_NONE_`: Switch for using the GM foot model"
+
+
+|  
+|   
+| 
+| 
+
+
 .. ammr:bm_statement:: BM_LEG_MODEL
 
     Parameter defining the Leg model used.
 
 
-    :Default: :ammr:bm_constant:`_LEG_MODEL_TLEM_`
-    :Example: ``#define BM_LEG_MODEL _LEG_MODEL_TLEM_``
+    :Default: :ammr:bm_constant:`_LEG_MODEL_TLEM2_`
+    :Example: ``#define BM_LEG_MODEL _LEG_MODEL_TLEM2_``
     :Options: - :any:`OFF`: 
               - :any:`_LEG_MODEL_TLEM_`: Switch to use leg model: "TLEM 1"
               - :any:`_LEG_MODEL_TLEM2_`: Switch to use leg model: "TLEM 2"
@@ -159,15 +176,15 @@ All BodyModel parameters
 | 
 
 
-.. ammr:bm_statement:: BM_FOOT_MODEL
+.. ammr:bm_statement:: BM_ARM_THORAX_SCAPULA_CONTACT
 
-    Parameter defining the foot model used.
+    Parameter defining the contact type between Thorax and Scapula
 
 
-    :Default: :ammr:bm_constant:`_FOOT_MODEL_DEFAULT_`
-    :Example: ``#define BM_FOOT_MODEL _FOOT_MODEL_DEFAULT_``
-    :Options: - :any:`_FOOT_MODEL_DEFAULT_`: Switch for using the default foot model
-              - :any:`_FOOT_MODEL_NONE_`: Switch for using the GM foot model"
+    :Default: :ammr:bm_constant:`_ELLIPSOID_CONTACT_`
+    :Example: ``#define BM_ARM_THORAX_SCAPULA_CONTACT _ELLIPSOID_CONTACT_``
+    :Options: - :any:`_ELLIPSOID_CONTACT_`: Switch for using ellipsoid contact between scapula and thorax
+              - :any:`_MULTIPLE_POINT_CONTACT_`: Switch for using multiple point contact between scapula and thorax"
 
 
 |  
@@ -441,12 +458,14 @@ All BodyModel parameters
 
 .. ammr:bm_statement:: BM_TRUNK_RHYTHM
 
-    A switch to use a kinematic rhythm for the whole spine.
+    A switch to use a kinematic rhythm for the whole spine. ON indicate that the rhythm is a hard contraint while _RHYTHM_SOFT_ will make the rhythm as soft kinematic contraint.
 
 
     :Default: ``ON``
     :Example: ``#define BM_TRUNK_RHYTHM ON``
-    :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
+    :Options: - :any:`OFF`: 
+              - :any:`ON`: 
+              - :any:`_RHYTHM_SOFT_`: Constant to switch kinematic rhythms as soft contraints
 
 
 |  
@@ -457,11 +476,15 @@ All BodyModel parameters
 
 .. ammr:bm_statement:: BM_TRUNK_LUMBAR_RHYTHM
 
-    A switch to use a kinematic rhythm for the lumbar spine.
+    A switch to use a kinematic rhythm for the lumbar spine. ON indicate that the rhythm is a hard contraint while _RHYTHM_SOFT_ will make the rhythm as soft kinematic contraint.
 
 
     :Default: :ammr:bm_statement:`BM_TRUNK_RHYTHM`
     :Example: ``#define BM_TRUNK_LUMBAR_RHYTHM BM_TRUNK_RHYTHM``
+    :Options: - :any:`OFF`: 
+              - :any:`ON`: 
+              - :any:`_RHYTHM_SOFT_`: Constant to switch kinematic rhythms as soft contraints
+
 
 |  
 |   
@@ -471,11 +494,15 @@ All BodyModel parameters
 
 .. ammr:bm_statement:: BM_TRUNK_CERVICAL_RHYTHM
 
-    A switch to use a kinematic rhythm for the cervical spine.
+    A switch to use a kinematic rhythm for the cervical spine. ON indicate that the rhythm is a hard contraint while _RHYTHM_SOFT_ will make the rhythm as soft kinematic contraint.
 
 
     :Default: :ammr:bm_statement:`BM_TRUNK_RHYTHM`
     :Example: ``#define BM_TRUNK_CERVICAL_RHYTHM BM_TRUNK_RHYTHM``
+    :Options: - :any:`OFF`: 
+              - :any:`ON`: 
+              - :any:`_RHYTHM_SOFT_`: Constant to switch kinematic rhythms as soft contraints
+
 
 |  
 |   
@@ -643,12 +670,32 @@ All BodyModel parameters
 
 .. ammr:bm_statement:: BM_ARM_SHOULDER_RHYTHM
 
-    Switch for the shoulder rhythm constraints.
+    Switch for the shoulder rhythm constraints. ON indicate that the rhythm is a hard contraint while _RHYTHM_SOFT_ will make the rhythm as soft kinematic contraint.
 
 
     :Default: ``OFF``
     :Example: ``#define BM_ARM_SHOULDER_RHYTHM OFF``
-    :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
+    :Options: - :any:`OFF`: 
+              - :any:`ON`: 
+              - :any:`_RHYTHM_SOFT_`: Constant to switch kinematic rhythms as soft contraints
+
+
+|  
+|   
+| 
+| 
+
+
+.. ammr:bm_statement:: BM_ARM_CLAVICULA_ROTATION_RHYTHM
+
+    Switch for the clavicula rotation rhythm. If enabled axial rotation of the clavicula will be distributed evenly between the sterno-clavicula and acromio-clavicula joint. Effectively removing clavicula axial rotation as an independent degree of freedom.resterno-clavicula axial rotation.
+
+
+    :Default: ``ON``
+    :Example: ``#define BM_ARM_CLAVICULA_ROTATION_RHYTHM ON``
+    :Options: - :any:`OFF`: 
+              - :any:`ON`: 
+              - :any:`_RHYTHM_SOFT_`: Constant to switch kinematic rhythms as soft contraints
 
 
 |  
@@ -665,6 +712,24 @@ All BodyModel parameters
     :Default: ``OFF``
     :Example: ``#define BM_ARM_DETAILED_HAND OFF``
     :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
+
+
+|  
+|   
+| 
+| 
+
+
+.. ammr:bm_statement:: BM_ARM_DELTOID_WRAPPING
+
+    Switch for deltoid wrapping. Setting this to OFF or _DELTOID_WRAPPING_RAKE_ will revert to the older rake based implementation of the deltoid.
+
+
+    :Default: :ammr:bm_constant:`_DELTOID_WRAPPING_ELIPSOIDS_`
+    :Example: ``#define BM_ARM_DELTOID_WRAPPING _DELTOID_WRAPPING_ELIPSOIDS_``
+    :Options: - :any:`_DELTOID_WRAPPING_RAKE_`: Switch for using pre AMMR 2.2. rake implementation for deltoid wrapping
+              - :any:`_DELTOID_WRAPPING_ELIPSOIDS_`: Switch for using multiple elipsoids in the deltoid wrapping"
+              - :any:`_DELTOID_WRAPPING_CYLINDERS_`: Switch for using mulitple cylinder in the deltroid wrapping
 
 
 |  
@@ -749,7 +814,7 @@ All BodyModel parameters
 
 .. ammr:bm_statement:: BM_MANNEQUIN_FILE
 
-    File name of the mannequin definition file. By default this is no longer used, since the values in ``HumanModel.Mannequin`` can be assigned directly in your applicaiton ( E.g. ``Main.HumanModel.Mannequin.Posture.NeckExtension = 30;``). However, the parameter can still be used to set your own mannequin file. Just define your own mannequin file in your applicaiton like this: ``#path BM_MANNEQUIN_FILE "<ANYBODY_PATH_BODY>\BodyModels\GenericBodyModel\BodyModel.mannequin.any"``
+    File name of the mannequin definition file. By default this is no longer used, since the values in ``HumanModel.Mannequin`` can be assigned directly in your applicaiton ( E.g. ``Main.HumanModel.Mannequin.Posture.NeckExtension = 30;``). However, the parameter can still be used to set your own mannequin file. Just define your own mannequin file in your applicaiton like this: ``#path BM_MANNEQUIN_FILE "<ANYBODY_PATH_BODY>\BodyModels\GenericBodyModel\BodyModel.mannequin.any";``
 
 
 |  
@@ -790,22 +855,6 @@ All BodyModel parameters
 | 
 
 
-.. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_INDIVIDUAL_WEIGHTS
-
-    Allows for individual weights if the BM mannequin drivers are soft. Weights are set by assigning the BM_MANNEQUIN_DRIVER_* switches a value instead of ON/OFF.
-
-
-    :Default: ``OFF``
-    :Example: ``#define BM_MANNEQUIN_DRIVER_INDIVIDUAL_WEIGHTS OFF``
-    :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
-
-
-|  
-|   
-| 
-| 
-
-
 .. ammr:bm_statement:: BM_LEG_TRUNK_INTERFACE
 
     Keyword for the interface morhping between the trunk and the leg pelvis segments.
@@ -833,6 +882,7 @@ All BodyModel parameters
     :Example: ``#define BM_CALIBRATION_TYPE _CALIBRATION_TYPE_1PAR_``
     :Options: - :any:`_CALIBRATION_TYPE_1PAR_`: Constant to use 1 parameter muscle tendon calibration
               - :any:`_CALIBRATION_TYPE_2PAR_`: Constant to use 2 parameter muscle tendon calibration
+              - :any:`_CALIBRATION_TYPE_CUSTOM_`: Use custom calibration. I.e. diables calibration so the user can add their own code.
 
 
 |  
@@ -958,7 +1008,57 @@ All BodyModel parameters
     :Example: ``#define BM_MANNEQUIN_DRIVER_NECK BM_MANNEQUIN_DRIVER_DEFAULT``
     :Options: - :any:`ON`: 
               - :any:`OFF`: 
-              - :any:`BM_MANNEQUIN_DRIVER_DEFAULT`: 
+
+
+|  
+|   
+| 
+| 
+
+
+.. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_SKULL_THORAX_FLEXION
+
+    Switch for the mannequin driver being active or not
+
+
+    :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_NECK`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_SKULL_THORAX_FLEXION BM_MANNEQUIN_DRIVER_NECK``
+    :Options: - :any:`ON`: 
+              - :any:`OFF`: 
+
+
+|  
+|   
+| 
+| 
+
+
+.. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_SKULL_THORAX_LATERALBENDING
+
+    Switch for the mannequin driver being active or not
+
+
+    :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_NECK`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_SKULL_THORAX_LATERALBENDING BM_MANNEQUIN_DRIVER_NECK``
+    :Options: - :any:`ON`: 
+              - :any:`OFF`: 
+
+
+|  
+|   
+| 
+| 
+
+
+.. ammr:bm_statement:: BM_MANNEQUIN_DRIVER_SKULL_THORAX_ROTATION
+
+    Switch for the mannequin driver being active or not
+
+
+    :Default: :ammr:bm_statement:`BM_MANNEQUIN_DRIVER_NECK`
+    :Example: ``#define BM_MANNEQUIN_DRIVER_SKULL_THORAX_ROTATION BM_MANNEQUIN_DRIVER_NECK``
+    :Options: - :any:`ON`: 
+              - :any:`OFF`: 
 
 
 |  
