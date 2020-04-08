@@ -27,7 +27,7 @@
 <xsl:if test="starts-with(@name, concat('BM_',string(translate($table-type, $lo, $up)))) ">
 <xsl:text>   :ammr:bm_statement:`</xsl:text><xsl:value-of select="@name"/>`, |<xsl:value-of select="@name"/>_DESCRIPTION|
 </xsl:if>
-<xsl:if test="$table-type='Other' and ( not(contains(@name,'ARM')) and not(contains(@name,'TRUNK'))and not(contains(@name,'MANNEQUIN')) and not(contains(@name,'SCALING')) and not(contains(@name,'LEG')) and not(contains(@name,'JOINT_TYPE')) )">
+<xsl:if test="$table-type='Other' and ( not(contains(@name,'ARM')) and not(contains(@name,'HAND')) and not(contains(@name,'TRUNK'))and not(contains(@name,'MANNEQUIN')) and not(contains(@name,'SCALING')) and not(contains(@name,'LEG')) and not(contains(@name,'JOINT_TYPE')) )">
 <xsl:text>   :ammr:bm_statement:`</xsl:text><xsl:value-of select="@name"/>`, |<xsl:value-of select="@name"/>_DESCRIPTION|
 </xsl:if>
 

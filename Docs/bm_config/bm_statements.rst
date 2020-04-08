@@ -554,6 +554,83 @@ All BodyModel parameters
 | 
 
 
+.. ammr:bm_statement:: BM_HAND_MODEL
+
+    Parameter defining the Hand model used.
+
+
+    :Default: :ammr:bm_constant:`_HAND_MODEL_OFF_`
+    :Example: ``#define BM_HAND_MODEL _HAND_MODEL_OFF_``
+    :Options: - :any:`_HAND_MODEL_OFF_`: Switch for using the simple one-segment hand
+              - :any:`_HAND_MODEL_ANYBODY_`: Switch for using old detailed hand without muscles"
+              - :any:`_HAND_MODEL_RUHM_`: Switch for using the detailed Regensburg-Ulm Hand Model (RUHM)."
+
+
+|  
+|   
+| 
+| 
+
+
+.. ammr:bm_statement:: BM_HAND_FINGER_RHYTHM
+
+    A switch to use a kinematic rhythm for the fingers.
+
+
+    :Default: ``OFF``
+    :Example: ``#define BM_HAND_FINGER_RHYTHM OFF``
+    :Options: - :any:`OFF`: 
+              - :any:`ON`: 
+
+
+|  
+|   
+| 
+| 
+
+
+.. ammr:bm_statement:: BM_HAND_STRENGTH_INDEX
+
+    Index parameter to specify muscle strength for the hand model.
+
+
+    :Default: ``1.0``
+    :Example: ``#define BM_HAND_STRENGTH_INDEX 1.0``
+
+|  
+|   
+| 
+| 
+
+
+.. ammr:bm_statement:: BM_HAND_STRENGTH_INTRINSIC_INDEX
+
+    Index parameter to specify muscle strength for the intrinsic hand model.
+
+
+    :Default: :ammr:bm_statement:`BM_HAND_STRENGTH_INDEX`
+    :Example: ``#define BM_HAND_STRENGTH_INTRINSIC_INDEX BM_HAND_STRENGTH_INDEX``
+
+|  
+|   
+| 
+| 
+
+
+.. ammr:bm_statement:: BM_HAND_STRENGTH_EXTRINSIC_INDEX
+
+    Index parameter to specify muscle strength for the extrinsic hand model.
+
+
+    :Default: :ammr:bm_statement:`BM_HAND_STRENGTH_INDEX`
+    :Example: ``#define BM_HAND_STRENGTH_EXTRINSIC_INDEX BM_HAND_STRENGTH_INDEX``
+
+|  
+|   
+| 
+| 
+
+
 .. ammr:bm_statement:: BM_ARM_STRENGTH_INDEX
 
     Index parameter to specify muscle strength for upper extremities.
@@ -601,23 +678,6 @@ All BodyModel parameters
 | 
 
 
-.. ammr:bm_statement:: BM_ARM_SHOULDER_RHYTHM_LEFT
-    :deprecated:
-
-    Switch for the shoulder rhythm constraints for the left arm being present or not.
-
-
-    :Default: ``OFF``
-    :Example: ``#define BM_ARM_SHOULDER_RHYTHM_LEFT OFF``
-    :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
-
-
-|  
-|   
-| 
-| 
-
-
 .. ammr:bm_statement:: BM_ARM_RIGHT
 
     Switch for the right arm model being present or not.
@@ -625,23 +685,6 @@ All BodyModel parameters
 
     :Default: ``ON``
     :Example: ``#define BM_ARM_RIGHT ON``
-    :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
-
-
-|  
-|   
-| 
-| 
-
-
-.. ammr:bm_statement:: BM_ARM_DETAIL_HAND_RIGHT
-    :deprecated:
-
-    Keyword for the type of right hand.
-
-
-    :Default: ``OFF``
-    :Example: ``#define BM_ARM_DETAIL_HAND_RIGHT OFF``
     :Options: :ammr:bm_constant:`ON`/ :ammr:bm_constant:`OFF`
 
 
@@ -705,6 +748,7 @@ All BodyModel parameters
 
 
 .. ammr:bm_statement:: BM_ARM_DETAILED_HAND
+    :deprecated:
 
     Switch for enabling the detailed hand.
 

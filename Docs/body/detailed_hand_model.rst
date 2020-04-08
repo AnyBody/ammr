@@ -1,7 +1,7 @@
-Detailed hand model
+AnyBody Detailed hand model
 =============================
 
-The  detailed hand model is a model of the carpal bones with 17 DOFs. The model
+The  AnyBody detailed hand model is a model of the carpal bones with 17 DOFs. The model
 has no muscles, but the joints are equiped with joint actuators, so the model can
 be used for dynamic analysis. 
 
@@ -16,7 +16,7 @@ Short example of how to configure and enable the model:
 
 .. code-block:: AnyScriptDoc
 
-    #define BM_ARM_DETAILED_HAND  ON 
+    #define BM_HAND_MODEL  _HAND_MODEL_ANYBODY_ 
     #define BM_MANNEQUIN_DRIVER_HAND_RIGHT ON
     #define BM_MANNEQUIN_DRIVER_HAND_LEFT ON
 
