@@ -30,7 +30,7 @@ detailed hand model by setting the values  in ``Main.HumanModel.Mannequin``:
     HumanModel.Mannequin.Posture.Right = {
       Finger1 = 
       {
-         CMCDeviation = 10;
+         CMCAbduction = 10;
          CMCFlexion = 40;
          MCPFlexion = 55;
          MCPDeviation = 0.0;
