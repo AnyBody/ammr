@@ -33,7 +33,7 @@ detailed hand model by setting the values  in ``Main.HumanModel.Mannequin``:
          CMCAbduction = 10;
          CMCFlexion = 40;
          MCPFlexion = 55;
-         MCPDeviation = 0.0;
+         MCPAbduction = 0.0;
          DIPFlexion = 20;
       };
       Finger2 =
