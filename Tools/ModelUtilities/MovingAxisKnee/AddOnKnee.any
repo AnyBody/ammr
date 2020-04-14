@@ -1,35 +1,184 @@
+//--------------------------------------------------------------------
+//Simplify to one DEFINE_LOCAL_COORDINATE withtwo arguements, 
+//the 2nd stating how the node should be scaled: 
+//(none, ..CustomMarkerScaling, ..Flex2scaledSeg)
 #ifndef DEFINE_LOCAL_COORDINATE
-#define DEFINE_LOCAL_COORDINATE(rNode) sRel = (rNode-.rOffset)*.AOffset;
+#define DEFINE_LOCAL_COORDINATE(rNode) sRel = ((rNode)-.rOffset)*.AOffset;
 #endif 
+#ifndef DEFINE_LOCAL_COORDINATE_CT2scaledSeg
+#define DEFINE_LOCAL_COORDINATE_CT2scaledSeg(rNode) sRel = (..CustomMarkerScaling(rNode)-.rOffset)*.AOffset;
+#endif 
+#ifndef DEFINE_LOCAL_COORDINATE_Flex2scaledSeg
+#define DEFINE_LOCAL_COORDINATE_Flex2scaledSeg(rNode) sRel = (..Flex2scaledSeg(rNode)-.rOffset)*.AOffset;
+#endif 
+//--------------------------------------------------------------------
 
+#define AddPointCloud(name,setR,setB) AnyDrawPointCloud ptcl_##name = {Points = .name##_surf.points;PointStyle.Style = PointStyleSphere;Points3D = On;ShowNames = On;RGB={setR,0,setB};PointStyle.Size=0.0015;};
 
-
+//--------------------------------------------------------------------
+//Simplify these into one define statement using AnyString and more arguements to do so
+// fit cylinder to given point cloud without fixed direction
+#define FitCylinder(name) AnyRefNode name = {sRel = test_cylinder_fit.sRel; ARel = test_cylinder_fit.ARel;AnyDrawNode drw={Visible=Off;ScaleXYZ={0,0,0}*0.001;};AnyDrawRefFrame fr = {Visible=Off;ScaleXYZ={1,1,1}*0.1;RGB={1,0,0};};  AnySurfCylinderFit test_cylinder_fit = {Length = 0.000001;FixedDirection = Off;Direction = {0.0, 0.0, 1.0}; Points = DesignVar(..name##_points);AnyDrawParamSurf srf_##name={Visible = Off;RGB={0,1,1};Opacity=0.2;};};}; 
+// fit cylinder to condyle point clouds with direction fixed to secondary PC of a cylinder fit to medial and lateral condyles combined
+#define FitCylinder_PC(name1,name2,Vis_n,Vis_par) AnyRefNode name2 = {sRel = test_cylinder_fit.sRel; ARel = (test_cylinder_fit.ARel);AnyDrawNode drw={Visible=Vis_n;RGB= {0,0,0};ScaleXYZ={1,1,1}*0.002;}; AnySurfCylinderFit test_cylinder_fit = {Length = 0.00001;FixedDirection =On;Direction = ..name1.test_cylinder_fit.ARel[2]*...AMirroring; Points = DesignVar(..name2##_surf.points);AnyDrawParamSurf srf_##name2={Visible =Vis_par;RGB={0,1,1};Opacity=0.2;};};}; 
+//--------------------------------------------------------------------
 
 Main = {
+
   HumanModel ={
-    //include all scripts needed for moving-axis knee model
-    #include "SubjectSpecificScaling.any"
-    #include "Femur_FitCylinders_MA.any"
-    #include "Tibia_FitCylinders_MA.any"
-    #include "KneeJointNodes.any"
-    #include "InvisibleSegments.any"   
-    #include "InvisibleJoints_Drivers.any"
+    //If the right knee userdefined
+    #ifdef BM_JOINT_TYPE_KNEE_RIGHT
+    #if BM_JOINT_TYPE_KNEE_RIGHT == _JOINT_TYPE_USERDEFINED_
     
-    BodyModel.Interface.Right = {
-      #include "<ANYBODY_PATH_MODELUTILS>\MovingAxisKnee\TibiofemoralMeasures.any"
+
+    BodyModel={
+      
+      //then add the following to the right leg:
+      Right.Leg = {
+        
+        //if the personalization level is 0, use default scalable moving-axis
+        #if BM_JOINT_MOVINGAXIS_TYPE_RIGHT == 0
+        #include "DefaultKneePositions.any"
+        #endif
+        
+        //if the personalization level is 1, and the knees ARE NOT mirrored --> define UserDefinedKneePositions_Right
+        #if BM_JOINT_MOVINGAXIS_TYPE_RIGHT == 1
+        
+        #if BM_JOINT_MOVINGAXIS_MIRRORED == 0
+        #include "UserDefinedKneePositions_Right.any"
+        #else
+        //if the personalization level is 1, and the right knee IS mirrored from left known positions
+        #include "UserDefinedKneePositions_Left.any"
+        #endif
+        
+        #endif
+        
+        #include "<ANYBODY_PATH_MODELUTILS>\MovingAxisKnee\TibiofemoralMeasures.any"
+        
+        Seg ={
+          
+          //Matrix does nothing, needed for implementation of left 
+          AnyMat33 AMirroring = { {1,0,0},{0,1,0},{0,0,1}};
+          
+          Thigh  = {
+            
+            #include "SubjectSpecificScaling.any"
+            #include "Femur_FitCylinders_MA.any"
+            
+            // Length between Tibiofemoral ECFs m->l (Femur Registration)
+            AnyVar L1 = vnorm(Lateral_TF_EFC.sRel - Medial_TF_EFC.sRel,2.0);
+            AnyVar L1_test = vnorm(EpicondylusFemorisLateralis.sRel - EpicondylusFemorisMedialis.sRel,2.0);
+
+            KneeJoint = {
+              AnyVec3 sRelUnscaled = ((.StdPar.EpicondylusFemorisLateralis)+(.StdPar.EpicondylusFemorisMedialis))/2;
+            };
+            
+            AnyString Bone = "Thigh";
+            
+          }; 
+          
+          Shank  = {
+            
+            AnyString Bone = "Shank";
+            #include "SubjectSpecificScaling.any"
+            #include "Tibia_FitCylinders_MA.any"
+            
+          };
+          
+          #include "KneeJointNodes.any"
+          #include "InvisibleSegments.any" 
+          
+        };
+        
+        #include "InvisibleJoints_Drivers.any"
+        
+      };
     };
     
-    Main.HumanModel.BodyModel.Right.Leg.Seg.Thigh.KneeJoint = {
-    AnyVec3 sRelUnscaled = ((.StdPar.EpicondylusFemorisLateralis)+(.StdPar.EpicondylusFemorisMedialis))/2;
-  };
-  
-//  //FIX ME//Gait model will not run without this KinematicTol change, however FlywheelSquat will.
-//  Main.Studies.MarkerTracking.InitialConditions.KinematicTol=1e-3;
-//  Main.Studies.MarkerTracking.Kinematics.KinematicTol=1e-3;
+    #endif
+    #endif
+    
+    //If the left knee userdefined
+    #ifdef BM_JOINT_TYPE_KNEE_LEFT
+    #if BM_JOINT_TYPE_KNEE_LEFT == _JOINT_TYPE_USERDEFINED_
+    
 
-  
-  
+    BodyModel={
+      
+      Left.Leg={
+        
+        //if the personalization level is 0, use default scalable moving-axis
+        #if BM_JOINT_MOVINGAXIS_TYPE_LEFT == 1
+        
+        //if the personalization level is 1, and the knees ARE NOT mirrored define UserDefinedKneePositions_Left
+        #if BM_JOINT_MOVINGAXIS_MIRRORED == 0
+        #include "UserDefinedKneePositions_Left.any"
+        #else
+        //if the personalization level is 1, and the left knee IS mirrored from right known positions
+        #include "UserDefinedKneePositions_Right.any"
+        #endif
+        
+        #endif
+        
+        #if BM_JOINT_MOVINGAXIS_TYPE_LEFT == 0
+        #include "DefaultKneePositions.any"
+        #endif
+        
+        #include "<ANYBODY_PATH_MODELUTILS>\MovingAxisKnee\TibiofemoralMeasures.any"
+        
+        Seg ={
+          
+          //Mirroring matrix needed for implementation of left moving-axis
+          AnyMat33 AMirroring = { {1,0,0},{0,1,0},{0,0,-1}};
+          
+          Thigh  = {  
+            
+            // Length between Tibiofemoral ECFs m->l (Femur Registration)
+            AnyVar L1 = vnorm(Lateral_TF_EFC.sRel - Medial_TF_EFC.sRel,2.0);
+            AnyVar L1_test = vnorm(EpicondylusFemorisLateralis.sRel - EpicondylusFemorisMedialis.sRel,2.0);
+
+            KneeJoint = {
+              
+              AnyVec3 sRelUnscaled = ((.StdPar.EpicondylusFemorisLateralis)+(.StdPar.EpicondylusFemorisMedialis))/2;
+              
+            };
+            
+            AnyString Bone = "Thigh";
+            #include "SubjectSpecificScaling.any"
+            #include "Femur_FitCylinders_MA.any"
+            
+          };
+          
+          Shank  = {  
+            
+            AnyString Bone = "Shank";
+            #include "SubjectSpecificScaling.any"
+            #include "Tibia_FitCylinders_MA.any"
+            
+          };
+          
+          #include "KneeJointNodes.any"
+          #include "InvisibleSegments.any" 
+          
+        };
+        
+        #include "InvisibleJoints_Drivers.any"
+        
+      };
+    };
+    
+    #endif
+    #endif
+    
   };
 };
+
+
+
+
+
+
+
+
 
 

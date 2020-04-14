@@ -1,124 +1,67 @@
-Main.HumanModel.BodyModel.Right.Leg.Seg.Shank = {
-  
-  AnyFunTransform3D &CustomMarkerScaling = Main.HumanModel.SubjectSpecificScaling.Right.Shank.RegTransform;
-    AnyFunTransform3D &Seg2CT = Main.HumanModel.SubjectSpecificScaling.Right.Shank.Seg2CT;
+AnyFunTransform3D &CustomMarkerScaling = SubjectSpecificScaling.RegTransform;
+AnyFunTransform3D &Tibia2CT = SubjectSpecificScaling.Seg2CT;
+AnyFunTransform3D &Flex2scaledSeg = SubjectSpecificScaling.Flex2scaledSeg;
 
-  AnyVec3 rOffset= Main.HumanModel.BodyModel.Right.Leg.Seg.Shank.KneeJointAnatomicalFrame.sRel;
-  AnyMat33 AOffset= Main.HumanModel.BodyModel.Right.Leg.Seg.Shank.KneeJointAnatomicalFrame.ARel;
-  
-  AnyDrawRefFrame fr = {Visible=Off;ScaleXYZ={1,1,1}*0.1;}; 
-  
-  AnyDrawSurf Medial_TF_EFC_surf = {
-    FileName = ANYBODY_PATH_MODELUTILS +"\MovingAxisKnee\STLs\Medial_TF_EFC.stl";
-    Visible=Off;
-    ScaleXYZ = {1.0, 1.0, 1.0};
-    RGB = {1,0,0};
-    AnyFunTransform3D &Scale =.CustomMarkerScaling;
-    Face=-1;
-    AnyInt NumPoints = STL_Size(FileName, 1)[0];
-    AnyFloat points = GetVertices(iarr(0, 1, NumPoints-1));
-  };
-  
-  AnyDrawSurf Lateral_TF_EFC_surf = {
-    FileName = ANYBODY_PATH_MODELUTILS +"\MovingAxisKnee\STLs\Lateral_TF_EFC.stl";
-    Visible=Off;
-    ScaleXYZ = {1.0, 1.0, 1.0};
-    RGB = {1,0,0};
-    AnyFunTransform3D &Scale =.CustomMarkerScaling;
-    Face=-1;
-    AnyInt NumPoints = STL_Size(FileName, 1)[0];
-    AnyFloat points = GetVertices(iarr(0, 1, NumPoints-1));
-  };
-  
-  ////  comment in when position of femur and tibia STLs at 90 deg tibiofemoral flexion has been achieved for TLEM 2.0 (literature or bonepin study) 
-  //  AnyDrawSurf Medial_TF_FFC_surf = {
-  //    FileName = "<ANYBODY_PATH_BODY>\LegTLEM\TLEM2.1\CT_RefFrame_STLs\Medial_TF_FFC.stl";
-  //    Visible=Off;
-  //    ScaleXYZ = {1.0, 1.0, 1.0}*0.001;
-  //    RGB = {1,0,0};
-  //    AnyFunTransform3D &Scale =.CustomMarkerScaling;
-  //    Face=-1;
-  //    AnyInt NumPoints = STL_Size(FileName, 1)[0];
-  //    AnyFloat points = GetVertices(iarr(0, 1, NumPoints-1));
-  //  };
-  
-  //  AnyDrawSurf Lateral_TF_FFC_surf = {
-  //    FileName = "<ANYBODY_PATH_BODY>\LegTLEM\TLEM2.1\CT_RefFrame_STLs\Lateral_TF_FFC.stl";
-  //    Visible=Off;
-  //    ScaleXYZ = {1.0, 1.0, 1.0}*0.001;
-  //    RGB = {1,0,0};
-  //    AnyFunTransform3D &Scale =.CustomMarkerScaling;
-  //    Face=-1;
-  //    AnyInt NumPoints = STL_Size(FileName, 1)[0];
-  //    AnyFloat points = GetVertices(iarr(0, 1, NumPoints-1));
-  //  };
-  
-  AnyFloat TF_EFC_points =arrcat(Medial_TF_EFC_surf.points, Lateral_TF_EFC_surf.points);
-  
-  // comment in when position of femur and tibia STLs at 90 deg tibiofemoral flexion has been achieved for TLEM 2.0 (literature or bonepin study)
-  //  AnyFloat TF_FFC_points =arrcat(Medial_TF_FFC_surf.points, Lateral_TF_FFC_surf.points);
-  
-  FitCylinder(TF_EFC)
-  FitCylinder_PC(TF_EFC,Medial_TF_EFC,Off,Off)
-  FitCylinder_PC(TF_EFC,Lateral_TF_EFC,Off,Off)
-  
-  // comment in when position of femur and tibia STLs at 90 deg tibiofemoral flexion has been achieved for TLEM 2.0 (literature or bonepin study)
-  //  FitCylinder_PC(TF_FFC,Medial_TF_FFC,Off,Off)
-  //  FitCylinder_PC(TF_FFC,Lateral_TF_FFC,Off,Off)
-  AnyFloat tibia_Medial_EFC_CT={
-    Seg2CT(Main.HumanModel.BodyModel.Right.Leg.Seg.Shank.Medial_TF_EFC.sRel)
-  };
-  AnyFloat tibia_Lateral_EFC_CT ={
-    Seg2CT(Main.HumanModel.BodyModel.Right.Leg.Seg.Shank.Lateral_TF_EFC.sRel)
-  };
-  // FIX ME! Offset values are currently just guesses
-  AnyRefNode Medial_TF_FFC = {
-    AnyVec3 offset ={-0.006,-0.015,0.000};
-    sRel=.Medial_TF_EFC.sRel+offset;
-  };
-  
-  // FIX ME! Offset values are currently just guesses
-  AnyRefNode Lateral_TF_FFC = {
-    AnyVec3 offset ={-0.015,-0.005,0.002};
-    sRel=.Lateral_TF_EFC.sRel+offset;
-  };
-  
-  KneeJointAnatomicalFrame={
-    AnyVec3 rOffset= sRel;
-    AnyMat33 AOffset= ARel;
-    
-    // Length between Tibiofemoral ECFs m->l (Femur KneeJointAnatomicalFrame Registration)
-    // Unit Vector directed along Tibiofemoral FFCs m->l (Tibia KneeJointAnatomicalFrame Registration)
-    AnyVar L3 = vnorm(..Thigh.KneeJointAnatomicalFrame.Lateral_TF_EFC.sRel - ..Thigh.KneeJointAnatomicalFrame.Medial_TF_EFC.sRel,2.0);
-    AnyVec3 e3 = (TEMP_Lateral_TF_FFC.sRel - Medial_TF_FFC.sRel)/vnorm(TEMP_Lateral_TF_FFC.sRel - Medial_TF_FFC.sRel); 
-    
-    AnyRefNode Lateral_TF_EFC = {
-      DEFINE_LOCAL_COORDINATE(..Lateral_TF_EFC.sRel)
-      AnyDrawNode drw={Visible=Off;ScaleXYZ={1,1,1}*0.002;};
-    };
-    AnyRefNode Medial_TF_EFC = {
-      DEFINE_LOCAL_COORDINATE(..Medial_TF_EFC.sRel)
-      AnyDrawNode drw={Visible=Off;ScaleXYZ={1,1,1}*0.002;};
-    }; 
-    AnyRefNode TEMP_Lateral_TF_FFC = {
-      DEFINE_LOCAL_COORDINATE(..Lateral_TF_FFC.sRel)
-    };
-    AnyRefNode Medial_TF_FFC = {
-      DEFINE_LOCAL_COORDINATE(..Medial_TF_FFC.sRel)
-      AnyDrawNode drw={ScaleXYZ={1,1,1}*0.002;RGB={1,0,0};};
-    };
-    
-    AnyRefNode Lateral_TF_FFC = {
-      AnyVec3 sRel_us = (..Medial_TF_FFC.sRel)+(.e3*.L3);
-      DEFINE_LOCAL_COORDINATE(sRel_us)
-      AnyDrawNode drw={ScaleXYZ={1,1,1}*0.002;RGB={1,0,0};};
-    };
-    
-    AnyRefNode InvisibleFemurRotationNode = {
-      sRel = ...InvisibleFemur_TF.MA_AnatomicalFrame.sRel;
-      ARel = .ARel'*...InvisibleFemur_TF.MA_AnatomicalFrame.ARel;
-    }; 
-  };
+AnyVec3 rOffset= KneeJointAnatomicalFrame.sRel;
+AnyMat33 AOffset= KneeJointAnatomicalFrame.ARel;
+
+AnyDrawRefFrame fr = {Visible=Off;ScaleXYZ={1,1,1}*0.1;}; 
+
+AnyRefNode EpicondylusFemorisMedialis={
+  DEFINE_LOCAL_COORDINATE(..Thigh.EpicondylusFemorisMedialis.sRel)
 };
+AnyRefNode EpicondylusFemorisLateralis={
+  DEFINE_LOCAL_COORDINATE(..Thigh.EpicondylusFemorisLateralis.sRel)
+};
+AnyRefNode HipJoint ={
+  DEFINE_LOCAL_COORDINATE(..Thigh.HipJoint.sRel)
+};
+  // bring EFC points and necessary anatomical landmarks into CT (TF Extension position) reference frame
+  AnyFolder CT_Data={
+    AnyVec3 MedialEpicondyle= .Tibia2CT(.MedialTibialEpicondyle.sRel);
+    AnyVec3 LateralEpicondyle= .Tibia2CT(.LateralTibialEpicondyle.sRel);
+    AnyVec3 AnkleJointCenter= .Tibia2CT(.AnkleJoint.sRel);
+  };
+KneeJointAnatomicalFrame={
+  AnyVec3 rOffset= sRel;
+  AnyMat33 AOffset= ARel;
+  
+  AnyRefNode Lateral_TF_EFC = {
+    DEFINE_LOCAL_COORDINATE_CT2scaledSeg(...Thigh.CT_Data.Lateral_TF_EFC)
+    AnyDrawNode drw={Visible=Off;ScaleXYZ={1,1,1}*0.002;};
+  };
+  
+  AnyRefNode Medial_TF_EFC = {
+    DEFINE_LOCAL_COORDINATE_CT2scaledSeg(...Thigh.CT_Data.Medial_TF_EFC)
+    AnyDrawNode drw={Visible=Off;ScaleXYZ={1,1,1}*0.002;};
+  }; 
+  
+  AnyRefNode TEMP_Lateral_TF_FFC = {
+    DEFINE_LOCAL_COORDINATE_Flex2scaledSeg(...Thigh.Flexed_Data.Lateral_TF_FFC)
+  };
+  
+  AnyRefNode Medial_TF_FFC = {
+    DEFINE_LOCAL_COORDINATE_Flex2scaledSeg(...Thigh.Flexed_Data.Medial_TF_FFC)
+//    AnyDrawNode drw={Visible=On;ScaleXYZ={1,1,1}*0.002;RGB={1,0,0};};
+  };
+  
+  // Unit Vector directed along Tibiofemoral FFCs m->l (Tibia Registration)
+  AnyVec3 e_T = (TEMP_Lateral_TF_FFC.sRel - Medial_TF_FFC.sRel)/vnorm(TEMP_Lateral_TF_FFC.sRel - Medial_TF_FFC.sRel);    
+  
+  AnyRefNode Lateral_TF_FFC = {
+    sRel = .Medial_TF_FFC.sRel+(.e_T*...Thigh.L1);
+//    AnyDrawNode drw={Visible=On;ScaleXYZ={1,1,1}*0.002;RGB={1,0,0};};
+  };
+  
+  AnyRefNode InvisibleFemurRotationNode = {
+    sRel = ...InvisibleFemur_TF.MA_AnatomicalFrame.sRel;
+    ARel = .AOffset'*...InvisibleFemur_TF.MA_AnatomicalFrame.ARel;
+  }; 
+  
+    //check to see if L is uniform and if the unit vector is pointing in the correct direction  
+    AnyVar FFC_mag_check=vnorm(...Sign*(Lateral_TF_FFC.sRel - Medial_TF_FFC.sRel),2.0);
+    AnyVec3 FFC_vec_check=(...Sign*(Lateral_TF_FFC.sRel - Medial_TF_FFC.sRel))/vnorm(...Sign*(Lateral_TF_FFC.sRel - Medial_TF_FFC.sRel));
+};
+
 
 
