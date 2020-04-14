@@ -1,0 +1,41 @@
+//Create this for both CT and Flexed 
+//  For AdjustedCT first we would Pretransforms {Seg2CT, GC_transMat_0(CT)=Adjusted_CT} then bring back into model {Adjusted_CT2Seg} 
+//  OR create a template with CAD3 bones with 0 rotations and 0 translations which can be then adjusted accordingly to necessary Adjusted CT, and then to AdjustedFlexedPos
+//  For AdjustedFlexed (without known 0 degree data) first we would Pretransforms {Seg2CT, GC_transMat_90(CT)=FlexedPoints} then bring back into model {AdjustedFlexed2Seg}
+//  OR
+//  For AdjustedFlexed (with known 0 degree data) first we would Pretransforms {Seg2CT, GC_transMat_90(AdjustedCT)=FlexedPoints} then bring back into model {AdjustedFlexed2Seg}
+
+AnyFunTransform3DLin GS_transMat = {
+  AnyFloat A = (-1)*....GS_Measures.TF_FE_90*(pi/180);
+  AnyFloat B = (90+(..Sign)*....GS_Measures.TF_AA_90)*(pi/180);
+  AnyFloat C = (..Sign)*....GS_Measures.TF_IE_90*(pi/180);
+  ScaleMat = {{cos(C)*sin(B), (-1)*cos(A)*sin(C)-cos(C)*sin(A)*cos(B), sin(A)*sin(C)-cos(C)*cos(A)*cos(B)}, 
+    {sin(C)*sin(B), cos(A)*cos(C)-sin(C)*sin(A)*cos(B), (-1)*cos(C)*sin(A)-cos(A)*cos(B)*sin(C)}, 
+    {cos(B), sin(B)*sin(A), cos(A)*sin(B)}};
+  Offset = {..Sign*(....GS_Measures.TF_ML_90), ....GS_Measures.TF_AP_90, ....GS_Measures.TF_SI_90}*0.001;
+};
+
+//Experimenting with Transformation Matrices
+//transformation from the scaled segmental ref. frame to flexed bone position ref. frame
+AnyFunTransform3DLin2 Seg2Flexed = {
+  AnyString SourceFN = ANYBODY_PATH_BODY+"\LegTLEM\TLEM2.1\Seg_RefFrame_STLs\Seg_" + ..Bone + "_R.stl";
+  AnyFileVar SourceSTL = SourceFN;
+  AnyMatrix Points0unscaled = STL_Vertices(SourceSTL, iarr(0, 1, NumPoints0 - 1), 1)*...AMirroring;
+  Points0 = .TScale2SegFrame(Points0unscaled);
+  Points1 = .GS_transMat(Points0);
+  AnyInt NumPoints0 = STL_Size(SourceSTL, 1)[0];
+  Mode = VTK_LANDMARK_AFFINE;
+};
+
+//Experimenting with Transformation Matrices
+//transformation from flexed bone position ref. frame to unscaled segmental ref. frame
+AnyFunTransform3DLin2 Flex2Seg = {
+  AnyString TargetFN = ANYBODY_PATH_BODY+"\LegTLEM\TLEM2.1\Seg_RefFrame_STLs\Seg_" + ..Bone + "_R.stl";
+  AnyFileVar TargetSTL = TargetFN;
+  AnyInt NumPoints0 = STL_Size(TargetSTL, 1)[0];
+  Points0 = STL_Vertices(TargetSTL, iarr(0, 1, NumPoints0 - 1), 1)*...AMirroring;
+  Points1 = .GS_transMat(Points0);
+  Mode = VTK_LANDMARK_RIGIDBODY;
+}; 
+
+

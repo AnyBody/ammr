@@ -1,0 +1,111 @@
+ AnySeg InvisibleFemur_TF = {
+  
+  AnyFunTransform3D &CustomMarkerScaling = .Thigh.SubjectSpecificScaling.RegTransform;
+  AnyFunTransform3D &Flex2scaledSeg =.Thigh.SubjectSpecificScaling.Flex2scaledSeg;
+  
+  Mass = 0;
+  Jii = {0,0,0}; 
+  r0 = .Thigh.r0+MA_AnatomicalFrame.rOffset*.Thigh.Axes0';
+  Axes0 = .Thigh.Axes0*MA_AnatomicalFrame.AOffset;
+  
+  AnyDrawRefFrame fr = {Visible=Off;ScaleXYZ={1,1,1}*0.1;RGB={1,0,0};}; 
+  
+  AnyRefNode MA_AnatomicalFrame = { 
+    AnyVec3 O = (.CustomMarkerScaling(..Thigh.CT_Data.Medial_TF_EFC) + .CustomMarkerScaling(..Thigh.CT_Data.Lateral_TF_EFC))/2; 
+    AnyVec3 Z = ...Sign*(.CustomMarkerScaling(..Thigh.CT_Data.Lateral_TF_EFC) - .CustomMarkerScaling(..Thigh.CT_Data.Medial_TF_EFC));
+    AnyVec3 X = cross(.CustomMarkerScaling(..Thigh.CT_Data.HipJointCenter)-O,Z);
+    AnyVec3 Y = cross(Z,X);
+    AnyVec3 rOffset= O;
+    AnyMat33 AOffset={X/vnorm(X),Y/vnorm(Y),Z/vnorm(Z)}';
+    
+    AnyRefNode Medial_TF_EFC = {
+      DEFINE_LOCAL_COORDINATE_CT2scaledSeg(...Thigh.CT_Data.Medial_TF_EFC)
+      AnyDrawNode drw ={Visible=Off;ScaleXYZ=0.002*{1,1,1};RGB={0,0,1};};
+    };
+    
+    AnyRefNode Medial_TF_FFC = {
+      DEFINE_LOCAL_COORDINATE_Flex2scaledSeg(...Thigh.Flexed_Data.Medial_TF_FFC)
+      AnyDrawNode drw ={Visible=Off;ScaleXYZ=0.002*{1,1,1};RGB={1,0,0};};
+    };
+    
+    AnyRefNode Lateral_TF_EFC = {
+      DEFINE_LOCAL_COORDINATE_CT2scaledSeg(...Thigh.CT_Data.Lateral_TF_EFC)
+      AnyDrawNode drw ={Visible=Off;ScaleXYZ=0.002*{1,1,1};RGB={0,0,1};};
+    }; 
+    
+    AnyRefNode TEMP_Lateral_TF_FFC = {
+      DEFINE_LOCAL_COORDINATE_Flex2scaledSeg(...Thigh.Flexed_Data.Lateral_TF_FFC)
+      AnyDrawNode drw ={Visible=Off;ScaleXYZ=0.002*{1,1,1};RGB={1,1,1};};
+    };
+    
+    // Unit Vector directed along Tibiofemoral FFCs m->l (Invisible Femur Registration)
+    AnyVec3 e_IF = (TEMP_Lateral_TF_FFC.sRel - Medial_TF_FFC.sRel)/vnorm(TEMP_Lateral_TF_FFC.sRel - Medial_TF_FFC.sRel);    
+    
+    AnyRefNode Lateral_TF_FFC = {
+      sRel= .Medial_TF_FFC.sRel+(.e_IF*...Thigh.L1);
+      AnyDrawNode drw ={Visible=Off;ScaleXYZ=0.002*{1,1,1};RGB={1,1,1};};
+    };
+    
+    //check to see if L is uniform and if the unit vector is pointing in the correct direction  
+    AnyVar FFC_mag_check=vnorm(...Sign*(Lateral_TF_FFC.sRel - Medial_TF_FFC.sRel),2.0);
+    AnyVec3 FFC_vec_check=(...Sign*(Lateral_TF_FFC.sRel - Medial_TF_FFC.sRel))/vnorm(...Sign*(Lateral_TF_FFC.sRel - Medial_TF_FFC.sRel));
+  };
+};  
+
+AnySeg InvisibleTibia = {
+  AnyFunTransform3D &CustomMarkerScaling = .Shank.SubjectSpecificScaling.RegTransform;
+  AnyFunTransform3D &Flex2scaledSeg = .Shank.SubjectSpecificScaling.Flex2scaledSeg;
+  
+  Mass = 0;
+  Jii = {0, 0, 0};
+  r0 = .Shank.r0+MA_AnatomicalFrame.rOffset*.Shank.Axes0';
+  Axes0 = .Shank.Axes0*MA_AnatomicalFrame.AOffset;
+  
+  AnyDrawRefFrame fr = {Visible=Off;ScaleXYZ={1,1,1}*0.1;RGB={1,0,0};}; 
+  
+  AnyRefNode MA_AnatomicalFrame ={
+    AnyVec3 O = (.CustomMarkerScaling(..Thigh.CT_Data.Medial_TF_EFC) + .CustomMarkerScaling(..Thigh.CT_Data.Lateral_TF_EFC))/2; 
+    AnyVec3 Z = ...Sign*(.CustomMarkerScaling(..Thigh.CT_Data.Lateral_TF_EFC) - .CustomMarkerScaling(..Thigh.CT_Data.Medial_TF_EFC));
+    AnyVec3 X = cross(.CustomMarkerScaling(..Thigh.CT_Data.HipJointCenter)-O,Z);
+    AnyVec3 Y = cross(Z,X);
+    AnyVec3 rOffset= O;
+    AnyMat33 AOffset={X/vnorm(X),Y/vnorm(Y),Z/vnorm(Z)}';
+    
+    AnyRefNode Medial_TF_EFC  = {
+      DEFINE_LOCAL_COORDINATE_CT2scaledSeg(...Thigh.CT_Data.Medial_TF_EFC)
+//      AnyDrawNode drw ={Visible=On;ScaleXYZ=0.002*{1,1,1};RGB={0,0,1};};
+    };
+    
+    AnyRefNode Medial_TF_FFC = {
+      DEFINE_LOCAL_COORDINATE_Flex2scaledSeg(...Thigh.Flexed_Data.Medial_TF_FFC)
+      AnyDrawNode drw ={Visible=Off;ScaleXYZ=0.002*{1,1,1};RGB={1,1,1};};
+    };
+    
+    AnyRefNode Lateral_TF_EFC = {
+      DEFINE_LOCAL_COORDINATE_CT2scaledSeg(...Thigh.CT_Data.Lateral_TF_EFC)
+//      AnyDrawNode drw ={Visible=On;ScaleXYZ=0.002*{1,1,1};RGB={0,0,1};};
+    }; 
+    
+    AnyRefNode TEMP_Lateral_TF_FFC = {
+      DEFINE_LOCAL_COORDINATE_Flex2scaledSeg(...Thigh.Flexed_Data.Lateral_TF_FFC)
+      AnyDrawNode drw ={Visible=Off;ScaleXYZ=0.002*{1,1,1};RGB={1,1,1};};
+    };
+    
+    // Unit Vector directed along Tibiofemoral FFCs m->l (Invisible Femur Registration)
+    AnyVec3 e_IT = (TEMP_Lateral_TF_FFC.sRel - Medial_TF_FFC.sRel)/vnorm(TEMP_Lateral_TF_FFC.sRel - Medial_TF_FFC.sRel);    
+    
+    AnyRefNode Lateral_TF_FFC = {
+      sRel= .Medial_TF_FFC.sRel+(.e_IT*...Thigh.L1);
+      AnyDrawNode drw ={Visible=Off;ScaleXYZ=0.002*{1,1,1};RGB={1,1,1};};
+    };
+
+    //check to see if L is uniform and if the unit vector is pointing in the correct direction  
+    AnyVar FFC_mag_check=vnorm(...Sign*(Lateral_TF_FFC.sRel - Medial_TF_FFC.sRel),2.0);
+    AnyVec3 FFC_vec_check=(...Sign*(Lateral_TF_FFC.sRel - Medial_TF_FFC.sRel))/vnorm(...Sign*(Lateral_TF_FFC.sRel - Medial_TF_FFC.sRel));
+  };
+};
+
+
+
+
+
