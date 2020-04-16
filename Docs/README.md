@@ -1,7 +1,8 @@
 <img src="_static/AMMR_Logo2.png" align="right" />
 
-# AnyBody Managed Model Repository [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1251306.svg)](https://doi.org/10.5281/zenodo.1251306)
+# AnyBody Managed Model Repository 
 > An open library of musculoskeletal models
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1251306.svg)](https://doi.org/10.5281/zenodo.1251306)
 
 The AnyBody Model Repository (AMMR), is an open library of musculoskeletal
 models and examples ready to be used with the [AnyBody Modeling
