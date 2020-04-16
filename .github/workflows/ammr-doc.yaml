@@ -1,0 +1,53 @@
+
+name: ammr-doc
+
+on:
+  push:
+     branches: [ master ]
+  pull_request:
+     branches: [ master ]
+
+jobs:
+  sphinx-build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v2
+        
+      - name: Setup conda
+        uses: goanpeca/setup-miniconda@v1
+        with:
+          activate-environment: sphinx
+          environment-file: Docs/environment.yaml
+          channels: conda-forge
+          
+      - name: Build Documentation
+        shell: bash -l {0}
+        run: |
+          set -e
+          cd Docs
+          make html-dev
+          cd ..
+          mkdir -p public/beta
+          cp -rT Docs/_build/html public/beta
+          
+      - name: Build last tagged version
+        if: github.ref == 'refs/heads/master'
+        shell: bash -l {0}
+        run: |
+          git checkout $(git describe --tags `git rev-list --tags --max-count=1`);
+          cd Docs
+          make clean
+          make html
+          cd ..
+          cp -rT Docs/_build/html public
+           
+      - name: Deploy 🚀
+        if: github.ref == 'refs/heads/master'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+          #personal_token: ${{ secrets.ACCESS_TOKEN }}
+          external_repository: AnyBody/ammr-doc
+          publish_branch: master
+          publish_dir: ./public
