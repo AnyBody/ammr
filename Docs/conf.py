@@ -35,7 +35,7 @@ import cloud_sptheme
 
 
 sys.path.insert(0, os.path.abspath("exts"))
-sys.path.insert(0, os.path.abspath("exts/sphinx_gallery-0.1.13-py3.6.egg"))
+sys.path.insert(0, os.path.abspath("exts/sphinx_gallery-0.7.0.custom.egg"))
 
 
 try:
@@ -137,7 +137,7 @@ language = "en"
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ["_build", "README.rst", "Thumbs.db", ".DS_Store"]
+exclude_patterns = ["_build", "README.rst", "Thumbs.db", ".DS_Store", "exts" ]
 
 # The name of the Pygments (syntax highlighting) style to use.
 highlight_language = "AnyScriptDoc"
@@ -361,4 +361,4 @@ else:
 
 
 def setup(app):
-    app.add_stylesheet("custom.css")
+    app.add_css_file("custom.css")
