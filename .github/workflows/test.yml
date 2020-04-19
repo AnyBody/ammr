@@ -7,21 +7,24 @@ on:
     branches: [ master ]
     paths-ignore:
     - 'Docs/**'
+  schedule:
+    - cron: 0 3 * * *
 
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   test:
-    # The type of runner that the job will run on
+
     runs-on: self-hosted
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: AMMR tests
-      run: pytest -n 4 --instafail
+      - name: Nigthly Full AMMR tests
+        if:  github.event_name == 'schedule'
+        run: pytest -n 4 --instafail --runslow
+
+      - name: AMMR tests (Fast)
+        if:  github.event_name != 'schedule'
+        run: pytest -n 4 --instafail
+
   
