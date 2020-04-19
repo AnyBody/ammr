@@ -200,7 +200,7 @@ project = "AMMR"
 copyright = f"{current_year}, AnyBody Technology"
 author = "AnyBody Technology"
 
-github_doc_root = "https://gitlab.com/anybody/beta/ammr/tree/master/Docs"
+github_doc_root = "https://github.com/AnyBody/ammr/tree/master/Docs"
 
 
 # The version info for the project you're documenting, acts as replacement for
