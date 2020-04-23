@@ -4,7 +4,7 @@ ADL Gait (beta)
 ===============================
 
 Fullbody MoCap model with multple subjects and trials based on the 
-"Rehazenter-Adult-Walking-Dataset" by `Schreiber and Moissenet (2019) <https://doi.org/10.1038/s41597-019-0124-4>`__.
+"Rehazente Adult Walking Dataset" by `Schreiber and Moissenet (2019) <https://doi.org/10.1038/s41597-019-0124-4>`__.
 
 The model has 50 subjects and 1145 trials. Subjects walk at five different
 speeds (conditions) C1: 0–0.4 m/s, C2: 0.4–0.8 m/s, C3: 0.8–1.2 m/s, C4: a 
@@ -22,20 +22,25 @@ These parameters are then loaded in the matching dynamic trials.
 
 .. warning:: The model is a starting point for analysing the 
    "`Rehazenter adult walking dataset <https://doi.org/10.1038/s41597-019-0124-4>`__". 
-   The model has not been through any kind of validation or publication. It is likely that 
+   The model has not been through *any* kind of validation or publication. It is likely that 
    some results will not be correct without further adjustments.
     
 Choises of model parameters are in some cases arbitrary as this model is a work in progress. If you come up 
 with improvements to the model please share them back. 
+
+The model was created by `Enrico De Pieri <https://www.linkedin.com/in/enrico-de-pieri-13096a7a/>`__, 
+`Anderson de Souza Castelo Oliveira <https://vbn.aau.dk/en/persons/121260>`__, and Morten Enemark Lund. 
+and `Morten Enemark Lund <https://www.linkedin.com/in/biomedical>`__
+but has not yet been used for publication.
 
 
 Dataset
 ----------
 
 The full "Rehazenter adult walking dataset" is not distributed with the model. Schreiber and Moissenet (2009) has
-released the data under a Creative Commons license for every one to use. 
+released the data under a Creative Commons license (CC BY 4.0). 
 
-You must download it sepearately from:
+You must download the data sepearately from this model:
 
 * `Rehazenter adult walking dataset  <https://figshare.com/articles/A_multimodal_dataset_of_human_gait_at_different_walking_speeds/7734767>`__
 
@@ -45,7 +50,7 @@ After downloading extract the data into the ´C3DFiles` sub folder.
 Model structure
 ---------------
 
-The files are structured so each trial has its own folder with a main file
+The model files are structured so each trial has its own folder with a main file
 (``Main.any``) and a file with trial specific data (``TrialSpecificData.any``).
 The C3D files are placed together in a separate folder.
 
