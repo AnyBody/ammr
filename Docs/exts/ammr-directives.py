@@ -42,7 +42,7 @@ from docutils.parsers import rst
 from docutils.parsers.rst import directives
 from sphinx.domains import Domain, ObjType, std
 from sphinx.roles import XRefRole
-from sphinx.locale import l_, _
+from sphinx.locale import _
 import sphinx
 
 
@@ -335,19 +335,15 @@ def make_git_link(name, rawtext, text, lineno, inliner, options={}, content=[]):
     """
     This docutils role lets us link to source code via the handy :ammr:git: markup.
     Link references are rooted at the top level source directory. All links resolve
-    to GitLab.
+    to Github.
 
-    Examples:
-
-        To link to proxy/Main.cc:
-
-            This is a link to seg.any file: :ts:git:`proxy/Main.cc`.
+    Example:
 
         To link to CONTRIBUTING.md:
 
             If you want to contribute, take a look at :ammr:git:`CONTRIBUTING.md`.
     """
-    url = "https://gitlab.com/anybody/beta/ammr/blob/{}/{}"
+    url = "https://github.com/AnyBody/ammr/blob/{}/{}"
     ref = ammr_version if ammr_version == git_branch else "master"
     node = nodes.reference(rawtext, text, refuri=url.format(ref, text), **options)
     return [node], []
@@ -363,6 +359,6 @@ def setup(app):
 
     app.add_domain(AMMRDomain)
 
-    # this lets us do :ammr:git:`<file_path>` and link to the file on gitlab
+    # this lets us do :ammr:git:`<file_path>` and link to the file on github
     app.add_role_to_domain("ammr", "git", make_git_link)
 
