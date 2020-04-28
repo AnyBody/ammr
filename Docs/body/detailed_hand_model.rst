@@ -17,8 +17,6 @@ Short example of how to configure and enable the model:
 .. code-block:: AnyScriptDoc
 
     #define BM_HAND_MODEL  _HAND_MODEL_ANYBODY_ 
-    #define BM_MANNEQUIN_DRIVER_HAND_RIGHT ON
-    #define BM_MANNEQUIN_DRIVER_HAND_LEFT ON
 
     
 If you haven't include a custom mannequin file in your model, you can directly specify the posture of the 

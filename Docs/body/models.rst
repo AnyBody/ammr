@@ -58,6 +58,7 @@ which can be assembled into the full human in many combinations.
 
     shoulder_arm_model
     detailed_hand_model
+    regensburg_ulm_hand_model
 
 
 .. toctree::
