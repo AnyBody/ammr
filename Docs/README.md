@@ -1,4 +1,4 @@
-![Nightly Full AMMR tests](https://github.com/AnyBody/ammr/workflows/Nightly%20Full%20AMMR%20tests/badge.svg) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1251306.svg)](https://doi.org/10.5281/zenodo.1251306)<img src="_static/AMMR_Logo2.png" align="right" />
+[![Nightly Full AMMR tests](https://github.com/AnyBody/ammr/workflows/Nightly%20Full%20AMMR%20tests/badge.svg)](https://github.com/AnyBody/ammr/actions?query=workflow%3A%22Nightly+Full+AMMR+tests%22+branch%3Amaster) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1251306.svg)](https://doi.org/10.5281/zenodo.1251306)<img src="_static/AMMR_Logo2.png" align="right" />
 
 # AnyBody Managed Model Repository 
 > An open library of musculoskeletal models
