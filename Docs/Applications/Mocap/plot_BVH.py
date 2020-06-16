@@ -27,36 +27,13 @@ The remaining parts of the model are equvilent to other :ref:`MoCap model <anymo
 Updating old (ammr < 2.2.3) BVH based models
 -------------------------------------------------
 
-The safest approch is to reimplement your model based on the newest BVH example and AMMR v.2.2.3. 
+The safest approch is to reimplement your model based on the newest BVH example and AMMR v.2.3. 
 
 However, it is also posible to change a few files in existing models to utilize the 
-new BVH improvments in AnyBody v.7.2.3. 
+new BVH improvments in AnyBody v.7.3. 
 
-1.  **Important**: Make sure your use the new AMMR (>=2.2.3) and new AnyBody Modeling System (>=7.2.3).
+1.  **Important**: Make sure your use the new AMMR (>=2.3) and new AnyBody Modeling System (>=7.3).
     You can copy your existing model folder into the new AMMR, or edit the local ``libdef.any`` file to point to the new AMMR.
-
-2.  Add following to the local ``libdef.any`` file to enable new features: 
-
-    .. code-block:: AnyScriptDoc
-
-        #define MOCAP_FUTURE_BVH_READER_73
-    
-    From future version 7.3 this will not be necessary
-
-2.  Add the following  the follwing to ``MarkerProtocol.any`` file:
-   
-    .. code-block:: AnyScriptDoc
-
-        Main.ModelSetup.BVHFileData.CompatibilityMode_72 = Off;
-        Main.ModelSetup.BVHFileData.MarkerNames = { 
-           "HEAD", "HEAD_R", "HEAD_L", "SACR", "RHJC", "LHJC", "T1C7Jnt", "SPINE",
-           "L3", "CHEST", "RSJC", "REJC", "RALE", "RWRB", "RWJC", "RHT1", "RHT2",
-           "LSJC", "LEJC", "LALE", "LWRB", "LWJC", "LHT1", "LHT2", "RKJC", "RKNE",
-           "RAJC", "RTOE", "RTOE2", "LKJC", "LKNE", "LAJC", "LTOE", "LTOE2"
-        };
-
-   .. note:: If you have adapted your protocol to anything else that the Xsens standard you need to use 
-       your own marker names. Also, the model may complain about deprecated members, which can just be deleted. 
 
 
 """
