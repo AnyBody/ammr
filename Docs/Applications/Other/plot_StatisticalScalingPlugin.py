@@ -6,7 +6,7 @@ Statistical Scaling Plugin
 Plugin for scaling subjects based on an anthropometric database.
 
 This example shows how to use the Statistical Scaling Plugin. The plugin is a
-small app which allows you to specify only few anatomical or functional
+small app which allows you to simply specify a few anatomical or functional
 parameters when scaling the model. The plugin calculates the remaining (free)
 anthropometric variables based on the ANSUR [#f1]_ anthropometrical database. 
 
