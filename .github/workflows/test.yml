@@ -1,0 +1,41 @@
+name: AMMR tests
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+    paths-ignore:
+      - 'Docs/**'
+
+jobs:
+  test:
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        wrapping: [Default, Experimental]
+    
+    env:
+      AnyBody73_ExperimentalShortestPathSolver: ${{ matrix.wrapping == 'Experimental' }}
+      PYTEST_ADDOPTS: |
+        --anybodycon="C:\Program Files\AnyBody Technology\AnyBody.7.3_Beta\AnyBodyCon.exe"
+
+    name: |
+      ${{ matrix.wrapping }} wrapping
+
+    runs-on: self-hosted
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    
+    steps:
+      - uses: technote-space/auto-cancel-redundant-job@v1
+      - uses: actions/checkout@v2
+
+      - uses: goanpeca/setup-miniconda@v1
+        with:
+          environment-file: Tests/test-environment.yml
+
+      - name: AMMR tests
+        run: pytest -n 4 --instafail
+
+  
