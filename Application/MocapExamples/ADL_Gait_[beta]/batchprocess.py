@@ -3,7 +3,7 @@
    The script runs batch processing in three steps:
 
    1. Runs all the standing reference trials to 
-      calculate scaling and and marker positions for each subject. 
+      calculate scaling and marker positions for each subject. 
 
    2. Runs marker tracking for all trials, saving joint angles to files. 
 
@@ -41,11 +41,11 @@ if len(glob.glob("c3dfiles/**/*.c3d")) < 3:
     warnings.warn(
         "Dataset not present. Please see "
         "Schreiber & Moissenet (2019) https://doi.org/10.1038/s41597-019-0124-4 "
-        "and download data from  https://ndownloader.figshare.com/files/14397965 "
+        "and download the data from https://ndownloader.figshare.com/articles/7734767/versions/8 "
     )
 
 # Create folder for storing batch processing logfiles
-# Note: Log files are automatically deleted unless the model fails.
+# NOTE: Log files are automatically deleted unless the model fails.
 os.makedirs("BatchProcessingLogs", exist_ok=True)
 
 #%% Process all standing reference trials
