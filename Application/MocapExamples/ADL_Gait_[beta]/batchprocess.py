@@ -70,6 +70,7 @@ macro = [
 app = AnyPyProcess()
 app.start_macro(
     macro,
+    ignore_errors=[".anyset"],
     search_subdirs=r"\d{7}_C\d_\d\d\\Main.any",
     logfile="BatchProcessingLogs/MarkerTracking.txt",
 )
