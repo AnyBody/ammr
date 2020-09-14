@@ -146,7 +146,7 @@ pygments_style = "AnyScript"
 
 current_year = os.environ.get("YEAR", datetime.now().year)
 
-ams_version = os.environ.get("AMS_VERSION", "7.3.0")
+ams_version = os.environ.get("AMS_VERSION", "7.3.1")
 if not re.match("^\d\.\d\.\d", ams_version):
     raise ValueError("Wrong format for AMS version, environment variable")
 ams_version_short = ams_version.rpartition(".")[0]
