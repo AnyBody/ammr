@@ -11,7 +11,7 @@ parameters when scaling the model. The plugin calculates the remaining (free)
 anthropometric variables based on the ANSUR [#f1]_ anthropometrical database. 
 
 | **Main file:** 
-| ``Application/Examples/StandingModelScalingDisplay/StatisticalScalingPlugin/Main.any``
+| ``Application/Examples/StatisticalScalingPlugin/Main.any``
 
 The big advantage is that the correlation between variables are maintained, so
 the model will have realistic anthropometrical dimension as long as the
