@@ -67,7 +67,7 @@ macro = [
     mc.OperationRun("Main.RunAnalysis.MarkerTracking"),
 ]
 
-app = AnyPyProcess(ignore_errors=[".anyset"],)
+app = AnyPyProcess(ignore_errors=[".anyset"])
 app.start_macro(
     macro,
     search_subdirs=r"\d{7}_C\d_\d\d\\Main.any",
@@ -84,7 +84,7 @@ macro = [
     # Add more output here
 ]
 
-app = AnyPyProcess()
+app = AnyPyProcess(ignore_errors=[".anyset"])
 results = app.start_macro(
     macro,
     search_subdirs=r"\d{7}_C\d_\d\d\\Main.any",
