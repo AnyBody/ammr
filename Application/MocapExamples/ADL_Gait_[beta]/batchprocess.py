@@ -51,7 +51,7 @@ os.makedirs("BatchProcessingLogs", exist_ok=True)
 #%% Process all standing reference trials
 macro = [mc.Load("Main.any"), mc.OperationRun("Main.RunParameterIdentification")]
 
-app = AnyPyProcess()
+app = AnyPyProcess(num_processes=3)
 app.start_macro(
     macro,
     search_subdirs=r"\d{7}_ST\\Main.any",
@@ -67,7 +67,7 @@ macro = [
     mc.OperationRun("Main.RunAnalysis.MarkerTracking"),
 ]
 
-app = AnyPyProcess(ignore_errors=[".anyset"])
+app = AnyPyProcess(num_processes=3, ignore_errors=[".anyset"])
 app.start_macro(
     macro,
     search_subdirs=r"\d{7}_C\d_\d\d\\Main.any",
@@ -84,7 +84,7 @@ macro = [
     # Add more output here
 ]
 
-app = AnyPyProcess(ignore_errors=[".anyset"])
+app = AnyPyProcess(num_processes=3, ignore_errors=[".anyset"])
 results = app.start_macro(
     macro,
     search_subdirs=r"\d{7}_C\d_\d\d\\Main.any",
