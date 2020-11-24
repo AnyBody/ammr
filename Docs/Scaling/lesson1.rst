@@ -192,22 +192,22 @@ Let's have a look at the content of the AnyMan file to learn what can be entered
     
     
     AnyFolder SegmentDimensions = {
-      AnyVar PelvisWidth = 0.176*.BodyHeight/1.8; //distance between hip joints (0.16 for simple leg model)
-      AnyVar HeadHeight = 0.14*.BodyHeight/1.8;//height in neutral position from  C1HatNode to top of head
-      AnyVar TrunkHeight = 0.620233*.BodyHeight/1.8;//height in neautral position from  C1HatNode to L5SacrumJnt
+      AnyVar PelvisWidth = 0.176*.BodyHeight/1.75; //distance between hip joints (0.16 for simple leg model)
+      AnyVar HeadHeight = 0.14*.BodyHeight/1.75;//height in neutral position from  C1HatNode to top of head
+      AnyVar TrunkHeight = 0.620233*.BodyHeight/1.75;//height in neautral position from  C1HatNode to L5SacrumJnt
       
       
      // These two folders are used by the scaling laws
       AnyFolder Right = 
       {
-        AnyVar UpperArmLength = 0.340079*..BodyHeight/1.8;
-        AnyVar LowerArmLength =0.2690167*..BodyHeight/1.8;
-        AnyVar HandLength = 0.182*..BodyHeight/1.8;
-        AnyVar HandBreadth = 0.085*..BodyHeight/1.8;  
+        AnyVar UpperArmLength = 0.340079*..BodyHeight/1.75;
+        AnyVar LowerArmLength =0.2690167*..BodyHeight/1.75;
+        AnyVar HandLength = 0.182*..BodyHeight/1.75;
+        AnyVar HandBreadth = 0.085*..BodyHeight/1.75;  
     
-        AnyVar ThighLength = 0.4098364*..BodyHeight/1.8;
-        AnyVar ShankLength = 0.4210448*..BodyHeight/1.8;
-        AnyVar FootLength = 0.2571425*..BodyHeight/1.8;
+        AnyVar ThighLength = 0.4098364*..BodyHeight/1.75;
+        AnyVar ShankLength = 0.4210448*..BodyHeight/1.75;
+        AnyVar FootLength = 0.2571425*..BodyHeight/1.75;
         AnyVar TalusLength = 0.133*FootLength;
       };
       
@@ -285,22 +285,22 @@ by modifying the corresponding variable:
 
 
     AnyFolder SegmentDimensions = {
-      AnyVar PelvisWidth = 0.176*.BodyHeight/1.8; //distance between hip joints (0.16 for simple leg model)
-      AnyVar HeadHeight = 0.14*.BodyHeight/1.8;//height in neutral position from  C1HatNode to top of head
-      AnyVar TrunkHeight = 0.620233*.BodyHeight/1.8;//height in neautral position from  C1HatNode to L5SacrumJnt
+      AnyVar PelvisWidth = 0.176*.BodyHeight/1.75; //distance between hip joints (0.16 for simple leg model)
+      AnyVar HeadHeight = 0.14*.BodyHeight/1.75;//height in neutral position from  C1HatNode to top of head
+      AnyVar TrunkHeight = 0.620233*.BodyHeight/1.75;//height in neautral position from  C1HatNode to L5SacrumJnt
       
       
      // These two folders are used by the scaling laws
       AnyFolder Right = 
       {
-        AnyVar UpperArmLength = 0.340079*..BodyHeight/1.8;
-        AnyVar LowerArmLength =0.2690167*..BodyHeight/1.8;
-        AnyVar HandLength = 0.182*..BodyHeight/1.8;
-        AnyVar HandBreadth = 0.085*..BodyHeight/1.8;  
+        AnyVar UpperArmLength = 0.340079*..BodyHeight/1.75;
+        AnyVar LowerArmLength =0.2690167*..BodyHeight/1.75;
+        AnyVar HandLength = 0.182*..BodyHeight/1.75;
+        AnyVar HandBreadth = 0.085*..BodyHeight/1.75;  
     
         AnyVar ThighLength = §0.626§;
-        AnyVar ShankLength = 0.4210448*..BodyHeight/1.8;
-        AnyVar FootLength = 0.2571425*..BodyHeight/1.8;
+        AnyVar ShankLength = 0.4210448*..BodyHeight/1.75;
+        AnyVar FootLength = 0.2571425*..BodyHeight/1.75;
         AnyVar TalusLength = 0.133*FootLength;
       };
   
@@ -332,8 +332,8 @@ to the following set of consistent measures:
       {
         AnyVar UpperArmLength = §0.405§;
         AnyVar LowerArmLength =§0.316§;
-        AnyVar HandLength = 0.182*..BodyHeight/1.8;
-        AnyVar HandBreadth = 0.085*..BodyHeight/1.8;  
+        AnyVar HandLength = 0.182*..BodyHeight/1.75;
+        AnyVar HandBreadth = 0.085*..BodyHeight/1.75;  
     
         AnyVar ThighLength = §0.548§;
         AnyVar ShankLength = §0.551§;
@@ -345,8 +345,8 @@ to the following set of consistent measures:
       {
         AnyVar UpperArmLength = §0.405§;
         AnyVar LowerArmLength =§0.316§;
-        AnyVar HandLength = 0.182*..BodyHeight/1.8;
-        AnyVar HandBreadth = 0.085*..BodyHeight/1.8;  
+        AnyVar HandLength = 0.182*..BodyHeight/1.75;
+        AnyVar HandBreadth = 0.085*..BodyHeight/1.75;  
     
         AnyVar ThighLength = §0.548§;
         AnyVar ShankLength = §0.551§;
@@ -429,35 +429,35 @@ ones and increase the body mass to 110 kg:
     AnyVar Body_Mass = §110§;
     ...
     AnyFolder SegmentDimensions = {
-      AnyVar PelvisWidth = 0.176*.BodyHeight/1.8; //distance between hip joints (0.16 for simple leg model)
-      AnyVar HeadHeight = 0.14*.BodyHeight/1.8;//height in neutral position from  C1HatNode to top of head
-      AnyVar TrunkHeight = 0.620233*.BodyHeight/1.8;//height in neautral position from  C1HatNode to L5SacrumJnt
+      AnyVar PelvisWidth = 0.176*.BodyHeight/1.75; //distance between hip joints (0.16 for simple leg model)
+      AnyVar HeadHeight = 0.14*.BodyHeight/1.75;//height in neutral position from  C1HatNode to top of head
+      AnyVar TrunkHeight = 0.620233*.BodyHeight/1.75;//height in neautral position from  C1HatNode to L5SacrumJnt
       
       
      // These two folders are used by the scaling laws
       AnyFolder Right = 
       {
-        AnyVar UpperArmLength = 0.340079*..BodyHeight/1.8;
-        AnyVar LowerArmLength =0.2690167*..BodyHeight/1.8;
-        AnyVar HandLength = 0.182*..BodyHeight/1.8;
-        AnyVar HandBreadth = 0.085*..BodyHeight/1.8;  
+        AnyVar UpperArmLength = 0.340079*..BodyHeight/1.75;
+        AnyVar LowerArmLength =0.2690167*..BodyHeight/1.75;
+        AnyVar HandLength = 0.182*..BodyHeight/1.75;
+        AnyVar HandBreadth = 0.085*..BodyHeight/1.75;  
     
-        AnyVar ThighLength = 0.4098364*..BodyHeight/1.8;
-        AnyVar ShankLength = 0.4210448*..BodyHeight/1.8;
-        AnyVar FootLength = 0.2571425*..BodyHeight/1.8;
+        AnyVar ThighLength = 0.4098364*..BodyHeight/1.75;
+        AnyVar ShankLength = 0.4210448*..BodyHeight/1.75;
+        AnyVar FootLength = 0.2571425*..BodyHeight/1.75;
         AnyVar TalusLength = 0.133*FootLength;
       };
       
       AnyFolder Left = 
       {
-        AnyVar UpperArmLength = 0.340079*..BodyHeight/1.8;
-        AnyVar LowerArmLength =0.2690167*..BodyHeight/1.8;
-        AnyVar HandLength = 0.182*..BodyHeight/1.8;
-        AnyVar HandBreadth = 0.085*..BodyHeight/1.8;  
+        AnyVar UpperArmLength = 0.340079*..BodyHeight/1.75;
+        AnyVar LowerArmLength =0.2690167*..BodyHeight/1.75;
+        AnyVar HandLength = 0.182*..BodyHeight/1.75;
+        AnyVar HandBreadth = 0.085*..BodyHeight/1.75;  
     
-        AnyVar ThighLength = 0.4098364*..BodyHeight/1.8;
-        AnyVar ShankLength = 0.4210448*..BodyHeight/1.8;
-        AnyVar FootLength = 0.2571425*..BodyHeight/1.8;
+        AnyVar ThighLength = 0.4098364*..BodyHeight/1.75;
+        AnyVar ShankLength = 0.4210448*..BodyHeight/1.75;
+        AnyVar FootLength = 0.2571425*..BodyHeight/1.75;
         AnyVar TalusLength = 0.133*FootLength;
       };
 
