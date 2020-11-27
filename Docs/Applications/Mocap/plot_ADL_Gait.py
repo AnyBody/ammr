@@ -29,22 +29,21 @@ Choises of model parameters are in some cases arbitrary as this model is a work 
 with improvements to the model please share them back. 
 
 The model was created by `Enrico De Pieri <https://www.linkedin.com/in/enrico-de-pieri-13096a7a/>`__, 
-`Anderson de Souza Castelo Oliveira <https://vbn.aau.dk/en/persons/121260>`__, and Morten Enemark Lund. 
-and `Morten Enemark Lund <https://www.linkedin.com/in/biomedical>`__
+`Anderson de Souza Castelo Oliveira <https://vbn.aau.dk/en/persons/121260>`__, and `Morten Enemark Lund <https://www.linkedin.com/in/biomedical>`__
 but has not yet been used for publication.
 
 
 Dataset
 ----------
 
-The full "Rehazenter adult walking dataset" is not distributed with the model. Schreiber and Moissenet (2009) has
+The full "Rehazenter adult walking dataset" is not distributed with the model. Schreiber and Moissenet (2019) has
 released the data under a Creative Commons license (CC BY 4.0). 
 
 You must download the data sepearately from this model:
 
 * `Rehazenter adult walking dataset  <https://figshare.com/articles/A_multimodal_dataset_of_human_gait_at_different_walking_speeds/7734767>`__
 
-After downloading extract the data into the ´C3DFiles` sub folder. 
+After downloading extract the data into the ``C3DFiles`` sub folder. 
 
 
 Model structure

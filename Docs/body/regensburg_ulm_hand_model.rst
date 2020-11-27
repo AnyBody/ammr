@@ -29,53 +29,53 @@ from Ulm University and OTH Regensburg respectively.
 ..     Your browser does not support the video tag.
 ..     </video>
 
-The model was Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
-veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
-dolore
+.. The model was Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+.. eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
+.. veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+.. consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
+.. dolore
 
 
 
-Example Configuration
------------------------
+.. Example Configuration
+.. -----------------------
 
-Short example of how to enable the the model:  
+.. Short example of how to enable the the model:  
 
-.. code-block:: AnyScriptDoc
+.. .. code-block:: AnyScriptDoc
 
-    #define BM_HAND_MODEL  _HAND_MODEL_RUHM_ 
+..     #define BM_HAND_MODEL  _HAND_MODEL_RUHM_ 
 
-You can directly specify the posture of the 
-detailed hand model by setting the values  in ``Main.HumanModel.Mannequin``:
-
-
-.. code-block:: AnyScriptDoc
-
-    HumanModel.Mannequin.Posture.Right = {
-      Finger1 = 
-      {
-         CMCAbduction = 10;
-         CMCFlexion = 40;
-         MCPFlexion = 55;
-         MCPAbduction = 0.0;
-         DIPFlexion = 20;
-      };
-      Finger2 =
-      {
-        MCPFlexion = 10;
-        PIPFlexion = 10;
-        DIPFlexion = 5;
-      }; 
-    };
+.. You can directly specify the posture of the 
+.. detailed hand model by setting the values  in ``Main.HumanModel.Mannequin``:
 
 
-.. rst-class:: float-right
+.. .. code-block:: AnyScriptDoc
 
-.. seealso::
+..     HumanModel.Mannequin.Posture.Right = {
+..       Finger1 = 
+..       {
+..          CMCAbduction = 10;
+..          CMCFlexion = 40;
+..          MCPFlexion = 55;
+..          MCPAbduction = 0.0;
+..          DIPFlexion = 20;
+..       };
+..       Finger2 =
+..       {
+..         MCPFlexion = 10;
+..         PIPFlexion = 10;
+..         DIPFlexion = 5;
+..       }; 
+..     };
+
+
+.. .. rst-class:: float-right
+
+.. .. seealso::
    
-   The :doc:`Leg configuration parameters <../bm_config/leg>` for a
-   full list of configuration parameters.
+..    The :doc:`Leg configuration parameters <../bm_config/leg>` for a
+..    full list of configuration parameters.
 
 
 References

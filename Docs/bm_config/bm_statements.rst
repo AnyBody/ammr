@@ -540,20 +540,6 @@ All BodyModel parameters
 | 
 
 
-.. ammr:bm_statement:: BM_TRUNK_CERVICAL_LIGAMENTS
-
-    A switch to control the cervical spine ligaments.
-
-
-    :Default: :ammr:bm_statement:`BM_TRUNK_LIGAMENTS`
-    :Example: ``#define BM_TRUNK_CERVICAL_LIGAMENTS BM_TRUNK_LIGAMENTS``
-
-|  
-|   
-| 
-| 
-
-
 .. ammr:bm_statement:: BM_HAND_MODEL
 
     Parameter defining the Hand model used.

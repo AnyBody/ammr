@@ -37,7 +37,7 @@ also include documentation are distributed with the [AnyBody Modeling
 System](https://www.anybodytech.com/software/ams/), or available with a DOI from
 [zendo.org/communities/anybody](https://zenodo.org/communities/anybody/). 
 
-Please see the [AMMR documentation](https://anyscript.org/ammr-doc/dev) for more
+Please see the [AMMR documentation](https://anyscript.org/ammr-doc/beta) for more
 information on getting started using the AMMR.
 
 ## Contributing
