@@ -30,7 +30,7 @@ on a single parameter:
 
 .. code-block:: AnyScriptDoc
 
-    AnyVar HeadHeight = 0.14*.BodyHeight/1.8;
+    AnyVar HeadHeight = 0.14*.BodyHeight/1.75;
 
 and in case of the ``_SCALING_LENGTHMASSFAT_`` it would also depend on the
 corresponding mass of the head segment. But we could actually know even more
@@ -190,7 +190,7 @@ by defining a common scaling factor and applying it to all dimensions like this:
     AnyVar BodyMass = 75 ;
     AnyVar BodyHeight = 180 /100;
 
-    §#define STATURE_SCALE_FACTOR 1.733/1.8§
+    §#define STATURE_SCALE_FACTOR 1.733/1.75§
 
     ...
 
