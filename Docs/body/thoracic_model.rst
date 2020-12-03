@@ -1,41 +1,48 @@
-Thoracic model (beta)
+Thoracic spine model (beta)
 =============================
 
-.. rst-class:: without-title
-
-.. caution:: **Unreleased model:** The thorcic model is not included in the public release. 
+.. caution:: **Unreleased model:** The thoracic spine model is not included in the public release. 
     The model is still under development. Access to the model can be given on request. so please 
     `contact us <sales@anybodytech.com>`_ if you are interested in this work. 
 
 
 
-Some text about the model
+The thoracic spine model consists of the thoracic vertebral column and the ribcage, including individual ribs and sternum. It can be used as a single segment or as a collection of several segments interconnected by joints replicating physiological connection and load transfer mechanisms.
 
+The thoracic vertebral column contains 12 vertebrae with 3 DoF spherical joints in between each 2 vertebrae, connecting to the cervical spine through a spherical joint at T1C7 levels, and a spherical joint to the lumbar spine at T12L1 levels. Costovertebral and sternocostal joint are also represented through kinematic joints. The majority of the muscle fascicles are defined for the  thoracic column and ribcage region. 
 
 
 .. image:: _static/thoracic.png
    :width: 100%
 
-
-.. rst-class:: without-title
-
 .. warning:: **Complex model:** The Thoracic model is very complex and not recommended for
     beginners in musculoskeletal modeling and AnyBody.
 
 
-.. Example Configuration
-.. -----------------------
 
-.. Short example of how to configure the model: 
+Example Configuration
+-----------------------
 
-.. .. code-block:: AnyScriptDoc
+The thoracic column and ribcage model comes with several different configurations: 
 
-..     #define BM_EXAMPLE_CONFIG  ON 
+.. code-block:: AnyScriptDoc
+    :emphasize-lines: 3
+
+    #define BM_TRUNK_RIGCAGE_MODE _RIBCAGE_RIGID_
+    #define BM_TRUNK_RIGCAGE_MODE _RIBCAGE_SEMI_RIGID_
+    #define BM_TRUNK_RIGCAGE_MODE _RIBCAGE_POTENTIAL_ENERGY_
 
 
-.. .. rst-class:: float-right
+.. rst-class:: float-right
 
-.. .. seealso::
+.. seealso::
    
-..    The :doc:`XXXXX configuration parameters <../bm_config/arm>` for a
-..    full list of parmaeters.
+   The :doc:`Trunk configuration parameters <../bm_config/trunk>` for a
+   full list of Trunk parmaeters.
+   
+References
+----------------
+
+-  Ignasiak, D., Dendorfer, S., Fergusson, S.J. (2016), "Thoracolumbar spine model with 
+   articulated ribcage for the prediction of dynamic spinal loading", 
+   Journal of Biomechanics, vol. 49 (6), pp. 959-966.
