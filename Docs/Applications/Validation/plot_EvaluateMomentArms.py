@@ -14,10 +14,10 @@ folder.
     :align: center
 
     The figure shows the moment arms (in meters) for Iliacus and GluteusMaximus inferior) during the hip flexion.
-    Agonists muscles (Iliacus) have positve moment arms, and anatagonist (GluetusMaximus) have negative moment arms. 
+    Agonists muscles (Iliacus) have positive moment arms, and anatagonist (GluetusMaximus) have negative moment arms. 
 
 .. note:: This  will include a lot of studies (one per DOF) so they will 
-          affect perfomance when loading and switching between tabs/operations.
+          affect performance when loading and switching between tabs/operations.
 
 
 **Main file:** ``Application/Validation/EvaluateJointStrength/EvaluateMomentArms.main.any``

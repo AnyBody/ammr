@@ -15,7 +15,7 @@ However, AnyBody has the possibility to predict ground reaction forces (GRF), so
 you can make inverse dynamics models based on recorded motion without GRF force
 measurement (Fluit et al., 2014; Jung et al., 2014). 
 
-More information is availble in the :doc:`documenation for the GRF prediction </anymocap/grf-prediction>`.
+More information is available in the :doc:`documentation for the GRF prediction </anymocap/grf-prediction>`.
 
 """
 
