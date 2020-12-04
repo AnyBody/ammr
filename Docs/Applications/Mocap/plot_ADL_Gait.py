@@ -3,8 +3,8 @@ r"""
 ADL Gait (beta)
 ===============================
 
-Fullbody MoCap model with multple subjects and trials based on the 
-"Rehazente Adult Walking Dataset" by `Schreiber and Moissenet (2019) <https://doi.org/10.1038/s41597-019-0124-4>`__.
+Fullbody MoCap model with multiple subjects and trials based on the 
+"Rehazenter Adult Walking Dataset" by `Schreiber and Moissenet (2019) <https://doi.org/10.1038/s41597-019-0124-4>`__.
 
 .. rst-class:: without-title
 .. seealso:: **Model file location in AMMR:** 
@@ -16,7 +16,7 @@ speeds (conditions) C1: 0–0.4 m/s, C2: 0.4–0.8 m/s, C3: 0.8–1.2 m/s, C4: a
 self-selected spontaneous speed, C5, self-selected fast speed.
 
 The dataset uses 53 reflective markers and measured ground reaction forces. A 
-standing reference trial is used to indentify a number parameters: 
+standing reference trial is used to identify a number parameters: 
 
 * Segment lengths
 * Tibial torsion angle
@@ -30,7 +30,7 @@ These parameters are then loaded in the matching dynamic trials.
    The model has not been through *any* kind of validation or publication. It is likely that 
    some results will not be correct without further adjustments.
     
-Choises of model parameters are in some cases arbitrary as this model is a work in progress. If you come up 
+Choices of model parameters are in some cases arbitrary as this model is a work in progress. If you come up 
 with improvements to the model please share them back. 
 
 The model was created by `Enrico De Pieri <https://www.linkedin.com/in/enrico-de-pieri-13096a7a/>`__, 
