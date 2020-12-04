@@ -6,9 +6,10 @@ The Glasgow-Maastricht Foot Model (GM Foot)
 
 .. rst-class:: without-title
 
-.. caution:: **Unreleased model:** The FootGM model is not included in the public release. 
+.. caution:: **Unreleased model:** The model is under development and not yet included in the managed model repository. 
     An updated version of the Glasgow-Maastricht Foot model 
     is under development, and used in various research projects. 
+    See the `GitHub repository <https://github.com/AnyBody/GMFoot>`__ for more info.
 
     Access to the model can be given on request. so please 
     `contact us <sales@anybodytech.com>`_ if you are interested in this work. 
@@ -31,6 +32,13 @@ a validation process comparing it with other experimental and computational stud
         <source src="../_static/footgm.mp4" type="video/mp4">
     Your browser does not support the video tag.
     </video>
+
+
+.. rst-class:: without-title
+
+.. warning:: **Complex model:** The GM Foot model is very complex and not recommended for
+    beginners in musculoskeletal modeling and AnyBody.
+
 
 
 
@@ -60,13 +68,6 @@ To use the GM foot model the file GM_Foot_libdef.any must be included before the
 
 Model structure
 ----------------
-
-
-.. rst-class:: without-title
-
-.. warning:: **Complex model:** The GM Foot model is very complex and not recommended for
-    beginners in musculoskeletal modeling and AnyBody.
-
 
 
 The foot model includes 26 rigid segments representing all the bones of
