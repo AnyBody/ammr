@@ -30,6 +30,7 @@ thoracic column and ribcage region.
 .. .. image:: _static/thoracic.png
 ..    :width: 100%
 
+.. rst-class:: without-title
 .. warning:: **Complex model:** The Thoracic model is a high complexity model and not recommended for
     beginners in musculoskeletal modeling and AnyBody.
 
