@@ -7,7 +7,12 @@ Example of full body MoCap model using the Plug-in-Gait marker protocol but
 without force plates. The external forces are instead predicted using the GRF
 algorithms.
 
-``Application/MocapExamples/Plug-in-gait_Simple/FullBody_GRFPrediction.main.any``
+
+.. rst-class:: without-title
+.. seealso:: **Main file location in AMMR:** 
+
+  :menuselection:`Application --> MocapExamples --> Plug-in-gait_Simple -->
+  FullBody_GRFPrediction.main.any`
 
 Motion capture data is often recorded without force plates. In traditional
 inverse dynamics, this would make it impossible to perform a dynamic analysis.
