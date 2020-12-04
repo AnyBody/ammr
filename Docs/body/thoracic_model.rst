@@ -1,21 +1,36 @@
-Thoracic spine model (beta)
+Thoracic spine model
 =============================
 
-.. caution:: **Unreleased model:** The thoracic spine model is not included in the public release. 
-    The model is still under development. Access to the model can be given on request. so please 
+.. rst-class:: without-title
+
+.. caution:: **Unreleased model:** This is an upcoming model not included in the public release. 
+    The model is still under development. Access to the model can be given on request. Please 
     `contact us <sales@anybodytech.com>`_ if you are interested in this work. 
 
+The thoracic spine model consists of the thoracic vertebral column and the
+ribcage, including individual ribs and sternum. It can be used as a single
+segment or as a collection of several segments interconnected by joints
+replicating physiological connection and load transfer mechanisms.
+
+.. raw:: html 
+
+    <video width="70%" style="display:block; margin: 0 auto;" controls autoplay loop>
+        <source src="../_static/thoracic1.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+    </video>
+
+The thoracic vertebral column contains 12 vertebrae with 3 DoF spherical joints
+in between each 2 vertebrae, connecting to the cervical spine through a
+spherical joint at T1C7 levels, and a spherical joint to the lumbar spine at
+T12L1 levels. Costovertebral and sternocostal joint are also represented through
+kinematic joints. The majority of the muscle fascicles are defined for the
+thoracic column and ribcage region. 
 
 
-The thoracic spine model consists of the thoracic vertebral column and the ribcage, including individual ribs and sternum. It can be used as a single segment or as a collection of several segments interconnected by joints replicating physiological connection and load transfer mechanisms.
+.. .. image:: _static/thoracic.png
+..    :width: 100%
 
-The thoracic vertebral column contains 12 vertebrae with 3 DoF spherical joints in between each 2 vertebrae, connecting to the cervical spine through a spherical joint at T1C7 levels, and a spherical joint to the lumbar spine at T12L1 levels. Costovertebral and sternocostal joint are also represented through kinematic joints. The majority of the muscle fascicles are defined for the  thoracic column and ribcage region. 
-
-
-.. image:: _static/thoracic.png
-   :width: 100%
-
-.. warning:: **Complex model:** The Thoracic model is very complex and not recommended for
+.. warning:: **Complex model:** The Thoracic model is a high complexity model and not recommended for
     beginners in musculoskeletal modeling and AnyBody.
 
 
@@ -33,12 +48,12 @@ The thoracic column and ribcage model comes with several different configuration
     #define BM_TRUNK_RIGCAGE_MODE _RIBCAGE_POTENTIAL_ENERGY_
 
 
-.. rst-class:: float-right
+.. .. rst-class:: float-right
 
-.. seealso::
+.. .. seealso::
    
-   The :doc:`Trunk configuration parameters <../bm_config/trunk>` for a
-   full list of Trunk parmaeters.
+..    The :doc:`Trunk configuration parameters <../bm_config/trunk>` for a
+..    full list of Trunk parmaeters.
    
 References
 ----------------
