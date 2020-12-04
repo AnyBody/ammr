@@ -20,7 +20,12 @@ folder.
           affect performance when loading and switching between tabs/operations.
 
 
-**Main file:** ``Application/Validation/EvaluateJointStrength/EvaluateMomentArms.main.any``
+
+.. rst-class:: without-title
+.. seealso:: **Main file location in AMMR:** 
+
+  :menuselection:`Application --> Validation --> EvaluateMomentArms --> EvaluateMomentArms.main.any`
+
 
 """
 

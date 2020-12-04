@@ -10,12 +10,16 @@ small app which allows you to simply specify a few anatomical or functional
 parameters when scaling the model. The plugin calculates the remaining (free)
 anthropometric variables based on the ANSUR [#f1]_ anthropometrical database. 
 
-| **Main file:** 
-| ``Application/Examples/StandingModelScalingDisplay/StatisticalScalingPlugin/Main.any``
+
+.. rst-class:: without-title
+.. seealso:: **Main file location in AMMR:** 
+
+  :menuselection:`Application --> Examples --> StatisticalScalingPlugin --> Main.any`
+
 
 The big advantage is that the correlation between variables are maintained, so
 the model will have realistic anthropometrical dimension as long as the
-contraints does not conflict (e.g. a very high stature with very short legs )
+constraints does not conflict (e.g. a very high stature with very short legs )
 
 .. figure:: /Applications/Other/StatisticalScalingPlugin1.png
     :align: center
@@ -24,7 +28,7 @@ contraints does not conflict (e.g. a very high stature with very short legs )
 The algorithm used by the plugin is based on principal component analysis (PCA)
 of the correlations between variables in the anthropometric database. An optimization
 problem is then solved minimizing the normalized principal component subject to
-the anthropometical contraints given by the user. Please see: 
+the anthropometricall constraintsngiven by the user. Please see: 
 
    Rasmussen, J., Waagepetersen, R. P. & Rasmussen, K. P. 
    Projection of anthropometric correlation for virtual population modelling.
@@ -32,27 +36,28 @@ the anthropometical contraints given by the user. Please see:
 
 
 .. warning:: The plugin can not be used to generate subjects which are very
-     different from the pubulation the ANSUR database. For example children. 
+     different from the population of the ANSUR database. For example children. 
 
 
 Use the plugin in other models
 ------------------------------
 
 The plugin can be used in any model as long as it uses the
-:ammr:bm_constant:`_SCALING_XYZ_` scaling law. It is also necessary to speciy into
-which file the plugin should write the calculated antrhopometrics. This is done
+:ammr:bm_constant:`_SCALING_XYZ_` scaling law. It is also necessary to specify into
+which file the plugin should write the calculated anthropometrics. This is done
 by setting `#path ANSUR_PLUGIN_ANYMAN_FILE` model file which contains the
-anthropometics. 
+anthropometrics
+. 
 
 .. code:: AnyScriptDoc
 
     #define BM_SCALING _SCALING_XYZ_
 
     #include "<ANYBODY_PATH_AMMR>/Tools/Plugins/ANSUR_Plugin.any"
-    #path ANSUR_PLUGIN_ANYMAN_FILE "anthropometics.any"
+    #path ANSUR_PLUGIN_ANYMAN_FILE "anthropometrics.any"
     
     // Ensure that the generated anthropometrics are
-    #include "anthropometics.any"
+    #include "anthropometrics.any"
 
 .. rubric:: Footnotes
 

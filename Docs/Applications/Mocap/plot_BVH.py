@@ -7,7 +7,11 @@ Example of a MoCap model using data from an inertial motional caputure suit.
 The model uses a BVH file with data from an Xsens suit. The ground reaction
 forces are predicted using the GRF prediction algorithm.
 
-**Example Main File**: :menuselection:`Application --> MocapExamples --> BVH_Xsens --> Subjects --> S1 --> S01_Trial01 --> Main.any`
+
+.. rst-class:: without-title
+.. seealso:: **Main file Example:** 
+
+  :menuselection:`Application --> MocapExamples --> BVH_Xsens --> Subjects --> S1 --> S01_Trial01 --> Main.any`
 
 The model works using virtual markers placed on the BVH rig (i.e. the stick-figure
 model specified by the BVH file). The virtual markers are used to make the

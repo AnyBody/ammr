@@ -3,12 +3,17 @@ r"""
 Posture Prediction Model
 ===============================
 
+
 This is a model which can predict the posture as a consequence of applied loads in hands. 
 It does this by minimizing joint torques and applying balance drivers which account for external 
 applied loads.
 
-| **Main file:** 
-| ``Application/Examples/StandingPosturePredictionWithLoad/StandingPosturePrediction.main.any``
+
+.. rst-class:: without-title
+.. seealso:: **Main file location in AMMR:** 
+
+  :menuselection:`Application --> Examples --> StandingPosturePredictionWithLoad -->
+  StandingPosturePrediction.main.any`
 
 .. figure:: /Applications/images/StandingPosturePredictionModel_UpwardsForce.jpg
     :align: center
@@ -20,6 +25,10 @@ The model is driven by a combination of the following drivers:
  * Hands are linked to an object, of which positioning can be altered using widgets
  
 Two type of loads can be applied, either a fixed weight of the object and/or a force vector.
+
+
+Usage
+-----------------
 
 To run the model
  * Load the model

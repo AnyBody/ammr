@@ -8,7 +8,12 @@ and walking on three typ4 force platforms. The model is fairly simple and a
 good starting point for new users. If you plan to have many trials/subjects,
 take a look at the example which better support multiple trails.
 
-``Application/MocapExamples/Plug-in-gait_Simple/LowerExtremity.main.any``
+.. rst-class:: without-title
+.. seealso:: **Main file location in AMMR:** 
+
+  :menuselection:`Application --> MocapExamples --> Plug-in-gait_Simple -->
+  LowerExtremity.main.any`
+
 
 """
 
