@@ -3,9 +3,9 @@ Regensburg-Ulm Hand Model (RUHM)
 
 .. rst-class:: without-title
 
-.. caution:: **Unreleased model:** The model is still under development and not included in the public model repository. 
-   The model is, however, used for various research projects and access to the development version
-   can be given on request. See the `GitHub repository <https://github.com/AnyBody/GMFoot>`__ for more info.
+.. caution:: **Unreleased model:** The model is under development and not yet included in the managed model repository. 
+   The model is used in various research projects and access to the development version
+   can be given on request. 
 
 The Regensburg-Ulm hand model (RUHM) is a detailed
 hand model which includes all extrinsic and intrinsic muscles using data

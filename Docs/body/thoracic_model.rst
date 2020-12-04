@@ -3,8 +3,8 @@ Thoracic spine model
 
 .. rst-class:: without-title
 
-.. caution:: **Unreleased model:** This is an upcoming model not included in the public release. 
-    The model is still under development. Access to the model can be given on request. Please 
+.. caution:: **Unreleased model:** The model is under development and not yet included in the managed model repository. 
+   The model is used in various research projects and access to the model can be given on request. Please 
     `contact us <sales@anybodytech.com>`_ if you are interested in this work. 
 
 The thoracic spine model consists of the thoracic vertebral column and the
@@ -26,14 +26,14 @@ T12L1 levels. Costovertebral and sternocostal joint are also represented through
 kinematic joints. The majority of the muscle fascicles are defined for the
 thoracic column and ribcage region. 
 
-
-.. .. image:: _static/thoracic.png
-..    :width: 100%
-
 .. rst-class:: without-title
 .. warning:: **Complex model:** The Thoracic model is a high complexity model and not recommended for
     beginners in musculoskeletal modeling and AnyBody.
 
+
+
+.. .. image:: _static/thoracic.png
+..    :width: 100%
 
 
 Example Configuration
