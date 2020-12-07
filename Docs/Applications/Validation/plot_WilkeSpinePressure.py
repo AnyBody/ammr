@@ -5,6 +5,12 @@ Wilke Spine Disc Pressure Model
 
 The Wilke Spine Pressure models are eight models that compare intradiscal pressure measured between L4 and L5 discs in different postures.
 
+
+.. rst-class:: without-title
+.. seealso:: **Model location in AMMR:** 
+
+  :menuselection:`Application --> Validation --> WilkeSpinalDiscPressure -->`
+
 For the comparison, all data is normalized (100 %) to the forces from *'SpinePressureStanding.Main.any'*  and *'Relaxed Standing'* to show trend validity between the various postures.
 
 .. figure:: /Applications/Validation/wilke.svg

@@ -3,15 +3,20 @@ r"""
 ADL Gait (beta)
 ===============================
 
-Fullbody MoCap model with multple subjects and trials based on the 
-"Rehazente Adult Walking Dataset" by `Schreiber and Moissenet (2019) <https://doi.org/10.1038/s41597-019-0124-4>`__.
+Fullbody MoCap model with multiple subjects and trials based on the 
+"Rehazenter Adult Walking Dataset" by `Schreiber and Moissenet (2019) <https://doi.org/10.1038/s41597-019-0124-4>`__.
+
+.. rst-class:: without-title
+.. seealso:: **Model file location in AMMR:** 
+
+  :menuselection:`Application --> MocapExamples --> ADL_Gait_[beta]`
 
 The model has 50 subjects and 1145 trials. Subjects walk at five different
 speeds (conditions) C1: 0–0.4 m/s, C2: 0.4–0.8 m/s, C3: 0.8–1.2 m/s, C4: a 
 self-selected spontaneous speed, C5, self-selected fast speed.
 
 The dataset uses 53 reflective markers and measured ground reaction forces. A 
-standing reference trial is used to indentify a number parameters: 
+standing reference trial is used to identify a number parameters: 
 
 * Segment lengths
 * Tibial torsion angle
@@ -25,7 +30,7 @@ These parameters are then loaded in the matching dynamic trials.
    The model has not been through *any* kind of validation or publication. It is likely that 
    some results will not be correct without further adjustments.
     
-Choises of model parameters are in some cases arbitrary as this model is a work in progress. If you come up 
+Choices of model parameters are in some cases arbitrary as this model is a work in progress. If you come up 
 with improvements to the model please share them back. 
 
 The model was created by `Enrico De Pieri <https://www.linkedin.com/in/enrico-de-pieri-13096a7a/>`__, 
@@ -57,7 +62,7 @@ The model is structured as outlined below:
 
 .. code-block:: none
 
-   Application/MocapExamples/Rehazenter-adult-walking-model
+   Application/MocapExamples/ADL_Gait_[beta]
     │   libdef.any
     │   C3DSettings.any
     │   BodyModelConfig.any
@@ -104,7 +109,7 @@ The model is structured as outlined below:
 
 Batch processing
 ----------------
-The model also contains a batch processing Python script for running all models autmatically. The script 
+The model also contains a batch processing Python script for running all models. The script 
 ``batchprocess.py`` is located in the top-level folder. 
 
 To use the scirpt install the `Anaconda Python Distribution <https://www.anaconda.com/distribution/#download-section>`__. 
@@ -123,7 +128,7 @@ Then run the following command in the model folder:
     python batchprocess.py
 
 .. note:: You may need to modify the script to output the variables you are interested in. It may also 
-    be necessary to modify the number parrallel AnyBody instances to match the number of licenses you have. 
+    be necessary to modify the number parallel AnyBody instances to match the number of licenses you have. 
     
 
 Bibliography

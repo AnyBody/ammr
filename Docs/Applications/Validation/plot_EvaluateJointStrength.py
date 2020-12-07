@@ -18,7 +18,11 @@ There are currently only joint strength studies for the arm model and the Leg mo
           affect perfomance when loading and switching between tabs/operations.
 
 
-**Main file:** ``Application/Validation/EvaluateJointStrength/EvaluateJointStrength.main.any``
+.. rst-class:: without-title
+.. seealso:: **Main file location in AMMR:** 
+
+  :menuselection:`Application --> Validation --> EvaluateJointStrength --> EvaluateJointStrength.main.any`
+
 
 """
 

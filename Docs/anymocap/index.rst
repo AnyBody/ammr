@@ -5,7 +5,7 @@ The AnyMoCap Framework
 ######################
 
 The AnyMoCap model is an effort to create a simple and unified framework for
-doing any kind of mocap analysis with the `AnyBody Modeling
+doing any kind of MoCap analysis with the `AnyBody Modeling
 System <http://anybodytech.com>`__.
 
 .. image:: /_static/anymocap.jpg
@@ -34,14 +34,14 @@ Over determinate kinematic analysis
 *************************************
 
 Musculoskeletal models that use Motion capture data are different from other
-types of models found the AMMR.  Most importantly, MOCAP models usually require
+types of models found the AMMR.  Most importantly, MoCap models usually require
 an over-determinate kinematic solver to handle the excess in information that
 the optical markers provide. 
 
 The over-determinate solver in AMS works great, but
 it can only find velocities and accelerations numerically. That has some
 performance issue when running inverse dynamics analysis. To overcome the
-problem, the MOCAP analysis is split into a two-step procedure, as illustrated on
+problem, the MoCap analysis is split into a two-step procedure, as illustrated on
 the figure below:
 
 .. _AnyMoCap-flow-figure:

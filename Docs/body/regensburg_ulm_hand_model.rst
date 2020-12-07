@@ -1,16 +1,23 @@
-.. _ruhm:
+Regensburg-Ulm Hand Model (RUHM) 
+================================
 
-Regensburg Ulm Hand Model (RUHM)
-==================================
+.. rst-class:: without-title
 
-The Regensburg-Ulm hand model (RUHM) is full detailed hand model for the AMS
-including all extrinsic and intrinsic muscles using data
-by the University of West Bohemia gained through an anatomical study by Fiala et al. (???) 
-of ten cadaver hands.
+.. caution:: **Unreleased model:** The model is under development and not yet included in the managed model repository. 
+   The model is used in various research projects and access to the development version
+   can be given on request. 
+
+The Regensburg-Ulm hand model (RUHM) is a detailed
+hand model which includes all extrinsic and intrinsic muscles using data
+from an anatomical study by Havelková et al. [HAZI20]_ (Charles University, Pilsen) of 16 cadaveric forearms. 
 
 
-.. figure:: _static/RUHMHandCloseUp.jpg
+.. figure:: _static/ruhm1.png
     :width: 50%
+
+
+.. figure:: _static/ruhm2.png
+    :width: 70%
 
 
 The hand model consists of 22 hand segments
@@ -18,12 +25,11 @@ The hand model consists of 22 hand segments
 linked by physiological idealized joints giving a total of 31 DOF.
 For the sake of reduced complexity the carpal bones where treated as one rigid body.
 
-The Regensburg-Ulm-Hand-Model was developed by Lucas Engelhardt and Maximilian Melzner
+The Regensburg-Ulm-Hand-Model was developed by Lucas Engelhardt and Maximilian Melzner [EMHF20]_
 from Ulm University and OTH Regensburg respectively. 
 
 .. EMBED a rotatable 3D version of the hand model.
 .. .. raw:: html 
-
 ..     <video width="45%" style="display:block; margin: 0 auto;" controls autoplay loop>
 ..         <source src="../_static/TLEM2_rotating_model.mp4" type="video/mp4">
 ..     Your browser does not support the video tag.
@@ -73,9 +79,11 @@ from Ulm University and OTH Regensburg respectively.
 .. .. rst-class:: float-right
 
 .. .. seealso::
-   
+
 ..    The :doc:`Leg configuration parameters <../bm_config/leg>` for a
 ..    full list of configuration parameters.
+.. rst-class:: without-title
+
 
 
 References
@@ -83,6 +91,11 @@ References
 
 If you need to cite the model use the following references: 
 
-.. [ENME20] Engelhardt,L. and Melzner,M. “Cool title for the RUHM paper”
-   Nature (2020) ( `link <https://nature.com>`__ ) 
 
+.. [EMHF20] Engelhardt, L., Melzner, M., Havelkova, L. & Fiala, P. 
+   A new musculoskeletal AnyBodyTM detailed hand model i. Journal of Computer Methods in Biomechanics and Biomedical Engineering (2020) 
+   doi: 10.1080/10255842.2020.1851367
+
+.. [HAZI20] Havelková L., Zítka T., Fiala P., Rybarova M., Tupý R., Kalis V., & Ismail K.M. (2020). 
+   Data for: Hand muscles attachments: A Geometrical model (Version pre pub sc v1.1) [Data set]. Zenodo. 
+   (`link <http://doi.org/10.5281/zenodo.3954024>`__)

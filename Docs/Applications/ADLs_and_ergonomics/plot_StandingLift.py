@@ -5,11 +5,13 @@ Lifting Model
 
 Standing body model lifting a box.
 
-**Main files:** 
+.. rst-class:: without-title
+.. seealso:: **Main files location in AMMR:** 
 
-* ``Application/Examples/StandingLift/StandingLift.Main.any``
-* ``Application/Examples/StandingLift/StandingLiftFEA.Main.any``
+  :menuselection:`Application --> Examples --> StandingLift -->`
 
+  :menuselection:`StandingLift.Main.any` / 
+  :menuselection:`StandingLiftFEA.Main.any`
 
 
 This application can be a good starting point for new applications involving 
