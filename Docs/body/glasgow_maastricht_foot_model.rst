@@ -6,14 +6,8 @@ The Glasgow-Maastricht Foot Model (GM Foot)
 
 .. rst-class:: without-title
 
-.. caution:: **Unreleased model:** The model is under development and not yet included in the managed model repository. 
-    An updated version of the Glasgow-Maastricht Foot model 
-    is under development, and used in various research projects. 
-    See the `GitHub repository <https://github.com/AnyBody/gm-foot>`__ for more info.
-
-    Access to the model can be given on request. so please 
-    `contact us <sales@anybodytech.com>`_ if you are interested in this work. 
-
+.. caution:: **External model:** The model is under development and not yet included in the managed model repository. 
+    You can find this model in a public `repository on GitHub <https://github.com/AnyBody/gm-foot>`_.
 
 AnyBody Technology developed in corporation with Glasgow Caledonian
 University and University of Maastricht inside the `AFootprint EU project <http://www.afootprint.eu/>`_ 
