@@ -1,0 +1,86 @@
+
+
+MultiWrapSurfs TricepsLHWrapping (
+BASE_FRAME = TricepsLHWrappingSeg.RotNode,
+NUMBER_OF_CYLINDERS= 1,
+TYPE=2,
+DEBUG=0
+) = 
+{     
+  Radius = 0.86*vnorm(..Seg.Scapula.EdgeNode1.sRel - ..Seg.Scapula.gh.sRel);
+  
+  WrapSurfLength = 4*Radius;
+  Angles = ..Sign*({-30});  
+  
+  AnySeg TricepsLHWrappingSeg ={
+    //^ Segment on which the wrapping cylinders are placed. 
+    //^ The ssegment follows scapula kinematically, but is dynamically 
+    //^ attached to both scapula and humerus to ensure that forces on 
+    //^ the wrapping cylinders are distributed correctly between humerus 
+    //^ scapula 
+    
+    Mass=0;
+    Jii={0.0,0.0,0.0};    
+    
+    r0= ...Seg.Humerus.gh.sRel*...Seg.Humerus.Axes0'+...Seg.Humerus.r0;  
+    Axes0=...Seg.Humerus.Axes0
+    #if _LEFT_RIGHT_ == "LEFT"
+    * RotMat(-pi/2,y) 
+    #endif
+    ;
+    
+
+
+    AnyRefNode RotNode = 
+    {
+      AnyVar PosteriorTilt = 0;
+      #if _LEFT_RIGHT_ == "LEFT"
+      ARel = RotMat(-0.1,y)*RotMat(pi,x)*RotMat(PosteriorTilt*pi/180,x);
+      #else
+      ARel = RotMat(-0.1,y)*RotMat(PosteriorTilt*pi/180,x);
+      #endif
+    };  
+  };   
+  
+  AnySphericalJoint WrapSegmentHumerusJnt ={
+    AnyRefNode &ref1=...Seg.Humerus.gh ;
+    AnySeg &ref2=.TricepsLHWrappingSeg; 
+  };
+  
+  AnyFolder &ScapulaRef=..Seg.Scapula;
+
+  AnyFolder &HumerusRef =..Seg.Humerus;
+
+  AnyKinMotion WrappingSegmentDriver={
+    AnyKinMeasureLinComb LinComb = {
+    AnyKinRotational HumerusScapulaRot={
+      AnyRefNode &ref2=...ScapulaRef.gh_rotated1; 
+      AnyRefNode &ref1=...HumerusRef.gh_rotated1;
+      Type = RotVector;
+    };
+    AnyKinRotational HumerusWrapSegmentRot={
+      AnyRefFrame &ref1=...ScapulaRef.gh_rotated1;
+      AnyRefFrame &ref2=...TricepsLHWrappingSeg; 
+      Type =RotVector;
+    };
+      OutDim = 3;
+      Coef={
+        {1,0,0,-1,0,0},
+        {0,0.00,0,0,-1,0}, //this one controls the rotaion around the long axis og humerus
+        {0,0, 1,0,0,-1}
+      };   
+    };
+  };
+    
+  AnyReacForce MomentsToScapula = 
+  {
+    AnyKinRotational rot ={
+      AnyRefFrame &ref1=..TricepsLHWrappingSeg;
+      AnyRefFrame &ref2=....Seg.Scapula;
+      Type=RotVector;
+    };  
+  };  
+  
+}; 
+
+  
