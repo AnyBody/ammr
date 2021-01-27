@@ -89,6 +89,7 @@ extensions = [
     "cloud_sptheme.ext.table_styling",
     "ammr-directives",
     "inline_highlight",
+    "anylink",
 ]
 
 
@@ -190,6 +191,18 @@ no_index = """
 .. meta::
    :robots: noindex
 """
+
+
+# -- Options for AnyLink extensions -----------------------------------
+
+anylink_ams_version = ams_version_short
+anylink_open_text = "Open in AnyBody"
+anylink_open_tooltip = f"Opens model in AnyBody {ams_version_short} (Must be installed) "
+
+# ----------------------------------------------------------------------
+
+
+
 
 if tags.has("draft"):
     rst_epilog = rst_epilog + no_index
