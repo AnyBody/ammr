@@ -5,7 +5,7 @@ Thoracic spine model
 
 .. caution:: **Unreleased model:** The model is under development and not yet included in the managed model repository. 
    The model is used in various research projects and access to the model can be given on request. Please 
-    `contact us <sales@anybodytech.com>`_ if you are interested in this work. 
+   `contact us <sales@anybodytech.com>`_ if you are interested in this work. 
 
 The thoracic spine model consists of the thoracic vertebral column and the
 ribcage, including individual ribs and sternum. It can be used as a single
