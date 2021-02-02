@@ -41,9 +41,9 @@ class AnyLinkFile(ReferenceRole):
             )
             supscript += nodes.Text(")", ")")
             reference += supscript
-            reference += nodes.inline(
-                "", self.config.anylink_open_tooltip, classes=["anylink-tooltiptext"]
-            )
+            # reference += nodes.inline(
+            #     "", self.config.anylink_open_tooltip, classes=["anylink-tooltiptext"]
+            # )
 
         except ValueError:
             msg = self.inliner.reporter.error(
