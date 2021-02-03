@@ -251,6 +251,8 @@ html_theme = "cloud"
 
 html_theme_path = [cloud_sptheme.get_theme_dir()]
 
+html_copy_source = False
+
 
 html_title = "%s v%s Documentation" % (project, release)
 
