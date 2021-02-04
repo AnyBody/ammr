@@ -7,7 +7,7 @@ function anylink_file(dummy_element, version, repo, target, relative_repo_path) 
     href = href + "repo=" + repo
     href = href + "&target=" + target
 
-    if (window.location.protocol == "file:"){
+    if (window.location.protocol == "file:" && repo_relative_path != ""){
        current_dir = path.dirname(window.location.pathname)
        repo_path = path.join(current_dir, DOCUMENTATION_OPTIONS.URL_ROOT, relative_repo_path)
        if (repo_path.startsWith("/") && repo_path[2] == ":"){

@@ -43,7 +43,10 @@ class AnyLinkFile(ReferenceRole):
 
             # Formatting of the anylink:// url is done in the javascript function when the pages loads
             # to ensure we can get the correct path to local repositories. See anylink.js 
-            repo_relative_path = self.config.anylink_repo_relative_paths[self.repo]
+            if self.config.anylink_link_local_repo:
+                repo_relative_path = self.config.anylink_repo_relative_paths[self.repo]
+            else:
+                repo_relative_path = ""
             javascript_fun = f"anylink_file(this, '{self.config.anylink_ams_version}', '{self.repo}', '{self.target}', '{repo_relative_path}')"
             # The mall formed <img> element trigger the onerror js function which fills the 
             # href of the parent node (<a>), then it removes the <img> element
@@ -93,6 +96,7 @@ def setup(app):
     app.add_config_value(
         "anylink_open_tooltip", "Open model in AnyBody.\n Requires AnyBody", "env"
     )
+    app.add_config_value("anylink_link_local_repo", True, "env")
 
     # Add js and css files to sphinx
     css_files = ["anylink.css"]

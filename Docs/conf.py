@@ -199,11 +199,16 @@ anylink_ams_version = ams_version_short
 anylink_open_text = "Open in AnyBody"
 anylink_open_tooltip = f"Opens model in AnyBody {ams_version_short} (Must be installed) "
 
+# This will cause add an argument to anylink:// urls ("repo_path=") with the path
+# to the local repository when serving html locally. (defaults to True)
+anylink_link_local_repo = True
+
 # The paths where the repositories can be found relative to html root of the 
 # sphinx documentation. This is used when creating links to local repositories.
 anylink_repo_relative_paths = {
     "ammr": "../ammr"  
 }
+
 # ----------------------------------------------------------------------
 
 
