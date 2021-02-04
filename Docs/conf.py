@@ -199,6 +199,11 @@ anylink_ams_version = ams_version_short
 anylink_open_text = "Open in AnyBody"
 anylink_open_tooltip = f"Opens model in AnyBody {ams_version_short} (Must be installed) "
 
+# The paths where the repositories can be found relative to html root of the 
+# sphinx documentation. This is used when creating links to local repositories.
+anylink_repo_relative_paths = {
+    "ammr": "../ammr"  
+}
 # ----------------------------------------------------------------------
 
 
