@@ -6,15 +6,16 @@ Free posture Models
 A basic static full-body model standing on a floor.
 
 .. rst-class:: without-title
-.. seealso:: **Model location in AMMR:** 
+.. seealso:: **Model location in AMMR:**
 
-  :menuselection:`Application --> Examples --> FreePosture -->` 
+  :menuselection:`Application --> Examples --> FreePosture` 
 
-  | :menuselection:`FreePostureFullBodyMove.Main.any`
-  | :menuselection:`FreePostureFullBodyShoulderRhythmMove.Main.any`
-  | :menuselection:`FreePostureFullBodyShoulderRhythmStatic.Main.any`
-  | :menuselection:`FreePostureFullBodyShoulderRhythmStatic.Main.any`
-
+  4 Models are available: 
+  
+  * :anylink-ammr:`FullBodyStatic.Main.any <Application/Examples/FreePosture/FreePostureFullBodyStatic.Main.any>`
+  * :anylink-ammr:`FullBodyMove.Main.any <Application/Examples/FreePosture/FreePostureFullBodyMove.Main.any>`
+  * :anylink-ammr:`FullBodyShoulderRhythmStatic.Main.any <Application/Examples/FreePosture/FreePostureFullBodyShoulderRhythmStatic.Main.any>`
+  * :anylink-ammr:`FullBodyShoulderRhythmMove.Main.any <Application/Examples/FreePosture/FreePostureFullBodyShoulderRhythmMove.Main.any>`
 
 This model uses the full body model, i.e. most of the body parts available
 in the AAUHuman part of the Body directory. The model is grounded at the

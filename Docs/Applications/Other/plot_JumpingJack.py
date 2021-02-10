@@ -8,9 +8,7 @@ A simple jumping jack model, illustrating some kinematic modeling concepts for a
 .. rst-class:: without-title
 .. seealso:: **Main file location in AMMR:** 
 
-  :menuselection:`Application --> Examples --> JumpingJack -->
-  JumpingJack.main.any`
-
+  :anylink-ammr:`Application/Examples/JumpingJack/JumpingJack.main.any`
 
 
 """

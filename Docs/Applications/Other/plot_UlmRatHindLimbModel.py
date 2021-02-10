@@ -10,10 +10,11 @@ of the lower extremity of 15 rats. Kinematics was created from x-ray movies in
 two different planes. This model is good example of small stand alone model to answer a specific
 research question.
 
-The main file of the model is located at:
+.. rst-class:: without-title
+.. seealso:: **Main file location in AMMR:** 
 
-:menuselection:`Application --> Beta --> UlmRatHindLimbModel -->
-UlmRatHindLimbModel.Main.any`
+  :anylink-ammr:`Application/Beta/UlmRatHindLimbModel/UlmRatHindLimbModel.Main.any`
+
 
 .. .. figure:: _static/DetailedHandCloseUp.jpg ..    :width: 50%
 ..

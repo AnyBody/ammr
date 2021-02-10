@@ -9,10 +9,13 @@ FullBody or as LowerExtremity version.
 .. rst-class:: without-title
 .. seealso:: **Main file location in AMMR:** 
 
-  :menuselection:`Application --> Examples --> BikeModel -->` 
+  :menuselection:`Application --> Examples --> BikeModel` 
   
-  :menuselection:`BikeModel-FullBody.main.any` / 
-  :menuselection:`BikeModel-LowerBody.main.any`
+  Two variants of the model exist:
+
+  *  :anylink-ammr:`BikeModel-FullBody.main.any <Application/Examples/BikeModel/BikeModel-FullBody.main.any>`
+  *  :anylink-ammr:`BikeModel-LowerBody.main.any <Application/Examples/BikeModel/BikeModel-LowerBody.main.any>`
+
 
 
 The model illustrates several important topics in model 

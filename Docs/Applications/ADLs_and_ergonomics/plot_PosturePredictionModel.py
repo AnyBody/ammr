@@ -12,8 +12,7 @@ applied loads.
 .. rst-class:: without-title
 .. seealso:: **Main file location in AMMR:** 
 
-  :menuselection:`Application --> Examples --> StandingPosturePredictionWithLoad -->
-  StandingPosturePrediction.main.any`
+  :anylink-ammr:`Application/Examples/StandingPosturePredictionWithLoad/StandingPosturePrediction.main.any`
 
 .. figure:: /Applications/images/StandingPosturePredictionModel_UpwardsForce.jpg
     :align: center

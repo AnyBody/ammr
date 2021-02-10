@@ -10,8 +10,8 @@ pedal.
 .. rst-class:: without-title
 .. seealso:: **Main file location in AMMR:** 
 
-  :menuselection:`Application --> Examples --> PedalDemoConditional -->
-  PedalDemoConditional.Main.any`
+  :anylink-ammr:`Application/Examples/PedalDemoConditional/PedalDemoConditional.Main.any`
+
 
 This model is for design of a pedal that is comfortable to use 
 for a seated operator depending on the stiffness of the embedded

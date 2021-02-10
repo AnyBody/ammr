@@ -9,7 +9,7 @@ SolidModeling Class Template in the ToolBox of AMMR.
 .. rst-class:: without-title
 .. seealso:: **Main file location in AMMR:** 
 
-  :menuselection:`Application --> Examples --> LegPressMachine --> LegPressMachine.main.any`
+  :anylink-ammr:`Application/Examples/LegPressMachine/LegPressMachine.main.any`
 
 
 """

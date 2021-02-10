@@ -9,9 +9,14 @@ forces are predicted using the GRF prediction algorithm.
 
 
 .. rst-class:: without-title
-.. seealso:: **Main file Example:** 
+.. seealso:: **Model location in AMMR:** 
 
-  :menuselection:`Application --> MocapExamples --> BVH_Xsens --> Subjects --> S1 --> S01_Trial01 --> Main.any`
+  :menuselection:`Application --> MocapExamples --> BVH_Xsens`
+  
+  Trial examples: 
+  
+  * :anylink-ammr:`Subjects/S1/S1_Trial01/Main.any <Application/MocapExamples/BVH_Xsens/Subjects/S1/S01_Trial01/Main.any>`
+  * :anylink-ammr:`Subjects/S1/S1_Trial02/Main.any <Application/MocapExamples/BVH_Xsens/Subjects/S1/S01_Trial02/Main.any>`
 
 The model works using virtual markers placed on the BVH rig (i.e. the stick-figure
 model specified by the BVH file). The virtual markers are used to make the

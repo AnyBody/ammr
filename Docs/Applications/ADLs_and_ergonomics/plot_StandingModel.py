@@ -20,7 +20,7 @@ The model is identical to the standing model created with the  template generato
 .. rst-class:: without-title
 .. seealso:: **Main file location in AMMR:** 
 
-  :menuselection:`Application --> Examples --> StandingModel --> StandingModel.Main.any`
+  :anylink-ammr:`Application/Examples/StandingModel/StandingModel.Main.any`
 
 
 """

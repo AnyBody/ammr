@@ -11,6 +11,18 @@ The Wilke Spine Pressure models are eight models that compare intradiscal pressu
 
   :menuselection:`Application --> Validation --> WilkeSpinalDiscPressure -->`
 
+    * :anylink-ammr:`SpinePressureLyingOnBack.main.any <Application/Validation/WilkeSpinalDiscPressure/SpinePressureLyingOnBack/SpinePressureLyingOnBack.main.any>`
+    * :anylink-ammr:`SpinePressureSeatingRelaxed.main.any <Application/Validation/WilkeSpinalDiscPressure/SpinePressureSeatingRelaxed/SpinePressureSeatingRelaxed.main.any>`
+    * :anylink-ammr:`SpinePressureSeatingStraitNoSupport.main.any <Application/Validation/WilkeSpinalDiscPressure/SpinePressureSeatingStraitNoSupport/SpinePressureSeatingStraitNoSupport.main.any>`
+    * :anylink-ammr:`SpinePressureStanding.main.any <Application/Validation/WilkeSpinalDiscPressure/SpinePressureStanding/SpinePressureStanding.main.any>`
+    * :anylink-ammr:`SpinePressureStandingFlexed.main.any <Application/Validation/WilkeSpinalDiscPressure/SpinePressureStandingFlexed/SpinePressureStandingFlexed.main.any>`
+    * :anylink-ammr:`SpinePressureStandingLiftClose.main.any <Application/Validation/WilkeSpinalDiscPressure/SpinePressureStandingLiftClose/SpinePressureStandingLiftClose.main.any>`
+    * :anylink-ammr:`SpinePressureStandingLiftFlexed.main.any <Application/Validation/WilkeSpinalDiscPressure/SpinePressureStandingLiftFlexed/SpinePressureStandingLiftFlexed.main.any>`
+    * :anylink-ammr:`SpinePressureStandingLiftStretchedArms.main.any <Application/Validation/WilkeSpinalDiscPressure/SpinePressureStandingLiftStretchedArms/SpinePressureStandingLiftStretchedArms.main.any>`
+
+
+
+
 For the comparison, all data is normalized (100 %) to the forces from *'SpinePressureStanding.Main.any'*  and *'Relaxed Standing'* to show trend validity between the various postures.
 
 .. figure:: /Applications/Validation/wilke.svg

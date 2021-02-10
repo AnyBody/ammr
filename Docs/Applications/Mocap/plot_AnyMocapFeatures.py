@@ -14,11 +14,13 @@ A collection of small models that show-off special features of the
 
 This includes:
 
-* Offset to forceplates.
-* Individual cutoff frequencies for markers.
-* Normalization with respect to gait cycle events
-* Using time-varying weight for markers
-* Much more.
+* Offset to forceplates:  :anylink-ammr:`📂 <Application/MocapExamples/SpecialFeatures/ForcePlateSurfaceOffset.main.any>`
+
+* Individual cutoff frequencies for markers: :anylink-ammr:`📂 <Application/MocapExamples/SpecialFeatures/IndividualMarkerCutoffFrequency.main.any>`
+
+* Normalization with respect to gait cycle events: :anylink-ammr:`📂 <Application/MocapExamples/SpecialFeatures/GaitCycleNormalization.main.any>`
+
+* Using time-varying weight for markers: :anylink-ammr:`📂 <Application/MocapExamples/SpecialFeatures/MarkerWeightsExample.main.any>`
 
 """
 import sys

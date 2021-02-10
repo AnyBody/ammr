@@ -8,6 +8,14 @@ and trials. This special structure makes it much easier to work with large
 datasets with multiple subjects and trials. Hence, this model is the best
 starting point for analyzing bigger MoCap experiments.
 
+  :menuselection:`Application --> MocapExamples --> Plug-in-gait_MultiTrial_StandingRef`
+  
+  Trial examples: 
+  
+  * :anylink-ammr:`Subjects/S1/S1_StandingRef/Main.any <Application/MocapExamples/Plug-in-gait_MultiTrial_StandingRef/Subjects/S1/S1_StandingRef/Main.any>`
+  * :anylink-ammr:`Subjects/S1/S1_FlywheelSquat/Main.any <Application/MocapExamples/Plug-in-gait_MultiTrial_StandingRef/Subjects/S1/S1_FlywheelSquat/Main.any>`
+
+
 This example shows the :doc:`AnyMoCap framework </anymocap/index>` applied to a set
 of squatting trials.
 The subject specific scaling and marker optimization is done on a standing

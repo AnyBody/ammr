@@ -9,8 +9,7 @@ of a foot pedal example.
 .. rst-class:: without-title
 .. seealso:: **Main file location in AMMR:** 
 
-  :menuselection:`Application --> Examples --> PedalDemo -->
-  PedalDemo.main.any`
+  :anylink-ammr:`Application/Examples/PedalDemo/PedalDemo.main.any`
 
 This model is for design of a pedal that is comfortable to use 
 for a seated operator depending on the stiffness of the embedded

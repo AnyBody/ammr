@@ -9,7 +9,7 @@ Mandible model example.
 .. rst-class:: without-title
 .. seealso:: **Main file location in AMMR:** 
 
-  :menuselection:`Application --> Validation --> MandibleChewingAndClenching --> MandibleChewingAndClenching.main.any`
+  :anylink-ammr:`Application/Validation/MandibleChewingAndClenching/MandibleChewingAndClenching.main.any`
 
       
 Model simulating chewing and comparing values to measurements from de Zee et al., J. of Biomechanics 2007.

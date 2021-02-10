@@ -9,7 +9,7 @@ The purpose of the model is shoulder validation.
 .. rst-class:: without-title
 .. seealso:: **Main file location in AMMR:** 
 
-  :menuselection:`Application --> Examples --> WheelTurn --> WheelTurn.Main.any`
+  :anylink-ammr:`Application/Examples/WheelTurn/WheelTurn.Main.any`
 
 
 

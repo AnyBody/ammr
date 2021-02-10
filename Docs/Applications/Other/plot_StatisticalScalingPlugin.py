@@ -14,7 +14,7 @@ anthropometric variables based on the ANSUR [#f1]_ anthropometrical database.
 .. rst-class:: without-title
 .. seealso:: **Main file location in AMMR:** 
 
-  :menuselection:`Application --> Examples --> StatisticalScalingPlugin --> Main.any`
+  :anylink-ammr:`Application/Examples/StatisticalScalingPlugin/Main.any`
 
 
 The big advantage is that the correlation between variables are maintained, so

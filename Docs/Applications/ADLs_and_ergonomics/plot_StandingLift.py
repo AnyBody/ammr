@@ -10,8 +10,11 @@ Standing body model lifting a box.
 
   :menuselection:`Application --> Examples --> StandingLift -->`
 
-  :menuselection:`StandingLift.Main.any` / 
-  :menuselection:`StandingLiftFEA.Main.any`
+  Two models are available:
+
+  * :anylink-ammr:`StandingLift.Main.any <Application/Examples/StandingLift/StandingLift.Main.any>`
+  * :anylink-ammr:`StandingLiftFEA.Main.any <Application/Examples/StandingLift/StandingLiftFEA.Main.any>`
+
 
 
 This application can be a good starting point for new applications involving 

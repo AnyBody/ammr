@@ -9,8 +9,7 @@ interface between the two.
 .. rst-class:: without-title
 .. seealso:: **Main file location in AMMR:** 
 
-  :menuselection:`Application --> Examples --> SeatedHuman -->
-  SeatedHuman.Main.any`
+  :anylink-ammr:`Application/Examples/SeatedHuman/SeatedHuman.Main.any`
 
 
 The Seated Human is a family of models resulting from a

@@ -9,7 +9,7 @@ EMG measurements.
 .. rst-class:: without-title
 .. seealso:: **Main file location in AMMR:** 
 
-  :menuselection:`Application --> Validation --> GaitVaughan --> GaitVaughan.Main.any`
+  :anylink-ammr:`Application/Validation/GaitVaughan/GaitVaughan.Main.any`
 
 
 """

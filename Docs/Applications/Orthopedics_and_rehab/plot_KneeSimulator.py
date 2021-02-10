@@ -6,7 +6,11 @@ Knee Simulator Model
 Model of a Knee Simulator using a knee implant model and force-dependent kinematics (FDK). 
 For an indepth description of the mathematics and mechanics behind FDK please see [AZDN17]_.
 
-**Main file:** ``Application/Examples/KneeSimulator/AnyKneeSimulator.Main.any``
+.. rst-class:: without-title
+.. seealso:: **Main file location in AMMR:** 
+
+  :anylink-ammr:`Application/Examples/KneeSimulator/Main.any`
+
 
 
 .. figure:: /Applications/images/KneeSimulator_Full.jpg

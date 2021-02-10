@@ -9,7 +9,8 @@ extended with the human.
 .. rst-class:: without-title
 .. seealso:: **Main file location in AMMR:** 
 
-  :menuselection:`Application --> Examples --> CrossTrainer --> CrossTrainer.main.any`
+  :anylink-ammr:`Application/Examples/CrossTrainer/CrossTrainer.main.any`
+
 
 
 The model is also the subject of the AnyBody Tutorial

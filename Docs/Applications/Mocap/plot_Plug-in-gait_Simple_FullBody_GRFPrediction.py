@@ -11,8 +11,7 @@ algorithms.
 .. rst-class:: without-title
 .. seealso:: **Main file location in AMMR:** 
 
-  :menuselection:`Application --> MocapExamples --> Plug-in-gait_Simple -->
-  FullBody_GRFPrediction.main.any`
+  :anylink-ammr:`Application/MocapExamples/Plug-in-gait_Simple/FullBody_GRFPrediction.main.any`
 
 Motion capture data is often recorded without force plates. In traditional
 inverse dynamics, this would make it impossible to perform a dynamic analysis.

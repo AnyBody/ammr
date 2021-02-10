@@ -6,7 +6,12 @@ Wheel Chair model
 A model of a person sitting in a wheelchair, the model is driven by motion
 capture data.
 
-**Main file:** ``Application/Examples/WheelChairRancho/WheelChairRancho.main.any``
+.. rst-class:: without-title
+.. seealso:: **Main file location in AMMR:** 
+
+  :anylink-ammr:`Application/Examples/WheelChairRancho/WheelChairRancho.main.any`
+
+
 
 This is a model of a person sitting in a wheelchair. The model only comprises
 the upper right arm.

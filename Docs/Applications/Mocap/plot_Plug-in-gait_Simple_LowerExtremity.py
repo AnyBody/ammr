@@ -11,8 +11,8 @@ take a look at the example which better support multiple trails.
 .. rst-class:: without-title
 .. seealso:: **Main file location in AMMR:** 
 
-  :menuselection:`Application --> MocapExamples --> Plug-in-gait_Simple -->
-  LowerExtremity.main.any`
+  :anylink-ammr:`Application/MocapExamples/Plug-in-gait_Simple/LowerExtremity.main.any`
+
 
 
 """

@@ -10,7 +10,7 @@ study.
 .. rst-class:: without-title
 .. seealso:: **Main file location in AMMR:** 
 
-  :menuselection:`Application --> Validation --> BergmannGH --> BergmannGH.Main.any`
+  :anylink-ammr:`Application/Validation/BergmannGH/BergmannGH.main.any`
 
 
 

@@ -13,8 +13,9 @@ This model is good example of small stand alone model to answer specific researc
 
 .. seealso:: **Main file location in AMMR:** 
 
-  :menuselection:`Application --> Beta --> IndexFinger_JohnWu -->
-  IndexFinger_JohnWu.Main.any`
+  :anylink-ammr:`Application/Beta/IndexFinger_JohnWu/IndexFinger_JohnWu.Main.any`
+
+
 
 .. .. figure:: _static/DetailedHandCloseUp.jpg ..    :width: 50%
 ..

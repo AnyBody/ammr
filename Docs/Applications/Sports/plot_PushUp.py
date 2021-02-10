@@ -9,7 +9,7 @@ A full-body model doing push-ups with assumed drivers.
 .. rst-class:: without-title
 .. seealso:: **Main file location in AMMR:** 
 
-  :menuselection:`Application --> Examples --> PushUp --> PushUp.main.any`
+  :anylink-ammr:`Application/Examples/PushUp/PushUp.main.any`
 
 
 The model displays several topics

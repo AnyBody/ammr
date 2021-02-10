@@ -9,7 +9,16 @@ Fullbody MoCap model with multiple subjects and trials based on the
 .. rst-class:: without-title
 .. seealso:: **Model file location in AMMR:** 
 
-  :menuselection:`Application --> MocapExamples --> ADL_Gait_[beta]`
+  Top level model folder is at: 
+
+  - :menuselection:`Application --> MocapExamples --> ADL_Gait_[beta]`
+
+  Some example trials:
+
+  * :anylink-ammr:`Subjects/2014001/2014001_C1_01/Main.any <Application/MocapExamples/ADL_Gait_[beta]/Subjects/2014001/2014001_C1_01/Main.any>`
+  * :anylink-ammr:`Subjects/2014001/2014001_C1_02/Main.any <Application/MocapExamples/ADL_Gait_[beta]/Subjects/2014001/2014001_C1_02/Main.any>`
+  * :anylink-ammr:`Subjects/2014001/2014001_ST/Main.any <Application/MocapExamples/ADL_Gait_[beta]/Subjects/2014001/2014001_ST/Main.any>`
+
 
 The model has 50 subjects and 1145 trials. Subjects walk at five different
 speeds (conditions) C1: 0–0.4 m/s, C2: 0.4–0.8 m/s, C3: 0.8–1.2 m/s, C4: a 

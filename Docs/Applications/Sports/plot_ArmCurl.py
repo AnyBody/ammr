@@ -8,7 +8,7 @@ Example of an Arm Curl fitness machine.
 .. rst-class:: without-title
 .. seealso:: **Main file location in AMMR:** 
 
-  :menuselection:`Application --> Examples --> ArmCurl --> ArmCurl.main.any`
+  :anylink-ammr:`Application/Examples/ArmCurl/ArmCurl.main.any`
 
 
 The objective of this example is to adjust the eccentricity of the cable wheel

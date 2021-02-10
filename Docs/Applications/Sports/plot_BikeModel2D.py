@@ -9,7 +9,7 @@ leg model.
 .. rst-class:: without-title
 .. seealso:: **Main file location in AMMR:** 
 
-  :menuselection:`Application --> Examples --> BikeModel2D --> BikeModel2D.main.any`
+  :anylink-ammr:`Application/Examples/BikeModel2D/BikeModel2D.main.any`
 
 
 Although this model can be rotated in 3-D space it really is just a saggital
