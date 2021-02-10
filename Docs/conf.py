@@ -28,6 +28,7 @@
 import os
 import re
 import sys
+from pathlib import Path
 import subprocess
 from datetime import datetime
 
@@ -204,9 +205,12 @@ anylink_open_tooltip = f"Opens model in AnyBody {ams_version_short} (Must be ins
 anylink_link_local_repo = True
 
 # The paths where the repositories can be found relative to html root of the 
-# sphinx documentation. This is used when creating links to local repositories.
+# sphinx documentation when the documentation is deployed.
+# This is used when creating links to local repositories.
+# (if a tuple is given, the second element holds the absolute path to
+#  repository, and is used to check validity of the target at build time)
 anylink_repo_relative_paths = {
-    "ammr": "../"  
+    "ammr": ("../", Path(__file__).parent.parent)
 }
 
 # ----------------------------------------------------------------------

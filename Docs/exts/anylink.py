@@ -45,6 +45,11 @@ class AnyLinkFile(ReferenceRole):
             # to ensure we can get the correct path to local repositories. See anylink.js 
             if self.config.anylink_link_local_repo:
                 repo_relative_path = self.config.anylink_repo_relative_paths[self.repo]
+                if isinstance(repo_relative_path, tuple):
+                # if it is a tuple use the second element for validating the target 
+                    repo_relative_path, repo_path = repo_relative_path
+                    if not Path(repo_path).joinpath(self.target).exists():
+                        raise ValueError("Target file does not exists")
             else:
                 repo_relative_path = ""
             javascript_fun = f"anylink_file(this, '{self.config.anylink_ams_version}', '{self.repo}', '{self.target}', '{repo_relative_path}')"
