@@ -112,6 +112,7 @@ AnyFolder STL =
   #include "<BM_LEG_DATASET_PATH>STL.any"
 };
 
+#if BM_FOOT_MODEL == _FOOT_MODEL_DEFAULT_
 AnySeg Talus =
 {
   AnyFolder &StdPar = ..ModelParameters.Talus;
@@ -230,6 +231,7 @@ AnySeg Talus =
   };
 }; // end of Talus segment
 
+
 AnySeg Foot =
 {
   AnyFolder &StdPar = ..ModelParameters.Foot;
@@ -278,7 +280,7 @@ AnySeg Foot =
   #endif
   
   /// This coordinate system is placed according the International Society of Biomechanics' (ISB)
-  /// recommendations for an anatomical coordinate system for the hip joint in the thigh segment.
+  /// recommendations for an anatomical coordinate system for the ankle joint in the foot segment.
   /// See ISB proposal by G. Wu, S. Siegler, P. Allard, C. Kirtley, A. Leardini, D. Rosenbaum, M. Whittle, D.
   /// D'Lima, L. Cristofolini, H. Witte, O. Schmid, I. Stokes. J. Biomech. 35(4):543-548, 2002
   /// Section 3.4
@@ -316,6 +318,12 @@ AnySeg Foot =
   AnyRefNode GroundJoint =
   {
     sRel = .Scale(.StdPar.GroundJoint);// Estimation, between Heel and Toetip
+    ARel = .ScalingNode.ARel;
+  };
+#else
+  AnyRefNode GroundJoint =
+  {
+    sRel = 0.55*.HeelContactNodeLow.sRel + 0.45*.BigToeNode.sRel;
     ARel = .ScalingNode.ARel;
   };
 #endif
@@ -622,6 +630,8 @@ AnySeg Foot =
 };// End of foot
 
 
+#endif //BM_FOOT_MODEL == _FOOT_MODEL_DEFAULT_
+
 AnySeg Shank =
 {
   AnyFolder &StdPar = ..ModelParameters.Shank;
@@ -673,11 +683,12 @@ AnySeg Shank =
     AnyVec3 Y = cross(Z,X);
     sRel = O;
     ARel = {X/vnorm(X),Y/vnorm(Y),Z/vnorm(Z)}';
+    
   };
 
 
   /// This coordinate system is placed according the International Society of Biomechanics' (ISB)
-  /// recommendations for an anatomical coordinate system for the hip joint in the thigh segment.
+  /// recommendations for an anatomical coordinate system for the ankle joint in the shank segment.
   /// See ISB proposal by G. Wu, S. Siegler, P. Allard, C. Kirtley, A. Leardini, D. Rosenbaum, M. Whittle, D.
   /// D'Lima, L. Cristofolini, H. Witte, O. Schmid, I. Stokes. J. Biomech. 35(4):543-548, 2002
   /// Section 3.3
@@ -756,6 +767,7 @@ AnySeg Shank =
     #endif
 
     #include "../DrawSettings/JointAxesDistal.any"
+  
   };
   #endif
   
@@ -1254,6 +1266,28 @@ AnySeg Thigh =
     };
   };
 
+  AnyRefNode RectusWrapSurf =
+  {
+    AnyMatrix p = .Scale({
+    .StdPar.IliacusWrapLandmarks[1]-(.StdPar.IliacusWrapLandmarks[1]-.StdPar.IliacusWrapLandmarks[0]),
+    .StdPar.IliacusWrapLandmarks[1]+(.StdPar.IliacusWrapLandmarks[1]-.StdPar.IliacusWrapLandmarks[0]),
+    .StdPar.IliacusWrapLandmarks[2],
+    .StdPar.IliacusWrapLandmarks[3],
+    .StdPar.IliacusWrapLandmarks[4]
+    });
+    
+    AnyFloat lengthscalefactor = 0;
+    AnyFloat radiusscalefactor = 1.15;
+
+    AnyVar Z_rotation =pi*(1-...Sign)*0.5;
+    #include "<ANYBODY_PATH_MODELUTILS>/WrappingSurfaces/WrappingCylinder5PointFit.any"
+    
+    cyl = 
+    {
+      CapRatio = 1;
+      CapRatio2 = 3;
+    };
+  };
 #endif
 
    #if JOINT_TYPE_KNEE != _JOINT_TYPE_USERDEFINED_
@@ -1645,6 +1679,7 @@ AnySeg Thigh =
     AnyFloat radiusscalefactor = 1;
   
     AnyVar Z_rotation =0;
+    cyl.CapRatio = 1;
   
     #include "<ANYBODY_PATH_MODELUTILS>/WrappingSurfaces/WrappingCylinder5PointFit.any"
   };
@@ -1952,8 +1987,69 @@ PelvisSeg =
           CapRatio = 0.1;
         };
       };
+      
+      AnyRefNode BicepsFemorisCaputLongumWrapSurf ={
+      
+         AnyFloat p = {
+           .Semitendinosus1Node.sRel+{0.001,0,0},
+           .BicepsFemorisCaputLongum1Node.sRel+{0.001,0,0},
+           .BicepsFemorisCaputLongum1Node.sRel+{0.001,0,0},
+           .IschialTuberosityWrapNode.sRel,
+           .QuadratusFemoris3Node.sRel
+        };
+        
+        AnyVar lengthscalefactor=12;
+        AnyVar Z_rotation=0;
+        AnyVar radiusscalefactor=1;
+        #include "<ANYBODY_PATH_MODELUTILS>/WrappingSurfaces/WrappingCylinder5PointFit.any"
+
+        AnyDrawSphere p1 = {Position = (.p[0]-.sRel)*.ARel;ScaleXYZ = 0.002*{1,1,1};Visible=Off;};
+        AnyDrawSphere p2 = {Position = (.p[1]-.sRel)*.ARel;ScaleXYZ = 0.002*{1,1,1};Visible=Off;};
+        AnyDrawSphere p3 = {Position = (.p[2]-.sRel)*.ARel;ScaleXYZ = 0.002*{1,1,1};Visible=Off;};
+        AnyDrawSphere p4 = {Position = (.p[3]-.sRel)*.ARel;ScaleXYZ = 0.002*{1,1,1};Visible=Off;};
+        AnyDrawSphere p5 = {Position = (.p[4]-.sRel)*.ARel;ScaleXYZ = 0.002*{1,1,1};Visible=Off;};
+        cyl =  
+        {
+          AnyDrawParamSurf drwsurf={RGB={1,0,0};Opacity = 0.3;Visible = Off;};
+        };
+
+      
+};     
+      AnyRefNode Semitendinosus1WrapSurf ={
+
+         AnyFloat p = {
+           .Semitendinosus1Node.sRel+{0.001,0,0},
+           .BicepsFemorisCaputLongum1Node.sRel+{0.001,0,0},
+           .Semitendinosus1Node.sRel+{0.001,0,0},
+           .IschialTuberosityWrapNode.sRel,
+           .QuadratusFemoris3Node.sRel
+        };
+        
+        AnyVar lengthscalefactor=8;
+        AnyVar Z_rotation=0;
+        AnyVar radiusscalefactor=1;
+        #include "<ANYBODY_PATH_MODELUTILS>/WrappingSurfaces/WrappingCylinder5PointFit.any"
+
+        AnyDrawSphere p1 = {Position = (.p[0]-.sRel)*.ARel;ScaleXYZ = 0.002*{1,1,1};Visible=Off;};
+        AnyDrawSphere p2 = {Position = (.p[1]-.sRel)*.ARel;ScaleXYZ = 0.002*{1,1,1};Visible=Off;};
+        AnyDrawSphere p3 = {Position = (.p[2]-.sRel)*.ARel;ScaleXYZ = 0.002*{1,1,1};Visible=Off;};
+        AnyDrawSphere p4 = {Position = (.p[3]-.sRel)*.ARel;ScaleXYZ = 0.002*{1,1,1};Visible=Off;};
+        AnyDrawSphere p5 = {Position = (.p[4]-.sRel)*.ARel;ScaleXYZ = 0.002*{1,1,1};Visible=Off;};
+        cyl =  
+        {
+          AnyDrawParamSurf drwsurf={RGB={1,0,0};Opacity = 0.3;Visible = Off;};
+          CapRatio = 1;
+          CapRatio2 = 1;
+        };
+};
+
+
+      
 #endif
 
+      #if BM_LEG_MORPHOLOGY == 2
+      AnyRefNode IschialTuberosityWrapNode = {sRel = .Scale( .StdPar.IschialTuberosityWrapNode);};
+      #endif
       // Origin points on the Pelvis
 
       AnyRefNode ASIS = {sRel = .Scale( .StdPar.AsisIpsilateral); /*AnyDrawNode Node = {ScaleXYZ = {0.005, 0.005, 0.005};};*/};
@@ -2107,6 +2203,9 @@ PelvisSeg =
 #endif
 
       AnyRefNode Pectineus1Node = {sRel = .Scale( .StdPar.Pectineus1Node );};
+#if BM_LEG_MORPHOLOGY == 2
+      AnyRefNode Pectineus1ViaNode = {sRel = .Scale( .StdPar.Pectineus1ViaNode );};
+#endif
       AnyRefNode Pectineus2Node = {sRel = .Scale( .StdPar.Pectineus2Node );};
       AnyRefNode Pectineus3Node = {sRel = .Scale( .StdPar.Pectineus3Node );};
       AnyRefNode Pectineus4Node = {sRel = .Scale( .StdPar.Pectineus4Node );};

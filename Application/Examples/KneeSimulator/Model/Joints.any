@@ -1,0 +1,141 @@
+AnyFolder Joints = {  
+  AnyKinEq Fix_FemurMass = {
+    AnyKinLinear lin = {
+      AnyRefFrame& ref0 = Main.Model.Segs.Femur.PrincipalAxesNode ;
+      AnyRefFrame& ref1 = Main.Model.Segs.FemurMass;
+      Ref = -1;
+    };
+    AnyKinRotational rot = {
+      AnyRefFrame& ref0 = Main.Model.Segs.Femur.PrincipalAxesNode ;
+      AnyRefFrame& ref1 = Main.Model.Segs.FemurMass;
+      Type = PlanarAngles;
+    };
+    Reaction.Type = {On, On, On, On, On, On};
+  };
+  
+  AnyKinEq Fix_TibiaMass = {
+    AnyKinLinear lin = {
+      AnyRefFrame& ref0 = Main.Model.Segs.Tibia.PrincipalAxesNode ;
+      AnyRefFrame& ref1 = Main.Model.Segs.TibiaMass;
+      Ref = -1;
+    };
+    AnyKinRotational rot = {
+      AnyRefFrame& ref0 = Main.Model.Segs.Tibia.PrincipalAxesNode ;
+      AnyRefFrame& ref1 = Main.Model.Segs.TibiaMass;
+      Type = PlanarAngles;
+    };
+    Reaction.Type = {On, On, On, On, On, On};
+  };    
+  
+  AnyKinEq KneeJoint_Lin = {
+    AnyKinLinear lin = {
+      AnyRefFrame & ref0 = Main.Model.Segs.Tibia.KneeJoint;
+      AnyRefFrame & ref1 = Main.Model.Segs.Femur.KneeJoint;
+      Ref = 0;    
+    };
+    #if USE_FDK == 1
+    CType  = {ForceDep, ForceDep, ForceDep};
+    Reaction.Type = {Off, Off, Off};
+    #endif    
+  };
+  
+  AnyKinEq KneeJoint_Rot = {
+    AnyKinMeasureLinComb lincomb = {
+      AnyKinRotational rot = {
+        AnyRefFrame & ref0 = Main.Model.Segs.Tibia.KneeJoint;
+        AnyRefFrame & ref1 = Main.Model.Segs.Femur.KneeJoint;
+        Type = PlanarAngles;   
+        Axis1 = z;
+        Axis2 = y;
+        Axis3 = x;
+      };    
+      Coef = (1.0/pi)*{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};  
+      OutDim = 3;
+    };    
+    MeasureOrganizer = {1, 2};
+    #if USE_FDK == 1
+    CType  = {ForceDep, ForceDep};
+    Reaction.Type = {Off, Off};
+    #endif        
+  };
+  
+  AnyKinEq PatellaJoint_Lin = {
+    AnyKinLinear lin = {
+      AnyRefFrame & ref0 = Main.Model.Segs.Femur.PatellaJoint;
+      AnyRefFrame & ref1 = Main.Model.Segs.Patella.PatellaJoint;
+      Ref = 0;    
+    };
+    #if USE_FDK == 1
+    CType  = {ForceDep, ForceDep, ForceDep};
+    Reaction.Type = {Off, Off, Off};
+    #endif    
+  };
+  
+  AnyKinEq PatellaJoint_Rot = {
+    AnyKinMeasureLinComb lincomb = {
+      AnyKinRotational rot = {
+        AnyRefFrame & ref0 = Main.Model.Segs.Femur.PatellaJoint;
+        AnyRefFrame & ref1 = Main.Model.Segs.Patella.PatellaJoint;
+        Type = PlanarAngles;   
+        Axis1 = z;
+        Axis2 = y;
+        Axis3 = x;
+      };    
+      Coef = (1.0/pi)*{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};  
+      OutDim = 3;
+    };    
+    MeasureOrganizer = {1, 2};
+    #if USE_FDK == 1
+    CType  = {ForceDep, ForceDep};
+    Reaction.Type = {Off, Off};
+    #endif        
+  };  
+  
+  AnyRevoluteJoint HipRevolute = {
+    AnyRefFrame & ref0 = Main.Model.Segs.FemurHipDummy ;
+    AnyRefFrame & ref1 = Main.Model.Segs.Femur.HipJoint;
+    Axis = z;
+  };  
+  
+  AnyPrismaticJoint HipPrismatic = {
+    AnyRefFrame & ref0 = Main.Model.GlobalRef.RotNode.OffsetNode;
+    AnyRefFrame & ref1 = Main.Model.Segs.FemurHipDummy ;
+    Axis = y;    
+  };
+  
+  AnyPrismaticJoint AnklePrismatic = {
+    AnyRefFrame & ref0 = Main.Model.GlobalRef.RotNode;
+    AnyRefFrame & ref1 = Main.Model.Segs.TibiaAnkleDummy ;
+    Axis = z;
+  };  
+  
+  AnyRevoluteJoint AnkleRevolute1 = {
+    AnyRefFrame & ref0 = Main.Model.Segs.TibiaAnkleConnect1;
+    AnyRefFrame & ref1 = Main.Model.Segs.Tibia.AnkleJoint;
+    Axis = z;
+  };
+  AnyRevoluteJoint AnkleRevolute2 = {
+    AnyRefFrame & ref0 = Main.Model.Segs.TibiaAnkleConnect2;
+    AnyRefFrame & ref1 = Main.Model.Segs.TibiaAnkleConnect1;
+    Axis = x;
+  };
+  AnyRevoluteJoint AnkleRevolute3 = {
+    AnyRefFrame & ref0 = Main.Model.Segs.TibiaAnkleDummy;
+    AnyRefFrame & ref1 = Main.Model.Segs.TibiaAnkleConnect2;    
+    Axis = y;
+  };  
+  
+  AnyKinSPLine Quadriceps_Tendon_PLine_Center = {
+    AnyRefFrame& ref0 = Main.Model.Segs.Femur.PrincipalAxesNode.OffsetNode;
+    AnyRefFrame& ref1 = Main.Model.Segs.Patella.QTNode;
+    AnySurface& surf = Main.Model.Segs.Femur.FitBaseNode_Anterior.FitCyl;
+    StringMesh = 45;
+    InitWrapPosVectors = {0.03*{0, -1, 0}, 0.03*{-1, 0, 0}};
+    
+    AnyDrawPLine Drw = {
+      Thickness = 0.005;
+      RGB = {1, 0, 0};
+    };
+  };      
+};//Joints
+

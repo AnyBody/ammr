@@ -1,8 +1,12 @@
 
 AnyFolder Model = {
   // Model parts included in the moment arm study
-  AnyFolder &PelvisRef = .....BodyModel.Trunk.SegmentsLumbar.PelvisSeg; //This is a reference to the folder which holds the human part of the model
-  AnyFolder &LegSegSideRef = .SideHumanFolderRef.Leg.Seg; //This is a reference to the folder which holds the human part of the model
+  AnyFolder &PelvisRef = .....BodyModel.Trunk.SegmentsLumbar.PelvisSeg; 
+  AnyFolder &ThoraxRef = .....BodyModel.Trunk.SegmentsThorax.ThoraxSeg;
+  AnyFolder &SegLumberRef = .....BodyModel.Trunk.SegmentsLumbar; 
+  AnyFolder &JointsLumberRef = .....BodyModel.Trunk.JointsLumbar;   
+  
+  AnyFolder &LegSegSideRef = .SideHumanFolderRef.Leg.Seg; 
   AnyFolder &LegJntsRef =  .SideHumanFolderRef.Leg.Jnt;
   AnyFolder &LegMusRef = .SideHumanFolderRef.Leg.Mus;
   AnyFolder &SpineMusRef = .SideTrunkMusRef;
@@ -17,17 +21,34 @@ AnyFolder Model = {
   AnyFolder Drivers = {
     AnyVar AngularVelocity = (..RangeOfMotion[1]-..RangeOfMotion[0])*pi/180;
     AnyKinMeasureOrg LegMeasure = {
-      AnyKinMeasure &HipFlexion= ...SideHumanInterfaceRef.HipFlexion;
-      AnyKinMeasure &HipAbduction= ...SideHumanInterfaceRef.HipAbduction;
-      AnyKinMeasure &HipExternalRotation= ...SideHumanInterfaceRef.HipExternalRotation;
-      AnyKinMeasure &KneeFlexion= ...SideHumanInterfaceRef.KneeFlexion;
-      AnyKinMeasure &AnklePlantarFlexion= ...SideHumanInterfaceRef.AnklePlantarFlexion;
-      AnyKinMeasure &AnkleEversion= ...SideHumanInterfaceRef.AnkleEversion;  
+      AnyKinMeasure& HipFlexion= ...SideHumanInterfaceRef.HipFlexion;
+      AnyKinMeasure& HipAbduction= ...SideHumanInterfaceRef.HipAbduction;
+      AnyKinMeasure& HipExternalRotation= ...SideHumanInterfaceRef.HipExternalRotation;
+      AnyKinMeasure& KneeFlexion= ...SideHumanInterfaceRef.KneeFlexion;
+      AnyKinMeasure& AnklePlantarFlexion= ...SideHumanInterfaceRef.AnklePlantarFlexion;
+      AnyKinMeasure& AnkleEversion= ...SideHumanInterfaceRef.AnkleEversion;  
     };
     AnyStdJoint PelvisGround={
       AnyRefFrame &Ground = ..ground.node;
       AnyRefFrame &Sacrum= ..PelvisRef; 
     };
+    AnyReacForce SpineRythmReacForce = 
+    {
+      AnyKinMeasureOrg ExcludePelvisSacrum =
+      {
+        AnyKinMeasure& ref = ...JointsLumberRef.SpineRhythmDrv.Measure;
+        MeasureOrganizer = {3,4,5,6,7,8,9,10,11,12,13,14,15,16,17};
+      };
+    };
+    AnyKinEq ThoraxFix = 
+    {
+      AnyKinMeasure& PelvisThoraxExtension= .......BodyModel.Interface.Trunk.PelvisThoraxExtension;
+      AnyKinMeasure& PelvisThoraxLateralBending= .......BodyModel.Interface.Trunk.PelvisThoraxLateralBending;
+      AnyKinMeasure& PelvisThoraxRotation= .......BodyModel.Interface.Trunk.PelvisThoraxRotation;
+      Reaction.Type = repmat(nDim, On);
+    };         
+    
+    
   };// Drivers
 };// Model
 
@@ -86,11 +107,13 @@ AnyProject ModelViews = {};
 
 ModelViews = {
   AnyDrawGroup Selection = {
-    Objects = arrcat(arrcat(arrcat(
-                            ObjSearchRecursive(CompleteNameOf(&..Model.PelvisRef ), "*", "AnyDrawObject"), 
-                            ObjSearchRecursive(CompleteNameOf(&..Model.LegSegSideRef ), "*", "AnyDrawObject")),
-                            ObjSearchRecursive(CompleteNameOf(&..Model.LegMusRef ), "*", "AnyDrawObject")),
-                            ObjSearchRecursive(CompleteNameOf(&..Model.SpineMusRef )+".PsoasMajor", "*", "AnyDrawObject")) ;
+    Objects = arrcat(
+      ObjSearchRecursive(CompleteNameOf(&..Model.SegLumberRef ), "*", "AnyDrawObject"), 
+      ObjSearchRecursive(CompleteNameOf(&..Model.PelvisRef ), "*", "AnyDrawObject"), 
+      ObjSearchRecursive(CompleteNameOf(&..Model.LegSegSideRef ), "*", "AnyDrawObject"),
+      ObjSearchRecursive(CompleteNameOf(&..Model.LegMusRef ), "*", "AnyDrawObject"),
+      ObjSearchRecursive(CompleteNameOf(&..Model.SpineMusRef )+".PsoasMajor", "*", "AnyDrawObject")
+    );
   };
   Views = {
     AnyProjectModelViewDefinition SelectedView = {

@@ -1,0 +1,49 @@
+#include "..\libdef.any"
+
+#include "<ANYBODY_PATH_MODELUTILS>\FootConnections\CreateFootPrintClass.any"
+#include "<ANYBODY_PATH_MODELUTILS>\FootConnections\CreateFootConnectionClasses.any"
+#include "<ANYBODY_PATH_AMMR>\Tools\GRFPrediction\FootPlateConditionalContact.any" 
+
+Main = {  
+  
+  // ----------------------------------------------------------
+  // Body Model Configuration
+  // ----------------------------------------------------------
+  #include "Model/BodyModelConfiguration.any"
+  
+  #include "Input\Parameters.any"
+  
+  #include "Model\Mannequin.any"
+  
+  // Include default human model
+  #include "<ANYBODY_PATH_BODY>\HumanModel.any"
+  
+  AnyFolder Model = 
+  {  
+    // A link to the human model
+    AnyFolder &BodyModel = .HumanModel.BodyModel;
+    
+    // Environment files are used to include objects surrounding human
+    #include "Model\Environment.any"   
+    
+    AnyFolder ModelEnvironmentConnection = 
+    {
+      //'JointsAndDrivers.any' file can include all kinematic constraints such as joints and drivers
+      #include "Model\JointsAndDrivers.any"
+      #include "Model\FootPrintGeneration.any"
+      #include "Model\Supports.any"
+    };
+  };
+  
+  AnyBodyStudy Study = 
+  {
+    AnyFolder &Model = .Model;  
+    Gravity={0.0, -9.81, 0.0};
+    tEnd = ADL_SQUAT_TIME_PERIOD;
+    nStep = round(ADL_SQUAT_TIME_PERIOD*ADL_SQUAT_FRAMES_PER_SECOND+1);
+  };
+  
+  #include "<ANYBODY_PATH_MODELUTILS>\Operations\RunAppSequence.any"   
+}; //Main
+
+

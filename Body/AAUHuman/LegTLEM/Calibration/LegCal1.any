@@ -4,7 +4,7 @@
 //obtained in this study
 
 AnyFolder LegCal1 ={
-  
+  AnyComponentDefinition obj = {};  
   AnyFolder &Pelvis = ...BodyModel.Trunk.SegmentsLumbar.PelvisSeg;
   AnyFolder &Sacrum = ...BodyModel.Trunk.SegmentsLumbar.SacrumSeg;
   
@@ -28,14 +28,14 @@ AnyFolder LegCal1 ={
     };
   };
   
-  AnyKinEqDriver ThoraxFix = 
+  AnyKinEq ThoraxFix = 
   {
     AnyKinMeasure& PelvisThoraxExtension = ....BodyModel.Interface.Trunk.PelvisThoraxExtension;
     AnyKinMeasure& PelvisThoraxLateralBending = ....BodyModel.Interface.Trunk.PelvisThoraxLateralBending;
     AnyKinMeasure& PelvisThoraxRotation = ....BodyModel.Interface.Trunk.PelvisThoraxRotation;
   };
   
-AnyKinEqDriver PelvisFix = {
+AnyKinEq PelvisFix = {
     AnyKinLinear Lin = {
       AnyRefFrame &ground = ..ground.node;
       AnyRefFrame &Pelvis = .....BodyModel.Trunk.SegmentsLumbar.PelvisSeg;
@@ -57,28 +57,30 @@ AnyKinEqDriver PelvisFix = {
   
   
   AnyKinEqSimpleDriver Knee = {
-    AnyKinMeasure &Hinge = ..SideInterfaceFolderRef.KneeFlexion;
+    AnyKinMeasure& Hinge = ..SideInterfaceFolderRef.KneeFlexion;
     DriverPos = {0*pi/180};
     DriverVel = {0*pi/180};
     Reaction.Type = {Off};
   };
   
-  
+  #if BM_FOOT_MODEL == _FOOT_MODEL_DEFAULT_
   AnyKinEqSimpleDriver Ankle = {
-    AnyKinMeasure &Hinge = ..SideInterfaceFolderRef.AnklePlantarFlexion;
+    AnyKinMeasure& Hinge = ..SideInterfaceFolderRef.AnklePlantarFlexion;
     DriverPos = {0*pi/180};
     DriverVel = {0*pi/180};
     Reaction.Type = {Off};
   };
 
   AnyKinEqSimpleDriver SubTalar = {
-    AnyKinMeasure &Hinge = ..SideInterfaceFolderRef.SubTalarEversion;
+    AnyKinMeasure& Hinge = ..SideInterfaceFolderRef.SubTalarEversion;
     DriverPos = {0*pi/180};
     DriverVel = {0*pi/180}; 
     Reaction.Type = {Off};
   };
+  #endif
 
 };
+
 
 // The study: Operations to be performed on the model
 AnyBodyCalibrationStudy LegCalibrationStudy1 = {
@@ -88,4 +90,30 @@ AnyBodyCalibrationStudy LegCalibrationStudy1 = {
   Kinematics.SmallStepAssumptionOnOff = Off;
   Kinematics.PosAnalysisOnlyOnOff = On;
   InitialConditions.PosAnalysisOnlyOnOff = On;
+#if (ANYBODY_V1 > 7)|(ANYBODY_V1 == 7 & ANYBODY_V2 > 2)|(ANYBODY_V1 == 7 & ANYBODY_V2 == 2 & ANYBODY_V3 >= 2)
+  MuscleArr = set_difference(
+      ObjSearchRecursive(CompleteNameOf(&.SideHumanFolderRef.Leg.Mus),"*", "AnyMuscle&"),
+    arrcat(
+      ..CALIBRATION_STUDY_REF(2).MuscleArr,
+      ..CALIBRATION_STUDY_REF(3).MuscleArr,
+      ..CALIBRATION_STUDY_REF(5).MuscleArr,
+      ..CALIBRATION_STUDY_REF(6).MuscleArr,
+      ..CALIBRATION_STUDY_REF(7).MuscleArr,
+      ..CALIBRATION_STUDY_REF(8).MuscleArr
+    )
+  );
+#else
+  MuscleArr = arrcat(
+     ObjSearch(CompleteNameOf(&.SideHumanFolderRef.Leg.Mus)+".BicepsFemorisCaput*", "AnyMuscle"),
+     ObjSearch(CompleteNameOf(&.SideHumanFolderRef.Leg.Mus)+".Iliacus*", "AnyMuscle"),
+     ObjSearch(CompleteNameOf(&.SideHumanFolderRef.Leg.Mus)+".PeroneusBrevis*", "AnyMuscle"),
+     ObjSearch(CompleteNameOf(&.SideHumanFolderRef.Leg.Mus)+".Piriformis*", "AnyMuscle"),
+     ObjSearch(CompleteNameOf(&.SideHumanFolderRef.Leg.Mus)+".Popliteus*", "AnyMuscle"),
+     ObjSearch(CompleteNameOf(&.SideHumanFolderRef.Leg.Mus)+".RectusFemoris*", "AnyMuscle"),
+     ObjSearch(CompleteNameOf(&.SideHumanFolderRef.Leg.Mus)+".Sartorius*", "AnyMuscle"),
+     ObjSearch(CompleteNameOf(&.SideHumanFolderRef.Leg.TrunkMuscles.PsoasMajor)+".*", "AnyMuscle")
+  );
+#endif
+   
+  
 };

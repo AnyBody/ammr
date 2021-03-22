@@ -6,10 +6,14 @@ Bike Model
 Bicycle rider model that runs either as
 FullBody or as LowerExtremity version.
 
-**Main files:** 
+.. rst-class:: without-title
+.. seealso:: **Main file location in AMMR:** 
 
-* ``Application/Examples/BikeModel/BikeModel-FullBody.main.any``
-* ``Application/Examples/BikeModel/BikeModel-LowerBody.main.any``
+  :menuselection:`Application --> Examples --> BikeModel -->` 
+  
+  :menuselection:`BikeModel-FullBody.main.any` / 
+  :menuselection:`BikeModel-LowerBody.main.any`
+
 
 The model illustrates several important topics in model 
 construction:

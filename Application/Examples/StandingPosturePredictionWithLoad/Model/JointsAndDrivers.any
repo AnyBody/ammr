@@ -1,0 +1,305 @@
+
+
+
+AnyFolder Joints = {
+  
+};
+
+AnyFolder Drivers = {
+  
+  
+  
+  
+  #if  LoadInRightHand == 1
+  //defines spherical joint between the object and the right hand
+  AnySphericalJoint HandControlRight ={
+    AnyRefNode &ref1=Main.Model.Environment.HandSeg.RightHandle;
+    AnySeg &ref2=Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Glove;
+  };
+  //Add reaction to spherical joint 
+  AnyReacForce HandControlRightMoment ={
+    AnySphericalJoint &ref=.HandControlRight;
+  };
+  #endif
+  
+  
+  #if  LoadInLeftHand==1
+  //defines spherical joint between the object and the left hand
+  AnySphericalJoint HandControlLeft ={
+    AnyRefNode &ref1=Main.Model.Environment.HandSeg.LeftHandle;
+    AnySeg &ref2=Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Glove;
+  };
+  //Add reaction to spherical joint 
+  AnyReacForce HandControlLeftMoment ={
+    AnySphericalJoint &ref=.HandControlLeft;
+  };
+  #endif
+  
+  
+  AnyKinMeasureOrg RightFootToPlateMeasures = 
+  {
+    AnyKinLinear TranslationHeel =    {
+      AnyRefFrame &ref1 = Main.Model.Environment.GlobalRef.RightFootPoint;
+      AnyRefFrame &ref2 =  Main.HumanModel.BodyModel.Right.Leg.Seg.Foot.HeelContactNode;
+    };
+    
+    AnyKinMeasureOrg HeelHeight ={
+      MeasureOrganizer={2};
+      AnyKinLinear &ref=.TranslationHeel;
+    };
+    
+    AnyKinLinear TranslationMedialFront = {
+      AnyRefFrame &ref1 = Main.Model.Environment.GlobalRef.RightFootPoint;
+      AnyRefFrame &ref2 =  Main.HumanModel.BodyModel.Right.Leg.Seg.Foot.ToeMedialContactNode;
+    };
+    
+    AnyKinMeasureOrg TranslationMedialFrontHeight ={
+      MeasureOrganizer={2};
+      AnyKinLinear &ref=.TranslationMedialFront;
+    };
+    
+    AnyKinLinear TranslationLateralFront = {
+      AnyRefFrame &ref1 = Main.Model.Environment.GlobalRef.RightFootPoint;
+      AnyRefFrame &ref2 =  Main.HumanModel.BodyModel.Right.Leg.Seg.Foot.ToeLateralContactNode;
+    };
+    
+    AnyKinMeasureOrg TranslationLateralFrontHeight ={
+      MeasureOrganizer={2};
+      AnyKinLinear &ref=.TranslationLateralFront;
+    };
+    
+    AnyKinRotational Rotation = {
+      AnyRefFrame &ref1 = Main.Model.Environment.GlobalRef.RightFootPoint.RotNode;
+      AnyRefFrame &ref2 = Main.HumanModel.BodyModel.Right.Leg.Seg.Foot.ConditionalContact_Nodes.Node0;
+      Type = RotAxesAngles;
+    };
+    
+  };
+  
+  
+  
+  AnyKinEq ConstrainRightFoot = {
+    AnyKinLinear &ref1= .RightFootToPlateMeasures.TranslationMedialFront ;
+    AnyKinLinear &ref2= .RightFootToPlateMeasures.TranslationLateralFront ;
+    AnyKinRotational &ref3= .RightFootToPlateMeasures.Rotation ;
+    CType = {Hard,Hard,Hard,Soft,Soft};
+    Reaction.Type = {Off,Off,Off,Off,Off}; // Switch off reactions, predicted GRF enforces constraints
+    MeasureOrganizer={0,1,2,5,7};
+  };
+  
+  //Conditional constraint on heel height means heel can lift off  
+  KinLimitsDriver DriverRight(
+  KinMeasure= .RightFootToPlateMeasures.HeelHeight
+  ) = { LowerLimit =0;HighLimit = 0.1; MeasureConversion=1;ErrorAtHardLimit= 2*0.05;};
+  
+  
+  
+  
+  
+  
+  AnyKinMeasureOrg LeftFootToPlateMeasures = 
+  {
+    AnyKinLinear TranslationHeel =  {
+      AnyRefFrame &ref1 = Main.Model.Environment.GlobalRef.LeftFootPoint;
+      AnyRefFrame &ref2 =  Main.HumanModel.BodyModel.Left.Leg.Seg.Foot.HeelContactNode;
+    };
+    
+    AnyKinMeasureOrg HeelHeight ={
+      MeasureOrganizer={2};
+      AnyKinLinear &ref=.TranslationHeel;
+    };
+    
+    AnyKinLinear TranslationMedialFront =    {
+      AnyRefFrame &ref1 = Main.Model.Environment.GlobalRef.LeftFootPoint;
+      AnyRefFrame &ref2 =  Main.HumanModel.BodyModel.Left.Leg.Seg.Foot.ToeMedialContactNode;
+    };
+    
+    AnyKinMeasureOrg TranslationMedialFrontHeight ={
+      MeasureOrganizer={2};
+      AnyKinLinear &ref=.TranslationMedialFront;
+    };
+    
+    AnyKinLinear TranslationLateralFront =
+    {
+      AnyRefFrame &ref1 = Main.Model.Environment.GlobalRef.LeftFootPoint;
+      AnyRefFrame &ref2 =  Main.HumanModel.BodyModel.Left.Leg.Seg.Foot.ToeLateralContactNode;
+    };
+    AnyKinMeasureOrg TranslationLateralFrontHeight ={
+      MeasureOrganizer={2};
+      AnyKinLinear &ref=.TranslationLateralFront;
+    };
+    AnyKinRotational Rotation =
+    {
+      AnyRefFrame &ref1 = Main.Model.Environment.GlobalRef.LeftFootPoint.RotNode;
+      AnyRefFrame &ref2 = Main.HumanModel.BodyModel.Left.Leg.Seg.Foot.ConditionalContact_Nodes.Node0;
+      
+      Type = RotAxesAngles;
+    };
+    
+  };
+  
+  
+  
+  AnyKinEq ConstrainLeftFoot = {
+    
+    AnyKinLinear &ref1= .LeftFootToPlateMeasures.TranslationMedialFront ;
+    AnyKinLinear &ref2= .LeftFootToPlateMeasures.TranslationLateralFront ;
+    AnyKinRotational &ref3= .LeftFootToPlateMeasures.Rotation;
+    CType = {Hard,Hard,Hard,Soft,Soft};
+    Reaction.Type = {Off,Off,Off,Off,Off}; // Switch off reactions, predicted GRF enforces constraints
+    MeasureOrganizer={0,1,2,5,7};
+  };
+  
+  
+  KinLimitsDriver DriverLeft(
+  KinMeasure= .LeftFootToPlateMeasures.HeelHeight
+  ) = { LowerLimit =0;HighLimit = 0.1; MeasureConversion=1;ErrorAtHardLimit= 2*0.05;};
+  
+  
+  
+  
+  RangeOfMotionLimits JointLimits( 
+  ARM_RIGHT = BM_ARM_RIGHT,
+  ARM_LEFT = BM_ARM_LEFT,
+  LEG_RIGHT = BM_LEG_RIGHT,
+  LEG_LEFT = BM_LEG_LEFT,
+  PELVIS_THORAX_EXTENSION = "Off",
+  PELVIS_THORAX_LATERAL_BENDING = "Off",
+  PELVIS_THORAX_ROTATION = "Off",
+  SKULL_THORAX_FLEXION = "Off",
+  SKULL_THORAX_LATERALBENDING = "Off",
+  SKULL_THORAX_ROTATION = "Off",
+  STERNO_CLAVICULAR_PROTRACTION = "On",
+  STERNO_CLAVICULAR_ELEVATION = "On",
+  STERNO_CLAVICULAR_AXIALROTATION = "Off",
+  GLENOHUMERAL_FLEXION = "On",
+  GLENOHUMERAL_EXTERNAL_ROTATION = "On",
+  GLENOHUMERAL_ABDUCTION = "On",
+  ELBOW_FLEXION = "On",
+  ELBOW_PRONATION = "Off",
+  WRIST_FLEXION = "Off",
+  WRIST_ABDUCTION = "Off",
+  HIP_ABDUCTION = "Off",
+  HIP_FLEXION = "On",
+  HIP_EXTERNAL_ROTATION = "Off",
+  KNEE_FLEXION = "On",
+  ANKLE_PLANTAR_FLEXION = "Off",
+  SUBTALAR_EVERSION = "Off",
+  SKULL_THORAX_FLEXION = "Off",
+  SKULL_THORAX_LATERALBENDING = "Off",
+  SKULL_THORAX_ROTATION = "Off"
+  )={
+    Main.Model.ModelEnvironmentConnection.Drivers.JointLimits.Limits.Right.SternoClavicularElevation={0,20};
+    Main.Model.ModelEnvironmentConnection.Drivers.JointLimits.Limits.Left.SternoClavicularElevation={0,20};
+    
+  };
+  
+  //Here the Zero Moment Point (ZMP) is constrained to be within the foot stance area
+  // A segment PointWithZeroMoment (red sphere) has been created by the balance driver and here the motion of it is constrained
+  CreateCoMLimitDriversFootStanceArea CoMLimits(CoM=Main.Model.OverallWeightBalanceControl.PointWithZeroMoment)={};
+  
+
+  Main.HumanModel.DefaultMannequinDrivers.PelvisGroundDriverRotX.DriverPos={0};
+  Main.HumanModel.DefaultMannequinDrivers.PelvisGroundDriverRotY.DriverPos={0};
+  Main.HumanModel.DefaultMannequinDrivers.PelvisGroundDriverRotZ.DriverPos={0};
+  
+  Main.HumanModel.DefaultMannequinDrivers.SkullThoraxFlexionDriver.DriverPos={0};
+  //Main.HumanModel.DefaultMannequinDrivers.SkullThoraxLateralBendingDriver.DriverPos={0};
+  //Main.HumanModel.DefaultMannequinDrivers.SkullThoraxRotationDriver.DriverPos={0};
+  Main.HumanModel.DefaultMannequinDrivers.PostureDriverBending.DriverPos ={0};
+  Main.HumanModel.DefaultMannequinDrivers.PostureDriverRotation.DriverPos ={0};
+  Main.HumanModel.DefaultMannequinDrivers.PostureDriverExtension.DriverPos ={-5*pi/180};
+  
+  Main.HumanModel.DefaultMannequinDrivers.SCProtractionDriverRight.DriverPos = {-0.4014257};
+  Main.HumanModel.DefaultMannequinDrivers.SCElevationDriverRight.DriverPos = {0.2007129};
+  Main.HumanModel.DefaultMannequinDrivers.GHDriverRightAbduction.DriverPos ={0};
+  Main.HumanModel.DefaultMannequinDrivers.GHDriverRightFlexion.DriverPos ={0};
+  Main.HumanModel.DefaultMannequinDrivers.GHDriverRightExternalRotation.DriverPos ={0};
+  Main.HumanModel.DefaultMannequinDrivers.ElbowFlexionDriverRight.DriverPos ={30*pi/180};
+  Main.HumanModel.DefaultMannequinDrivers.ElbowPronationDriverRight.DriverPos ={0*pi/180};
+  Main.HumanModel.DefaultMannequinDrivers.WristDriverRightFlexion.DriverPos ={0};
+  Main.HumanModel.DefaultMannequinDrivers.WristDriverRightAbduction.DriverPos ={0};
+  
+  Main.HumanModel.DefaultMannequinDrivers.SCProtractionDriverLeft.DriverPos = {-0.4014257};
+  Main.HumanModel.DefaultMannequinDrivers.SCElevationDriverLeft.DriverPos = { 0.2007129};
+  Main.HumanModel.DefaultMannequinDrivers.GHDriverLeftAbduction.DriverPos= {0};
+  Main.HumanModel.DefaultMannequinDrivers.GHDriverLeftFlexion.DriverPos= {0};
+  Main.HumanModel.DefaultMannequinDrivers.GHDriverLeftExternalRotation.DriverPos= {0};
+  Main.HumanModel.DefaultMannequinDrivers.ElbowFlexionDriverLeft.DriverPos= {30*pi/180};
+  Main.HumanModel.DefaultMannequinDrivers.ElbowPronationDriverLeft.DriverPos= {0};
+  Main.HumanModel.DefaultMannequinDrivers.WristDriverLeftFlexion.DriverPos= {0};
+  Main.HumanModel.DefaultMannequinDrivers.WristDriverLeftAbduction.DriverPos= {0};
+  
+  Main.HumanModel.DefaultMannequinDrivers.HipDriverRightFlexion.DriverPos= {0};
+  Main.HumanModel.DefaultMannequinDrivers.HipDriverRightExternalRotation.DriverPos= {0};
+  Main.HumanModel.DefaultMannequinDrivers.HipDriverRightAbduction.DriverPos= {0};
+  Main.HumanModel.DefaultMannequinDrivers.KneeDriverRight.DriverPos= {0};
+  Main.HumanModel.DefaultMannequinDrivers.AnkleDriverRightFlexion.DriverPos= {0};
+  Main.HumanModel.DefaultMannequinDrivers.AnkleDriverRightEversion.DriverPos= {0};
+  
+  Main.HumanModel.DefaultMannequinDrivers.HipDriverLeftFlexion.DriverPos= {0};
+  Main.HumanModel.DefaultMannequinDrivers.HipDriverLeftExternalRotation.DriverPos= {0};
+  Main.HumanModel.DefaultMannequinDrivers.HipDriverLeftAbduction.DriverPos= {0};
+  Main.HumanModel.DefaultMannequinDrivers.KneeDriverLeft.DriverPos= {0};
+  Main.HumanModel.DefaultMannequinDrivers.AnkleDriverLeftFlexion.DriverPos= {0};
+  Main.HumanModel.DefaultMannequinDrivers.AnkleDriverLeftEversion.DriverPos= {0};
+  
+  
+  
+  
+  
+  
+  //weights
+  Main.HumanModel.DefaultMannequinDrivers.PelvisGroundDriverPosX.WeakDriverWeight=0.0000;  //zero weight on pelvis pos
+  Main.HumanModel.DefaultMannequinDrivers.PelvisGroundDriverPosY.WeakDriverWeight=0.0000;
+  Main.HumanModel.DefaultMannequinDrivers.PelvisGroundDriverPosZ.WeakDriverWeight=0.0000;
+  Main.HumanModel.DefaultMannequinDrivers.PelvisGroundDriverRotZ.WeakDriverWeight=0.0000;
+  Main.HumanModel.DefaultMannequinDrivers.PelvisGroundDriverRotY.WeakDriverWeight=0.0000;
+  Main.HumanModel.DefaultMannequinDrivers.PelvisGroundDriverRotX.WeakDriverWeight=0.0000;
+  //  Main.HumanModel.DefaultMannequinDrivers.NeckJntDriver.WeakDriverWeight=0.00001;
+  //  Main.HumanModel.DefaultMannequinDrivers.PostureDriverBending.WeakDriverWeight=0.00001;
+  //  Main.HumanModel.DefaultMannequinDrivers.PostureDriverRotation.WeakDriverWeight=0.00001;
+  //  Main.HumanModel.DefaultMannequinDrivers.PostureDriverExtension.WeakDriverWeight=0.00001;
+  
+  //  Main.HumanModel.DefaultMannequinDrivers.SCProtractionDriverRight.WeakDriverWeight =0.002;
+  //  Main.HumanModel.DefaultMannequinDrivers.SCProtractionDriverRight.WeakDriverWeight = 0.0001;
+  //  Main.HumanModel.DefaultMannequinDrivers.SCElevationDriverRight.WeakDriverWeight = 0.0001;
+  //  Main.HumanModel.DefaultMannequinDrivers.SCAxialRotationDriverRight.WeakDriverWeight = 0.0001;
+  Main.HumanModel.DefaultMannequinDrivers.GHDriverRightAbduction.WeakDriverWeight =0.0001;
+  Main.HumanModel.DefaultMannequinDrivers.GHDriverRightFlexion.WeakDriverWeight =0.00001;
+  Main.HumanModel.DefaultMannequinDrivers.GHDriverRightExternalRotation.WeakDriverWeight =0.0001;
+  Main.HumanModel.DefaultMannequinDrivers.ElbowFlexionDriverRight.WeakDriverWeight =0.0001;
+  //  Main.HumanModel.DefaultMannequinDrivers.ElbowPronationDriverRight.WeakDriverWeight =0.00001;
+  //  Main.HumanModel.DefaultMannequinDrivers.WristDriverRightFlexion.WeakDriverWeight =0.00001;
+  //  Main.HumanModel.DefaultMannequinDrivers.WristDriverRightAbduction.WeakDriverWeight =0.00001;
+  //  
+  //  Main.HumanModel.DefaultMannequinDrivers.SCProtractionDriverLeft.WeakDriverWeight = 0.00001;
+  //  Main.HumanModel.DefaultMannequinDrivers.SCElevationDriverLeft.WeakDriverWeight = 0.00001;
+  //  Main.HumanModel.DefaultMannequinDrivers.SCAxialRotationDriverLeft.WeakDriverWeight =0.00001;
+  Main.HumanModel.DefaultMannequinDrivers.GHDriverLeftAbduction.WeakDriverWeight= 0.0001;
+  Main.HumanModel.DefaultMannequinDrivers.GHDriverLeftFlexion.WeakDriverWeight= 0.0001;
+  Main.HumanModel.DefaultMannequinDrivers.GHDriverLeftExternalRotation.WeakDriverWeight= 0.0001;
+  Main.HumanModel.DefaultMannequinDrivers.ElbowFlexionDriverLeft.WeakDriverWeight= 0.0001;
+  //  Main.HumanModel.DefaultMannequinDrivers.ElbowPronationDriverLeft.WeakDriverWeight= 0.00001;
+  //  Main.HumanModel.DefaultMannequinDrivers.WristDriverLeftFlexion.WeakDriverWeight= 0.00001;
+  //  Main.HumanModel.DefaultMannequinDrivers.WristDriverLeftAbduction.WeakDriverWeight= 0.00001;
+  
+  
+  
+  Main.HumanModel.DefaultMannequinDrivers.HipDriverRightFlexion.WeakDriverWeight= 0.00001;
+  //  Main.HumanModel.DefaultMannequinDrivers.HipDriverRightExternalRotation.WeakDriverWeight= 0.00001;
+  //  Main.HumanModel.DefaultMannequinDrivers.HipDriverRightAbduction.WeakDriverWeight= 0.00001;;
+  Main.HumanModel.DefaultMannequinDrivers.KneeDriverRight.WeakDriverWeight= 0.00001;
+  Main.HumanModel.DefaultMannequinDrivers.AnkleDriverRightFlexion.WeakDriverWeight=100* 0.00001;
+  //  Main.HumanModel.DefaultMannequinDrivers.AnkleDriverRightEversion.WeakDriverWeight= 0.00001;
+  //  
+  Main.HumanModel.DefaultMannequinDrivers.HipDriverLeftFlexion.WeakDriverWeight= 0.00001;
+  //  Main.HumanModel.DefaultMannequinDrivers.HipDriverLeftExternalRotation.WeakDriverWeight= 0.00001;
+  //  Main.HumanModel.DefaultMannequinDrivers.HipDriverLeftAbduction.WeakDriverWeight= 0.00001;
+  Main.HumanModel.DefaultMannequinDrivers.KneeDriverLeft.WeakDriverWeight= 0.00001;
+  Main.HumanModel.DefaultMannequinDrivers.AnkleDriverLeftFlexion.WeakDriverWeight= 100*0.00001;
+  //  Main.HumanModel.DefaultMannequinDrivers.AnkleDriverLeftEversion.WeakDriverWeight= 0.00001;
+  //
+  
+  
+};

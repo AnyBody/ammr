@@ -39,7 +39,7 @@
   #var AnyVar ConstMarkerWeightY = WeightY;
   #var AnyVar ConstMarkerWeightZ = WeightZ;
   
-  #if (UseC3DWeightResiduals == 1) & (USE_BVH_INPUT != 0)
+  #if (UseC3DWeightResiduals == 1) & (USE_BVH_INPUT == 0)
     AnyFunSquareWaveThreshold MarkerWeightsFun = 
     {
       #var dT = {C3D_OBJECT.WeightTransitionTime};
@@ -79,9 +79,8 @@
 
   
   
-  AnyFolder &Macro=  Main.ModelSetup.Macros ;
-  Macro={
-    AnyStringVar Set##MarkerName = ("classoperation "+  CompleteNameOf(.sRelOptEdit) + " " + strquote("Set Value") +  strformat ("\n")+ "classoperation Main " + strquote("Update Values") + strformat ("\n"));
+  Main.ModelSetup.Macros={
+    AnyStringVar Set##MarkerName = ("classoperation "+  CompleteNameOf(...sRelOptEdit) + " " + strquote("Set Value") +  strformat ("\n")+ "classoperation Main " + strquote("Update Values") + strformat ("\n"));
   };
 
   
@@ -111,17 +110,6 @@
   MarkerPlacementSegment = {
     
     AnyRefNode MarkerName={
-#if USE_BVH_INPUT
-       #if ScaleMarkerPosOnOff == 1
-         AnyVec3 MarkerOffset = (.GeomScale(..sRelOpt) + ..sRelOptEdit )*.AnatomicalFrame.ARel' ;
-         sRel = .PlaceMarkerAt.sRel + MarkerOffset;
-         ARel= .AnatomicalFrame.ARel;
-       #else
- //      sRel = .PlaceMarkerAt.sRel + (..sRelOpt + ..sRelOptEdit )*.PlaceMarkerAt.ARel';
- //      ARel= .PlaceMarkerAt.ARel;
-         sRel = .PlaceMarkerAt.sRel + ..sRelOpt;
-       #endif
-#else
       #if ScaleMarkerPosOnOff == 1
         AnyVec3 MarkerOffset = (.GeomScale(..sRelOpt) + ..sRelOptEdit )*.AnatomicalFrame.ARel' ;
         sRel = .PlaceMarkerAt.sRel + MarkerOffset;
@@ -130,7 +118,6 @@
         sRel = .PlaceMarkerAt.sRel + (..sRelOpt + ..sRelOptEdit )*.PlaceMarkerAt.ARel';
         ARel= .PlaceMarkerAt.ARel;
       #endif
-#endif
       
 //      This was an attempt to allow PlaceMarkerAt to be anywhere and not only
 //      a RefNode on the segments.
@@ -169,8 +156,12 @@
       
       AnyKinDriverMarker Driver = {
         AnyDrawKinMeasure Draw = {
+          #if UseC3DWeightResiduals
+          #var Visible = iffun(bool(sum(.WeightPos)), On, Off);
+          #else
           #var Visible = On;
-          #var Opacity = 1;
+          #endif
+          #var Opacity = iffun(bool(sum(.WeightPos)), 1.0, 0.2);
           #var Label = Off;
           #var Size = DRAW_SCALE*0.01;
           #if USE_BVH_INPUT
@@ -179,6 +170,16 @@
           #var Line = On;
           #endif
         };
+        #if UseC3DWeightResiduals
+        AnyDrawKinMeasure DrawDroppedOutMarker = {
+          #var Visible = iffun(bool(sum(.WeightPos)), Off, On);
+          #var Label = Off;
+          #var Size = DRAW_SCALE*0.01;
+          #var Opacity = 0.5;
+          RGB1 = {0.4, 0.4, 0.4};
+          RGB3 = {0.4, 0.4, 0.4};
+        };
+        #endif
         Linear.Ref=0;
         AnyRefFrame &MarkerRef = BODY_MODEL_FOLDER.MarkerPlacement.MarkerName;
         //AnyFolder &MarkerName = C3D_OBJECT.Points.Markers.MarkerName;
@@ -199,9 +200,10 @@
           {
             #var Type = Bspline;
             BsplineOrder =4;
+
             #if USE_BVH_INPUT
-            T = C3D_OBJECT.Points.Markers.MarkerName.FromBVH.val_T;
-            Data = .LowPassFilter(C3D_OBJECT.Points.Markers.MarkerName.FromBVH.Data);
+            T = BVH_OBJECT.Markers.MarkerName.PosInterpol.T;
+            Data = .LowPassFilter(BVH_OBJECT.Markers.MarkerName.Pos');
             #else
             T = C3D_OBJECT.Points.Markers.MarkerName.PosInterpol.T;
             Data = .LowPassFilter(C3D_OBJECT.Points.Markers.MarkerName.Pos');
@@ -209,7 +211,13 @@
           };
           
         #else
+        #if USE_BVH_INPUT
+        
+        
+        AnyParamFun &InterpolRef = BVH_OBJECT.Markers.MarkerName.PosInterpol;
+        #else
         AnyParamFun &InterpolRef = C3D_OBJECT.Points.Markers.MarkerName.PosInterpol;
+        #endif
         #endif
         
         WeightFun={.MarkerWeightsPtr};
@@ -231,94 +239,37 @@
     
   };
   
-
 #if USE_BVH_INPUT
-//-->Test
-  AnyFolder Test_Visual = 
-  {
-    AnyFunInterpol UnfilteredPosInterpol = 
-    {
-      Type = PiecewiseLinear ;
-      T = C3D_OBJECT.Points.Markers.MarkerName.FromBVH.val_T ;
-      Data = C3D_OBJECT.Points.Markers.MarkerName.FromBVH.Data ;
-    };
-    AnyDrawSphere UnfilteredTest ={
-      RGB={0.8,0.2,0.8};
-      Opacity = 0.5;
-      ScaleXYZ={1,1,1}*0.01;
-      Position = .UnfilteredPosInterpol(..Driver.t);
-    };        
-  };
-  //<--Test
-    
-  C3D_OBJECT.Points.Markers = 
-  {
-    AnyFolder MarkerName = 
-    {
-      AnyFunction& FilterRef = C3D_OBJECT.Filter;
-      AnyFloat Pos = FromBVH.Data';
-      AnyFloat PosFiltered = FilterRef(FromBVH.Data)';
-      AnyFunInterpol PosInterpol = 
-      {
-        #var Type = Bspline;
-        BsplineOrder =4;
-        
-        T = .FromBVH.val_T;
-        Data = (.PosFiltered)';
-      };         
-      AnyFolder FromBVH = 
-      {
-        AnyVector val_X =DesignVar(zeros(Main.Studies.BVH_CreateMarkerTrajectoriesStudy.nStep,1)'); 
-        AnyVector val_Y =DesignVar(zeros(Main.Studies.BVH_CreateMarkerTrajectoriesStudy.nStep,1)');
-        AnyVector val_Z =DesignVar(zeros(Main.Studies.BVH_CreateMarkerTrajectoriesStudy.nStep,1)');
-        AnyVector val_T=DesignVar(iarr(0, Main.Studies.BVH_CreateMarkerTrajectoriesStudy.nStep-1));
-        AnyFloat  Data= DesignVar({val_X,val_Y,val_Z});        
-      };
-    };
-  };  
 
-  AnyFolder &MarkerInsertionNodeBVH = MarkerPlacementBVH;
-  MarkerInsertionNodeBVH = 
+   BVH_OBJECT.Markers = {
+      AnyVirtualMarkerBVH MarkerName = {
+        RefFramePtr = &MarkerPlacementBVH.MarkerName;
+      };        
+   };
+
+  
+  //AnyFolder &MarkerInsertionNodeBVH = MarkerPlacementBVH;  
+  MarkerPlacementBVH = 
   {
     AnyRefNode MarkerName = 
     {
-      sRel = ..sRelOnBVH;
-      //sRel = Main.ModelSetup.MocapDrivers.MarkerName.sRelOnBVH ;
+      //sRel = ..sRelOnBVH;
+      sRel = Main.ModelSetup.MocapDrivers.MarkerName.sRelOnBVH ;
       AnyDrawNode drw_node = 
       {
         #var RGB = {0, 1, 0};
         #var ScaleXYZ = 0.015*{1, 1, 1};     
-        #var Visible = On;
+        Visible = Main.ModelSetup.BVHFileData.ModelDrawOnOff;
       };
     };
   };//
-
-  Main.Studies.BVH_CreateMarkerTrajectoriesStudy.MarkerOutput =
-  {  
-    AnyFolder MarkerName ={
-      AnyOutputFun Output_X ={          Val =.lin.Pos[0];        };
-      AnyOutputFun Output_Y ={          Val =.lin.Pos[1];        };
-      AnyOutputFun Output_Z ={          Val =.lin.Pos[2];        };
-      AnyOutputFun Output_T ={          Val =.lin.t;        };
-      
-      AnyKinLinear  lin  ={
-        AnyRefNode &ref=Main.ModelSetup.MocapDrivers.MarkerName.MarkerInsertionNodeBVH.MarkerName ;
-        Ref=-1;
-      };
-      
-    };   
-  };
   
-  Main.ModelSetup.Macros.BVH_Preprocess.OutputFunStudy = 
-  {  
-    AnyVector MarkerName##_Val_X = iffun(eqfun(SizesOf(Main.Studies.BVH_CreateMarkerTrajectoriesStudy.MarkerOutput.MarkerName.Output_X())[0],1),0*farr(0.0,1.0,Main.Studies.BVH_CreateMarkerTrajectoriesStudy.nStep),Main.Studies.BVH_CreateMarkerTrajectoriesStudy.MarkerOutput.MarkerName.Output_X());
-    AnyVector MarkerName##_Val_Y = iffun(eqfun(SizesOf(Main.Studies.BVH_CreateMarkerTrajectoriesStudy.MarkerOutput.MarkerName.Output_Y())[0],1),0*farr(0.0,1.0,Main.Studies.BVH_CreateMarkerTrajectoriesStudy.nStep),Main.Studies.BVH_CreateMarkerTrajectoriesStudy.MarkerOutput.MarkerName.Output_Y());
-    AnyVector MarkerName##_Val_Z = iffun(eqfun(SizesOf(Main.Studies.BVH_CreateMarkerTrajectoriesStudy.MarkerOutput.MarkerName.Output_Z())[0],1),0*farr(0.0,1.0,Main.Studies.BVH_CreateMarkerTrajectoriesStudy.nStep),Main.Studies.BVH_CreateMarkerTrajectoriesStudy.MarkerOutput.MarkerName.Output_Z());
-    AnyVector MarkerName##_Val_T = iffun(eqfun(SizesOf(Main.Studies.BVH_CreateMarkerTrajectoriesStudy.MarkerOutput.MarkerName.Output_T())[0],1),0*farr(0.0,1.0,Main.Studies.BVH_CreateMarkerTrajectoriesStudy.nStep),Main.Studies.BVH_CreateMarkerTrajectoriesStudy.MarkerOutput.MarkerName.Output_T());
-  };
+  //Main.ModelSetup.BVHFileData.Markers.MarkerName.
 
+  
 
-#endif  
+#endif
+  
   
   
   

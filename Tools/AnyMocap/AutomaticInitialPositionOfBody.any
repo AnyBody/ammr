@@ -5,15 +5,23 @@ LASIS=LASI,
 BACK=RPSI,
 DIRECT_PELVIS_POS=0,
 C3D_OBJECT=Main.ModelSetup.C3DFileData,
-T_START = Main.Studies.InverseDynamicStudy.tStart,
+TSTART = Main.Studies.InverseDynamicStudy.tStart,
 MANNEQUIN_FOLDER = Main.HumanModel.Mannequin
 ) {
     #if DIRECT_PELVIS_POS == 0
-      #var AnyVar tStart = T_START;
+      #var AnyVar tStart = TSTART;      
+      
+      // Calculate the index in the C3D data which corresponds to the tStart  variable.
+      AnyFloat tStartC3D = C3D_OBJECT.Header.FirstFrameNo/C3D_OBJECT.Header.VideoFrameRate;
+      AnyFloat tEndC3D = (C3D_OBJECT.Header.LastFrameNo+1)/C3D_OBJECT.Header.VideoFrameRate;
+      AnyInt nC3d = C3D_OBJECT.Header.LastFrameNo-C3D_OBJECT.Header.FirstFrameNo+1;
+      AnyFloat closest_idx = (nC3d)/(tEndC3D-tStartC3D)*(tStart -tStartC3D);
+      AnyInt start_idx = round( max({0.0,  min({closest_idx, nC3d } )}));
+      
       // construct the position vector and rotation matrix from the values in the C3D file.
-      #var AnyVec3 Pelvis_RASIS = C3D_OBJECT.Points.Markers.RASIS.PosInterpol(tStart);
-      #var AnyVec3 Pelvis_LASIS = C3D_OBJECT.Points.Markers.LASIS.PosInterpol(tStart);
-      #var AnyVec3 Pelvis_Back = Main.ModelSetup.C3DFileData.Points.Markers.BACK.PosInterpol(tStart);
+      #var AnyVec3 Pelvis_RASIS = C3D_OBJECT.Points.Markers.RASIS.Pos[start_idx];
+      #var AnyVec3 Pelvis_LASIS = C3D_OBJECT.Points.Markers.LASIS.Pos[start_idx];
+      #var AnyVec3 Pelvis_Back = C3D_OBJECT.Points.Markers.BACK.Pos[start_idx];
     
       #var AnyVec3 PelvisPos = 0.5*(Pelvis_RASIS + Pelvis_LASIS) - 0.02*PelvisRotMat'[0] - 0.01*PelvisRotMat'[1];
       #var AnyMat33 PelvisRotMat = RotMat(Pelvis_LASIS, Pelvis_RASIS, Pelvis_Back)
