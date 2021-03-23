@@ -8,25 +8,25 @@ AnyFolder HandCalLeft01 ={
   AnyVar Radialabduction = 0;  // positive: radial abduction; negative: ulnar abduction
   
   AnyVar Finger1_CMC_flexion = 0;
-  AnyVar Finger1_CMC_abduction = -20;
+  AnyVar Finger1_CMC_abduction = 40;
   AnyVar Finger1_MCP_flexion = 20;
   AnyVar Finger1_MCP_abduction = 0;
   AnyVar Finger1_DIP = 20;
   
   AnyVar Finger2_MCP_flexion = 0;
-  AnyVar Finger2_MCP_abduction = 30;
+  AnyVar Finger2_MCP_abduction = -20;
   AnyVar Finger2_PIP = 0;
   AnyVar Finger2_DIP = 0;
   AnyVar Finger3_MCP_flexion = 0;
-  AnyVar Finger3_MCP_abduction = 10;
+  AnyVar Finger3_MCP_abduction = -0;
   AnyVar Finger3_PIP = 0;
   AnyVar Finger3_DIP = 0;    
   AnyVar Finger4_MCP_flexion = 0;
-  AnyVar Finger4_MCP_abduction = -20;
+  AnyVar Finger4_MCP_abduction = 20;
   AnyVar Finger4_PIP = 0;
   AnyVar Finger4_DIP = 0;  
   AnyVar Finger5_MCP_flexion = 0;
-  AnyVar Finger5_MCP_abduction = -50;
+  AnyVar Finger5_MCP_abduction = 30;
   AnyVar Finger5_PIP = 0;
   AnyVar Finger5_DIP = 0;
   
@@ -37,8 +37,21 @@ AnyFolder HandCalLeft01 ={
   AnyFolder &LumbarSpineJoints =  ...BodyModel.Trunk.JointsLumbar;
   AnyFolder &LumbarCervicalJoints =  ...BodyModel.Trunk.JointsCervicalSpine;
   
+  AnyFolder &Cylinder=  .SideHumanFolderRef.ShoulderArm.Mus.Pectoralis_minor2_cyl.Cylinder;
+
   AnyFolder &SegSideCal = .SideHumanFolderRef.ShoulderArm.Seg;
   AnyFolder &JointsSideCal = .SideHumanFolderRef.ShoulderArm.Jnt;
+
+  #if BM_ARM_DELTOID_WRAPPING == _DELTOID_WRAPPING_RAKE_
+  AnyFolder& DeltoidRakeRef = .SideHumanFolderRef.ShoulderArm.Mus.ArtificialRake;
+  #else
+  AnyFolder& DeltoidWrappingPosteriorRef = .SideHumanFolderRef.ShoulderArm.Mus.DeltoidWrappingPosterior;
+  AnyFolder& DeltoidWrappingLateralRef = .SideHumanFolderRef.ShoulderArm.Mus.DeltoidWrappingLateral;
+  AnyFolder& DeltoidWrappingAnteriorRef = .SideHumanFolderRef.ShoulderArm.Mus.DeltoidWrappingAnterior;
+  #endif
+  
+  AnyFolder& LastissimusWrappingRef = .SideHumanFolderRef.ShoulderArm.Mus.LatissimusDorsiWrapping;
+
   
   AnyFolder &MusCalSide =  .SideHumanFolderRef.ShoulderArm.Mus;
   AnyFolder &MusParCalSide =  .SideHumanFolderRef.ShoulderArm.MusPar;
@@ -84,10 +97,13 @@ AnyFolder HandCalLeft01 ={
   
   #if !BM_ARM_SHOULDER_RHYTHM
   AnyKinEqSimpleDriver SCDriver ={
-    AnyKinRotational &SC =  ..SideInterfaceFolderRef.SternoClavicularProtraction.SCRot;  
-    DriverPos = {-0.4226357, 0.148608, -0.1283884}; 
-    DriverVel = {0.0,0.0,0.0};
-    Reaction.Type={Off,Off,Off};
+    AnyKinMeasureOrg SC_measure = {
+      AnyKinMeasure& ref = ...SideInterfaceFolderRef.SternoClavicularProtraction.SCRot;
+      MeasureOrganizer = {0,1};
+    };
+    DriverPos = {-0.6338205, 0.2559457};
+    DriverVel = {-0.0,-0.0};
+    Reaction.Type={Off,Off};
   };
   #endif
   
@@ -250,15 +266,23 @@ AnyFolder HandCalLeft01 ={
     DriverVel={0};
   };  
   
-  
+
 };
 // The study: Operations to be performed on the model
 AnyBodyCalibrationStudy HandCalibrationStudy01 = {
-  AnyFolder &ref=.HandCalLeft01; 
+  AnyFolder &ref=.HandCalRight01;
+  
+  AnyString HandMusPrefix = CompleteNameOf(&.SideHumanFolderRef.ShoulderArm.Mus.Hand);
+
+  MuscleArr = ObjSearch(HandMusPrefix + ".*", "AnyMuscle");
+
+  
+  
+  
   nStep = 1;
   Kinematics.KinematicTol = 1e-06;
   InitialConditions.SmallStepAssumptionOnOff = Off;
-  Kinematics.SmallStepAssumptionOnOff = Off;
+  Kinematics.SmallStepAssumptionOnOff = On;
   InitialConditions.PosAnalysisOnlyOnOff = On;
   Kinematics.PosAnalysisOnlyOnOff = On;
 };
