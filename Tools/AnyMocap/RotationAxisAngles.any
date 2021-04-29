@@ -5,27 +5,32 @@
   RotAxisAnglesZYX Angles(ROT = .SomeSeg.Axes0) = {};
 
 
-  The RotAxisAnglesZYX1 version does the same, but can calulate the relative 
+  The RotAxisAnglesZYX can also calculate the relative 
   rotation angles between two segments. 
 
-  RotAxisAnglesZYX Angles(ROT = .SomeSeg.Axes0) = {
-    ROT_rel = .SomeOtherSeg.Axes0;
-  };
+  
+    RotAxisAnglesZYX Angles(ROT = .SomeSeg.Axes0) = {
+      ROT_rel = .SomeOtherSeg.Axes0;
+    };
 
 
 */ 
 
 #class_template RotAxisAnglesZYX (ROT){
- AnyFolder Calculations = {
+    #var AnyMat33 ROT_rel = {{1,0,0},{0,1,0},{0,0,1}};
   
-      AnyVar yRot1 = asin(-.ROT[2][0]);
+    AnyFolder Calculations = {
+  
+      AnyMat33 Rot = .ROT_rel'*.ROT;
+  
+      AnyVar yRot1 = asin(-Rot[2][0]);
       AnyVar yRot2 = pi - yRot1;
       
-      AnyVar zRot1 = atan2(.ROT[1][0]/cos(yRot1), .ROT[0][0]/cos(yRot1));
-      AnyVar zRot2 = atan2(.ROT[1][0]/cos(yRot2), .ROT[0][0]/cos(yRot2));
+      AnyVar zRot1 = atan2(Rot[1][0]/cos(yRot1), Rot[0][0]/cos(yRot1));
+      AnyVar zRot2 = atan2(Rot[1][0]/cos(yRot2), Rot[0][0]/cos(yRot2));
       
-      AnyVar xRot1 = atan2(.ROT[2][1]/cos(yRot1),.ROT[2][2]/cos(yRot1));
-      AnyVar xRot2 = atan2(.ROT[2][1]/cos(yRot2),.ROT[2][2]/cos(yRot2));
+      AnyVar xRot1 = atan2(Rot[2][1]/cos(yRot1),Rot[2][2]/cos(yRot1));
+      AnyVar xRot2 = atan2(Rot[2][1]/cos(yRot2),Rot[2][2]/cos(yRot2));
       AnyVar abs1 = abs(zRot1)+abs(yRot1)+abs(zRot1);
       AnyVar abs2 = abs(zRot2)+abs(yRot2)+abs(zRot2);
     };
@@ -35,26 +40,71 @@
     AnyVar xRot = iffun(gtfun(Calculations.abs1,Calculations.abs2), Calculations.xRot2,Calculations.xRot1) ;
 }; 
 
-#class_template RotAxisAnglesZYX1 (ROT){
-   #var AnyMat33 ROT_rel = {{1,0,0},{0,1,0},{0,0,1}};
+
+
+/* 
+  Class to bind two segments together with softdrivers based on their 
+  load time positions. 
+
+  The class can also add add the forces between the segments using 
+  strong recruited actuators. (Recruited actuators are used to avoid
+  statically indeterminate systems, which could easily occur with 
+  normal reaction forces.)
   
-    AnyFolder Calculations = {
-  
-      AnyMat33 Rot = .ROT_rel'*..ROT;
-  
-      AnyVar yRot1 = asin(-Rot[2][0]);
-      AnyVar yRot2 = pi - yRot1;
+
+    DriverBasedOnLoadPos driver1(Seg1=..Mass1,Seg2=..Mass2) ={};
+
+
+
+*/ 
+
+#class_template DriverBasedOnLoadPos(AnySeg &Seg1, AnySeg &Seg2){
       
-      AnyVar zRot1 = atan2(..Rot[1][0]/cos(yRot1), ..Rot[0][0]/cos(yRot1));
-      AnyVar zRot2 = atan2(..Rot[1][0]/cos(yRot2), ..Rot[0][0]/cos(yRot2));
+      RotAxisAnglesZYX  RotPos (ROT=.Seg2.Axes0)= {ROT_rel=.Seg1.Axes0;};
       
-      AnyVar xRot1 = atan2(..Rot[2][1]/cos(yRot1),..Rot[2][2]/cos(yRot1));
-      AnyVar xRot2 = atan2(..Rot[2][1]/cos(yRot2),..Rot[2][2]/cos(yRot2));
-      AnyVar abs1 = abs(zRot1)+abs(yRot1)+abs(zRot1);
-      AnyVar abs2 = abs(zRot2)+abs(yRot2)+abs(zRot2);
+     
+      AnyKinEqSimpleDriver driver ={
+        AnyKinLinear lin ={
+          AnyRefFrame &ref1=..Seg1;
+          AnyRefFrame &ref2=..Seg2;
+        };
+        AnyKinRotational rot ={
+          AnyRefFrame &ref1=..Seg1;
+          AnyRefFrame &ref2=..Seg2;
+          Type=RotAxesAngles;
+        };
+        AnyFloat LinPos=.Seg2.r0-.Seg1.r0;
+     
+        DriverPos={LinPos[0],LinPos[1],LinPos[2],.RotPos.zRot,.RotPos.yRot,.RotPos.xRot};
+        DriverVel={0,0,0,0,0,0};
+        Reaction.Type={Off,Off,Off,Off,Off,Off};
+        CType={Soft,Soft,Soft,Soft,Soft,Soft};
+      };
+      
+      AnyMuscleModel MusMdl={F0=2000;};
+      AnyKinMeasureOrg Linx = {AnyKinMeasure &ref=.driver.lin; MeasureOrganizer={0};};
+      AnyKinMeasureOrg Liny = {AnyKinMeasure &ref=.driver.lin; MeasureOrganizer={1};};
+      AnyKinMeasureOrg Linz = {AnyKinMeasure &ref=.driver.lin; MeasureOrganizer={2};};
+      AnyKinMeasureOrg Rotx = {AnyKinMeasure &ref=.driver.rot; MeasureOrganizer={2};};
+      AnyKinMeasureOrg Roty = {AnyKinMeasure &ref=.driver.rot; MeasureOrganizer={1};};
+      AnyKinMeasureOrg Rotz = {AnyKinMeasure &ref=.driver.rot; MeasureOrganizer={0};};
+      AnyGeneralMuscle Mus_Linx_Pos ={ AnyKinMeasureOrg &ref2=.Linx; ForceDirection=1; AnyMuscleModel &ref1=.MusMdl; };
+      AnyGeneralMuscle Mus_Linx_Neg ={ AnyKinMeasureOrg &ref2=.Linx; ForceDirection=-1; AnyMuscleModel &ref1=.MusMdl; };
+      AnyGeneralMuscle Mus_Liny_Pos ={ AnyKinMeasureOrg &ref2=.Liny; ForceDirection=1; AnyMuscleModel &ref1=.MusMdl; };
+      AnyGeneralMuscle Mus_Liny_Neg ={ AnyKinMeasureOrg &ref2=.Liny; ForceDirection=-1; AnyMuscleModel &ref1=.MusMdl; };
+      AnyGeneralMuscle Mus_Linz_Pos ={ AnyKinMeasureOrg &ref2=.Linz; ForceDirection=1; AnyMuscleModel &ref1=.MusMdl; };
+      AnyGeneralMuscle Mus_Linz_Neg ={ AnyKinMeasureOrg &ref2=.Linz; ForceDirection=-1; AnyMuscleModel &ref1=.MusMdl; };
+      AnyGeneralMuscle Mus_Rotx_Pos ={ AnyKinMeasureOrg &ref2=.Rotx; ForceDirection=1; AnyMuscleModel &ref1=.MusMdl; };
+      AnyGeneralMuscle Mus_Rotx_Neg ={ AnyKinMeasureOrg &ref2=.Rotx; ForceDirection=-1; AnyMuscleModel &ref1=.MusMdl; };
+      AnyGeneralMuscle Mus_Roty_Pos ={ AnyKinMeasureOrg &ref2=.Roty; ForceDirection=1; AnyMuscleModel &ref1=.MusMdl; };
+      AnyGeneralMuscle Mus_Roty_Neg ={ AnyKinMeasureOrg &ref2=.Roty; ForceDirection=-1; AnyMuscleModel &ref1=.MusMdl; };
+      AnyGeneralMuscle Mus_Rotz_Pos ={ AnyKinMeasureOrg &ref2=.Rotz; ForceDirection=1; AnyMuscleModel &ref1=.MusMdl; };
+      AnyGeneralMuscle Mus_Rotz_Neg ={ AnyKinMeasureOrg &ref2=.Rotz; ForceDirection=-1; AnyMuscleModel &ref1=.MusMdl; };
+
+
+
     };
+
+  
     
-    AnyVar zRot = iffun(gtfun(Calculations.abs1,Calculations.abs2), Calculations.zRot2,Calculations.zRot1);
-    AnyVar yRot = iffun(gtfun(Calculations.abs1,Calculations.abs2), Calculations.yRot2,Calculations.yRot1);
-    AnyVar xRot = iffun(gtfun(Calculations.abs1,Calculations.abs2), Calculations.xRot2,Calculations.xRot1) ;
-}; 
+
