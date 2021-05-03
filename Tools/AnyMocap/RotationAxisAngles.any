@@ -60,51 +60,56 @@
 
 #class_template DriverBasedOnLoadPos(AnySeg &Seg1, AnySeg &Seg2, RECRUITMENT_CONSTRAINTS=1){
       
-      RotAxisAnglesZYX  RotPos (ROT=.Seg2.Axes0)= {ROT_rel=.Seg1.Axes0;};
-      
-     
-      AnyKinEqSimpleDriver driver ={
-        AnyKinLinear lin ={
-          AnyRefFrame &ref1=..Seg1;
-          AnyRefFrame &ref2=..Seg2;
-        };
-        AnyKinRotational rot ={
-          AnyRefFrame &ref1=..Seg1;
-          AnyRefFrame &ref2=..Seg2;
-          Type=RotAxesAngles;
-        };
-        AnyFloat LinPos=.Seg2.r0-.Seg1.r0;
-     
-        DriverPos={LinPos[0],LinPos[1],LinPos[2],.RotPos.zRot,.RotPos.yRot,.RotPos.xRot};
-        DriverVel={0,0,0,0,0,0};
-        Reaction.Type={Off,Off,Off,Off,Off,Off};
-        CType={Soft,Soft,Soft,Soft,Soft,Soft};
+  RotAxisAnglesZYX  RotPos (ROT=.Seg2.Axes0)= {ROT_rel=.Seg1.Axes0;};
+  
+    
+  AnyKinEqSimpleDriver driver ={
+      AnyKinLinear lin ={
+        Ref=0;
+        AnyRefFrame &ref1=..Seg1;
+        AnyRefFrame &ref2=..Seg2;
+      };
+      AnyKinRotational rot ={
+        AnyRefFrame &ref1=..Seg1;
+        AnyRefFrame &ref2=..Seg2;
+        Type=RotAxesAngles;
       };
       
-      #if RECRUITMENT_CONSTRAINTS
-      AnyMuscleModel MusMdl={F0=2000;};
-      AnyKinMeasureOrg Linx = {AnyKinMeasure &ref=.driver.lin; MeasureOrganizer={0};};
-      AnyKinMeasureOrg Liny = {AnyKinMeasure &ref=.driver.lin; MeasureOrganizer={1};};
-      AnyKinMeasureOrg Linz = {AnyKinMeasure &ref=.driver.lin; MeasureOrganizer={2};};
-      AnyKinMeasureOrg Rotx = {AnyKinMeasure &ref=.driver.rot; MeasureOrganizer={2};};
-      AnyKinMeasureOrg Roty = {AnyKinMeasure &ref=.driver.rot; MeasureOrganizer={1};};
-      AnyKinMeasureOrg Rotz = {AnyKinMeasure &ref=.driver.rot; MeasureOrganizer={0};};
-      AnyGeneralMuscle Mus_Linx_Pos ={ AnyKinMeasureOrg &ref2=.Linx; ForceDirection=1; AnyMuscleModel &ref1=.MusMdl; };
-      AnyGeneralMuscle Mus_Linx_Neg ={ AnyKinMeasureOrg &ref2=.Linx; ForceDirection=-1; AnyMuscleModel &ref1=.MusMdl; };
-      AnyGeneralMuscle Mus_Liny_Pos ={ AnyKinMeasureOrg &ref2=.Liny; ForceDirection=1; AnyMuscleModel &ref1=.MusMdl; };
-      AnyGeneralMuscle Mus_Liny_Neg ={ AnyKinMeasureOrg &ref2=.Liny; ForceDirection=-1; AnyMuscleModel &ref1=.MusMdl; };
-      AnyGeneralMuscle Mus_Linz_Pos ={ AnyKinMeasureOrg &ref2=.Linz; ForceDirection=1; AnyMuscleModel &ref1=.MusMdl; };
-      AnyGeneralMuscle Mus_Linz_Neg ={ AnyKinMeasureOrg &ref2=.Linz; ForceDirection=-1; AnyMuscleModel &ref1=.MusMdl; };
-      AnyGeneralMuscle Mus_Rotx_Pos ={ AnyKinMeasureOrg &ref2=.Rotx; ForceDirection=1; AnyMuscleModel &ref1=.MusMdl; };
-      AnyGeneralMuscle Mus_Rotx_Neg ={ AnyKinMeasureOrg &ref2=.Rotx; ForceDirection=-1; AnyMuscleModel &ref1=.MusMdl; };
-      AnyGeneralMuscle Mus_Roty_Pos ={ AnyKinMeasureOrg &ref2=.Roty; ForceDirection=1; AnyMuscleModel &ref1=.MusMdl; };
-      AnyGeneralMuscle Mus_Roty_Neg ={ AnyKinMeasureOrg &ref2=.Roty; ForceDirection=-1; AnyMuscleModel &ref1=.MusMdl; };
-      AnyGeneralMuscle Mus_Rotz_Pos ={ AnyKinMeasureOrg &ref2=.Rotz; ForceDirection=1; AnyMuscleModel &ref1=.MusMdl; };
-      AnyGeneralMuscle Mus_Rotz_Neg ={ AnyKinMeasureOrg &ref2=.Rotz; ForceDirection=-1; AnyMuscleModel &ref1=.MusMdl; };
-      #endif
+      AnyFloat LinPos=.Seg2.r0-.Seg1.r0;
+      AnyMat33 RelRotMat = RotMat(.RotPos.zRot,z)*RotMat(.RotPos.yRot,y)*RotMat(.RotPos.xRot,x);
+      AnyVec3 LinVec = LinPos*.Seg1.Axes0;
+      DriverPos={LinVec[0],LinVec[1],LinVec[2],.RotPos.zRot,.RotPos.yRot,.RotPos.xRot};
+      
+      DriverVel={0,0,0,0,0,0};
+      Reaction.Type={Off,Off,Off,Off,Off,Off};
+      CType={Soft,Soft,Soft,Soft,Soft,Soft};
+  };
+
+  
+  #if RECRUITMENT_CONSTRAINTS
+  AnyMuscleModel MusMdl={F0=2000;};
+  AnyKinMeasureOrg Linx = {AnyKinMeasure &ref=.driver.lin; MeasureOrganizer={0};};
+  AnyKinMeasureOrg Liny = {AnyKinMeasure &ref=.driver.lin; MeasureOrganizer={1};};
+  AnyKinMeasureOrg Linz = {AnyKinMeasure &ref=.driver.lin; MeasureOrganizer={2};};
+  AnyKinMeasureOrg Rotx = {AnyKinMeasure &ref=.driver.rot; MeasureOrganizer={2};};
+  AnyKinMeasureOrg Roty = {AnyKinMeasure &ref=.driver.rot; MeasureOrganizer={1};};
+  AnyKinMeasureOrg Rotz = {AnyKinMeasure &ref=.driver.rot; MeasureOrganizer={0};};
+  AnyGeneralMuscle Mus_Linx_Pos ={ AnyKinMeasureOrg &ref2=.Linx; ForceDirection=1; AnyMuscleModel &ref1=.MusMdl; };
+  AnyGeneralMuscle Mus_Linx_Neg ={ AnyKinMeasureOrg &ref2=.Linx; ForceDirection=-1; AnyMuscleModel &ref1=.MusMdl; };
+  AnyGeneralMuscle Mus_Liny_Pos ={ AnyKinMeasureOrg &ref2=.Liny; ForceDirection=1; AnyMuscleModel &ref1=.MusMdl; };
+  AnyGeneralMuscle Mus_Liny_Neg ={ AnyKinMeasureOrg &ref2=.Liny; ForceDirection=-1; AnyMuscleModel &ref1=.MusMdl; };
+  AnyGeneralMuscle Mus_Linz_Pos ={ AnyKinMeasureOrg &ref2=.Linz; ForceDirection=1; AnyMuscleModel &ref1=.MusMdl; };
+  AnyGeneralMuscle Mus_Linz_Neg ={ AnyKinMeasureOrg &ref2=.Linz; ForceDirection=-1; AnyMuscleModel &ref1=.MusMdl; };
+  AnyGeneralMuscle Mus_Rotx_Pos ={ AnyKinMeasureOrg &ref2=.Rotx; ForceDirection=1; AnyMuscleModel &ref1=.MusMdl; };
+  AnyGeneralMuscle Mus_Rotx_Neg ={ AnyKinMeasureOrg &ref2=.Rotx; ForceDirection=-1; AnyMuscleModel &ref1=.MusMdl; };
+  AnyGeneralMuscle Mus_Roty_Pos ={ AnyKinMeasureOrg &ref2=.Roty; ForceDirection=1; AnyMuscleModel &ref1=.MusMdl; };
+  AnyGeneralMuscle Mus_Roty_Neg ={ AnyKinMeasureOrg &ref2=.Roty; ForceDirection=-1; AnyMuscleModel &ref1=.MusMdl; };
+  AnyGeneralMuscle Mus_Rotz_Pos ={ AnyKinMeasureOrg &ref2=.Rotz; ForceDirection=1; AnyMuscleModel &ref1=.MusMdl; };
+  AnyGeneralMuscle Mus_Rotz_Neg ={ AnyKinMeasureOrg &ref2=.Rotz; ForceDirection=-1; AnyMuscleModel &ref1=.MusMdl; };
+  #endif
 
 
-    };
+};
 
   
     
