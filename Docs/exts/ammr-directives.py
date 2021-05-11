@@ -93,6 +93,7 @@ class AMMR_BMStatement(std.Target):
 
         # Create a documentation node to use as the parent.
         node = sphinx.addnodes.desc()
+        node["domain"] = "ammr"
         node.document = self.state.document
         node["objtype"] = "bm_statement"
         node.set_class("section")
