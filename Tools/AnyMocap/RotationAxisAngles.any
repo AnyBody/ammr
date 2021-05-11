@@ -43,49 +43,53 @@
 
 
 /* 
-  Class to bind two segments together with softdrivers based on their 
-  load time positions. 
+  Class to bind two segments together with drivers based on their load time positions. The
+  driver constraint type can be controlled by the _CTYPE arg
 
-  The class can also add add the forces between the segments using 
-  strong recruited actuators. (Recruited actuators are used to avoid
-  statically indeterminate systems, which could easily occur with 
-  normal reaction forces.)
-  
+  The class adds a node on Seg1 with position and velocity set to 0. This helps certain
+  situatons where gimbal lock might occur. 
 
-    DriverBasedOnLoadPos driver1(Seg1=..Mass1,Seg2=..Mass2) ={};
+  The class can also add add the forces between the segments using strong recruited
+  actuators. (Recruited actuators are used to avoid statically indeterminate systems,
+  which could easily occur with normal reaction forces.)
+
+
+    DriverBasedOnLoadPos driver1(Seg1=..Mass1,Seg2=..Mass2, NodeName = Node1) ={};
 
 
 
 */ 
 
-#class_template DriverBasedOnLoadPos(AnySeg &Seg1, AnySeg &Seg2, RECRUITMENT_CONSTRAINTS=1){
+#class_template DriverBasedOnLoadPos(AnySeg &Seg1,AnySeg &Seg2, NodeName, RECRUITMENT_CONSTRAINTS = 1, _CTYPE = Soft){
       
   RotAxisAnglesZYX  RotPos (ROT=.Seg2.Axes0)= {ROT_rel=.Seg1.Axes0;};
-  
-    
-  AnyKinEqSimpleDriver driver ={
-      AnyKinLinear lin ={
-        Ref=0;
-        AnyRefFrame &ref1=..Seg1;
-        AnyRefFrame &ref2=..Seg2;
-      };
-      AnyKinRotational rot ={
-        AnyRefFrame &ref1=..Seg1;
-        AnyRefFrame &ref2=..Seg2;
-        Type=RotAxesAngles;
-      };
-      
-      AnyFloat LinPos=.Seg2.r0-.Seg1.r0;
-      AnyMat33 RelRotMat = RotMat(.RotPos.zRot,z)*RotMat(.RotPos.yRot,y)*RotMat(.RotPos.xRot,x);
-      AnyVec3 LinVec = LinPos*.Seg1.Axes0;
-      DriverPos={LinVec[0],LinVec[1],LinVec[2],.RotPos.zRot,.RotPos.yRot,.RotPos.xRot};
-      
-      DriverVel={0,0,0,0,0,0};
-      Reaction.Type={Off,Off,Off,Off,Off,Off};
-      CType={Soft,Soft,Soft,Soft,Soft,Soft};
+
+
+  Seg1= {
+    //        AnyDrawSeg drw2 ={};
+    AnyRefNode NodeName ={
+      sRel=(..Seg2.r0-.r0)*.Axes0;
+      ARel= RotMat(..RotPos.zRot,z)*RotMat(..RotPos.yRot,y)*RotMat(..RotPos.xRot,x);
+    };
   };
 
-  
+  AnyKinEqSimpleDriver driver ={
+    AnyKinLinear lin ={
+      AnyRefFrame &ref1=..Seg1.NodeName;
+      AnyRefFrame &ref2=..Seg2;
+    };
+    AnyKinRotational rot ={
+      AnyRefFrame &ref1=..Seg1.NodeName;
+      AnyRefFrame &ref2=..Seg2;
+      Type=RotVector;
+    };
+    
+    DriverPos={0,0,0,0,0,0};
+    DriverVel={0,0,0,0,0,0};
+    Reaction.Type={Off,Off,Off,Off,Off,Off};
+    CType={_CTYPE,_CTYPE,_CTYPE,_CTYPE,_CTYPE,_CTYPE};
+  };
+
   #if RECRUITMENT_CONSTRAINTS
   AnyMuscleModel MusMdl={F0=2000;};
   AnyKinMeasureOrg Linx = {AnyKinMeasure &ref=.driver.lin; MeasureOrganizer={0};};
@@ -107,8 +111,6 @@
   AnyGeneralMuscle Mus_Rotz_Pos ={ AnyKinMeasureOrg &ref2=.Rotz; ForceDirection=1; AnyMuscleModel &ref1=.MusMdl; };
   AnyGeneralMuscle Mus_Rotz_Neg ={ AnyKinMeasureOrg &ref2=.Rotz; ForceDirection=-1; AnyMuscleModel &ref1=.MusMdl; };
   #endif
-
-
 };
 
   
