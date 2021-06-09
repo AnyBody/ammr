@@ -1,0 +1,62 @@
+//fatal_warnings = True;
+
+
+#include "../libdef.any"
+
+
+
+Main = {
+  
+  AnyOperation& RunTest = study.InverseDynamics;
+  
+
+  AnyFolder Model = 
+  {
+    
+    AnyFixedRefFrame GlobalRef = {
+    };
+    
+    AnyStdJoint KinematicSupport = {
+      AnyRefFrame& ref0 = .GlobalRef;
+      AnyRefFrame& ref1 = .seg;
+      Constraints.Reaction.Type = {Off,Off,Off,Off,Off,Off};
+    };
+    
+    AnyFolder BugWorkAround = {
+      // For small systems it is necessary to have a least one reaction in the system. 
+      // Otherwise the recuitment solver fails. Hence the code below ensure this works
+        AnyStdJoint dummySupport = {
+          AnyRefFrame& ref0 = ..GlobalRef;   
+          AnyRefFrame& ref1 = .dummy;
+        };
+        AnySeg dummy = {
+          Mass = 1;
+          Jii = 0.1*{1,1,0.1};
+        };
+    };
+    
+    AnySeg seg = {
+      sCoM = {0,0.05,0};
+      r0 = {0.1,0,0.1};
+      Mass = 10;
+      Jii = 1*{1,1,0.1};
+      viewInertia.Visible=On;
+    };
+    
+    #include "<ANYBODY_PATH_MODELUTILS>/Reactions/Support.any"  
+  
+  };
+  
+
+  AnyBodyStudy study = {
+    nStep = 1;
+    Gravity = {0, -9.81, 0.1};
+    
+    AnyFolder& Model = .Model;
+ 
+  };
+
+
+
+
+};
