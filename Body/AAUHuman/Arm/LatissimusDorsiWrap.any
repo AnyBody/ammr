@@ -1,0 +1,86 @@
+
+
+MultiWrapSurfs LatissimusDorsiWrapping (
+BASE_FRAME = LatissimusWrappingSeg.RotNode,
+NUMBER_OF_CYLINDERS= 1,
+TYPE=2,
+DEBUG=0
+) = 
+{     
+  RadiusX = 1.15* vnorm(..Seg.Scapula.GHReactionCenterNode.sRel - ..Seg.Scapula.gh.sRel);
+  Radius = RadiusX;//vnorm(..Seg.Scapula.acj.sRel - ..Seg.Scapula.gh.sRel)*0.8613933;
+  RadiusHeight = 0.65* vnorm(..Seg.Humerus.gh.sRel - ..Seg.Humerus.I_latissimus_dorsi_5.sRel);
+  
+  WrapSurfLength = 1.8 * vnorm(..Seg.Humerus.I_latissimus_dorsi_1.sRel - ..Seg.Humerus.gh.sRel);
+  Angles = ..Sign*({-100});  
+  
+  AnySeg LatissimusWrappingSeg ={
+    //^ Segment on which the wrapping cylinders are placed. 
+    //^ The ssegment follows scapula kinematically, but is dynamically 
+    //^ attached to both scapula and humerus to ensure that forces on 
+    //^ the wrapping cylinders are distributed correctly between humerus 
+    //^ scapula 
+    
+    Mass=0;
+    Jii={0.0,0.0,0.0};    
+    
+    r0= ...Seg.Humerus.gh.sRel*...Seg.Humerus.Axes0'+...Seg.Humerus.r0;  
+    Axes0=...Seg.Humerus.Axes0
+    #if _LEFT_RIGHT_ == "LEFT"
+    * RotMat(-pi/2,y) 
+    #endif;
+
+    AnyRefNode RotNode = 
+    {
+      AnyVar PosteriorTilt = 0;
+      //AnyDrawRefFrame drwf ={ScaleXYZ=0.1*{1,1,1};RGB={0,1,1};};
+      #if _LEFT_RIGHT_ == "LEFT"
+      ARel = RotMat(-0.1,y)*RotMat(pi,x)*RotMat(PosteriorTilt*pi/180,x);
+      #else
+      ARel = RotMat(-0.1,y)*RotMat(PosteriorTilt*pi/180,x);
+      #endif
+    };  
+  };   
+  
+  AnySphericalJoint WrapSegmentHumerusJnt ={
+    AnyRefNode &ref1=...Seg.Humerus.gh ;
+    AnySeg &ref2=.LatissimusWrappingSeg; 
+  };
+  
+  AnyFolder &ScapulaRef=..Seg.Scapula;
+
+  AnyFolder &HumerusRef =..Seg.Humerus;
+
+  AnyKinMotion WrappingSegmentDriver={
+    AnyKinMeasureLinComb LinComb = {
+    AnyKinRotational HumerusScapulaRot={
+      AnyRefNode &ref2=...ScapulaRef.gh_rotated1; 
+      AnyRefNode &ref1=...HumerusRef.gh_rotated1;
+      Type = RotVector;
+    };
+    AnyKinRotational HumerusWrapSegmentRot={
+      AnyRefFrame &ref1=...ScapulaRef.gh_rotated1;
+      AnyRefFrame &ref2=...LatissimusWrappingSeg; 
+      Type =RotVector;
+    };
+      OutDim = 3;
+      Coef={
+        {1,0,0,-1,0,0},
+        { 0,0.2,0,0,-1,0}, //this one controls the rotaion around the long axis og humerus
+        {0,0,0.98,0,0,-1}
+      };    
+    }; // Measure  
+  };
+    
+  AnyReacForce MomentsToThorax = 
+  {
+    AnyKinRotational rot ={
+      AnyRefFrame &ref1=..LatissimusWrappingSeg;
+      AnyRefFrame &ref2=......Trunk.SegmentsThorax.ThoraxSeg;
+      Type=RotVector;
+    };  
+  };
+  
+}; 
+
+  

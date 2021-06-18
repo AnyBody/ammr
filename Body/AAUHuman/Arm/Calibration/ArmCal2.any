@@ -1,5 +1,6 @@
 ///This is the calibratiion file it will calibrate the anterrio part of the deltoid muscle 10 deg abduction 35 flexion
 AnyFolder ArmCal2 ={
+  AnyComponentDefinition obj = {};  
   
   AnyFolder &ThoraxSegs =  ...BodyModel.Trunk.SegmentsThorax;
   AnyFolder &LumbarSegs =  ...BodyModel.Trunk.SegmentsLumbar;
@@ -10,7 +11,14 @@ AnyFolder ArmCal2 ={
   
   AnyFolder &SegSideCal = .SideHumanFolderRef.ShoulderArm.Seg;
   AnyFolder &JointsSideCal = .SideHumanFolderRef.ShoulderArm.Jnt;
-  AnyFolder &DeltoidRakeRef = .SideHumanFolderRef.ShoulderArm.Mus.ArtificialRake;
+  
+  #if BM_ARM_DELTOID_WRAPPING == _DELTOID_WRAPPING_RAKE_
+  AnyFolder& DeltoidRakeRef = .SideHumanFolderRef.ShoulderArm.Mus.ArtificialRake;
+  #else
+  AnyFolder& DeltoidWrappingPosteriorRef = .SideHumanFolderRef.ShoulderArm.Mus.DeltoidWrappingPosterior;
+  AnyFolder& DeltoidWrappingLateralRef = .SideHumanFolderRef.ShoulderArm.Mus.DeltoidWrappingLateral;
+  AnyFolder& DeltoidWrappingAnteriorRef = .SideHumanFolderRef.ShoulderArm.Mus.DeltoidWrappingAnterior;
+  #endif
 
   AnyFolder &MusParCalSide =  .SideHumanFolderRef.ShoulderArm.MusPar;
   
@@ -36,18 +44,18 @@ AnyFolder ArmCal2 ={
   
   
   AnyKinEqSimpleDriver NeckJntDriver = {
-    AnyKinMeasure &lb = ....BodyModel.Interface.Trunk.SkullThoraxLateralBending;
-    AnyKinMeasure &ar = ....BodyModel.Interface.Trunk.SkullThoraxRotation;
-    AnyKinMeasure &fe = ....BodyModel.Interface.Trunk.SkullThoraxFlexion;
+    AnyKinMeasure& lb = ....BodyModel.Interface.Trunk.SkullThoraxLateralBending;
+    AnyKinMeasure& ar = ....BodyModel.Interface.Trunk.SkullThoraxRotation;
+    AnyKinMeasure& fe = ....BodyModel.Interface.Trunk.SkullThoraxFlexion;
     DriverPos = {0,0,0};
     DriverVel = {0,0,0};
     Reaction.Type = {On,On,On};
   };
   
   AnyKinEqSimpleDriver ThoraxDriver ={
-    AnyKinMeasureOrg &Ref2 = ....BodyModel.Interface.Trunk.PelvisThoraxLateralBending;
-    AnyKinMeasureOrg &Ref3 = ....BodyModel.Interface.Trunk.PelvisThoraxRotation;
-    AnyKinMeasureOrg &Ref1 = ....BodyModel.Interface.Trunk.PelvisThoraxExtension;
+    AnyKinMeasure& Ref2 = ....BodyModel.Interface.Trunk.PelvisThoraxLateralBending;
+    AnyKinMeasure& Ref3 = ....BodyModel.Interface.Trunk.PelvisThoraxRotation;
+    AnyKinMeasure& Ref1 = ....BodyModel.Interface.Trunk.PelvisThoraxExtension;
     DriverPos = pi/180*{0,0,0};
     DriverVel = pi/180*{0,0,0};
     Reaction.Type = {On,On,On};
@@ -55,30 +63,33 @@ AnyFolder ArmCal2 ={
   
   #if !BM_ARM_SHOULDER_RHYTHM
   AnyKinEqSimpleDriver SCDriver ={
-    AnyKinRotational &SC =  ..SideInterfaceFolderRef.SternoClavicularProtraction.SCRot;
-    DriverPos = {-0.222621, 0.05610554, -0.3493471};
-    DriverVel = {0.0,0.0,0.0};
-    Reaction.Type={Off,Off,Off};
+    AnyKinMeasureOrg SC_measure = {
+      AnyKinMeasure& ref = ...SideInterfaceFolderRef.SternoClavicularProtraction.SCRot;
+      MeasureOrganizer = {0,1};
+    };
+    DriverPos = {-0.222621, 0.05610554};
+    DriverVel = {0.0,0.0};
+    Reaction.Type={Off,Off};
   };
   #endif
   
   AnyKinEqSimpleDriver WristDriver ={
-    AnyKinMeasure &WF = ..SideInterfaceFolderRef.WristFlexion;
-    AnyKinMeasure &WA = ..SideInterfaceFolderRef.WristAbduction;
+    AnyKinMeasure& WF = ..SideInterfaceFolderRef.WristFlexion;
+    AnyKinMeasure& WA = ..SideInterfaceFolderRef.WristAbduction;
     DriverPos = {0,0};
     DriverVel = {0,0};
     Reaction.Type={On,On};
   };
   
   AnyKinEqSimpleDriver FEDriver ={
-    AnyKinMeasure &FE = ..SideInterfaceFolderRef.ElbowFlexion;
+    AnyKinMeasure& FE = ..SideInterfaceFolderRef.ElbowFlexion;
     DriverPos = {65*pi/180};
     DriverVel = {0};
     Reaction.Type = {Off};
   };
   
   AnyKinEqSimpleDriver PSDriver ={
-    AnyKinMeasure &FE = ..SideInterfaceFolderRef.ElbowPronation;
+    AnyKinMeasure& FE = ..SideInterfaceFolderRef.ElbowPronation;
     DriverPos = {0*pi/180};
     DriverVel = pi/180*{ 0.0 };
     Reaction.Type = {Off};
@@ -225,7 +236,11 @@ AnyFolder ArmCal2 ={
   #endif
 
   AnyString MusPrefix = CompleteNameOf(&.SideHumanFolderRef.ShoulderArm.Mus);
+  #if BM_ARM_DELTOID_WRAPPING == _DELTOID_WRAPPING_RAKE_
   AnyObjectPtrArray deltoideus_clavicularMuscles = ObjSearch(MusPrefix+".deltoideus_clavicular*", "AnyMuscle");
+  #else
+  AnyObjectPtrArray deltoideus_clavicularMuscles = ObjSearch(MusPrefix+".deltoideus_anterior*", "AnyMuscle");
+  #endif
   
 };
 
@@ -238,6 +253,8 @@ AnyBodyCalibrationStudy ArmCalibrationStudy2 = {
       ref.deltoideus_clavicularMuscles
   );
   Kinematics.KinematicTol = 1e-07;
-  InitialConditions.SmallStepAssumptionOnOff = Off;
+  Kinematics.SmallStepAssumptionOnOff = Off;
+  InitialConditions.PosAnalysisOnlyOnOff = On;
+  Kinematics.PosAnalysisOnlyOnOff = On;
 };
 

@@ -15,6 +15,9 @@ if "%1" == "" goto help
 
 if "%1" == "clean" goto clean
 
+if "%1" == "release" goto release
+
+
 %SPHINXBUILD% >NUL 2>NUL
 if errorlevel 9009 (
 	echo.
@@ -30,6 +33,23 @@ if errorlevel 9009 (
 
 %SPHINXBUILD% -M %1 %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% -n
 robocopy /MIR _build\html ..\Documentation /mt /NFL /NDL /NJH /NJS /nc /ns /np
+goto end
+
+
+:release
+%SPHINXBUILD% -M html %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% -n -W -t offline
+robocopy /MIR _build\html ..\Documentation /mt /NFL /NDL /NJH /NJS /nc /ns /np
+cd ..
+git checkout -b archive
+git checkout archive
+git add -f Documentation\*
+git commit -m "doc archive"
+git archive archive -o release.zip
+git reset --soft HEAD~
+git reset
+git checkout master
+git branch -D archive
+cd docs
 goto end
 
 :help

@@ -1,0 +1,74 @@
+#include "../libdef.any"
+
+
+#include "<ANYMOCAP_PATH>/RotationAxisAngles.any"
+
+
+Main ={
+  
+  AnyOperation& RunTest = study.InverseDynamics;
+  
+
+  AnyBodyStudy study ={
+    
+    
+    AnyFloat DiffSeg2 = Seg2.Axes0-Seg2.Axes;
+    AnyFloat DiffSeg1 = Seg1.Axes0-Seg1.Axes;
+
+    AnyVar test_precission = 1e-15;
+    
+    AnyInt test_seg1 = expect(ceil(repmat(3,3, test_precission)-abs(DiffSeg2)), "Axes not equal to Axes0");
+    AnyInt test_seg2 = expect(ceil(repmat(3,3, test_precission)-abs(DiffSeg1)), "Axes not equal to Axes0");
+    
+    
+    //AnyVar test = assert(Seg2.Axes0-Seg2.Axes), "Hallo");
+    
+    
+    Gravity ={0,0,0};
+    
+    nStep = 3;
+    
+    AnySeg Seg1={
+      Mass=0;
+      Jii ={0,0,0};
+      AnyVec3 rot_XYZ= 3*{20,40,120}*pi/180;
+      Axes0 = RotMat(rot_XYZ[0],z)*RotMat(rot_XYZ[1],y)*RotMat(rot_XYZ[2],x);
+      r0=3*{1,2,3};
+      AnyDrawRefFrame drw ={RGB={1,0,0};};
+    };
+    
+    AnySeg Seg2={
+      Mass=0;
+      Jii ={0,0,0};
+      Axes0 = RotMat(120*pi/180,x)*RotMat(140*pi/180,y)*RotMat(10*pi/180,z);
+      r0={2,1,2};
+      AnyDrawRefFrame drw ={};
+    };
+    
+    AnyFixedRefFrame Global ={};
+    
+    AnyKinEqSimpleDriver drv ={
+      AnyKinLinear lin ={
+        AnyRefFrame &ref1=..Global;
+        AnyRefFrame &ref2=..Seg1;
+      };
+      AnyKinRotational rot ={
+        AnyRefFrame &ref1=..Global;
+        AnyRefFrame &ref2=..Seg1;
+        Type=RotAxesAngles;
+      };  
+      DriverPos ={.Seg1.r0[0],.Seg1.r0[1],.Seg1.r0[2],.Seg1.rot_XYZ[0],.Seg1.rot_XYZ[1],.Seg1.rot_XYZ[2]};
+      DriverVel ={0,0,0,0,0,0};
+      
+    };
+    
+    
+        
+    AnyFolder InitPosDriver={
+      
+      DriverBasedOnLoadPos driver1(Seg1=..Seg1,Seg2=..Seg2, NodeName = Node1, _CTYPE = Hard) ={};
+      
+    };
+    
+  };
+};

@@ -9,6 +9,11 @@ comes from the Dutch Shoulder Group and their
 
 .. todo:: What is the VU and MAYO study shown below? Need to add references?
 
+.. versionadded:: 2.2
+    A new wrapping implementation of the deltoid muscles was recently added by Marta Strzelczak from 
+    École de technologie supérieure, Montreal, CA. See :ref:`DeltoidWrapping` below.
+
+
 The model is built using data from subject 2 from the VU study and subject 2
 from the MAYO study. The files, which contains the name "forearm", are
 built on data from the MAYO study
@@ -72,6 +77,39 @@ The model consists of the following joints:
     .. Image:arm.png
 
 
+
+.. _DeltoidWrapping:
+
+Deltoid wrapping
+-----------------
+
+A new implementation of the deltoid muscles have been added. The implementation
+uses multiple wrapping cylinders for each element of the deltoid muscle. The new
+approach ensures a more realistic path of the muscle fibers compared to the
+previous implementaiton which used a dedicated rake segment to hold the detoid
+fibers in place.
+
+.. raw:: html 
+
+    <video width="45%" style="display:block; margin: 0 auto;" controls autoplay loop>
+        <source src="../_static/new_deltoid_wrapping.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+    </video>
+
+
+New deltoid wrapping can be disabled/enabled with the switch
+:ammr:bm_statement:`BM_ARM_DELTOID_WRAPPING`. 
+
+The new deltoid wrapping was developed by Marta Strzelczak from Département de
+génie de la production automatisée, École de technologie supérieure, Montreal,
+CA. Please cite the following work if you need it: 
+
+   Strzelczak, M., Lund, M. E., Sins, L., Mickael, B. & Hagemeister, N. A new
+   wrapping approach for the deltoid muscle modelling. in The Proceedings of the
+   20th Biennial Meeting of theCanadian Society for Biomechanics (2018).
+
+
+
 Degrees of freedom
 ------------------
 
@@ -131,6 +169,11 @@ Joint terminology
     Wrist joint                            Two successive revolute joints where 
                                            the axes of rotations are not coincident
     ================= ==================== =======================================================
+
+
+
+
+
 
 
 Resources

@@ -15,5 +15,5 @@ Contents
     auto_examples/index
     creating_model_from_scratch
     Scaling/intro
-    anymocap
+    anymocap/index
     about

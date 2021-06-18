@@ -1,8 +1,84 @@
+#ifndef _ANYMOCAP_FORCE_PLATE_AUTO_DETECTION_ANY_
+#define _ANYMOCAP_FORCE_PLATE_AUTO_DETECTION_ANY_
+
 #include "ForcePlateTypes.any"
 
-// TIP: If you have a model with only one leg. 
-// Make both LIMB1 and LIMB1 point to the same foot
 
+/* Class template: ForcePlateAutoDetection 
+
+  Class template to create a force plates from measured data (in c3d files) which
+  automatically detects which foot comes in contact with the plate.
+  
+  The class can also be used for other limbs. 
+  
+  Tip: If you have a model with only one leg, or want to ensure that only one leg
+  contacts the plate then set LIMB1 and LIMB2 to the same segment
+ 
+
+   Class arguments:
+   ----------
+    PLATE_NO: int
+      The plate number in the C3D file (1..N)
+    FORCEPLATE_TYPE int:
+       The type of force plate.
+    VerticalDirection: string, optional
+      The vertical direction of the force plate used in the contact detection. 
+      Possible values are "X", "Y", "Z","Automatic". (Defaults to "Automatic")
+    HeightTolerance: float, optional
+      The height tolerance for contact detection. (Defaults to 0.07 m)
+    VelThreshold: float, optional
+      The velocity tolerance for contact detection. (Defaults to 2.2 m/s)
+    ALLOW_MULTI_LIMB_CONTACT: bool, optional
+       Switch to specify if two feet can be in contact wit the plate simultaneously.
+       If set to OFF only the leg with lowest velocity will be assumed in contact. 
+       Set this to OFF to prevent false contact detection in the swing phase from 
+       the collateral leg. (Defaults to ON)
+    LIMB1: objname, optional
+      Location of the limb 1 (defaults to: Main.HumanModel.BodyModel.Right.Leg.Seg.Foot)
+    LIMB2: objname, optional
+      Location of the limb 2 (defaults to: Main.HumanModel.BodyModel.Left.Leg.Seg.Foot)
+    DRAW_RAW_FORCES: bool,  optional
+        Switch if the specify if the raw force in the forceplate should  be visualized. (Defaults to ON)
+    C3D_OBJECT: objname, optional
+      Location of the c3d file object in the model three (defaults to: Main.ModelSetup.C3DFileData,
+    CONTACT_NODE1: objname, optional
+       The node on LIMB1/2 used for contact detection. Change this if you are connecting 
+       to something different than the feet. (Defaults to: HeelContactNodeLow)
+    CONTACT_NODE2: objname, optional
+       The node on LIMB1/2 used for contact detection. Change this if you are connecting 
+       to something different than the feet. (Defaults to: ToeLateralContactNode)
+    CREATE_KIN_GRF: bool, optional
+        Create a kinematic represenation of the ground reaction force vector. This is experimental 
+        but could be used to include the GRF vector in the parameter optimization. (Defaults to OFF)
+    KIN_GRF_LIMB1_FUN: objname, optional
+        Switch to customize the kinematic GRF vector represenation. Experimental. (Defautls to GlobalCopFun)
+        KIN_GRF_LIMB2_FUN: objname, optional
+        Switch to customize the kinematic GRF vector represenation. Experimental. (Defautls to GlobalCopFun)
+        
+   
+  Optional initialization:
+  ------------------------
+  GroundVelocity = {0, 0, 0}; //< Sets the velocity of the ground. Useful if subject walks on treadmills
+
+  SurfaceOffset = {0,0,0};    // Offset of the plate surface. Usefull if stairs or other equiment is placed
+                              // is placed on the force plate. 
+  
+   
+  Example: 
+  --------
+  ForcePlateAutoDetection <Object_name>(
+    PLATE_NO=<1..N>,
+    FORCEPLATE_TYPE = 1,
+    HeightTolerance = 0.07,
+    VelThreshold = 2.2,
+    ALLOW_MULTI_LIMB_CONTACT = OFF
+  )=
+  {
+      SurfaceOffset = {0, 0.1, 0}
+  };  
+  
+   
+*/
 
 #class_template ForcePlateAutoDetection (
     PLATE_NO,
@@ -12,15 +88,28 @@
     VerticalDirection = "Automatic",
     HeightTolerance = 0.07,
     VelThreshold = 2.2, 
+    ALLOW_MULTI_LIMB_CONTACT = 1,
     FORCEPLATE_TYPE,
+    CONTACT_NODE1 = HeelContactNodeLow,
+    CONTACT_NODE2 = ToeLateralContactNode,
     CREATE_KIN_GRF = 0,
     KIN_GRF_LIMB1_FUN = GlobalCopFun,
     KIN_GRF_LIMB2_FUN = GlobalCopFun,
-    DRAW_RAW_FORCES = On
+    DRAW_RAW_FORCES = 1
     )
 {
+  AnyComponentDefinition obj = {};  
+  AnyFolder ForcePlateInfo = 
+  {
+    #var AnyInt USED = reshape(C3D_OBJECT.Groups.FORCE_PLATFORM.USED.Data, repmat(0,0));
+    #var AnyInt TYPE = reshape(C3D_OBJECT.Groups.FORCE_PLATFORM.TYPE.Data, {USED});
+    #var AnyFloat CORNERS = reshape(C3D_OBJECT.Groups.FORCE_PLATFORM.CORNERS.Data, {USED, 4, 3});
+    #var AnyFloat ORIGIN = reshape(C3D_OBJECT.Groups.FORCE_PLATFORM.ORIGIN.Data, {USED, 3});
+    #var AnyIntVar MaxChannels = iffun(sum(eqfun(3, TYPE)), 8, 6);
+    #var AnyInt CHANNEL = reshape(C3D_OBJECT.Groups.FORCE_PLATFORM.CHANNEL.Data, {USED, MaxChannels});  
+  };
   
-  AnyInt ForcePlateType = C3D_OBJECT.Groups.FORCE_PLATFORM.TYPE.Data[PLATE_NO-1];
+  AnyInt ForcePlateType = ForcePlateInfo.TYPE[PLATE_NO-1];
   
   
   #var AnyVar ColorScale = max({min({InContactOnOff *ForcePlate.OnOff*(1* ForcePlate.LoadRatio),1}),0});
@@ -28,12 +117,12 @@
       
   /// Checks that the FORCEPLATE_TYPE match the specification in the C3D file.   
   AnyMessage PlateTypeCheck  = {
-      AnyInt test = neqfun(.ForcePlateType, FORCEPLATE_TYPE);
+      AnyInt test = max(neqfun(.ForcePlateType, FORCEPLATE_TYPE));
       TriggerPreProcess = test;
       Type = MSG_ErrorFatal ;
       Message = strformat("AnyMOCAP: Wrong force plate type:\n"+
 	            "C3D file reports force plate as beeing type " +
-				strval(C3D_OBJECT.Groups.FORCE_PLATFORM.TYPE.Data[PLATE_NO-1]) + 
+				strval(.ForcePlateInfo.TYPE[PLATE_NO-1]) + 
 				" not type: " + strval(FORCEPLATE_TYPE));
    };  
    
@@ -82,6 +171,9 @@
   
   
   #var AnySwitch Switch_DrawForceVectorFromCOP = On;
+  
+  /// Specifies the velocity of the ground frame. I.e. if the subject is walking on a treadmill. 
+  #var AnyVec3 GroundVelocity = {0, 0, 0};
 
   #var AnyVec3 SurfaceOffset = {0,0,0};
   
@@ -91,16 +183,21 @@
   #var AnyVec3 SurfaceCorner_c04 = Corners.Origin + Corners.c04.sRel * Corners.Axes' + SurfaceOffset;
   
   AnyFixedRefFrame Corners ={
+    /// Used by AnyMoCap to check that gravity is consistant with the plate
+    AnyVec3 DownDirection = RotMat(
+       0.25*(c01.cpoint+ c02.cpoint+ c03.cpoint+ c04.cpoint),
+       0.5*(c01.cpoint+c04.cpoint),
+       0.5*(c01.cpoint+c02.cpoint))'[2];
     AnyVar CoordinateSystemSize= 0.1;
-    #var AnyFloat Data = C3D_OBJECT.Groups.FORCE_PLATFORM.CORNERS.Data;
     #var AnyInt plate_idx=PLATE_NO-1;
     AnyRefNode c01={
       #var AnyInt i=0;
-      #var sRel=C3D_OBJECT.PointsScaleFactor*{
-          .Data[.plate_idx][i][0],
-          .Data[.plate_idx][i][1],
-          .Data[.plate_idx][i][2]
+      AnyVec3 cpoint = C3D_OBJECT.PointsScaleFactor*{
+          ..ForcePlateInfo.CORNERS[.plate_idx][i][0],
+          ..ForcePlateInfo.CORNERS[.plate_idx][i][1],
+          ..ForcePlateInfo.CORNERS[.plate_idx][i][2]
       };
+      #var sRel = cpoint;
       AnyDrawNode drw={ScaleXYZ=0.01*{1,1,1};RGB={1,0,0};};
       AnyDrawVector  DrawName = {
         Vec = {0.0,0,0};  //use zero length
@@ -113,11 +210,12 @@
     
     AnyRefNode c02={
       #var AnyInt i=1;
-      #var sRel=C3D_OBJECT.PointsScaleFactor*{
-          .Data[.plate_idx][i][0],
-          .Data[.plate_idx][i][1],
-          .Data[.plate_idx][i][2]
+      AnyVec3 cpoint = C3D_OBJECT.PointsScaleFactor*{
+          ..ForcePlateInfo.CORNERS[.plate_idx][i][0],
+          ..ForcePlateInfo.CORNERS[.plate_idx][i][1],
+          ..ForcePlateInfo.CORNERS[.plate_idx][i][2]
       };
+      #var sRel=cpoint;
       AnyDrawNode drw={ScaleXYZ=0.01*{1,1,1};RGB={1,0,0};};
       AnyDrawVector  DrawName = {
         Vec = {0.0,0,0};  //use zero length
@@ -130,11 +228,12 @@
     
     AnyRefNode c03={
       #var AnyInt i=2;
-      #var sRel=C3D_OBJECT.PointsScaleFactor*{
-          .Data[.plate_idx][i][0],
-          .Data[.plate_idx][i][1],
-          .Data[.plate_idx][i][2]
+      AnyVec3 cpoint = C3D_OBJECT.PointsScaleFactor*{
+          ..ForcePlateInfo.CORNERS[.plate_idx][i][0],
+          ..ForcePlateInfo.CORNERS[.plate_idx][i][1],
+          ..ForcePlateInfo.CORNERS[.plate_idx][i][2]
       };
+      #var sRel = cpoint;
       AnyDrawNode drw={ScaleXYZ=0.01*{1,1,1};RGB={1,0,0};};
       
       AnyDrawVector  DrawName = {
@@ -148,11 +247,12 @@
     
     AnyRefNode c04={
       #var AnyInt i=3;
-      #var sRel=C3D_OBJECT.PointsScaleFactor*{
-          .Data[.plate_idx][i][0],
-          .Data[.plate_idx][i][1],
-          .Data[.plate_idx][i][2]
+      AnyVec3 cpoint = C3D_OBJECT.PointsScaleFactor*{
+          ..ForcePlateInfo.CORNERS[.plate_idx][i][0],
+          ..ForcePlateInfo.CORNERS[.plate_idx][i][1],
+          ..ForcePlateInfo.CORNERS[.plate_idx][i][2]
       };
+      #var sRel = cpoint;
       AnyDrawNode drw={ScaleXYZ=0.01*{1,1,1};RGB={1,0,0};};
       AnyDrawVector  DrawName = {
         Vec = {0.0,0,0};  //use zero length
@@ -204,7 +304,7 @@
         
         
       AnyRefNode SurfaceGraphics = {
-        #var AnyVar VisualPlateHeight = C3D_OBJECT.PointsScaleFactor*abs(C3D_OBJECT.Groups.FORCE_PLATFORM.ORIGIN.Data[PLATE_NO-1][2]);
+        #var AnyVar VisualPlateHeight = C3D_OBJECT.PointsScaleFactor*abs(....ForcePlateInfo.ORIGIN[PLATE_NO-1][2]);
         sRel={0,0,VisualPlateHeight/2};
         AnyVec3 Size={
           vnorm( ....SurfaceCorner_c01 - ....SurfaceCorner_c02 ,2),
@@ -332,17 +432,28 @@
   
   
   AnyFolder ContactDetectionLimb1 ={
-    AnyVec3 P1= .Limb1.HeelContactNodeLow.r;
-    AnyVar P1Vel= vnorm(.Limb1.HeelContactNodeLow.rDot,2);
+    AnyComponentDefinition obj = {
+      SubGroupRegexSearch = "([_[:alnum:]]+?)\.([_[:alnum:]]+?)";
+      SubGroupRegexReplace = "$1";
+    };  
+    AnyVec3 P1= .Limb1.CONTACT_NODE1.r;
+    AnyVar P1Vel= vnorm(.Limb1.CONTACT_NODE1.rDot-.GroundVelocity,2);
     
-    AnyVec3 P2= .Limb1.ToeLateralContactNode.r;
-    AnyVar P2Vel= vnorm(.Limb1.HeelContactNodeLow.rDot,2);
+    AnyVec3 P2= .Limb1.CONTACT_NODE2.r;
+    AnyVar P2Vel= vnorm(.Limb1.CONTACT_NODE2.rDot-.GroundVelocity,2);
     
     #include "ContactDetection.any"
     
     AnyMuscleModelUsr1 InContactMuscle = {
+      /// If the ALLOW_MULTI_LIMB_CONTACT option is OFF this ensures that two limbs can't
+      /// have contact with the plate at the same time
+      /// UseOppositeLimb is 1 if the opposite limb has contact and a lower velocity that limb1
+      AnyVar UseOppositeLimb = not(ALLOW_MULTI_LIMB_CONTACT)*
+            andfun(..ContactDetectionLimb2.NodeWithInBox.WithinBoxAndVelBelowThreshold,
+                   ltfun(..ContactDetectionLimb2.P1Vel, .P1Vel));
+     
       F0 = 0;
-      S = .NodeWithInBox.WithinBoxAndVelBelowThreshold *10000;
+      S = .NodeWithInBox.WithinBoxAndVelBelowThreshold *10000*not(UseOppositeLimb);
     };
     
     AnyMuscleModelUsr1 NoContactMuscle = {
@@ -368,17 +479,28 @@
   };
  
   AnyFolder ContactDetectionLimb2 = {
-    AnyVec3 P1= .Limb2.HeelContactNodeLow.r;
-    AnyVar P1Vel= vnorm(.Limb2.HeelContactNodeLow.rDot,2);
+    AnyComponentDefinition obj = {
+      SubGroupRegexSearch = "([_[:alnum:]]+?)\.([_[:alnum:]]+?)";
+      SubGroupRegexReplace = "$1";
+    };  
+    AnyVec3 P1= .Limb2.CONTACT_NODE1.r;
+    AnyVar P1Vel= vnorm(.Limb2.CONTACT_NODE1.rDot-.GroundVelocity,2);
     
-    AnyVec3 P2= .Limb2.ToeLateralContactNode.r;
-    AnyVar P2Vel= vnorm(.Limb2.HeelContactNodeLow.rDot,2);
+    AnyVec3 P2= .Limb2.CONTACT_NODE2.r;
+    AnyVar P2Vel= vnorm(.Limb2.CONTACT_NODE2.rDot-.GroundVelocity,2);
     
     #include "ContactDetection.any"
     
     AnyMuscleModelUsr1 InContactMuscle = {
+      /// If the ALLOW_MULTI_LIMB_CONTACT option is OFF this ensures that two limbs can't
+      /// have contact with the plate at the same time
+      /// UseOppositeLimb is 1 if the opposite limb has contact and a lower velocity that limb2
+      AnyVar UseOppositeLimb = not(ALLOW_MULTI_LIMB_CONTACT)*
+            andfun(..ContactDetectionLimb1.NodeWithInBox.WithinBoxAndVelBelowThreshold,
+                   ltfun(..ContactDetectionLimb1.P1Vel, .P1Vel));
+     
       F0 = 0;
-      S = .NodeWithInBox.WithinBoxAndVelBelowThreshold *10000;
+      S = .NodeWithInBox.WithinBoxAndVelBelowThreshold *10000*not(UseOppositeLimb);
     };
     
     AnyMuscleModelUsr1 NoContactMuscle = {
@@ -558,6 +680,13 @@
       CType = {Hard, Hard};
     };  
   } ;
-  #endif
+  #endif  
+  
+  
+  
+  
+  
   
 };
+
+#endif

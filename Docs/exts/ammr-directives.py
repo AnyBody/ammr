@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 #
-#  Based on Sphinx Domain specification from the Apache Traffic 
+#  Based on Sphinx Domain specification from the Apache Traffic
 #  Server project. See:
 #  https://docs.trafficserver.apache.org/en/latest/developer-guide/documentation/adding-domains.en.html
 #
@@ -33,17 +33,19 @@
     :copyright: Copyright 2017 AnyBodyTechnology
     :license: Apache
 """
+import subprocess
+import re
+import os
 
 from docutils import nodes
 from docutils.parsers import rst
 from docutils.parsers.rst import directives
 from sphinx.domains import Domain, ObjType, std
 from sphinx.roles import XRefRole
-from sphinx.locale import l_, _
+from sphinx.locale import _
 import sphinx
 
-import subprocess
-import re
+
 
 
 class AMMR_BMStatement(std.Target):
@@ -63,10 +65,10 @@ class AMMR_BMStatement(std.Target):
     """
 
     option_spec = {
-        'deprecated' : rst.directives.flag,
-        'default' : rst.directives.unchanged,
-        'type' : rst.directives.unchanged,
-        'noindex': rst.directives.flag,
+        "deprecated": rst.directives.flag,
+        "default": rst.directives.unchanged,
+        "type": rst.directives.unchanged,
+        "noindex": rst.directives.flag,
     }
 
     required_arguments = 1
@@ -84,7 +86,6 @@ class AMMR_BMStatement(std.Target):
             body.append(value)
         field.append(body)
         return field
-    
 
     def run(self):
         env = self.state.document.settings.env
@@ -92,38 +93,37 @@ class AMMR_BMStatement(std.Target):
 
         # Create a documentation node to use as the parent.
         node = sphinx.addnodes.desc()
+        node["domain"] = "ammr"
         node.document = self.state.document
-        node['objtype'] = 'bm_statement'
-        node.set_class('section')
-
+        node["objtype"] = "bm_statement"
+        node.set_class("section")
 
         # Add the signature child node for permalinks.
-        title = sphinx.addnodes.desc_signature(var_name, '')
-        title['ids'].append(nodes.make_id(var_name))
-        title['ids'].append(var_name)
-        title['names'].append(var_name)
-        title['first'] = False
-        title['objtype'] = node['objtype']
+        title = sphinx.addnodes.desc_signature(var_name, "")
+        title["ids"].append(nodes.make_id(var_name))
+        title["ids"].append(var_name)
+        title["names"].append(var_name)
+        title["first"] = False
+        title["objtype"] = node["objtype"]
         self.add_name(title)
-        title.set_class('ammr-bm_statement-title')
-
+        title.set_class("ammr-bm_statement-title")
 
         title += sphinx.addnodes.desc_name(var_name, var_name)
         node.append(title)
 
         # This has to be a distinct node before the title. if nested then
         # the browser will scroll forward to just past the title.
-        anchor = nodes.target('', '', names=[var_name])
+        anchor = nodes.target("", "", names=[var_name])
         # Second (optional) arg is 'msgNode' - no idea what I should pass for that
         # or if it even matters, although I now think it should not be used.
         self.state.document.note_explicit_target(title)
 
-        env.domaindata['ammr']['bm_statement'][var_name] = env.docname
+        env.domaindata["ammr"]["bm_statement"][var_name] = env.docname
 
         # Create table detailing all provided domain options
         fl = nodes.field_list()
-        if ('deprecated' in self.options):
-            fl.append(self.make_field('Deprecated', 'Yes'))        
+        if "deprecated" in self.options:
+            fl.append(self.make_field("Deprecated", "Yes"))
 
         # Parse any associated block content for the item's description
         nn = nodes.compound()
@@ -132,12 +132,12 @@ class AMMR_BMStatement(std.Target):
         # Create an index node so Sphinx will list this variable and its
         # references in the index section.
         indexnode = sphinx.addnodes.index(entries=[])
-        indexnode['entries'].append(
-            ('single', _('%s') % var_name, nodes.make_id(var_name), '', None)
+        indexnode["entries"].append(
+            ("single", _("%s") % var_name, nodes.make_id(var_name), "", None)
         )
 
         rtn = []
-        if 'noindex' not in self.options:
+        if "noindex" not in self.options:
             rtn.append(indexnode)
         rtn.append(node)
         if len(fl):
@@ -145,6 +145,7 @@ class AMMR_BMStatement(std.Target):
         rtn.append(nn)
 
         return rtn
+
 
 class AMMR_BMStatementRef(XRefRole):
     def process_link(self, env, ref_node, explicit_title_p, title, target):
@@ -166,9 +167,9 @@ class AMMR_BMConstant(std.Target):
     """
 
     option_spec = {
-        'deprecated' : rst.directives.flag,
-        'value' : rst.directives.unchanged,
-        'noindex': rst.directives.flag,
+        "deprecated": rst.directives.flag,
+        "value": rst.directives.unchanged,
+        "noindex": rst.directives.flag,
     }
 
     required_arguments = 1
@@ -194,40 +195,40 @@ class AMMR_BMConstant(std.Target):
         # Create a documentation node to use as the parent.
         node = sphinx.addnodes.desc()
         node.document = self.state.document
-        node['objtype'] = 'bm_constant'
-        node.set_class('section')
+        node["objtype"] = "bm_constant"
+        node.set_class("section")
 
         # Add the signature child node for permalinks.
-        title = sphinx.addnodes.desc_signature(var_name, '')
-        title['ids'].append(nodes.make_id(var_name))
-        title['ids'].append(var_name)
-        title['names'].append(var_name)
-        title['first'] = False
-        title['objtype'] = node['objtype']
+        title = sphinx.addnodes.desc_signature(var_name, "")
+        title["ids"].append(nodes.make_id(var_name))
+        title["ids"].append(var_name)
+        title["names"].append(var_name)
+        title["first"] = False
+        title["objtype"] = node["objtype"]
         self.add_name(title)
-        title.set_class('ammr-bm_constant-title')
+        title.set_class("ammr-bm_constant-title")
 
         title += sphinx.addnodes.desc_name(var_name, var_name)
         node.append(title)
 
         # This has to be a distinct node before the title. if nested then
         # the browser will scroll forward to just past the title.
-        anchor = nodes.target('', '', names=[var_name])
+        anchor = nodes.target("", "", names=[var_name])
         # Second (optional) arg is 'msgNode' - no idea what I should pass for that
         # or if it even matters, although I now think it should not be used.
         self.state.document.note_explicit_target(title)
 
-        env.domaindata['ammr']['bm_constant'][var_name] = env.docname
+        env.domaindata["ammr"]["bm_constant"][var_name] = env.docname
 
         # Create table detailing all provided domain options
         fl = nodes.field_list()
 
-        if ('deprecated' in self.options):
-            fl.append(self.make_field('Deprecated', 'Yes'))
+        if "deprecated" in self.options:
+            fl.append(self.make_field("Deprecated", "Yes"))
 
-        if ('value' in self.options):
-            fl.append(self.make_field('Value', self.options['value']))
-        
+        if "value" in self.options:
+            fl.append(self.make_field("Value", self.options["value"]))
+
         # Parse any associated block content for the item's description
         nn = nodes.compound()
         self.state.nested_parse(self.content, self.content_offset, nn)
@@ -235,12 +236,12 @@ class AMMR_BMConstant(std.Target):
         # Create an index node so Sphinx will list this variable and its
         # references in the index section.
         indexnode = sphinx.addnodes.index(entries=[])
-        indexnode['entries'].append(
-            ('single', _('%s') % var_name, nodes.make_id(var_name), '', None)
+        indexnode["entries"].append(
+            ("single", _("%s") % var_name, nodes.make_id(var_name), "", None)
         )
 
         rtn = []
-        if 'noindex' not in self.options:
+        if "noindex" not in self.options:
             rtn.append(indexnode)
         rtn.extend([node, fl, nn])
 
@@ -252,47 +253,37 @@ class AMMR_BMConstantRef(XRefRole):
         return title, target
 
 
-
 class AMMRDomain(Domain):
     """
     AMMR Documentation.
     """
 
-    name = 'ammr'
-    label = 'AMMR'
+    name = "ammr"
+    label = "AMMR"
     data_version = 2
 
     object_types = {
-        'bm_statement': ObjType(l_('Body Model Statement'), 'bm_statement'),
-        'bm_constant': ObjType(l_('Body Model Constant'), 'bm_constant')
+        "bm_statement": ObjType(_("Body Model Statement"), "bm_statement"),
+        "bm_constant": ObjType(_("Body Model Constant"), "bm_constant"),
     }
 
-    directives = {
-        'bm_statement': AMMR_BMStatement,
-        'bm_constant': AMMR_BMConstant,
-    }
+    directives = {"bm_statement": AMMR_BMStatement, "bm_constant": AMMR_BMConstant}
 
-    roles = {
-        'bm_statement': AMMR_BMStatementRef(),
-        'bm_constant': AMMR_BMConstantRef()
-    }
+    roles = {"bm_statement": AMMR_BMStatementRef(), "bm_constant": AMMR_BMConstantRef()}
 
-    initial_data = {
-        'bm_statement': {},  # full name -> docname
-        'bm_constant': {}
-    }
+    initial_data = {"bm_statement": {}, "bm_constant": {}}  # full name -> docname
 
     dangling_warnings = {
-        'bm_statement': "No definition found for Body Model statement '%(target)s'",
-        'bm_constant': "No definition found for Body Model constant '%(target)s'"
+        "bm_statement": "No definition found for Body Model statement '%(target)s'",
+        "bm_constant": "No definition found for Body Model constant '%(target)s'",
     }
 
     def clear_doc(self, docname):
-        bm_statement_list = self.data['bm_statement']
+        bm_statement_list = self.data["bm_statement"]
         for var, doc in list(bm_statement_list.items()):
             if doc == docname:
                 del bm_statement_list[var]
-        bm_constant_list = self.data['bm_constant']
+        bm_constant_list = self.data["bm_constant"]
         for var, doc in list(bm_constant_list.items()):
             if doc == docname:
                 del bm_constant_list[var]
@@ -300,10 +291,10 @@ class AMMRDomain(Domain):
     def find_doc(self, key, obj_type):
         zret = None
 
-        if obj_type == 'bm_statement':
-            obj_list = self.data['bm_statement']
-        elif obj_type == 'bm_constant':
-            obj_list = self.data['bm_constant']
+        if obj_type == "bm_statement":
+            obj_list = self.data["bm_statement"]
+        elif obj_type == "bm_constant":
+            obj_list = self.data["bm_constant"]
         else:
             obj_list = None
 
@@ -314,57 +305,61 @@ class AMMRDomain(Domain):
 
     def resolve_xref(self, env, src_doc, builder, obj_type, target, node, cont_node):
         dst_doc = self.find_doc(target, obj_type)
-        if (dst_doc):
-            return sphinx.util.nodes.make_refnode(builder, src_doc, dst_doc, nodes.make_id(target), cont_node, 'records.config')
+        if dst_doc:
+            return sphinx.util.nodes.make_refnode(
+                builder,
+                src_doc,
+                dst_doc,
+                nodes.make_id(target),
+                cont_node,
+                "records.config",
+            )
 
     def get_objects(self):
-        for var, doc in self.data['bm_statement'].items():
-            yield var, var, 'bm_statement', doc, var, 1
-        for var, doc in self.data['bm_constant'].items():
-            yield var, var, 'bm_constant', doc, var, 1
+        for var, doc in self.data["bm_statement"].items():
+            yield var, var, "bm_statement", doc, var, 1
+        for var, doc in self.data["bm_constant"].items():
+            yield var, var, "bm_constant", doc, var, 1
 
 
 # get the branch this documentation is building for in X.X.x form
-with open('../AMMR.version.any', 'r') as f:
+with open(os.path.normpath(os.path.join(__file__, "../../../AMMR.version.any")), "r") as f:
     contents = f.read()
     match = re.compile(r'.*AMMR_VERSION\s"(?P<version>.*)"').search(contents)
-    ammr_version = '.'.join(match.groupdict()['version'].split('.', 3)[:3])
+    ammr_version = ".".join(match.groupdict()["version"].split(".", 3)[:3])
 
 # get the current branch the local repository is on
-git_branch = subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD'])
+git_branch = subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"])
 
 
 def make_git_link(name, rawtext, text, lineno, inliner, options={}, content=[]):
     """
     This docutils role lets us link to source code via the handy :ammr:git: markup.
     Link references are rooted at the top level source directory. All links resolve
-    to GitLab.
+    to Github.
 
-    Examples:
-
-        To link to proxy/Main.cc:
-
-            This is a link to seg.any file: :ts:git:`proxy/Main.cc`.
+    Example:
 
         To link to CONTRIBUTING.md:
 
             If you want to contribute, take a look at :ammr:git:`CONTRIBUTING.md`.
     """
-    url = 'https://gitlab.com/anybody/beta/ammr/blob/{}/{}'
-    ref = ammr_version if ammr_version == git_branch else 'master'
+    url = "https://github.com/AnyBody/ammr/blob/{}/{}"
+    ref = ammr_version if ammr_version == git_branch else "master"
     node = nodes.reference(rawtext, text, refuri=url.format(ref, text), **options)
     return [node], []
 
 
 def setup(app):
-    app.add_crossref_type('configfile', 'file',
-                          objname='Configuration file',
-                          indextemplate='pair: %s; Configuration files')
-    app.add_crossref_type('logfile', 'file',
-                          objname='Log file',
-                          indextemplate='pair: %s; Log files')
+    # app.add_crossref_type('configfile', 'file',
+    #                       objname='Configuration file',
+    #                       indextemplate='pair: %s; Configuration files')
+    # app.add_crossref_type('logfile', 'file',
+    #                       objname='Log file',
+    #                       indextemplate='pair: %s; Log files')
 
     app.add_domain(AMMRDomain)
 
-    # this lets us do :ammr:git:`<file_path>` and link to the file on gitlab
-    app.add_role_to_domain('ammr', 'git', make_git_link)
+    # this lets us do :ammr:git:`<file_path>` and link to the file on github
+    app.add_role_to_domain("ammr", "git", make_git_link)
+

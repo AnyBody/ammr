@@ -26,9 +26,15 @@ the AAUHuman. These two mandible models can be found in ``Body/Mandible``
 The ``Body/Beta`` folder contains less developed and tested models.
 
 The different body parts included in the full body model are derived from
-various anatomical databases from literature. The full body model
+various anatomical databases from literature. 
+
+The segmental coordinate systems are constructed using the original data. To ensure having a well defined coordinate system for all segments an anatomical frame has been defined, the anatomical frame is constructed using well defined bony landmark locations on the bone.
+
+The full body model
 contains shoulder/arm, trunk, foot and multiple leg models
 which can be assembled into the full human in many combinations. 
+
+
 
 .. note:: Parts of the AAUHuman (except the
     mandible) are by default assembled together into a full body model.
@@ -37,12 +43,14 @@ which can be assembled into the full human in many combinations.
 
 .. rubric:: Models
 
+
 .. toctree::
     :maxdepth: 1
     :caption: Trunk
 
     lumbar_spine_model
     cervical_spine_model
+    thoracic_model
 
 
 .. toctree::
@@ -51,6 +59,7 @@ which can be assembled into the full human in many combinations.
 
     shoulder_arm_model
     detailed_hand_model
+    Regensburg-Ulm hand model <regensburg_ulm_hand_model>
 
 
 .. toctree::
@@ -60,6 +69,7 @@ which can be assembled into the full human in many combinations.
     leg_model
     leg_tlem_model
     leg_tlem2_model
+    GM Foot model <glasgow_maastricht_foot_model>
 
 .. toctree::
     :maxdepth: 1
