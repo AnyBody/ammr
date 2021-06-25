@@ -1,0 +1,248 @@
+
+AnyFolder Model = {
+  // Model parts included in the moment arm study
+  AnyFolder &PelvisRef = .TrunkHumanFolderRef.SegmentsLumbar.PelvisSeg; 
+  AnyFolder &TrunkRef = .TrunkHumanFolderRef; 
+  #if BM_TRUNK_MUSCLES
+  AnyFolder &SpineMusRef = .TrunkHumanFolderRef.MusclesSpine;
+  AnyFolder &SpineMusRightRef =. TrunkHumanFolderRef.MusclesSpineRight;
+  AnyFolder &SpineMusLeftRef = .TrunkHumanFolderRef.MusclesSpineLeft;
+  #else
+  AnyFolder SpineMusRef = {};
+  AnyFolder SpineMusRightRef = {};
+  AnyFolder SpineMusLeftRef = {};
+  #endif
+  
+  AnyFolder &ArmSegLeftRef = ....BodyModel.Left.ShoulderArm.Seg;
+  AnyFolder &ArmSegRightRef = ....BodyModel.Right.ShoulderArm.Seg;
+  
+  AnyFolder &ArmJntsRightRef = ....BodyModel.Right.ShoulderArm.Jnt;
+  AnyFolder &ArmJntsLeftRef = ....BodyModel.Left.ShoulderArm.Jnt;
+  
+  AnyFolder &MusRightRef = ....BodyModel.Right.ShoulderArm.Mus;
+  AnyFolder &MusLeftRef = ....BodyModel.Left.ShoulderArm.Mus;
+
+
+  
+  
+  
+  
+ AnyFixedRefFrame ground = {
+   AnyRefNode node = { 
+      ARel=..PelvisRef.Axes0;
+     sRel=..PelvisRef.r0;
+   };
+ };
+ 
+// AnyFolder& RightArmRef = ....BodyModel.Right.ShoulderArm;
+//  AnyKinEq RHipDriver= {
+//  };
+// 
+// 
+ 
+
+AnyFolder Drivers = {
+   AnyVar AngularVelocity = (..RangeOfMotion[1]-..RangeOfMotion[0])*pi/180;
+ 
+ AnyKinMeasureOrg TrunkMeasure = {
+  AnyKinMeasure &PelvisThoraxExtension= ...HumanInterfaceRef.Trunk.PelvisThoraxExtension;
+  AnyKinMeasure &PelvisThoraxLateralBending= ...HumanInterfaceRef.Trunk.PelvisThoraxLateralBending;
+  AnyKinMeasure &PelvisThoraxRotation= ...HumanInterfaceRef.Trunk.PelvisThoraxRotation;
+  AnyKinMeasure &SkullThoraxFlexion= ...HumanInterfaceRef.Trunk.SkullThoraxFlexion;
+  AnyKinMeasure &SkullThoraxLateralBending= ...HumanInterfaceRef.Trunk.SkullThoraxLateralBending;
+  AnyKinMeasure &SkullThoraxRotation= ...HumanInterfaceRef.Trunk.SkullThoraxRotation;
+ };
+   
+ 
+ 
+ AnyKinMeasureOrg ArmMeasureRight = {
+   #if BM_ARM_SHOULDER_RHYTHM == OFF
+   AnyKinMeasure& SCProtraction= ...HumanInterfaceRef.Right.SternoClavicularProtraction;
+   AnyKinMeasure& SCElevation = ...HumanInterfaceRef.Right.SternoClavicularElevation;
+   #endif
+   AnyKinMeasure& GHAbduction = ...HumanInterfaceRef.Right.GlenohumeralAbduction;
+   AnyKinMeasure& GHFlexion = ...HumanInterfaceRef.Right.GlenohumeralFlexion;
+   AnyKinMeasure& GHExternalRotation = ...HumanInterfaceRef.Right.GlenohumeralExternalRotation;
+   AnyKinMeasure& ElbowFlexion = ...HumanInterfaceRef.Right.ElbowFlexion;
+   AnyKinMeasure& ElbowPronation = ...HumanInterfaceRef.Right.ElbowPronation;
+   AnyKinMeasure& WristFlexion = ...HumanInterfaceRef.Right.WristFlexion;
+   AnyKinMeasure& WristAbduction = ...HumanInterfaceRef.Right.WristAbduction;
+ };
+  AnyKinMeasureOrg ArmMeasureLeft = {
+   #if BM_ARM_SHOULDER_RHYTHM == OFF
+   AnyKinMeasure& SCProtraction= ...HumanInterfaceRef.Left.SternoClavicularProtraction;
+   AnyKinMeasure& SCElevation = ...HumanInterfaceRef.Left.SternoClavicularElevation;
+   #endif
+   AnyKinMeasure& GHAbduction = ...HumanInterfaceRef.Left.GlenohumeralAbduction;
+   AnyKinMeasure& GHFlexion = ...HumanInterfaceRef.Left.GlenohumeralFlexion;
+   AnyKinMeasure& GHExternalRotation = ...HumanInterfaceRef.Left.GlenohumeralExternalRotation;
+   AnyKinMeasure& ElbowFlexion = ...HumanInterfaceRef.Left.ElbowFlexion;
+   AnyKinMeasure& ElbowPronation = ...HumanInterfaceRef.Left.ElbowPronation;
+   AnyKinMeasure& WristFlexion = ...HumanInterfaceRef.Left.WristFlexion;
+   AnyKinMeasure& WristAbduction = ...HumanInterfaceRef.Left.WristAbduction;
+ };   
+ 
+  AnyKinEqSimpleDriver ArmDriver= {
+    AnyKinMeasure& refR = .ArmMeasureRight;
+    AnyKinMeasure& refL = .ArmMeasureLeft;
+    AnyFolder& JntPos = ......Mannequin.Posture;
+
+    DriverPos = pi/180*{
+   #if BM_ARM_SHOULDER_RHYTHM == OFF
+       JntPos.Right.SternoClavicularProtraction,
+       JntPos.Right.SternoClavicularElevation,
+   #endif
+       JntPos.Right.GlenohumeralAbduction,
+       JntPos.Right.GlenohumeralFlexion,
+       JntPos.Right.GlenohumeralExternalRotation,
+       JntPos.Right.ElbowFlexion,
+       JntPos.Right.ElbowPronation,
+       JntPos.Right.WristFlexion,
+       JntPos.Right.WristAbduction,
+   #if BM_ARM_SHOULDER_RHYTHM == OFF
+       JntPos.Left.SternoClavicularProtraction,
+       JntPos.Left.SternoClavicularElevation,
+   #endif
+       JntPos.Left.GlenohumeralAbduction,
+       JntPos.Left.GlenohumeralFlexion,
+       JntPos.Left.GlenohumeralExternalRotation,
+       JntPos.Left.ElbowFlexion,
+       JntPos.Left.ElbowPronation,
+       JntPos.Left.WristFlexion,
+       JntPos.Left.WristAbduction
+     };
+     DriverVel = 0*DriverPos;
+     Reaction.Type = repmat(nDim, On);
+  };    
+ 
+ 
+ 
+ 
+ // If Leg are included then Psoas muscle are attached to the legs. 
+ // Thus, we need to driver for the hip joint
+ #if BM_LEG_RIGHT
+ AnySphericalJoint &RHipJoint = .....BodyModel.Right.Leg.Jnt.Hip;
+ AnyKinEq RHipDriver= {
+   AnyKinMeasureOrg HipMeasure = {
+      AnyKinMeasure &ref1 = .......BodyModel.Interface.Right.HipFlexion;
+      AnyKinMeasure &ref2 = .......BodyModel.Interface.Right.HipAbduction;
+      AnyKinMeasure &ref3 = .......BodyModel.Interface.Right.HipExternalRotation;
+    };
+  };
+ #endif
+ #if BM_LEG_LEFT
+ AnySphericalJoint &LHipJoint = .....BodyModel.Left.Leg.Jnt.Hip;
+ AnyKinEq LHipDriver= {
+   AnyKinMeasureOrg HipMeasure = {
+      AnyKinMeasure &ref1 = .......BodyModel.Interface.Left.HipFlexion;
+      AnyKinMeasure &ref2 = .......BodyModel.Interface.Left.HipAbduction;
+      AnyKinMeasure &ref3 = .......BodyModel.Interface.Left.HipExternalRotation;
+    };
+  };
+ #endif
+ 
+ 
+ AnyStdJoint PelvisGround={
+    AnyRefFrame &Ground = ..ground.node;
+    AnyRefFrame &Sacrum= ..PelvisRef; 
+ };
+    
+   };// Drivers
+   
+  AnyForce JointLoad = {
+      AnyKinMeasure &ref = .Drivers.TrunkMeasure;
+      AnyInt Sign = -round(.Drivers.AngularVelocity/abs(.Drivers.AngularVelocity));
+      F = 50*Sign*not(not(.Drivers.TrunkDriver.DriverVel));
+  };   
+ 
+};
+ 
+ 
+AnyBodyStudy Study = {
+  Gravity = {0,0,0};
+//  tStart = 0;
+  tEnd = 1;
+  #ifdef EVALUATE_JOINT_STRENGTH_NSTEP
+  nStep = EVALUATE_JOINT_STRENGTH_NSTEP;
+  #else
+  nStep = 40;
+  #endif
+    
+//  InitialConditions.KinematicTol = 1e-5;
+//  InitialConditions.MaxIteration = 5000;
+//  InitialConditions.SolverType = KinSolDeterminate2;
+//  
+//  Kinematics.KinematicTol = 1e-3;
+//  Kinematics.MaxIteration = 5000;
+//  Kinematics.SolverType = KinSolDeterminate2;
+
+  
+  Kinematics.UseStartGuessOnOff = On;
+  Kinematics.PosAnalysisOnlyOnOff = Off;
+  InitialConditions.PosAnalysisOnlyOnOff = Off;
+
+  InverseDynamics.Criterion.Type = MR_MinMaxStrict;
+  
+  AnyFolder &Model = .Model;
+    
+  AnyFolder JointStrength = {
+     AnyFolder Abscissa  ={
+        AnyVar JointAngle = not(not(..Model.Drivers.TrunkDriver.DriverVel))*..Model.Drivers.TrunkMeasure.Pos'*180/pi;     
+     };
+     AnyVar JointStrength = max(abs(.Model.JointLoad.F))/(.MaxMuscleActivity+0.00000001);
+     
+     //AnyVar PsoasMajorT12I = -1*.Model.SpineMusRef.PsoasMajor.PMT12I_TM.LmtDot/.Model.Drivers.AngularVelocity;
+  };
+  
+  
+  
+  
+  
+
+};
+
+#if (ANYBODY_V1 >= 6) & (ANYBODY_V2 >= 1)
+AnyFolder ModelViews = { AnyFolder Views =  {}; };
+#else
+AnyProject ModelViews = {};
+#endif
+
+ModelViews = {
+  AnyDrawGroup Selection = {
+    Objects = arrcat(arrcat(
+       ObjSearchRecursive(CompleteNameOf(&..Model.PelvisRef ), "*", "AnyDrawObject"), 
+       ObjSearchRecursive(CompleteNameOf(&..Model.TrunkRef ), "*", "AnyDrawObject"),
+       ObjSearchRecursive(CompleteNameOf(&..Model.SpineMusRef ), "*", "AnyDrawObject"),
+       ObjSearchRecursive(CompleteNameOf(&..Model.SpineMusRightRef ), "*", "AnyDrawObject"),
+       ObjSearchRecursive(CompleteNameOf(&..Model.SpineMusLeftRef ), "*", "AnyDrawObject"),
+       ObjSearchRecursive(CompleteNameOf(&..Model.ArmSegLeftRef ), "*", "AnyDrawObject")),
+       ObjSearchRecursive(CompleteNameOf(&..Model.ArmSegRightRef ), "*", "AnyDrawObject"),
+       ObjSearch(CompleteNameOf(&..Model.MusRightRef )+".latissimus_dorsi_*.*", "AnyDrawObject"),
+       ObjSearch(CompleteNameOf(&..Model.MusLeftRef )+".latissimus_dorsi_*.*", "AnyDrawObject")
+    );
+  };
+  Views = {
+    AnyProjectModelViewDefinition SelectedView = {
+      DrawGroupSequence = {&..Selection};
+      Reset = {On};
+    };
+  };
+};
+
+AnyOperationSequence Run = 
+{
+    AnyOperationMacro SetView = 
+    {
+      MacroStr = { "classoperation " + CompleteNameOf(&..ModelViews.Views.SelectedView) + strquote("Set View") };
+    };
+    AnyOperation &Study = .Study.InverseDynamics;
+//    #ifdef ANYBODY_PATH_OUTPUT
+//    AnyOperationMacro Save = 
+//    {
+//      MacroStr = {
+//           "classoperation " + CompleteNameOf(&.Study.Output) + strquote("Save data") 
+//           + " --type=" + strquote("Deep") +" --file=" + strquote(
+//           ANYBODY_PATH_OUTPUT + .OutputFileName + ".anydata.h5")
+//      };
+//    #endif
+};
