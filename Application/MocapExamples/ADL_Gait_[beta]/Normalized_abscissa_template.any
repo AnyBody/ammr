@@ -1,0 +1,68 @@
+#ifndef _NORMALIZED_ABSCISSA_
+#define _NORMALIZED_ABSCISSA_
+
+#class_template CALC_START_STEP_VAL(y2, x2, y1, x1, tstart,tend,nstep ) {
+  AnyVar _a = (y2-y1)/(x2-x1);
+  AnyVar _b = y2-_a*x2;
+  AnyVar startval = _a*tstart+_b;
+  AnyVar stepval = ( (y2-y1)*(tend-tstart)/(x2-x1) ) / max({nstep-1,1});
+};
+
+
+
+#class_template Normalized_Absicssa(Study ) {
+
+  #var AnyVar StartEvent = Study.tStart;
+  #var AnyVar StartEventPercent = 0;
+  
+  #var AnyVar MiddleEvent = StartEvent + (EndEvent-StartEvent)*MiddleEventPercent/100;
+  #var AnyVar MiddleEventPercent= 50;
+  
+  #var AnyVar EndEvent = Study.tEnd;
+  #var AnyVar EndEventPercent = 100;
+  
+  
+  AnyFolder Calculations = {
+    AnyInt check = gtfun(.EndEvent,.StartEvent) * gteqfun(.StartEvent,0) *
+                   gtfun(.MiddleEvent, .StartEvent) * ltfun(.MiddleEvent, .EndEvent) *
+                   gtfun(.EndEventPercent,.StartEventPercent )*gtfun(.MiddleEventPercent, .StartEventPercent)*
+                   ltfun(.MiddleEventPercent, .EndEventPercent);
+    
+    AnyInt NormalizedAbscissaWarning1 = warn(check, "The events are invalid, and no normalized abscissa could be calculated. "+
+        "Falling back to use tStart/tEnd for normalization."+
+        "(This error could for example occur if StartEvent occurs later than EndEvent.)");
+          
+    AnyVar SE = iffun(check, .StartEvent, Study.tStart);
+    AnyVar SEP = iffun(check, .StartEventPercent*1.0, 0.0);
+    AnyVar EE = iffun(check, .EndEvent, Study.tEnd);
+    AnyVar EEP = iffun(check, .EndEventPercent*1.0, 100.0);
+    AnyVar ME = iffun(check, .MiddleEvent , SE + (EE-SE)*MEP/100.0);
+    AnyVar MEP = iffun(check, .MiddleEventPercent*1.0, 50.0);
+                                 
+    CALC_START_STEP_VAL Start2Mid(y2 = .MEP,
+                             x2 = .ME,
+                             y1 = .SEP,
+                             x1 = .SE,
+                             tstart = Study.tStart,
+                             tend = Study.tEnd,
+                             nstep = Study.nStep) = {};
+    CALC_START_STEP_VAL Mid2End(y2 = .EEP,
+                              x2 = .EE,
+                              y1 = .MEP,
+                              x1 = .ME,
+                              tstart = Study.tStart,
+                              tend = Study.tEnd,
+                              nstep = Study.nStep) = {};
+                              
+    AnyFloat Abscissa_Start2Mid = 0*Study.t + farr( Start2Mid.startval, Start2Mid.stepval , Study.nStep )[Study.iStep];  
+    AnyFloat Abscissa_Mid2End = 0*Study.t + farr( Mid2End.startval, Mid2End.stepval , Study.nStep )[Study.iStep];  
+  };
+  
+  
+  
+  // The (0*t) term is hack to make AMS include the expression in the output folder. 
+  AnyFloat Abscissa = iffun(ltfun(Study.t,Calculations.ME ),Calculations.Abscissa_Start2Mid, Calculations.Abscissa_Mid2End );
+};
+
+
+#endif
