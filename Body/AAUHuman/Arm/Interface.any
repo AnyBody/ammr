@@ -83,17 +83,25 @@ AnyFolder AcromioClavicular =
 
   AnyKinMeasureLinComb Protraction ={
      
-     AnyFolder& Calvicula = ...Seg.Clavicula.AnatomicalFrame;
-     Calvicula = { 
-       AnyRefNode ISB_Coord ={ ARel={{0, 0,.....Sign*1}, {0, .....Sign*1,0}, {-1, 0,0}};};
+     AnyFolder& Calvicula = ...Seg.Clavicula;
+     Calvicula.AnatomicalFrame = { 
+       AnyRefNode ISB_Coord ={ ARel={{0, 0,......Sign*1}, {0, ......Sign*1,0}, {-1, 0,0}};};
      };
-     AnyFolder& Scapula = ...Seg.Scapula.AnatomicalFrame;
-     Scapula = {
-       AnyRefNode ISB_Coord = {ARel={{ 0, 0,.....Sign*1}, { 0, .....Sign*1,0}, {-1, 0,0}}; };
+     
+     AnyFolder& Scapula = ...Seg.Scapula;
+     Scapula.AnatomicalFrame = {
+       AnyRefNode ISB_Coord = {ARel={{ 0, 0,......Sign*1}, { 0, ......Sign*1,0}, {-1, 0,0}}; };
      };
+     Calvicula.acj = {
+          AnyRefNode RotNode={ ARel={{......Sign*1,0,0},  {0,1,0},      {0,0,......Sign*1}};};
+       };
+     Scapula.acj = {
+          AnyRefNode RotNode={ ARel={{......Sign*1,0,0},  {0,1,0},      {0,0,......Sign*1}};};
+       };
+     
      AnyKinRotational ACRot = {
-       AnyRefNode &clavicula = .Calvicula.ISB_Coord;    
-       AnyRefNode &scapula = .Scapula.ISB_Coord;
+       AnyRefNode &clavicula = .Calvicula.AnatomicalFrame.ISB_Coord;    
+       AnyRefNode &scapula = .Scapula.AnatomicalFrame.ISB_Coord;
        Type = RotAxesAngles;
        Axis1 = y;
        Axis2 = x;
@@ -190,31 +198,41 @@ AnyFolder ThoraxHumerus =
   //^ Follows the ISB recommendations for definitions of joint coordinate systems of the Humerus relative to Thorax
   //^ See section 2.4.7 in https://doi.org/10.1016/j.jbiomech.2004.05.042   
    
-   AnyKinMeasureLinComb PlaneOfElevation ={
-     
-     AnyKinRotational GHRot = {
-       AnyRefNode &Thorax = ....ShoulderRef.scj.ISB_Coord;    
-       AnyRefNode &Humerus = ....Seg.Humerus.AnatomicalFrame.ISB_Coord;
-       Type = RotAxesAngles;
-       Axis1 = y;
-       Axis2 = x;
-       Axis3 = y;
-     };
-     OutDim = 1;
-     Coef = {{...Sign*1,0,0}};
+  AnyKinMeasureOrg PlaneOfElevation ={
+    AnyRefNode& ThoraxShoulderISB = ...ShoulderRef.scj.ISB_Coord;    
+    AnyRefNode& HumerusISB = ...Seg.Humerus.AnatomicalFrame.ISB_Coord;
+    
+    AnyRefNode& ShoulderNodeRef  = ...ShoulderRef;
+    AnyFolder& gh=...Seg.Humerus.gh ;
+    
+    ThoraxShoulderISB = {
+      AnyRefNode RotNodeElevPlane={ARel={{.....Sign*-1,0,0},{0,.....Sign*1,0},{0,0,-1}};};
+    };
+    HumerusISB = {
+      AnyRefNode RotNodeElevPlane={ARel={{.....Sign*-1,0,0},{0,.....Sign*1,0},{0,0,-1}}; };
+    };  
+    
+    AnyKinRotational GHRot = {
+      AnyRefNode& ref1  = .ThoraxShoulderISB.RotNodeElevPlane;
+      AnyRefNode& ref2  = .HumerusISB.RotNodeElevPlane;
+  
+      Type = RotAxesAngles;
+      Axis1 = y;
+      Axis2 = x;
+      Axis3 = y;
+    };
+    MeasureOrganizer = {0};
+  };
+
+   AnyKinMeasureOrg Elevation ={
+    AnyKinRotational& ref=.PlaneOfElevation.GHRot;
+    MeasureOrganizer = {1};
    };
-   
-   AnyKinMeasureLinComb Elevation ={
-     AnyKinRotational &ref=.PlaneOfElevation.GHRot;
-     OutDim = 1;
-     Coef = {{0,...Sign*1,0}};  
-   };
-   
-   AnyKinMeasureLinComb InternalAxialRotation ={
-     AnyKinRotational &ref=.PlaneOfElevation.GHRot;
-     OutDim = 1;
-     Coef = {{0,0,...Sign*1}};  
-   };
+  
+  AnyKinMeasureOrg InternalAxialRotation ={
+    AnyKinRotational& ref=.PlaneOfElevation.GHRot;
+    MeasureOrganizer ={2};
+  };
 
 };
 
@@ -381,16 +399,17 @@ AnyKinMeasureOrg WristFlexion ={
       ARel={{....Sign*1,0,0},{0,1,0},{0,0,....Sign*1}};
     };
   };
-  AnyFolder &hand=..Seg.Hand.HandRef.wj;
-  hand ={
+  AnyFolder &WristJointSeg= ..Seg.WristJointSeg.FlexionExtensionAxis;
+  WristJointSeg ={
     AnyRefNode RotNode={ 
       ARel={{....Sign*1,0,0},{0,1,0},{0,0,....Sign*1}};
     };
   };
+  
   AnyKinRotational WristJoint = {
     Type=RotAxesAngles;
     AnyRefNode &radius_wj = ...Seg.Radius.wj.RotNode;
-    AnyRefNode &hand_wj =...Seg.Hand.HandRef.wj.RotNode;
+    AnyRefNode &hand_wj = ...Seg.WristJointSeg.FlexionExtensionAxis.RotNode;
   };//End WristJoint
   MeasureOrganizer ={1};
 };
@@ -406,6 +425,12 @@ AnyKinMeasureOrg WristAbduction ={
       ARel={{....Sign*1,0,0},{0,1,0},{0,0,....Sign*1}};
     };
   };
+  AnyFolder &HandSeg= ..Seg.Hand.HandRef.wj;
+  HandSeg ={
+    AnyRefNode RotNode={ 
+      ARel={{....Sign*1,0,0},{0,1,0},{0,0,....Sign*1}};
+    };
+  };  
   AnyKinRotational WristJoint = {
     Type=RotAxesAngles;
     AnyRefNode &radius_wj = ...Seg.WristJointSeg.RadialUlnarDeviation.RotNode;
@@ -413,6 +438,69 @@ AnyKinMeasureOrg WristAbduction ={
   };//End WristJoint
 
 };
+
+/// RotVec based measures of joint angles. These measures are used for 
+/// exporting and importing joint angles. They do not make sense from 
+/// clinical point of view. 
+RotVectorMeasures = 
+{
+    AnyKinRotational ThoraxClavicula = 
+    {
+       Type = RotVector;
+       AnyRefFrame &ref1 = ...ShoulderRef.scj.RotNode;
+       AnyRefFrame &ref2 = ...Seg.Clavicula.scj.RotNode;
+    };  
+    AnyKinRotational ClaviculaScapula = 
+    {
+       Type = RotVector;
+       AnyRefFrame &ref1 = ...Seg.Clavicula.acj.RotNode;
+       AnyRefFrame &ref2 = ...Seg.Scapula.acj.RotNode;
+    };  
+    AnyKinRotational ScapulaHumerus = 
+    {
+       Type = RotVector;
+       AnyRefFrame &ref1 = ...Seg.Scapula.gh.RotNode;
+       AnyRefFrame &ref2 = ...Seg.Humerus.gh.RotNode;
+    };
+    AnyKinMeasureOrg HumerusUlna = {
+      AnyKinRotational rot = 
+      {
+         Type = RotVector;
+         AnyRefFrame &ref1 = ....Seg.Humerus.fe.RotNode;
+         AnyRefFrame &ref2 = ....Seg.Ulna.fe.RotNode;
+      };
+      MeasureOrganizer = {0}; 
+    };
+    AnyKinMeasureOrg UlnaRadius = {
+      AnyKinRotational rot = 
+      {
+         Type = RotVector;
+         AnyRefFrame &ref1 = ....Seg.Ulna.ps2.RotNode;
+         AnyRefFrame &ref2 = ....Seg.Radius.PointPS2.RotNode;
+      };
+      MeasureOrganizer = {0}; 
+    };
+    AnyKinMeasureOrg RadiusWrist = {
+      AnyKinRotational rot = 
+      {
+         Type = RotVector;
+         AnyRefFrame &ref1 = ....Seg.Radius.wj.RotNode;
+         AnyRefFrame &ref2 = ....Seg.WristJointSeg.FlexionExtensionAxis.RotNode;
+      };
+      MeasureOrganizer = {1}; 
+    };
+    AnyKinMeasureOrg WristHand = {
+      AnyKinRotational rot = 
+      {
+         Type = RotVector;
+         AnyRefFrame &ref1 = ....Seg.WristJointSeg.RadialUlnarDeviation.RotNode;
+         AnyRefFrame &ref2 = ....Seg.Hand.HandRef.wj.RotNode;
+      };
+      MeasureOrganizer = {2}; 
+    };
+    
+    
+  };
 
 
 #if !((BM_ARM_RIGHT & BM_ARM_DETAILED_HAND) | (BM_ARM_LEFT & BM_ARM_DETAILED_HAND))

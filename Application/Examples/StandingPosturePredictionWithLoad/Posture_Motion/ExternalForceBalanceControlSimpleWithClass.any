@@ -1,0 +1,477 @@
+
+
+AnyFolder Settings ={
+  //these sections determine the amount of weight the torque minimization drivers will have
+  //for each joint
+  AnyFolder OverallWeightBalanceControl= {
+    AnyVar  WeightOnSoftDriver =1; 
+    AnyVar WeightOnEqFunction=10*0.00025;
+  };
+  AnyFolder MinMomentOnKneeJnt= {
+    AnyVar  WeightOnSoftDriver =1;
+    AnyVar WeightOnEqFunction=2*0.00025;
+  };
+  AnyFolder MinMomentOnL5SacrumJnt= {
+    AnyVar  WeightOnSoftDriver =1;
+    AnyVar WeightOnEqFunction=2*0.00025;
+  };
+  AnyFolder MinMomentOnRightshoulderJnt= {
+    AnyVar  WeightOnSoftDriver =1;
+    AnyVar WeightOnEqFunction=2*0.00025;
+  };
+  AnyFolder MinMomentOnRightElbowJnt= {
+    AnyVar  WeightOnSoftDriver =1;
+    AnyVar WeightOnEqFunction=2*0.00025;
+  };
+  AnyFolder MinMomentOnLeftshoulderJnt= {
+    AnyVar  WeightOnSoftDriver =1;
+    AnyVar WeightOnEqFunction=2*0.00025;
+  };
+  AnyFolder MinMomentOnLeftElbowJnt= {
+    AnyVar  WeightOnSoftDriver =1;
+    AnyVar WeightOnEqFunction=2*0.00025;
+  };
+};
+
+//Make a visual representation of human + object CoM
+AnyFolder VisualAid ={
+  AnyKinCoM CoM ={
+    AnyFolder &ref1=Main.HumanModel.BodyModel; 
+    AnyFolder &ref2=  Main.Model.Environment.HandSeg;
+  };
+  AnyDrawSphere DrwCoMAndMass ={
+    RGB={0,1,0};
+    ScaleXYZ={1,1,1}*0.035;
+    Position ={.CoM.Pos[0],.CoM.Pos[1],0};
+  };
+};
+
+
+//distribute the load between the hands
+#if LoadInRightHand  == 1 & LoadInLeftHand == 1
+    AnyFloat HandWeightRight=0.5*Main.Model.Environment.HandSeg.Mass*{Main.Study.Gravity[0]*one_vec,Main.Study.Gravity[1]*one_vec,Main.Study.Gravity[2]*one_vec};
+    AnyFloat HandWeightLeft=HandWeightRight;
+    AnyFloat HandForceRight= 0.5*   Main.InputParameters.HandForce;
+    AnyFloat HandForceLeft=   HandForceRight;
+    
+ #endif
+
+ #if LoadInRightHand  == 1 & LoadInLeftHand == 0
+    AnyFloat HandWeightRight=Main.Model.Environment.HandSeg.Mass*{Main.Study.Gravity[0]*one_vec,Main.Study.Gravity[1]*one_vec,Main.Study.Gravity[2]*one_vec};
+    AnyFloat HandWeightLeft=0;
+    AnyFloat HandForceRight=    Main.InputParameters.HandForce;
+    AnyFloat HandForceLeft=  0;
+    
+ #endif
+
+ #if LoadInRightHand  == 0 & LoadInLeftHand == 1
+    AnyFloat HandWeightRight=0;
+    AnyFloat HandWeightLeft=Main.Model.Environment.HandSeg.Mass*{Main.Study.Gravity[0]*one_vec,Main.Study.Gravity[1]*one_vec,Main.Study.Gravity[2]*one_vec};
+    AnyFloat HandForceRight= 0;
+    AnyFloat HandForceLeft=     Main.InputParameters.HandForce;
+  #endif 
+
+AnyVar MassOfSegments = 
+//trunk
+Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.Mass+
+Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.SacrumSeg.Mass+
+Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.L5Seg.Mass+
+Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.L4Seg.Mass+
+Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.L3Seg.Mass+
+Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.L2Seg.Mass+
+Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.L1Seg.Mass+
+Main.HumanModel.BodyModel.Trunk.SegmentsThorax.SkullSeg.Mass+ 
+Main.HumanModel.BodyModel.Trunk.SegmentsThorax.ThoraxSeg.Mass+ 
+Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C1Seg.Mass+
+Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C2Seg.Mass+
+Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C3Seg.Mass+
+Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C4Seg.Mass+
+Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C5Seg.Mass+
+Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C6Seg.Mass+
+Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C7Seg.Mass+
+//Right arm
+Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Clavicula.Mass+ 
+Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Scapula.Mass+ 
+Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Humerus.Mass+ 
+Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Ulna.Mass+ 
+Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Radius.Mass+ 
+Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Hand.Mass+ 
+//Left arm
+Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Clavicula.Mass+ 
+Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Scapula.Mass+ 
+Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Humerus.Mass+ 
+Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Ulna.Mass+ 
+Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Radius.Mass+ 
+Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Hand.Mass+
+//right leg    
+Main.HumanModel.BodyModel.Right.Leg.Seg.Thigh.Mass+ 
+Main.HumanModel.BodyModel.Right.Leg.Seg.Shank.Mass+ 
+Main.HumanModel.BodyModel.Right.Leg.Seg.Patella.Mass+ 
+Main.HumanModel.BodyModel.Right.Leg.Seg.Talus.Mass+
+Main.HumanModel.BodyModel.Right.Leg.Seg.Foot.Mass+
+//left leg    
+Main.HumanModel.BodyModel.Left.Leg.Seg.Thigh.Mass+ 
+Main.HumanModel.BodyModel.Left.Leg.Seg.Shank.Mass+ 
+Main.HumanModel.BodyModel.Left.Leg.Seg.Patella.Mass+ 
+Main.HumanModel.BodyModel.Left.Leg.Seg.Talus.Mass+
+Main.HumanModel.BodyModel.Left.Leg.Seg.Foot.Mass;
+
+
+AnyVar MassOfSegmentsAboveSacrum = 
+    Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.L5Seg.Mass+
+    Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.L4Seg.Mass+
+    Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.L3Seg.Mass+
+    Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.L2Seg.Mass+
+    Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.L1Seg.Mass+
+    Main.HumanModel.BodyModel.Trunk.SegmentsThorax.SkullSeg.Mass+ 
+    Main.HumanModel.BodyModel.Trunk.SegmentsThorax.ThoraxSeg.Mass+ 
+    Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C1Seg.Mass+
+    Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C2Seg.Mass+
+    Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C3Seg.Mass+
+    Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C4Seg.Mass+
+    Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C5Seg.Mass+
+    Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C6Seg.Mass+
+    Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C7Seg.Mass+
+    Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Clavicula.Mass+ 
+    Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Scapula.Mass+ 
+    Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Humerus.Mass+ 
+    Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Ulna.Mass+ 
+    Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Radius.Mass+ 
+    Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Hand.Mass+ 
+    Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Clavicula.Mass+ 
+    Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Scapula.Mass+ 
+    Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Humerus.Mass+ 
+    Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Ulna.Mass+ 
+    Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Radius.Mass+ 
+    Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Hand.Mass;
+
+
+    
+AnyVar MassOfSegmentsAboveKnee = 
+    Main.HumanModel.BodyModel.Right.Leg.Seg.Thigh.Mass+
+    Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.Mass+
+    Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.SacrumSeg.Mass+
+    Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.L5Seg.Mass+
+    Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.L4Seg.Mass+
+    Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.L3Seg.Mass+
+    Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.L2Seg.Mass+
+    Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.L1Seg.Mass+
+    Main.HumanModel.BodyModel.Trunk.SegmentsThorax.SkullSeg.Mass+ 
+    Main.HumanModel.BodyModel.Trunk.SegmentsThorax.ThoraxSeg.Mass+ 
+    Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C1Seg.Mass+
+    Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C2Seg.Mass+
+    Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C3Seg.Mass+
+    Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C4Seg.Mass+
+    Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C5Seg.Mass+
+    Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C6Seg.Mass+
+    Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C7Seg.Mass+
+    Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Clavicula.Mass+ 
+    Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Scapula.Mass+ 
+    Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Humerus.Mass+ 
+    Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Ulna.Mass+ 
+    Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Radius.Mass+ 
+    Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Hand.Mass+ 
+    Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Clavicula.Mass+ 
+    Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Scapula.Mass+ 
+    Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Humerus.Mass+ 
+    Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Ulna.Mass+ 
+    Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Radius.Mass+ 
+    Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Hand.Mass;
+
+
+  AnyVar MassOfSegmentsBelowShoulder = 
+    Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Humerus.Mass+ 
+    Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Ulna.Mass+ 
+    Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Radius.Mass+ 
+    Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Hand.Mass;
+
+AnyVar MassOfSegmentsBelowElbow = 
+    Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Ulna.Mass+ 
+    Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Radius.Mass+ 
+    Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Hand.Mass;
+
+
+
+AnyInt size=SizesOf(Main.InputParameters.HandForceTime);
+AnyFloat one_vec=ones(size[0],1)';
+
+
+CreateTorqueDriver  OverallWeightBalanceControl(
+CreateZeroMomentPointAsExtraSeg=1,
+ForceApplicationPoint=Main.Model.Environment.HandSeg,
+LevelForMeasurePlane=Main.Model.Environment.GlobalRef, 
+TargetPointForZeroMoment=Main.Model.Environment.GlobalRef.FootCenterPoint) ={
+  
+  InitialPositionForPointWithZeroMoment=Main.Model.Environment.GlobalRef.FootCenterPoint.sRel;
+  WeightOnSoftDriver=.Settings.OverallWeightBalanceControl.WeightOnSoftDriver;
+  WeightOnEqFunction=.Settings.OverallWeightBalanceControl.WeightOnEqFunction;
+  GravityVector=Main.Study.Gravity ;
+  ExternalForce_T=Main.InputParameters.HandForceTime;
+  ExternalForce_Data=.HandForceRight+.HandForceLeft+.HandWeightRight+.HandWeightLeft;
+  MassOfHumanSegments= .MassOfSegments;
+  HumanSegs ={
+    AnyFolder   &HumanSegs = Main.HumanModel;  
+  };
+};
+
+
+
+CreateTorqueDriver  MinMomentOnL5SacrumJnt(
+CreateZeroMomentPointAsExtraSeg=0,
+ForceApplicationPoint=Main.Model.Environment.HandSeg,
+LevelForMeasurePlane=Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.SacrumSeg.SacrumL5JntNode, 
+TargetPointForZeroMoment=Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.SacrumSeg.SacrumL5JntNode) ={
+  
+  InitialPositionForPointWithZeroMoment=Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.SacrumSeg.r0;
+  WeightOnSoftDriver=.Settings.MinMomentOnL5SacrumJnt.WeightOnSoftDriver/.MassOfSegmentsAboveSacrum;
+  WeightOnEqFunction=.Settings.MinMomentOnL5SacrumJnt.WeightOnEqFunction;
+  GravityVector=Main.Study.Gravity ;
+  ExternalForce_T=Main.InputParameters.HandForceTime;
+   ExternalForce_Data=.HandForceRight+.HandForceLeft+.HandWeightRight+.HandWeightLeft;
+  MassOfHumanSegments= .MassOfSegmentsAboveSacrum;
+  HumanSegs ={
+   AnyFolder &ref3= Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.L5Seg;
+    AnyFolder &ref4= Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.L4Seg;
+    AnyFolder &ref5= Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.L3Seg;
+    AnyFolder &ref6= Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.L2Seg;
+    AnyFolder &ref7= Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.L1Seg;
+    AnyFolder &ref8= Main.HumanModel.BodyModel.Trunk.SegmentsThorax.SkullSeg; 
+    AnyFolder &ref9= Main.HumanModel.BodyModel.Trunk.SegmentsThorax.ThoraxSeg; 
+    AnyFolder &ref10= Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C1Seg;
+    AnyFolder &ref11= Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C2Seg;
+    AnyFolder &ref12= Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C3Seg;
+    AnyFolder &ref13= Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C4Seg;
+    AnyFolder &ref14= Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C5Seg;
+    AnyFolder &ref15= Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C6Seg;
+    AnyFolder &ref16= Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C7Seg;
+    AnyFolder &ref17= Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Clavicula; 
+    AnyFolder &ref18= Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Scapula; 
+    AnyFolder &ref19= Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Humerus; 
+    AnyFolder &ref20= Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Ulna; 
+    AnyFolder &ref21= Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Radius; 
+    AnyFolder &ref22= Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Hand; 
+    AnyFolder &ref23= Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Clavicula; 
+    AnyFolder &ref24= Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Scapula; 
+    AnyFolder &ref25= Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Humerus; 
+    AnyFolder &ref26= Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Ulna; 
+    AnyFolder &ref27= Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Radius; 
+    AnyFolder &ref28= Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Hand;
+  };
+};
+
+
+
+
+
+
+
+
+
+
+CreateTorqueDriver  MinMomentOnRightKnee(
+CreateZeroMomentPointAsExtraSeg=0,
+ForceApplicationPoint=Main.Model.Environment.HandSeg,
+LevelForMeasurePlane=Main.HumanModel.BodyModel.Right.Leg.Seg.Thigh.KneeJoint, 
+TargetPointForZeroMoment=Main.HumanModel.BodyModel.Right.Leg.Seg.Thigh.KneeJoint) ={
+  
+  InitialPositionForPointWithZeroMoment=Main.HumanModel.BodyModel.Right.Leg.Seg.Thigh.r0;
+  WeightOnSoftDriver=.Settings.MinMomentOnKneeJnt.WeightOnSoftDriver/.MassOfSegmentsAboveKnee;
+  WeightOnEqFunction=.Settings.MinMomentOnKneeJnt.WeightOnEqFunction;
+  GravityVector=Main.Study.Gravity ;
+  ExternalForce_T=Main.InputParameters.HandForceTime;
+    ExternalForce_Data=.HandForceRight+.HandForceLeft+.HandWeightRight+.HandWeightLeft;
+  MassOfHumanSegments= .MassOfSegmentsAboveKnee;
+  HumanSegs ={
+    AnyFolder &ref0=     Main.HumanModel.BodyModel.Right.Leg.Seg.Thigh;
+    AnyFolder &ref1=    Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg;
+    AnyFolder &ref2=    Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.SacrumSeg;
+    AnyFolder &ref3=    Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.L5Seg;
+    AnyFolder &ref4= Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.L4Seg;
+    AnyFolder &ref5= Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.L3Seg;
+    AnyFolder &ref6= Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.L2Seg;
+    AnyFolder &ref7= Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.L1Seg;
+    AnyFolder &ref8= Main.HumanModel.BodyModel.Trunk.SegmentsThorax.SkullSeg; 
+    AnyFolder &ref9= Main.HumanModel.BodyModel.Trunk.SegmentsThorax.ThoraxSeg; 
+    AnyFolder &ref10= Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C1Seg;
+    AnyFolder &ref11= Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C2Seg;
+    AnyFolder &ref12= Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C3Seg;
+    AnyFolder &ref13= Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C4Seg;
+    AnyFolder &ref14= Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C5Seg;
+    AnyFolder &ref15= Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C6Seg;
+    AnyFolder &ref16= Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C7Seg;
+    AnyFolder &ref17= Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Clavicula; 
+    AnyFolder &ref18= Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Scapula; 
+    AnyFolder &ref19= Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Humerus; 
+    AnyFolder &ref20= Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Ulna; 
+    AnyFolder &ref21= Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Radius; 
+    AnyFolder &ref22= Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Hand; 
+    AnyFolder &ref23= Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Clavicula; 
+    AnyFolder &ref24= Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Scapula; 
+    AnyFolder &ref25= Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Humerus; 
+    AnyFolder &ref26= Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Ulna; 
+    AnyFolder &ref27= Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Radius; 
+    AnyFolder &ref28= Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Hand;
+  };
+};
+
+
+
+CreateTorqueDriver  MinMomentOnLeftKnee(
+CreateZeroMomentPointAsExtraSeg=0,
+ForceApplicationPoint=Main.Model.Environment.HandSeg,
+LevelForMeasurePlane=Main.HumanModel.BodyModel.Left.Leg.Seg.Thigh.KneeJoint, 
+TargetPointForZeroMoment=Main.HumanModel.BodyModel.Left.Leg.Seg.Thigh.KneeJoint) ={
+  
+  InitialPositionForPointWithZeroMoment=Main.HumanModel.BodyModel.Left.Leg.Seg.Thigh.r0;
+  WeightOnSoftDriver=.Settings.MinMomentOnKneeJnt.WeightOnSoftDriver/.MassOfSegmentsAboveKnee;
+  WeightOnEqFunction=.Settings.MinMomentOnKneeJnt.WeightOnEqFunction;
+  GravityVector=Main.Study.Gravity ;
+  ExternalForce_T=Main.InputParameters.HandForceTime;
+    ExternalForce_Data=.HandForceRight+.HandForceLeft+.HandWeightRight+.HandWeightLeft;
+  MassOfHumanSegments= .MassOfSegmentsAboveKnee;
+  HumanSegs ={
+    AnyFolder &ref0=     Main.HumanModel.BodyModel.Left.Leg.Seg.Thigh;
+    AnyFolder &ref1=    Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg;
+    AnyFolder &ref2=    Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.SacrumSeg;
+    AnyFolder &ref3=    Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.L5Seg;
+    AnyFolder &ref4= Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.L4Seg;
+    AnyFolder &ref5= Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.L3Seg;
+    AnyFolder &ref6= Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.L2Seg;
+    AnyFolder &ref7= Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.L1Seg;
+    AnyFolder &ref8= Main.HumanModel.BodyModel.Trunk.SegmentsThorax.SkullSeg; 
+    AnyFolder &ref9= Main.HumanModel.BodyModel.Trunk.SegmentsThorax.ThoraxSeg; 
+    AnyFolder &ref10= Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C1Seg;
+    AnyFolder &ref11= Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C2Seg;
+    AnyFolder &ref12= Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C3Seg;
+    AnyFolder &ref13= Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C4Seg;
+    AnyFolder &ref14= Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C5Seg;
+    AnyFolder &ref15= Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C6Seg;
+    AnyFolder &ref16= Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.C7Seg;
+    AnyFolder &ref17= Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Clavicula; 
+    AnyFolder &ref18= Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Scapula; 
+    AnyFolder &ref19= Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Humerus; 
+    AnyFolder &ref20= Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Ulna; 
+    AnyFolder &ref21= Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Radius; 
+    AnyFolder &ref22= Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Hand; 
+    AnyFolder &ref23= Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Clavicula; 
+    AnyFolder &ref24= Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Scapula; 
+    AnyFolder &ref25= Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Humerus; 
+    AnyFolder &ref26= Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Ulna; 
+    AnyFolder &ref27= Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Radius; 
+    AnyFolder &ref28= Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Hand;
+  };
+};
+
+
+
+
+
+
+
+
+
+
+#if LoadInRightHand==1
+ 
+  
+  
+
+CreateTorqueDriver  MinMomentOnRightElbowJnt2(
+CreateZeroMomentPointAsExtraSeg=0,
+ForceApplicationPoint=Main.Model.Environment.HandSeg,
+LevelForMeasurePlane=Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Humerus.fe, 
+TargetPointForZeroMoment=Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Humerus.fe) ={
+  
+  InitialPositionForPointWithZeroMoment=Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Humerus.r0;
+  WeightOnSoftDriver=.Settings.MinMomentOnRightElbowJnt.WeightOnSoftDriver/.MassOfSegmentsBelowElbow;
+  WeightOnEqFunction=.Settings.MinMomentOnRightElbowJnt.WeightOnEqFunction;
+  GravityVector=Main.Study.Gravity ;
+  ExternalForce_T=Main.InputParameters.HandForceTime;
+  ExternalForce_Data=.HandForceRight+.HandForceLeft+.HandWeightRight+.HandWeightLeft;
+  MassOfHumanSegments= .MassOfSegmentsBelowElbow;
+  HumanSegs ={
+      AnyFolder &ref20= Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Ulna; 
+    AnyFolder &ref21= Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Radius; 
+    AnyFolder &ref22= Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Hand;   };
+};
+
+
+
+CreateTorqueDriver  MinMomentOnRightShoulderJnt(
+CreateZeroMomentPointAsExtraSeg=0,
+ForceApplicationPoint=Main.Model.Environment.HandSeg,
+LevelForMeasurePlane=Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Scapula.gh, 
+TargetPointForZeroMoment=Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Scapula.gh) ={
+  
+  InitialPositionForPointWithZeroMoment=Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Scapula.r0;
+  WeightOnSoftDriver=.Settings.MinMomentOnRightshoulderJnt.WeightOnSoftDriver/.MassOfSegmentsBelowElbow;
+  WeightOnEqFunction=.Settings.MinMomentOnRightshoulderJnt.WeightOnEqFunction;
+  GravityVector=Main.Study.Gravity ;
+  ExternalForce_T=Main.InputParameters.HandForceTime;
+  ExternalForce_Data=.HandForceRight+.HandForceLeft+.HandWeightRight+.HandWeightLeft;
+  MassOfHumanSegments= .MassOfSegmentsBelowElbow;
+  HumanSegs ={
+    AnyFolder &ref19= Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Humerus; 
+    AnyFolder &ref20= Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Ulna; 
+    AnyFolder &ref21= Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Radius; 
+    AnyFolder &ref22= Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Hand;   };
+};
+
+#endif
+
+
+
+
+#if LoadInLeftHand==1
+ 
+  
+
+CreateTorqueDriver  MinMomentOnLeftElbowJnt(
+CreateZeroMomentPointAsExtraSeg=0,
+ForceApplicationPoint=Main.Model.Environment.HandSeg,
+LevelForMeasurePlane=Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Humerus.fe, 
+TargetPointForZeroMoment=Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Humerus.fe) ={
+  
+  InitialPositionForPointWithZeroMoment=Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Humerus.r0;
+  WeightOnSoftDriver=.Settings.MinMomentOnLeftElbowJnt.WeightOnSoftDriver/.MassOfSegmentsBelowShoulder;
+  WeightOnEqFunction=.Settings.MinMomentOnLeftElbowJnt.WeightOnEqFunction;
+  GravityVector=Main.Study.Gravity ;
+  ExternalForce_T=Main.InputParameters.HandForceTime;
+  ExternalForce_Data=.HandForceRight+.HandForceLeft+.HandWeightRight+.HandWeightLeft;
+  MassOfHumanSegments= .MassOfSegmentsBelowShoulder;
+  HumanSegs ={
+    AnyFolder &ref20= Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Ulna; 
+    AnyFolder &ref21= Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Radius; 
+    AnyFolder &ref22= Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Hand;   };
+};
+
+
+
+
+
+
+
+  
+
+
+CreateTorqueDriver  MinMomentOnLeftShoulderJnt(
+CreateZeroMomentPointAsExtraSeg=0,
+ForceApplicationPoint=Main.Model.Environment.HandSeg,
+LevelForMeasurePlane=Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Scapula.gh, 
+TargetPointForZeroMoment=Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Scapula.gh) ={
+  
+  InitialPositionForPointWithZeroMoment=Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Scapula.r0;
+  WeightOnSoftDriver=.Settings.MinMomentOnLeftshoulderJnt.WeightOnSoftDriver/.MassOfSegmentsBelowShoulder;
+  WeightOnEqFunction=.Settings.MinMomentOnLeftshoulderJnt.WeightOnEqFunction;
+  GravityVector=Main.Study.Gravity ;
+  ExternalForce_T=Main.InputParameters.HandForceTime;
+  ExternalForce_Data=.HandForceRight+.HandForceLeft+.HandWeightRight+.HandWeightLeft;
+  MassOfHumanSegments= .MassOfSegmentsBelowShoulder;
+  HumanSegs ={
+     AnyFolder &ref19= Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Humerus; 
+      AnyFolder &ref20= Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Ulna; 
+    AnyFolder &ref21= Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Radius; 
+    AnyFolder &ref22= Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Hand;   };
+};
+
+#endif

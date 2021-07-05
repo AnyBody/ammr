@@ -71,6 +71,31 @@ All BodyModel constants
 
     Switch for using the GM foot model"
 
+.. ammr:bm_constant:: _ELLIPSOID_CONTACT_
+    :value: 1
+
+    Switch for using ellipsoid contact between scapula and thorax
+
+.. ammr:bm_constant:: _MULTIPLE_POINT_CONTACT_
+    :value: 0
+
+    Switch for using multiple point contact between scapula and thorax"
+
+.. ammr:bm_constant:: _DELTOID_WRAPPING_RAKE_
+    :value: 0
+
+    Switch for using pre AMMR 2.2. rake implementation for deltoid wrapping
+
+.. ammr:bm_constant:: _DELTOID_WRAPPING_CYLINDERS_
+    :value: 1
+
+    Switch for using mulitple cylinder in the deltroid wrapping
+
+.. ammr:bm_constant:: _DELTOID_WRAPPING_ELIPSOIDS_
+    :value: 2
+
+    Switch for using multiple elipsoids in the deltoid wrapping"
+
 .. ammr:bm_constant:: _MORPH_NONE_
     :value: 0
 
@@ -115,6 +140,11 @@ All BodyModel constants
     :value: 2
 
     Constant to switch nonlinear disc spring on in the spine
+
+.. ammr:bm_constant:: _RHYTHM_SOFT_
+    :value: 2
+
+    Constant to switch kinematic rhythms as soft contraints
 
 .. ammr:bm_constant:: _SCALING_NONE_
     :value: 0
@@ -202,6 +232,11 @@ All BodyModel constants
     :value: 2
 
     Constant to use 2 parameter muscle tendon calibration
+
+.. ammr:bm_constant:: _CALIBRATION_TYPE_CUSTOM_
+    :value: 0
+
+    Use custom calibration. I.e. diables calibration so the user can add their own code.
 
 .. ammr:bm_constant:: CONST_MUSCLES_NONE
     :value: 0

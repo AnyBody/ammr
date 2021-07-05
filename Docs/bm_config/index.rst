@@ -71,7 +71,7 @@ See the following links for details on BM parameters related to different body p
                     - :any:`CONST_MUSCLES_3E_HILL`: Constant to use 3 element Hill-type muscle
 
 
-All Parameters and contants
+All Parameters and constants
 ------------------------------------
 
 The full list of all the parameter and their options is available in the links below:

@@ -1,0 +1,85 @@
+
+
+#ifndef REFERENCE_TRIAL
+
+// This Section calculates the walking speed
+Main.ModelSetup.TrialSpecificData = 
+{
+   #define RFS1 Main.Studies.InverseDynamicStudy.GaitCycle.Right.FootStrike1
+   #define RFS2 Main.Studies.InverseDynamicStudy.GaitCycle.Right.FootStrike2
+   #define LFS1 Main.Studies.InverseDynamicStudy.GaitCycle.Left.FootStrike1
+   #define LFS2 Main.Studies.InverseDynamicStudy.GaitCycle.Left.FootStrike2
+   #define RIGHT_HEEL_MARKER(x) Main.ModelSetup.C3DFileData.Points.Markers.R_FCC.PosInterpol(x)
+   #define LEFT_HEEL_MARKER(x) Main.ModelSetup.C3DFileData.Points.Markers.L_FCC.PosInterpol(x)
+   
+   AnyVar StrideLengthRight = vnorm(RIGHT_HEEL_MARKER(RFS2)- RIGHT_HEEL_MARKER(RFS1));
+   AnyVar StrideLengthLeft = vnorm(LEFT_HEEL_MARKER(LFS2)- LEFT_HEEL_MARKER(LFS1));
+   /// Average walking speed based on markers
+   AnyVar Speed = 0.5*( StrideLengthRight/(RFS2-RFS1) + StrideLengthLeft/(LFS2-LFS1));
+    
+};
+
+
+Main.Studies.InverseDynamicStudy = 
+{
+  
+  // This Section calculates two variables of normalized gait cycle percent. 
+  // These are usefull as the x axes when plotting results from the model. 
+  
+  AnyFolder GaitCycle = 
+  {
+    #define _TIMES  Main.ModelSetup.C3DFileData.Groups.EVENT.TIMES.Data
+    #define _CONTEXTS Main.ModelSetup.C3DFileData.Groups.EVENT.CONTEXTS.Data 
+    #define _LABELS Main.ModelSetup.C3DFileData.Groups.EVENT.LABELS.Data
+    #define _MOCAPTIME Main.Studies.InverseDynamicStudy.tArray
+    
+    AnyFunEx GetC3DEvent = {
+      //^ Define a function to lookup events times in the C3D EVENT.TIMES data 
+      //^ based on the label and context variables. 
+      AnyFloat Return =  _TIMES'[0];
+      AnyFunExMonoPy get_event =  {
+        ModuleFile = "c3d-events.py";
+        ArgList = {
+          AnyString context = "Right";
+          AnyString label = "FootStrike";
+          AnyMatrix allEventTimes = _TIMES;
+          AnyString allEventContext = _CONTEXTS;
+          AnyString allEventLabels = _LABELS;
+        };
+      };
+      AnyFunExMonoPy get_event_time =  {
+        ModuleFile = "c3d-events.py";
+        ArgList = {
+          AnyString context = "Right";
+          AnyString label = "FootStrike";
+          AnyMatrix allEventTimes = _TIMES;
+          AnyString allEventContext = _CONTEXTS;
+          AnyString allEventLabels = _LABELS;
+          AnyFloat timearray = _MOCAPTIME;
+        };
+      };
+    };
+    
+    Normalized_Absicssa Right (Study = Main.Studies.InverseDynamicStudy ) = {
+      AnyVar FootStrike1 = .GetC3DEvent("Right","Foot Strike1", _TIMES, _CONTEXTS, _LABELS, _MOCAPTIME)[0];
+      AnyVar FootStrike2 = .GetC3DEvent("Right","Foot Strike2", _TIMES, _CONTEXTS, _LABELS, _MOCAPTIME)[0];
+      StartEvent = FootStrike1;
+      EndEvent = FootStrike2;
+    };
+    
+    Normalized_Absicssa Left (Study = Main.Studies.InverseDynamicStudy ) = {
+      AnyVar FootStrike1 = .GetC3DEvent("Left","Foot Strike1", _TIMES, _CONTEXTS, _LABELS,_MOCAPTIME)[0];
+      AnyVar FootStrike2 = .GetC3DEvent("Left","Foot Strike2", _TIMES, _CONTEXTS, _LABELS,_MOCAPTIME)[0];
+      StartEvent = FootStrike1;
+      EndEvent = FootStrike2;
+    };
+    
+  };
+};
+
+
+
+
+
+// end REFERENCE_TRIAL
+#endif

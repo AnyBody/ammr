@@ -1,10 +1,22 @@
-  Main.ModelSetup.Macros = {     
-
+  Main.ModelSetup.Macros = {   
+   
+   #ifndef MOCAP_PARAMETER_FILE_PREFIX
+   #define MOCAP_PARAMETER_FILE_PREFIX MOCAP_TEST_FILENAME_PREFIX + MOCAP_OUTPUT_FILENAME_PREFIX
+   #endif
+      
+   #if (ANYBODY_V1 > 7)|(ANYBODY_V1 == 7 & ANYBODY_V2 > 2)
+   AnyOperationMacro Save_parameters = {
+     AnyFileVar SavePath = TEMP_PATH;
+     MacroStr  = {"classoperation Main" + strquote("Save Values") +"--file=" + 
+       strquote(FilePathCompleteOf(SavePath) +"/"+  MOCAP_PARAMETER_FILE_PREFIX + Main.ModelSetup.TrialSpecificData.TrialFileName +".anyset" )    
+     };
+   };
+   #else
    AnyOperationSequence Save_parameters= {
      OPERATION_DISPLAY_PRIORITY(PriorityLow);
      // This operation uses `AnyOperationSetValue` to mark all values that must be saved 
       AnyOperationSetValue TouchMarkers = {
-        Source = ObjSearch("Main.ModelSetup.MocapDrivers.*.sRelOptEdit"     );
+        Source = ObjSearch("Main.ModelSetup.MocapDrivers.*.sRelOptEdit");
         Target = Source;
       };     
       AnyOperationSetValue TouchSegLength =  {
@@ -20,23 +32,25 @@
       };   
       
       AnyOperationSetValue TouchOtherValues =  {
-        Source = ObjSearch("Main.HumanModel.BodyModel.*.Leg.Seg.Thigh.KneeJoint.VarusValgusRotation", "AnyValue");
+        Source = arrcat(
+          ObjSearch("Main.HumanModel.BodyModel.Left.Leg.Seg.Thigh.KneeJoint.VarusValgusRotation", "AnyValue"),
+          ObjSearch("Main.HumanModel.BodyModel.Right.Leg.Seg.Thigh.KneeJoint.VarusValgusRotation", "AnyValue"),
+          ObjSearch("Main.HumanModel.BodyModel.Left.Leg.Seg.Shank.AnkleJoint.TibialTorsionOffset", "AnyValue"),
+          ObjSearch("Main.HumanModel.BodyModel.Right.Leg.Seg.Shank.AnkleJoint.TibialTorsionOffset", "AnyValue")
+         );
+          
         Target = Source;
       };   
-      
-      
-      #ifndef MOCAP_PARAMETER_FILE_PREFIX
-      #define MOCAP_PARAMETER_FILE_PREFIX MOCAP_TEST_FILENAME_PREFIX + MOCAP_OUTPUT_FILENAME_PREFIX
-      #endif
-      
+            
       AnyOperationMacro SaveToFile = {
         AnyFileVar SavePath = TEMP_PATH;
         MacroStr  = {"classoperation Main" + strquote("Save Values") +"--file=" + 
           strquote(FilePathCompleteOf(SavePath) +"/"+  MOCAP_PARAMETER_FILE_PREFIX + Main.ModelSetup.TrialSpecificData.TrialFileName +".anyset" )
         };
-        
       };
     };
+    #endif
+      
     #if MOCAP_CREATE_PARAMETER_ID_SHORTCUT
     Main.RunParameterIdentification.SaveParameters = {
       AnyOperation &Save_parameters_to_anyset = Main.ModelSetup.Macros.Save_parameters;

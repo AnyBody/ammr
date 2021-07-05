@@ -35,7 +35,7 @@ import cloud_sptheme
 
 
 sys.path.insert(0, os.path.abspath("exts"))
-sys.path.insert(0, os.path.abspath("exts/sphinx_gallery-0.1.13-py3.6.egg"))
+sys.path.insert(0, os.path.abspath("exts/sphinx_gallery-0.7.0.custom.egg"))
 
 
 try:
@@ -137,7 +137,7 @@ language = "en"
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ["_build", "README.rst", "Thumbs.db", ".DS_Store"]
+exclude_patterns = ["_build", "README.rst", "Thumbs.db", ".DS_Store", "exts" ]
 
 # The name of the Pygments (syntax highlighting) style to use.
 highlight_language = "AnyScriptDoc"
@@ -146,17 +146,28 @@ pygments_style = "AnyScript"
 
 current_year = os.environ.get("YEAR", datetime.now().year)
 
-ams_version = os.environ.get("AMS_VERSION", "7.2.0")
+ams_version = os.environ.get("AMS_VERSION", "7.3.4")
 if not re.match("^\d\.\d\.\d", ams_version):
     raise ValueError("Wrong format for AMS version, environment variable")
 ams_version_short = ams_version.rpartition(".")[0]
 ams_version_x = ams_version_short + ".x"
 
-ammr_version = os.environ.get("AMMR_VERSION", "2.2.0-beta")
+
+ammr_version = os.environ.get("AMMR_VERSION", None)
+if ammr_version is None:
+    AMMR_VERSION_RE = re.compile(r'.*AMMR_VERSION\s"(?P<version>.*)"')
+    with open('../AMMR.version.any') as fh:
+        match = AMMR_VERSION_RE.search(fh.read())
+        if match:
+            ammr_version =  match.groupdict()["version"]
+        else:
+            raise Exception('Could not parse AMMR version')
+
+
 if not re.match("^\d\.\d\.\d", ammr_version):
     raise ValueError("Wrong format for AMMR version, environment variable")
-ammr_version_short = ammr_version.rpartition(".")[0]
 
+ammr_version_short = ammr_version.rpartition(".")[0]
 
 rst_epilog = f"""
 .. include:: /bm_config/Substitutions.txt
@@ -189,7 +200,7 @@ project = "AMMR"
 copyright = f"{current_year}, AnyBody Technology"
 author = "AnyBody Technology"
 
-github_doc_root = "https://gitlab.com/anybody/beta/ammr/tree/master/Docs"
+github_doc_root = "https://github.com/AnyBody/ammr/tree/master/Docs"
 
 
 # The version info for the project you're documenting, acts as replacement for
@@ -227,6 +238,8 @@ html_theme = "cloud"
 
 html_theme_path = [cloud_sptheme.get_theme_dir()]
 
+html_copy_source = False
+
 
 html_title = "%s v%s Documentation" % (project, release)
 
@@ -256,6 +269,7 @@ html_theme_options = {
     "minimal_width": "700px",
     "borderless_decor": True,
     "lighter_header_decor": False,
+    "inline_admonitions": True,
     # 'sidebar_master_title':'TEST2'
     # 'sidebarwidth': "3.8in",
     "fontcssurl": "https://fonts.googleapis.com/css?family=Noticia+Text|Open+Sans|Droid+Sans+Mono",
@@ -347,3 +361,6 @@ else:
     else:
         intersphinx_mapping["tutorials"] = ("https://anyscript.org/tutorials/", None)
 
+
+def setup(app):
+    app.add_css_file("custom.css")

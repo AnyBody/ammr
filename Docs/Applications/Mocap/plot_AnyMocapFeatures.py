@@ -6,7 +6,11 @@ AnyMoCap Features
 A collection of small models that show-off special features of the
 *AnyMoCap* framework.
 
-``Application/MocapExamples/SpecialFeatures``
+
+.. rst-class:: without-title
+.. seealso:: **Model location in AMMR:** 
+
+  :menuselection:`Application --> MocapExamples --> SpecialFeatures -->`
 
 This includes:
 

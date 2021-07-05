@@ -2,7 +2,7 @@ Welcome to the AMMR documentation!
 =======================================
 
 The AnyBody Model Repository (AMMR), is an open library of
-musculoskeletal models and examples ready to be used with the `AnyBody Modelling
+musculoskeletal models and examples ready to be used with the `AnyBody Modeling
 System`_. 
 
 .. rst-class:: float-right
@@ -48,4 +48,4 @@ install it and how to use it.
     **Continue:** :doc:`Get Started using the AMMR </getting_started>`
 
 
-.. _AnyBody Modelling System: https://www.anybodytech.com/software/ams/
+.. _AnyBody Modeling System: https://www.anybodytech.com/software/ams/

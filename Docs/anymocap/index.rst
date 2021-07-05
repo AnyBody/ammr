@@ -5,7 +5,7 @@ The AnyMoCap Framework
 ######################
 
 The AnyMoCap model is an effort to create a simple and unified framework for
-doing any kind of mocap analysis with the `AnyBody Modeling
+doing any kind of MoCap analysis with the `AnyBody Modeling
 System <http://anybodytech.com>`__.
 
 .. image:: /_static/anymocap.jpg
@@ -34,14 +34,14 @@ Over determinate kinematic analysis
 *************************************
 
 Musculoskeletal models that use Motion capture data are different from other
-types of models found the AMMR.  Most importantly, MOCAP models usually require
+types of models found the AMMR.  Most importantly, MoCap models usually require
 an over-determinate kinematic solver to handle the excess in information that
 the optical markers provide. 
 
 The over-determinate solver in AMS works great, but
 it can only find velocities and accelerations numerically. That has some
 performance issue when running inverse dynamics analysis. To overcome the
-problem, the MOCAP analysis is split into a two-step procedure, as illustrated on
+problem, the MoCap analysis is split into a two-step procedure, as illustrated on
 the figure below:
 
 .. _AnyMoCap-flow-figure:
@@ -123,7 +123,7 @@ Description of Model folders
     ======================================= ==============================================================================================
     Folder name                             Description                                                                                  
     ======================================= ==============================================================================================
-    ``ModelSetup``                          Contains contains all the machinery of the AnyMoCap Frame (:doc:`see here for details <model-structure>`).    
+    ``ModelSetup``                          Contains contains all the machinery of the AnyMoCap Frame.
     ``HumanModel``                          Contain the Human model used. This is constructed automatically by the AnyMoCap framework.    
     ``Main.EnvironmentModel``               Contains the model parts which are not part of the Human model. (e.g.  force plate and environment) 
     ``Studies``                             Contains the three studies ``ParameterIdentification``, ``MarkerTracking``, and
@@ -135,6 +135,10 @@ Description of Model folders
     ``LoadAndReplay``                       This loads any previously saved data and starts the replay operation.
     ======================================= ==============================================================================================
 
+
+.. _anymocap_settings:
+
+.. rst-class:: emphasize-children
 
 Options and settings
 ***************************
@@ -156,7 +160,7 @@ The following two sections gives an overview of the settings available:
 
 .. rst-class:: html-toggle
 
-``#path``/``#define`` settings
+Paths settings and switches
 -------------------------------
 
 Path settings and switches are usually prefixed by ``MOCAP_`` to indicate that
@@ -201,6 +205,8 @@ they are specific to the AnyMoCap framework.
     ``MOCAP_INPUT_DATA_TYPE``                      Data type ("C3D", "BVH") used by the AnyMoCap application.                                     "C3D"
     ``MOCAP_CREATE_PARAMETER_ID_SHORTCUT``         Setting for creating the ``Main.RunParameterIdentification`` shortcut operation  .             ON
     ``MOCAP_OUTPUT_FILENAME_PREFIX``               Prefix added to all output files from the model.                                               ""
+    ``MOCAP_PARAMETER_FILE_PREFIX``                Prefix for the parameter identfication files. Can be usefull to set explicitly                 ``MOCAP_OUTPUT_FILENAME_PREFIX``
+                                                   in special cases where subjects share a common parameter file.
     ``MOCAP_USE_GRF_PREDICTION``                   Switch to indicate that the model uses Ground Reaction Force (GRF) prediction. It will ensure  OFF
                                                    that the AnyMoCap framework uses the appropriate settings. (e.g. recruited actuators as weak 
                                                    residuals on the pelvis. 
@@ -216,7 +222,7 @@ they are specific to the AnyMoCap framework.
 
 .. rst-class:: html-toggle
 
-Settings in Main.ModelSetup
+Configurable variables 
 -----------------------------
 
 The ``Main.ModelSetup`` folder contains all the machinery of the AnyMoCap

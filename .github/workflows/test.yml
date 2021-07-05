@@ -1,0 +1,51 @@
+name: AMMR tests
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+    paths-ignore:
+      - 'Docs/**'
+  workflow_dispatch:
+
+
+jobs:
+  test:
+    
+    strategy:
+      fail-fast: false
+
+    env:
+      # Triggers a warning at 20 deg
+      ShortestPathMaxAngle: 0.3491 
+
+    runs-on: [self-hosted, AMS, conda]
+
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    
+    steps:
+      - uses: technote-space/auto-cancel-redundant-job@v1
+
+      - uses: actions/checkout@v2
+
+      - name: Cache conda/mamba
+        uses: actions/cache@v2
+        env:
+          CACHE_NUMBER: 0
+        with:
+          path: ~/conda_pkgs_dir
+          key: conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('Tests/test-environment.yml') }}      
+
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          channels: conda-forge
+          activate-environment: test
+          mamba-version: "*"
+          use-only-tar-bz2: true  # requried for caching
+          environment-file: Tests/test-environment.yml
+
+      - name: AMMR tests
+        run: pytest -n 4 --instafail
+
+  
