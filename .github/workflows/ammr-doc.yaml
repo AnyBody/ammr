@@ -4,8 +4,17 @@ name: Documentation build and deploy
 on:
   push:
      branches: [ master ]
+     tags: ['*']
+     paths:
+       - 'Docs/**'
+       - 'CHANGELOG.txt'
   pull_request:
      branches: [ master ]
+     paths:
+      - 'Docs/**'
+      - 'CHANGELOG.txt'
+  workflow_dispatch:
+
 
 jobs:
   sphinx-build:
@@ -13,14 +22,18 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     
     steps:
+      - uses: technote-space/auto-cancel-redundant-job@v1
       - uses: actions/checkout@v2
         
       - name: Setup conda
-        uses: goanpeca/setup-miniconda@v1
+        uses: conda-incubator/setup-miniconda@v2
         with:
           activate-environment: sphinx
           environment-file: Docs/environment.yaml
           channels: conda-forge
+          
+      - uses: ammaraskar/sphinx-problem-matcher@master
+        if: github.ref != 'refs/heads/master'
           
       - name: Build Documentation
         shell: bash -l {0}
@@ -36,6 +49,7 @@ jobs:
         if: github.ref == 'refs/heads/master'
         shell: bash -l {0}
         run: |
+          git fetch --shallow-since=2020-07-07
           git checkout $(git describe --tags `git rev-list --tags --max-count=1`);
           cd Docs
           make clean

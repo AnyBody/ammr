@@ -1,0 +1,314 @@
+
+#include "../libdef.any"
+
+
+#ifndef MOVE_PELVIS
+#define MOVE_PELVIS ON
+#endif
+
+Main = 
+{
+
+  // BodyModel configuration:
+  #include "BodyModelConfiguration.any"
+  
+   
+  // Include the Human model from AMMR
+  #include "<ANYBODY_PATH_BODY>\HumanModel.any"
+  
+  // Define your models posture or movement
+  #include "Mannequin.any"
+  
+  // Compose the model used by the study
+  AnyFolder Model = 
+  {  
+    // Center of Mass (COM) position in the ground YZ plane
+    // COM balance driver can be excluded with:
+    // #define EXCLUDE_COM_BALANCE_DRIVERS
+    AnyVector CenterOfMassXZ = {0,0};
+    
+    // Positioning of the right and left feet. 
+    // Ground-foot constraints can be excluded with:
+    // #define EXCLUDE_FOOT_CONSTRAINTS
+    Environment.GlobalRef.RightFootPrint = {
+      AnyVec3 HeelPosition = {-0.08, 0, 0.14};
+      AnyVec3 ToeDirection = {1, 0, 0.1}; 
+    };
+    Environment.GlobalRef.LeftFootPrint = {
+      AnyVec3 HeelPosition = {-0.08, 0, -0.14};
+      AnyVec3 ToeDirection = {1, 0, -0.1}; 
+    };
+    
+    // Include the body part of the Human model
+    AnyFolder &BodyModel = .HumanModel.BodyModel;
+    
+    // Include the default mannequin drivers
+    AnyFolder &DefaultMannequinDrivers = .HumanModel.DefaultMannequinDrivers;
+    
+    // Environment files are used to include objects surrounding human,
+    // e.g. global reference frame
+    #include "Environment.any"   
+    
+    AnyFolder ModelEnvironmentConnection = 
+    {
+      //Move Pelvis to test if this will break kin
+//      AnyKinEqSimpleDriver PelvisMover ={
+//        AnyKinMeasure &ref=.Main.HumanModel.BodyModel.Interface.Trunk.PelvisPosX.lin;
+//        DriverPos ={0,0,0};
+//        #if MOVE_PELVIS == ON
+//        DriverVel ={-10,0,0};
+//        #else
+//        DriverVel ={0,0,0};
+//        #endif
+//        Reaction.Type = {On,On,On};
+//      };
+      
+     AnyKinEqFourierDriver PelvisMover =      {
+        Type = CosSin;
+        Freq = 1.2;    
+        #if MOVE_PELVIS == ON
+        A = {{0, 1.5 },{0, 0},{0, 0 }};
+        B = {{0, 0},{0, 0},{0, 1.5}};       
+        #else
+        A = {{0, 0 },{0, 0 },{0, 0 }};
+        B =  {{0, 0},{0, 0},{0, 0}};       
+        #endif
+        Reaction.Type={On,On,On};
+        AnyKinMeasure &ref=.Main.HumanModel.BodyModel.Interface.Trunk.PelvisPosX.lin;
+      };
+      
+      
+      
+      
+      
+      
+      
+      //Move Pelvis to test if this will break kin
+      AnyKinEqSimpleDriver PelvisMoverRot ={
+        AnyKinMeasure &ref=.Main.HumanModel.BodyModel.Interface.Trunk.PelvisRotX.rot;
+        DriverPos ={0,0,0};
+        #if MOVE_PELVIS == ON
+        DriverVel ={0, 3*pi, 0};
+        #else
+        DriverVel ={0,0,0};
+        #endif
+        Reaction.Type = {On,On,On};
+      };
+  
+    };
+  };
+  
+  AnyBodyStudy Study =
+  {
+    AnyFolder &Model = .Model;  
+    
+    Gravity={0.0, -9.81, 0.0};
+    nStep = 200;
+    tStart=0;
+    tEnd=4;
+    // Overdeterminate solver is needed while using the 
+    // soft default mannequin drivers.
+    Kinematics.SolverType = KinSolDeterminate;
+    InitialConditions.SolverType = Kinematics.SolverType;
+    
+    //Include the next line to have a camera in the model
+    // Note: to generate videos FFMPEG must be available on the
+    // system.
+    //#include "Model/VideoCamera.any"
+    
+    
+    AnyFolder JointAndDrivers ={
+      
+      AnyFolder Right ={
+      
+      AnyKinEqSimpleDriver  PlaneOfElevation ={
+        AnyKinMeasure &rtef=.Main.HumanModel.BodyModel.Interface.Right.ThoraxHumerus.PlaneOfElevation;
+        DriverPos ={-20*pi/180};
+        DriverVel ={130*pi/180}/20;
+        Reaction.Type={Off};
+      };
+      
+      
+      AnyKinEqSimpleDriver  AxialRot ={
+        AnyKinMeasure &ref=  Main.HumanModel.BodyModel.Interface.Right.ThoraxHumerus.InternalAxialRotation;
+        DriverPos ={0*pi/180};
+        DriverVel ={0};
+        CType={Soft};
+        Reaction.Type={Off};
+      };
+      
+      
+      
+      
+      AnyKinEqFourierDriver Elevation = 
+      {
+        Type = CosSin;
+        Freq = 0.5;    
+        A ={{80, 0 }}*pi/180;
+        B = {{0, (70)}}*pi/180;
+        Reaction.Type={Off};
+        
+        
+        AnyKinMeasure &rtef=.Main.HumanModel.BodyModel.Interface.Right.ThoraxHumerus.Elevation;
+      };
+      
+    };
+      
+    
+    
+    
+    
+     AnyFolder Left ={
+      
+      AnyKinEqSimpleDriver  PlaneOfElevation ={
+        AnyKinMeasure &rtef=.Main.HumanModel.BodyModel.Interface.Left.ThoraxHumerus.PlaneOfElevation;
+        DriverPos =Main.Study.JointAndDrivers.Right.PlaneOfElevation.DriverPos;
+        DriverVel =Main.Study.JointAndDrivers.Right.PlaneOfElevation.DriverVel;
+        Reaction.Type={Off};
+      };
+      
+      
+      AnyKinEqSimpleDriver  AxialRot ={
+        AnyKinMeasure &ref=  Main.HumanModel.BodyModel.Interface.Left.ThoraxHumerus.InternalAxialRotation;
+        DriverPos =Main.Study.JointAndDrivers.Right.AxialRot.DriverPos;
+        DriverVel =Main.Study.JointAndDrivers.Right.AxialRot.DriverVel;
+        CType={Soft};
+        Reaction.Type={Off};
+
+      };
+      
+      
+      
+      
+      AnyKinEqFourierDriver Elevation = 
+      {
+        Type = CosSin;
+        Freq =  Main.Study.JointAndDrivers.Right.Elevation.Freq;
+        A =  Main.Study.JointAndDrivers.Right.Elevation.A;
+        B =  Main.Study.JointAndDrivers.Right.Elevation.B;
+        Reaction.Type={Off};
+        AnyKinMeasure &rtef=.Main.HumanModel.BodyModel.Interface.Left.ThoraxHumerus.Elevation;
+      };
+      
+    };
+      
+    };
+
+    
+   
+};
+
+
+
+
+ AnyBodyStudy Study2 =
+  {
+    AnyFolder &Model = .Model;  
+    
+    Gravity={0.0, -9.81, 0.0};
+    nStep = 50;
+    tEnd=5;
+    // Overdeterminate solver is needed while using the 
+    // soft default mannequin drivers.
+    Kinematics.SolverType = KinSolOverDeterminate;
+    InitialConditions.SolverType = Kinematics.SolverType;
+    
+    //Include the next line to have a camera in the model
+    // Note: to generate videos FFMPEG must be available on the
+    // system.
+    //#include "Model/VideoCamera.any"
+    
+    
+    AnyFolder JointAndDrivers ={
+      AnyFolder Right ={
+       
+     AnyKinEqFourierDriver PlaneOfElevation =      {
+        Type = CosSin;
+        Freq = 0.25;    
+          A = {{25, -80 }}*pi/180;
+          B = {{0, 0}}*pi/180;       
+              Reaction.Type={Off};
+
+      AnyKinMeasure &rtef=.Main.HumanModel.BodyModel.Interface.Right.ThoraxHumerus.PlaneOfElevation;
+      };
+      
+      
+      AnyKinEqSimpleDriver  AxialRot ={
+        AnyKinMeasure &ref=  Main.HumanModel.BodyModel.Interface.Right.ThoraxHumerus.InternalAxialRotation;
+        DriverPos ={0*pi/180};
+        DriverVel ={0};
+        CType={Soft};
+             Reaction.Type={Off};
+ };
+      
+      
+      
+      
+      AnyKinEqFourierDriver Elevation = 
+      {
+        Type = CosSin;
+        Freq = .25;    
+        A = {{80, 0 }}*pi/180;
+        B ={{0, (70)}}*pi/180;
+              Reaction.Type={Off};
+  
+        
+        AnyKinMeasure &rtef=.Main.HumanModel.BodyModel.Interface.Right.ThoraxHumerus.Elevation;
+      };
+      
+      
+      
+    };
+    
+    
+      AnyFolder Left ={
+       
+     AnyKinEqFourierDriver PlaneOfElevation =      {
+        Type = CosSin;
+        Freq = 0.25;    
+          A ={{25, -80 }}*pi/180;
+      B =  {{0, 0}}*pi/180;       
+             Reaction.Type={Off};
+ 
+      AnyKinMeasure &rtef=.Main.HumanModel.BodyModel.Interface.Left.ThoraxHumerus.PlaneOfElevation;
+      };
+      
+      
+      AnyKinEqSimpleDriver  AxialRot ={
+        AnyKinMeasure &ref=  Main.HumanModel.BodyModel.Interface.Left.ThoraxHumerus.InternalAxialRotation;
+        DriverPos ={0*pi/180};
+        DriverVel ={0};
+        CType={Soft};
+            Reaction.Type={Off};
+  };
+      
+      
+      
+      
+      AnyKinEqFourierDriver Elevation = 
+      {
+        Type = CosSin;
+        Freq = .25;    
+        A = {{80, 0 }}*pi/180;
+        B = {{0, (70)}}*pi/180;
+        
+              Reaction.Type={Off};
+  
+        AnyKinMeasure &rtef=.Main.HumanModel.BodyModel.Interface.Left.ThoraxHumerus.Elevation;
+      };
+      
+      
+      
+    };
+    
+  };
+    
+    
+       
+
+};
+
+
+}; //Main
+
+

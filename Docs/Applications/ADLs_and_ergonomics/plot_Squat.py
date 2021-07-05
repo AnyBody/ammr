@@ -5,7 +5,11 @@ Squat
 
 This model demonstrates parameterized squating motion.
 
-**Main file:** ``Application/Examples/Squat/Squat.main.any``
+.. rst-class:: without-title
+.. seealso:: **Main file location in AMMR:** 
+
+  :menuselection:`Application --> Examples --> Squat -->
+  Squat.main.any`
 
 Users can try to change different parameters of this model in the 'Input\Parameters.any' file including:
 

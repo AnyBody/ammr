@@ -6,7 +6,11 @@ Pedel demo simple
 This model demonstrates the construction
 of a foot pedal example.
 
-**Main file:** ``Application/Examples/PedalDemo/PedalDemo.Main.any``
+.. rst-class:: without-title
+.. seealso:: **Main file location in AMMR:** 
+
+  :menuselection:`Application --> Examples --> PedalDemo -->
+  PedalDemo.main.any`
 
 This model is for design of a pedal that is comfortable to use 
 for a seated operator depending on the stiffness of the embedded

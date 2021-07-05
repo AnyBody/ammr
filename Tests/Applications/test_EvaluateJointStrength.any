@@ -2,16 +2,19 @@
 //ignore_errors = [
 //   "Overloaded muscle configuration",  # Overloaded muscles is expected... 
 //   "Solver switched to fallback",  # Can happen to Latissimus dorsi
+//   "Orientation close to Gimbal Lock",
 //]
 //define = [
 //    {'BM_LEG_MODEL': 'OFF',
-//     'BM_ARM_LEFT':'ON','BM_ARM_RIGHT':'ON'},
+//     'BM_ARM_LEFT':'ON','BM_ARM_RIGHT':'ON', "BM_TRUNK_MUSCLES": "OFF"},
 //    {'BM_LEG_MODEL': '_LEG_MODEL_Leg_',
-//     'BM_ARM_LEFT':'OFF','BM_ARM_RIGHT':'OFF'},
+//     'BM_ARM_LEFT':'OFF','BM_ARM_RIGHT':'OFF', "BM_TRUNK_MUSCLES": "OFF"},
 //    {'BM_LEG_MODEL': '_LEG_MODEL_TLEM_',
-//     'BM_ARM_LEFT':'OFF','BM_ARM_RIGHT':'OFF'},
+//     'BM_ARM_LEFT':'OFF','BM_ARM_RIGHT':'OFF', "BM_TRUNK_MUSCLES": "OFF"},
 //    {'BM_LEG_MODEL': '_LEG_MODEL_TLEM2_', 
-//     'BM_ARM_LEFT':'OFF','BM_ARM_RIGHT':'OFF'},
+//     'BM_ARM_LEFT':'OFF','BM_ARM_RIGHT':'OFF', "BM_TRUNK_MUSCLES": "OFF"},
+//    {'BM_LEG_MODEL': 'OFF', 
+//     'BM_ARM_LEFT':'ON','BM_ARM_RIGHT':'ON', "BM_TRUNK_MUSCLES": "ON"},
 //]
 //pytest_markers=["slow"]
 
@@ -20,20 +23,32 @@
 
 #ifndef TEST_NAME
 
-   #define BM_CALIBRATION_TYPE _CALIBRATION_TYPE_2PAR_
   #define BM_LEG_MODEL 0
   #define BM_ARM_LEFT 1
   #define BM_ARM_RIGHT 1
  
 //  #define CREATE_IMAGE 0
+  #define BM_TRUNK_MUSCLES ON
 #endif
 
 #include "../../Application/Validation/EvaluateJointStrength/EvaluateJointStrength.main.any"
 
 Main = 
 {
-#ifndef CREATE_IMAGE
+#ifndef CREATE_IMAGE 
+  #if BM_TRUNK_MUSCLES == OFF
   AnyOperation& RunTest = Main.RunApplication;
+  #else
+  AnyOperationSequence RunTest = {
+    AnyOperation& PelvisThoraxFlexion = Main.HumanModel.EvalulateJointStrength.Run_all_studies.PelvisThoraxFlexion;
+    AnyOperation& PelvisThoraxExtension = Main.HumanModel.EvalulateJointStrength.Run_all_studies.PelvisThoraxExtension;
+    AnyOperation& PelvisThoraxLateralBendingRight = Main.HumanModel.EvalulateJointStrength.Run_all_studies.PelvisThoraxLateralBendingRight;
+    AnyOperation& PelvisThoraxLateralBendingLeft = Main.HumanModel.EvalulateJointStrength.Run_all_studies.PelvisThoraxLateralBendingLeft;
+    AnyOperation& PelvisThoraxRotationRight = Main.HumanModel.EvalulateJointStrength.Run_all_studies.PelvisThoraxRotationRight;
+    AnyOperation& PelvisThoraxRotationLeft = Main.HumanModel.EvalulateJointStrength.Run_all_studies.PelvisThoraxRotationLeft;
+  };
+  #endif
+  
 #else
   #include "../Cameras.any"
   #if BM_LEG_MODEL

@@ -3,13 +3,48 @@ name: Nightly Full AMMR tests
 on:
   schedule:
     - cron: 0 3 * * *
+  pull_request_review_comment:
+    types: [created, edited]
+  pull_request:
+    types: [opened]
+  workflow_dispatch:
+
 
 jobs:
   test:
-    runs-on: self-hosted
+    runs-on: [self-hosted, AMS, conda]
+    if: contains(github.event.comment.body, '#Run full test') || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+
+    env:
+      # Triggers a warning at 20 deg
+      ShortestPathMaxAngle: 0.3491
+   
+
+    strategy:
+      fail-fast: false
+          
     steps:
-      - uses: actions/checkout@v2
-      - name: Run tests
-        run: pytest -n 4 --instafail --runslow
+    - uses: actions/checkout@v2
+
+    - name: Cache conda/mamba
+      uses: actions/cache@v2
+      env:
+        CACHE_NUMBER: 0
+      with:
+        path: ~/conda_pkgs_dir
+        key: conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('Tests/test-environment.yml') }}      
+
+    - uses: conda-incubator/setup-miniconda@v2
+      with:
+        channels: conda-forge
+        activate-environment: test
+        mamba-version: "*"
+        use-only-tar-bz2: true  # requried for caching
+        environment-file: Tests/test-environment.yml
+
+    - name: Run tests
+      run: |
+        cd Tests
+        pytest --runslow -n 4 --instafail 
 
   

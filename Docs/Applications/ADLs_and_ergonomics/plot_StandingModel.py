@@ -17,8 +17,10 @@ The model has the following features which makes it a good starting point for cr
 
 The model is identical to the standing model created with the  template generator in the AnyBody Modeling System. 
 
+.. rst-class:: without-title
+.. seealso:: **Main file location in AMMR:** 
 
-**Main file:** ``Application/Examples/StandingModel/StandingModel.Main.any``
+  :menuselection:`Application --> Examples --> StandingModel --> StandingModel.Main.any`
 
 
 """

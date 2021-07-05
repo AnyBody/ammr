@@ -146,7 +146,7 @@ pygments_style = "AnyScript"
 
 current_year = os.environ.get("YEAR", datetime.now().year)
 
-ams_version = os.environ.get("AMS_VERSION", "7.2.3")
+ams_version = os.environ.get("AMS_VERSION", "7.3.4")
 if not re.match("^\d\.\d\.\d", ams_version):
     raise ValueError("Wrong format for AMS version, environment variable")
 ams_version_short = ams_version.rpartition(".")[0]
@@ -237,6 +237,8 @@ html_sidebars = {
 html_theme = "cloud"
 
 html_theme_path = [cloud_sptheme.get_theme_dir()]
+
+html_copy_source = False
 
 
 html_title = "%s v%s Documentation" % (project, release)

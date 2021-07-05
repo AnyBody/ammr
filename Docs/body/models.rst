@@ -50,6 +50,7 @@ which can be assembled into the full human in many combinations.
 
     lumbar_spine_model
     cervical_spine_model
+    thoracic_model
 
 
 .. toctree::
@@ -58,6 +59,7 @@ which can be assembled into the full human in many combinations.
 
     shoulder_arm_model
     detailed_hand_model
+    Regensburg-Ulm hand model <regensburg_ulm_hand_model>
 
 
 .. toctree::
@@ -67,6 +69,7 @@ which can be assembled into the full human in many combinations.
     leg_model
     leg_tlem_model
     leg_tlem2_model
+    GM Foot model <glasgow_maastricht_foot_model>
 
 .. toctree::
     :maxdepth: 1
