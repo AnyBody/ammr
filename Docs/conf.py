@@ -89,7 +89,13 @@ extensions = [
     "cloud_sptheme.ext.table_styling",
     "ammr-directives",
     "inline_highlight",
+    # "myst_parser"
 ]
+
+# myst_enable_extensions = [
+#   "colon_fence",
+# ]
+
 
 
 sphinx_gallery_conf = {
