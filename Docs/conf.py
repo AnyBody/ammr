@@ -89,12 +89,12 @@ extensions = [
     "cloud_sptheme.ext.table_styling",
     "ammr-directives",
     "inline_highlight",
-    # "myst_parser"
+    "myst_parser"
 ]
 
-# myst_enable_extensions = [
-#   "colon_fence",
-# ]
+myst_enable_extensions = [
+  "colon_fence",
+]
 
 
 
@@ -175,8 +175,9 @@ if not re.match("^\d\.\d\.\d", ammr_version):
 
 ammr_version_short = ammr_version.rpartition(".")[0]
 
+#.. include:: /bm_config/Substitutions.txt
+
 rst_epilog = f"""
-.. include:: /bm_config/Substitutions.txt
 
 .. |AMS| replace:: AnyBody Modeling System™
 .. |AMS_VERSION_X| replace:: {ams_version_x}
