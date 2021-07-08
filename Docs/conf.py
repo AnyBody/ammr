@@ -87,13 +87,17 @@ extensions = [
     "cloud_sptheme.ext.escaped_samp_literals",
     "cloud_sptheme.ext.issue_tracker",
     "cloud_sptheme.ext.table_styling",
-    "ammr-directives",
+    "ammr_directives",
     "inline_highlight",
     "myst_parser"
 ]
 
 myst_enable_extensions = [
-  "colon_fence",
+    "colon_fence",
+    "deflist",
+    "dollarmath",
+    "amsmath",
+    "html_image",
 ]
 
 
@@ -123,8 +127,8 @@ templates_path = ["_templates"]
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
-# source_suffix = ['.rst', '.md']
-source_suffix = ".rst"
+source_suffix = ['.rst', '.md']
+#source_suffix = ".rst"
 
 # The master toctree document.
 master_doc = "contents"
@@ -143,7 +147,7 @@ language = "en"
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ["_build", "README.rst", "Thumbs.db", ".DS_Store", "exts" ]
+exclude_patterns = ["_build", "README.md", "Thumbs.db", ".DS_Store", "exts" ]
 
 # The name of the Pygments (syntax highlighting) style to use.
 highlight_language = "AnyScriptDoc"
@@ -197,9 +201,15 @@ no_index = """
 .. meta::
    :robots: noindex
 """
+myst_html_meta = {}
 
 if tags.has("draft"):
     rst_epilog = rst_epilog + no_index
+    myst_html_meta["robots"] = "noindex"
+
+
+
+
 
 
 # General information about the project.

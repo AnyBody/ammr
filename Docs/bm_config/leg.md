@@ -2,7 +2,8 @@
 
 
 :::{csv-table} Leg Parameters
-:header: "Name", "Description"
+:header: Name, Description
 :widths: 2, 5
+:quote: "'"
 :file: LegTable.csv
 :::

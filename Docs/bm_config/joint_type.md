@@ -9,7 +9,8 @@ new custom joints in the model.
 
 
 :::{csv-table} Joint type Parameters
-:header: "Name", "Description"
+:header: Name, Description
 :widths: 2, 5
+:quote: "'"
 :file: JointTypeTable.csv
 :::

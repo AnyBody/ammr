@@ -4,7 +4,8 @@
 
 
 :::{csv-table} Arm Parameters
-:header: "Name", "Description"
+:header: Name, Description
 :widths: 2, 5
+:quote: "'"
 :file: ArmTable.csv
 :::
