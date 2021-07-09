@@ -4,10 +4,7 @@
 % random empty or make a new entry a random place in the bullet lists.
 
 ## AMMR 2.3.4 (2021-07-05)
-
-```{image} https://zenodo.org/badge/DOI/10.5281/zenodo.5060249.svg
-:target: https://doi.org/10.5281/zenodo.5060249
-```
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.5060249.svg)](https://doi.org/10.5281/zenodo.5060249)
 
 **Fixed:**
 
@@ -37,9 +34,9 @@
 
 ## AMMR 2.3.3 (2021-03-24)
 
-```{image} https://zenodo.org/badge/DOI/10.5281/zenodo.4616316.svg
-:target: https://doi.org/10.5281/zenodo.4616316
-```
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.4616316.svg)](https://doi.org/10.5281/zenodo.4616316)
+
+
 
 **Fixed:**
 
@@ -61,9 +58,11 @@
 
 ## AMMR 2.3.2 (2021-01-21)
 
-```{image} https://zenodo.org/badge/DOI/10.5281/zenodo.4305559.svg
-:target: https://doi.org/10.5281/zenodo.4305559
-```
+
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.4305559.svg)](https://doi.org/10.5281/zenodo.4305559)
+
+
+
 
 ```{rst-class} without-title
 ```
@@ -142,9 +141,7 @@ requested body height.
  
 ## AMMR 2.3.1 (2020-09-30)
 
-```{image} https://zenodo.org/badge/DOI/10.5281/zenodo.4023956.svg
-:target: https://doi.org/10.5281/zenodo.4023956
-```
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.4023956.svg)](https://doi.org/10.5281/zenodo.4023956)
 
 **Added:**
 
@@ -230,9 +227,8 @@ requested body height.
 
 ## AMMR 2.3 (2020-07-07)
 
-```{image} https://zenodo.org/badge/DOI/10.5281/zenodo.3932764.svg
-:target: https://doi.org/10.5281/zenodo.3932764
-```
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.3932764.svg)](https://doi.org/10.5281/zenodo.3932764)
+
 
 **Added:**
 
@@ -375,9 +371,8 @@ requested body height.
 
 ## AMMR 2.2.3 (2019-11-13)
 
-```{image} https://zenodo.org/badge/DOI/10.5281/zenodo.3521521.svg
-:target: https://doi.org/10.5281/zenodo.3521521
-```
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.3521521.svg)](https://doi.org/10.5281/zenodo.3521521)
+
 
 **Added:**
 
@@ -436,9 +431,8 @@ requested body height.
 
 ## AMMR 2.2.2 (2019-09-12)
 
-```{image} https://zenodo.org/badge/DOI/10.5281/zenodo.3404750.svg
-:target: https://doi.org/10.5281/zenodo.3404750
-```
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.3404750.svg)](https://doi.org/10.5281/zenodo.3404750)
+
 
 **Fixed:**
 
@@ -501,9 +495,8 @@ requested body height.
 
 ## AMMR 2.2 (2019-04-03)
 
-```{image} https://zenodo.org/badge/DOI/10.5281/zenodo.1481635.svg
-:target: https://doi.org/10.5281/zenodo.1481635
-```
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.1481635.svg)](https://doi.org/10.5281/zenodo.1481635)
+
 
 **Added:**
 
@@ -759,9 +752,7 @@ requested body height.
 
 ## AMMR 2.1.1 (2018-06-12)
 
-```{image} https://zenodo.org/badge/DOI/10.5281/zenodo.1287730.svg
-:target: https://doi.org/10.5281/zenodo.1287730
-```
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.1287730.svg)](https://doi.org/10.5281/zenodo.1287730)
 
 The AMMR 2.1.1 version is a minor release of the AMMR with smaller changes and bugfixes.
 The AnyBody Managed Model Repository now has a DOI ([10.5281/zenodo.1250764](https://doi.org/10.5281/zenodo.1250764)).
@@ -810,9 +801,7 @@ This is handled by [Zenodo.org](https://zenodo.org/) (The European Open Science 
 
 ## AMMR 2.1.0 (2018-03-22)
 
-```{image} https://zenodo.org/badge/DOI/10.5281/zenodo.1251276.svg
-:target: https://doi.org/10.5281/zenodo.1251276
-```
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.1251276.svg)](https://doi.org/10.5281/zenodo.1251276)
 
 **Added:**
 
@@ -961,9 +950,7 @@ the driver values are updated.
 
 ## AMMR 2.0.0 (2017-11-29)
 
-```{image} https://zenodo.org/badge/DOI/10.5281/zenodo.1251274.svg
-:target: https://doi.org/10.5281/zenodo.1251274
-```
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.1251274.svg)](https://doi.org/10.5281/zenodo.1251274)
 
 ### Major changes:
 
