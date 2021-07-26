@@ -10,7 +10,8 @@ import toml
 
 
 
-tmplpath =  Path(__file__).parent
+tmplpath =  Path(__file__).parent.absolute()
+
 rootpath = tmplpath.parents[2]
 
 data = toml.load(rootpath / "Body/AAUHuman/bm-parameters.toml")

@@ -265,16 +265,6 @@ Path to specify the underlying dataset. This currently only affects the TLEM bas
 
 
 
-```{ammr:bm_statement} BM_LEG_MORPHOLOGY
-
-Parameter for the morphology method used by the Leg model. This currently only affects the TLEM based models.Valid options depends on which model (TLEM1/2) is used, and what dataset are available. If not specified, this will be configure automatically.
-
-:::{eval-rst}
-:::
-```
-
-
-
 ```{ammr:bm_statement} BM_TRUNK_DATASET
 
 Parameter to define a trunk model dataset.
