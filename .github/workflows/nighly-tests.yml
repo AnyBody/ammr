@@ -20,7 +20,7 @@ jobs:
     if: contains(github.event.comment.body, '#Run full test') || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
 
     env:
-      # Triggers a warning at 20 deg
+      # Triggers a warning at 20 deg muscles angles
       ShortestPathMaxAngle: 0.3491
    
 
@@ -43,13 +43,14 @@ jobs:
       - name: Create conda environment
         run: | 
           ~\micromamba.exe shell hook -s powershell | Out-String | iex
-          micromamba update -y -f Tests/test-environment.yml; if (-not $?) {micromamba create -y -f Tests/test-environment.yml}
+          if (Test-Path -Path $MAMBA_ROOT_PREFIX\envs\_ammr_test) {$OPR = "update"} else {$OPR = "create"}
+          micromamba env $OPR -y -n _ammr_test -f Tests\test-environment.yml
 
 
       - name: Run full AMMR tests
         run: |
           ~\micromamba.exe shell hook -s powershell | Out-String | iex
-          micromamba activate _test
+          micromamba activate _ammr_test
 
           cd Tests
           pytest --runslow -n 4 --instafail 
