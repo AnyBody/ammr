@@ -15,6 +15,10 @@ on:
       - 'CHANGELOG.txt'
   workflow_dispatch:
 
+concurrency: 
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 
 jobs:
   sphinx-build:
@@ -22,16 +26,13 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     
     steps:
-      - uses: technote-space/auto-cancel-redundant-job@v1
       - uses: actions/checkout@v2
         
-      - name: Setup conda
-        uses: conda-incubator/setup-miniconda@v2
+      - name: Install mamba
+        uses: mamba-org/provision-with-micromamba@main
         with:
-          activate-environment: sphinx
           environment-file: Docs/environment.yaml
-          channels: conda-forge
-          
+                  
       - uses: ammaraskar/sphinx-problem-matcher@master
         if: github.ref != 'refs/heads/master'
           

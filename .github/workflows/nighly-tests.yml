@@ -9,14 +9,18 @@ on:
     types: [opened]
   workflow_dispatch:
 
+concurrency: 
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 
 jobs:
   test:
-    runs-on: [self-hosted, AMS, conda]
+    runs-on: [self-hosted, AnyBody]
     if: contains(github.event.comment.body, '#Run full test') || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
 
     env:
-      # Triggers a warning at 20 deg
+      # Triggers a warning at 20 deg muscles angles
       ShortestPathMaxAngle: 0.3491
    
 
@@ -24,27 +28,31 @@ jobs:
       fail-fast: false
           
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Cache conda/mamba
-      uses: actions/cache@v2
-      env:
-        CACHE_NUMBER: 0
-      with:
-        path: ~/conda_pkgs_dir
-        key: conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('Tests/test-environment.yml') }}      
+      - name: reset powershell
+        run: Remove-Item $PROFILE
 
-    - uses: conda-incubator/setup-miniconda@v2
-      with:
-        channels: conda-forge
-        activate-environment: test
-        mamba-version: "*"
-        use-only-tar-bz2: true  # requried for caching
-        environment-file: Tests/test-environment.yml
+      - name: Install conda
+        run: | 
+          Invoke-Webrequest -URI https://anaconda.org/conda-forge/micromamba/0.15.2/download/win-64/micromamba-0.15.2-0.tar.bz2 -OutFile ~\micromamba.tar.bz2
+          (Get-FileHash ~\micromamba.tar.bz2).hash -eq "d406ee990640123b05b5b55a720720513d3ad8eed6d3377324e4842c6f141308"
+          C:\PROGRA~1\Git\usr\bin\tar.exe -xvjf ~/micromamba.tar.bz2 --strip-components 2 -C ~ Library/bin/micromamba.exe
+          echo "MAMBA_ROOT_PREFIX=~\micromamba" >> $GITHUB_ENV
 
-    - name: Run tests
-      run: |
-        cd Tests
-        pytest --runslow -n 4 --instafail 
+      - name: Create conda environment
+        run: | 
+          ~\micromamba.exe shell hook -s powershell | Out-String | iex
+          if (Test-Path -Path $MAMBA_ROOT_PREFIX\envs\_ammr_test) {$OPR = "update"} else {$OPR = "create"}
+          micromamba env $OPR -y -n _ammr_test -f Tests\test-environment.yml
 
-  
+
+      - name: Run full AMMR tests
+        run: |
+          ~\micromamba.exe shell hook -s powershell | Out-String | iex
+          micromamba activate _ammr_test
+
+          cd Tests
+          pytest --runslow -n 4 --instafail 
+
+    
