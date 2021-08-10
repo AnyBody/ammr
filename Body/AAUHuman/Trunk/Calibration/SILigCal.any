@@ -1,0 +1,53 @@
+AnyFolder SILigCal ={
+  AnyComponentDefinition obj = {};  
+  AnyFolder &Pelvis =  ...BodyModel.Trunk.SegmentsLumbar.PelvisSeg;
+  AnyFolder &Sacrum =  ...BodyModel.Trunk.SegmentsLumbar.SacrumSeg;
+  AnyFolder &SILigaments =  ...BodyModel.Trunk.LumbarSpineLigaments.SILig;
+  
+  AnyFixedRefFrame ground = {
+    AnyRefNode node = { 
+      ARel=..Pelvis.Axes0; 
+      sRel=..Pelvis.r0;
+    };
+  };  
+  AnySphericalJoint PelvisGround={
+    AnyRefFrame &Ground = .ground.node;
+    AnyRefFrame &Pelvis= .Pelvis;
+  };
+  
+  AnyKinEqSimpleDriver  PelvisGroundDriver = {
+    AnySphericalJoint &Jnt = .PelvisGround;
+    DriverPos = {0,0,0};
+    DriverVel = {0,0,0};
+    Reaction.Type = {Off,Off,Off}; 
+  };
+  
+  
+  AnyKinEqSimpleDriver SIJntDrv = {
+      AnyJoint &SIJnt = ....BodyModel.Trunk.JointsLumbar.SacrumPelvisJnt;
+      #if SI_JNT_TYPE == "SPHERICAL"
+      DriverPos = {0,0,0};
+      DriverVel = {0,0,0};
+      Reaction.Type = {On,On,On};
+      #endif   
+      #if SI_JNT_TYPE == "REVOLUTE"
+      DriverPos = {0};
+      DriverVel = {0};
+      Reaction.Type = {On};
+      #endif   
+      #if SI_JNT_TYPE == "CYLINDRICAL"
+      DriverPos = {0,0};
+      DriverVel = {0,0};
+      Reaction.Type = {On,On};
+      #endif   
+    };
+};
+
+// The study: Operations to be performed on the model
+AnyBodyCalibrationStudy SILigCalibrationStudy = {
+  AnyFolder &ref=.SILigCal; 
+  nStep = 1;
+};
+
+
+
