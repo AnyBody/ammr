@@ -3,6 +3,18 @@
 % To minimize the risk of merge conflicts insert the your changes at a
 % random empty or make a new entry a random place in the bullet lists.
 
+## AMMR BETA
+
+**Fixed:**
+
+- Improved the selected output by adding the m. Semimembranosus and m.
+  Semitendinosus contributions to the knee flexor group for both muscle activity (`KneeFlexorMuscleActivity`)
+  and muscle force (`KneeFlexorMuscleForce`).
+
+**Added:**
+
+**Changed:**
+
 ## AMMR 2.3.4 (2021-07-05)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.5060249.svg)](https://doi.org/10.5281/zenodo.5060249)
 
