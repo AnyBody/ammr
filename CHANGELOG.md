@@ -31,6 +31,10 @@
   fixed.
 - The posture of the {ref}`standing lift example <sphx_glr_auto_examples_ADLs_and_ergonomics_plot_StandingLift.py>`
   have been modified to make the example more robust.
+- The `Tuber_ischiadicum` node to `Seat_contact` as it was misaligned to the actual bony
+  landmark position. New `Tuber_ischiadicum` nodes have been added at the bony landmark.
+  The renaming also makes it easier to identify what the node is used for across the ammr
+  models.
 
 ## AMMR 2.3.3 (2021-03-24)
 
