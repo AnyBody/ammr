@@ -1,0 +1,162 @@
+ 
+
+#class_template CreateBeam (
+  BeamName,
+  AnyFolder& Frame1,
+  AnyFolder& Frame2,
+  E,
+  G,
+  R,
+  Ix,
+  Iyz,
+  L,
+  A,
+  MinStress = 3e8,
+  MaxStress = 1e9,
+  BoundaryConditions = "Fixed_Fixed"
+){
+  // Options to translate and rotate beam attachement nodes on parent ref frame  
+  #var AnyVec3 Node1_sRel; 
+  #var AnyVec3 Node2_sRel; 
+
+  #var AnyMat33 Node1_ARel; 
+  #var AnyMat33 Node2_ARel; 
+  
+  // Create new nodes for attachement, allowing multiple beams on parent frame
+  Frame1 = {
+    AnyRefNode BeamName ={
+      sRel=..Node1_sRel; ARel=..Node1_ARel;
+       AnyDrawRefFrame drw ={ScaleXYZ={1,1,1}*0.01;};
+    };  
+  };
+  Frame2 = { 
+    AnyRefNode BeamName ={
+      sRel=..Node2_sRel; ARel=..Node2_ARel;
+       AnyDrawRefFrame drw ={ScaleXYZ={1,1,1}*0.01;};
+    };  
+  };
+
+  AnyKinRotational rot ={
+    AnyRefFrame &ref1=.Frame1.BeamName;
+    AnyRefFrame &ref2=.Frame2.BeamName;
+    Type=RotAxesAngles;
+    AngVelOnOff=On;
+  };
+  AnyKinLinear lin ={
+    Ref=0;
+    AnyRefFrame &ref1=.Frame1.BeamName;
+    AnyRefFrame &ref2=.Frame2.BeamName;
+  };
+  
+  // Ease referencing individual constraints
+  AnyVar Theta_Z =  rot.Pos[0];
+  AnyVar Theta_Y = -rot.Pos[1];  //this sign is needed to in order to be able to use same formulas..for y and z
+  AnyVar Theta_X =  rot.Pos[2]; 
+  
+  AnyVar Delta_X = -L + lin.Pos[0];
+  AnyVar Delta_Y =      lin.Pos[1];
+  AnyVar Delta_Z =      lin.Pos[2];
+  
+
+  #if BoundaryConditions =="Fixed_Fixed"
+    Frame1.BeamName ={  AnyDrawSurf drw2 = {ScaleXYZ=0.01*{1,1,1};FileName ="cube";};};
+    Frame2.BeamName ={  AnyDrawSurf drw2 = {ScaleXYZ=0.01*{1,1,1};FileName ="cube";};};
+    
+     AnyVar FY = Delta_Y*12*E*Iyz/(L^3)-6*E*Iyz*Theta_Z/(L^2);
+     AnyVar MZ = Theta_Z*E*Iyz/L-FY*L/2;
+  
+     AnyVar FZ = Delta_Z*12*E*Iyz/(L^3)-6*E*Iyz*Theta_Y/(L^2);
+     AnyVar MY = Theta_Y*E*Iyz/L-FZ*L/2;
+ 
+     AnyVar FX = A*E*Delta_X/L;
+     AnyVar MX = Theta_X*G*Ix/L;
+     
+  #endif
+  
+  #if BoundaryConditions =="Fixed_Simple"
+    
+     Frame1.BeamName ={  AnyDrawSurf drw2 = {ScaleXYZ=0.01*{1,1,1};FileName ="cube";};};
+     Frame2.BeamName ={  AnyDrawSurf drw2 = {ScaleXYZ=0.5*0.01*{1,1,1};FileName ="sphere";};};
+
+     AnyVar FY=Delta_Y*3*E*Iyz/L^3;
+     AnyVar FZ=Delta_Z*3*E*Iyz/L^3;
+     
+     AnyVar FX = 0;
+    
+     AnyVar MX = 0;
+     AnyVar MY = 0;
+     AnyVar MZ = 0;
+
+  #endif
+  
+  AnyForce ApplyForce ={
+    AnyKinLinear &ref=.lin;
+    F =-{.FX,.FY,.FZ};  
+  };
+  
+  AnyForce ApplyMoment ={
+    AnyKinRotational &ref=.rot;
+    F=-{.MX,.MY,.MZ};  
+  };
+
+  // Each beam is visualized by 20 elements 
+  AnyFolder P0  ={ AnyVar _x0=0.00;AnyVar _E=.E;AnyVar _R=.R;AnyVar _I=.Iyz;AnyVar _L=.L;AnyVar _A=.A;  #include "Calc1.any"};
+  AnyFolder P1  ={ AnyVar _x0=0.05;AnyVar _E=.E;AnyVar _R=.R;AnyVar _I=.Iyz;AnyVar _L=.L;AnyVar _A=.A;  #include "Calc1.any"};
+  AnyFolder P2  ={ AnyVar _x0=0.10;AnyVar _E=.E;AnyVar _R=.R;AnyVar _I=.Iyz;AnyVar _L=.L;AnyVar _A=.A;  #include "Calc1.any"};
+  AnyFolder P3  ={ AnyVar _x0=0.15;AnyVar _E=.E;AnyVar _R=.R;AnyVar _I=.Iyz;AnyVar _L=.L;AnyVar _A=.A;  #include "Calc1.any"};
+  AnyFolder P4  ={ AnyVar _x0=0.20;AnyVar _E=.E;AnyVar _R=.R;AnyVar _I=.Iyz;AnyVar _L=.L;AnyVar _A=.A;  #include "Calc1.any"};
+  AnyFolder P5  ={ AnyVar _x0=0.25;AnyVar _E=.E;AnyVar _R=.R;AnyVar _I=.Iyz;AnyVar _L=.L;AnyVar _A=.A;  #include "Calc1.any"};
+  AnyFolder P6  ={ AnyVar _x0=0.30;AnyVar _E=.E;AnyVar _R=.R;AnyVar _I=.Iyz;AnyVar _L=.L;AnyVar _A=.A;  #include "Calc1.any"};
+  AnyFolder P7  ={ AnyVar _x0=0.35;AnyVar _E=.E;AnyVar _R=.R;AnyVar _I=.Iyz;AnyVar _L=.L;AnyVar _A=.A;  #include "Calc1.any"};
+  AnyFolder P8  ={ AnyVar _x0=0.40;AnyVar _E=.E;AnyVar _R=.R;AnyVar _I=.Iyz;AnyVar _L=.L;AnyVar _A=.A;  #include "Calc1.any"};
+  AnyFolder P9  ={ AnyVar _x0=0.45;AnyVar _E=.E;AnyVar _R=.R;AnyVar _I=.Iyz;AnyVar _L=.L;AnyVar _A=.A;  #include "Calc1.any"};
+  AnyFolder P10 ={ AnyVar _x0=0.50;AnyVar _E=.E;AnyVar _R=.R;AnyVar _I=.Iyz;AnyVar _L=.L;AnyVar _A=.A;  #include "Calc1.any"};
+  AnyFolder P11 ={ AnyVar _x0=0.55;AnyVar _E=.E;AnyVar _R=.R;AnyVar _I=.Iyz;AnyVar _L=.L;AnyVar _A=.A;  #include "Calc1.any"};
+  AnyFolder P12 ={ AnyVar _x0=0.60;AnyVar _E=.E;AnyVar _R=.R;AnyVar _I=.Iyz;AnyVar _L=.L;AnyVar _A=.A;  #include "Calc1.any"};
+  AnyFolder P13 ={ AnyVar _x0=0.65;AnyVar _E=.E;AnyVar _R=.R;AnyVar _I=.Iyz;AnyVar _L=.L;AnyVar _A=.A;  #include "Calc1.any"};
+  AnyFolder P14 ={ AnyVar _x0=0.70;AnyVar _E=.E;AnyVar _R=.R;AnyVar _I=.Iyz;AnyVar _L=.L;AnyVar _A=.A;  #include "Calc1.any"};
+  AnyFolder P15 ={ AnyVar _x0=0.75;AnyVar _E=.E;AnyVar _R=.R;AnyVar _I=.Iyz;AnyVar _L=.L;AnyVar _A=.A;  #include "Calc1.any"};
+  AnyFolder P16 ={ AnyVar _x0=0.80;AnyVar _E=.E;AnyVar _R=.R;AnyVar _I=.Iyz;AnyVar _L=.L;AnyVar _A=.A;  #include "Calc1.any"};
+  AnyFolder P17 ={ AnyVar _x0=0.85;AnyVar _E=.E;AnyVar _R=.R;AnyVar _I=.Iyz;AnyVar _L=.L;AnyVar _A=.A;  #include "Calc1.any"};
+  AnyFolder P18 ={ AnyVar _x0=0.90;AnyVar _E=.E;AnyVar _R=.R;AnyVar _I=.Iyz;AnyVar _L=.L;AnyVar _A=.A;  #include "Calc1.any"};
+  AnyFolder P19 ={ AnyVar _x0=0.95;AnyVar _E=.E;AnyVar _R=.R;AnyVar _I=.Iyz;AnyVar _L=.L;AnyVar _A=.A;  #include "Calc1.any"};
+  AnyFolder P20 ={ AnyVar _x0=1.00;AnyVar _E=.E;AnyVar _R=.R;AnyVar _I=.Iyz;AnyVar _L=.L;AnyVar _A=.A;  #include "Calc1.any"};
+
+  
+  // Note: color is currently not possible to use on beam elements
+  // AnyFunInterpol Colors ={
+  //   Type=PiecewiseLinear;
+  //   T=farr(MinStress,(MaxStress-MinStress)/3,3);
+  //   Data={{0,0,1},{0,1,0},{1,0,0}}';
+  // };
+  
+  // Drawing each beam element - opacity is used to visualize location of max von mieses stress
+  AnyFunInterpol Opacity ={
+    Type=PiecewiseLinear;
+    T=farr(MinStress,(MaxStress-MinStress)/3,3);
+    Data={{0.1,0.5,1.2}};
+  };
+  
+  Frame1.BeamName ={    
+    AnyDrawLine FM_Draw0  ={p0=...P0.P;p1=...P1.P; Opacity=...Opacity(...P0._von_mieses)[0];GlobalCoord =Off;};
+    AnyDrawLine FM_Draw1  ={p0=...P1.P;p1=...P2.P; Opacity=...Opacity(...P1._von_mieses)[0];GlobalCoord =Off;};
+    AnyDrawLine FM_Draw2  ={p0=...P2.P;p1=...P3.P; Opacity=...Opacity(...P2._von_mieses)[0];GlobalCoord =Off;};
+    AnyDrawLine FM_Draw3  ={p0=...P3.P;p1=...P4.P; Opacity=...Opacity(...P3._von_mieses)[0];GlobalCoord =Off;};
+    AnyDrawLine FM_Draw4  ={p0=...P4.P;p1=...P5.P; Opacity=...Opacity(...P4._von_mieses)[0];GlobalCoord =Off;};
+    AnyDrawLine FM_Draw5  ={p0=...P5.P;p1=...P6.P; Opacity=...Opacity(...P5._von_mieses)[0];GlobalCoord =Off;};
+    AnyDrawLine FM_Draw6  ={p0=...P6.P;p1=...P7.P; Opacity=...Opacity(...P6._von_mieses)[0];GlobalCoord =Off;};
+    AnyDrawLine FM_Draw7  ={p0=...P7.P;p1=...P8.P; Opacity=...Opacity(...P7._von_mieses)[0];GlobalCoord =Off;};
+    AnyDrawLine FM_Draw8  ={p0=...P8.P;p1=...P9.P; Opacity=...Opacity(...P8._von_mieses)[0];GlobalCoord =Off;};
+    AnyDrawLine FM_Draw9  ={p0=...P9.P;p1=...P10.P;Opacity=...Opacity(...P10._von_mieses)[0];GlobalCoord =Off;};
+    AnyDrawLine FM_Draw10 ={p0=...P10.P;p1=...P11.P;Opacity=...Opacity(...P11._von_mieses)[0];GlobalCoord =Off;};
+    AnyDrawLine FM_Draw11 ={p0=...P11.P;p1=...P12.P;Opacity=...Opacity(...P12._von_mieses)[0];GlobalCoord =Off;};
+    AnyDrawLine FM_Draw12 ={p0=...P12.P;p1=...P13.P;Opacity=...Opacity(...P13._von_mieses)[0];GlobalCoord =Off;};
+    AnyDrawLine FM_Draw13 ={p0=...P13.P;p1=...P14.P;Opacity=...Opacity(...P14._von_mieses)[0];GlobalCoord =Off;};
+    AnyDrawLine FM_Draw14 ={p0=...P14.P;p1=...P15.P;Opacity=...Opacity(...P15._von_mieses)[0];GlobalCoord =Off;};
+    AnyDrawLine FM_Draw15 ={p0=...P15.P;p1=...P16.P;Opacity=...Opacity(...P16._von_mieses)[0];GlobalCoord =Off;};
+    AnyDrawLine FM_Draw16 ={p0=...P16.P;p1=...P17.P;Opacity=...Opacity(...P17._von_mieses)[0];GlobalCoord =Off;};
+    AnyDrawLine FM_Draw17 ={p0=...P17.P;p1=...P18.P;Opacity=...Opacity(...P18._von_mieses)[0];GlobalCoord =Off;};
+    AnyDrawLine FM_Draw18 ={p0=...P18.P;p1=...P19.P;Opacity=...Opacity(...P19._von_mieses)[0];GlobalCoord =Off;};
+    AnyDrawLine FM_Draw19 ={p0=...P19.P;p1=...P20.P;Opacity=...Opacity(...P20._von_mieses)[0];GlobalCoord =Off;};
+  };  
+};
