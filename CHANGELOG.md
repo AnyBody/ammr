@@ -3,6 +3,18 @@
 % To minimize the risk of merge conflicts insert the your changes at a
 % random empty or make a new entry a random place in the bullet lists.
 
+## AMMR BETA
+
+**Fixed:**
+
+- Improved the selected output by adding the m. Semimembranosus and m.
+  Semitendinosus contributions to the knee flexor group for both muscle activity (`KneeFlexorMuscleActivity`)
+  and muscle force (`KneeFlexorMuscleForce`).
+
+**Added:**
+
+**Changed:**
+
 ## AMMR 2.3.4 (2021-07-05)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.5060249.svg)](https://doi.org/10.5281/zenodo.5060249)
 
@@ -31,6 +43,10 @@
   fixed.
 - The posture of the {ref}`standing lift example <sphx_glr_auto_examples_ADLs_and_ergonomics_plot_StandingLift.py>`
   have been modified to make the example more robust.
+- The `Tuber_ischiadicum` node to `Seat_contact` as it was misaligned to the actual bony
+  landmark position. New `Tuber_ischiadicum` nodes have been added at the bony landmark.
+  The renaming also makes it easier to identify what the node is used for across the ammr
+  models.
 
 ## AMMR 2.3.3 (2021-03-24)
 
