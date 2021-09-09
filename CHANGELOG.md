@@ -34,6 +34,9 @@
   a custom frame.
 - Add a new ability to evaluate trunk strength into the built-in studies for
   {ref}`joint strength evaluation <sphx_glr_auto_examples_Validation_plot_EvaluateJointStrength.py>`.
+- New ligaments connecting the Sacrum and Pelvis segments are added. They are enabled
+  togehter with the ligaments on the lumbar spine through the `BM_TRUNK_LUMBAR_LIGAMENTS`
+  define statement.
 
 **Changed:**
 
