@@ -15,6 +15,13 @@
 
 **Changed:**
 
+- Updated the methods for distributing muscle volume among discretized muscle
+  elements in the LegTLEM model. This new method allows for different optimal
+  fiber lengths among elements of a muscle. If one element of a muscle get a
+  smaller optimal fiber length (i.e. from calibration) the volume of the muscles
+  element gets redistributed, and PCSA remains contant across elements.
+
+
 ## AMMR 2.3.4 (2021-07-05)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.5060249.svg)](https://doi.org/10.5281/zenodo.5060249)
 
