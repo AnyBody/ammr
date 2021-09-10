@@ -47,6 +47,7 @@ def _create_from_template(output, data):
 @click.command()
 @click.option(
     "--ammr",
+    default=Path(__file__).parent.parent,
     prompt="AMMR path to add files",
     type=click.Path(exists=True),
     help="AMMR paths.",

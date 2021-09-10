@@ -57,6 +57,20 @@
   J. Biomech. Vol. 28, pp. 513-525, 1995
 */ 
 
+// This logic ensures that TotalTendonLength and OpatinalFiberLength are not
+// created as DesignVars when they are also calibrated.
+#if BM_CALIBRATION_TYPE == _CALIBRATION_TYPE_1PAR_
+ #define _TENDON_LENGTH_DESIGNVAR(x) (x)
+ #define _FIBER_LENGTH_DESIGNVAR(x) DesignVar(x)
+#endif
+#if BM_CALIBRATION_TYPE == _CALIBRATION_TYPE_2PAR_
+ #define _TENDON_LENGTH_DESIGNVAR(x) (x)
+ #define _FIBER_LENGTH_DESIGNVAR(x) (x)
+#endif
+#if BM_CALIBRATION_TYPE == _CALIBRATION_TYPE_CUSTOM_
+ #define _TENDON_LENGTH_DESIGNVAR(x) DesignVar(x)
+ #define _FIBER_LENGTH_DESIGNVAR(x) DesignVar(x)
+#endif
 
 
 AnyFolder Muscles = 
@@ -83,8 +97,8 @@ AnyFolder Muscles =
     AnyIntVar MuscleElemAmount = {{param['elements']}}; ///< The total amount of elements for this muscle
     AnyFloat Pennationangle = DesignVar({{ Pennationangle }}); ///< Pennation angle of the muscle fibers (degres)
     AnyFloat MuscleVolume = DesignVar({{ MuscleVolume }}); ///< Volume of the muscle  (ml)
-    AnyFloat OptimalFiberlength = DesignVar({{ OptimalFiberlength }}); ///< Optimal working length of the muscle fiber (m)
-    AnyFloat TotalTendonLength = DesignVar({{ TotalTendonLength }});///< The total tendon length (m)
+    AnyFloat OptimalFiberlength = _FIBER_LENGTH_DESIGNVAR({{ OptimalFiberlength }}); ///< Optimal working length of the muscle fiber (m)
+    AnyFloat TotalTendonLength = _TENDON_LENGTH_DESIGNVAR({{ TotalTendonLength }});///< The total tendon length (m)
     AnyFloat K1 = DesignVar({{ K1 }}); ///< K1 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat K2 = DesignVar({{ K2 }}); ///< K2 constant in the muscle model.  Factor for determining shortening speed at optimum length
     AnyFloat Epsilon0 = DesignVar({{ Epsilon0 }}); ///< Epsilon bar in the muscle model. Represents tendon strain at F0
@@ -96,3 +110,6 @@ AnyFolder Muscles =
 {% endfor -%}
 
 }; // Muscles
+
+#undef _TENDON_LENGTH_DESIGNVAR
+#undef _FIBER_LENGTH_DESIGNVAR
