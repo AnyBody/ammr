@@ -15,6 +15,14 @@
 
 **Changed:**
 
+- Improve the trunk model's strength for trunk external rotation. This change
+  improves the implementation of the internal/external obliques and latissimus
+  dorsi muscles. More branches are added to the internal obliques and the
+  geometry is update to better match anatomical text books. Likewise, the
+  latissimus dorsi muscles is discretized into more branches so it has branch
+  inserting on every vertebra.
+
+
 - The `OptimalFiberLength` and `TotalTendonLength` in the TLEM leg models, are no longer 'DesignVar', when the
   parameters are also calibrated. This prevents huge amount warning when calibrating the leg muscles.
 
