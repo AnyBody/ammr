@@ -1,0 +1,62 @@
+name: Create compare reference
+
+on:
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+    inputs:
+      git_reference:
+        description: 'Which Git reference to check out. Examples: "refs/tags/v0.2.1", "refs/heads/master".'
+        default: refs/tags/vX.Y.Z
+        required: true
+
+
+concurrency: 
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+
+jobs:
+  test:
+    runs-on: [self-hosted, AnyBody]
+
+    strategy:
+      fail-fast: false
+
+    steps:
+      - name: Set variables
+        env:
+          DEFAULT_GIT_REFERENCE: refs/heads/master
+        run: |
+          echo "GIT_REFERENCE=${{ github.event.inputs.git_reference || env.DEFAULT_GIT_REFERENCE }}" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
+
+
+      - name: Checkout repository at ${{ env.GIT_REFERENCE }}
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ env.GIT_REFERENCE }}
+          fetch-depth: 0
+
+      - name: Install conda
+        run: | 
+          Invoke-Webrequest -URI https://anaconda.org/conda-forge/micromamba/0.15.2/download/win-64/micromamba-0.15.2-0.tar.bz2 -OutFile ~\micromamba.tar.bz2
+          (Get-FileHash ~\micromamba.tar.bz2).hash -eq "d406ee990640123b05b5b55a720720513d3ad8eed6d3377324e4842c6f141308"
+          $env:Path = "C:\PROGRA~1\Git\usr\bin;" + $env:Path
+          tar -xvjf ~/micromamba.tar.bz2 --strip-components 2 -C ~ Library/bin/micromamba.exe
+          echo "MAMBA_ROOT_PREFIX=$HOME\micromamba" >> $GITHUB_ENV
+
+      - name: Create conda environment
+        run: | 
+          ~\micromamba.exe shell hook -s powershell | Out-String | iex
+          if (Test-Path -Path $Env:MAMBA_ROOT_PREFIX\envs\_ammr_test) {$OPR = "update"} else {$OPR = "create"}
+          micromamba env $OPR -y -n _ammr_test -f Tests\test-environment.yml
+
+      - name: Run full AMMR tests
+        run: |
+          ~\micromamba.exe shell hook -s powershell | Out-String | iex
+          micromamba activate _ammr_test
+
+          pytest --runslow --anytest-output=test-output --anytest-name=${{ env.GIT_REFERENCE }} tests
+
+
