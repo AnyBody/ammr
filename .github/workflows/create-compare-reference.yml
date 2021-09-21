@@ -59,7 +59,7 @@ jobs:
         run: |
           ~\micromamba.exe shell hook -s powershell | Out-String | iex
           micromamba activate _ammr_test
-          $AMS_VERSION = $(python -c "import anypytools; print(anypytools.tools.anybodycon_version().partition(' (')[0])")
+          $AMS_VERSION = $(python -c "import anypytools; print(anypytools.tools.anybodycon_version())")
           echo "AMS_VERSION=$AMS_VERSION" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Run test for compare
@@ -84,9 +84,10 @@ jobs:
           from azure.storage.blob import BlobClient
           print(os.environ["AZURE_CONTAINER_NAME"])
           print(os.environ["AZURE_BLOB_NAME"])
+          version = os.environ["AMS_VERSION"].partition(" (")[0].replace(' ','')
           blob_client = BlobClient.from_connection_string(
               conn_str=os.environ["AZURE_CONN_STR"],
-              container_name=os.environ["AZURE_CONTAINER_NAME"],
+              container_name=f"ams-{version.replace('.','-')}",
               blob_name=os.environ["AZURE_BLOB_NAME"],
           )
           with open(sys.argv[1], "rb") as fh:
@@ -97,7 +98,6 @@ jobs:
         working-directory: ${{runner.temp}}
         env: 
           AZURE_CONN_STR: ${{ secrets.AZURE_CONN_STR }}
-          AZURE_CONTAINER_NAME: ${{env.AMS_VERSION}}
           AZURE_BLOB_NAME: ${{ env.COMPARE_TEST_NAME }}
         run: |
           ~\micromamba.exe shell hook -s powershell | Out-String | iex
