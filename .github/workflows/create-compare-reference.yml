@@ -55,15 +55,22 @@ jobs:
           if (Test-Path -Path $Env:MAMBA_ROOT_PREFIX\envs\_ammr_test) {$OPR = "update"} else {$OPR = "create"}
           micromamba env $OPR -y -n _ammr_test -f Tests\test-environment.yml
 
+      - name: Store AMS Version
+        run: |
+          ~\micromamba.exe shell hook -s powershell | Out-String | iex
+          micromamba activate _ammr_test
+
+          echo "AMS_VERSION=$(python -c "import anypytools; print(anypytools.tools.anybodycon_version())")" >> $GITHUB_ENV
+
       - name: Run test for compare
         run: |
           ~\micromamba.exe shell hook -s powershell | Out-String | iex
           micromamba activate _ammr_test
 
           pytest --anytest-output=${{runner.temp}} --anytest-name=${{ env.GIT_REFERENCE }} Tests/Applications/test_JumpingJack.any
-          echo "AMS_VERSION=$(python -c "import anypytools; print(anypytools.tools.anybodycon_version())")" >> $GITHUB_ENV
           
-      - name: Run test for compare
+
+      - name: Compress compare data
         working-directory: ${{runner.temp}}
         run: |
           Compress-Archive -Force -Path ${{ env.GIT_REFERENCE }}/* -DestinationPath compare-data.zip
@@ -77,7 +84,7 @@ jobs:
           AZURE_BLOB_NAME: ${{ env.COMPARE_TEST_NAME }}
         run: |
           ~\micromamba.exe shell hook -s powershell | Out-String | iex
-          micromamba create -y -n _azure-storage-blob azure-storage-blob
+          micromamba create -y -c conda-forge -n _azure-storage-blob azure-storage-blob
           micromamba activate _azure-storage-blob 
 
           python .github/workflows/azure-blob-upload.py compare-data.zip
