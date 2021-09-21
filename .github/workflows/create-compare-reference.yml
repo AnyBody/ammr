@@ -30,7 +30,9 @@ jobs:
         env:
           DEFAULT_GIT_REFERENCE: refs/heads/master
         run: |
-          echo "GIT_REFERENCE=${{ github.event.inputs.git_reference || env.DEFAULT_GIT_REFERENCE }}" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+          $GIT_REFERENCE =${{ github.event.inputs.git_reference || env.DEFAULT_GIT_REFERENCE }}"
+          echo "GIT_REFERENCE=$GIT_REFERENCE" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+          echo "COMPARE_TEST_NAME=$($GIT_REFERENCE.replace("/","-"))" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
 
 
       - name: Checkout repository at ${{ env.GIT_REFERENCE }}
@@ -60,7 +62,7 @@ jobs:
 
           pytest --anytest-output=${{runner.temp}} --anytest-name=${{ env.GIT_REFERENCE }} Tests/Applications/test_JumpingJack.any
           
-          Compress-Archive -Force -Path ${{runner.temp}}/${{ env.GIT_REFERENCE }}/* -DestinationPath ../test-output/$( "${{ env.GIT_REFERENCE }}".replace("/","-") ).zip
+          Compress-Archive -Force -Path ${{runner.temp}}/* -DestinationPath ../${{env.COMPARE_TEST_NAME}}.zip
 
 
       # - name: Upload to azure
