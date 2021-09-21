@@ -61,19 +61,24 @@ jobs:
           micromamba activate _ammr_test
 
           pytest --anytest-output=${{runner.temp}} --anytest-name=${{ env.GIT_REFERENCE }} Tests/Applications/test_JumpingJack.any
+          echo "AMS_VERSION=$(python -c "import anypytools; print(anypytools.tools.anybodycon_version())")" >> $GITHUB_ENV
           
-          Compress-Archive -Force -Path ${{runner.temp}}/* -DestinationPath ../${{env.COMPARE_TEST_NAME}}.zip
+      - name: Run test for compare
+        working-directory: ${{runner.temp}}
+        run: |
+          Compress-Archive -Force -Path ${{ env.GIT_REFERENCE }}/* -DestinationPath compare-data.zip
 
 
-      # - name: Upload to azure
-      #   env: 
-      #     AZURE_CONN_STR: "${{ secrets.AZURE_CONN_STR }}"
-      #     AZURE_CONTAINER_NAME: ""
-      #     AZURE_BLOB_NAME: ""          
-      #   run: |
-      #     ~\micromamba.exe shell hook -s powershell | Out-String | iex
-      #     micromamba create -y -n _azure-storage-blob azure-storage-blob
-      #     micromamba activate _azure-storage-blob 
+      - name: Upload to azure
+        working-directory: ${{runner.temp}}
+        env: 
+          AZURE_CONN_STR: ${{ secrets.AZURE_CONN_STR }}
+          AZURE_CONTAINER_NAME: ${{env.AMS_VERSION}}
+          AZURE_BLOB_NAME: ${{ env.COMPARE_TEST_NAME }}
+        run: |
+          ~\micromamba.exe shell hook -s powershell | Out-String | iex
+          micromamba create -y -n _azure-storage-blob azure-storage-blob
+          micromamba activate _azure-storage-blob 
 
-      #     python .github/workflows/azure-blob-upload.py ../test-output/${{ env.GIT_REFERENCE }}
+          python .github/workflows/azure-blob-upload.py compare-data.zip
 
