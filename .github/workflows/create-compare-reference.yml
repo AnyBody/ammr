@@ -75,8 +75,24 @@ jobs:
         run: |
           Compress-Archive -Force -Path ${{ env.GIT_REFERENCE }}/* -DestinationPath compare-data.zip
 
+      - name: Create Upload script
+        working-directory: ${{runner.temp}}
+        run: |
+          $script = @"
+          import os
+          import sys
+          from azure.storage.blob import BlobClient
+          blob_client = BlobClient.from_connection_string(
+              conn_str=os.environ["AZURE_CONN_STR"],
+              container_name=os.environ["AZURE_CONTAINER_NAME"],
+              blob_name=os.environ["AZURE_BLOB_NAME"],
+          )
+          with open(sys.argv[1], "rb") as fh:
+              blob_client.upload_blob(fh, overwrite=True)
+          "@ | Set-Content -Path "upload.py"
 
       - name: Upload to azure
+        working-directory: ${{runner.temp}}
         env: 
           AZURE_CONN_STR: ${{ secrets.AZURE_CONN_STR }}
           AZURE_CONTAINER_NAME: ${{env.AMS_VERSION}}
@@ -86,5 +102,5 @@ jobs:
           micromamba create -y -c conda-forge -n _azure-storage-blob azure-storage-blob
           micromamba activate _azure-storage-blob 
 
-          python .github/workflows/azure-blob-upload.py ${{runner.temp}}/compare-data.zip
+          python upload.py compare-data.zip
 
