@@ -81,17 +81,15 @@ jobs:
           $script = @"
           import os
           import sys
-          from azure.storage.blob import BlobClient
-          print(os.environ["AZURE_BLOB_NAME"])
-          version = os.environ["AMS_VERSION"].partition(" (")[0].replace(' ','')
-          print(f"ams-{version.replace('.','-')}")
-          blob_client = BlobClient.from_connection_string(
-              conn_str=os.environ["AZURE_CONN_STR"],
-              container_name=f"ams-{version.replace('.','-')}",
-              blob_name=os.environ["AZURE_BLOB_NAME"],
-          )
+          from azure.storage.blob import BlobServiceClient
+          version = os.environ["AMS_VERSION"].partition(" (")[0].replace(" ", "")
+          container_name = f"ams-{version.replace('.','-')}"
+          blob_name = os.environ["AZURE_BLOB_NAME"]
+          container_client = BlobServiceClient.from_connection_string(
+              os.environ["AZURE_CONN_STR"]
+          ).get_container_client(container_name)
           with open(sys.argv[1], "rb") as fh:
-              blob_client.upload_blob(fh, overwrite=True)
+              container_client.upload_blob(blob_name, fh, overwrite=True)
           "@ | Set-Content -Path "upload.py"
 
       - name: Upload to azure
