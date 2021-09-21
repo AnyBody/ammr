@@ -47,7 +47,7 @@ jobs:
           (Get-FileHash ~\micromamba.tar.bz2).hash -eq "d406ee990640123b05b5b55a720720513d3ad8eed6d3377324e4842c6f141308"
           $env:Path = "C:\PROGRA~1\Git\usr\bin;" + $env:Path
           tar -xvjf ~/micromamba.tar.bz2 --strip-components 2 -C ~ Library/bin/micromamba.exe
-          echo "MAMBA_ROOT_PREFIX=$HOME\micromamba" >> $GITHUB_ENV
+          echo "MAMBA_ROOT_PREFIX=$HOME\micromamba" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Create conda environment
         run: | 
@@ -59,8 +59,8 @@ jobs:
         run: |
           ~\micromamba.exe shell hook -s powershell | Out-String | iex
           micromamba activate _ammr_test
-
-          echo "AMS_VERSION=$(python -c "import anypytools; print(anypytools.tools.anybodycon_version())")" >> $GITHUB_ENV
+          $AMS_VERSION = $(python -c "import anypytools; print(anypytools.tools.anybodycon_version())")
+          echo "AMS_VERSION=$AMS_VERSION" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Run test for compare
         run: |
@@ -101,7 +101,7 @@ jobs:
           AZURE_BLOB_NAME: ${{ env.COMPARE_TEST_NAME }}
         run: |
           ~\micromamba.exe shell hook -s powershell | Out-String | iex
-          micromamba create -y -c conda-forge -n _azure-storage-blob azure-storage-blob
+          micromamba create -y -q -c conda-forge -n _azure-storage-blob azure-storage-blob
           micromamba activate _azure-storage-blob
           echo $env:AZURE_BLOB_NAME
           echo $env:AZURE_CONTAINER_NAME
