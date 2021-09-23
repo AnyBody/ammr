@@ -1,0 +1,109 @@
+name: Create compare reference
+
+on:
+  pull_request:
+  push:
+    tags:
+      - 'ammr-*'
+  workflow_dispatch:
+    inputs:
+      git_reference:
+        description: 'Which Git reference to check out. Examples: "refs/tags/v0.2.1", "refs/heads/master".'
+        default: refs/tags/vX.Y.Z
+        required: true
+
+
+concurrency: 
+  group: compare-test-${{ github.ref }}
+  cancel-in-progress: true
+
+
+jobs:
+  test:
+    runs-on: [self-hosted, AnyBody]
+
+    strategy:
+      fail-fast: false
+
+    steps:
+      - name: Set variables
+        env:
+          DEFAULT_GIT_REFERENCE: refs/heads/master
+        run: |
+          $GIT_REFERENCE="${{ github.event.inputs.git_reference || env.DEFAULT_GIT_REFERENCE }}"
+          echo "GIT_REFERENCE=$GIT_REFERENCE" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+          echo "COMPARE_TEST_NAME=$($GIT_REFERENCE.replace("/","-"))" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+
+
+      - name: Checkout repository at ${{ env.GIT_REFERENCE }}
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ env.GIT_REFERENCE }}
+          fetch-depth: 0
+
+      - name: Install conda
+        run: | 
+          Invoke-Webrequest -URI https://anaconda.org/conda-forge/micromamba/0.15.2/download/win-64/micromamba-0.15.2-0.tar.bz2 -OutFile ~\micromamba.tar.bz2
+          (Get-FileHash ~\micromamba.tar.bz2).hash -eq "d406ee990640123b05b5b55a720720513d3ad8eed6d3377324e4842c6f141308"
+          $env:Path = "C:\PROGRA~1\Git\usr\bin;" + $env:Path
+          tar -xvjf ~/micromamba.tar.bz2 --strip-components 2 -C ~ Library/bin/micromamba.exe
+          echo "MAMBA_ROOT_PREFIX=$HOME\micromamba" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Create conda environment
+        run: | 
+          ~\micromamba.exe shell hook -s powershell | Out-String | iex
+          if (Test-Path -Path $Env:MAMBA_ROOT_PREFIX\envs\_ammr_test) {$OPR = "update"} else {$OPR = "create"}
+          micromamba env $OPR -y -n _ammr_test -f Tests\test-environment.yml
+
+      - name: Store AMS Version
+        run: |
+          ~\micromamba.exe shell hook -s powershell | Out-String | iex
+          micromamba activate _ammr_test
+          $AMS_VERSION = $(python -c "import anypytools; print(anypytools.tools.anybodycon_version())")
+          echo "AMS_VERSION=$AMS_VERSION" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Run test for compare
+        run: |
+          ~\micromamba.exe shell hook -s powershell | Out-String | iex
+          micromamba activate _ammr_test
+
+          pytest --runslow --anytest-output=${{runner.temp}} --anytest-name=${{ env.GIT_REFERENCE }} Tests
+
+      - name: Compress compare data
+        working-directory: ${{runner.temp}}
+        run: |
+          Compress-Archive -Force -Path ${{ env.GIT_REFERENCE }}/* -DestinationPath compare-data.zip
+
+      - name: Create Upload script
+        working-directory: ${{runner.temp}}
+        run: |
+          $script = @"
+          import os
+          import sys
+          from azure.storage.blob import BlobServiceClient
+          version = os.environ["AMS_VERSION"].partition(" (")[0].replace(" ", "")
+          container_name = f"ams-{version.replace('.','-')}"
+          blob_name = os.environ["AZURE_BLOB_NAME"]
+          container_client = BlobServiceClient.from_connection_string(
+              os.environ["AZURE_CONN_STR"]
+          ).get_container_client(container_name)
+          if not container_client.exists():
+            container_client.create_container()
+          with open(sys.argv[1], "rb") as fh:
+              container_client.upload_blob(blob_name, fh, overwrite=True)
+          "@ | Set-Content -Path "upload.py"
+
+      - name: Upload to azure
+        working-directory: ${{runner.temp}}
+        env: 
+          AZURE_CONN_STR: ${{ secrets.AZURE_CONN_STR }}
+          AZURE_BLOB_NAME: ${{ env.COMPARE_TEST_NAME }}
+        run: |
+          ~\micromamba.exe shell hook -s powershell | Out-String | iex
+          micromamba create -y -q -c conda-forge -n _azure-storage-blob azure-storage-blob
+          micromamba activate _azure-storage-blob
+          echo $env:AZURE_BLOB_NAME
+          echo $env:AZURE_CONTAINER_NAME
+
+          python upload.py compare-data.zip
+
