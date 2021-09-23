@@ -1,0 +1,91 @@
+name: Create compare reference
+
+on:
+  pull_request:
+  push:
+    tags:
+      - 'ammr-*'
+  workflow_dispatch:
+    inputs:
+      git_reference:
+        description: 'Which Git reference to check out. Examples: "refs/tags/v0.2.1", "refs/heads/master".'
+        default: refs/tags/vX.Y.Z
+        required: true
+
+
+concurrency: 
+  group: compare-test-${{ github.ref }}
+  cancel-in-progress: true
+
+
+jobs:
+  test:
+    runs-on: [self-hosted, linux]
+    container: ghcr.io/anybody/anybodycon-linux:latest
+
+    steps:
+      - name: Set variables
+        env:
+          DEFAULT_GIT_REFERENCE: refs/heads/master
+        run: |
+          $GIT_REFERENCE="${{ github.event.inputs.git_reference || env.DEFAULT_GIT_REFERENCE }}"
+          echo "GIT_REFERENCE=$GIT_REFERENCE" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+          echo "COMPARE_TEST_NAME=$($GIT_REFERENCE.replace("/","-"))" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+
+
+      - name: Checkout repository at ${{ env.GIT_REFERENCE }}
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ env.GIT_REFERENCE }}
+          fetch-depth: 0
+
+      - name: Store AMS Version
+        shell: python
+        run: |
+          import os, anypytools
+          version = anypytools.tools.anybodycon_version()
+          with open(os.environ["GITHUB_ENV"], "a") as fp:
+            fp.write(f"AMS_VERSION={version}")
+
+      - name: Run test for compare
+        run: |
+          pytest --anytest-output=${{runner.temp}} --anytest-name=${{ env.GIT_REFERENCE }} Tests/Applications/test_JumpingJack.any
+
+      # - name: Compress compare data
+      #   working-directory: ${{runner.temp}}
+      #   run: |
+      #     Compress-Archive -Force -Path ${{ env.GIT_REFERENCE }}/* -DestinationPath compare-data.zip
+
+      # - name: Create Upload script
+      #   working-directory: ${{runner.temp}}
+      #   run: |
+      #     $script = @"
+      #     import os
+      #     import sys
+      #     from azure.storage.blob import BlobServiceClient
+      #     version = os.environ["AMS_VERSION"].partition(" (")[0].replace(" ", "")
+      #     container_name = f"ams-{version.replace('.','-')}"
+      #     blob_name = os.environ["AZURE_BLOB_NAME"]
+      #     container_client = BlobServiceClient.from_connection_string(
+      #         os.environ["AZURE_CONN_STR"]
+      #     ).get_container_client(container_name)
+      #     if not container_client.exists():
+      #       container_client.create_container()
+      #     with open(sys.argv[1], "rb") as fh:
+      #         container_client.upload_blob(blob_name, fh, overwrite=True)
+      #     "@ | Set-Content -Path "upload.py"
+
+      # - name: Upload to azure
+      #   working-directory: ${{runner.temp}}
+      #   env: 
+      #     AZURE_CONN_STR: ${{ secrets.AZURE_CONN_STR }}
+      #     AZURE_BLOB_NAME: ${{ env.COMPARE_TEST_NAME }}
+      #   run: |
+      #     ~\micromamba.exe shell hook -s powershell | Out-String | iex
+      #     micromamba create -y -q -c conda-forge -n _azure-storage-blob azure-storage-blob
+      #     micromamba activate _azure-storage-blob
+      #     echo $env:AZURE_BLOB_NAME
+      #     echo $env:AZURE_CONTAINER_NAME
+
+      #     python upload.py compare-data.zip
+
