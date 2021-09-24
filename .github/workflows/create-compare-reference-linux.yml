@@ -1,7 +1,6 @@
-name: Create compare reference (Linux worker)
+name: Save compare reference (Linux worker)
 
 on:
-  pull_request:
   push:
     tags:
       - 'ammr-*'
@@ -45,9 +44,6 @@ jobs:
           mamba install -y -q -c conda-forge pytest-xdist
           pytest --runslow -n 4 --anytest-output=.output --anytest-name=${{ env.GIT_REFERENCE }} Tests
 
-      # - name: Compress compare data
-      #   run: |
-      #     tar -zcvf compare-data.tar.gz .output/${{ env.GIT_REFERENCE }}
 
       - name: Storage container name
         shell: python
@@ -68,22 +64,3 @@ jobs:
           destination_folder: ${{ env.GIT_REFERENCE }}
           clean_destination_folder: true
           fail_if_source_empty: true
-
-      # - name: Create Upload script
-      #   env: 
-      #     AZURE_CONN_STR: ${{ secrets.AZURE_CONN_STR }}
-      #     AZURE_BLOB_NAME: ${{ env.COMPARE_TEST_NAME }}
-      #   shell: python
-      #   run: |
-      #     import os, sys
-      #     from azure.storage.blob import BlobServiceClient
-      #     container_name = "linux-ams-" + os.environ['AMS_VERSION'].replace('.','-')
-      #     blob_name = os.environ["AZURE_BLOB_NAME"]
-      #     container_client = BlobServiceClient.from_connection_string(
-      #         os.environ["AZURE_CONN_STR"]
-      #     ).get_container_client(container_name)
-      #     if not container_client.exists():
-      #       container_client.create_container()
-      #     with open("${{runner.temp}}/compare-data.tar.gz", "rb") as fh:
-      #         container_client.upload_blob(blob_name, fh, overwrite=True)
-
