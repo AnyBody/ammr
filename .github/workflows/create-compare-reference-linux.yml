@@ -42,12 +42,11 @@ jobs:
         env:
           RLM_LICENSE_PASSWORD: ${{ secrets.LICENSE_PASSWORD }}
         run: |
-          pytest --anytest-output=${{runner.temp}} --anytest-name=${{ env.GIT_REFERENCE }} Tests/Applications/test_JumpingJack.any
+          pytest --anytest-output=.output --anytest-name=${{ env.GIT_REFERENCE }} Tests/Applications/test_JumpingJack.any
 
       # - name: Compress compare data
       #   run: |
-      #     cd ${{runner.temp}}
-      #     tar -zcvf compare-data.tar.gz ./${{ env.GIT_REFERENCE }}
+      #     tar -zcvf compare-data.tar.gz .output/${{ env.GIT_REFERENCE }}
 
       - name: Storage container name
         shell: python
@@ -57,14 +56,14 @@ jobs:
           name = name.partition(" (")[0].replace(" ","")
           name = "linux-ams-"+name.replace(".","-")
           with open(os.environ["GITHUB_ENV"], "a") as fp:
-            fp.write(f"CONTAINER_NAME=name")
+            fp.write(f"CONTAINER_NAME={name}")
 
       - uses: LanceMcCarthy/Action-AzureBlobUpload@v1.9.0
         name: Azure Blob Upload with Destination folder defined
         with:
           connection_string: ${{ secrets.AZURE_CONN_STR }}
           container_name: ${{env.CONTAINER_NAME}}
-          source_folder: ${{runner.temp}}/${{ env.GIT_REFERENCE }}
+          source_folder: .output/${{ env.GIT_REFERENCE }}
           destination_folder: ${{ env.GIT_REFERENCE }}
           clean_destination_folder: true
           fail_if_source_empty: true
