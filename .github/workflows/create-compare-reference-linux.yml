@@ -53,11 +53,8 @@ jobs:
           pytest --anytest-output=${{runner.temp}} --anytest-name=${{ env.GIT_REFERENCE }} Tests/Applications/test_JumpingJack.any
 
       - name: Compress compare data
-        working-directory: ${{runner.temp}}
         run: |
-          echo $PWD
           cd ${{runner.temp}}
-          ls .
           tar -zcvf compare-data.tar.gz ./${{ env.GIT_REFERENCE }}
 
       - name: install azure storage blob
@@ -68,7 +65,6 @@ jobs:
         env: 
           AZURE_CONN_STR: ${{ secrets.AZURE_CONN_STR }}
           AZURE_BLOB_NAME: ${{ env.COMPARE_TEST_NAME }}
-        working-directory: ${{runner.temp}}
         shell: python
         run: |
           import os, sys
@@ -80,6 +76,6 @@ jobs:
           ).get_container_client(container_name)
           if not container_client.exists():
             container_client.create_container()
-          with open("compare-data.tar.gz", "rb") as fh:
+          with open("${{runner.temp}}/compare-data.tar.gz", "rb") as fh:
               container_client.upload_blob(blob_name, fh, overwrite=True)
 
