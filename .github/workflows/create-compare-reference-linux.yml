@@ -37,14 +37,6 @@ jobs:
           ref: ${{ env.GIT_REFERENCE }}
           fetch-depth: 0
 
-      - name: Store AMS Version
-        shell: python
-        run: |
-          import os, anypytools
-          ver = anypytools.tools.anybodycon_version()
-          ver = ver.partition(" (")[0].replace(" ","")
-          with open(os.environ["GITHUB_ENV"], "a") as fp:
-            fp.write(f"AMS_VERSION={ver}")
 
       - name: Run test for compare
         env:
@@ -52,30 +44,46 @@ jobs:
         run: |
           pytest --anytest-output=${{runner.temp}} --anytest-name=${{ env.GIT_REFERENCE }} Tests/Applications/test_JumpingJack.any
 
-      - name: Compress compare data
-        run: |
-          cd ${{runner.temp}}
-          tar -zcvf compare-data.tar.gz ./${{ env.GIT_REFERENCE }}
+      # - name: Compress compare data
+      #   run: |
+      #     cd ${{runner.temp}}
+      #     tar -zcvf compare-data.tar.gz ./${{ env.GIT_REFERENCE }}
 
-      - name: install azure storage blob
-        run: | 
-          mamba install azure-storage-blob
-
-      - name: Create Upload script
-        env: 
-          AZURE_CONN_STR: ${{ secrets.AZURE_CONN_STR }}
-          AZURE_BLOB_NAME: ${{ env.COMPARE_TEST_NAME }}
+      - name: Storage container name
         shell: python
         run: |
-          import os, sys
-          from azure.storage.blob import BlobServiceClient
-          container_name = "linux-ams-" + os.environ['AMS_VERSION'].replace('.','-')
-          blob_name = os.environ["AZURE_BLOB_NAME"]
-          container_client = BlobServiceClient.from_connection_string(
-              os.environ["AZURE_CONN_STR"]
-          ).get_container_client(container_name)
-          if not container_client.exists():
-            container_client.create_container()
-          with open("${{runner.temp}}/compare-data.tar.gz", "rb") as fh:
-              container_client.upload_blob(blob_name, fh, overwrite=True)
+          import os, anypytools
+          container_name = anypytools.tools.anybodycon_version()
+          container_name = ver.partition(" (")[0].replace(" ","")
+          container_name = "linux-ams-"+container_name.replace(".","-")
+          with open(os.environ["GITHUB_ENV"], "a") as fp:
+            fp.write(f"CONTAINER_NAME=container_name")
+
+      - uses: LanceMcCarthy/Action-AzureBlobUpload@v1.9.0
+        name: Azure Blob Upload with Destination folder defined
+        with:
+          connection_string: ${{ secrets.AZURE_CONN_STR }}
+          container_name: ${{env.CONTAINER_NAME}}
+          source_folder: ${{runner.temp}}/${{ env.GIT_REFERENCE }}
+          destination_folder: ${{ env.GIT_REFERENCE }}
+          clean_destination_folder: true
+          fail_if_source_empty: true
+
+      # - name: Create Upload script
+      #   env: 
+      #     AZURE_CONN_STR: ${{ secrets.AZURE_CONN_STR }}
+      #     AZURE_BLOB_NAME: ${{ env.COMPARE_TEST_NAME }}
+      #   shell: python
+      #   run: |
+      #     import os, sys
+      #     from azure.storage.blob import BlobServiceClient
+      #     container_name = "linux-ams-" + os.environ['AMS_VERSION'].replace('.','-')
+      #     blob_name = os.environ["AZURE_BLOB_NAME"]
+      #     container_client = BlobServiceClient.from_connection_string(
+      #         os.environ["AZURE_CONN_STR"]
+      #     ).get_container_client(container_name)
+      #     if not container_client.exists():
+      #       container_client.create_container()
+      #     with open("${{runner.temp}}/compare-data.tar.gz", "rb") as fh:
+      #         container_client.upload_blob(blob_name, fh, overwrite=True)
 
