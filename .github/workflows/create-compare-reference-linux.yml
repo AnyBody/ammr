@@ -21,7 +21,7 @@ concurrency:
 jobs:
   test:
     runs-on: [self-hosted, linux]
-    container: ghcr.io/anybody/anybodycon-linux:DEV
+    container: ghcr.io/anybody/anybodycon-linux:latest
 
     steps:
       - name: Set variables
@@ -42,11 +42,14 @@ jobs:
         env:
           RLM_LICENSE_PASSWORD: ${{ secrets.LICENSE_PASSWORD }}
         run: |
-          mamba install -y -q -c conda-forge pytest-xdist
-          pytest --runslow -n 4 --anytest-output=.output --anytest-name=${{ env.GIT_REFERENCE }} Tests
+          pytest --runslow \
+            -n 2 \
+            --anytest-output=.output \
+            --anytest-name=${{ env.GIT_REFERENCE }} \
+            Tests
 
 
-      - name: Storage container name
+      - name: Construct storage name from AMS version
         shell: python
         run: |
           import os, anypytools
@@ -57,7 +60,7 @@ jobs:
             fp.write(f"CONTAINER_NAME={name}")
 
       - uses: LanceMcCarthy/Action-AzureBlobUpload@v1.9.0
-        name: Azure Blob Upload with Destination folder defined
+        name: Upload compare reference to Azure
         with:
           connection_string: ${{ secrets.AZURE_CONN_STR }}
           container_name: ${{env.CONTAINER_NAME}}
