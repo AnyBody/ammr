@@ -3,10 +3,6 @@ name: Nightly Full AMMR tests
 on:
   schedule:
     - cron: 0 3 * * *
-  pull_request_review_comment:
-    types: [created, edited]
-  pull_request:
-    types: [opened]
   workflow_dispatch:
 
 concurrency: 
@@ -17,15 +13,11 @@ concurrency:
 jobs:
   test:
     runs-on: [self-hosted, AnyBody]
-    if: contains(github.event.comment.body, '#Run full test') || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
 
     env:
       # Triggers a warning at 20 deg muscles angles
       ShortestPathMaxAngle: 0.3491
-   
 
-    strategy:
-      fail-fast: false
           
     steps:
       - uses: actions/checkout@v2
@@ -44,7 +36,6 @@ jobs:
           if (Test-Path -Path $Env:MAMBA_ROOT_PREFIX\envs\_ammr_test) {$OPR = "update"} else {$OPR = "create"}
           micromamba env $OPR -y -n _ammr_test -f Tests\test-environment.yml
 
-
       - name: Run full AMMR tests
         run: |
           ~\micromamba.exe shell hook -s powershell | Out-String | iex
@@ -52,5 +43,20 @@ jobs:
 
           cd Tests
           pytest --runslow -n 4 --instafail 
+
+  test-linux:
+    runs-on: [self-hosted, linux]
+    container: ghcr.io/anybody/anybodycon-linux:latest
+
+    env:
+      # Triggers a warning at 20 deg muscles angles
+      ShortestPathMaxAngle: 0.3491
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run full AMMR tests
+          RLM_LICENSE: 5053@104.46.46.229
+          RLM_LICENSE_PASSWORD: ${{ secrets.LICENSE_PASSWORD }}
+        run: pytest --runslow -n 4 --instafail Tests
 
     
