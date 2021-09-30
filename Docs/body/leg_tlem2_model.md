@@ -31,7 +31,7 @@ Key feature of this TLEM 2.1 model in the AMMR is:
   bone surface scans from the same subject. This makes TLEM2 the more
   anatomically consistent model. Bone contact at joints such as the knee thus
   consists of naturally congruent surfaces, making it easier to implement
-  Force Dependent Kinematics on joint moments ({tutorials:doc}`see tutorial <ForceDependentKinematics/index>`)
+  Force Dependent Kinematics on joint moments ({doc}`see tutorial <tutorials:ForceDependentKinematics/index>`)
 - Updated the wrapping surfaces for several muscles. These changes were engineered to
   result in realistic muscle coordination and hip contact forces as documented
   in the publication by De Pieri et al. [^cite_dlgr17]
