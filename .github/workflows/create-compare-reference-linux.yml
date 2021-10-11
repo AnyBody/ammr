@@ -23,7 +23,7 @@ concurrency:
 jobs:
   test:
     runs-on: [self-hosted, linux]
-    container: ghcr.io/anybody/anybodycon-linux:latest
+    #container: ghcr.io/anybody/anybodycon-linux:latest
 
     steps:
       - name: Set variables
@@ -33,48 +33,37 @@ jobs:
           echo "GIT_REFERENCE=${{ github.event.inputs.git_reference || env.DEFAULT_GIT_REFERENCE }}" >> $GITHUB_ENV
           echo ${{ github.event.inputs.debug_config }} >> $GITHUB_ENV
 
-
       - name: Checkout repository at ${{ env.GIT_REFERENCE }}
         uses: actions/checkout@v2
         with:
           ref: ${{ env.GIT_REFERENCE }}
           fetch-depth: 0
 
-      - name: use newest anypytools
-        run: |
-          git clone https://github.com/AnyBody-Research-Group/AnyPyTools.git
-          pip install ./AnyPyTools
-
-
-      - name: Run test for compare
-        env:
-          RLM_LICENSE_PASSWORD: ${{ secrets.LICENSE_PASSWORD }}
-        run: |
-          pytest --runslow \
-            -n 2 \
-            --anytest-output=.output \
-            --anytest-name=${{ env.GIT_REFERENCE }} \
-            Tests
-
-
-      - name: Construct storage name from AMS version
-        shell: python
-        run: |
-          import os, anypytools
-          cn = anypytools.tools.anybodycon_version()
-          cn = cn.partition(" (")[0].replace(" ","")
-          cn = "linux-ams-"+cn.replace(".","-")
-          fn = "${{ env.GIT_REFERENCE }}".replace("/","-") 
-          with open(os.environ["GITHUB_ENV"], "a") as fp:
-            fp.write(f"CONTAINER_NAME={cn}")
-            fp.write(f"FOLDER_NAME={fn}")
-
-      - uses: LanceMcCarthy/Action-AzureBlobUpload@v1.9.0
-        name: Upload compare reference to Azure
+      - id: RunAnyBody
+        uses: anybody/anybodycon-action@7.3.4
         with:
-          connection_string: ${{ secrets.AZURE_CONN_STR }}
-          container_name: ${{env.CONTAINER_NAME}}
-          source_folder: .output/${{ env.GIT_REFERENCE }}/
-          destination_folder: ${{ env.FOLDER_NAME }}/
-          clean_destination_folder: true
-          fail_if_source_empty: true
+          license_server_password: ${{ secrets.LICENSE_PASSWORD }}
+          license_server: ${{ secrets.LICENSE_SERVER }}
+          run: |
+            pytest --runslow \
+              -n 2 \
+              --anytest-output=.output \
+              --anytest-name=${{ env.GIT_REFERENCE }} \
+              Tests
+
+      - name: Azure CLI script
+        uses: azure/CLI@v1
+        env:
+          AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_CONN_STR }}
+        with:
+          inlineScript: |
+            ams_version="${{ steps.RunAnyBody.outputs.anybody_version }}"
+            az storage blob delete-batch \
+              --source ${ams_version//\./-} \
+              --pattern ${{ env.GIT_REFERENCE }}/**/*
+            
+            az storage blob upload-batch   
+               --destination ${ams_version//\./-} \
+               --source  .output/${{ env.GIT_REFERENCE }} \
+               --destination-path ${{ env.GIT_REFERENCE }}
+
