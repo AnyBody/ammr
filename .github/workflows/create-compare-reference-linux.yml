@@ -1,0 +1,80 @@
+name: Save compare reference (Linux worker)
+
+on:
+  push:
+    tags:
+      - 'ammr-*'
+  workflow_dispatch:
+    inputs:
+      git_reference:
+        description: 'Which Git reference to check out. Examples: "refs/tags/v0.2.1", "refs/heads/master".'
+        default: refs/tags/vX.Y.Z
+        required: true
+      debug_config:
+        description: 'A debug environment varibles. Examples: VAR=VALUE'
+        default: ""
+
+
+concurrency: 
+  group: compare-test-${{ github.ref }}
+  cancel-in-progress: true
+
+
+jobs:
+  test:
+    runs-on: [self-hosted, linux]
+    container: ghcr.io/anybody/anybodycon-linux:latest
+
+    steps:
+      - name: Set variables
+        env:
+          DEFAULT_GIT_REFERENCE: refs/heads/master
+        run: |
+          echo "GIT_REFERENCE=${{ github.event.inputs.git_reference || env.DEFAULT_GIT_REFERENCE }}" >> $GITHUB_ENV
+          echo ${{ github.event.inputs.debug_config }} >> $GITHUB_ENV
+
+
+      - name: Checkout repository at ${{ env.GIT_REFERENCE }}
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ env.GIT_REFERENCE }}
+          fetch-depth: 0
+
+      - name: use newest anypytools
+        run: |
+          git clone https://github.com/AnyBody-Research-Group/AnyPyTools.git
+          pip install ./AnyPyTools
+
+
+      - name: Run test for compare
+        env:
+          RLM_LICENSE_PASSWORD: ${{ secrets.LICENSE_PASSWORD }}
+        run: |
+          pytest --runslow \
+            -n 2 \
+            --anytest-output=.output \
+            --anytest-name=${{ env.GIT_REFERENCE }} \
+            Tests
+
+
+      - name: Construct storage name from AMS version
+        shell: python
+        run: |
+          import os, anypytools
+          cn = anypytools.tools.anybodycon_version()
+          cn = cn.partition(" (")[0].replace(" ","")
+          cn = "linux-ams-"+cn.replace(".","-")
+          fn = "${{ env.GIT_REFERENCE }}".replace("/","-") 
+          with open(os.environ["GITHUB_ENV"], "a") as fp:
+            fp.write(f"CONTAINER_NAME={cn}")
+            fp.write(f"FOLDER_NAME={fn}")
+
+      - uses: LanceMcCarthy/Action-AzureBlobUpload@v1.9.0
+        name: Upload compare reference to Azure
+        with:
+          connection_string: ${{ secrets.AZURE_CONN_STR }}
+          container_name: ${{env.CONTAINER_NAME}}
+          source_folder: .output/${{ env.GIT_REFERENCE }}/
+          destination_folder: ${{ env.FOLDER_NAME }}/
+          clean_destination_folder: true
+          fail_if_source_empty: true

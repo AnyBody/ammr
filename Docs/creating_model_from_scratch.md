@@ -181,7 +181,7 @@ Main =
 First add the lines of code highlighted in yellow below. An explanation follows.
 
 While the previous step included the human body model in `Model`, a key piece of machinery was still missing - Motion constraints. In fact, you will see a warning message
-if the model is loaded now. While motion prescription in elaborated on in {tutorials:doc}`the making things move tutorial <Making_things_move/index>`, a basic AnyBody requirement is that the number of motion constraints
+if the model is loaded now. While motion prescription in elaborated on in {doc}`the making things move tutorial <tutorials:Making_things_move/index>`, a basic AnyBody requirement is that the number of motion constraints
 (called motion drivers in AnyBody) must at least equal the number of DOFs of the model.
 
 The total number of DOFs & motion constraints can be found by double clicking the `Study` object in the Model tree. This opens the Object Description which
@@ -230,7 +230,7 @@ Main =
 Add the highlighted code to create generalized reaction forces at the pelvis which support the model's weight.
 
 It consists of 6 generalized forces applied on the human model by the Ground frame and is composed of 3 linear forces and 3 moments.
-The reaction force is constructed by an `AnyReacForce` class containing references to the kinematic measures (see this {tutorials:doc}`tutorial on kinematic measures <The_mechanical_elements/lesson4>`)
+The reaction force is constructed by an `AnyReacForce` class containing references to the kinematic measures (see this {doc}`tutorial on kinematic measures <tutorials:The_mechanical_elements/lesson4>`)
 of the Pelvis w.r.t ground.
 
 ```{code-block} AnyScriptDoc
@@ -280,7 +280,7 @@ Main =
 Load the model and run the `InverseDynamics` analysis contained within `Study`. Refer to {tutorials:doc}`this tutorial <Interface_features/lesson3>` on how to view/plot the simulation outputs.
 
 We encourage you to experiment further by adding more complex model components such as motion drivers, external forces etc. to the current model. Refer
-to {tutorials:doc}`these tutorials <The_mechanical_elements/index>` to understand these features better.
+to {doc}`these tutorials <tutorials:The_mechanical_elements/index>` to understand these features better.
 
 ```{raw} html
 <video width="45%" style="display:block; margin: 0 auto;" controls autoplay loop>

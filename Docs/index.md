@@ -13,8 +13,6 @@ System][anybody modeling system].
 
 :::{figure-md} 
 :align: center
-:alt: The AnyBody Model Repository
-:figwidth: 85 %
 :width: 70 %
 
 ![The AnyBody Model Repository](_static/ammr_bodyparts.png)
