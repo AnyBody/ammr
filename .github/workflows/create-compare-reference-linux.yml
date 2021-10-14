@@ -12,6 +12,7 @@ on:
         required: true
       debug_config:
         description: 'A debug environment varibles. Examples: VAR=VALUE'
+        required: false
         default: ""
 
 
@@ -21,9 +22,11 @@ concurrency:
 
 
 jobs:
-  test:
+  save_compare_test_data:
     runs-on: [self-hosted, linux]
     #container: ghcr.io/anybody/anybodycon-linux:latest
+    env:
+      COMPARE_DATA_PATH: $GITHUB_WORKSPACE/_out
 
     steps:
       - name: Set variables
@@ -48,8 +51,8 @@ jobs:
             cd Tests
             pytest --runslow \
               -n 2 \
-              --anytest-output=.output \
-              --anytest-name=${{ env.GIT_REFERENCE }} 
+              --anytest-output=$COMPARE_DATA_PATH \
+              --anytest-name=$GIT_REFERENCE
 
       - name: Azure CLI script
         uses: azure/CLI@v1
@@ -58,12 +61,19 @@ jobs:
         with:
           inlineScript: |
             ams_version="${{ steps.RunAnyBody.outputs.anybody_version }}"
+            container=ams-${ams_version//\./-}
+            folder=ammr/$GIT_REFERENCE
+
+            az storage container create -n $container
+
             az storage blob delete-batch \
-              --source ${ams_version//\./-} \
-              --pattern ${{ env.GIT_REFERENCE }}/**/* || true
+              --source $container \
+              --pattern $folder/**/* || true
+
             
             az storage blob upload-batch \
-               --destination ${ams_version//\./-} \
-               --source  .output/${{ env.GIT_REFERENCE }} \
-               --destination-path ${{ env.GIT_REFERENCE }}
+               --destination $container \
+               --source  $COMPARE_DATA_PATH/$GIT_REFERENCE \
+               --destination-path $folder
 
+            rm -rf $COMPARE_DATA_PATH/*
