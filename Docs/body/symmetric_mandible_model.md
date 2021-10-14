@@ -18,9 +18,7 @@ example of how the model is used.
 .. todo::  Add a short example on how the mandible model is used and configured.
 ```
 
-:::{figure-md}
 <img src="image1.png" width="3.46978in">
-:::
 
 ```{rubric} References
 ```
