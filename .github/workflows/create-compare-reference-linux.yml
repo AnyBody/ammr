@@ -1,0 +1,75 @@
+name: Save compare reference (Linux worker)
+
+on:
+  push:
+    tags:
+      - 'ammr-*'
+  workflow_dispatch:
+    inputs:
+      git_reference:
+        description: 'Which Git reference to check out. Examples: "refs/tags/v0.2.1", "refs/heads/master".'
+        default: refs/tags/vX.Y.Z
+        required: true
+      debug_config:
+        description: 'A debug environment varibles. Examples: VAR=VALUE'
+        required: false
+        default: ""
+
+
+concurrency: 
+  group: compare-test-${{  github.event.inputs.git_reference || github.ref }}
+  cancel-in-progress: true
+
+
+jobs:
+  save_compare_test_data:
+    runs-on: [self-hosted, linux]
+    env:
+      GIT_REFERENCE: ${{ github.event.inputs.git_reference || github.ref }}
+
+    steps:
+      - name: Set variables
+        run: |
+          echo ${{ github.event.inputs.debug_config }} >> $GITHUB_ENV
+
+      - name: Checkout repository at ${{ env.GIT_REFERENCE }}
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ env.GIT_REFERENCE }}
+          fetch-depth: 0
+
+      - id: RunAnyBody
+        uses: anybody/anybodycon-action@7.3.4
+        with:
+          license_server_password: ${{ secrets.LICENSE_PASSWORD }}
+          license_server: ${{ secrets.LICENSE_SERVER }}
+          run: |
+            cd Tests
+            pytest --runslow \
+              -n 2 \
+              --anytest-output=$GITHUB_WORKSPACE/_out \
+              --anytest-name=$GIT_REFERENCE
+
+      - name: Azure CLI script
+        uses: azure/CLI@v1
+        env:
+          AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_CONN_STR }}
+        with:
+          inlineScript: |
+            ams_version="${{ steps.RunAnyBody.outputs.anybody_version }}"
+            container=ams-${ams_version//\./-}
+            folder=ammr/$GIT_REFERENCE
+
+            az storage container create -n $container
+
+            az storage blob delete-batch \
+              --source $container \
+              --pattern $folder/**/* || true
+
+            
+            az storage blob upload-batch \
+               --destination $container \
+               --source  $GITHUB_WORKSPACE/_out/$GIT_REFERENCE \
+               --destination-path $folder
+
+            rm -rf $GITHUB_WORKSPACE/_out/*

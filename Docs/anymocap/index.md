@@ -10,6 +10,8 @@ System](http://anybodytech.com).
 :align: center
 
 <img src="/_static/anymocap.jpg" width="50%">
+
+Making MoCap models the easier
 :::
 
 ## Features
