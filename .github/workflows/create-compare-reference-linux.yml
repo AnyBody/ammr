@@ -57,14 +57,18 @@ jobs:
         with:
           inlineScript: |
             ams_version="${{ steps.RunAnyBody.outputs.anybody_version }}"
+            container=${ams_version//\./-}
+
+            az storage container create -n $container
+            
             az storage blob delete-batch \
-              --source ${ams_version//\./-} \
+              --source $container \
               --pattern ${{ env.GIT_REFERENCE }}/**/* || true
 
             ls -l -a 
             
             az storage blob upload-batch \
-               --destination ${ams_version//\./-} \
+               --destination $container \
                --source  $GITHUB_WORKSPACE/_out/${{ env.GIT_REFERENCE }} \
                --destination-path ${{ env.GIT_REFERENCE }}
 
