@@ -17,23 +17,19 @@ on:
 
 
 concurrency: 
-  group: compare-test-${{ github.ref }}
+  group: compare-test-${{  github.event.inputs.git_reference || github.ref }}
   cancel-in-progress: true
 
 
 jobs:
   save_compare_test_data:
     runs-on: [self-hosted, linux]
-    #container: ghcr.io/anybody/anybodycon-linux:latest
     env:
-      COMPARE_DATA_PATH: $GITHUB_WORKSPACE/_out
+      GIT_REFERENCE: ${{ github.event.inputs.git_reference || github.ref }}
 
     steps:
       - name: Set variables
-        env:
-          DEFAULT_GIT_REFERENCE: refs/heads/master
         run: |
-          echo "GIT_REFERENCE=${{ github.event.inputs.git_reference || env.DEFAULT_GIT_REFERENCE }}" >> $GITHUB_ENV
           echo ${{ github.event.inputs.debug_config }} >> $GITHUB_ENV
 
       - name: Checkout repository at ${{ env.GIT_REFERENCE }}
@@ -51,7 +47,7 @@ jobs:
             cd Tests
             pytest --runslow \
               -n 2 \
-              --anytest-output=$COMPARE_DATA_PATH \
+              --anytest-output=$GITHUB_WORKSPACE/_out \
               --anytest-name=$GIT_REFERENCE
 
       - name: Azure CLI script
@@ -73,7 +69,7 @@ jobs:
             
             az storage blob upload-batch \
                --destination $container \
-               --source  $COMPARE_DATA_PATH/$GIT_REFERENCE \
+               --source  $GITHUB_WORKSPACE/_out/$GIT_REFERENCE \
                --destination-path $folder
 
-            rm -rf $COMPARE_DATA_PATH/*
+            rm -rf $GITHUB_WORKSPACE/_out/*
