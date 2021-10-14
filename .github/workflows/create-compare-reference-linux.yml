@@ -2,6 +2,8 @@ name: Save compare reference (Linux worker)
 
 on:
   push:
+    tags:
+      - 'ammr-*'
   workflow_dispatch:
     inputs:
       git_reference:
@@ -10,6 +12,7 @@ on:
         required: true
       debug_config:
         description: 'A debug environment varibles. Examples: VAR=VALUE'
+        required: false
         default: ""
 
 
@@ -19,7 +22,7 @@ concurrency:
 
 
 jobs:
-  test:
+  save_compare_test_data:
     runs-on: [self-hosted, linux]
     #container: ghcr.io/anybody/anybodycon-linux:latest
 
@@ -47,8 +50,7 @@ jobs:
             pytest --runslow \
               -n 2 \
               --anytest-output=$GITHUB_WORKSPACE/_out \
-              --anytest-name=${{ env.GIT_REFERENCE }} \
-              Applications/test_JumpingJack.any
+              --anytest-name=${{ env.GIT_REFERENCE }}
 
       - name: Azure CLI script
         uses: azure/CLI@v1
@@ -60,15 +62,15 @@ jobs:
             container=${ams_version//\./-}
 
             az storage container create -n $container
-            
+
             az storage blob delete-batch \
               --source $container \
               --pattern ${{ env.GIT_REFERENCE }}/**/* || true
 
-            ls -l -a 
             
             az storage blob upload-batch \
                --destination $container \
                --source  $GITHUB_WORKSPACE/_out/${{ env.GIT_REFERENCE }} \
                --destination-path ${{ env.GIT_REFERENCE }}
 
+            rm -rf $GITHUB_WORKSPACE/_out/*
