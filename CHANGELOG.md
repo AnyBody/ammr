@@ -10,7 +10,7 @@
 - Improved the selected output by adding the m. Semimembranosus and m.
   Semitendinosus contributions to the knee flexor group for both muscle activity (`KneeFlexorMuscleActivity`)
   and muscle force (`KneeFlexorMuscleForce`).
-- Update and improved origin of the hamstring muscles. The muscles biceps
+- Updated and improved origin of the hamstring muscles. The muscles biceps
   femoris, semitendinosus and semimembranosus have been updated to improve their
   moment arms in certain lunge movements. The origin points at pelvis has been
   moved down a bit to ensure the muscles wraps correctly in lunge movements,
