@@ -14,7 +14,7 @@
   femoris, semitendinosus and semimembranosus have been updated to improve their
   moment arms in certain lunge movements. The origin points at pelvis has been
   moved down a bit to ensure the muscles wraps correctly in lunge movements,
-  while maining the same moment arm in gait etc.
+  while maintaining the same moment arm in gait etc.
 
 
 **Added:**
