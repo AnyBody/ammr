@@ -49,12 +49,6 @@ Switch to use leg model: "TLEM 2"
 
 :::{ammr:bm_constant} _LEG_MODEL_LEG_
 :value: 3
-:deprecated:
-Switch to use leg model: "Leg"
-:::
-
-:::{ammr:bm_constant} _LEG_MODEL_LEG_
-:value: 3
 Switch to use leg model: "Leg"
 :::
 
