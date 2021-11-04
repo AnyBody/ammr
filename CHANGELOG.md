@@ -14,7 +14,7 @@
 **Added:**
 
 - New utility macros which makes it easier to create 3D grid arrays.
-  `GRID_XYZ(xarr, yarr, zarr)` and  `MESHGRID(xarr,yarr,zarr)`. I.e. for
+  `MESHTRIPLES(xarr, yarr, zarr)` and  `MESHGRID(xarr,yarr,zarr)`. I.e. for
   creating arrays of all points in a 3D grid array.
 
   See the file: {menuselection}`Body --> AAUHuman --> BodyModels --> GenericBodyModel --> Helper.ClassTemplates.any`
