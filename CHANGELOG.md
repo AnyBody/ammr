@@ -26,6 +26,12 @@
 - The `OptimalFiberLength` and `TotalTendonLength` in the TLEM leg models, are no longer 'DesignVar', when the
   parameters are also calibrated. This prevents huge amount warning when calibrating the leg muscles.
 
+** Removed:**
+
+- The previously deprecated BM keyword `_LEG_MODEL_Leg_` has been completely removed.
+
+
+
 ## AMMR 2.3.4 (2021-07-05)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.5060249.svg)](https://doi.org/10.5281/zenodo.5060249)
 
