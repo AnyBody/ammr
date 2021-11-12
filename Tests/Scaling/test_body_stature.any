@@ -1,0 +1,80 @@
+//define = (
+// [
+//  {'BM_SCALING':'_SCALING_STANDARD_',},
+//  {'BM_SCALING':'_SCALING_UNIFORM_'},
+//  {'BM_SCALING':'_SCALING_LENGTHMASS_'},
+//  {'BM_SCALING':'_SCALING_LENGTHMASSFAT_'},
+//  {'BM_SCALING':'_SCALING_UNIFORM_EXTMEASUREMENTS_'},
+//  {'BM_SCALING':'_SCALING_LENGTHMASS_EXTMEASUREMENTS_'},
+//  {'BM_SCALING':'_SCALING_LENGTHMASSFAT_EXTMEASUREMENTS_'},
+//  {'BM_SCALING':'_SCALING_XYZ_'},
+//],
+//[
+//  {'BODY_HEIGHT': '1.6'},
+//  {'BODY_HEIGHT': '1.75'},
+//  {'BODY_HEIGHT': '1.95'},
+//], 
+//[
+//  {'BODY_MASS': '60'},
+//  {'BODY_MASS': '75'},
+//  {'BODY_MASS': '90'},
+//], 
+//)
+
+
+/*
+Test how well the scaling of segment lengths match the defined stature parameter
+*/
+
+#include "../libdef.any"
+#include "../tools.any"
+
+#ifndef TEST_NAME
+  #define BODY_HEIGHT 1.95
+  #define BODY_MASS 90
+  #define BM_SCALING 3
+#endif
+
+
+Main = 
+{
+  #include "<ANYBODY_PATH_BODY>/HumanModel.any"
+
+  // Parameters are not editable when using the standard scaling
+  #if BM_SCALING != _SCALING_STANDARD_
+    HumanModel.Anthropometrics.BodyHeight = BODY_HEIGHT;  
+    HumanModel.Anthropometrics.BodyMass = BODY_MASS;
+  #endif
+  
+  
+  AnyFolder Test = {
+    // Absolute tolerance on the testmeasure
+    AnyFloat abstol = 5e-3;
+
+    // The test measure of the stature
+    AnyFloat Stature = (
+      .HumanModel.BodyModel.Trunk.SegmentsThorax.SkullSeg.TopOfHead.r[1] - 
+      .HumanModel.BodyModel.Right.Leg.Seg.Foot.HeelContactNode.r[1]
+    );
+    
+    // Test helper to evaluate the measure between the limits
+    AnyFloat minlim = .HumanModel.Anthropometrics.BodyHeight - abstol;
+    AnyFloat maxlim = .HumanModel.Anthropometrics.BodyHeight + abstol;
+    EXPECT_RANGE(Stature, .Test.Stature, minlim, maxlim, .Test.TestTrigger, "Stature out of expected range");
+    
+    // First evaluate the test expression when this trigger is = 1
+    AnyInt TestTrigger = DesignVar(0); 
+    // helper operation to trigger the test after certain study operation
+    OPERATION_TEST_TRIGGER(Study.InitialConditions.PreOperation, Main.Test.TestTrigger);
+  };
+
+  AnyOperation &RunTest = Study.InitialConditions;
+
+  AnyBodyStudy Study ={
+    AnyFolder &BodyModel = .HumanModel.BodyModel;
+    AnyFolder &DefaultMannequinDrivers = .HumanModel.DefaultMannequinDrivers;
+    AnyFolder &testref = Main.Test;
+    Gravity={0.0, -9.81, 0.0};
+    nStep = 1;
+  };
+};
