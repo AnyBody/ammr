@@ -13,6 +13,14 @@
 
 **Added:**
 
+- Added a new model tool to apply femoroal torsion to the TLEM2.0 leg model.
+  This tool was developed by Dr. Enrico De Pieri from University of Basel
+  Children’s Hospital (UKBB). Please see web cast (Link to come) by Enrico on his work and
+  publications on femoral torsion. 
+  Also see the {ref}`new application example <_sphx_glr_auto_examples_Orthopedics_and_rehab_plot_FemoralTorsionTool.py> 
+  which shows how to easily use the tool. 
+
+
 **Changed:**
 
 - Improve the trunk model's strength for trunk external rotation. This change
