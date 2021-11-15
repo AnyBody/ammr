@@ -10,6 +10,8 @@
 - Improved the selected output by adding the m. Semimembranosus and m.
   Semitendinosus contributions to the knee flexor group for both muscle activity (`KneeFlexorMuscleActivity`)
   and muscle force (`KneeFlexorMuscleForce`).
+- Fixed a problem where custom scaling and {bm_constant}`_SCALING_XYZ_` would 
+  prevent the model from loading.
 
 **Added:**
 
