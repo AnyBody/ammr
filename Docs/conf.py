@@ -98,6 +98,7 @@ myst_enable_extensions = [
     "dollarmath",
     "amsmath",
     "html_image",
+    "substitution"
 ]
 
 
@@ -195,6 +196,21 @@ rst_epilog = f"""
 .. |DOI| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.1250764.svg
                  :target: https://doi.org/10.5281/zenodo.1250764
 """
+
+
+myst_substitutions = {
+  "AMS": "AnyBody Modeling System™",
+  "AMS_VERSION_X": ams_version_x,
+  "AMS_VERSION": ams_version_x,
+  "AMS_VERSION_SHORT": ams_version_short,
+  "AMMR_VERSION_SHORT": ams_version_short,
+  "AMMR_VERSION": ammr_version,
+  "CURRENT_YEAR": current_year,
+  "AMMR_DEMO_INST_DIR": f"`~/Documents/{ams_version_x}/AMMR.v{ammr_version}-Demo`",
+  "DOI": "[![DOI image](https://zenodo.org/badge/DOI/10.5281/zenodo.1250764.svg)](https://doi.org/10.5281/zenodo.1250764)",
+  "WHAT_IS_NEW": f"{{ref}}`What's new in AMMR {ammr_version} <whats-new>`",
+}
+
 
 
 no_index = """

@@ -1,0 +1,364 @@
+
+
+#if FEMORALTORSION_SIDE == "Left"
+#define _RIGHTLEFT_ Left
+#define _FEMORALTORSION_LEFTRIGHT_ FemoralTorsionLeft
+#endif
+
+#if FEMORALTORSION_SIDE == "Right"
+#define _RIGHTLEFT_ Right
+#define _FEMORALTORSION_LEFTRIGHT_ FemoralTorsionRight
+#endif
+
+
+
+#define THIGH_SEG  Main.HumanModel.BodyModel._RIGHTLEFT_.Leg.Seg.Thigh
+
+/* 
+ Add Model parameters to TLEM2 used for the coordinate systems
+ which define femoral torsion.
+*/
+Main.HumanModel.BodyModel._RIGHTLEFT_.Leg.ModelParameters.Thigh  = 
+{
+   AnyVec3 LateralPosteriorCondyle = {-0.02504595, -0.0056740027, ..Sign*0.027797787};
+   AnyVec3 MedialPosteriorCondyle = {-0.032076184, -0.0055254665, ..Sign*-0.025188807};
+   AnyFloat FemoralNeckPoints = {
+     {0.00962782, 0.339763, ..Sign*0.015402},
+     {-0.015063, 0.347057, ..Sign*0.0212549}
+   };
+};
+
+
+
+
+/* 
+ This section adds coordinate systems to the thigh segment inorder to measure
+ the femoral torsion. The torsion is measured based on two points on the posterior
+ femoral condyles as well as the femoral neck direction (hip center to a point in the femoral neck).
+*/
+
+THIGH_SEG = {
+  
+   AnyRefNode FemoralTorsion = 
+   {
+     AnyRefNode ReferenceNode = 
+     {   
+       AnyVec3 mpc = ....ModelParameters.Thigh.MedialPosteriorCondyle;
+       AnyVec3 lpc = ....ModelParameters.Thigh.LateralPosteriorCondyle;
+       sRel = .FemoralNeckCenter.sRel;//0.5*(mpc+lpc);
+       
+       AnyMat33 ARelUnscaled = RotMat(
+           {0,0,0.0},
+           ..AnatomicalFrame.ARelUnscaled'[1],
+           ..Sign*(lpc-mpc)
+         )*RotMat(-pi/2,y);
+       
+       ARel = RotMat(
+           {0,0,0.0},
+           ..AnatomicalFrame.ARel'[1],
+           ..Sign*(..Scale(lpc)-..Scale(mpc))
+          )*RotMat(-pi/2,y);
+          
+       #ifdef FEMORALTORSION_VISUALIZE_MORPHING_POINTS
+       viewRefFrame.Visible=On;
+       #endif
+       viewRefFrame.ScaleXYZ=1*{1,1,1.0};
+       viewRefFrame.RGB={0.4, 0.8, 0.4};
+     };
+             
+     
+     AnyRefNode FemoralNeckCenter = 
+     {
+       AnyVec3 sRelUnscaled = mean(....ModelParameters.Thigh.FemoralNeckPoints');
+       sRel = mean(..Scale(....ModelParameters.Thigh.FemoralNeckPoints)');
+       AnyMat33 ARelUnscaled = RotMat(
+                   {0,0,0.0},
+                   ..AnatomicalFrame.ARelUnscaled'[1],
+                   ..Sign*(sRelUnscaled-....ModelParameters.Thigh.HipJoint)
+               )*RotMat(-pi/2,y);
+       ARel = RotMat(
+                {0,0,0.0},
+                ..AnatomicalFrame.ARel'[1],
+                ..Sign*(sRel-..HipJoint.sRel)
+             )*RotMat(-pi/2,y);
+       
+       viewRefFrame.ScaleXYZ=1*{1,1,1.0};
+       #ifdef FEMORALTORSION_VISUALIZE_MORPHING_POINTS
+       viewRefFrame.Visible = On;
+       #endif
+       viewRefFrame.RGB={0.96875, 0.796875, 0.4492188};
+     };
+     
+       AnyVar FemoralTorsionUnscaled = .Sign*-180/pi*asin(FemoralNeckCenter.ARelUnscaled'[1]*ReferenceNode.ARelUnscaled'[0]');
+       AnyVar FemoralTorsion = .Sign*-180/pi*asin(FemoralNeckCenter.ARel'[1]*ReferenceNode.ARel'[0]');
+                 
+    };
+    
+  };
+        
+    
+/* 
+ The tools works by adding a 8 control points around the hip center and knee center, which control a RBF scale function.
+ The control points are scaled witht the default model scaling with the femoral torsion added on top.
+
+*/
+   
+   // First enable custom scaling for the thigh.
+   #if FEMORALTORSION_SIDE == "Left"
+   #define CUSTOM_SCALING_Left_Thigh
+   #endif
+   
+   #if FEMORALTORSION_SIDE == "Right"
+   #define CUSTOM_SCALING_Right_Thigh
+   #endif
+
+  
+  Main.HumanModel.Scaling.GeometricalScaling._RIGHTLEFT_.Thigh = {
+    
+    AnyFunction& ScaleDefault = Main.HumanModel.ScalingDefault.GeometricalScaling._RIGHTLEFT_.Thigh.ScaleFunction;
+
+    AnyVar BoxSizeHip=0.05;
+    AnyVar BoxSizeKnee=0.05;
+    AnyVar Sign = THIGH_SEG.Sign;
+    
+    AnyFolder& ScalingFrame = THIGH_SEG.AnatomicalFrame;
+    
+    // Unscaled hip and knee points  define the coordinate system of the unscaled hip joint. 
+    AnyVec3 HipJointStandard = (THIGH_SEG.HipJoint.sRelUnscaled-ScalingFrame.sRelUnscaled)*ScalingFrame.ARelUnscaled ;
+    AnyVec3 MedialPosteriorCondyleStandard = (THIGH_SEG.StdPar.MedialPosteriorCondyle-ScalingFrame.sRelUnscaled)*ScalingFrame.ARelUnscaled ;
+    AnyVec3 LateralPosteriorCondyleStandard = (THIGH_SEG.StdPar.LateralPosteriorCondyle-ScalingFrame.sRelUnscaled)*ScalingFrame.ARelUnscaled ;
+    
+    AnyVec3 KneeCenterStandard = (0.5*(THIGH_SEG.StdPar.EpicondylusFemorisMedialis + THIGH_SEG.StdPar.EpicondylusFemorisLateralis)-ScalingFrame.sRelUnscaled)*ScalingFrame.ARelUnscaled;
+    
+    AnyVec3 FemoralNeckCenterStanard = (THIGH_SEG.FemoralTorsion.FemoralNeckCenter.sRelUnscaled-ScalingFrame.sRelUnscaled)*ScalingFrame.ARelUnscaled ;
+
+    
+    AnyFolder SourcePoints = 
+    {
+      AnyVec3 HipCenter = .HipJointStandard;
+      AnyVec3 KneePoint = .KneeCenterStandard;
+      AnyVec3 NeckCenter = .FemoralNeckCenterStanard;
+      
+      AnyVec3 CPoint1 = HipCenter + .BoxSizeHip*{1, 1, .Sign*1};
+      AnyVec3 CPoint2 = HipCenter + .BoxSizeHip*{1, 1, .Sign*-1};
+      AnyVec3 CPoint3 = HipCenter + .BoxSizeHip*{-1, 1, .Sign*-1};
+      AnyVec3 CPoint4 = HipCenter + .BoxSizeHip*{-1, 1, .Sign*1};
+      AnyVec3 CPoint5 = HipCenter + .BoxSizeHip*{1, -1, .Sign*1};
+      AnyVec3 CPoint6 = HipCenter + .BoxSizeHip*{1, -1, .Sign*-1};
+      AnyVec3 CPoint7 = HipCenter + .BoxSizeHip*{-1, -1, .Sign*-1};
+      AnyVec3 CPoint8 = HipCenter + .BoxSizeHip*{-1, -1, .Sign*1};
+      
+      AnyVec3 CPoint9 = KneePoint + .BoxSizeKnee*{1, -1, .Sign*1};
+      AnyVec3 CPoint10 = KneePoint + .BoxSizeKnee*{1, -1, .Sign*-1};
+      AnyVec3 CPoint11 = KneePoint + .BoxSizeKnee*{-1, -1, .Sign*-1};
+      AnyVec3 CPoint12 = KneePoint + .BoxSizeKnee*{-1, -1, .Sign*1};
+      AnyVec3 CPoint13 = KneePoint + .BoxSizeKnee*{1, 1, .Sign*1};
+      AnyVec3 CPoint14 = KneePoint + .BoxSizeKnee*{1, 1, .Sign*-1};
+      AnyVec3 CPoint15 = KneePoint + .BoxSizeKnee*{-1, 1, .Sign*-1};
+      AnyVec3 CPoint16 = KneePoint + .BoxSizeKnee*{-1, 1, .Sign*1};
+      
+      AnyVec3 MedialPosteriorCondyle = .MedialPosteriorCondyleStandard;
+      AnyVec3 LateralPosteriorCondyle = .LateralPosteriorCondyleStandard;
+      
+    };
+    
+    
+    AnyFolder TargetPoints = 
+    { 
+      
+      AnyVar FemurTorsionOffset = Main.HumanModel.Anthropometrics._FEMORALTORSION_LEFTRIGHT_ 
+                                  - THIGH_SEG.FemoralTorsion.FemoralTorsionUnscaled;
+      
+      AnyMat33 FemurTorsionRot = RotMat(.Sign*-pi/180 *FemurTorsionOffset,y);
+      
+      AnyVec3 HipCenter = .ScaleDefault(.HipJointStandard);
+      AnyVec3 KneePoint = .ScaleDefault(.KneeCenterStandard);
+      AnyVec3 NeckCenter = HipCenter + (.ScaleDefault(.FemoralNeckCenterStanard) - .ScaleDefault(.HipJointStandard))*FemurTorsionRot';
+
+      AnyVec3 CPoint1 = HipCenter +.ScaleDefault(.BoxSizeHip*{1, 1, .Sign*1})*FemurTorsionRot';
+      AnyVec3 CPoint2 = HipCenter +.ScaleDefault(.BoxSizeHip*{1, 1, .Sign*-1})*FemurTorsionRot';
+      AnyVec3 CPoint3 = HipCenter +.ScaleDefault(.BoxSizeHip*{-1, 1, .Sign*-1})*FemurTorsionRot';
+      AnyVec3 CPoint4 = HipCenter +.ScaleDefault(.BoxSizeHip*{-1, 1, .Sign*1})*FemurTorsionRot';
+      AnyVec3 CPoint5 = HipCenter +.ScaleDefault(.BoxSizeHip*{1, -1, .Sign*1})*FemurTorsionRot';
+      AnyVec3 CPoint6 = HipCenter +.ScaleDefault(.BoxSizeHip*{1, -1, .Sign*-1})*FemurTorsionRot';
+      AnyVec3 CPoint7 = HipCenter +.ScaleDefault(.BoxSizeHip*{-1, -1, .Sign*-1})*FemurTorsionRot';
+      AnyVec3 CPoint8 = HipCenter +.ScaleDefault(.BoxSizeHip*{-1, -1, .Sign*1})*FemurTorsionRot';
+      
+      
+      AnyVec3 CPoint9 = KneePoint+.ScaleDefault(.BoxSizeKnee*{1, -1, .Sign*1});
+      AnyVec3 CPoint10 = KneePoint+ .ScaleDefault(.BoxSizeKnee*{1, -1, .Sign*-1});
+      AnyVec3 CPoint11 = KneePoint+.ScaleDefault(.BoxSizeKnee*{-1, -1, .Sign*-1});
+      AnyVec3 CPoint12 = KneePoint+.ScaleDefault(.BoxSizeKnee*{-1, -1, .Sign*1});
+      AnyVec3 CPoint13 = KneePoint+.ScaleDefault(.BoxSizeKnee*{1, 1, .Sign*1});
+      AnyVec3 CPoint14 = KneePoint+.ScaleDefault(.BoxSizeKnee*{1, 1, .Sign*-1});
+      AnyVec3 CPoint15 = KneePoint+.ScaleDefault(.BoxSizeKnee*{-1, 1, .Sign*-1});
+      AnyVec3 CPoint16 = KneePoint+.ScaleDefault(.BoxSizeKnee*{-1, 1, .Sign*1});      
+      
+      AnyVec3 MedialPosteriorCondyle = .ScaleDefault(.MedialPosteriorCondyleStandard);
+      AnyVec3 LateralPosteriorCondyle = .ScaleDefault(.LateralPosteriorCondyleStandard);
+      
+    };
+
+
+    // Create the actual ScaleFunction which is used by the thigh segment
+    AnyFunTransform3DRBF ScaleFunction= 
+    {
+      //RBFDef.Param = 0.3;
+      BoundingBoxOnOff = On;
+      PolynomDegree = 1;
+      RBFDef.Type = RBF_ThinPlate;          
+      Points0 ={    
+        .SourcePoints.HipCenter, // Hip joint center
+        .SourcePoints.NeckCenter,
+        .SourcePoints.CPoint1,
+        .SourcePoints.CPoint2,
+        .SourcePoints.CPoint3,
+        .SourcePoints.CPoint4,
+        .SourcePoints.CPoint5,
+        .SourcePoints.CPoint6,
+        .SourcePoints.CPoint7,
+        .SourcePoints.CPoint8,
+        .SourcePoints.CPoint9,
+        .SourcePoints.CPoint10,
+        .SourcePoints.CPoint11,
+        .SourcePoints.CPoint12,
+        .SourcePoints.CPoint13,
+        .SourcePoints.CPoint14,
+        .SourcePoints.CPoint15,
+        .SourcePoints.CPoint16,
+        .SourcePoints.MedialPosteriorCondyle,
+        .SourcePoints.LateralPosteriorCondyle,
+        .SourcePoints.KneePoint
+      };
+      Points1 = { 
+        .TargetPoints.HipCenter, // Hip joint center
+        .TargetPoints.NeckCenter,
+        .TargetPoints.CPoint1,
+        .TargetPoints.CPoint2,
+        .TargetPoints.CPoint3,
+        .TargetPoints.CPoint4,
+        .TargetPoints.CPoint5,
+        .TargetPoints.CPoint6,
+        .TargetPoints.CPoint7,
+        .TargetPoints.CPoint8,
+        .TargetPoints.CPoint9,
+        .TargetPoints.CPoint10,
+        .TargetPoints.CPoint11,
+        .TargetPoints.CPoint12,
+        .TargetPoints.CPoint13,
+        .TargetPoints.CPoint14,
+        .TargetPoints.CPoint15,
+        .TargetPoints.CPoint16,
+        .TargetPoints.MedialPosteriorCondyle,
+        .TargetPoints.LateralPosteriorCondyle,
+        .TargetPoints.KneePoint
+       };              
+    };
+};
+
+  THIGH_SEG = {
+ #ifdef FEMORALTORSION_VISUALIZE_MORPHING_POINTS
+
+    AnyRefNode MorphNodesVisualize = {
+      
+      AnyDrawSurf FemurWithOutTorsion = {
+        FileName = ..Drw3.FileName;
+        ScaleXYZ = 0.999*..Drw3.ScaleXYZ;
+        RGB = {0.4, 0.8, 0.4};
+        Opacity = 0.6;
+        AnyFunTransform3D Scale = {
+           PreTransforms = 
+           {
+             &...Scale.T0, 
+             &Main.HumanModel.ScalingDefault.GeometricalScaling._RIGHTLEFT_.Thigh.ScaleFunction,
+             &...Scale.T1_Inv 
+           };
+        };
+      };
+      
+      AnyMatrix Points0 = .GeomScale.Points0;
+      AnyMatrix Points1 = .GeomScale.Points1;
+      AnyMatrix Points0InSeg =.Scale.T0_Inv(Points0);
+      AnyMatrix Points1InSeg =.Scale.T0_Inv(Points1);
+      //AnyMatrix Points0InSegScaled =.Scale(Points0InSeg);
+      
+      AnyDrawPointCloud SourcePoints ={
+        PointStyle.Style = PointStyleSphere;
+        Points3D = On;
+        ShowNames = Off;
+        RGB= {0.4, 0.8, 0.4};
+        // Here the source points are visualized with default scaling applied
+        Points=.FemurWithOutTorsion.Scale(.Points0InSeg);
+        PointStyle.Size=0.010;
+        Opacity = 0.5;
+        Visible = On;
+
+        PointNames={
+          "SourcePoints.HipCenter", 
+          "SourcePoints.NeckCenter", 
+          "SourcePoints.CPoint1",
+          "SourcePoints.CPoint2",
+          "SourcePoints.CPoint3",
+          "SourcePoints.CPoint4",
+          "SourcePoints.CPoint5",
+          "SourcePoints.CPoint6",
+          "SourcePoints.CPoint7",
+          "SourcePoints.CPoint8",
+          "SourcePoints.CPoint9",
+          "SourcePoints.CPoint10",
+          "SourcePoints.CPoint11",
+          "SourcePoints.CPoint12",
+          "SourcePoints.CPoint13",
+          "SourcePoints.CPoint14",
+          "SourcePoints.CPoint15",
+          "SourcePoints.CPoint16",
+          "SourcePoints.CPoint17",
+          "SourcePoints.CPoint18",
+          "SourcePoints.KneePoint"          
+        };
+      };
+      
+      AnyDrawPointCloud TargetPoints ={
+        PointStyle.Style = PointStyleSphere;
+        Points3D = On;
+        ShowNames = Off;
+        RGB= {0.96875, 0.796875, 0.4492188};
+        PointStyle.Size=0.010;
+        Visible = On;
+
+        Points=.Points1InSeg ;
+        PointNames={
+          "TargetPoints.HipCenter", 
+          "TargetPoints.NeckCenter", 
+          "TargetPoints.CPoint1",
+          "TargetPoints.CPoint2",
+          "TargetPoints.CPoint3",
+          "TargetPoints.CPoint4",
+          "TargetPoints.CPoint5",
+          "TargetPoints.CPoint6",
+          "TargetPoints.CPoint7",
+          "TargetPoints.CPoint8",
+          "TargetPoints.CPoint9",
+          "TargetPoints.CPoint10",
+          "TargetPoints.CPoint11",
+          "TargetPoints.CPoint12",
+          "TargetPoints.CPoint13",
+          "TargetPoints.CPoint14",
+          "TargetPoints.CPoint15",
+          "TargetPoints.CPoint16",
+          "TargetPoints.CPoint17",
+          "TargetPoints.CPoint18",
+          "TargetPoints.KneePoint"
+        };
+      };
+
+      
+    };
+  #endif
+};
+
+
+#undef THIGH_SEG
+#undef FEMORALTORSION_SIDE
+#undef _RIGHTLEFT_
+#undef _FEMORALTORSION_LEFTRIGHT_

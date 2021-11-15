@@ -13,11 +13,18 @@
 
 **Added:**
 
+- Added a {ref}`new model tool <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_FemoralTorsionTool.py>`
+  to apply femoral torsion to the TLEM2.0 leg model.
+  This tool was developed by Dr. Enrico De Pieri from University of Basel
+  Children’s Hospital (UKBB). Please see the {ref}`documentation <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_FemoralTorsionTool.py>`
+  or the web cast (Link to come) by Enrico on his work and publication on femoral torsion. 
+
 - New utility macros which makes it easier to create 3D grid arrays.
   `MESHTRIPLES(xarr, yarr, zarr)` and  `MESHGRID(xarr,yarr,zarr)`. I.e. for
   creating arrays of all points in a 3D grid array.
 
   See the file: {menuselection}`Body --> AAUHuman --> BodyModels --> GenericBodyModel --> Helper.ClassTemplates.any`
+
 
 **Changed:**
 
@@ -31,6 +38,12 @@
 
 - The `OptimalFiberLength` and `TotalTendonLength` in the TLEM leg models, are no longer 'DesignVar', when the
   parameters are also calibrated. This prevents huge amount warning when calibrating the leg muscles.
+
+** Removed:**
+
+- The previously deprecated BM keyword `_LEG_MODEL_Leg_` has been completely removed.
+
+
 
 ## AMMR 2.3.4 (2021-07-05)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.5060249.svg)](https://doi.org/10.5281/zenodo.5060249)
