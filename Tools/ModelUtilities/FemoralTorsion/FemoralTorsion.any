@@ -256,18 +256,38 @@ THIGH_SEG = {
 };
 
   THIGH_SEG = {
+ #ifdef FEMORALTORSION_VISUALIZE_MORPHING_POINTS
+
     AnyRefNode MorphNodesVisualize = {
-      AnyMatrix Points0 = .GeomScale.Points0;
-      AnyMatrix Points0InSeg =.Scale.T0_Inv(Points0);
-      AnyMatrix Points0InSegScaled =.Scale(Points0InSeg);
       
-      #ifdef FEMORALTORSION_VISUALIZE_MORPHING_POINTS
+      AnyDrawSurf FemurWithOutTorsion = {
+        FileName = ..Drw3.FileName;
+        ScaleXYZ = 0.999*..Drw3.ScaleXYZ;
+        RGB = {0.2,0.4, 0.2};
+        Opacity = 0.6;
+        AnyFunTransform3D Scale = {
+           PreTransforms = 
+           {
+             &...Scale.T0, 
+             &Main.HumanModel.ScalingDefault.GeometricalScaling._RIGHTLEFT_.Thigh.ScaleFunction,
+             &...Scale.T1_Inv 
+           };
+        };
+      };
+      
+      AnyMatrix Points0 = .GeomScale.Points0;
+      AnyMatrix Points1 = .GeomScale.Points1;
+      AnyMatrix Points0InSeg =.Scale.T0_Inv(Points0);
+      AnyMatrix Points1InSeg =.Scale.T0_Inv(Points1);
+      //AnyMatrix Points0InSegScaled =.Scale(Points0InSeg);
+      
       AnyDrawPointCloud SourcePoints ={
         PointStyle.Style = PointStyleSphere;
         Points3D = On;
         ShowNames = Off;
         RGB= {0.01796875, 0.76953125, 0.06640625};
-        Points=.Points0InSeg;
+        // Here the source points are visualized with default scaling applied
+        Points=.FemurWithOutTorsion.Scale(.Points0InSeg);
         PointStyle.Size=0.010;
         Opacity = 0.2;
         Visible = On;
@@ -305,7 +325,7 @@ THIGH_SEG = {
         PointStyle.Size=0.010;
         Visible = On;
 
-        Points=.Points0InSegScaled ;
+        Points=.Points1InSeg ;
         PointNames={
           "TargetPoints.HipCenter", 
           "TargetPoints.NeckCenter", 
@@ -330,11 +350,11 @@ THIGH_SEG = {
           "TargetPoints.KneePoint"
         };
       };
-      #endif
+
       
     };
-          
-  };
+  #endif
+};
 
 
 #undef THIGH_SEG
