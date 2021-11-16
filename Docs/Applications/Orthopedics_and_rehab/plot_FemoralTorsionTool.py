@@ -3,11 +3,11 @@ r"""
 Femoral Torsion tool
 =======================================
 
-This is an example of modifying the femoral torsion of the generic TLEM geometry
-by using a model utility tool included within the model repository. The  model
-is the simple standing model where the femoral torsion has been altered to 20
-degrees. The model is also a good example on how a similar morphing approach can
-be used to personalize different body segments.
+This is an example of modifying the femoral torsion of the default leg
+({ref}`TLEM 2.0 <tlem2>`) geometry by using a model utility tool included within
+the model repository. The  model is the simple standing model where the femoral
+torsion has been altered to 20 degrees. The model is also a good example on how
+a similar morphing approach can be used to personalize different body segments.
 
 .. rst-class:: without-title 
 
@@ -53,7 +53,7 @@ be included in any model using the following code:
   };
 
   // This line must be included before the "HumanModel". 
-  #include "<ANYBODY_PATH_MODELUTILS>/FemoralTorsion/FemoralTorsionInclude.any"
+  #include "<ANYBODY_PATH_MODELUTILS>/FemoralTorsion/Include.any""
 
 
 .. note:: This tool takes as input the nominal value of femoral torsion that is
