@@ -10,6 +10,8 @@
 - Improved the selected output by adding the m. Semimembranosus and m.
   Semitendinosus contributions to the knee flexor group for both muscle activity (`KneeFlexorMuscleActivity`)
   and muscle force (`KneeFlexorMuscleForce`).
+- Fixed a bug in scaling where the mass of the trunk model pelvis was used in some cases instead of the 
+  pelvis mass from the leg model. This could cause a slightly incorrect mass to be used for the pelvis segment.
 
 **Added:**
 
