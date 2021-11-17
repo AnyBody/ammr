@@ -23,6 +23,12 @@
   Children’s Hospital (UKBB). Please see the {ref}`documentation <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_FemoralTorsionTool.py>`
   or the web cast (Link to come) by Enrico on his work and publication on femoral torsion. 
 
+- New utility macros which makes it easier to create 3D grid arrays.
+  `MESHTRIPLES(xarr, yarr, zarr)` and  `MESHGRID(xarr,yarr,zarr)`. I.e. for
+  creating arrays of all points in a 3D grid array.
+
+  See the file: {menuselection}`Body --> AAUHuman --> BodyModels --> GenericBodyModel --> Helper.ClassTemplates.any`
+
 
 **Changed:**
 
