@@ -12,6 +12,11 @@
   and muscle force (`KneeFlexorMuscleForce`).
 - Fixed a problem where custom scaling and {bm_constant}`_SCALING_XYZ_` would 
   prevent the model from loading.
+- Fixed a logical error in the length calculation and drawing of the normal force in the
+  `ContactSurfaceDistanceAndVelocityDepLinPush.any` file.
+- Fixed a extrapolation error when setting`_SMOOTHING_FUNCTION_PROFILE_` to
+  `FUNC_PROFILE_BSPLINE`. We now cap the height ratio to only be in the interpolation
+  area. Values outside infers that no contact is present.
 
 **Added:**
 
