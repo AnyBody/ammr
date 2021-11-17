@@ -10,8 +10,17 @@
 - Improved the selected output by adding the m. Semimembranosus and m.
   Semitendinosus contributions to the knee flexor group for both muscle activity (`KneeFlexorMuscleActivity`)
   and muscle force (`KneeFlexorMuscleForce`).
+- Fixed a problem where custom scaling and {bm_constant}`_SCALING_XYZ_` would 
+  prevent the model from loading.
 
 **Added:**
+
+- Added a {ref}`new model tool <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_FemoralTorsionTool.py>`
+  to apply femoral torsion to the TLEM2.0 leg model.
+  This tool was developed by Dr. Enrico De Pieri from University of Basel
+  Children’s Hospital (UKBB). Please see the {ref}`documentation <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_FemoralTorsionTool.py>`
+  or the web cast (Link to come) by Enrico on his work and publication on femoral torsion. 
+
 
 **Changed:**
 
