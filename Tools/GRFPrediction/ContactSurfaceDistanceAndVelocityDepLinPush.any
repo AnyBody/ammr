@@ -221,14 +221,38 @@ AnyFolder Push ={
   AnyVar FirstControlVelRatio = 1.0;
   AnyVar SecondControlVelRatio = 0.1;
   
+  //Ensure the heightratio is not outside the interpol fun
+  AnyVar  HeightRatioMaxInSplineFun =max(HeightFactorFun_BSpline4.T)-0.0001; //find max "T" in spline function subtract tol 
+  AnyVar  HeightRatioMinInSplineFun =min(HeightFactorFun_BSpline4.T)+0.0001;//find min "T" in spline function add tol 
+  AnyVar  HeightRatioCapped_max = iffun(gtfun(HeightRatio,HeightRatioMaxInSplineFun),HeightRatioMaxInSplineFun,HeightRatio) ;  //cap ratio 
+  AnyVar  HeightRatioCapped = iffun(ltfun(HeightRatioCapped_max,HeightRatioMinInSplineFun),HeightRatioMinInSplineFun,HeightRatioCapped_max) ;
+
+  //Ensure the radiusratio is not outside the interpol fun
+  AnyVar  RadiusRatioMaxInSplineFun =max(RadiusFactorFun_BSpline4.T)-0.0001; //find max "T" in spline function subtract tol 
+  AnyVar  RadiusRatioMinInSplineFun =min(RadiusFactorFun_BSpline4.T)+0.0001;//find min "T" in spline function add tol 
+  AnyVar  RadiusRatioCapped_max = iffun(gtfun(RadiusRatio,RadiusRatioMaxInSplineFun),RadiusRatioMaxInSplineFun,RadiusRatio) ;  //cap ratio 
+  AnyVar  RadiusRatioCapped = iffun(ltfun(RadiusRatioCapped_max,RadiusRatioMinInSplineFun),RadiusRatioMinInSplineFun,RadiusRatioCapped_max) ;
+  
+  //Ensure the Velatio is not outside the interpol fun
+  AnyVar  VelRatioMaxInSplineFun =max(VelFactorFun_BSpline4.T)-0.0001; //find max "T" in spline function subtract tol 
+  AnyVar  VelRatioMinInSplineFun =min(VelFactorFun_BSpline4.T)+0.0001;//find min "T" in spline function add tol 
+  AnyVar  VelRatioCapped_max = iffun(gtfun(VelRatio,VelRatioMaxInSplineFun),VelRatioMaxInSplineFun,VelRatio) ;  //cap ratio 
+  AnyVar  VelRatioCapped = iffun(ltfun(VelRatioCapped_max,VelRatioMinInSplineFun),VelRatioMinInSplineFun,VelRatioCapped_max) ;
+    
+  
   AnyVar HeightFactorFun = iffun(lteqfun(HeightRatio, FirstControlHeightRatio),
-  iffun(ltfun(HeightRatio, SecondControlHeightRatio), 1.0, HeightFactorFun_BSpline4(HeightRatio)[0]),
+ // iffun(ltfun(HeightRatio, SecondControlHeightRatio), 1.0, HeightFactorFun_BSpline4(HeightRatio)[0]),
+  iffun(ltfun(HeightRatio, SecondControlHeightRatio), 1.0, HeightFactorFun_BSpline4(HeightRatioCapped)[0]),
+
   0.0);
   AnyVar RadiusFactorFun = iffun(lteqfun(RadiusRatio, FirstControlRadiusRatio),
-  iffun(ltfun(RadiusRatio, SecondControlRadiusRatio), 1.0, RadiusFactorFun_BSpline4(RadiusRatio)[0]),
+  //iffun(ltfun(RadiusRatio, SecondControlRadiusRatio), 1.0, RadiusFactorFun_BSpline4(RadiusRatio)[0]),
+  iffun(ltfun(RadiusRatio, SecondControlRadiusRatio), 1.0, RadiusFactorFun_BSpline4(RadiusRatioCapped)[0]),
+
   0.0);
   AnyVar VelFactorFun    = iffun(lteqfun(VelRatio, FirstControlVelRatio),
-  iffun(ltfun(VelRatio, SecondControlVelRatio), 1.0, VelFactorFun_BSpline4(VelRatio)[0]),
+//  iffun(ltfun(VelRatio, SecondControlVelRatio), 1.0, VelFactorFun_BSpline4(VelRatio)[0]),
+  iffun(ltfun(VelRatio, SecondControlVelRatio), 1.0, VelFactorFun_BSpline4(VelRatioCapped)[0]),
   0.0);
   #endif  
   
@@ -523,7 +547,7 @@ AnyFolder Push ={
   AnyDrawVector DrawNormalForce =     
   {
     AnyRefFrame &ref=..TargetObject;
-    AnyVar Strength=   iffun(.ContactMuscleModel.S,.ContactMuscleModel.S,0.00001);
+    AnyVar Strength= iffun(gtfun(.ContactMuscleModel.S,0.00001),.ContactMuscleModel.S, 0.00001);
     Vec =..ScaleFactor*..DrawRef.DrawSettingsSupport.Lin.ScaleFactor*(
     .NormalVector*.Direction0Muscle.NormalDirectionMuscle.Ft*..BaseObject.Axes'
     +.NormalVector*.Direction01Muscle.Push.FrictionMuscle.Ft*..BaseObject.Axes'
@@ -545,7 +569,7 @@ AnyFolder Push ={
   AnyFolder NormalForceValue =     
   {
     AnyRefFrame &ref=..TargetObject;
-    AnyVar Strength=   iffun(.ContactMuscleModel.S,.ContactMuscleModel.S,0.00001);
+    AnyVar Strength= iffun(gtfun(.ContactMuscleModel.S,0.00001),.ContactMuscleModel.S, 0.00001);
     AnyVec3 NormalForceVector =..ScaleFactor*..DrawRef.DrawSettingsSupport.Lin.ScaleFactor*(
     .NormalVector*.Direction0Muscle.NormalDirectionMuscle.Ft*..BaseObject.Axes'
     +.NormalVector*.Direction01Muscle.Push.FrictionMuscle.Ft*..BaseObject.Axes'
