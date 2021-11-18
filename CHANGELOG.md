@@ -43,12 +43,13 @@
   geometry is updated to better match anatomical text books. Likewise, the
   latissimus dorsi muscles is discretized into more branches so it has branch
   inserting on every vertebra.
-
-
+- The `clavicle` entry in the `Anthropometric.SegmentMasses` folder have been renamed to `shoulder`. 
+  This makes it consistent with the rest of varaibles in the folder, and correctly reflect that 
+  the mass is assigned to both the scapula and clavicle segment. 
 - The `OptimalFiberLength` and `TotalTendonLength` in the TLEM leg models, are no longer 'DesignVar', when the
   parameters are also calibrated. This prevents huge amount warning when calibrating the leg muscles.
 
-** Removed:**
+**Removed:**
 
 - The previously deprecated BM keyword `_LEG_MODEL_Leg_` has been completely removed.
 
