@@ -10,8 +10,30 @@
 - Improved the selected output by adding the m. Semimembranosus and m.
   Semitendinosus contributions to the knee flexor group for both muscle activity (`KneeFlexorMuscleActivity`)
   and muscle force (`KneeFlexorMuscleForce`).
+- Fixed a bug in scaling where the mass of the trunk model pelvis was used in some cases instead of the 
+  pelvis mass from the leg model. This could cause a slightly incorrect mass to be used for the pelvis segment.
+- Fixed a problem where custom scaling and {bm_constant}`_SCALING_XYZ_` would 
+  prevent the model from loading.
+- Fixed some logical issues with the `ContactSurfaceDistanceAndVelocityDepLinPush.any` file.
+   - Fix length calculation and drawing of the normal force
+   - Fixed an extrapolation error when changing the internal setting `_SMOOTHING_FUNCTION_PROFILE_` to
+     `FUNC_PROFILE_BSPLINE`. We now cap the height ratio to only be in the interpolation area. 
+     Values outside infers that no contact is present.
 
 **Added:**
+
+- Added a {ref}`new model tool <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_FemoralTorsionTool.py>`
+  to apply femoral torsion to the TLEM2.0 leg model.
+  This tool was developed by Dr. Enrico De Pieri from University of Basel
+  Children’s Hospital (UKBB). Please see the {ref}`documentation <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_FemoralTorsionTool.py>`
+  or the web cast (Link to come) by Enrico on his work and publication on femoral torsion. 
+
+- New utility macros which makes it easier to create 3D grid arrays.
+  `MESHTRIPLES(xarr, yarr, zarr)` and  `MESHGRID(xarr,yarr,zarr)`. I.e. for
+  creating arrays of all points in a 3D grid array.
+
+  See the file: {menuselection}`Body --> AAUHuman --> BodyModels --> GenericBodyModel --> Helper.ClassTemplates.any`
+
 
 **Changed:**
 
@@ -21,12 +43,13 @@
   geometry is updated to better match anatomical text books. Likewise, the
   latissimus dorsi muscles is discretized into more branches so it has branch
   inserting on every vertebra.
-
-
+- The `clavicle` entry in the `Anthropometric.SegmentMasses` folder have been renamed to `shoulder`. 
+  This makes it consistent with the rest of varaibles in the folder, and correctly reflect that 
+  the mass is assigned to both the scapula and clavicle segment. 
 - The `OptimalFiberLength` and `TotalTendonLength` in the TLEM leg models, are no longer 'DesignVar', when the
   parameters are also calibrated. This prevents huge amount warning when calibrating the leg muscles.
 
-** Removed:**
+**Removed:**
 
 - The previously deprecated BM keyword `_LEG_MODEL_Leg_` has been completely removed.
 
