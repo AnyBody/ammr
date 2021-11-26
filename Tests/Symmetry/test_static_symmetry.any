@@ -1,0 +1,106 @@
+//define = (
+// [
+//  {'BM_SCALING':'_SCALING_STANDARD_',},
+//  {'BM_SCALING':'_SCALING_UNIFORM_'},
+//  {'BM_SCALING':'_SCALING_LENGTHMASS_'},
+//  {'BM_SCALING':'_SCALING_LENGTHMASSFAT_'},
+//  {'BM_SCALING':'_SCALING_UNIFORM_EXTMEASUREMENTS_'},
+//  {'BM_SCALING':'_SCALING_LENGTHMASS_EXTMEASUREMENTS_'},
+//  {'BM_SCALING':'_SCALING_LENGTHMASSFAT_EXTMEASUREMENTS_'},
+//  {'BM_SCALING':'_SCALING_XYZ_'},
+//],
+//[
+//  {'BODY_HEIGHT': '1.6'},
+//  {'BODY_HEIGHT': '1.75'},
+//  {'BODY_HEIGHT': '1.95'},
+//], 
+//[
+//  {'BODY_MASS': '60'},
+//  {'BODY_MASS': '75'},
+//  {'BODY_MASS': '90'},
+//], 
+//)
+
+
+/*
+Test static symmetry of scaling
+*/
+
+#include "../libdef.any"
+#include "../tools.any"
+
+#ifndef TEST_NAME
+  #define BODY_HEIGHT 1.95
+  #define BODY_MASS 90
+  #define BM_SCALING 2
+#endif
+
+
+Main = 
+{
+  #include "<ANYBODY_PATH_BODY>/HumanModel.any"
+
+  // Parameters are not editable when using the standard scaling
+  #if BM_SCALING != _SCALING_STANDARD_
+    HumanModel.Anthropometrics.BodyHeight = BODY_HEIGHT;  
+    HumanModel.Anthropometrics.BodyMass = BODY_MASS;
+  #endif
+  
+  
+  AnyFolder Test = {
+
+    AnyFolder DifferenceMeasures = {
+      
+        AnyFolder SegmentMasses = {
+          AnyFolder &right = Main.HumanModel.Anthropometrics.SegmentMasses.Right;
+          AnyFolder &left = Main.HumanModel.Anthropometrics.SegmentMasses.Left;
+          
+          AnyInt shoulderMass = expect(orfun(not(..TestTrigger), eqfun(right.Shoulder, left.Shoulder)), "Segment Symmetry: shoulder mass failed");
+          AnyInt UpperArmMass = expect(orfun(not(..TestTrigger), eqfun(right.UpperArm, left.UpperArm)), "Segment Symmetry: UpperArm mass failed");
+          AnyInt LowerArmMass = expect(orfun(not(..TestTrigger), eqfun(right.LowerArm, left.LowerArm)), "Segment Symmetry: LowerArm mass failed");
+          AnyInt HandMass = expect(orfun(not(..TestTrigger), eqfun(right.Hand, left.Hand)), "Segment Symmetry: Hand mass failed");
+          AnyInt ThighMass = expect(orfun(not(..TestTrigger), eqfun(right.Thigh, left.Thigh)), "Segment Symmetry: Thigh mass failed");
+          AnyInt ShankMass = expect(orfun(not(..TestTrigger), eqfun(right.Shank, left.Shank)), "Segment Symmetry: Shank mass failed");
+          AnyInt TalusMass = expect(orfun(not(..TestTrigger), eqfun(right.Talus, left.Talus)), "Segment Symmetry: Talus mass failed");
+          AnyInt FootMass = expect(orfun(not(..TestTrigger), eqfun(right.Foot, left.Foot)), "Segment Symmetry: Foot mass failed");
+        };
+
+        AnyFolder SegmentLengths = {
+          AnyFolder &right = Main.HumanModel.Anthropometrics.SegmentDimensions.Right;
+          AnyFolder &left = Main.HumanModel.Anthropometrics.SegmentDimensions.Left;
+
+          AnyInt thighLength = expect(orfun(not(..TestTrigger), eqfun(right.ThighLength, left.ThighLength)), "Segment Symmetry: thighLength failed");
+          AnyInt shankLength = expect(orfun(not(..TestTrigger), eqfun(right.ShankLength, left.ShankLength)), "Segment Symmetry: shankLength failed");
+          AnyInt footLength = expect(orfun(not(..TestTrigger), eqfun(right.FootLength, left.FootLength)), "Segment Symmetry: footlengthLength failed");
+          AnyInt upperArmLength = expect(orfun(not(..TestTrigger), eqfun(right.UpperArmLength, left.UpperArmLength)), "Segment Symmetry: upper armLength failed");
+          AnyInt lowerArmLength = expect(orfun(not(..TestTrigger), eqfun(right.LowerArmLength, left.LowerArmLength)), "Segment Symmetry: lower armLength failed");
+          AnyInt handLength = expect(orfun(not(..TestTrigger), eqfun(right.HandLength, left.HandLength)), "Segment Symmetry: Hand Length failed");
+          AnyInt handBreadth = expect(orfun(not(..TestTrigger), eqfun(right.HandBreadth, left.HandBreadth)), "Segment Symmetry: Hand Breadth failed");
+
+          // XYZ scaling handles Talus differently
+          #if BM_SCALING != _SCALING_XYZ_
+            AnyInt talusLength = expect(orfun(not(..TestTrigger), eqfun(right.TalusLength, left.TalusLength)), "Segment Symmetry: Talus Length failed");
+          #else
+            AnyInt footHeight = expect(orfun(not(..TestTrigger), eqfun(right.FootHeight, left.FootHeight)), "Segment Symmetry: footHeight failed");
+            AnyInt footWidth = expect(orfun(not(..TestTrigger), eqfun(right.FootWidth, left.FootWidth)), "Segment Symmetry: footWidth failed");
+          #endif
+
+        };
+    };
+    
+    // First evaluate the test expression when this trigger is = 1
+    AnyInt TestTrigger = DesignVar(0); 
+    // helper operation to trigger the test after certain study operation
+    OPERATION_TEST_TRIGGER(Study.InitialConditions.PostOperation, Main.Test.TestTrigger);
+  };
+
+  AnyOperation &RunTest = Study.InitialConditions;
+
+  AnyBodyStudy Study ={
+    AnyFolder &BodyModel = .HumanModel.BodyModel;
+    AnyFolder &DefaultMannequinDrivers = .HumanModel.DefaultMannequinDrivers;
+    AnyFolder &testref = Main.Test;
+    Gravity={0.0, -9.81, 0.0};
+    nStep = 1;
+  };
+};
