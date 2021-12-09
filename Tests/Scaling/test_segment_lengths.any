@@ -1,0 +1,186 @@
+//define = (
+// [
+//  {'BM_SCALING':'_SCALING_STANDARD_'},
+//  {'BM_SCALING':'_SCALING_UNIFORM_'},
+//  {'BM_SCALING':'_SCALING_LENGTHMASS_'},
+//  {'BM_SCALING':'_SCALING_LENGTHMASSFAT_'},
+//  {'BM_SCALING':'_SCALING_UNIFORM_EXTMEASUREMENTS_'},
+//  {'BM_SCALING':'_SCALING_LENGTHMASS_EXTMEASUREMENTS_'},
+//  {'BM_SCALING':'_SCALING_LENGTHMASSFAT_EXTMEASUREMENTS_'},
+//  {'BM_SCALING':'_SCALING_XYZ_'},
+//],
+//[
+//  {
+//  "PELVIS_WIDTH": "0.18",
+//  "PELVIS_HEIGHT": "0.11",
+//  "PELVIS_DEPTH": "0.14",
+//  "HEAD_HEIGHT": "0.15",
+//  "HEAD_DEPTH": "0.23",
+//  "HEAD_WIDTH": "0.18",
+//  "NECK_LENGTH": "0.13",
+//  "TRUNK_HEIGHT": "0.62",
+//  "TRUNK_DEPTH": "0.18",
+//  "TRUNK_WIDTH": "0.38",
+//  "THIGH_LENGTH": "0.40",
+//  "SHANK_LENGTH": "0.42",
+//  "FOOT_LENGTH": "0.25",
+//  "FOOT_WIDTH": "0.08",
+//  "FOOT_HEIGHT": "0.05",
+//  "TALUS_LENGTH": "0.03",
+//  "UPPER_ARM_LENGTH": "0.34",
+//  "LOWER_ARM_LENGTH": "0.26",
+//  "HAND_LENGTH": "0.18",
+//  "HAND_BREADTH": "0.08",
+//  },
+//], 
+//)
+
+
+
+/*
+Test how setting the segment lengths in HumanModel.Anthropometrics.SegmentDimensions
+directly affects the actual segment lengths measured on the model.
+*/
+
+#include "../libdef.any"
+#include "../tools.any"
+
+#ifndef TEST_NAME
+  #define BM_SCALING 3
+  #define PELVIS_WIDTH 0.18
+  #define PELVIS_HEIGHT 0.11
+  #define PELVIS_DEPTH 0.14
+  #define HEAD_HEIGHT 0.15
+  #define HEAD_DEPTH 0.23
+  #define HEAD_WIDTH 0.18
+  #define NECK_LENGTH 0.13
+  #define TRUNK_HEIGHT 0.62
+  #define TRUNK_DEPTH 0.18
+  #define TRUNK_WIDTH 0.38
+  #define THIGH_LENGTH 0.40
+  #define SHANK_LENGTH 0.42
+  #define FOOT_LENGTH 0.25
+  #define FOOT_WIDTH 0.08
+  #define FOOT_HEIGHT 0.05
+  #define TALUS_LENGTH 0.03
+  #define UPPER_ARM_LENGTH 0.34
+  #define LOWER_ARM_LENGTH 0.26
+  #define HAND_LENGTH 0.18
+  #define HAND_BREADTH 0.08
+#endif
+
+
+Main = 
+{
+  #include "<ANYBODY_PATH_BODY>/HumanModel.any"
+
+  // Parameters are not editable when using the standard scaling
+  #if BM_SCALING != _SCALING_STANDARD_
+    HumanModel.Anthropometrics.SegmentDimensions.PelvisWidth = PELVIS_WIDTH;
+    HumanModel.Anthropometrics.SegmentDimensions.HeadHeight = HEAD_HEIGHT;
+    HumanModel.Anthropometrics.SegmentDimensions.TrunkHeight = TRUNK_HEIGHT;
+    HumanModel.Anthropometrics.SegmentDimensions.Right.ThighLength = THIGH_LENGTH;
+    HumanModel.Anthropometrics.SegmentDimensions.Right.ShankLength = SHANK_LENGTH;
+    HumanModel.Anthropometrics.SegmentDimensions.Right.FootLength = FOOT_LENGTH;
+    
+    #if BM_SCALING != _SCALING_XYZ_ 
+      HumanModel.Anthropometrics.SegmentDimensions.Right.TalusLength = TALUS_LENGTH;
+    #endif   
+
+    HumanModel.Anthropometrics.SegmentDimensions.Right.UpperArmLength = UPPER_ARM_LENGTH;
+    HumanModel.Anthropometrics.SegmentDimensions.Right.LowerArmLength = LOWER_ARM_LENGTH;
+    HumanModel.Anthropometrics.SegmentDimensions.Right.HandLength = HAND_LENGTH;
+    HumanModel.Anthropometrics.SegmentDimensions.Right.HandBreadth = HAND_BREADTH;
+  #endif
+
+  #if BM_SCALING == _SCALING_XYZ_
+    HumanModel.Anthropometrics.SegmentDimensions.PelvisHeight = PELVIS_HEIGHT;
+    HumanModel.Anthropometrics.SegmentDimensions.PelvisDepth = PELVIS_DEPTH;
+    HumanModel.Anthropometrics.SegmentDimensions.HeadWidth = HEAD_WIDTH;
+    HumanModel.Anthropometrics.SegmentDimensions.HeadDepth = HEAD_DEPTH;
+    HumanModel.Anthropometrics.SegmentDimensions.NeckLength = NECK_LENGTH;
+    HumanModel.Anthropometrics.SegmentDimensions.TrunkWidth = TRUNK_WIDTH;
+    HumanModel.Anthropometrics.SegmentDimensions.TrunkDepth = TRUNK_DEPTH;
+    HumanModel.Anthropometrics.SegmentDimensions.Right.FootHeight = FOOT_HEIGHT;
+    HumanModel.Anthropometrics.SegmentDimensions.Right.FootWidth = FOOT_WIDTH;
+  #endif
+
+  AnyFolder Test = {
+    AnyFloat rTol = 0.04; ///< Relative tolerance on the test measures
+    AnyFloat HighRelTol = 1 + rTol;
+    AnyFloat LowRelTol = 1 - rTol;
+
+    AnyFolder LengthMeasures = {
+      AnyFolder &bm = ..HumanModel.BodyModel;
+      AnyFloat PelvisWidth = bm.Trunk.SegmentsLumbar.PelvisSeg.Right.HipJoint.r[2] - bm.Trunk.SegmentsLumbar.PelvisSeg.Left.HipJoint.r[2];
+      AnyFloat PelvisHeight = bm.Trunk.SegmentsLumbar.PelvisSeg.Right.PSIS.r[1] - bm.Trunk.SegmentsLumbar.PelvisSeg.Right.PT.r[1];
+      AnyFloat PelvisDepth = bm.Trunk.SegmentsLumbar.PelvisSeg.Right.PT.r[0] - bm.Trunk.SegmentsLumbar.PelvisSeg.Right.PSIS.r[0];
+      AnyFloat HeadHeight = bm.Trunk.SegmentsThorax.SkullSeg.TopOfHead.r[1] - bm.Trunk.SegmentsThorax.ThoraxSeg.C1HatNode.r[1];
+      AnyFloat HeadDepth = bm.Trunk.SegmentsThorax.SkullSeg.AnteriorPoint.r[0] - bm.Trunk.SegmentsThorax.SkullSeg.PosteriorPoint.r[0];
+      AnyFloat HeadWidth = bm.Trunk.SegmentsThorax.SkullSeg.LateralPoint.r[2] - bm.Trunk.SegmentsThorax.SkullSeg.MedialPoint.r[2];
+      AnyFloat NeckLength = bm.Trunk.SegmentsThorax.ThoraxSeg.C1HatNode.r[1] - bm.Trunk.SegmentsThorax.ThoraxSeg.T1C7JntNode.r[1];
+      AnyFloat TrunkHeight = bm.Trunk.SegmentsThorax.ThoraxSeg.C1HatNode.r[1] - bm.Trunk.SegmentsLumbar.L5Seg.L5SacrumJntNode.r[1];
+      AnyFloat TrunkWidth = bm.Right.ShoulderArm.Seg.Humerus.art_gh_hum.r[2] - bm.Left.ShoulderArm.Seg.Humerus.art_gh_hum.r[2];
+      AnyFloat TrunkDepth = bm.Trunk.SegmentsThorax.ThoraxSeg.RACP_Via_4_R.r[0] - bm.Trunk.SegmentsThorax.ThoraxSeg.LTptT8S3Via2NodeR.r[0];
+      AnyFloat UpperArmLength = bm.Right.ShoulderArm.Seg.Humerus.gh.r[1] - bm.Right.ShoulderArm.Seg.Humerus.fe.r[1];
+      AnyFloat LowerArmLength = bm.Right.ShoulderArm.Seg.Ulna.ol.r[1] - bm.Right.ShoulderArm.Seg.Ulna.us.r[1];
+      AnyFloat ThighLength = bm.Right.Leg.Seg.Thigh.HipJoint.r[1] - bm.Right.Leg.Seg.Thigh.KneeJoint.r[1];
+      AnyFloat ShankLength = bm.Right.Leg.Seg.Shank.KneeJoint.r[1] - bm.Right.Leg.Seg.Shank.AnkleJoint.r[1];
+      AnyFloat FootLength = bm.Right.Leg.Seg.Foot.BigToeNode.r[0] - bm.Right.Leg.Seg.Foot.HeelNode.r[0];
+      AnyFloat TalusLength= bm.Right.Leg.Seg.Talus.AnteriorPoint.r[0] - bm.Right.Leg.Seg.Talus.PosteriorPoint.r[0];
+   
+      Main.HumanModel.BodyModel.Right.Leg.Seg.Talus = {
+        AnyRefNode PosteriorPoint = {sRel = .Scale({-0.031, -0.01, 0}); viewRefFrame.Visible = On;};
+        AnyRefNode AnteriorPoint = {sRel = .Scale({0.031, -0.01, 0}); viewRefFrame.Visible = On;};
+      };
+      Main.HumanModel.BodyModel.Trunk.SegmentsThorax.SkullSeg = {
+        AnyRefNode PosteriorPoint = {sRel = .Scale({-0.11, 0.04, 0.0}); viewRefFrame.Visible = On;};
+        AnyRefNode AnteriorPoint = {sRel = .Scale({0.11, 0.06, 0.0}); viewRefFrame.Visible = On;};
+      };
+      Main.HumanModel.BodyModel.Trunk.SegmentsThorax.SkullSeg = {
+        AnyRefNode LateralPoint = {sRel = .Scale({0.0, 0.05, 0.09}); viewRefFrame.Visible = On;};
+        AnyRefNode MedialPoint = {sRel = .Scale({0.0, 0.05, -0.09}); viewRefFrame.Visible = On;};
+      };
+
+    };
+          
+    AnyFolder &SegDims = .HumanModel.Anthropometrics.SegmentDimensions;
+    
+    #if BM_SCALING == _SCALING_XYZ_
+      EXPECT_RANGE(PelvisHeight, LengthMeasures.PelvisHeight, SegDims.PelvisHeight * LowRelTol, SegDims.PelvisHeight * HighRelTol, .Test.TestTrigger, "PelvisHeight out of expected range");
+      EXPECT_RANGE(PelvisDepth, LengthMeasures.PelvisDepth, SegDims.PelvisDepth * LowRelTol, SegDims.PelvisDepth * HighRelTol, .Test.TestTrigger, "PelvisDepth out of expected range");
+      EXPECT_RANGE(NeckLength, LengthMeasures.NeckLength, SegDims.NeckLength * LowRelTol, SegDims.NeckLength * HighRelTol, .Test.TestTrigger, "NeckLength out of expected range");
+      EXPECT_RANGE(TrunkWidth, LengthMeasures.TrunkWidth, SegDims.TrunkWidth * LowRelTol, SegDims.TrunkWidth * HighRelTol, .Test.TestTrigger, "TrunkWidth out of expected range");
+      EXPECT_RANGE(TrunkDepth, LengthMeasures.TrunkDepth, SegDims.TrunkDepth * LowRelTol, SegDims.TrunkDepth * HighRelTol, .Test.TestTrigger, "TrunkDepth out of expected range");
+      EXPECT_RANGE(HeadWidth, LengthMeasures.HeadWidth, SegDims.HeadWidth * LowRelTol, SegDims.HeadWidth * HighRelTol, .Test.TestTrigger, "HeadWidth out of expected range");
+      EXPECT_RANGE(HeadDepth, LengthMeasures.HeadDepth, SegDims.HeadDepth * LowRelTol, SegDims.HeadDepth * HighRelTol, .Test.TestTrigger, "HeadDepth out of expected range");
+    #else
+     EXPECT_RANGE(TalusLength, LengthMeasures.TalusLength, SegDims.Right.TalusLength * LowRelTol, SegDims.Right.TalusLength * HighRelTol, .Test.TestTrigger, "TalusLength out of expected range");
+    #endif
+
+    EXPECT_RANGE(PelvisWidth, LengthMeasures.PelvisWidth, SegDims.PelvisWidth * LowRelTol, SegDims.PelvisWidth * HighRelTol, .Test.TestTrigger, "PelvisWidth out of expected range");
+    EXPECT_RANGE(HeadHeight, LengthMeasures.HeadHeight, SegDims.HeadHeight * LowRelTol, SegDims.HeadHeight * HighRelTol, .Test.TestTrigger, "HeadHeight out of expected range");
+    EXPECT_RANGE(TrunkHeight, LengthMeasures.TrunkHeight, SegDims.TrunkHeight * LowRelTol, SegDims.TrunkHeight * HighRelTol, .Test.TestTrigger, "Trunkheight out of expected range");
+    EXPECT_RANGE(UpperArmLength, LengthMeasures.UpperArmLength, SegDims.Right.UpperArmLength * LowRelTol, SegDims.Right.UpperArmLength * HighRelTol, .Test.TestTrigger, "UpperArmLength out of expected range");
+    EXPECT_RANGE(LowerArmLength, LengthMeasures.LowerArmLength, SegDims.Right.LowerArmLength * LowRelTol, SegDims.Right.LowerArmLength * HighRelTol, .Test.TestTrigger, "LowerArmLength out of expected range");
+    EXPECT_RANGE(ThighLength, LengthMeasures.ThighLength, SegDims.Right.ThighLength * LowRelTol, SegDims.Right.ThighLength * HighRelTol, .Test.TestTrigger, "ThighLength out of expected range");
+    EXPECT_RANGE(ShankLength, LengthMeasures.ShankLength, SegDims.Right.ShankLength * LowRelTol, SegDims.Right.ShankLength * HighRelTol, .Test.TestTrigger, "ShankLength out of expected range");
+    EXPECT_RANGE(FootLength, LengthMeasures.FootLength, SegDims.Right.FootLength * LowRelTol, SegDims.Right.FootLength * HighRelTol, .Test.TestTrigger, "FootLength out of expected range");
+    
+
+    // First evaluate the test expression when this trigger is = 1
+    AnyInt TestTrigger = DesignVar(0); 
+    // helper operation to trigger the test after certain study operation
+    OPERATION_TEST_TRIGGER(Study.InitialConditions.PostOperation, Main.Test.TestTrigger);
+  };
+
+  AnyOperation &RunTest = Study.InitialConditions;
+
+  AnyBodyStudy Study ={
+    AnyFolder &BodyModel = .HumanModel.BodyModel;
+    AnyFolder &DefaultMannequinDrivers = .HumanModel.DefaultMannequinDrivers;
+    AnyFolder &testref = Main.Test;
+    Gravity={0.0, -9.81, 0.0};
+    nStep = 1;
+  };
+};
