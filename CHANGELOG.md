@@ -19,6 +19,7 @@
    - Fixed an extrapolation error when changing the internal setting `_SMOOTHING_FUNCTION_PROFILE_` to
      `FUNC_PROFILE_BSPLINE`. We now cap the height ratio to only be in the interpolation area. 
      Values outside infers that no contact is present.
+- Refactored the way Trunk nodes are mirrored between left and right. This is more consistent with the remaining bodyparts.
 
 **Added:**
 
@@ -48,6 +49,9 @@
   the mass is assigned to both the scapula and clavicle segment. 
 - The `OptimalFiberLength` and `TotalTendonLength` in the TLEM leg models, are no longer 'DesignVar', when the
   parameters are also calibrated. This prevents huge amount warning when calibrating the leg muscles.
+- The `L5LContactNode`,`L4LContactNode`,`L3LContactNode`,
+  `L4LContactNode`,`L1LContactNode` nodes where scaled using the Right node Z-axis. This
+  is now changed to use the Left node Z-axis.
 
 **Removed:**
 
