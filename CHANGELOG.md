@@ -10,6 +10,11 @@
 - Improved the selected output by adding the m. Semimembranosus and m.
   Semitendinosus contributions to the knee flexor group for both muscle activity (`KneeFlexorMuscleActivity`)
   and muscle force (`KneeFlexorMuscleForce`).
+- Updated and improved origin of the hamstring muscles. The muscles biceps
+  femoris, semitendinosus and semimembranosus have been updated to improve their
+  moment arms in certain lunge movements. The origin points at pelvis has been
+  moved down a bit to ensure the muscles wraps correctly in lunge movements,
+  while maintaining the same moment arm in gait etc.
 - Fixed a bug in scaling where the mass of the trunk model pelvis was used in some cases instead of the 
   pelvis mass from the leg model. This could cause a slightly incorrect mass to be used for the pelvis segment.
 - Fixed a problem where custom scaling and {bm_constant}`_SCALING_XYZ_` would 
