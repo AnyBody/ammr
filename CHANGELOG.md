@@ -24,6 +24,7 @@
    - Fixed an extrapolation error when changing the internal setting `_SMOOTHING_FUNCTION_PROFILE_` to
      `FUNC_PROFILE_BSPLINE`. We now cap the height ratio to only be in the interpolation area. 
      Values outside infers that no contact is present.
+- Fixed a bug in the right transversus PCSA calculation.
 
 **Added:**
 
