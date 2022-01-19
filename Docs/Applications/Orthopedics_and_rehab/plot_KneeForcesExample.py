@@ -6,7 +6,7 @@ Knee forces example
 Example of calculating the medial/lateral knee force from the total force and moment.
 
 Most musculoskeletal models uses a simplified knee joint (revolute joint). But we can still estimate
-what the medial and lateral femoral condyle contacts forces are on the tibial plateau. 
+what the medial and lateral femoral condyle contact forces are on the tibial plateau. 
 
  .. figure:: /Applications/Orthopedics_and_rehab/KneeForces2.png
    :align: center
@@ -14,7 +14,7 @@ what the medial and lateral femoral condyle contacts forces are on the tibial pl
 
 
 .. note:: 
-      This medial and lateral knee forces calculated here are only crude 
+      The medial and lateral knee forces calculated here are only crude 
       estimate for the actual knee condyle contact force. 
 
 This example shows how to find the knee reaction forces and moments and decompose them into 
