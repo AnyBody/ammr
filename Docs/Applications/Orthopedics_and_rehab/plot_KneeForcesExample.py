@@ -26,10 +26,10 @@ femur to the tibial tray.
    :align: center
    :width: 50%
 
-   The vertical knee force with regards to the shank and the knee moment in the
-   shank frontal plane is decomposed into a lateral and medial force component.
-   These forces can be thought as a representation of the knee condyle forces on
-   the tibial plateau.
+The vertical knee force with regards to the shank and the knee moment in the
+shank frontal plane is decomposed into a lateral and medial force component.
+These forces can be thought as a representation of the knee condyle forces on
+the tibial plateau.
 
 The figure above shows the concept. The relationship between the forces and moment can be expressed as:
 
