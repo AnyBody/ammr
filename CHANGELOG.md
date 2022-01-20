@@ -32,7 +32,9 @@
   This tool was developed by Dr. Enrico De Pieri from University of Basel
   Children’s Hospital (UKBB). Please see the {ref}`documentation <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_FemoralTorsionTool.py>`
   or the web cast (Link to come) by Enrico on his work and publication on femoral torsion. 
-
+- A {ref}`new model example <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_KneeForcesExample.py>` 
+  which shows how to calculate an estimate for the medial and lateral knee force in models
+  with simple revolute knee joints. 
 - New utility macros which makes it easier to create 3D grid arrays.
   `MESHTRIPLES(xarr, yarr, zarr)` and  `MESHGRID(xarr,yarr,zarr)`. I.e. for
   creating arrays of all points in a 3D grid array.
