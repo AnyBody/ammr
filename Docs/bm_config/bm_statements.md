@@ -289,6 +289,21 @@ Index parameter to specify strength for trunk muscles.
 
 
 
+```{ammr:bm_statement} BM_TRUNK_THORACIC_FUTURE
+:deprecated:
+
+Internal swtich to enable some of the future detailed thoracic components in the model. This switch is for internal development use.
+
+:::{eval-rst}
+:Default: OFF
+:Example: ``#define BM_TRUNK_THORACIC_FUTURE OFF``
+:Options: - :any:`OFF`:None
+          - :any:`ON`: None
+:::
+```
+
+
+
 ```{ammr:bm_statement} BM_TRUNK_MUSCLES
 
 Definition of the type of all spine muscles.
