@@ -25,6 +25,8 @@
      `FUNC_PROFILE_BSPLINE`. We now cap the height ratio to only be in the interpolation area. 
      Values outside infers that no contact is present.
 - Refactored the way Trunk nodes are mirrored between left and right. This is more consistent with the remaining bodyparts and handled in the cadaver data files.
+- Fix a problem in MoCap models where calibration studies were not run automatically in model 
+  which only had 3-element muscles on the upper body.
 
 **Added:**
 
@@ -41,6 +43,8 @@
   creating arrays of all points in a 3D grid array.
 
   See the file: {menuselection}`Body --> AAUHuman --> BodyModels --> GenericBodyModel --> Helper.ClassTemplates.any`
+- Added a warning when the glenohumeral flexion/abduction in the 
+  mannequin values can cause problems as start guess for the kinematic solver. An small automatic pertubation of the Humerus orientation (`Axes0`) are also added in these cases so the shoulder rhythm will work as expected. 
 
 
 **Changed:**
