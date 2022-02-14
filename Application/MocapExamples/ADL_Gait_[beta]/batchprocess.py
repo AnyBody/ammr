@@ -37,7 +37,8 @@ except ImportError as exp:
 
 
 # Check if the full dataset is present
-if len(glob.glob("c3dfiles/**/*.c3d")) < 3:
+os.chdir(os.path.dirname(__file__))
+if len(glob.glob("C3DFiles/**/*.c3d")) < 3:
     warnings.warn(
         "Dataset not present. Please see "
         "Schreiber & Moissenet (2019) https://doi.org/10.1038/s41597-019-0124-4 "
