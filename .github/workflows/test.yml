@@ -9,43 +9,43 @@ on:
       - 'Docs/**'
   workflow_dispatch:
 
+concurrency: 
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
     
-    strategy:
-      fail-fast: false
-
     env:
       # Triggers a warning at 20 deg
       ShortestPathMaxAngle: 0.3491 
 
-    runs-on: [self-hosted, AMS, conda]
+    runs-on: [self-hosted, AnyBody]
 
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     
     steps:
-      - uses: technote-space/auto-cancel-redundant-job@v1
-
       - uses: actions/checkout@v2
 
-      - name: Cache conda/mamba
-        uses: actions/cache@v2
-        env:
-          CACHE_NUMBER: 0
-        with:
-          path: ~/conda_pkgs_dir
-          key: conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('Tests/test-environment.yml') }}      
+      - name: Install conda
+        run: | 
+          Invoke-Webrequest -URI https://anaconda.org/conda-forge/micromamba/0.16.0/download/win-64/micromamba-0.16.0-0.tar.bz2 -OutFile ~\micromamba.tar.bz2
+          (Get-FileHash ~\micromamba.tar.bz2).hash -eq "d406ee990640123b05b5b55a720720513d3ad8eed6d3377324e4842c6f141308"
+          $env:Path = "C:\PROGRA~1\Git\usr\bin;" + $env:Path
+          tar -xvjf ~/micromamba.tar.bz2 --strip-components 2 -C ~ Library/bin/micromamba.exe
+          echo "MAMBA_ROOT_PREFIX=$HOME\micromamba" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
 
-      - uses: conda-incubator/setup-miniconda@v2
-        with:
-          channels: conda-forge
-          activate-environment: test
-          mamba-version: "*"
-          use-only-tar-bz2: true  # requried for caching
-          environment-file: Tests/test-environment.yml
+      - name: Create conda environment
+        run: |
+          ~\micromamba.exe shell hook -s powershell | Out-String | iex
+          if (Test-Path -Path $Env:MAMBA_ROOT_PREFIX\envs\_ammr_test) {$OPR = "update"} else {$OPR = "create"}
+          micromamba env $OPR -y -n _ammr_test -f Tests\test-environment.yml
 
-      - name: AMMR tests
-        run: pytest -n 4 --instafail
+      - name: Run fast AMMR tests
+        run: |
+          ~\micromamba.exe shell hook -s powershell | Out-String | iex
+          micromamba activate _ammr_test
+        
+          pytest -n 4 --instafail Tests
 
-  
+
