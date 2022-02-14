@@ -27,6 +27,8 @@
 - Refactored the way Trunk nodes are mirrored between left and right. This is more consistent with the remaining bodyparts and handled in the cadaver data files.
 - Fix a problem in MoCap models where calibration studies were not run automatically in model 
   which only had 3-element muscles on the upper body.
+- The {ref}`example to evaluate moments arms <sphx_glr_auto_examples_Validation_plot_EvaluateMomentArms.py>` 
+  now works when the shoulder rhythm is enabled. 
 
 **Added:**
 

@@ -1,58 +1,69 @@
 
 AnyFolder Model = {
   // Model parts included in the moment arm study
-  AnyFolder &ThoraxRef = .....BodyModel.Trunk.SegmentsThorax.ThoraxSeg; //This is a reference to the folder which holds the human part of the model
-  AnyFolder &ArmSegSideRef = .SideHumanFolderRef.ShoulderArm.Seg; //This is a reference to the folder which holds the human part of the model
-  AnyFolder & CervicalSpineRef = .....BodyModel.Trunk.SegmentsCervicalSpine;
-  AnyFolder & SkullRef = .....BodyModel.Trunk.SegmentsCervicalSpine.SkullSeg;
-  AnyFolder & SegLumberRef = .....BodyModel.Trunk.SegmentsLumbar;
-   
-  
+  AnyFolder &ThoraxRef = .....BodyModel.Trunk.SegmentsThorax.ThoraxSeg;
+  AnyFolder &SkullRef = .....BodyModel.Trunk.SegmentsCervicalSpine.SkullSeg;
   AnyFolder &CervicalSpineJntRef = .....BodyModel.Trunk.JointsCervicalSpine;
-  AnyFolder &JointsLumbarRef = .....BodyModel.Trunk.JointsLumbar;
-  AnyFolder &ArmJntsRef =  .SideHumanFolderRef.ShoulderArm.Jnt;
-  AnyFolder &ArmMusRef = .SideHumanFolderRef.ShoulderArm.Mus;
-  AnyFolder &SpineMusRef = .SideTrunkMusRef;
-  
+  AnyFolder &CervicalSpineSegRef = .....BodyModel.Trunk.SegmentsCervicalSpine;
+  AnyFolder &LumbarJntRef = .....BodyModel.Trunk.JointsLumbar;
+  AnyFolder &LumbarSegRef = .....BodyModel.Trunk.SegmentsLumbar;
+  AnyFolder &ArmSegSideRef = .SideBodyModelRef.ShoulderArm.Seg;
+  AnyFolder &ArmJntsRef =  .SideBodyModelRef.ShoulderArm.Jnt;
+  AnyFolder &MusRef = .SideBodyModelRef.ShoulderArm.Mus;
+   
+ 
   AnyFixedRefFrame ground = {
     AnyRefNode node = { 
-      ARel=..ThoraxRef.Axes0;
+       ARel=..ThoraxRef.Axes0;
       sRel=..ThoraxRef.r0;
     };
+  };
+
+  AnyKinEq FixSkullThoraxPelvis = 
+  {
+    AnyKinMeasure& SkullThorax = ......BodyModel.Trunk.JointsCervicalSpine.SkullThoraxRotMeasure;
+    AnyKinMeasure& PelvisThorax = ......BodyModel.Trunk.JointsLumbar.PelvisThoraxRotMeasure;
   };
   
   AnyFolder Drivers = {
     AnyVar AngularVelocity = (..RangeOfMotion[1]-..RangeOfMotion[0])*pi/180;
+    
     AnyKinMeasureOrg ArmMeasure = {
-      AnyKinMeasure& SCProtraction= ...SideHumanInterfaceRef.SternoClavicularProtraction;
-      AnyKinMeasure& SCElevation= ...SideHumanInterfaceRef.SternoClavicularElevation;
-      AnyKinMeasure& GHFlexion= ...SideHumanInterfaceRef.GlenohumeralFlexion;
-      AnyKinMeasure& GHAbduction= ...SideHumanInterfaceRef.GlenohumeralAbduction;
-      AnyKinMeasure& GHExternalRotation= ...SideHumanInterfaceRef.GlenohumeralExternalRotation;
-      AnyKinMeasure& ElbowFlexion= ...SideHumanInterfaceRef.ElbowFlexion;
-      AnyKinMeasure& ElbowPronation= ...SideHumanInterfaceRef.ElbowPronation;
-      AnyKinMeasure& WristFlexion= ...SideHumanInterfaceRef.WristFlexion;
-      AnyKinMeasure& WristAbduction= ...SideHumanInterfaceRef.WristAbduction;  
-    };
-    AnyStdJoint PelvisGround={
-      AnyRefFrame &Ground = ..ground.node;
-      AnyRefFrame &Sacrum= ..ThoraxRef; 
+     #if BM_ARM_SHOULDER_RHYTHM == OFF
+     AnyKinMeasure& SCProtraction= ...SideBodyInterfaceRef.SternoClavicularProtraction;
+     AnyKinMeasure& SCElevation= ...SideBodyInterfaceRef.SternoClavicularElevation;
+     #endif
+     AnyKinMeasure& GHAbduction= ...SideBodyInterfaceRef.GlenohumeralAbduction;
+     AnyKinMeasure& GHFlexion= ...SideBodyInterfaceRef.GlenohumeralFlexion;
+     AnyKinMeasure& GHExternalRotation= ...SideBodyInterfaceRef.GlenohumeralExternalRotation;
+     AnyKinMeasure& ElbowFlexion= ...SideBodyInterfaceRef.ElbowFlexion;
+     AnyKinMeasure& ElbowPronation= ...SideBodyInterfaceRef.ElbowPronation;
+     AnyKinMeasure& WristFlexion= ...SideBodyInterfaceRef.WristFlexion;
+     AnyKinMeasure& WristAbduction= ...SideBodyInterfaceRef.WristAbduction;  
     };
     
-    AnyKinEq SkullFix = 
-    {
-      AnyKinMeasure& SkullThoraxFlexion = .......BodyModel.Interface.Trunk.SkullThoraxFlexion;
-      AnyKinMeasure& SkullThoraxLateralBending = .......BodyModel.Interface.Trunk.SkullThoraxLateralBending;
-      AnyKinMeasure& SkullThoraxRotation = .......BodyModel.Interface.Trunk.SkullThoraxRotation;
+    AnyKinEqSimpleDriver ArmDriver= {
+      AnyKinMeasure& ref = .ArmMeasure;
+      
+      #if BM_ARM_SHOULDER_RHYTHM == OFF
+      #define __MEASURE_INDEXER(X) { X[0],X[1],X[2],X[3],X[4],X[5],X[6],X[7],X[8] }
+      #else
+      #define __MEASURE_INDEXER(X) { X[2], X[3],X[4],X[5],X[6],X[7],X[8] }
+      #endif
+      
+      DriverPos = __MEASURE_INDEXER(...DriverPos);
+      AnyFloat Mask = __MEASURE_INDEXER( ...Mask);
+      
+      #undef __MEASURE_INDEXER
+      
+      DriverVel = Mask* (...RangeOfMotion[1]-...RangeOfMotion[0])*pi/180/...Study.tEnd;
     };
-
-    AnyKinEq LumbarFix = 
-    {
-      AnyKinMeasure& PelvisThoraxExtension = .......BodyModel.Interface.Trunk.PelvisThoraxExtension;
-      AnyKinMeasure& PelvisThoraxLateralBending = .......BodyModel.Interface.Trunk.PelvisThoraxLateralBending;
-      AnyKinMeasure& PelvisThoraxRotation = .......BodyModel.Interface.Trunk.PelvisThoraxRotation;
-    };
-
+    
+   
+   AnyStdJoint TrunkGround={
+     AnyRefFrame &Ground = ..ground.node;
+     AnyRefFrame &Thorax= ..ThoraxRef; 
+   };
 
   };// Drivers
 };// Model
@@ -74,7 +85,7 @@ AnyKinStudy Study = {
     AnyFolder Abscissa = { 
       AnyVar JointAngle =  not(not(..Model.Drivers.ArmDriver.DriverVel))*..Model.Drivers.ArmMeasure.Pos'*180/pi  ;    
     };
-#define _CODE_MACRO_(name) AnyVar name = ( .Model.ArmMusRef.name.Strength);    
+#define _CODE_MACRO_(name) AnyVar name = ( .Model.MusRef.name.Strength);    
         #include "armmuscles_for_output.any"
 #undef _CODE_MACRO_
   };
@@ -83,7 +94,7 @@ AnyKinStudy Study = {
     AnyFolder Abscissa = { 
       AnyVar JointAngle =  not(not(..Model.Drivers.ArmDriver.DriverVel))*..Model.Drivers.ArmMeasure.Pos'*180/pi  ;    
     };
-#define _CODE_MACRO_(name) AnyVar name = ( .Model.ArmMusRef.name.PennationAngle * 180/pi);    
+#define _CODE_MACRO_(name) AnyVar name = ( .Model.MusRef.name.PennationAngle * 180/pi);    
         #include "armmuscles_for_output.any"
 #undef _CODE_MACRO_
   };
@@ -92,7 +103,7 @@ AnyKinStudy Study = {
     AnyFolder Abscissa = { 
       AnyVar JointAngle =  not(not(..Model.Drivers.ArmDriver.DriverVel))*..Model.Drivers.ArmMeasure.Pos'*180/pi  ;    
     };
-#define _CODE_MACRO_(name) AnyVar name = ( -1*.Model.ArmMusRef.name.LmtDot/.Model.Drivers.AngularVelocity);    
+#define _CODE_MACRO_(name) AnyVar name = ( -1*.Model.MusRef.name.LmtDot/.Model.Drivers.AngularVelocity);    
         #include "armmuscles_for_output.any"
 #undef _CODE_MACRO_
   };
@@ -108,10 +119,10 @@ AnyProject ModelViews = {};
 ModelViews = {
   AnyDrawGroup Selection = {
     Objects = arrcat(ObjSearchRecursive(CompleteNameOf(&..Model.ThoraxRef), "*", "AnyDrawObject"), 
-                     ObjSearchRecursive(CompleteNameOf(&..Model.CervicalSpineRef), "*", "AnyDrawObject"), 
+                     ObjSearchRecursive(CompleteNameOf(&..Model.CervicalSpineSegRef), "*", "AnyDrawObject"), 
                      ObjSearchRecursive(CompleteNameOf(&..Model.SkullRef), "*", "AnyDrawObject"), 
                      ObjSearchRecursive(CompleteNameOf(&..Model.ArmSegSideRef), "*", "AnyDrawObject"),
-                     ObjSearchRecursive(CompleteNameOf(&..Model.ArmMusRef ), "*", "AnyDrawObject"));
+                     ObjSearchRecursive(CompleteNameOf(&..Model.MusRef ), "*", "AnyDrawObject"));
   };
   Views = {
     AnyProjectModelViewDefinition SelectedView = {
