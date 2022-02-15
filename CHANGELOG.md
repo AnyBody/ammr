@@ -10,6 +10,11 @@
 - Improved the selected output by adding the m. Semimembranosus and m.
   Semitendinosus contributions to the knee flexor group for both muscle activity (`KneeFlexorMuscleActivity`)
   and muscle force (`KneeFlexorMuscleForce`).
+- Updated and improved origin of the hamstring muscles. The muscles biceps
+  femoris, semitendinosus and semimembranosus have been updated to improve their
+  moment arms in certain lunge movements. The origin points at pelvis has been
+  moved down a bit to ensure the muscles wraps correctly in lunge movements,
+  while maintaining the same moment arm in gait etc.
 - Fixed a bug in scaling where the mass of the trunk model pelvis was used in some cases instead of the 
   pelvis mass from the leg model. This could cause a slightly incorrect mass to be used for the pelvis segment.
 - Fixed a problem where custom scaling and {bm_constant}`_SCALING_XYZ_` would 
@@ -19,6 +24,9 @@
    - Fixed an extrapolation error when changing the internal setting `_SMOOTHING_FUNCTION_PROFILE_` to
      `FUNC_PROFILE_BSPLINE`. We now cap the height ratio to only be in the interpolation area. 
      Values outside infers that no contact is present.
+- Refactored the way Trunk nodes are mirrored between left and right. This is more consistent with the remaining bodyparts and handled in the cadaver data files.
+- The {ref}`example to evaluate moments arms <sphx_glr_auto_examples_Validation_plot_EvaluateMomentArms.py>` 
+  now works when the shoulder rhythm is enabled. 
 
 **Added:**
 
@@ -27,7 +35,9 @@
   This tool was developed by Dr. Enrico De Pieri from University of Basel
   Children’s Hospital (UKBB). Please see the {ref}`documentation <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_FemoralTorsionTool.py>`
   or the web cast (Link to come) by Enrico on his work and publication on femoral torsion. 
-
+- A {ref}`new model example <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_KneeForcesExample.py>` 
+  which shows how to calculate an estimate for the medial and lateral knee force in models
+  with simple revolute knee joints. 
 - New utility macros which makes it easier to create 3D grid arrays.
   `MESHTRIPLES(xarr, yarr, zarr)` and  `MESHGRID(xarr,yarr,zarr)`. I.e. for
   creating arrays of all points in a 3D grid array.
@@ -48,6 +58,11 @@
   the mass is assigned to both the scapula and clavicle segment. 
 - The `OptimalFiberLength` and `TotalTendonLength` in the TLEM leg models, are no longer 'DesignVar', when the
   parameters are also calibrated. This prevents huge amount warning when calibrating the leg muscles.
+- The `L5LContactNode`,`L4LContactNode`,`L3LContactNode`,
+  `L4LContactNode`,`L1LContactNode` nodes where scaled using the Right node Z-axis. This
+  is now changed to use the Left node Z-axis.
+- The trunk model has been restructured in preparation for a full Thoracic model. 
+  This means that all the vertebra and ribs have been created in the model structure, but only as `AnyFolder&` references to the single rigid thorax segment.
 
 **Removed:**
 
