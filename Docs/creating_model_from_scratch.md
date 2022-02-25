@@ -186,7 +186,7 @@ if the model is loaded now. While motion prescription in elaborated on in {doc}`
 
 The total number of DOFs & motion constraints can be found by double clicking the `Study` object in the Model tree. This opens the Object Description which
 will show 378 DOFs but only 336 constraints. Therefore 42 more motion constraints are needed to make the simulation work.
-The AMMR thankfully provides 42 default soft drivers (see this {tutorials:doc}`tutorial which introduces soft drivers <A_Getting_started_modeling/lesson3>`) which set joint angle values that hold the body in a default standing posture.
+The AMMR thankfully provides 42 default soft drivers (see this {doc}`tutorial which introduces soft drivers <tutorials:A_Getting_started_modeling/lesson3>`) which set joint angle values that hold the body in a default standing posture.
 These are termed `DefaultMannequinDrivers` and are included in the `Model` folder below.
 
 Due to the inclusion of soft drivers, solver settings need to be readjusted (see yellow highlting in code below).
@@ -277,7 +277,7 @@ Main =
 
 **STEP 9**
 
-Load the model and run the `InverseDynamics` analysis contained within `Study`. Refer to {tutorials:doc}`this tutorial <Interface_features/lesson3>` on how to view/plot the simulation outputs.
+Load the model and run the `InverseDynamics` analysis contained within `Study`. Refer to {doc}`this tutorial <tutorials:Interface_features/lesson3>` on how to view/plot the simulation outputs.
 
 We encourage you to experiment further by adding more complex model components such as motion drivers, external forces etc. to the current model. Refer
 to {doc}`these tutorials <tutorials:The_mechanical_elements/index>` to understand these features better.

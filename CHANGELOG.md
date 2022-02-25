@@ -10,6 +10,23 @@
 - Improved the selected output by adding the m. Semimembranosus and m.
   Semitendinosus contributions to the knee flexor group for both muscle activity (`KneeFlexorMuscleActivity`)
   and muscle force (`KneeFlexorMuscleForce`).
+- Updated and improved origin of the hamstring muscles. The muscles biceps
+  femoris, semitendinosus and semimembranosus have been updated to improve their
+  moment arms in certain lunge movements. The origin points at pelvis has been
+  moved down a bit to ensure the muscles wraps correctly in lunge movements,
+  while maintaining the same moment arm in gait etc.
+- Fixed a bug in scaling where the mass of the trunk model pelvis was used in some cases instead of the 
+  pelvis mass from the leg model. This could cause a slightly incorrect mass to be used for the pelvis segment.
+- Fixed a problem where custom scaling and {bm_constant}`_SCALING_XYZ_` would 
+  prevent the model from loading.
+- Fixed some logical issues with the `ContactSurfaceDistanceAndVelocityDepLinPush.any` file.
+   - Fix length calculation and drawing of the normal force
+   - Fixed an extrapolation error when changing the internal setting `_SMOOTHING_FUNCTION_PROFILE_` to
+     `FUNC_PROFILE_BSPLINE`. We now cap the height ratio to only be in the interpolation area. 
+     Values outside infers that no contact is present.
+- Refactored the way Trunk nodes are mirrored between left and right. This is more consistent with the remaining bodyparts and handled in the cadaver data files.
+- The {ref}`example to evaluate moments arms <sphx_glr_auto_examples_Validation_plot_EvaluateMomentArms.py>` 
+  now works when the shoulder rhythm is enabled. 
 
 - Ensure consistency of arm muscle parameters when switching between simple muscle models and 3 element muscle models.
   The two muscles had a few differences in the underlying parameters. Mostly due
@@ -29,6 +46,21 @@
 
 **Added:**
 
+- Added a {ref}`new model tool <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_FemoralTorsionTool.py>`
+  to apply femoral torsion to the TLEM2.0 leg model.
+  This tool was developed by Dr. Enrico De Pieri from University of Basel
+  Children’s Hospital (UKBB). Please see the {ref}`documentation <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_FemoralTorsionTool.py>`
+  or the web cast (Link to come) by Enrico on his work and publication on femoral torsion. 
+- A {ref}`new model example <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_KneeForcesExample.py>` 
+  which shows how to calculate an estimate for the medial and lateral knee force in models
+  with simple revolute knee joints. 
+- New utility macros which makes it easier to create 3D grid arrays.
+  `MESHTRIPLES(xarr, yarr, zarr)` and  `MESHGRID(xarr,yarr,zarr)`. I.e. for
+  creating arrays of all points in a 3D grid array.
+
+  See the file: {menuselection}`Body --> AAUHuman --> BodyModels --> GenericBodyModel --> Helper.ClassTemplates.any`
+
+
 **Changed:**
 
 - Improve the trunk model's strength for trunk external rotation. This change
@@ -37,10 +69,22 @@
   geometry is updated to better match anatomical text books. Likewise, the
   latissimus dorsi muscles is discretized into more branches so it has branch
   inserting on every vertebra.
-
-
+- The `clavicle` entry in the `Anthropometric.SegmentMasses` folder have been renamed to `shoulder`. 
+  This makes it consistent with the rest of varaibles in the folder, and correctly reflect that 
+  the mass is assigned to both the scapula and clavicle segment. 
 - The `OptimalFiberLength` and `TotalTendonLength` in the TLEM leg models, are no longer 'DesignVar', when the
   parameters are also calibrated. This prevents huge amount warning when calibrating the leg muscles.
+- The `L5LContactNode`,`L4LContactNode`,`L3LContactNode`,
+  `L4LContactNode`,`L1LContactNode` nodes where scaled using the Right node Z-axis. This
+  is now changed to use the Left node Z-axis.
+- The trunk model has been restructured in preparation for a full Thoracic model. 
+  This means that all the vertebra and ribs have been created in the model structure, but only as `AnyFolder&` references to the single rigid thorax segment.
+
+**Removed:**
+
+- The previously deprecated BM keyword `_LEG_MODEL_Leg_` has been completely removed.
+
+
 
 ## AMMR 2.3.4 (2021-07-05)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.5060249.svg)](https://doi.org/10.5281/zenodo.5060249)
