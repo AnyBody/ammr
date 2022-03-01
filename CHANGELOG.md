@@ -67,6 +67,12 @@
   is now changed to use the Left node Z-axis.
 - The trunk model has been restructured in preparation for a full Thoracic model. 
   This means that all the vertebra and ribs have been created in the model structure, but only as `AnyFolder&` references to the single rigid thorax segment.
+- Updated the neutral scapula position and scapula sliding. The default neutral scapula position 
+  (medial rotation) have been updated to a more realistic position. Additionally, the node at scapula
+   TS point on which scapula slides have been moved to provide a more realistic clearance between 
+   the scapula and the ellipsoid sliding surface representing thorax. 
+   
+  Thanks to Johanna Menze (@menzejo) from the University of Bern from updating the model.
 
 **Removed:**
 
