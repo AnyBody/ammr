@@ -597,6 +597,7 @@ Switch for the clavicula rotation rhythm. If enabled axial rotation of the clavi
 
 
 ```{ammr:bm_statement} BM_ARM_DETAILED_HAND
+:deprecated:
 
 Switch for enabling the detailed hand.
 
@@ -667,6 +668,71 @@ Keyword for the muscle model for both the right arm.
           - :any:`_MUSCLES_SIMPLE_`: Constant to use simple muscles
           - :any:`_MUSCLES_3E_HILL_`: Constant to use 3 element Hill-type muscle
           - :any:`BM_ARM_MUSCLES_BOTH`: 
+:::
+```
+
+
+
+```{ammr:bm_statement} BM_HAND_MODEL
+
+Parameter defining the Hand model used.
+
+:::{eval-rst}
+:Default: :any:`_HAND_MODEL_OFF_`
+:Example: ``#define BM_HAND_MODEL _HAND_MODEL_OFF_``
+:Options: - :any:`_HAND_MODEL_OFF_`:Switch for using the simple one-segment hand
+          - :any:`_HAND_MODEL_ANYBODY_`: Switch for using old detailed hand without muscles
+          - :any:`_HAND_MODEL_RUHM_`: Switch for using the detailed Regensburg-Ulm Hand Model (RUHM).
+:::
+```
+
+
+
+```{ammr:bm_statement} BM_HAND_FINGER_RHYTHM
+
+A switch to use a kinematic rhythm for the fingers.
+
+:::{eval-rst}
+:Default: OFF
+:Example: ``#define BM_HAND_FINGER_RHYTHM OFF``
+:Options: - :any:`OFF`:None
+          - :any:`ON`: None
+:::
+```
+
+
+
+```{ammr:bm_statement} BM_HAND_STRENGTH_INDEX
+
+Index parameter to specify muscle strength for the hand model.
+
+:::{eval-rst}
+:Default: 1.0
+:Example: ``#define BM_HAND_STRENGTH_INDEX 1.0``
+:::
+```
+
+
+
+```{ammr:bm_statement} BM_HAND_STRENGTH_INTRINSIC_INDEX
+
+Index parameter to specify muscle strength for the intrinsic hand model.
+
+:::{eval-rst}
+:Default: :any:`BM_HAND_STRENGTH_INDEX`
+:Example: ``#define BM_HAND_STRENGTH_INTRINSIC_INDEX BM_HAND_STRENGTH_INDEX``
+:::
+```
+
+
+
+```{ammr:bm_statement} BM_HAND_STRENGTH_EXTRINSIC_INDEX
+
+Index parameter to specify muscle strength for the extrinsic hand model.
+
+:::{eval-rst}
+:Default: :any:`BM_HAND_STRENGTH_INDEX`
+:Example: ``#define BM_HAND_STRENGTH_EXTRINSIC_INDEX BM_HAND_STRENGTH_INDEX``
 :::
 ```
 

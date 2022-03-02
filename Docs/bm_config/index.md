@@ -51,6 +51,7 @@ See the following links for details on BM parameters related to different body p
 
 leg
 arm
+hand
 trunk
 mannequin
 scaling

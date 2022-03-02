@@ -62,6 +62,21 @@ Switch for using the default foot model
 Switch for using the GM foot model"
 :::
 
+:::{ammr:bm_constant} _HAND_MODEL_OFF_
+:value: 0
+Switch for using the simple one-segment hand
+:::
+
+:::{ammr:bm_constant} _HAND_MODEL_ANYBODY_
+:value: 1
+Switch for using old detailed hand without muscles
+:::
+
+:::{ammr:bm_constant} _HAND_MODEL_RUHM_
+:value: 2
+Switch for using the detailed Regensburg-Ulm Hand Model (RUHM).
+:::
+
 :::{ammr:bm_constant} _ELLIPSOID_CONTACT_
 :value: 1
 Switch for using ellipsoid contact between scapula and thorax

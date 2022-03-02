@@ -24,11 +24,12 @@ bm_all = filterp(".*")
 bm_leg = filterp('^BM_LEG')
 bm_trunk = filterp('^BM_TRUNK')
 bm_arm = filterp('^BM_ARM')
+bm_hand = filterp('^BM_HAND')
 bm_scaling = filterp('^BM_SCALING')
 bm_mannequin = filterp('^BM_MANNEQUIN_DRIVER')
 bm_jointtype = filterp('^BM_JOINT_TYPE')
 
-used_param = set().union(*[bm_leg, bm_trunk, bm_arm, bm_scaling, bm_mannequin, bm_jointtype])
+used_param = set().union(*[bm_leg, bm_trunk, bm_arm, bm_hand, bm_scaling, bm_mannequin, bm_jointtype])
 
 bm_other ={k: bm_all[k] for k in sorted(set(bm_all) - used_param)}
 
@@ -39,6 +40,7 @@ targets = [
     ("Docs/bm_config/LegTable.csv", "bmtable.csv.jinja", bm_leg),
     ("Docs/bm_config/TrunkTable.csv", "bmtable.csv.jinja", bm_trunk),
     ("Docs/bm_config/ArmTable.csv", "bmtable.csv.jinja", bm_arm),
+    ("Docs/bm_config/HandTable.csv", "bmtable.csv.jinja", bm_hand),
     ("Docs/bm_config/ScalingTable.csv", "bmtable.csv.jinja", bm_scaling),
     ("Docs/bm_config/MannequinTable.csv", "bmtable.csv.jinja", bm_mannequin),
     ("Docs/bm_config/JointTypeTable.csv", "bmtable.csv.jinja", bm_jointtype),
