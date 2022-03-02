@@ -25,6 +25,8 @@
      `FUNC_PROFILE_BSPLINE`. We now cap the height ratio to only be in the interpolation area. 
      Values outside infers that no contact is present.
 - Refactored the way Trunk nodes are mirrored between left and right. This is more consistent with the remaining bodyparts and handled in the cadaver data files.
+- Fix a problem in MoCap models where calibration studies were not run automatically in model 
+  which only had 3-element muscles on the upper body.
 - The {ref}`example to evaluate moments arms <sphx_glr_auto_examples_Validation_plot_EvaluateMomentArms.py>` 
   now works when the shoulder rhythm is enabled. 
 
@@ -59,6 +61,8 @@
   creating arrays of all points in a 3D grid array.
 
   See the file: {menuselection}`Body --> AAUHuman --> BodyModels --> GenericBodyModel --> Helper.ClassTemplates.any`
+- Added a warning when the glenohumeral flexion/abduction in the 
+  mannequin values can cause problems as start guess for the kinematic solver. An small automatic pertubation of the Humerus orientation (`Axes0`) are also added in these cases so the shoulder rhythm will work as expected. 
 
 
 **Changed:**
@@ -79,6 +83,12 @@
   is now changed to use the Left node Z-axis.
 - The trunk model has been restructured in preparation for a full Thoracic model. 
   This means that all the vertebra and ribs have been created in the model structure, but only as `AnyFolder&` references to the single rigid thorax segment.
+- Updated the neutral scapula position and scapula sliding. The default neutral scapula position 
+  (medial rotation) have been updated to a more realistic position. Additionally, the node at scapula
+   TS point on which scapula slides have been moved to provide a more realistic clearance between 
+   the scapula and the ellipsoid sliding surface representing thorax. 
+   
+  Thanks to Johanna Menze (@menzejo) from the University of Bern from updating the model.
 
 **Removed:**
 
