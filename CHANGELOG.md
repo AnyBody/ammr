@@ -115,6 +115,10 @@
   landmark position. New `Tuber_ischiadicum` nodes have been added at the bony landmark.
   The renaming also makes it easier to identify what the node is used for across the ammr
   models.
+- Changed the way the arm joint moment measures are calculated. This affect the output when no muscles are added to the model, and the  
+  moments are now calculated and expressed in same way as when muscles are included. The moments are
+  expressed in a fixed proximal reference frame instead of using the euler axis of rotation which may not be othogonal.
+  All moment contribution also now found using search function which will be more robust. 
 
 ## AMMR 2.3.3 (2021-03-24)
 
