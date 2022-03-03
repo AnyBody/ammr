@@ -43,6 +43,9 @@ This root file contains the following include files:
 AnyFolder &PsoasMajorRightRef=PsoasMajorRightReference;
 AnyFolder &PsoasMajorLeftRef=PsoasMajorLeftReference;
 
+
+/* Data section */
+
 #ifndef BM_TRUNK_DATASET
   // default dataset
   #define BM_TRUNK_DATASET "TrunkData1.1"
@@ -71,13 +74,40 @@ AnyFolder STL = {
 //  };
 //};
 
+
+/* Segment & node construction section */
+
+
 // Including all spinal segments
 #include "SegmentsLumbar.any"
-#include "SegmentsThorax.any"
 #include "SegmentsCervicalSpine.any"
 
-AnyFolder JointMuscles = {};
 
+// Thorax can be either rigid or deformable with more segments
+
+AnyFolder  SegmentsRibCage = {};
+
+
+
+#include "SegmentsThorax.any"  
+
+SegmentsRibCage = {
+  AnyFolder &SternumSeg = .SegmentsThorax.ThoraxSeg;
+  AnyFolder RibsRight = {};
+  AnyFolder RibsLeft = {};
+};
+
+
+// nodes for muscle attachments
+#include "NodesSegmentsThoraxIndividual.any"
+#include "NodesForThoracicMuscles.any"
+#include "RibCageMuscleNodes.any"
+
+// nodes for interaction with environment 
+#include "ContactPoints.any"
+
+/* Joint muscle section */
+AnyFolder JointMuscles = {};
 
 #if BM_TRUNK_CERVICAL_MUSCLES == OFF
   #include "JointMusclesCervical.any" //Adds muscles to the joints in the cervical spine
@@ -94,12 +124,12 @@ AnyFolder JointMuscles = {};
 #endif
 
 
+/* Section for kinematic constraints & stiffnesses */
+
 #include "JointsLumbar.any"
 #include "JointsCervical.any"
-//#include "JointsThoracic.any"  // PLACEHOLDER for the thorax integration
 
-#include "ContactPoints.any"
-//#include "NodeForScalingExt.any"
+/* Muscle definition section */
 
 // switch cervical muscles on if flags provided
 #if BM_TRUNK_CERVICAL_MUSCLES != OFF
@@ -110,25 +140,33 @@ AnyFolder JointMuscles = {};
 #endif
 
 
-// switch thoracic muscles on if flags provided
-//#if BM_TRUNK_THORACIC_MUSCLES != OFF
-// // PLACEHOLDER FOR THE THORAX
-//#endif
+#if BM_TRUNK_THORACIC_FUTURE
+  #include "MuscleParametersRibCage.any"
+  #include "MusclesRibCage.any"
+ // PLACEHOLDER FOR THE THORAX
+#endif
+
+
+AnyFolder MusclesSpineRight = {};
+AnyFolder MusclesSpineLeft= {};
 
 // switch lumbar muscles on if flags provided (NEEDS A REVISIT WHEN THORAX IS ADDED)
 #if BM_TRUNK_LUMBAR_MUSCLES != OFF
-  #include "NodesForThoracicMuscles.any"
   #include "Buckle.any"
-  #include "MusclesSpineRight.any"
-  #include "MusclesSpineLeft.any"
   #include "RectusAbdominis.any"
-  #include "Spinalis.any"
-
   #include "Transversus.any"
   
+
+  #include "MusclesSpineRight.any"
+  #include "MusclesSpineLeft.any"
+  #include "Spinalis.any"
+
   #include "MuscleParametersSpineSimpleRight.any"
   #include "MuscleParametersSpineSimpleLeft.any"     
 #endif
+
+
+/* Soft tissue section */
 
 #if BM_TRUNK_LUMBAR_LIGAMENTS == ON
    #include "LumbarLigamentNodes.any"
@@ -143,17 +181,13 @@ AnyFolder JointMuscles = {};
 //    // PLACEHOLDER FOR THE CERVICAL SPINE LIGAMENTS
 // #endif
 
-
-
-
-
-
+/* Other sections */
 
 
 //Summation of masses in the spine
 AnyFolder MassSummation=
 {
-    AnyVar Mass=.SegmentsThorax.SkullSeg.Mass+
+    AnyVar Mass=.SegmentsCervicalSpine.SkullSeg.Mass+
               .SegmentsThorax.ThoraxSeg.Mass+
               .SegmentsLumbar.L1Seg.Mass+
               .SegmentsLumbar.L2Seg.Mass+

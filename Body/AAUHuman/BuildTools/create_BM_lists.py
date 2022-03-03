@@ -1,26 +1,20 @@
-import xmltodict
+from pathlib import Path
+
+import toml
+
+bm_param_file = Path(__file__).parent / "../bm-parameters.toml"
+data = toml.load(bm_param_file)
 
 
-with open('../BodyModel.define.xml') as fp:
-    anyxdefs = xmltodict.parse(fp.read())['anyxdefs']
+parameters = list(data["parameters"])
+constants = list(data["constants"])
 
 
-parameters = [
-    e['@name']
-    for e in anyxdefs['parameter']
-]
-
-constants = [
-    e['@name']
-    for e in anyxdefs['constant']
-]
-
-with open('bm-parameters.txt','w') as fp:
+with open("bm-parameters.txt", "w") as fp:
     fp.write(" ".join(parameters))
 
-with open('bm-constants.txt','w') as fp:
+with open("bm-constants.txt", "w") as fp:
     fp.write(" ".join(constants))
-
 
 
 anyscript_highlighters = f"""
@@ -37,5 +31,5 @@ anyscript_highlighters = f"""
 
 """
 
-with open('anyscript_highlighters.txt', 'w') as fp:
+with open("anyscript_highlighters.txt", "w") as fp:
     fp.write(anyscript_highlighters)

@@ -1,0 +1,90 @@
+#include "libdef.any"
+
+Main = 
+{
+  // BodyModel configuration:
+  #include "Model/BodyModelConfiguration.any"
+  
+  Main.HumanModel.Anthropometrics = {
+     AnyVar FemoralTorsionRight = 20;
+     AnyVar FemoralTorsionLeft = 20;
+     
+  // This adds some vizualization of the femoral torsion 
+  #define FEMORALTORSION_VISUALIZE_MORPHING_POINTS
+  };
+  
+  
+  // Ensure that this is included before HumanModel.any
+  #include "<ANYBODY_PATH_MODELUTILS>/FemoralTorsion/Include.any"
+
+  
+  
+  // Include the Human model from AMMR
+  #include "<ANYBODY_PATH_BODY>\HumanModel.any"
+  
+  // Define your models posture or movement
+  #include "Model\Mannequin.any"
+  
+ 
+  // Compose the model used by the study
+  AnyFolder Model = 
+  {  
+     // Center of Mass (COM) position in the ground YZ plane
+     // COM balance driver can be excluded with:
+     // #define EXCLUDE_COM_BALANCE_DRIVERS
+     AnyVector CenterOfMassXZ = {0,0};
+     
+     // Positioning of the right and left feet. 
+     // Ground-foot constraints can be excluded with:
+     // #define EXCLUDE_FOOT_CONSTRAINTS
+     Environment.GlobalRef.RightFootPrint = {
+        AnyVec3 HeelPosition = {-0.08, 0, 0.14};
+        AnyVec3 ToeDirection = {1, 0, 0.1}; 
+     };
+     Environment.GlobalRef.LeftFootPrint = {
+        AnyVec3 HeelPosition = {-0.08, 0, -0.14};
+        AnyVec3 ToeDirection = {1, 0, -0.1}; 
+     };
+    
+    // Include the body part of the Human model
+    AnyFolder &BodyModel = .HumanModel.BodyModel;
+    
+    // Include the default mannequin drivers
+    AnyFolder &DefaultMannequinDrivers = .HumanModel.DefaultMannequinDrivers;
+ 
+    // Environment files are used to include objects surrounding human,
+    // e.g. global reference frame
+    #include "Model\Environment.any"   
+    
+    AnyFolder ModelEnvironmentConnection = 
+    {
+      // This file contains all contraints to simulate standing human
+      #include "Model/JointsAndDrivers.any"
+      
+      // Ground reaction force prediction
+      #include "Model/GRFPrediction.any"
+    };
+  };
+  
+  AnyBodyStudy Study =
+  {
+    AnyFolder &Model = .Model;  
+    
+    Gravity={0.0, -9.81, 0.0};
+    nStep = 1;
+    
+    // Overdeterminate solver is needed while using the 
+    // soft default mannequin drivers.
+    Kinematics.SolverType = KinSolOverDeterminate;
+    InitialConditions.SolverType = Kinematics.SolverType;
+    
+    //Include the next line to have a camera in the model
+    // Note: to generate videos FFMPEG must be available on the
+    // system.
+    //#include "Model/VideoCamera.any"
+  };
+  
+  #include "Model\RunAppSequence.any"
+  
+}; //Main
+

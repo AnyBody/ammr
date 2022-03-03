@@ -87,9 +87,20 @@ extensions = [
     "cloud_sptheme.ext.escaped_samp_literals",
     "cloud_sptheme.ext.issue_tracker",
     "cloud_sptheme.ext.table_styling",
-    "ammr-directives",
+    "ammr_directives",
     "inline_highlight",
+    "myst_parser"
 ]
+
+myst_enable_extensions = [
+    "colon_fence",
+    "deflist",
+    "dollarmath",
+    "amsmath",
+    "html_image",
+    "substitution"
+]
+
 
 
 sphinx_gallery_conf = {
@@ -117,8 +128,8 @@ templates_path = ["_templates"]
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
-# source_suffix = ['.rst', '.md']
-source_suffix = ".rst"
+source_suffix = ['.rst', '.md']
+#source_suffix = ".rst"
 
 # The master toctree document.
 master_doc = "contents"
@@ -137,7 +148,7 @@ language = "en"
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ["_build", "README.rst", "Thumbs.db", ".DS_Store", "exts" ]
+exclude_patterns = ["_build", "README.md", "Thumbs.db", ".DS_Store", "exts" ]
 
 # The name of the Pygments (syntax highlighting) style to use.
 highlight_language = "AnyScriptDoc"
@@ -146,7 +157,7 @@ pygments_style = "AnyScript"
 
 current_year = os.environ.get("YEAR", datetime.now().year)
 
-ams_version = os.environ.get("AMS_VERSION", "7.3.3")
+ams_version = os.environ.get("AMS_VERSION", "7.3.4")
 if not re.match("^\d\.\d\.\d", ams_version):
     raise ValueError("Wrong format for AMS version, environment variable")
 ams_version_short = ams_version.rpartition(".")[0]
@@ -169,8 +180,9 @@ if not re.match("^\d\.\d\.\d", ammr_version):
 
 ammr_version_short = ammr_version.rpartition(".")[0]
 
+#.. include:: /bm_config/Substitutions.txt
+
 rst_epilog = f"""
-.. include:: /bm_config/Substitutions.txt
 
 .. |AMS| replace:: AnyBody Modeling System™
 .. |AMS_VERSION_X| replace:: {ams_version_x}
@@ -186,13 +198,34 @@ rst_epilog = f"""
 """
 
 
+myst_substitutions = {
+  "AMS": "AnyBody Modeling System™",
+  "AMS_VERSION_X": ams_version_x,
+  "AMS_VERSION": ams_version_x,
+  "AMS_VERSION_SHORT": ams_version_short,
+  "AMMR_VERSION_SHORT": ams_version_short,
+  "AMMR_VERSION": ammr_version,
+  "CURRENT_YEAR": current_year,
+  "AMMR_DEMO_INST_DIR": f"`~/Documents/{ams_version_x}/AMMR.v{ammr_version}-Demo`",
+  "DOI": "[![DOI image](https://zenodo.org/badge/DOI/10.5281/zenodo.1250764.svg)](https://doi.org/10.5281/zenodo.1250764)",
+  "WHAT_IS_NEW": f"{{ref}}`What's new in AMMR {ammr_version} <whats-new>`",
+}
+
+
+
 no_index = """
 .. meta::
    :robots: noindex
 """
+myst_html_meta = {}
 
 if tags.has("draft"):
     rst_epilog = rst_epilog + no_index
+    myst_html_meta["robots"] = "noindex"
+
+
+
+
 
 
 # General information about the project.
