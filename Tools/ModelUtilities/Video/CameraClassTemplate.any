@@ -68,7 +68,7 @@ Main = {
   
   /// From FFMPEG: The range of the quantizer scale is 0-51: where 0 is lossless,
   /// and 51 is worst possible. A lower value is a higher quality.
-  #var AnyIntVar ConstantRateFactor = 11;
+  #var AnyIntVar ConstantRateFactor = 30;
   
   /// The ratio between video resolution and input images saved  
   /// from anybody. Default is to save images in same resolution as 
@@ -78,9 +78,9 @@ Main = {
   
   /// The video codec ffmepg will use to create the video. 
   /// Choose "libxvid" for best for compatibility (eg. with PowerPoint)
-  /// or "libx264" for best performance
-  #var AnyString VideoCodec = "libx264";
-  
+  /// or "libvpx-vp9" for best performance
+  #var AnyString VideoCodec = "libvpx-vp9";
+    
   /// This is the start frame used when creating Videos. This can be used to 
   /// for skipping some of the initial frames. 
   #var AnyInt VideoStartFrame = 0; 
@@ -94,8 +94,6 @@ Main = {
   #var AnyStringVar VideoPathFFMPEG = "ffmpeg.exe";
   #endif
   
-  /// Video BitRate in KiloByte
-  #var AnyInt VideoBitRate = 8000;
   
   /// Determines the speed of the video. Setting it to 
   /// nStep/(tEnd-tStart) make the video run in real time. 
@@ -145,6 +143,7 @@ Main = {
   /// Video output framerate. 
   #var AnyIntVar GifOutputFrameRate = VideoOutputFrameRate;
 
+  
   
   
   /// Operation to show a preview of what the camera sees. 
@@ -408,8 +407,11 @@ Main = {
     /// Convert video using FFMPEG
     AnyOperationShellExec ConvertVideo = 
     {
+      
+      
       #var FileName = "cmd.exe";
       #var AnyStringVar inputfile = ..VideoName + "_" + ..Camera.Recorder.CounterFormat +".png";
+      
       
       #var AnyFileVar out_file = ..VideoOutputPath+ "/"+ ..VideoName + ".mp4";
       
@@ -421,18 +423,26 @@ Main = {
       #endif
       AnyFloat InputOutputScale = ..VideoInputScale;
 
-      #var Arguments = CmdOpt +
+      #var AnyStringVar ffmpegBaseArg = 
       "call "+strquote(..VideoPathFFMPEG) +
       iffun(_OVER_WRITE, " -y","") +
       " -r " + strval(..VideoInputFrameRate) +
-      " -start_number " + strval(..VideoStartFrame,..Camera.Recorder.CounterFormat) +
+      " -start_number " + strval(..VideoStartFrame,..Camera.Recorder.CounterFormat) + 
       " -i "+strquote(inputfile) +
-      "  -c:v " + ..VideoCodec + " -crf "+ strval(..ConstantRateFactor)+" -profile:v baseline -level 3.0 -pix_fmt yuv420p -c:a aac -ac 2 -strict experimental -b:a 128k -movflags faststart"+
-      " -vf "+ strquote("fps="+strval(..VideoOutputFrameRate))+
-      " -vf "+ strquote("scale=trunc(iw/(2*"+strval(InputOutputScale,"%g" )+"))*2:trunc(ih/(2*"+strval(InputOutputScale,"%g" )+"))*2")+
-      " -metadata comment="+strquote("Created with the AnyBody Modeling System.")+" " +
-      strquote(FilePathCompleteOf(out_file));
+       " -metadata comment=" + strquote("Created with the AnyBody Modeling System.") + 
+      " -vf "+ strquote("fps="+strval(..VideoOutputFrameRate)+",scale=trunc(iw/(2*"+strval(InputOutputScale,"%g" )+"))*2:trunc(ih/(2*"+strval(InputOutputScale,"%g" )+"))*2") + 
+      " -an";
+
+      #var AnyStringVar CodecArgs = "  -c:v " + ..VideoCodec + " -crf " + strval(..ConstantRateFactor)+" -level 3.0 -pix_fmt yuv420p -strict experimental -movflags +faststart ";
+      #var AnyStringVar CodecArgs_VP9 = " -c:v libvpx-vp9" + " -crf " + strval(..ConstantRateFactor)+" -pix_fmt yuv420p -row-mt 1 ";
+
+
+      #var AnyStringVar OutputArg = strquote(FilePathCompleteOf(out_file));
       
+      #var Arguments = iffun(neqfun(..VideoCodec,"libvpx-vp9"),
+                 CmdOpt + ffmpegBaseArg + CodecArgs + OutputArg,
+                 CmdOpt + ffmpegBaseArg + CodecArgs_VP9 +" -pass 1 -f null NUL && " + ffmpegBaseArg + CodecArgs_VP9 + " -pass 2 " + OutputArg
+      );
       #var WorkDir = ..VideoOutputPath;
       #var Show = DesignVar(_DEBUG);
     };
@@ -447,7 +457,7 @@ Main = {
       #endif
       
       #var FileName = "cmd.exe";
-      #var  Arguments = CmdOpt + "del " + strquote(..VideoName+ "_" + "*.png");
+      #var  Arguments = CmdOpt + "del " + strquote(..VideoName+ "_" + "*.png") + " && del ffmpeg2pass-0.log";
       
       #var WorkDir = ..VideoOutputPath;
       #var Show = _DEBUG;
