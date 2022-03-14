@@ -25,6 +25,8 @@
      `FUNC_PROFILE_BSPLINE`. We now cap the height ratio to only be in the interpolation area. 
      Values outside infers that no contact is present.
 - Refactored the way Trunk nodes are mirrored between left and right. This is more consistent with the remaining bodyparts and handled in the cadaver data files.
+- Fix a problem in MoCap models where calibration studies were not run automatically in model 
+  which only had 3-element muscles on the upper body.
 - The {ref}`example to evaluate moments arms <sphx_glr_auto_examples_Validation_plot_EvaluateMomentArms.py>` 
   now works when the shoulder rhythm is enabled. 
 
@@ -46,6 +48,10 @@
 - Added the TKA knee bend demo model back into the repository. This beta demo model
   was temporarily removed in the AMMR 2.0.0 release. The model is a very **crude** example 
   of how to use FDK with knee implant.
+- Added a warning when the glenohumeral flexion/abduction in the 
+  mannequin values can cause problems as start guess for the kinematic solver. An small automatic pertubation of the Humerus orientation (`Axes0`) are also added in these cases so the shoulder rhythm will work as expected. 
+- Add the option to override more settings in the `DefaultMannequinDrivers` section. Now the driver 
+  type (`CType=Hard/Soft`), can be overridden directly by the users. 
 
 **Changed:**
 
@@ -65,11 +71,19 @@
   is now changed to use the Left node Z-axis.
 - The trunk model has been restructured in preparation for a full Thoracic model. 
   This means that all the vertebra and ribs have been created in the model structure, but only as `AnyFolder&` references to the single rigid thorax segment.
+- Updated the neutral scapula position and scapula sliding. The default neutral scapula position 
+  (medial rotation) have been updated to a more realistic position. Additionally, the node at scapula
+   TS point on which scapula slides have been moved to provide a more realistic clearance between 
+   the scapula and the ellipsoid sliding surface representing thorax. 
+   
+  Thanks to Johanna Menze (@menzejo) from the University of Bern from updating the model.
 
 **Removed:**
 
 - The previously deprecated BM keyword `_LEG_MODEL_Leg_` has been completely removed.
-
+- The special mannequin driver switches for the old leg model (`BM_MANNEQUIN_DRIVER_ANKLE_EVERSION_RIGHT/LEFT`) 
+  have been deprecated. Instead the switch used for the TLEM1/2 leg models
+  ({bm_statement}`BM_MANNEQUIN_DRIVER_ANKLE_SUBTALAR_EVERSION_RIGHT`) can now be used for all leg models. 
 
 
 ## AMMR 2.3.4 (2021-07-05)

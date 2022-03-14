@@ -129,13 +129,13 @@ And secondly switch off muscles in the Main file by uncommenting these lines:
 
 ```AnyScriptDoc
 §#ifndef BM_LEG_MUSCLES_BOTH
-        #define BM_LEG_MUSCLES_BOTH _MUSCLES_NONE_
+        #define BM_LEG_MUSCLES_BOTH OFF
 #endif
     #ifndef BM_ARM_MUSCLES_BOTH
-      #define BM_ARM_MUSCLES_BOTH _MUSCLES_NONE_
+      #define BM_ARM_MUSCLES_BOTH OFF
     #endif
     #ifndef BM_TRUNK_MUSCLES
-      #define BM_TRUNK_MUSCLES _MUSCLES_NONE_
+      #define BM_TRUNK_MUSCLES OFF
     #endif§
 ```
 
