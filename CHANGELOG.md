@@ -47,7 +47,12 @@
   See the file: {menuselection}`Body --> AAUHuman --> BodyModels --> GenericBodyModel --> Helper.ClassTemplates.any`
 - Added a warning when the glenohumeral flexion/abduction in the 
   mannequin values can cause problems as start guess for the kinematic solver. An small automatic pertubation of the Humerus orientation (`Axes0`) are also added in these cases so the shoulder rhythm will work as expected. 
-
+- Many AnyScript example models now include an option to automatically 
+  create a video from the model. To use this functionality find and run 
+  the new `VideoTool.CreateVideo` operation under the Study folder.
+  This will automatically run the example model, output still frames,
+  and combine them into a video afterwards. The script can easily be
+  addapted and moved to other examples. 
 
 **Changed:**
 
