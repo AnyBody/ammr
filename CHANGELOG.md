@@ -74,6 +74,7 @@
    the scapula and the ellipsoid sliding surface representing thorax. 
    
   Thanks to Johanna Menze (@menzejo) from the University of Bern from updating the model.
+- Renamed a few variable named `r` which could collide with builtin `r` variable. 
 
 **Removed:**
 
