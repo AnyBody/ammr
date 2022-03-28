@@ -89,7 +89,8 @@ extensions = [
     "cloud_sptheme.ext.table_styling",
     "ammr_directives",
     "inline_highlight",
-    "myst_parser"
+    "myst_parser",
+    "sphinxext.opengraph",
 ]
 
 myst_enable_extensions = [
@@ -393,6 +394,15 @@ else:
         )
     else:
         intersphinx_mapping["tutorials"] = ("https://anyscript.org/tutorials/", None)
+
+
+# -- Options for OpenGraph Ext. ----------------------------------------------
+# settings to control how the OpenGraph extension generates meta tags
+ogp_site_url = "https://anyscript.org/"
+ogp_site_name = "AMMR Documentation"
+ogp_image = "https://anyscript.org/ammr-doc/_static/AMMR_Logo.png"
+ogp_use_first_image = True # if not found defaults to 'ogp_image'
+
 
 
 def setup(app):
