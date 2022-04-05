@@ -1,11 +1,11 @@
 Main.ModelSetup ={
-  /// Various EnvironmentParameters for setting up the model
+  /// Various EnvironmentParameters for adjusting the Box
   AnyFolder EnvironmentParameters = {
-    AnyInt GravityDirection  = 1 ; //y
-    AnyVar BoxWeight = DesignVar(10);
-    AnyVec3 BoxJii= {0.1,0.1,0.1}; 
-    AnyVec3 BoxDimensions ={0.36,0.40,0.53};
-    AnyVec3 RightHandle ={0,0.18,0.265};
+    AnyInt GravityDirection  = 1 ; // y
+    AnyVar BoxWeight = 10; // kg
+    AnyVec3 BoxJii= {0.1,0.1,0.1}; // Inertia
+    AnyVec3 BoxDimensions ={0.36,0.40,0.53}; // m (depth, height, width)
+    AnyVec3 RightHandle ={0,0.18,0.265}; 
     AnyVec3 LeftHandle ={0,0.18,-0.265};
     AnyMat33 RightHandleOrientation =RotMat(0,x)*RotMat(0,y)*RotMat(0,z);
     AnyMat33 LeftHandleOrientation =RotMat(0,x)*RotMat(0,y)*RotMat(0,z);
@@ -13,70 +13,63 @@ Main.ModelSetup ={
 };
 
 AnySeg Box ={
-  Mass=Main.ModelSetup.EnvironmentParameters.BoxWeight;
-  Jii=Main.ModelSetup.EnvironmentParameters.BoxJii;
+  Mass= Main.ModelSetup.EnvironmentParameters.BoxWeight;
+  Jii= Main.ModelSetup.EnvironmentParameters.BoxJii;
   
-  AnyRefNode AnatomicalFrame = {};
   AnyFunTransform3DLin GeomScale = {
     ScaleMat ={{1,0,0},{0,1,0},{0,0,1}};
     Offset={0,0,0};
   };
-  AnyRefNode FrameAlignedWithGround ={
-    //ARel= RotMat(0.5*pi,y)*RotMat(-0.5*pi,z);
-    //ARel= RotMat(-pi,z);
-    //AnyDrawRefFrame drw ={};
-  };
+
+  AnyRefNode FrameAlignedWithGround ={};
   
   AnyDrawSurf Box ={
     FileName = "box";
-    ScaleXYZ =(1/(0.3))*Main.ModelSetup.EnvironmentParameters.BoxDimensions;
-    Opacity =0.1;
+    ScaleXYZ =(1 / 0.3) * Main.ModelSetup.EnvironmentParameters.BoxDimensions;
+    Opacity = 0.1;
   };
   
   AnyRefNode RightHandle ={       
-    //AnyDrawRefFrame drw ={ScaleXYZ={1,1,1}*0.1; RGB={0,0,1};};
     sRel =Main.ModelSetup.EnvironmentParameters.RightHandle;  
     ARel=Main.ModelSetup.EnvironmentParameters.RightHandleOrientation;  
   };
   
   AnyRefNode LeftHandle  ={     
-    //AnyDrawRefFrame drw ={ScaleXYZ={1,1,1}*0.1; RGB={0,0,1};};
     sRel =Main.ModelSetup.EnvironmentParameters.LeftHandle;  
     ARel=Main.ModelSetup.EnvironmentParameters.LeftHandleOrientation;
   };
   
   AnyRefNode BoxCorner1 ={
-    //AnyDrawSphere drw ={ScaleXYZ ={1,1,1}*0.01;};
-    sRel= 0.5*{
+    sRel= 0.5 * {
       Main.ModelSetup.EnvironmentParameters.BoxDimensions[0],
       -Main.ModelSetup.EnvironmentParameters.BoxDimensions[1],
-      Main.ModelSetup.EnvironmentParameters.BoxDimensions[2]};
+      Main.ModelSetup.EnvironmentParameters.BoxDimensions[2]
+    };
   };
   
   AnyRefNode BoxCorner2 ={
-    //AnyDrawSphere drw ={ScaleXYZ ={1,1,1}*0.01;};
-    sRel= 0.5*{
+    sRel= 0.5 * {
       -Main.ModelSetup.EnvironmentParameters.BoxDimensions[0],
       -Main.ModelSetup.EnvironmentParameters.BoxDimensions[1],
-      Main.ModelSetup.EnvironmentParameters.BoxDimensions[2]};
+      Main.ModelSetup.EnvironmentParameters.BoxDimensions[2]
+    };
   };
   
   AnyRefNode BoxCorner3 ={
-    //AnyDrawSphere drw ={ScaleXYZ ={1,1,1}*0.01;};
-    sRel= 0.5*{
+    sRel= 0.5 * {
       Main.ModelSetup.EnvironmentParameters.BoxDimensions[0],
       -Main.ModelSetup.EnvironmentParameters.BoxDimensions[1],
-      -Main.ModelSetup.EnvironmentParameters.BoxDimensions[2]};
+      -Main.ModelSetup.EnvironmentParameters.BoxDimensions[2]
+    };
   };
   
   AnyRefNode BoxCorner4 ={
-    //AnyDrawSphere drw ={ScaleXYZ ={1,1,1}*0.01;};
-    sRel= 0.5*{
+    sRel= 0.5 * {
       -Main.ModelSetup.EnvironmentParameters.BoxDimensions[0],
       -Main.ModelSetup.EnvironmentParameters.BoxDimensions[1],
-      -Main.ModelSetup.EnvironmentParameters.BoxDimensions[2]};
+      -Main.ModelSetup.EnvironmentParameters.BoxDimensions[2]
+    };
   };
-  
 };
 
 AnyKinLinear Lin_Box ={
@@ -90,7 +83,8 @@ AnyKinRotational Rot_Box ={
   Type=RotAxesAngles;
 };
 
-//Adds joints between human and env these will be include in kinematic model not inverse dyn model
+// Adds joints between human and the box.
+// these will be include in kinematic model and not the inverse dynamics study
 Main.ModelSetup.MocapExtraDrivers.ExtraDrivers ={
   AnyKinLinear HandleHandRight_lin ={
     Ref=0;
@@ -104,6 +98,7 @@ Main.ModelSetup.MocapExtraDrivers.ExtraDrivers ={
     Type=RotAxesAngles;
   };
   
+  // We allow linear translations of the box but restrain it from rotating
   AnyFunConst WeightFunLin ={Value ={1,1,1}*1;};
   AnyFunConst WeightFunRot ={Value ={1,1,1}*0.00;};
   
@@ -156,10 +151,11 @@ Main.ModelSetup.MocapExtraDrivers.ExtraDrivers ={
   };
   
   
-  //Make the box flat wrt ground
+  // Here we ensure that the box is always parallel to the ground
   AnyFunConst WeightPlaneToGround={
     Value ={1,1}*0.1;
   };
+
   //rotational measure from ground to box
   AnyKinRotational BoxGroundRotation ={
     AnyRefFrame &ref1=Main.EnvironmentModel.GlobalRef;
@@ -219,12 +215,11 @@ Main.ModelSetup.MocapExtraDrivers.ExtraDrivers ={
     DriverPos ={0,0};
     DriverVel ={0,0};
     Reaction.Type ={Off,Off};
-    //CType={Soft,Soft};
     WeightFun ={ &.WeightPlaneToGround};
   };
 };
 
-//open the folder for joint output  
+// We save the box kinematic information so wecan use it to drive the box in the inverse study
 Main.Studies.MarkerTracking.JointAngleOutputs ={ 
   AnyOutputFile BoxPos = {
    FileName = ANYBODY_PATH_OUTPUT + "/" + Main.ModelSetup.TrialSpecificData.TrialFileName + "_BoxPos.txt";
@@ -239,6 +234,7 @@ Main.Studies.MarkerTracking.JointAngleOutputs ={
   };
 };
 
+// Here we load in the kinematic data for the box to use in the inverse study
 Main.Studies.InverseDynamicStudy.ModelEnvironmentConnection.JointsAndDrivers  ={
  AnyKinDriver BoxDriver = {
    #include "<ANYBODY_PATH_AMMR>/Tools/AnyMocap/InterpolateJointAngleData.any"
@@ -253,7 +249,8 @@ Main.Studies.InverseDynamicStudy.ModelEnvironmentConnection.JointsAndDrivers  ={
 };
   
   
-//this folder add reactions between human and ..
+// this folder add reactions between human hands and the box
+// this helps avoid large moments around the wrist joint since we have no box rotation
 AnyFolder Support ={   
   AnyFolder HandBoxConnection ={
     AnyKinLinear HandBoxRight_Lin ={
