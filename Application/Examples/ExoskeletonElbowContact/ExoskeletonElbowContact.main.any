@@ -1,0 +1,100 @@
+#include "../libdef.any"
+
+/*
+This is a demo of the class template to simulate the rigid-body contact forces 
+at the human-exoskeleton interface using conditional contact elements. The example
+is based on the Human Standing Template from the AMMR. 
+
+In this demo, external loads are applied on both hands and a synthetic lifting 
+motion is simulated through "Model\Mannequin.any". 
+
+A simple exoskeleton assisting the right elbow is simulated and the effects of 
+the exoskeleton can be studied by comparing the Right arm (assisted) with the Left 
+arm (unassisted). 
+
+The class template of ContionalContactSegs is included before Main.
+
+The synthetic motion of the mannequin is implemented through the file 
+"Model\Mannequin.any". 
+
+The rest of the changes (defining the exoskeleton, hand loads, human-exo interface,
+etc.) are implemented in the file #include "ChangesForExoModel.any"
+*/
+
+// Include class template for Conditional Contact. 
+#include "<ANYBODY_PATH_AMMR>/Tools/EnvironmentConnection/IncludeConnectors.any"
+
+Main = 
+{
+  // Include Changes for Exoskeleton
+  #include "ChangesForExoModel.any"
+
+  
+  // BodyModel configuration:
+  // Specify which limb segments to include, the type of muscles, joints, scaling etc
+  #include "Model/BodyModelConfiguration.any"
+  
+  // Include the Human model from AMMR
+  #include "<ANYBODY_PATH_BODY>\HumanModel.any"
+  
+  // Define desired posture or movement of the model
+  #include "Model\Mannequin.any"
+ 
+  // Compose the model used by the study
+  AnyFolder Model = 
+  {  
+     // Center of Mass (COM) position in the ground YZ plane
+     // COM balance driver can be excluded with:
+     // #define EXCLUDE_COM_BALANCE_DRIVERS
+     AnyVector CenterOfMassXZ = {0,0};
+     
+     // Positioning of the right and left feet. 
+     // Ground-foot constraints can be excluded with:
+     // #define EXCLUDE_FOOT_CONSTRAINTS
+     Environment.GlobalRef.RightFootPrint = {
+        AnyVec3 HeelPosition = {-0.08, 0, 0.14};
+        AnyVec3 ToeDirection = {1, 0, 0.1}; 
+     };
+     Environment.GlobalRef.LeftFootPrint = {
+        AnyVec3 HeelPosition = {-0.08, 0, -0.14};
+        AnyVec3 ToeDirection = {1, 0, -0.1}; 
+     };
+    
+    // Include the body part of the Human model
+    AnyFolder &BodyModel = .HumanModel.BodyModel;
+    
+    // Include the default mannequin drivers
+    AnyFolder &DefaultMannequinDrivers = .HumanModel.DefaultMannequinDrivers;
+ 
+    // Environment files are used to include objects surrounding human,
+    // e.g. global reference frame
+    #include "Model\Environment.any"   
+    
+    AnyFolder ModelEnvironmentConnection = 
+    {
+      // This file contains all contraints to simulate the standing human
+      #include "Model/JointsAndDrivers.any"
+      
+      // Ground reaction force prediction
+      #include "Model/GRFPrediction.any"
+    };
+  };
+  // Define Study for running kinematics and inverse dynamics simulation analyses
+  AnyBodyStudy Study =
+  {
+    // Include the Model within the Study
+    AnyFolder &Model = .Model;  
+    
+    Gravity={0.0, -9.81, 0.0};
+    nStep = 50;
+    
+    // Overdeterminate solver is needed while using the 
+    // soft default mannequin drivers.
+    Kinematics.SolverType = KinSolOverDeterminate;
+    InitialConditions.SolverType = Kinematics.SolverType ;
+  };
+  // This is readymade simulation package including some pre-processing steps and the InverseDynamics analysis
+  #include "Model\RunAppSequence.any"
+  
+}; //Main
+

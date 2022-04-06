@@ -1,0 +1,299 @@
+// This file implements all the changes required for simulating the exoskeleton
+// contact model. Firstly, external loads are applied at the hands, then an 
+// exoskeleton model is defined (segments, joints, and assistive torque). Finally,
+// the exoskeleton is connected to the human kinematically and kinetically.
+
+// The exoskeleton is a simple elbow exoskeleton consisting of two segments 
+// connected by a revolute joint corresponding to the elbow. Please note that the
+// exoskeleton does not allow pronation/supination of the forearm.
+
+// -----------------------------------------------------
+// Apply external loads on Right and Left hands. This will allow in
+// studying the effect due to the exoskeleton, which acts on the right arm.
+// -----------------------------------------------------
+// Please note that objects that are declared elsewhere in the model can be accessed
+// in other parts of the the script.
+Main.Model.ModelEnvironmentConnection = {  
+  AnyFolder HandLoads = {
+    AnyForce3D RHand = {
+      F = {0,-100,0};
+      AnyRefFrame &RHand = Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Glove.ConnectionNode;
+      AnyDrawForce drw = {};
+    };
+    AnyForce3D LHand = {
+      F = {0,-100,0};
+      AnyRefFrame &LHand = Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Glove.ConnectionNode;
+      AnyDrawForce drw = {};
+    };    
+  }; // HandLoads
+}; // Model.ModelEnvironmentConnection
+
+
+// -----------------------------------------------------
+// Step 1: Define Exoskeleton Model
+//   1a. Create two segments for upper arm and lower arm
+//   1b. Define revolute joint between the two segments
+//   1c. Define assistive torque at the revolute joint from 1b.
+// -----------------------------------------------------  
+Main.Model.Environment = {
+  AnyFolder Exoskeleton = {
+    AnyFolder Right = {
+      // Create Exo Upper Arm Seg
+      AnySeg ExoUpperArm = {
+        r0 = {0,1.3,0.4};
+        Mass = 0.5;
+        Jii = 0.3*{0.01,0.002,0.01};
+        
+        AnyRefNode ElbowNode = { // Reference node for joint with ExoLowerArm
+          sRel = {0.0,-0.2,0};
+          AnySurfCylinder Visual = {
+            Radius = 0.03;
+            Length = 0.03;
+            CapRatio = 0.2;
+            CapRatio2 = 0;
+            viewSurface.Visible = 1;
+            viewSurface.RGB = {0.2,0.5,1};
+//            CreateMotionOutput.r = On;
+//            CreateMotionOutput.Axes = On;
+//            AnyDrawParamSurf drw = {RGB = {0.2,0.5,1}; ScaleXYZ = {0.5,1.7,1};};
+          };            
+        };
+        
+        AnyRefNode UArmNode = { // Reference node for attaching to human upper arm
+          sRel = {0.0,0.0,-0.07};
+//          AnyDrawRefFrame drw = {RGB = {0,0.5,1}; ScaleXYZ = 0.2*{1,1,1};};
+        };
+
+        AnyRefNode VisualNode = {sRel = {0,0.05,0};};     
+        AnyFolder Visual = {
+          AnyRefFrame &ref1 = .ElbowNode;
+          AnyRefFrame &ref2 = .VisualNode;         
+          AnyDrawPLine pline = 
+          {
+            Opacity = 1;
+            Thickness = 0.02;
+            RGB = {0.0, 0.5, 1.0};
+          };
+        };              
+      }; // ExoUpperArm   
+      
+      // Create Exo Lower Arm Seg
+      AnySeg ExoLowerArm = {
+        r0 = {0.3,1.1,0.4};
+        Axes0 = {{0,-1,0},{1,0,0},{0,0,1}};
+        Mass = 0.5;
+        Jii = 0.3*{0.01,0.002,0.01};
+        
+        AnyRefNode ElbowNode = { // Reference node for joint with ExoUpperArm
+          sRel = {0,0.15,0};
+          AnySurfCylinder Cyl_Visual = {
+            Radius = 0.03;
+            Length = 0.02;
+            sRel = {0,0,-Length};
+            CapRatio = 0;
+            viewSurface.Visible = 1;
+            viewSurface.RGB = {0,1,1};
+            CreateMotionOutput.r = On;
+            CreateMotionOutput.Axes = On;
+          };  
+        };
+        
+        AnyRefNode LArmNode = { // Reference node for attaching to human lower arm
+          sRel = {0,0.0,-0.07};
+//          AnyDrawRefFrame drw = {RGB = {0,1,1}; ScaleXYZ = 0.2*{1,1,1};};
+        };
+
+        AnyRefNode VisualNode = {sRel = {0,-0.05,0};};     
+        AnyFolder Visual = {
+          AnyRefFrame &ref1 = .ElbowNode;
+          AnyRefFrame &ref2 = .VisualNode;         
+          AnyDrawPLine pline = 
+          {
+            Opacity = 1;
+            Thickness = 0.02;
+            RGB = {0.0, 1.0, 1.0};
+          };
+        }; 
+      }; // ExoLowerArm
+
+      // Create Exo Elbow Joint
+      AnyRevoluteJoint ExoElbowJnt = {
+        Axis = z;
+        AnyRefNode &ExoLowerArmNode = .ExoLowerArm.ElbowNode;
+        AnyRefNode &ExoUpperArmNode = .ExoUpperArm.ElbowNode;
+      };  
+      // Add Assistive Torque at Exo Elbow Joint
+      AnyForce ExoTorque = {
+        AnyJoint& Jnt = .ExoElbowJnt;
+        AnyFloat JntPos = pi+Jnt.Pos;
+        F = -10*JntPos^3;  // Force, equivalent to torque in Newton.metre
+        AnyDrawForce drw = {
+          ForceScale = 0.01;
+          ScaleToView = Off;};
+      };  
+    }; // Right
+  }; // Exoskeleton
+}; // Model.Environment
+
+// -----------------------------------------------------
+// Step 2: Define Human-Exoskeleton Interface
+//   2a. Define reference nodes on human upper and lower
+//       arms for creating the connection with corresponding
+//       exo segs.
+//   2b. Define kinematic connection between the human and
+//       exoskeleton.
+//   2c. Define kinetic connection between the corresponding
+//       human and exoskeleton segments.
+// ----------------------------------------------------- 
+Main.Model.ModelEnvironmentConnection = {  
+  AnyFolder HumanExoConnection = {
+    AnyFolder Right = {
+      // Define reference nodes on human for connecting the exo. The reference nodes on the 
+      // human segment must be coincident with the corresponding reference nodes on the 
+      // exo segments for attaching the exoskeleton. In this example, the elbow joint of
+      // the human and exoskeleton are assumed to be aligned. The elbow nodes on the
+      // human are referred and attachment nodes are created on the human using the known  
+      // relative distance between the exo elbow and exo attachment points  
+      AnyRefNode &Hum_UArm_Elb = Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Humerus.fe;
+      AnyRefNode &Hum_LArm_Elb = Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Ulna.fe;
+      Hum_UArm_Elb = {
+        //        AnyDrawRefFrame drw = {};
+        AnyRefNode ExoConNode = {
+          sRel = {0,0.2,0};
+          ARel = RotMat(-pi/2,y);
+          AnyDrawRefFrame drw = {};
+        };
+      };
+      
+      Hum_LArm_Elb = {
+        //        AnyDrawRefFrame drw = {};
+        AnyRefNode ExoConNode = {
+          sRel = {0,0.15,0};
+          ARel = RotMat(pi/2,y)*RotMat(pi,x);
+          AnyDrawRefFrame drw = {};
+        };        
+      };
+      
+      // Create kinematic connections between human and exoskeleton
+      // The exoskeleton consists of 2 segments with 5 constraints
+      // from the revolute joint. Thus, 7 constraints are required 
+      // between the human and exoskeleton to fully define the kinematics
+      // of the exoskeleton. This is implemented by defining 6 constraints
+      // between the upper arm segments and one constraint between the 
+      // lower arm segments. Other combinations are possible as well. 
+      AnyFolder KinematicConnection = {
+        AnyStdJoint HumExoUArm = {
+          AnyRefFrame &HumUpperArmNode = ..Hum_UArm_Elb.ExoConNode;
+          AnyRefFrame &ExoUpperArmNode = Main.Model.Environment.Exoskeleton.Right.ExoUpperArm.UArmNode;
+          Constraints.Reaction.Type = {Off,Off,Off,Off,Off,Off};
+        }; 
+        AnyKinEq HumExoLArm = {
+          AnyKinLinear lin = {
+            AnyRefFrame &HumLowerArmNode = ...Hum_LArm_Elb.ExoConNode;
+            AnyRefFrame &ExoLowerArmNode = Main.Model.Environment.Exoskeleton.Right.ExoLowerArm.LArmNode;
+            Ref = 1;
+          };
+          MeasureOrganizer = {0};
+          Reaction.Type = {Off};
+        }; 
+      }; // KinematicConnection
+      
+      
+      // Create kinetic connections between human and exoskeleton
+      // Please note that kinematic and kinetic connections can be
+      // defined independently of each other. Firstly, please ensure
+      // that reaction forces (Reaction.Type) are set to Off in the 
+      // definition of kinematic constraints. 
+      // The kinetic connection between the human and exoskeleton are
+      // implemented by the conditional contact elements. The contact
+      // elements are set up between corresponding nodes on the 
+      // exoskeleton and the human. The nodes are created using another
+      // class template, EllipticCylinderPointsGrid, which allows the
+      // creation of a grid of nodes in an elliptical cylinder shape.
+      // The generated nodes have their orientations aligned such that 
+      // the normals of the nodes are locally normal to the circumference
+      // of the ellipse and one of the axes is parallel to the cylinder
+      // axis.
+      // The generated nodes are then used by the contact class template
+      // to set up conditional contact elements to simulate approximately
+      // static Coloumb friction at the interface.
+      AnyFolder KineticConnection = {
+        ConditionalContactMultiPoints UpperArm(
+        BASE_SEG = Main.Model.Environment.Exoskeleton.Right.ExoUpperArm,
+        BASE_NODES_FOLDER = Main.Model.Environment.Exoskeleton.Right.ExoUpperArm.UArmNode.NodeGroup,
+        BASE_FRAME = Main.Model.Environment.Exoskeleton.Right.ExoUpperArm.UArmNode.NodeGroup,
+        NORMAL_DIRECTION = "Z",
+        TARGET_NODES_FOLDER = ..Hum_UArm_Elb.ExoConNode.NodeGroup,
+        NUMBER_OF_NODES = 16, 
+        SHOW_TRIGGER_VOLUME = 1
+        ) =
+        {
+          Settings = { Strength = 2000;};
+          EllipticCylinderPointsGrid ExoNodes (
+          CENTER_FRAME = Main.Model.Environment.Exoskeleton.Right.ExoUpperArm.UArmNode,
+          AXIS = "Y",
+          LENGTH = 0.05,
+          MAJ_AX = 0.04,
+          MIN_AX = 0.04,
+          nROWS = 2,
+          nCOLS = 8) = { 
+            Settings = {
+              StartAngle = pi; // Points grid class can be used for partial surface
+              EndAngle = 2*pi;
+            };
+          };
+          
+          EllipticCylinderPointsGrid HumanNodes (
+          CENTER_FRAME = ...Hum_UArm_Elb.ExoConNode,
+          AXIS = "Y",
+          LENGTH = 0.05,
+          MAJ_AX = 0.04,
+          MIN_AX = 0.04,
+          nROWS = 2,
+          nCOLS = 8) = {
+            Settings = {
+              StartAngle = pi;
+              EndAngle = 2*pi;
+            };
+          };
+        };
+        
+        ConditionalContactMultiPoints LowerArm(
+        BASE_SEG = Main.Model.Environment.Exoskeleton.Right.ExoLowerArm,
+        BASE_NODES_FOLDER = Main.Model.Environment.Exoskeleton.Right.ExoLowerArm.LArmNode.NodeGroup,
+        BASE_FRAME = Main.Model.Environment.Exoskeleton.Right.ExoLowerArm.LArmNode.NodeGroup,
+        NORMAL_DIRECTION = "Z",
+        TARGET_NODES_FOLDER = ..Hum_LArm_Elb.ExoConNode.NodeGroup,
+        NUMBER_OF_NODES = 16, 
+        SHOW_TRIGGER_VOLUME = 1
+        ) =
+        {
+          Settings = { Strength = 2000;};
+          EllipticCylinderPointsGrid ExoNodes (
+          CENTER_FRAME = Main.Model.Environment.Exoskeleton.Right.ExoLowerArm.LArmNode,
+          AXIS = "Y",
+          LENGTH = 0.05,
+          MAJ_AX = 0.04,
+          MIN_AX = 0.04,
+          nROWS = 2,
+          nCOLS = 8) = {};
+          
+          EllipticCylinderPointsGrid HumanNodes (
+          CENTER_FRAME = ...Hum_LArm_Elb.ExoConNode,
+          AXIS = "Y",
+          LENGTH = 0.05,
+          MAJ_AX = 0.04,
+          MIN_AX = 0.04,
+          nROWS = 2,
+          nCOLS = 8) = {};
+        };
+        
+        
+      }; // KineticConnection
+      
+    }; // Right
+  }; // HumanExoConnection
+  
+  
+  
+}; // Model.ModelEnvironmentConnection
