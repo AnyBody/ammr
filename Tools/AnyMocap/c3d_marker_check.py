@@ -21,17 +21,19 @@ class Context(NamedTuple):
 def check_c3d_file(context: Context, c3d_file: str):
     """ Check if fpath is a writeable file """
     
-    report_str = "" 
+    report_str = ( 
+        "This is an example of analyzing a c3d file.\n" + 
+        "If nothing is returned from python the warning will not be triggered.\n"
+    )
 
     if not os.path.isfile(c3d_file):
-        return f"{c3d_file} is not a file\n"
+        return f"{c3d_file} is not a file\n\n"
 
     c3d = ezc3d.c3d(c3d_file)
     points_used = c3d['parameters']['POINT']['USED']['value'][0];  # Print the number of points used
     point_data = c3d['data']['points']
 
-    report_str += f"Points used: {points_used}\n"
-    report_str += f"Points data: \n{point_data}\n"
+    report_str += f"Number of Points in c3d file: {points_used}\n"
     
     return report_str
 
