@@ -51,7 +51,11 @@
 - Added a warning when the glenohumeral flexion/abduction in the 
   mannequin values can cause problems as start guess for the kinematic solver. An small automatic pertubation of the Humerus orientation (`Axes0`) are also added in these cases so the shoulder rhythm will work as expected. 
 - There is a new option to override more settings in the `DefaultMannequinDrivers` section. Now the driver 
-  type (`CType=Hard/Soft`), can be overridden directly by the users. 
+  type (`CType=Hard/Soft`), can be overridden directly by the users.
+- Fixed a lack of robustness with muscle recruitment of the abdominal muscles (`buckle support`). 
+  Muscle recruitment could previously fail with high lumbar flexion.
+  A small support "artificial muscle" has beeen added to the buckle 
+  segment, preventing muscle reqruitment from failing. 
 
 **Changed:**
 
