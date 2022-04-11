@@ -20,11 +20,14 @@
 - Fixed a problem where custom scaling and {bm_constant}`_SCALING_XYZ_` would 
   prevent the model from loading.
 - Fixed some logical issues with the `ContactSurfaceDistanceAndVelocityDepLinPush.any` file.
+   
    - Fix length calculation and drawing of the normal force
    - Fixed an extrapolation error when changing the internal setting `_SMOOTHING_FUNCTION_PROFILE_` to
      `FUNC_PROFILE_BSPLINE`. We now cap the height ratio to only be in the interpolation area. 
      Values outside infers that no contact is present.
-- Refactored the way Trunk nodes are mirrored between left and right. This is more consistent with the remaining bodyparts and handled in the cadaver data files.
+
+- Refactored the way Trunk nodes are mirrored between left and right. This is more consistent 
+  with the remaining bodyparts and handled in the cadaver data files.
 - Fix a problem in MoCap models where calibration studies were not run automatically in model 
   which only had 3-element muscles on the upper body.
 - The {ref}`example to evaluate moments arms <sphx_glr_auto_examples_Validation_plot_EvaluateMomentArms.py>` 
@@ -32,19 +35,19 @@
 
 **Added:**
 
-- Added a {ref}`new model tool <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_FemoralTorsionTool.py>`
+- Added a new {ref}`femoral torsion tool <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_FemoralTorsionTool.py>`
   to apply femoral torsion to the TLEM2.0 leg model.
-  This tool was developed by Dr. Enrico De Pieri from University of Basel
+  This model tool was developed by Dr. Enrico De Pieri from University of Basel
   Children’s Hospital (UKBB). Please see the {ref}`documentation <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_FemoralTorsionTool.py>`
-  or the web cast (Link to come) by Enrico on his work and publication on femoral torsion. 
-- A {ref}`new model example <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_KneeForcesExample.py>` 
-  which shows how to calculate an estimate for the medial and lateral knee force in models
-  with simple revolute knee joints. 
-- New utility macros which makes it easier to create 3D grid arrays.
+  or the [web cast](https://www.anybodytech.com/modeling-subject-specific-femoral-torsion-for-the-analysis-of-lower-limb-joint-loads/)
+  by Enrico on his work and publication on femoral torsion. 
+- Added a new {ref}`Knee force model <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_KneeForcesExample.py>` 
+  example. The model shows how to calculate a simple estimate of the medial and lateral knee force. 
+- Two new utility macros which makes it easier to create 3D grid arrays have been added to the model repository.
   `MESHTRIPLES(xarr, yarr, zarr)` and  `MESHGRID(xarr,yarr,zarr)`. I.e. for
-  creating arrays of all points in a 3D grid array.
+  creating arrays of all points in a 3D grid array. More information in the file: 
+  {menuselection}`Body --> AAUHuman --> BodyModels --> GenericBodyModel --> Helper.ClassTemplates.any`
 
-  See the file: {menuselection}`Body --> AAUHuman --> BodyModels --> GenericBodyModel --> Helper.ClassTemplates.any`
 - Added a warning when the glenohumeral flexion/abduction in the 
   mannequin values can cause problems as start guess for the kinematic solver. An small automatic pertubation of the Humerus orientation (`Axes0`) are also added in these cases so the shoulder rhythm will work as expected. 
 - Many AnyScript example models now include an option to automatically 
@@ -53,6 +56,12 @@
   This will automatically run the example model, output still frames,
   and combine them into a video afterwards. The script can easily be
   addapted and moved to other examples. 
+- There is a new option to override more settings in the `DefaultMannequinDrivers` section. Now the driver 
+  type (`CType=Hard/Soft`), can be overridden directly by the users.
+- Fixed a lack of robustness with muscle recruitment of the abdominal muscles (`buckle support`). 
+  Muscle recruitment could previously fail with high lumbar flexion.
+  A small support "artificial muscle" has beeen added to the buckle 
+  segment, preventing muscle reqruitment from failing. 
 
 **Changed:**
 
@@ -60,29 +69,32 @@
   improves the implementation of the internal/external obliques and latissimus
   dorsi muscles. More branches are added to the internal obliques and the
   geometry is updated to better match anatomical text books. Likewise, the
-  latissimus dorsi muscles is discretized into more branches so it has branch
+  latissimus dorsi muscles is discretized into more branches so it has branches
   inserting on every vertebra.
 - The `clavicle` entry in the `Anthropometric.SegmentMasses` folder have been renamed to `shoulder`. 
   This makes it consistent with the rest of varaibles in the folder, and correctly reflect that 
   the mass is assigned to both the scapula and clavicle segment. 
 - The `OptimalFiberLength` and `TotalTendonLength` in the TLEM leg models, are no longer 'DesignVar', when the
-  parameters are also calibrated. This prevents huge amount warning when calibrating the leg muscles.
+  parameters are also calibrated. This prevents huge amount warnings when calibrating the leg muscles.
 - The `L5LContactNode`,`L4LContactNode`,`L3LContactNode`,
-  `L4LContactNode`,`L1LContactNode` nodes where scaled using the Right node Z-axis. This
+  `L4LContactNode`,`L1LContactNode` nodes were scaled using the Right node Z-axis. This
   is now changed to use the Left node Z-axis.
 - The trunk model has been restructured in preparation for a full Thoracic model. 
-  This means that all the vertebra and ribs have been created in the model structure, but only as `AnyFolder&` references to the single rigid thorax segment.
+  This means that all the vertebra and ribs have been created in the model structure, but only as
+  `AnyFolder&` references to the single rigid thorax segment.
 - Updated the neutral scapula position and scapula sliding. The default neutral scapula position 
   (medial rotation) have been updated to a more realistic position. Additionally, the node at scapula
-   TS point on which scapula slides have been moved to provide a more realistic clearance between 
-   the scapula and the ellipsoid sliding surface representing thorax. 
-   
+  TS point on which scapula slides have been moved to provide a more realistic clearance between 
+  the scapula and the ellipsoid sliding surface representing thorax.  
   Thanks to Johanna Menze (@menzejo) from the University of Bern from updating the model.
+- Renamed a few variable named `r` which could collide with builtin `r` variable. 
 
 **Removed:**
 
 - The previously deprecated BM keyword `_LEG_MODEL_Leg_` has been completely removed.
-
+- The special mannequin driver switches for the old leg model (`BM_MANNEQUIN_DRIVER_ANKLE_EVERSION_RIGHT/LEFT`) 
+  have been deprecated. Instead the switch used for the TLEM1/2 leg models
+  ({bm_statement}`BM_MANNEQUIN_DRIVER_ANKLE_SUBTALAR_EVERSION_RIGHT`) can now be used for all leg models. 
 
 
 ## AMMR 2.3.4 (2021-07-05)
@@ -120,6 +132,10 @@
   landmark position. New `Tuber_ischiadicum` nodes have been added at the bony landmark.
   The renaming also makes it easier to identify what the node is used for across the ammr
   models.
+- Changed the way the arm joint moment measures are calculated. This affect the output when no muscles are added to the model, and the  
+  moments are now calculated and expressed in same way as when muscles are included. The moments are
+  expressed in a fixed proximal reference frame instead of using the euler axis of rotation which may not be othogonal.
+  All moment contribution also now found using search function which will be more robust. 
 
 ## AMMR 2.3.3 (2021-03-24)
 

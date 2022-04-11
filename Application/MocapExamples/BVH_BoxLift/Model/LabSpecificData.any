@@ -1,0 +1,38 @@
+Main.ModelSetup.LabSpecificData = {
+  // Switch to enable Inertial MoCap functionality
+  #path MOCAP_FORCE_PLATE_FILE "ForcePlates.any"
+  #path MOCAP_BVHSETTINGS "BVHSettings.any"
+  #path BODY_MODEL_CONFIG_FILE "BodyModelConfig.any" 
+  #path MOCAP_MARKER_PROTOCOL_FILE "<ANYMOCAP_PATH>/Protocols/XsensBVH.any"
+  #path MOCAP_EXTRA_DRIVERS_FILE "ExtraDrivers.any" 
+  
+  #define MOCAP_INPUT_DATA_TYPE "BVH" 
+  #define MOCAP_C3D_DATA_PATH "../BVH-files"
+  #define MOCAP_USE_GRF_PREDICTION ON
+  #define MOCAP_FILTER_JOINT_ANGLES ON
+  
+  // This model includes a Box object which is connected at both hands. The experimental
+  // data (.BVH files) does not include information about the box. What we do is to model
+  // the box obejct with the correction dimensions and mass properties. We let the human
+  // move the Box and track the kinematics of the box during the markertracking study.
+  // For simplicity we constrain the box from rotating. The joint angles of the box are
+  // saved and used as input to a driver during the inverse dynamics study.
+  Main = {EnvironmentModel = {#include "box.any"};};
+  
+
+  // GRF prediction models run with more numerical stability using a second order 
+  // criterion. This is due to the big difference in strength of recruited actuators
+  // (artificial muscles) which is used as contract element under the feet 
+  // (high strength) and human-ground residuals (low strength)
+  Main.Studies.InverseDynamicStudy.InverseDynamics.Criterion.Power = 2;
+  Gravity = -9.81*{0,1,0};
+   
+  LowPassFilterSettings = {
+    MarkerFilterCutOffFrequency = 5; 
+  };
+  
+  // This calculates the segment dimensions from the BVH rig
+  // The will have to be modified if a different type of BVH
+  // file is used.
+  #include "CalculateSegmentDimensionsFromBVH.any"
+};
