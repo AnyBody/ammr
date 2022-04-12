@@ -35,6 +35,10 @@
 
 **Added:**
 
+- Added a new {ref}`exoskeleton concept model <sphx_glr_auto_examples_Other_plot_ExoConcept_BoxLift.py>`
+  for simulation-driven conceptual design of exoskeletons. The model was developed by Prof. John Rasmussen from
+  Aalborg University. Please see the [web cast](https://www.anybodytech.com/simulation-driven-conceptual-design-of-exoskeletons/)
+  for more details.
 - Added a new {ref}`femoral torsion tool <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_FemoralTorsionTool.py>`
   to apply femoral torsion to the TLEM2.0 leg model.
   This model tool was developed by Dr. Enrico De Pieri from University of Basel
