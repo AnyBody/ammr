@@ -3,7 +3,15 @@
 
 /**
 This model demonstrates a simple application of the class template
-ConditionalContactMultiPoints.
+ConditionalContactMultiPoints. This class creates conditional
+contact elements between nodes on the base object (base nodes) and 
+nodes on the target object (target nodes). The contact elements are
+created indvidually between corresponding nodes on the two objects.
+That is, between <BaseObject>.Node0 and <TargetObject>.Node0, then 
+between <BaseObject>.Node1 and <TargetObject>.Node1, and so on. 
+This allows each node to have a unique orientation that can be used 
+to define the normal and frictional directions for the contact 
+elements. 
 
 The model consists of two segments. The first segment is grounded
 to the global ref using AnyStdJnt that simulates the reaction forces
@@ -90,10 +98,10 @@ Main = {
     // are defined here.
 
     AnyFolder Kinetics = {   
-      // Rotating force on Seg2 in YZ plane for first half interval
       AnyFloat tStart = Main.Study.tStart;
       AnyFloat tEnd = Main.Study.tEnd;
       AnyFloat tSim = tEnd - tStart;
+      // Rotating force on Seg2 in YZ plane for first half interval
       AnyForce3D ForceYZPlane = {
         AnyRefFrame &Seg2 = Main.Model.Seg2.LoadNode;        
         F = iffun(ltfun(t,.tStart+0.5*.tSim),300*{0,sin(2*(t-.tStart)*2*pi/.tSim),cos(2*(t-.tStart)*2*pi/.tSim)},{0.0,0.0,0.0});
@@ -112,7 +120,10 @@ Main = {
         AnyDrawForce drw = {};
       };
       
-      // Contact model between Seg2 and Seg1
+      // Contact model between Seg2 and Seg1. 
+      // Please see also the class template for detailed definitions
+      // of the class arguments
+      // #include "<ANYBODY_PATH_AMMR>/Tools/EnvironmentConnection/Connectors/ConditionalContact/ConditionalContactMultiPoints.any"
       ConditionalContactMultiPoints ContactS2S1(
       BASE_FRAME = Main.Model.Seg2,
       BASE_NODES_FOLDER = Main.Model.Seg2.NodeGroup,
@@ -149,13 +160,16 @@ Main = {
         // class. The contact nodes can be defined else where in the model
         // by the user and by other methods also. The requirement is that
         // the base and target nodes folder point to the folder containing
-        // the contact nodes.
+        // the contact nodes. The nodes are named Node0, Node1, Node2, etc. 
+        // And, the NUMBER_OF_NODES is equal to (or less than) the number
+        // of nodes in the base and target folders.
 
         // The EllipticCylinderPointsGrid class creates a grid of nodes 
         // in an elliptical cylinder shape with their reference frames
         // oriented to be tangential to the ellipse and parallel to the 
         // cylinder axis with the normal pointing inwards. Please see the 
         // class template and its demo for more details. 
+        // #include "<ANYBODY_PATH_AMMR>/Tools/EnvironmentConnection/Connectors/PointsGenerator/EllipticCylinderPointsGrid.any"
         EllipticCylinderPointsGrid BaseNodes (
         CENTER_FRAME = Main.Model.Seg2,
         AXIS = "X",
