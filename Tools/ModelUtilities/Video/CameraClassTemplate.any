@@ -48,6 +48,7 @@ Main = {
   #define _CAMERA_FFMPEG_DEFAULT_PATH_ "ffmpeg.exe"
 #endif #endif
 
+#define _CAMERA_OVERLAY_ ANYBODY_PATH_MODELUTILS + "video_overlay.png"
 
 #class_template VideoLookAtCamera ( 
   UP_DIRECTION = y,
@@ -57,7 +58,8 @@ Main = {
   _DEBUG = 0,
   _CLEAN_UP_IMAGES = 1,
   _AUTO_OPEN_PREVIEW_ = 1,
-  ENABLE_SAVE_SETTINGS=0
+  ENABLE_SAVE_SETTINGS=0,
+  ENABLE_OVERLAY= 1
   ) 
 {
     
@@ -87,6 +89,11 @@ Main = {
   /// This is the start frame used when creating Videos. This can be used to 
   /// for skipping some of the initial frames. 
   #var AnyInt VideoStartFrame = 0; 
+  
+  #var AnyString OverlayImage = _CAMERA_OVERLAY_;
+  
+  /// Height of the overlay image in percent of the video
+  #var AnyVar OverlayImageScale = 0.08;
 
   
   // The path to the ffmpeg binary. 
@@ -401,7 +408,15 @@ Main = {
       
       #var AnyFileVar out_file = ..VideoOutputPath+ "/"+ ..VideoName + ".mp4";
       
-      
+
+      #if ENABLE_OVERLAY
+      #var AnyString OverLayFilter = "[bg];[1:v]format=argb,geq=r='r(X,Y)':a='1.0*alpha(X,Y)',scale=-2:2*trunc("+strval(..VideoResolution[1])+"*"+strval(..OverlayImageScale)+"/2)[overlay];[bg][overlay]overlay=W-w:H-h";
+      //Option to fade out overlay: ":enable='between(t,0,2)'"
+      #else
+      #var AnyString OverLayFilter = "";
+      #endif
+
+
       AnyFloat InputOutputScale = ..VideoInputScale;
 
       #var AnyStringVar ffmpegBaseArg = 
@@ -410,9 +425,12 @@ Main = {
       " -r " + strval(..VideoInputFrameRate) +
       " -start_number " + strval(..VideoStartFrame,..Camera.Recorder.CounterFormat) + 
       " -i "+strquote(inputfile) +
-       " -metadata comment=" + strquote("Created with the AnyBody Modeling System.") + 
-      " -vf "+ strquote("fps="+strval(..VideoOutputFrameRate)+",scale=trunc(iw/(2*"+strval(InputOutputScale,"%g" )+"))*2:trunc(ih/(2*"+strval(InputOutputScale,"%g" )+"))*2") + 
-      " -an";
+      " -i " + strquote(..OverlayImage) + 
+      " -filter_complex " + strquote("[0:v]fps="+strval(..VideoOutputFrameRate)+ ",scale=trunc(iw/(2*"+strval(InputOutputScale,"%g" )+"))*2:trunc(ih/(2*"+strval(InputOutputScale,"%g" )+"))*2" + OverLayFilter + "[outv]") +
+      " -map [outv]" +
+      " -an" +
+      " -metadata comment=" + strquote("Created with the AnyBody Modeling System.") 
+      ;
 
       #var AnyStringVar CodecArgs = "  -c:v " + ..VideoCodec + " -crf " + strval(..ConstantRateFactor)+" -level 3.0 -pix_fmt yuv420p -strict experimental -movflags +faststart ";
       #var AnyStringVar CodecArgs_VP9 = " -c:v libvpx-vp9" + " -crf " + strval(..ConstantRateFactor)+" -pix_fmt yuv420p -row-mt 1 ";
@@ -427,6 +445,8 @@ Main = {
       #var WorkDir = ..VideoOutputPath;
       #var Show = DesignVar(_DEBUG);
     };
+    
+    
     
     /// 
     AnyOperationShellExec RemoveImageFiles = 
