@@ -177,7 +177,7 @@ Main = {
   AnyOperationSequence Create_Video =  
   {
     Settings = {
-      #var DisplayPriority = PriorityHigh;
+      #var DisplayPriority = #default;
     };
     AnyOperationSequence &PreAnalysis = .PreAnalysis;
     
@@ -302,7 +302,12 @@ Main = {
   
   AnyFolder Operations =
   {
-    
+     #if _DEBUG
+     AnyStringVar PostCmd = " &&set /p=DEBUG: Hit ENTER to continue...";
+     #else
+     AnyStringVar PostCmd = "";
+     #endif
+
     AnyOperationSequence Convert_video_to_animated_gif =  
     {  
       AnyFileVar video_file = ..VideoOutputPath+ "/"+ ..VideoName + ".mp4";
@@ -311,11 +316,6 @@ Main = {
       AnyStringVar filters = "fps="+strval(..GifOutputFrameRate)+",scale=w=" + strval(..GifResolution[0]) +
                               ":h=" + strval(..GifResolution[1]) + 
                               ":force_original_aspect_ratio=decrease:flags=lanczos";
-      #if _DEBUG
-        AnyStringVar CmdOpt = "/K TITLE Generate pallete&&";
-      #else
-        AnyStringVar CmdOpt = "/C ";
-      #endif
        
       /// Run through the video to calculate a color pallete to use when 
       /// generating the gif file. This improves quality a lot.
@@ -323,13 +323,12 @@ Main = {
       {
         FileName = "cmd.exe";      
         
-        Arguments = .CmdOpt +
-        "call "+strquote(...VideoPathFFMPEG) +
+        Arguments = "/C call "+strquote(...VideoPathFFMPEG) +
         " -v warning" + 
         " -i " + strquote(FilePathCompleteOf(.video_file)) + 
         " -vf " + strquote(.filters + ",palettegen=stats_mode=diff") +
         " -y " +
-        strquote(FilePathCompleteOf(.palette_file));
+        strquote(FilePathCompleteOf(.palette_file))+..PostCmd;
         #var WorkDir = ...VideoOutputPath;
         #var Show = _DEBUG;
         Wait = 1;
@@ -340,14 +339,13 @@ Main = {
       {
         FileName = "cmd.exe";      
         //
-        Arguments = .CmdOpt +
-        "call "+strquote(...VideoPathFFMPEG) +
+        Arguments = "/C call "+strquote(...VideoPathFFMPEG) +
         " -v warning" + 
         " -i " + strquote(FilePathCompleteOf(.video_file)) + 
         " -i " + strquote(FilePathCompleteOf(.palette_file)) +
         " -lavfi " + strquote(.filters + " [x]; [x][1:v] paletteuse=dither=floyd_steinberg:diff_mode=rectangle") +
         iffun(_OVER_WRITE, " -y "," ") +
-        strquote(FilePathCompleteOf(.gif_file));
+        strquote(FilePathCompleteOf(.gif_file))+..PostCmd;
         #var WorkDir = ...VideoOutputPath;
         #var Show = _DEBUG;   
         Wait = 1;
@@ -355,7 +353,7 @@ Main = {
       AnyOperationShellExec DeletePallete = 
       {
         FileName = "cmd.exe";      
-        Arguments = .CmdOpt + "del " + strquote(FilePathCompleteOf(.palette_file));
+        Arguments = "/C del " + strquote(FilePathCompleteOf(.palette_file))+..PostCmd;
           
         #var WorkDir = ...VideoOutputPath;
         #var Show = _DEBUG;
@@ -365,12 +363,7 @@ Main = {
     AnyOperationShellExec Open_gif = 
     {
       FileName = "cmd.exe"; 
-      #if _DEBUG
-      AnyStringVar CmdOpt = "/K TITLE Open Gif&&";
-      #else
-      AnyStringVar CmdOpt = "/C ";
-      #endif
-      #var Arguments = CmdOpt +"call "+ strquote(FilePathCompleteOf(.Convert_video_to_animated_gif.gif_file));
+      #var Arguments = "/C call "+ strquote(FilePathCompleteOf(.Convert_video_to_animated_gif.gif_file))+.PostCmd;
       #var Show = _DEBUG;
       Wait = _DEBUG;
     };      
@@ -379,12 +372,7 @@ Main = {
     AnyOperationShellExec OpenPreview = 
     {
       FileName = "cmd.exe"; 
-      #if _DEBUG
-      AnyStringVar CmdOpt = "/K TITLE Open Preview&&";
-      #else
-      AnyStringVar CmdOpt = "/C ";
-      #endif
-      #var Arguments = CmdOpt +"call "+ strquote(FilePathCompleteOf(..Preview.preview_file));
+      #var Arguments = "/C TITLE Open Preview&&" +"call "+ strquote(FilePathCompleteOf(..Preview.preview_file))+.PostCmd;
       #var Show = _DEBUG;
       Wait = _DEBUG;
     };    
@@ -414,11 +402,6 @@ Main = {
       #var AnyFileVar out_file = ..VideoOutputPath+ "/"+ ..VideoName + ".mp4";
       
       
-      #if _DEBUG
-      AnyStringVar CmdOpt = "/K TITLE Creating Video&&";
-      #else
-      AnyStringVar CmdOpt = "/C ";
-      #endif
       AnyFloat InputOutputScale = ..VideoInputScale;
 
       #var AnyStringVar ffmpegBaseArg = 
@@ -437,10 +420,10 @@ Main = {
 
       #var AnyStringVar OutputArg = strquote(FilePathCompleteOf(out_file));
       
-      #var Arguments = iffun(neqfun(..VideoCodec,"libvpx-vp9"),
-                 CmdOpt + ffmpegBaseArg + CodecArgs + OutputArg,
-                 CmdOpt + ffmpegBaseArg + CodecArgs_VP9 +" -pass 1 -f null NUL && " + ffmpegBaseArg + CodecArgs_VP9 + " -pass 2 " + OutputArg
-      );
+      #var Arguments = "/C TITLE Creating Video && "+iffun(neqfun(..VideoCodec,"libvpx-vp9"),
+                 ffmpegBaseArg + CodecArgs + OutputArg,
+                 ffmpegBaseArg + CodecArgs_VP9 +" -pass 1 -f null NUL && " + ffmpegBaseArg + CodecArgs_VP9 + " -pass 2 " + OutputArg
+      ) + .PostCmd;
       #var WorkDir = ..VideoOutputPath;
       #var Show = DesignVar(_DEBUG);
     };
@@ -448,14 +431,8 @@ Main = {
     /// 
     AnyOperationShellExec RemoveImageFiles = 
     {
-      #if _DEBUG
-      AnyStringVar CmdOpt = "/K TITLE Removing Images&&";
-      #else
-      AnyStringVar CmdOpt = "/C ";
-      #endif
-      
       #var FileName = "cmd.exe";
-      #var  Arguments = CmdOpt + "del " + strquote(..VideoName+ "_" + "*.png") + " && del ffmpeg2pass-0.log";
+      #var  Arguments = "/C TITLE Removing Images&&" + "del " + strquote(..VideoName+ "_" + "*.png") + " && del ffmpeg2pass-0.log"+.PostCmd;
       
       #var WorkDir = ..VideoOutputPath;
       #var Show = _DEBUG;
@@ -465,13 +442,8 @@ Main = {
     AnyOperationShellExec PlayVideo = 
     {
       FileName = "cmd.exe"; 
-      #if _DEBUG
-      AnyStringVar CmdOpt = "/K TITLE Play Video&&";
-      #else
-      AnyStringVar CmdOpt = "/C ";
-      #endif
       
-      #var Arguments = CmdOpt + "call "+ strquote(FilePathCompleteOf(..Create_Video.ConvertVideo.out_file));
+      #var Arguments = "/C TITLE Play Video&& call "+ strquote(FilePathCompleteOf(..Create_Video.ConvertVideo.out_file))+.PostCmd;
       #var Show =  _DEBUG;
       Wait = _DEBUG;
     };
