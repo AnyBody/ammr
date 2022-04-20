@@ -35,6 +35,10 @@
 
 **Added:**
 
+- Added a new {ref}`exoskeleton concept model <sphx_glr_auto_examples_Other_plot_ExoConcept_BoxLift.py>`
+  for simulation-driven conceptual design of exoskeletons. The model was developed by Prof. John Rasmussen from
+  Aalborg University. Please see the [web cast](https://www.anybodytech.com/simulation-driven-conceptual-design-of-exoskeletons/)
+  for more details.
 - Added a new {ref}`femoral torsion tool <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_FemoralTorsionTool.py>`
   to apply femoral torsion to the TLEM2.0 leg model.
   This model tool was developed by Dr. Enrico De Pieri from University of Basel
@@ -51,7 +55,11 @@
 - Added a warning when the glenohumeral flexion/abduction in the 
   mannequin values can cause problems as start guess for the kinematic solver. An small automatic pertubation of the Humerus orientation (`Axes0`) are also added in these cases so the shoulder rhythm will work as expected. 
 - There is a new option to override more settings in the `DefaultMannequinDrivers` section. Now the driver 
-  type (`CType=Hard/Soft`), can be overridden directly by the users. 
+  type (`CType=Hard/Soft`), can be overridden directly by the users.
+- Fixed a lack of robustness with muscle recruitment of the abdominal muscles (`buckle support`). 
+  Muscle recruitment could previously fail with high lumbar flexion.
+  A small support "artificial muscle" has beeen added to the buckle 
+  segment, preventing muscle reqruitment from failing. 
 
 **Changed:**
 

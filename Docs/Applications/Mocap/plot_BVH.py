@@ -3,7 +3,7 @@ r"""
 Inertial MoCap example
 ===============================
 
-Example of a MoCap model using data from an inertial motional caputure suit.
+Example of a MoCap model using data from an inertial motion capture suit.
 The model uses a BVH file with data from an Xsens suit. The ground reaction
 forces are predicted using the GRF prediction algorithm.
 
