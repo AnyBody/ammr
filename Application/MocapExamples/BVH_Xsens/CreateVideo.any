@@ -1,0 +1,55 @@
+
+// See following file for more information on the camera class template
+// and options. 
+// #include "<ANYBODY_PATH_MODELUTILS>/Video/CameraClassTemplate.any"
+
+// This is a simple example of using the camera class to create videos.
+
+#define VIDEO_STUDY Main.Studies.InverseDynamicStudy
+#define VIDEO_ANALYSIS InverseDynamics
+
+VIDEO_STUDY = {
+VideoLookAtCamera VideoTool (UP_DIRECTION = y) = 
+{
+     VideoName = Main.ModelSetup.TrialSpecificData.TrialFileName;
+  
+     // The point the camera focus on  
+     CameraLookAtPoint = {
+       Main.HumanModel.BodyModel.Interface.CenterOfMass.Pos[0],
+       0.9,
+       Main.HumanModel.BodyModel.Interface.CenterOfMass.Pos[2]
+     };
+     
+     // The vertical field of view in meters at the LookAtPoint
+     CameraFieldOfView = 2;
+     
+     // The direction which the camera is placed
+     // (In global coordinates with respect to the LookAtPoint)
+     CameraDirection = {1, 0, 0};
+     
+     Counter = VIDEO_STUDY.iStep;
+     
+     /// Determines the speed of the video. 
+     /// Currently set to realtime
+     VideoInputFrameRate = round(VIDEO_STUDY.nStep/iffun(VIDEO_STUDY.tEnd-VIDEO_STUDY.tStart, VIDEO_STUDY.tEnd-VIDEO_STUDY.tStart, 1.0*VIDEO_STUDY.nStep)); 
+   
+     
+     // Operation which run before recoding is started.
+     PreAnalysis = {
+         AnyOperation &step1 = Main.RunAnalysis.LoadParameters;
+         AnyOperation &step2 = Main.RunAnalysis.MarkerTracking;
+     };
+     
+     // The operations which should be included in the video.
+     Analysis = {
+         AnyOperation &ref = VIDEO_STUDY.VIDEO_ANALYSIS;
+     };
+ };
+};
+ 
+ Main.ModelSetup = {
+   AnyOperation& CreateVideo = VIDEO_STUDY.VideoTool.Create_Video;
+ };
+ 
+ 
+ 
