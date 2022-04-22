@@ -3,7 +3,42 @@
 % To minimize the risk of merge conflicts insert the your changes at a
 % random empty or make a new entry a random place in the bullet lists.
 
-## AMMR BETA
+## AMMR 2.4 (2022-04-26)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.6471999.svg)](https://doi.org/10.5281/zenodo.6471999)
+
+**New:**
+
+- Added a new {ref}`exoskeleton concept model <sphx_glr_auto_examples_Other_plot_ExoConcept_BoxLift.py>`
+  for simulation-driven conceptual design of exoskeletons. The model was developed by Prof. John Rasmussen from
+  Aalborg University. Please see the [web cast](https://www.anybodytech.com/simulation-driven-conceptual-design-of-exoskeletons/)
+  for more details.
+- Added a new {ref}`femoral torsion tool <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_FemoralTorsionTool.py>`
+  to apply femoral torsion to the TLEM2.0 leg model.
+  This model tool was developed by Dr. Enrico De Pieri from University of Basel
+  Children’s Hospital (UKBB). Please see the {ref}`documentation <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_FemoralTorsionTool.py>`
+  or the [web cast](https://www.anybodytech.com/modeling-subject-specific-femoral-torsion-for-the-analysis-of-lower-limb-joint-loads/)
+  by Enrico on his work and publication on femoral torsion. 
+- Added a new {ref}`Knee force model <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_KneeForcesExample.py>` 
+  example. The model shows how to calculate a simple estimate of the medial and lateral knee force.
+- Many AnyScript example models now include an option to automatically 
+  create a video from the model. To use this functionality find and run 
+  the new `VideoTool.CreateVideo` operation under the Study folder.
+  This will automatically run the example model, output still frames,
+  and combine them into a video afterwards. The script can easily be
+  addapted and moved to other examples. 
+- Two new utility macros which makes it easier to create 3D grid arrays have been added to the model repository.
+  `MESHTRIPLES(xarr, yarr, zarr)` and  `MESHGRID(xarr,yarr,zarr)`. I.e. for
+  creating arrays of all points in a 3D grid array. More information in the file: 
+  {menuselection}`Body --> AAUHuman --> BodyModels --> GenericBodyModel --> Helper.ClassTemplates.any`
+
+- Added a warning when the glenohumeral flexion/abduction in the 
+  mannequin values can cause problems as start guess for the kinematic solver. An small automatic pertubation of the Humerus orientation (`Axes0`) are also added in these cases so the shoulder rhythm will work as expected. 
+- There is a new option to override more settings in the `DefaultMannequinDrivers` section. Now the driver 
+  type (`CType=Hard/Soft`), can be overridden directly by the users.
+- Fixed a lack of robustness with muscle recruitment of the abdominal muscles (`buckle support`). 
+  Muscle recruitment could previously fail with high lumbar flexion.
+  A small support "artificial muscle" has beeen added to the buckle 
+  segment, preventing muscle reqruitment from failing. 
 
 **Fixed:**
 
@@ -33,39 +68,6 @@
 - The {ref}`example to evaluate moments arms <sphx_glr_auto_examples_Validation_plot_EvaluateMomentArms.py>` 
   now works when the shoulder rhythm is enabled. 
 
-**Added:**
-
-- Added a new {ref}`exoskeleton concept model <sphx_glr_auto_examples_Other_plot_ExoConcept_BoxLift.py>`
-  for simulation-driven conceptual design of exoskeletons. The model was developed by Prof. John Rasmussen from
-  Aalborg University. Please see the [web cast](https://www.anybodytech.com/simulation-driven-conceptual-design-of-exoskeletons/)
-  for more details.
-- Added a new {ref}`femoral torsion tool <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_FemoralTorsionTool.py>`
-  to apply femoral torsion to the TLEM2.0 leg model.
-  This model tool was developed by Dr. Enrico De Pieri from University of Basel
-  Children’s Hospital (UKBB). Please see the {ref}`documentation <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_FemoralTorsionTool.py>`
-  or the [web cast](https://www.anybodytech.com/modeling-subject-specific-femoral-torsion-for-the-analysis-of-lower-limb-joint-loads/)
-  by Enrico on his work and publication on femoral torsion. 
-- Added a new {ref}`Knee force model <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_KneeForcesExample.py>` 
-  example. The model shows how to calculate a simple estimate of the medial and lateral knee force. 
-- Two new utility macros which makes it easier to create 3D grid arrays have been added to the model repository.
-  `MESHTRIPLES(xarr, yarr, zarr)` and  `MESHGRID(xarr,yarr,zarr)`. I.e. for
-  creating arrays of all points in a 3D grid array. More information in the file: 
-  {menuselection}`Body --> AAUHuman --> BodyModels --> GenericBodyModel --> Helper.ClassTemplates.any`
-
-- Added a warning when the glenohumeral flexion/abduction in the 
-  mannequin values can cause problems as start guess for the kinematic solver. An small automatic pertubation of the Humerus orientation (`Axes0`) are also added in these cases so the shoulder rhythm will work as expected. 
-- Many AnyScript example models now include an option to automatically 
-  create a video from the model. To use this functionality find and run 
-  the new `VideoTool.CreateVideo` operation under the Study folder.
-  This will automatically run the example model, output still frames,
-  and combine them into a video afterwards. The script can easily be
-  addapted and moved to other examples. 
-- There is a new option to override more settings in the `DefaultMannequinDrivers` section. Now the driver 
-  type (`CType=Hard/Soft`), can be overridden directly by the users.
-- Fixed a lack of robustness with muscle recruitment of the abdominal muscles (`buckle support`). 
-  Muscle recruitment could previously fail with high lumbar flexion.
-  A small support "artificial muscle" has beeen added to the buckle 
-  segment, preventing muscle reqruitment from failing. 
 
 **Changed:**
 
