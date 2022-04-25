@@ -23,7 +23,7 @@ glenohumeral joint angles, also known as a "Shoulder rhythms".
 The AnyBody shoulder model's rhythm can be switched on
 and off, the full details of which can be seen in this report
 [Shoulder Rhythm
-Report](https://www.anybodytech.com/download.html?did=publications.files&fname=ShoulderRhythmReport.pdf).
+Report](https://paperpile.com/app/p/0349b48d-cb2b-0414-8a26-656f9b663e49).
 
 ```{raw} html
 <video width="45%" style="display:block; margin: 0 auto;" controls autoplay loop>
@@ -158,7 +158,7 @@ joint drivers directly or indirectly through connections to the environment
 
 More details on the ShoulderArm model can be found online:
 
-- Webcast: [Validation of the AnyBody version of the Dutch Shoulder Model by the in-vivo measurement of GH contact forces by Bergmann et al.](https://www.anybodytech.com/downloads/documentation/#2007426)
+- Webcast: [Validation of the AnyBody version of the Dutch Shoulder Model by the in-vivo measurement of GH contact forces by Bergmann et al.](https://www.anybodytech.com/validation-of-the-anybody-version-of-the-dutch-shoulder-model-by-the-in-vivo-measurement-of-gh-contact-forces-by-bergmann-et-al/)
 
 ## Anatomy References
 
