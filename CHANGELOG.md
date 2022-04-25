@@ -9,7 +9,29 @@
 ## AMMR 2.4 (2022-04-26)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.6471999.svg)](https://doi.org/10.5281/zenodo.6471999)
 
-**New:**
+
+**New example models:**
+
+- Added a new {ref}`trunk exoskeleton concept model <sphx_glr_auto_examples_Other_plot_ExoConceptTrunk_BoxLift.py>`
+  for simulating assistance at the trunk in a box lifting task. This simple example shows how to apply assistive torque directly
+  to the human model. <{ref}`Link to model <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_FemoralTorsionTool.py>`>
+- Added a new {ref}`exoskeleton concept model <sphx_glr_auto_examples_Other_plot_ExoConceptTrunk_BoxLift.py>`
+  for simulation-driven conceptual design of exoskeletons. The model was developed by Prof. John Rasmussen from
+  Aalborg University. Please see the [web cast](https://www.anybodytech.com/simulation-driven-conceptual-design-of-exoskeletons/)
+  for more details. <{ref}`Link to model <sphx_glr_auto_examples_Other_plot_ExoConcept_BoxLift.py>`>
+- Added a new femoral torsion tool to apply femoral torsion to the TLEM2.0 leg model.
+  This model tool was developed by Dr. Enrico De Pieri from University of Basel
+  Children’s Hospital (UKBB). Please see the {ref}`documentation <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_FemoralTorsionTool.py>`
+  or the [web cast](https://www.anybodytech.com/modeling-subject-specific-femoral-torsion-for-the-analysis-of-lower-limb-joint-loads/)
+  by Enrico on his work and publication on femoral torsion. <{ref}`Link to model <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_FemoralTorsionTool.py>`>
+- Added a new {ref}`Knee force model <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_KneeForcesExample.py>` 
+  example. The model shows how to calculate a simple estimate of the medial and lateral knee force. <{ref}`Link to model <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_KneeForcesExample.py>`>
+- A new box lifting motion capture model has been added. The model is based on data from an inertial measurement 
+  unit based suit ([Xsens](https://www.xsens.com/products/mtw-awinda)), and illustrates how to connect MoCap models with objects in the environment. 
+  <{ref}`Link to model <sphx_glr_auto_examples_mocap_plot_bvh_boxlift.py>`>
+
+
+**New features:**
 
 - Added a new {ref}`trunk exoskeleton concept model <sphx_glr_auto_examples_Other_plot_ExoConceptTrunk_BoxLift.py>`
   for simulating assistance at the trunk in a box lifting task. This simple example shows how to apply assistive torque directly
