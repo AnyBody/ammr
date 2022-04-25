@@ -11,6 +11,9 @@
 
 **New:**
 
+- Added a new {ref}`trunk exoskeleton concept model <sphx_glr_auto_examples_Other_plot_ExoConceptTrunk_BoxLift.py>`
+  for simulating assistance at the trunk in a box lifting task. This simple example shows how to apply assistive torque directly
+  to the human model.
 - Added a new {ref}`exoskeleton concept model <sphx_glr_auto_examples_Other_plot_ExoConcept_BoxLift.py>`
   for simulation-driven conceptual design of exoskeletons. The model was developed by Prof. John Rasmussen from
   Aalborg University. Please see the [web cast](https://www.anybodytech.com/simulation-driven-conceptual-design-of-exoskeletons/)
