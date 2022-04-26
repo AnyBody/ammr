@@ -65,6 +65,8 @@
   while maintaining the same moment arm in gait etc.
 - Fixed a bug in scaling where the mass of the trunk model pelvis was used in some cases instead of the 
   pelvis mass from the leg model. This could cause a slightly incorrect mass to be used for the pelvis segment.
+- Fixed wrong sign for the WristJoint flexion variable. This values users provided in the mannequin 
+  section was incorrectly interpreted as wrist extension.
 - Fixed a problem where custom scaling and {bm_constant}`_SCALING_XYZ_` would 
   prevent the model from loading.
 - Fixed some logical issues with the `ContactSurfaceDistanceAndVelocityDepLinPush.any` file.
