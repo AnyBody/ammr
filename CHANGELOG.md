@@ -6,26 +6,33 @@
 
 (ammr-2.4-changelog)=
 
-## AMMR 2.4 (2022-04-26)
+## AMMR 2.4 (2022-04-28)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.6471999.svg)](https://doi.org/10.5281/zenodo.6471999)
 
-**New:**
 
-- Added a new {ref}`trunk exoskeleton concept model <sphx_glr_auto_examples_Other_plot_ExoConceptTrunk_BoxLift.py>`
+**New example models:**
+
+- Added a new trunk exoskeleton concept model 
   for simulating assistance at the trunk in a box lifting task. This simple example shows how to apply assistive torque directly
-  to the human model.
-- Added a new {ref}`exoskeleton concept model <sphx_glr_auto_examples_Other_plot_ExoConcept_BoxLift.py>`
+  to the human model. <{ref}`See more <sphx_glr_auto_examples_Other_plot_ExoConceptTrunk_BoxLift.py>`>
+- Added a new exoskeleton concept model 
   for simulation-driven conceptual design of exoskeletons. The model was developed by Prof. John Rasmussen from
   Aalborg University. Please see the [web cast](https://www.anybodytech.com/simulation-driven-conceptual-design-of-exoskeletons/)
-  for more details.
-- Added a new {ref}`femoral torsion tool <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_FemoralTorsionTool.py>`
-  to apply femoral torsion to the TLEM2.0 leg model.
+  for more details. <{ref}`See more <sphx_glr_auto_examples_Other_plot_ExoConcept_BoxLift.py>`>
+- Added a new femoral torsion tool to apply femoral torsion to the TLEM2.0 leg model.
   This model tool was developed by Dr. Enrico De Pieri from University of Basel
-  Children’s Hospital (UKBB). Please see the {ref}`documentation <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_FemoralTorsionTool.py>`
+  Children’s Hospital (UKBB). Please see the documentation 
   or the [web cast](https://www.anybodytech.com/modeling-subject-specific-femoral-torsion-for-the-analysis-of-lower-limb-joint-loads/)
-  by Enrico on his work and publication on femoral torsion. 
-- Added a new {ref}`Knee force model <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_KneeForcesExample.py>` 
-  example. The model shows how to calculate a simple estimate of the medial and lateral knee force.
+  by Enrico on his work and publication on femoral torsion. <{ref}`See more <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_FemoralTorsionTool.py>`>
+- Added a new knee force model 
+  example. The model shows how to calculate a simple estimate of the medial and lateral knee force. <{ref}`See more <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_KneeForcesExample.py>`>
+- A new box lifting motion capture model has been added. The model is based on data from an inertial measurement 
+  unit based suit ([Xsens](https://www.xsens.com/products/mtw-awinda)), and illustrates how to connect MoCap models with objects in the environment. 
+  <{ref}`See more <sphx_glr_auto_examples_mocap_plot_bvh_boxlift.py>`>
+
+
+**New features:**
+
 - Many AnyScript example models now include an option to automatically 
   create a video from the model. To use this functionality find and run 
   the new `VideoTool.CreateVideo` operation under the Study folder.
@@ -58,6 +65,8 @@
   while maintaining the same moment arm in gait etc.
 - Fixed a bug in scaling where the mass of the trunk model pelvis was used in some cases instead of the 
   pelvis mass from the leg model. This could cause a slightly incorrect mass to be used for the pelvis segment.
+- Fixed wrong sign for the WristJoint flexion variable. This values users provided in the mannequin 
+  section was incorrectly interpreted as wrist extension.
 - Fixed a problem where custom scaling and {bm_constant}`_SCALING_XYZ_` would 
   prevent the model from loading.
 - Fixed some logical issues with the `ContactSurfaceDistanceAndVelocityDepLinPush.any` file.
@@ -123,7 +132,7 @@
 - The special mannequin driver switches for the old leg model (`BM_MANNEQUIN_DRIVER_ANKLE_EVERSION_RIGHT/LEFT`) 
   have been deprecated. Instead the switch used for the TLEM1/2 leg models
   ({bm_statement}`BM_MANNEQUIN_DRIVER_ANKLE_SUBTALAR_EVERSION_RIGHT`) can now be used for all leg models. 
-
+- Renamed all deprecated ligament class names. `AnyViaPointLigament`-> `AnyLigamentViaPoint`.
 
 ## AMMR 2.3.4 (2021-07-05)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.5060249.svg)](https://doi.org/10.5281/zenodo.5060249)
