@@ -1,0 +1,175 @@
+#class_template BVH_OptimizeOrigin (
+HUMAN_SEG = "LFOOT",
+ACTIVE_TIME_START,
+ACTIVE_TIME_END,
+NAME_PARA_OPT = BVH_Origin,
+OPT_LIN_X = 1, OPT_LIN_Y = 0, OPT_LIN_Z = 1,
+OPT_ROT_X = 0, OPT_ROT_Y = 1, OPT_ROT_Z = 0,
+PARAMETER_OPT_STUDY = Main.Studies.ParameterIdentification,
+REF_FRAME_FOR_TARGET = Main.EnvironmentModel.GlobalRef,
+BVH_FILE_DATA = Main.ModelSetup.BVHFileData
+)
+{
+  #var AnyVec3 TARGET_SREL = {0.0, 0.0, 0.0};
+  #var AnyMat33 TARGET_AREL = {{1,0,0},{0,1,0},{0,0,1}};
+AnyFolder Settings = {
+  #var AnyFloat InitialGuess = {0.0,0.0,0.0,0.0,0.0,0.0};
+  #var AnyVar Weight = 1;
+  #var AnyFloat dt_Ratio = {0.1,0.1};
+};
+
+AnyFolder InputArgs = {
+#if HUMAN_SEG == "LFOOT"
+AnyRefFrame &BVHSeg = BVH_FILE_DATA.Model.Hips.LeftHip.LeftKnee.LeftAnkle.Seg;
+BVHSeg = {
+AnyRefNode Node0 = {
+      sRel = {0,.LeftToe.sRel[1],0};
+      AnyDrawRefFrame drw ={};
+      AnyRefNode Node1 = {
+        sRel = {-0.02,0,0.15};
+        AnyDrawNode drw ={};
+      };
+      AnyRefNode Node2 = {
+        sRel = {0.05,0,0.15};
+        AnyDrawNode drw ={};
+      };
+    }; // Heel Node
+  }; // Seg
+  
+#endif
+
+  AnyRefFrame &TargetFrameRef = REF_FRAME_FOR_TARGET;
+  TargetFrameRef = {
+    AnyRefNode Node0 = {
+      sRel = ...TARGET_SREL;
+      ARel = ...TARGET_AREL;
+      AnyDrawNode drw ={};
+      AnyRefNode Node1 = {
+        sRel = ...BVHSeg.Node0.Node1.sRel;
+        AnyDrawNode drw ={};
+      };
+      AnyRefNode Node2 = {
+        sRel = ...BVHSeg.Node0.Node2.sRel;
+        AnyDrawNode drw ={};
+      };
+    };
+  };
+
+}; // InputArgs
+
+AnyFolder Functions = {
+AnyFunSquareWave WeightFun = 
+  {
+    InitialValues = {0.0};
+    Ts = {ACTIVE_TIME_START,ACTIVE_TIME_END};
+    Values = {{..Settings.Weight,0}};
+    dT = ..Settings.dt_Ratio*(Ts[1]-Ts[0]);
+  };
+AnyFunInterpol PosNode0 = {
+    Type = ConstantValue;
+    T = BVH_FILE_DATA.Data.Abscissa.Sample*BVH_FILE_DATA.Header.FrameTime;
+      Data = {repmat(SizesOf(T)[0], ..InputArgs.TargetFrameRef.Node0.sRel[0]),
+              repmat(SizesOf(T)[0], ..InputArgs.TargetFrameRef.Node0.sRel[1]),
+              repmat(SizesOf(T)[0], ..InputArgs.TargetFrameRef.Node0.sRel[2])};
+  };
+AnyFunInterpol PosNode1 = {
+    Type = ConstantValue;
+    T = BVH_FILE_DATA.Data.Abscissa.Sample*BVH_FILE_DATA.Header.FrameTime;
+      Data = {repmat(SizesOf(T)[0], ..InputArgs.TargetFrameRef.Node0.Node1.sRel[0]),
+              repmat(SizesOf(T)[0], ..InputArgs.TargetFrameRef.Node0.Node1.sRel[1]),
+              repmat(SizesOf(T)[0], ..InputArgs.TargetFrameRef.Node0.Node1.sRel[2])};
+  };
+AnyFunInterpol PosNode2 = {
+    Type = ConstantValue;
+    T = BVH_FILE_DATA.Data.Abscissa.Sample*BVH_FILE_DATA.Header.FrameTime;
+      Data = {repmat(SizesOf(T)[0], ..InputArgs.TargetFrameRef.Node0.Node2.sRel[0]),
+              repmat(SizesOf(T)[0], ..InputArgs.TargetFrameRef.Node0.Node2.sRel[1]),
+              repmat(SizesOf(T)[0], ..InputArgs.TargetFrameRef.Node0.Node2.sRel[2])};
+  };
+
+};// Functions
+
+AnyFolder BVHOrigin = {
+ AnyFloat NAME_PARA_OPT = DesignVar(.Settings.InitialGuess);
+ AnyFixedRefFrame &BVHOriginRef = BVH_FILE_DATA.Model.GlobalRef;
+  BVHOriginRef = {
+    Origin = {.NAME_PARA_OPT[0], .NAME_PARA_OPT[1], .NAME_PARA_OPT[2]};
+    Axes = RotMat(.NAME_PARA_OPT[3],x)
+            *RotMat(.NAME_PARA_OPT[4],y)
+            *RotMat(.NAME_PARA_OPT[5],z);
+};
+ 
+}; // BVH Origin
+
+AnyFolder &ParaOptStudy = PARAMETER_OPT_STUDY;
+ParaOptStudy = {
+
+#if OPT_LIN_X == 1
+AnyDesVar NAME_PARA_OPT##_LinX = {
+    Val = ..BVHOrigin.NAME_PARA_OPT[0];
+  };
+#endif
+#if OPT_LIN_Y == 1
+AnyDesVar NAME_PARA_OPT##_LinY = {
+    Val = ..BVHOrigin.NAME_PARA_OPT[1];
+  };
+#endif
+#if OPT_LIN_Z == 1
+AnyDesVar NAME_PARA_OPT##_LinZ = {
+    Val = ..BVHOrigin.NAME_PARA_OPT[2];
+  };
+#endif
+#if OPT_ROT_X == 1
+AnyDesVar NAME_PARA_OPT##_RotX = {
+    Val = ..BVHOrigin.NAME_PARA_OPT[3];
+  };
+#endif
+#if OPT_ROT_Y == 1
+AnyDesVar NAME_PARA_OPT##_RotY = {
+    Val = ..BVHOrigin.NAME_PARA_OPT[4];
+  };
+#endif
+#if OPT_ROT_Z == 1
+AnyDesVar NAME_PARA_OPT##_RotZ = {
+    Val = ..BVHOrigin.NAME_PARA_OPT[5];
+  };
+#endif
+
+KinematicStudyForParameterIdentification = {
+    AnyFolder &mocapmodel = Main.ModelSetup;
+    AnyFolder OptDrivers = {
+      
+    AnyKinDriverMarker Node0 = {
+    viewKinMeasure.Size = 0.2;
+    WeightFun = {&....Functions.WeightFun,
+                 &....Functions.WeightFun,
+                 &....Functions.WeightFun};
+    AnyRefFrame &BVHPoint = ....InputArgs.BVHSeg.Node0;
+    AnyParamFun &target = ....Functions.PosNode0;
+  };
+AnyKinDriverMarker Node1 = {
+    viewKinMeasure.Size = 0.2;
+    WeightFun = {&....Functions.WeightFun,
+                 &....Functions.WeightFun,
+                 &....Functions.WeightFun};
+    AnyRefFrame &BVHPoint = ....InputArgs.BVHSeg.Node0.Node1;
+    AnyParamFun &target = ....Functions.PosNode1;
+  };
+
+AnyKinDriverMarker Node2 = {
+    viewKinMeasure.Size = 0.2;
+    WeightFun = {&....Functions.WeightFun,
+                 &....Functions.WeightFun,
+                 &....Functions.WeightFun};
+    AnyRefFrame &BVHPoint = ....InputArgs.BVHSeg.Node0.Node2;
+    AnyParamFun &target = ....Functions.PosNode2;
+  };
+
+
+
+}; // OptDriver
+};//KinStudyForParaIden
+
+}; // ParaOptStudy
+
+}; // class template
