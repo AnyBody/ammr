@@ -6,6 +6,13 @@
 
 (ammr-2.4-changelog)=
 
+## AMMR 2.4.1 (??)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.6533249.svg)](https://doi.org/10.5281/zenodo.6533249)
+
+**Fixed:**
+* Fixed a small syntax error which caused the BVH example `S1/S01_Trial02/` to fail loading. 
+
+
 ## AMMR 2.4 (2022-04-28)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.6471999.svg)](https://doi.org/10.5281/zenodo.6471999)
 
