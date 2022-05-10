@@ -10,15 +10,23 @@ REF_FRAME_FOR_TARGET = Main.EnvironmentModel.GlobalRef,
 BVH_FILE_DATA = Main.ModelSetup.BVHFileData
 )
 {
-  #var AnyVec3 TARGET_SREL = {0.0, 0.0, 0.0};
-  #var AnyMat33 TARGET_AREL = {{1,0,0},{0,1,0},{0,0,1}};
+  #var AnyVec3 TARGET_Position = {0.0, 0.0, 0.0};
+  #var AnyMat33 TARGET_Orientation = {{1,0,0},{0,1,0},{0,0,1}};
 AnyFolder Settings = {
   #var AnyFloat InitialGuess = {0.0,0.0,0.0,0.0,0.0,0.0};
   #var AnyVar Weight = 1;
   #var AnyFloat dt_Ratio = {0.1,0.1};
 };
 
+
+
 AnyFolder InputArgs = {
+//  AnyInt FunLoadParms = neqfun(Main.ModelSetup.TrialSpecificData.LoadParametersFrom,"");
+
+  AnyInt Warning_LoadParams = warn(neqfun(Main.ModelSetup.TrialSpecificData.LoadParametersFrom,""),
+                  "Main.ModelSetup.TrialSpecificData.LoadParametersFrom is defined as empty. Loading parameters operation will not work! ");
+    
+  
   #if HUMAN_SEG == "LFOOT"
   AnyRefFrame &BVHSeg = BVH_FILE_DATA.Model.Hips.LeftHip.LeftKnee.LeftAnkle.Seg;
   BVHSeg = {
@@ -36,6 +44,16 @@ AnyFolder InputArgs = {
     }; // Heel Node
     
   }; // Seg  
+  
+   TargetFrameRef.Node0 = {
+    AnyFileVar STLFilename = Main.HumanModel.BodyModel.Left.Leg.Seg.STL.FilenameFoot;
+AnyFloat STLPos = -..BVHSeg.Node0.sRel;
+    AnyMat33 STLOrientation = RotMat(-pi/2,y);
+    AnyFloat STLScale = {1,1,-1};
+      AnyFunTransform3D &STLTransform = Main.HumanModel.BodyModel.Left.Leg.Seg.Foot.Scale;
+
+};
+
   #endif
   
   #if HUMAN_SEG == "RFOOT"
@@ -55,6 +73,17 @@ AnyFolder InputArgs = {
     }; // Heel Node
     
   }; // Seg  
+  
+  TargetFrameRef.Node0 = {
+    AnyFolder &HumRef = Main.HumanModel.BodyModel.Right.Leg.Seg;
+    AnyFileVar STLFilename = Main.HumanModel.BodyModel.Right.Leg.Seg.STL.FilenameFoot;
+AnyFloat STLPos = -..BVHSeg.Node0.sRel;// - HumRef.Talus.AnkleJoint.sRel*HumRef.Talus.AnkleJoint.ARel'
+//                      +HumRef.Talus.SubTalarJoint.sRel*HumRef.Talus.SubTalarJoint.ARel';
+    AnyMat33 STLOrientation = RotMat(-pi/2,y);
+  AnyFloat STLScale = {1,1,1};
+  AnyFunTransform3D &STLTransform = Main.HumanModel.BodyModel.Right.Leg.Seg.Foot.Scale;
+
+};
   #endif
   
   #if HUMAN_SEG == "LHAND"
@@ -74,6 +103,14 @@ AnyFolder InputArgs = {
     }; // Wrist Node
     
   }; // Seg  
+  TargetFrameRef.Node0 = {
+    AnyFileVar STLFilename = Main.HumanModel.BodyModel.Left.ShoulderArm.STL.FileNameHand;
+    AnyFloat STLPos = -..BVHSeg.Node0.sRel+Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Hand.Ref.wj.sRel;
+    AnyMat33 STLOrientation = RotMat(-pi/2,x)*RotMat(-pi,y);
+  AnyFloat STLScale = {1,1,-1};
+  AnyFunTransform3D &STLTransform = Main.HumanModel.Scaling.GeometricalScaling.Left.Hand.ScaleFunction;
+};
+
   #endif
 
 #if HUMAN_SEG == "RHAND"
@@ -93,23 +130,46 @@ AnyFolder InputArgs = {
     }; // Wrist Node
     
   }; // Seg  
+  TargetFrameRef.Node0 = {
+    AnyFileVar STLFilename = Main.HumanModel.BodyModel.Right.ShoulderArm.STL.FileNameHand;
+    AnyFloat STLPos = -..BVHSeg.Node0.sRel-Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Hand.Ref.wj.sRel;
+    AnyMat33 STLOrientation = RotMat(-pi/2,x);//*RotMat(-pi,y);
+  AnyFloat STLScale = {1,1,1};
+  AnyFunTransform3D &STLTransform = Main.HumanModel.Scaling.GeometricalScaling.Right.Hand.ScaleFunction;
+};
+
   #endif
 
   
   AnyRefFrame &TargetFrameRef = REF_FRAME_FOR_TARGET;
   TargetFrameRef = {
     AnyRefNode Node0 = {
-      sRel = ...TARGET_SREL;
-      ARel = ...TARGET_AREL;
-      AnyDrawNode drw ={};
+      sRel = ...TARGET_Position;
+      ARel = ...TARGET_Orientation;
+//      viewRefFrame.Visible = On;
+//      viewRefFrame.ScaleXYZ = 1.9*{1,1,1};
+//      viewRefFrame.RGB = {0.65,0.65,0.65};
+      AnyDrawRefFrame drw ={ScaleXYZ = 0.15*{1,1,1}; RGB = {0.65,0.65,0.65};};
+      AnyDrawSurf drwSurf = {
+        FileName = .STLFilename;
+        RelPos = .STLPos;
+        RelRotMat = .STLOrientation;
+        ScaleXYZ = .STLScale;
+        AnyFunTransform3D &Scale = .STLTransform;
+        };
+      
     };
     AnyRefNode Node1 = {
-      sRel = ..BVHSeg.Node0.Node1.sRel*...TARGET_AREL'+...TARGET_SREL;
-      AnyDrawNode drw ={};
+      sRel = ..BVHSeg.Node0.Node1.sRel*...TARGET_Orientation'+...TARGET_Position;
+//      viewNodes.Visible = On;
+////      viewNodes.ScaleXYZ = 0.5*{1,1,1};
+//      viewNodes.RGB = {0.65,0.65,0.65};
+//      viewNodes.Opacity = 0.5;
+      AnyDrawNode drw ={ScaleXYZ = 0.015*{1,1,1}; RGB = {0.65,0.65,0.65};Opacity = 0.5;};
     };
     AnyRefNode Node2 = {
-      sRel = ..BVHSeg.Node0.Node2.sRel*...TARGET_AREL'+...TARGET_SREL;
-      AnyDrawNode drw ={};
+      sRel = ..BVHSeg.Node0.Node2.sRel*...TARGET_Orientation'+...TARGET_Position;
+      AnyDrawNode drw ={ScaleXYZ = 0.015*{1,1,1}; RGB = {0.65,0.65,0.65};Opacity = 0.5;};
     };
   };
   
@@ -148,7 +208,8 @@ AnyFunInterpol PosNode2 = {
 };// Functions
 
 AnyFolder BVHOrigin = {
- AnyFloat NAME_PARA_OPT = DesignVar(.Settings.InitialGuess);
+// AnyFloat NAME_PARA_OPT = DesignVar(.Settings.InitialGuess);
+AnyFloat NAME_PARA_OPT = .Settings.InitialGuess;
  AnyFixedRefFrame &BVHOriginRef = BVH_FILE_DATA.Model.GlobalRef;
   BVHOriginRef = {
     Origin = {.NAME_PARA_OPT[0], .NAME_PARA_OPT[1], .NAME_PARA_OPT[2]};
@@ -159,8 +220,52 @@ AnyFolder BVHOrigin = {
  
 }; // BVH Origin
 
+
+//AnyFolder &ParaIdentification = Main.ModelSetup.ParameterIdentification;
+//ParaIdentification ={
+//AnyDesVar NAME_PARA_OPT##_LinX = {
+//    Val = ..BVHOrigin.BVHOriginRef.Origin[0];
+//  };
+//AnyDesVar NAME_PARA_OPT##_LinY = {
+//    Val = ..BVHOrigin.BVHOriginRef.Origin[1];
+//  };
+//AnyDesVar NAME_PARA_OPT##_LinZ = {
+//    Val = ..BVHOrigin.BVHOriginRef.Origin[2];
+//  };
+//AnyDesVar NAME_PARA_OPT##_RotX = {
+//    Val = ..BVHOrigin.NAME_PARA_OPT[3];
+//  };
+//AnyDesVar NAME_PARA_OPT##_RotY = {
+//    Val = ..BVHOrigin.NAME_PARA_OPT[4];
+//  };
+//AnyDesVar NAME_PARA_OPT##_RotZ = {
+//    Val = ..BVHOrigin.NAME_PARA_OPT[5];
+//  };
+//}; //ParaIdentification
+
 AnyFolder &ParaOptStudy = PARAMETER_OPT_STUDY;
 ParaOptStudy = {
+//#if OPT_LIN_X == 1
+//AnyDesVar &NAME_PARA_OPT##_LinX = Main.ModelSetup.ParameterIdentification.NAME_PARA_OPT##_LinX;
+//#endif
+//#if OPT_LIN_Y == 1
+//AnyDesVar &NAME_PARA_OPT##_LinY = Main.ModelSetup.ParameterIdentification.NAME_PARA_OPT##_LinY;
+//#endif
+//#if OPT_LIN_Z == 1
+//AnyDesVar &NAME_PARA_OPT##_LinZ = Main.ModelSetup.ParameterIdentification.NAME_PARA_OPT##_LinZ;
+//#endif
+//#if OPT_ROT_X == 1
+//AnyDesVar &NAME_PARA_OPT##_RotX = Main.ModelSetup.ParameterIdentification.NAME_PARA_OPT##_RotX;
+//#endif
+//#if OPT_ROT_Y == 1
+//AnyDesVar &NAME_PARA_OPT##_RotY = Main.ModelSetup.ParameterIdentification.NAME_PARA_OPT##_RotY;
+//#endif
+//#if OPT_ROT_Z == 1
+//AnyDesVar &NAME_PARA_OPT##_RotZ = Main.ModelSetup.ParameterIdentification.NAME_PARA_OPT##_RotZ;
+//#endif
+
+
+
 
 #if OPT_LIN_X == 1
 AnyDesVar NAME_PARA_OPT##_LinX = {
@@ -230,18 +335,27 @@ AnyKinDriverMarker Node2 = {
 
 }; // ParaOptStudy
 
-//Main.RunAnalysis.LoadParameters = {
+//Main.Studies.MarkerTracking = {
+//  AnyFolder &MocapModel = Main.ModelSetup.BVHFileData.Model;
+//};
+
+
+
+//AnyFolder &LoadParams = Main.RunAnalysis.LoadParameters;
+//LoadParams = {
 //AnyOperationMacro Load_BVH_Origin_parameters = {
 //    OPERATION_DISPLAY_PRIORITY(PriorityLow);
 //     
+//AnyFileVar LoadPath = "Output\";
 ////    AnyFileVar LoadPath = TEMP_PATH;
-//    AnyFileVar LoadPath = "..\..\Application\MocapExamples\BVH_Xsens_OptimizeOrigin\Output\";
+////    AnyFileVar LoadPath = "..\..\Application\MocapExamples\BVH_Xsens_OptimizeOrigin\Output\";
 //MacroStr = {"classoperation Main" + strquote("Load Values") +"--file=" + 
-//          strquote(FilePathCompleteOf(LoadPath) +"/"+  MOCAP_PARAMETER_FILE_PREFIX + Main.ModelSetup.TrialSpecificData.TrialFileName +".anyset" )
+//          strquote(FilePathCompleteOf(LoadPath) +"/"+   Main.ModelSetup.TrialSpecificData.TrialFileName +".anyset" ),
+//          "classoperation Main " + strquote("Update Values")
 //        };
 //};
 //
 //  };
-
+//MOCAP_NAME_MAINFILEDIR  MOCAP_PARAMETER_FILE_PREFIX +
 
 }; // class template
