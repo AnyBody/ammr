@@ -7,7 +7,6 @@ OPT_LIN_X = 1, OPT_LIN_Y = 0, OPT_LIN_Z = 1,
 OPT_ROT_X = 0, OPT_ROT_Y = 1, OPT_ROT_Z = 0,
 PARAMETER_OPT_STUDY = Main.Studies.ParameterIdentification,
 REF_FRAME_FOR_TARGET = Main.EnvironmentModel.GlobalRef,
-GLOBAL_REF = Main.EnvironmentModel.GlobalRef,
 BVH_FILE_DATA = Main.ModelSetup.BVHFileData,
 HUMAN_MODEL = Main.HumanModel
 )
@@ -195,37 +194,8 @@ HUMAN_MODEL = Main.HumanModel
       dT = ..Settings.dt_Ratio*(Ts[1]-Ts[0]);
     };
     
-    //    AnyRefFrame &TargetFrameRef = .InputArgs.TargetFrameRef;
-    //    AnyFunTransform3DLinRef2 T2 = {
-    //      Ref = &..InputArgs.TargetFrameRef;
-    //      RefTarget = &GLOBAL_REF;
-    //    };    
-    //    AnyVec3 PosNode0_Global = T2(.InputArgs.TargetFrameRef.Node0.sRel);
-    //    AnyVec3 PosNode1_Global = T2(.InputArgs.TargetFrameRef.Node1.sRel);
-    //    AnyVec3 PosNode2_Global = T2(.InputArgs.TargetFrameRef.Node2.sRel);
-    
-    //    AnyFunInterpol PosNode0 = {
-    //      Type = ConstantValue;
-    //      T = BVH_FILE_DATA.Data.Abscissa.Sample*BVH_FILE_DATA.Header.FrameTime;
-    //      Data = {repmat(SizesOf(T)[0], .PosNode0_Global[0]),
-    //        repmat(SizesOf(T)[0], .PosNode0_Global[1]),
-    //        repmat(SizesOf(T)[0], .PosNode0_Global[2])};
-    //    };
-    //    AnyFunInterpol PosNode1 = {
-    //      Type = ConstantValue;
-    //      T = BVH_FILE_DATA.Data.Abscissa.Sample*BVH_FILE_DATA.Header.FrameTime;
-    //      Data = {repmat(SizesOf(T)[0], .PosNode1_Global[0]),
-    //        repmat(SizesOf(T)[0], .PosNode1_Global[1]),
-    //        repmat(SizesOf(T)[0], .PosNode1_Global[2])};
-    //    };
-    //    AnyFunInterpol PosNode2 = {
-    //      Type = ConstantValue;
-    //      T = BVH_FILE_DATA.Data.Abscissa.Sample*BVH_FILE_DATA.Header.FrameTime;
-    //      Data = {repmat(SizesOf(T)[0], .PosNode2_Global[0]),
-    //        repmat(SizesOf(T)[0], .PosNode2_Global[1]),
-    //        repmat(SizesOf(T)[0], .PosNode2_Global[2])};
-    //    };
-    
+    // Create constant interpol functions that will be used to drive the linear measure between
+    // BVH model nodes and target nodes to zero.
     AnyFunInterpol DriverPosNode0 = {
       Type = ConstantValue;
       T = BVH_FILE_DATA.Data.Abscissa.Sample*BVH_FILE_DATA.Header.FrameTime;
@@ -248,58 +218,25 @@ HUMAN_MODEL = Main.HumanModel
               repmat(SizesOf(T)[0], 0)};
     };
     
-    
-//    Main.EnvironmentModel.GlobalRef = {
-//    AnyRefNode PosNode0 = {
-//      sRel = {Main.BVH_Origin_Modifier.Functions.PosNode0.Data[0][0],Main.BVH_Origin_Modifier.Functions.PosNode0.Data[1][0],Main.BVH_Origin_Modifier.Functions.PosNode0.Data[2][0]};
-//      AnyDrawRefFrame drw = {ScaleXYZ = 0.2*{1,1,1};};
-//      };
-//
-//AnyRefNode PosNode1 = {
-//      sRel = {Main.BVH_Origin_Modifier.Functions.PosNode1.Data[0][0],Main.BVH_Origin_Modifier.Functions.PosNode1.Data[1][0],Main.BVH_Origin_Modifier.Functions.PosNode1.Data[2][0]};
-//      AnyDrawRefFrame drw = {ScaleXYZ = 0.2*{1,1,1};};
-//      };
-//AnyRefNode PosNode2 = {
-//      sRel = {Main.BVH_Origin_Modifier.Functions.PosNode2.Data[0][0],Main.BVH_Origin_Modifier.Functions.PosNode2.Data[1][0],Main.BVH_Origin_Modifier.Functions.PosNode2.Data[2][0]};
-//      AnyDrawRefFrame drw = {ScaleXYZ = 0.2*{1,1,1};};
-//      };
-
-//AnyRefNode PosNode0_Global = {
-//  sRel = {Main.BVH_Origin_Modifier.Functions.PosNode0_Global[0],Main.BVH_Origin_Modifier.Functions.PosNode0_Global[1],Main.BVH_Origin_Modifier.Functions.PosNode0_Global[2]};
-//      AnyDrawRefFrame drw = {ScaleXYZ = 0.2*{1,1,1};};
-//      };
-//AnyRefNode PosNode1_Global = {
-//  sRel = {Main.BVH_Origin_Modifier.Functions.PosNode1_Global[0],Main.BVH_Origin_Modifier.Functions.PosNode1_Global[1],Main.BVH_Origin_Modifier.Functions.PosNode1_Global[2]};
-//      AnyDrawRefFrame drw = {ScaleXYZ = 0.2*{1,1,1};};
-//      };
-//AnyRefNode PosNode2_Global = {
-//  sRel = {Main.BVH_Origin_Modifier.Functions.PosNode2_Global[0],Main.BVH_Origin_Modifier.Functions.PosNode2_Global[1],Main.BVH_Origin_Modifier.Functions.PosNode2_Global[2]};
-//      AnyDrawRefFrame drw = {ScaleXYZ = 0.2*{1,1,1};};
-//      };
-
-//};
-
   };// Functions
   
+  // Define a variable that will be used to set the Origin and Axes value of the BVH origin
   AnyFolder BVHOrigin = {
-    // AnyFloat NAME_PARA_OPT = DesignVar(.Settings.InitialGuess);
     AnyFloat NAME_PARA_OPT = .Settings.InitialGuess;
     AnyFixedRefFrame &BVHOriginRef = BVH_FILE_DATA.Model.GlobalRef;
     BVHOriginRef = {
       Origin = {.NAME_PARA_OPT[0], .NAME_PARA_OPT[1], .NAME_PARA_OPT[2]};
       Axes = RotMat(.NAME_PARA_OPT[3],x)
-      *RotMat(.NAME_PARA_OPT[4],y)
-      *RotMat(.NAME_PARA_OPT[5],z);
-    };
-    
+            *RotMat(.NAME_PARA_OPT[4],y)
+            *RotMat(.NAME_PARA_OPT[5],z);
+    };    
   }; // BVH Origin
   
-    
+  // Insert conditionally the parameter used to set the BVH origin in the existing parameter optimization study
+  // and create drivers between BVH model nodes and target nodes.  
   AnyFolder &ParaOptStudy = PARAMETER_OPT_STUDY;
-  ParaOptStudy = {
-    
-    
-    
+  
+  ParaOptStudy = {    
     
     #if OPT_LIN_X == 1
     AnyDesVar NAME_PARA_OPT##_LinX = {
@@ -333,41 +270,17 @@ HUMAN_MODEL = Main.HumanModel
     #endif
     
     KinematicStudyForParameterIdentification = {
-      AnyFolder &mocapmodel = Main.ModelSetup;
-      AnyFolder OptDrivers = {
-        
-        //        AnyKinDriverMarker Node0 = {
-        //          viewKinMeasure.Size = 0.2;
-        //          WeightFun = {&....Functions.WeightFun,
-        //            &....Functions.WeightFun,
-        //            &....Functions.WeightFun};
-        //          AnyRefFrame &BVHPoint = ....InputArgs.BVHSeg.Node0;
-        //          AnyParamFun &target = ....Functions.PosNode0;
-        //        };
-        //        AnyKinDriverMarker Node1 = {
-        //          viewKinMeasure.Size = 0.2;
-        //          WeightFun = {&....Functions.WeightFun,
-        //            &....Functions.WeightFun,
-        //            &....Functions.WeightFun};
-        //          AnyRefFrame &BVHPoint = ....InputArgs.BVHSeg.Node0.Node1;
-        //          AnyParamFun &target = ....Functions.PosNode1;
-        //        };
-        //        
-        //        AnyKinDriverMarker Node2 = {
-        //          viewKinMeasure.Size = 0.2;
-        //          WeightFun = {&....Functions.WeightFun,
-        //            &....Functions.WeightFun,
-        //            &....Functions.WeightFun};
-        //          AnyRefFrame &BVHPoint = ....InputArgs.BVHSeg.Node0.Node2;
-        //          AnyParamFun &target = ....Functions.PosNode2;
-        //        };
-        
-        
+      // include BVH model in the optimization study
+      AnyFolder &mocapmodel = BVH_FILE_DATA;
+
+      // Create Drivers between BVH model nodes and target nodes.
+      AnyFolder NAME_PARA_OPT##_OptDrivers = {
+                
         AnyKinMotion Node0 = {
           viewKinMeasure.Size = 0.2;
           WeightFun = {&....Functions.WeightFun,
-            &....Functions.WeightFun,
-            &....Functions.WeightFun};
+                       &....Functions.WeightFun,
+                       &....Functions.WeightFun};
           AnyKinLinear Lin = {
             AnyRefFrame &BVHPoint = .....InputArgs.BVHSeg.Node0;
             AnyRefFrame &TargetPoint = .....InputArgs.TargetFrameRef.Node0;
@@ -378,8 +291,8 @@ HUMAN_MODEL = Main.HumanModel
         AnyKinMotion Node1 = {
           viewKinMeasure.Size = 0.2;
           WeightFun = {&....Functions.WeightFun,
-            &....Functions.WeightFun,
-            &....Functions.WeightFun};
+                       &....Functions.WeightFun,
+                       &....Functions.WeightFun};
           AnyKinLinear Lin = {
             AnyRefFrame &BVHPoint = .....InputArgs.BVHSeg.Node0.Node1;
             AnyRefFrame &TargetPoint = .....InputArgs.TargetFrameRef.Node1;
@@ -390,49 +303,23 @@ HUMAN_MODEL = Main.HumanModel
         AnyKinMotion Node2 = {
           viewKinMeasure.Size = 0.2;
           WeightFun = {&....Functions.WeightFun,
-            &....Functions.WeightFun,
-            &....Functions.WeightFun};
+                       &....Functions.WeightFun,
+                       &....Functions.WeightFun};
           AnyKinLinear Lin = {
             AnyRefFrame &BVHPoint = .....InputArgs.BVHSeg.Node0.Node2;
             AnyRefFrame &TargetPoint = .....InputArgs.TargetFrameRef.Node2;
           };
           AnyParamFun &target = ....Functions.DriverPosNode2;
-        };
-        
-        
-        
+        }; 
+         
       }; // OptDriver
     };//KinStudyForParaIden
     
   }; // ParaOptStudy
   
-  
-  //Main.Studies.MarkerTracking = {
-  //  AnyFolder &MocapModel = Main.ModelSetup.BVHFileData.Model;
-  //};
-  
-  
-  
-  //AnyFolder &LoadParams = Main.RunAnalysis.LoadParameters;
-  //LoadParams = {
-  //AnyOperationMacro Load_BVH_Origin_parameters = {
-  //    OPERATION_DISPLAY_PRIORITY(PriorityLow);
-  //     
-  //AnyFileVar LoadPath = "Output\";
-  ////    AnyFileVar LoadPath = TEMP_PATH;
-  ////    AnyFileVar LoadPath = "..\..\Application\MocapExamples\BVH_Xsens_OptimizeOrigin\Output\";
-  //MacroStr = {"classoperation Main" + strquote("Load Values") +"--file=" + 
-  //          strquote(FilePathCompleteOf(LoadPath) +"/"+   Main.ModelSetup.TrialSpecificData.TrialFileName +".anyset" ),
-  //          "classoperation Main " + strquote("Update Values")
-  //        };
-  //};
-  //
-  //  };
-
-  
+  // Error message for wrong choice of HUMAN_SEG
   #else
-  AnyInt Error_HumanSeg = assert(0,"Please check choice of HUMAN_SEG. Only LFOOT, RFOOT, LHAND or RHAND is allowed"); 
-  
+  AnyInt Error_HumanSeg = assert(0,strformat("Please check choice of HUMAN_SEG. Only one of \x22LFOOT\x22, \x22RFOOT\x22, \x22LHAND\x22, or \x22RHAND\x22 is allowed."));   
   #endif
   
 }; // class template
