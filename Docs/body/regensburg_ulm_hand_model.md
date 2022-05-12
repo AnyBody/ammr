@@ -114,10 +114,14 @@ from Ulm University and OTH Regensburg respectively.
 
 If you need to cite the model use the following references:
 
-[^cite_emhf20]: Engelhardt, L., Melzner, M., Havelkova, L. & Fiala, P.
-    A new musculoskeletal AnyBodyTM detailed hand model i. Journal of Computer Methods in Biomechanics and Biomedical Engineering (2020)
-    doi: 10.1080/10255842.2020.1851367
+[^cite_emhf20]: Engelhardt, L., Melzner, M., Havelkova, L., Fiala, P., Christen, P., Dendorfer, S., & Simon, U. (2020). A new musculoskeletal AnyBodyTM detailed hand model.    Computer Methods in Biomechanics and Biomedical Engineering, 1–11. 
+    ([link](https://doi.org/10.1080/10255842.2020.1851367))
 
 [^cite_hazi20]: Havelková L., Zítka T., Fiala P., Rybarova M., Tupý R., Kalis V., & Ismail K.M. (2020).
     Data for: Hand muscles attachments: A Geometrical model (Version pre pub sc v1.1) \[Data set\]. Zenodo.
     ([link](http://doi.org/10.5281/zenodo.3954024))
+
+[^cite_mesl21]: Melzner, M., Engelhardt, L., Simon, U., & Dendorfer, S. (2021). Electromyography Based Validation of a Musculoskeletal Hand Model. Journal of Biomechanical Engineering. ([link](https://doi.org/10.1115/1.4052115))
+
+[^cite_webcast20]: Engelhardt, L., Melzner M., (2020) A new musculoskeletal AnyBodyTM detailed hand model, AnyBody Technology Webcast.
+    ([link](https://www.anybodytech.com/a-new-musculoskeletal-anybody-detailed-hand-model))
