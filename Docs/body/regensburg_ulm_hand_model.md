@@ -29,6 +29,10 @@ For the sake of reduced complexity the carpal bones where treated as one rigid b
 The Regensburg-Ulm-Hand-Model was developed by Lucas Engelhardt and Maximilian Melzner [^cite_emhf20]
 from Ulm University and OTH Regensburg respectively.
 
+:::{seealso}
+See also other resources on the hand model:  [^cite_mesl21] [^cite_webcast20]
+:::
+
 % EMBED a rotatable 3D version of the hand model.
 
 % .. raw:: html
