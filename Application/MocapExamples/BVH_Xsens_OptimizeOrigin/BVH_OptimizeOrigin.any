@@ -1,10 +1,149 @@
+/* Class Template OptimizeBVH_Origin
+
+This class template can be useful when BVH recordings consist
+of interaction of the subject with environment objects. In such
+trials, it can be hard to locate the environment object relative
+to the subject. An example could be a subject lifting a box, 
+where the position of the box is known but the BVH recordings of 
+different trials results in the subject being located inconsistently
+with respect to the box.
+
+This class template optimizes the origin of the BVH model. 
+Normally, the origin of the BVH recording is coincident with the
+Global Ref of the model in AnyMoCap models. The BVH stick figure
+and consequently the movement of the human subject is reconstructed
+from the origin of the BVH recording. Whereas, environment objects
+are normally located with respect to the Global Ref of the model.
+
+The origin of the BVH model (recording) can be set to another postion 
+and orientation with respect to the Global Ref. This class template
+can optimize the origin of the BVH model such that a target segment
+of the human model (L/R Foot/Hand) is positioned and oriented in a
+known way for a known time interval. For example, the class template
+can set the origin of the BVH recording such that the right hand
+is positioned and oriented in a known way (such as on a box) in a
+known and definite time interval of the recording (such as the time
+interval in which the subject grasps the box).
+
+The class works by defining three ref nodes on the BVH stick figure
+and three corresponding nodes at the target. To help visualization, 
+a drawing of the selected human segment is generated at the target.
+The corresponding nodes are driven to be coincident by using 
+AnyKinMotion driver. These drivers are active only during the active 
+time interval. This is implemented by a square wave function that is 
+set to 1 during the active period and zero outside the active period. 
+Finally, the origin of the BVH recording is set using a design 
+variable that is optimized through the default parameter optimization 
+study of the AnyMoCap model.
+
+Class arguments:
+---------------
+HUMAN_SEG: <Optional. Default ="RFOOT">
+Is the human segment that must be positioned and oriented in the 
+target postion and orientation. 
+
+ACTIVE_TIME_START: <Obligatory>
+Is the start of the time interval where the selected human segment
+must be in the target position and orientation. AnyVector 
+
+ACTIVE_TIME_END: <Obligatory>
+Is the end of the time interval where the selected human segment
+must be in the target position and orientation. AnyVector
+
+OPT_LIN_X: <Optional. Default = 1>
+Switch to enable optimization of BVH origin in translation in X axis.
+
+OPT_LIN_Y: <Optional. Default = 0>
+Switch to enable optimization of BVH origin in translation in Y axis.
+
+OPT_LIN_Z: <Optional. Default = 1>
+Switch to enable optimization of BVH origin in translation in Z axis.
+
+OPT_ROT_X: <Optional. Default = 0>
+Switch to enable optimization of BVH origin in rotation in X axis.
+
+OPT_ROT_Y: <Optional. Default = 1>
+Switch to enable optimization of BVH origin in rotation in Y axis.
+
+OPT_ROT_Z: <Optional. Default = 0>
+Switch to enable optimization of BVH origin in rotation in Z axis.
+
+NAME_PARA_OPT: <Optional. Default = BVH_Origin>
+Is the name of the parameter that will be included in the parameter
+optimization study with suffix for direction (eg: NAME_PARA_OPT_LinX)
+
+REF_FRAME_FOR_TARGET: <Optional. Default = Main.EnvironmentModel.GlobalRef>
+Is the reference frame for defining the target position and orientation.
+
+BVH_FILE_DATA: <Optional. Default = Main.ModelSetup.BVHFileData>
+Is the pointer to the AnyInputBVH object in the model. This is the class
+that reads the BVH file.
+
+HUMAN_MODEL: <Optional. Default = Main.HumanModel>
+Is the pointer to the human model in the model.
+
+{
+  Target_Position: <Optional. Default = {0.0, 0.0, 0.0};>
+  Is the poisition vector of the Target referred in REF_FRAME_FOR_TARGET.
+
+  Target_Orientation: <Optional. Default = {{1,0,0},{0,1,0},{0,0,1}};>
+  Is the rotational transformation matrix of the Target referred in
+  REF_FRAME_FOR_TARGET.
+  
+  Optional initialization:
+  -----------------------
+  Settings: 
+    InitialGuess    : Initial guess for the BVH Origin in the order: {lin_x,
+                      lin_y, lin_z, rot_x, rot_y, rot_z}. in m or radians.
+    Weight          : Weight of the AnyKinMotion drivers in the active time interval
+    dt_Ratio        : Start and end transition time of the weight function 
+                      expressed as fraction of the active time interval. For more info,
+                      please see reference for AnyFunSquareWave
+
+}
+
+Please note:
+------------
+* When you implement this class in a copy of the BVH Xsens model from the AMMR, it is possible
+  that the TrialSpecificData.any file defines LoadParametersFrom = {""};. If you want to save the
+  optimized origin and load it again in the future, please comment the definition of 
+  LoadParametersFrom so that the AnyMoCap model can use the default definition of the filename.
+  The class template will provide a warning if LoadParametersFrom = {""};
+
+Initialization example:
+----------------------
+OptimizeBVH_Origin <Object_name> (
+    HUMAN_SEG = "<*RFOOT|LFOOT|RHAND|LHAND>",
+    ACTIVE_TIME_START = 0.1,
+    ACTIVE_TIME_END = 0.15,
+    // Optional Initialization showing default values
+    OPT_LIN_X = 1, OPT_LIN_Y = 0, OPT_LIN_Z = 1,
+    OPT_ROT_X = 0, OPT_ROT_Y = 1, OPT_ROT_Z = 0,
+    NAME_PARA_OPT = BVH_Origin,
+    PARAMETER_OPT_STUDY = Main.Studies.ParameterIdentification,
+    REF_FRAME_FOR_TARGET = Main.EnvironmentModel.GlobalRef,
+    BVH_FILE_DATA = Main.ModelSetup.BVHFileData,
+    HUMAN_MODEL = Main.HumanModel
+    ) = 
+      {
+        Target_Position = {0.0, 0.0, 0.0};
+        Target_Orientation = {{1,0,0},{0,1,0},{0,0,1}};
+        Settings = {
+          InitialGuess = {0.0,0.0,0.0,0.0,0.0,0.0};
+          Weight = 1;
+          dt_Ratio = {0.1,0.1};
+        };
+      };
+
+*/
+
 #class_template OptimizeBVH_Origin (
 HUMAN_SEG = "RFOOT",
 ACTIVE_TIME_START,
 ACTIVE_TIME_END,
-NAME_PARA_OPT = BVH_Origin,
 OPT_LIN_X = 1, OPT_LIN_Y = 0, OPT_LIN_Z = 1,
 OPT_ROT_X = 0, OPT_ROT_Y = 1, OPT_ROT_Z = 0,
+NAME_PARA_OPT = BVH_Origin,
 PARAMETER_OPT_STUDY = Main.Studies.ParameterIdentification,
 REF_FRAME_FOR_TARGET = Main.EnvironmentModel.GlobalRef,
 BVH_FILE_DATA = Main.ModelSetup.BVHFileData,
@@ -25,7 +164,7 @@ HUMAN_MODEL = Main.HumanModel
   
   AnyFolder InputArgs = {
     // warning for LoadParametersFrom value. BVH models normally don't have any parameters to be optimized. Thus, the anyset file with 
-    // parameters won't exist and LoadParametersFrom value is defined as blank in TrialSpecificData.any to avoid issues with 
+    // parameters won't exist and LoadParametersFrom value is defined as {""}; in TrialSpecificData.any to avoid issues with 
     // RunAnalysis.LoadParameters Operation. The definition of LoadParametersFrom in TrialSpecificData.any must be commented out 
     // so that AnyBody can define the default value for LoadParametersFrom value. Alternatively, provide the name of the file from 
     // which parameters should be loaded.
