@@ -25,7 +25,7 @@ Musculoskeletal model moved similar to marker based MoCap models.
    old examples. 
 
 AnyBody automatically calculates the virtual markers positions, and the model is scaled directly from
-the size of the BVH stick figure. Hence the model contains no *Parameter identification* step to find
+the size of the BVH stick figure. Hence the model contains no *Parameter identification* step to find the parameters.
 The remaining parts of the model are equivalent to other :ref:`MoCap model <anymocap>`  based on C3D files. 
 
 Updating old (ammr < 2.2.3) BVH based models
