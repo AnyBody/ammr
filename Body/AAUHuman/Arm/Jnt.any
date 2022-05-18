@@ -24,24 +24,24 @@ DEFAULT_PARAMETER_FOLDER ThoraxScapulaMultiPointContactSettings(
 
 
 /// Definition of SternoClavicular (SC) joint
-AnySphericalJoint SCJoint = {
+AnySphericalJoint SternoClavicularJoint = {
   AnyRefNode &thorax_sc = ..ShoulderRef.scj;
   AnyRefNode &clavicula_sc = ..Seg.Clavicula.scj;
 };
 
 
 /// Defintion of Acromial-Clavicular (AC) joint
-AnySphericalJoint ACJoint = {
+AnySphericalJoint AcromioClavicularJoint = {
   AnyRefNode &clavicula_ac = ..Seg.Clavicula.acj;
   AnyRefNode &scapula_ac = ..Seg.Scapula.acj;
 };
 
 
 /// Definition of GH joint
-AnySphericalJoint GHJoint = {
+AnySphericalJoint GlenoHumeralJoint = {
   AnyRefNode &scapula_gh = ..Seg.Scapula.gh;
   AnyRefNode &humerus_gh = ..Seg.Humerus.gh; 
-  //This is the reactions of the GH joint they are normally set to "Off Off Off" if the file 
+  //These are the reactions of the GH joint they are normally set to "Off Off Off" if the file 
   // GHReactions.any is being used, if this is not the case the reactions should be set to "On On On"
   Constraints.Reaction.Type={Off,Off,Off};
 };
@@ -62,14 +62,30 @@ AnyRevoluteJoint FE = {
 };//End FE
 
 
-///Definition of proximal forearm pronation supination joint 
-AnySphericalJoint PSJoint = {
+//Next three definitions equal to spherical joint 
+//Definition of proximal forearm pronation supination joint 
+AnyKinRotational PSRotProximal = {
+  Axis1 = x;
+  Axis2 = y;
+  Axis3 = z;
+  Type = RotAxesAngles;
+ 
+  AnyRefNode &RadiusPs = ..Seg.Radius.PointPS2;
+  AnyRefNode &UlnaPs = ..Seg.Ulna.ps2;
+};//End pronation supination joint proximal
+
+//Definition of forearm pronation supination joint 
+AnyKinLinear PSLinProximal = {
+  Ref=0;
+  
   AnyRefNode &UlnaPs = ..Seg.Ulna.ps2;
   AnyRefNode &RadiusPs = ..Seg.Radius.PointPS2;
-  Constraints.Reaction.Type = {Off,Off,Off};
+};//End pronation supination joint proximal
 
+AnyKinEq PSProximalConstraints = {
+  AnyKinLinear &Jnt = .PSLinProximal; 
+  Reaction.Type = {Off,Off,Off};
 };
-
 
 AnyReacForce PSProximalReacForce = 
 {
@@ -95,12 +111,25 @@ AnyReacForce PSProximalReacForce =
 };
 
 
-/// Defintions of the distal Elbow Pronation supination joint
-AnyTransSphericalJoint PSDistalJoint = {
-    AnyRefNode &UlnaPs = ..Seg.Ulna.ps2_usRot;
-    AnyRefNode &RadiusPs = ..Seg.Radius.PS;
-    Axis = y;
+//This is measure which will be used by the applications
+AnyKinMeasureOrg PS = {
+  AnyKinRotational &Jnt = .PSRotProximal;
+  MeasureOrganizer = {0};
 };
+//End definitions of spherical joint
+
+AnyKinEq PSLinDistalConstraint = {
+  
+  //Definition of distal forearm pronation supination joint 
+  AnyKinLinear PSLinDistal = {
+    Ref = 0; //Uses coordinate system of the first defined segment
+
+    AnyRefNode &UlnaPs = ...Seg.Ulna.ps2_usRot;
+    AnyRefNode &RadiusPs = ...Seg.Radius.PS;
+  };//End pronation supination joint distal
+  MeasureOrganizer = {0,2};
+};
+
 
 
 ////Definition of wrist joint
@@ -119,6 +148,7 @@ AnyRevoluteJoint WristJointDeviation = {
 
 
 //Scapula thorax gliding plane
+
 #if BM_ARM_THORAX_SCAPULA_CONTACT == _MULTIPLE_POINT_CONTACT_
 
 
