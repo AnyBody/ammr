@@ -9,6 +9,14 @@
 ## AMMR 2.4.1 (??)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.6533249.svg)](https://doi.org/10.5281/zenodo.6533249)
 
+**New example models:**
+
+- Added a model using a new class template to optimize the origin of BVH model. This model shows how to optimize
+  the origin of the BVH model such that a target segment of the human model (Left/Right Foot/Hand) hits a known 
+  position and orientation in a given time interval while following the recorded motion from the trial.
+  <{ref}`See more <sphx_glr_auto_examples_Mocap_plot_BVH_OptimizeOrigin.py>`>
+
+
 **Fixed:**
 * Fixed a small syntax error which caused the BVH example `S1/S01_Trial02/` to fail loading. 
 
