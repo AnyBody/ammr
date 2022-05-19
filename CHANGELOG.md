@@ -14,6 +14,10 @@
 * Fixed a problem with the "interface" morphing between the TLEM2 pelvis and Trunk Pelvis at the tip of the scarum bone. 
   This bug was visible when using `#define BM_LEG_TRUNK_INTERFACE _MORPH_LEG_TO_TRUNK_`, (i.e. when using the trunk pelvis morphology with the TLEM2 model), which is not the default. 
 
+**Added:**
+* A few previously renamed nodes in pelvis were added back to improve backwards compatibility when loading old seating models. 
+
+
 ## AMMR 2.4 (2022-04-28)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.6471999.svg)](https://doi.org/10.5281/zenodo.6471999)
 
@@ -111,6 +115,11 @@
 - The trunk model has been restructured in preparation for a full Thoracic model. 
   This means that all the vertebra and ribs have been created in the model structure, but only as
   `AnyFolder&` references to the single rigid thorax segment.
+  
+  :::{note} 
+  A number of nodes have been renamed in the process. If you have problems loading old model due to missing nodes, please consult the new model examples to find the new names. 
+  :::
+
 - Updated the neutral scapula position and scapula sliding. The default neutral scapula position 
   (medial rotation) have been updated to a more realistic position. Additionally, the node at scapula
   TS point on which scapula slides have been moved to provide a more realistic clearance between 
