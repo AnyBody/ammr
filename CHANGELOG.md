@@ -6,7 +6,7 @@
 
 (ammr-2.4-changelog)=
 
-## AMMR 2.4.1 (??)
+## AMMR 2.4.1 (2022-05-25)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.6533249.svg)](https://doi.org/10.5281/zenodo.6533249)
 
 **Fixed:**
