@@ -26,17 +26,6 @@ the size of the BVH stick figure. Hence the model contains no *Parameter identif
 In this model for optimizing the origin, the parameter identification step must be run manually prior 
 to running the model.
 
-Updating old (ammr < 2.2.3) BVH based models
--------------------------------------------------
-
-The safest approach is to reimplement your model based on the newest BVH example and AMMR v.2.3. 
-
-However, it is also possible to change a few files in existing models to utilize the 
-new BVH improvements in AnyBody v.7.3. 
-
-1.  **Important**: Make sure your use the new AMMR (>=2.3) and new AnyBody Modeling System (>=7.3).
-    You can copy your existing model folder into the new AMMR, or edit the local ``libdef.any`` file to point to the new AMMR.
-
 
 """
 import sys
