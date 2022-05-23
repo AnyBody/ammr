@@ -48,5 +48,5 @@ import gallery
 gallery.anymocap()
 
 
-gallery.plot("../images/BVH_OptimizeOrigin.jpg")
+gallery.plot("../images/BVH_OptimizeOrigin_Merged.jpg")
 gallery.show()
