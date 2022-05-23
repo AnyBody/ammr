@@ -6,7 +6,7 @@
 
 (ammr-2.4-changelog)=
 
-## AMMR 2.4.1 (??)
+## AMMR 2.4.1 (2022-05-25)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.6533249.svg)](https://doi.org/10.5281/zenodo.6533249)
 
 **Fixed:**
@@ -16,10 +16,14 @@
 * Fixed missing calibration for the new latissimus dorsi elements introduced in AMMR 2.4. This fix also ensures that all
   latissimus dorsi elements are calibrated in the same arm posture.
 
-**Changed**
+**Changed:**
 * The anyscript implemenatation of the acromio-clavicuala, sterno-clavicular, gleno-humeral
   joints have been refactored. They now use the `AnySphericalJoint` class instead of implementing the joints directly with measures and constraints. This simplifies the implementation and changes the structure of the model tree. But has no influence the kinematics of the model. 
   
+**Added:**
+* A few previously renamed nodes in pelvis were added back to improve backwards compatibility when loading old seating models. 
+
+
 ## AMMR 2.4 (2022-04-28)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.6471999.svg)](https://doi.org/10.5281/zenodo.6471999)
 
@@ -52,20 +56,20 @@
   the new `VideoTool.CreateVideo` operation under the Study folder.
   This will automatically run the example model, output still frames,
   and combine them into a video afterwards. The script can easily be
-  addapted and moved to other examples. 
-- Two new utility macros which makes it easier to create 3D grid arrays have been added to the model repository.
-  `MESHTRIPLES(xarr, yarr, zarr)` and  `MESHGRID(xarr,yarr,zarr)`. I.e. for
+  adapted and moved to other examples. 
+- Two new utility macros, which make it easier to create 3D grid arrays, have been added to the model repository.
+  `MESHTRIPLES(xarr, yarr, zarr)` and  `MESHGRID(xarr,yarr,zarr)`. i.e. for
   creating arrays of all points in a 3D grid array. More information in the file: 
   {menuselection}`Body --> AAUHuman --> BodyModels --> GenericBodyModel --> Helper.ClassTemplates.any`
 
 - Added a warning when the glenohumeral flexion/abduction in the 
-  mannequin values can cause problems as start guess for the kinematic solver. An small automatic pertubation of the Humerus orientation (`Axes0`) are also added in these cases so the shoulder rhythm will work as expected. 
+  mannequin values can cause problems as start guess for the kinematic solver. A small automatic pertubation of the Humerus orientation (`Axes0`) is also added in these cases so the shoulder rhythm will work as expected. 
 - There is a new option to override more settings in the `DefaultMannequinDrivers` section. Now the driver 
   type (`CType=Hard/Soft`), can be overridden directly by the users.
 - Fixed a lack of robustness with muscle recruitment of the abdominal muscles (`buckle support`). 
   Muscle recruitment could previously fail with high lumbar flexion.
   A small support "artificial muscle" has beeen added to the buckle 
-  segment, preventing muscle reqruitment from failing. 
+  segment, preventing muscle recruitment from failing. 
 
 **Fixed:**
 
@@ -79,7 +83,7 @@
   while maintaining the same moment arm in gait etc.
 - Fixed a bug in scaling where the mass of the trunk model pelvis was used in some cases instead of the 
   pelvis mass from the leg model. This could cause a slightly incorrect mass to be used for the pelvis segment.
-- Fixed wrong sign for the WristJoint flexion variable. This values users provided in the mannequin 
+- Fixed wrong sign for the WristJoint flexion variable. The values users provided in the mannequin 
   section was incorrectly interpreted as wrist extension.
 - Fixed a problem where custom scaling and {bm_constant}`_SCALING_XYZ_` would 
   prevent the model from loading.
@@ -88,12 +92,12 @@
    - Fix length calculation and drawing of the normal force
    - Fixed an extrapolation error when changing the internal setting `_SMOOTHING_FUNCTION_PROFILE_` to
      `FUNC_PROFILE_BSPLINE`. We now cap the height ratio to only be in the interpolation area. 
-     Values outside infers that no contact is present.
+     Values outside this area infer that no contact is present.
 
 - Refactored the way Trunk nodes are mirrored between left and right. This is more consistent 
-  with the remaining bodyparts and handled in the cadaver data files.
-- Fix a problem in MoCap models where calibration studies were not run automatically in model 
-  which only had 3-element muscles on the upper body.
+  with the remaining body parts and handled in the cadaver data files.
+- Fixed a problem in MoCap models where calibration studies were not run automatically in models 
+  that only had 3-element muscles on the upper body.
 - The {ref}`example to evaluate moments arms <sphx_glr_auto_examples_Validation_plot_EvaluateMomentArms.py>` 
   now works when the shoulder rhythm is enabled. 
 
@@ -109,20 +113,25 @@
 - The `clavicle` entry in the `Anthropometric.SegmentMasses` folder have been renamed to `shoulder`. 
   This makes it consistent with the rest of varaibles in the folder, and correctly reflect that 
   the mass is assigned to both the scapula and clavicle segment. 
-- The `OptimalFiberLength` and `TotalTendonLength` in the TLEM leg models, are no longer 'DesignVar', when the
-  parameters are also calibrated. This prevents huge amount warnings when calibrating the leg muscles.
+- The `OptimalFiberLength` and `TotalTendonLength` in the TLEM leg models are no longer 'DesignVar' when the
+  parameters are also calibrated. This prevents the huge amount of warnings when calibrating the leg muscles.
 - The `L5LContactNode`,`L4LContactNode`,`L3LContactNode`,
   `L4LContactNode`,`L1LContactNode` nodes were scaled using the Right node Z-axis. This
   is now changed to use the Left node Z-axis.
 - The trunk model has been restructured in preparation for a full Thoracic model. 
   This means that all the vertebra and ribs have been created in the model structure, but only as
   `AnyFolder&` references to the single rigid thorax segment.
+  
+  :::{note} 
+  A number of nodes have been renamed in the process. If you have problems loading old model due to missing nodes, please consult the new model examples to find the new names. 
+  :::
+
 - Updated the neutral scapula position and scapula sliding. The default neutral scapula position 
-  (medial rotation) have been updated to a more realistic position. Additionally, the node at scapula
-  TS point on which scapula slides have been moved to provide a more realistic clearance between 
+  (medial rotation) has been updated to a more realistic position. Additionally, the node at scapula
+  TS point, on which the scapula slides, has been moved to provide a more realistic clearance between 
   the scapula and the ellipsoid sliding surface representing thorax.  
-  Thanks to Johanna Menze (@menzejo) from the University of Bern from updating the model.
-- Renamed a few variable named `r` which could collide with builtin `r` variable. 
+  Thanks to Johanna Menze (@menzejo) from the University of Bern for updating the model.
+- Renamed a few variables named `r` which could collide with built-in `r` variable. 
 
 **Removed:**
 
