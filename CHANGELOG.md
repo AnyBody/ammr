@@ -18,7 +18,7 @@
 
 **Changed**
 * The anyscript implemenatation of the acromio-clavicuala, sterno-clavicular, gleno-humeral
-  joints have been refactored. They now use the `AnySphericalJoint` class instead of implementing the joints with manually measures and contraints. This simplifies the implementation and changes the structure of the model tree. But has no influence the kinematics of the model. 
+  joints have been refactored. They now use the `AnySphericalJoint` class instead of implementing the joints directly with measures and constraints. This simplifies the implementation and changes the structure of the model tree. But has no influence the kinematics of the model. 
   
 ## AMMR 2.4 (2022-04-28)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.6471999.svg)](https://doi.org/10.5281/zenodo.6471999)
