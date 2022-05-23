@@ -19,11 +19,12 @@ The origin of the BVH model (recording) can be set to another position
 and orientation with respect to the Global Ref. This class template
 can optimize the origin of the BVH model such that a target segment
 of the human model (L/R Foot/Hand) is positioned and oriented in a
-known way for a known time interval. For example, the class template
-can set the origin of the BVH recording such that the right hand
-is positioned and oriented in a known way (such as on a box) in a
-known and definite time interval of the recording (such as the time
-interval in which the subject grasps the box).
+known way for a known time interval while following the recorded
+motion. For example, the class template can set the origin of the BVH 
+recording such that the right hand is positioned and oriented in a 
+known way (such as on a box) in a known and definite time interval 
+of the recording (such as the time interval in which the subject 
+grasps the box).
 
 The class works by defining three ref nodes on the BVH stick figure
 and three corresponding nodes at the target. To help visualization, 
@@ -49,6 +50,13 @@ must be in the target position and orientation. AnyVector
 ACTIVE_TIME_END: <Obligatory>
 Is the end of the time interval where the selected human segment
 must be in the target position and orientation. AnyVector
+
+REPEAT_USE: <Optional. Default = 0>
+Switch to identify if the class template is being used more than one
+time. For multiple use of the of the class template in the same model, 
+the switch must be set to 0 only one time and to 1 for other times. 
+This switch prevents error due to the class template defining the same
+objects multiple times.
 
 OPT_LIN_X: <Optional. Default = 1>
 Switch to enable optimization of BVH origin in translation in X axis.
@@ -119,6 +127,7 @@ OptimizeBVH_Origin <Object_name> (
     
     // Optional Initialization showing default values
     
+    REPEAT_USE = 0,
     OPT_LIN_X = 1, OPT_LIN_Y = 0, OPT_LIN_Z = 1,
     OPT_ROT_X = 0, OPT_ROT_Y = 1, OPT_ROT_Z = 0,
     NAME_PARA_OPT = BVH_Origin,
@@ -143,6 +152,7 @@ OptimizeBVH_Origin <Object_name> (
 HUMAN_SEG = "RFOOT",
 ACTIVE_TIME_START,
 ACTIVE_TIME_END,
+REPEAT_USE = 0,
 OPT_LIN_X = 1, OPT_LIN_Y = 0, OPT_LIN_Z = 1,
 OPT_ROT_X = 0, OPT_ROT_Y = 1, OPT_ROT_Z = 0,
 NAME_PARA_OPT = BVH_Origin,
@@ -306,6 +316,9 @@ HUMAN_MODEL = Main.HumanModel
           RelPos = .STLPos;
           RelRotMat = .STLOrientation;
           ScaleXYZ = .STLScale;
+          Opacity = 0.3 + ....Functions.WeightFun(.t)[0]*0.5;
+//          RGB ={....Functions.WeightFun(.t)[0]*0.5,(....Settings.Weight-....Functions.WeightFun(.t)[0])*0.7,0.7*....Settings.Weight}/....Settings.Weight;
+          RGB = iffun(gtfun(....Functions.WeightFun(.t)[0],0),{0.2,0.8,0.2},{0.65,0.65,0.65});
           AnyFunTransform3D &Scale = .STLTransform;
         };
         
@@ -366,10 +379,14 @@ HUMAN_MODEL = Main.HumanModel
     AnyFloat NAME_PARA_OPT = .Settings.InitialGuess;
     AnyFixedRefFrame &BVHOriginRef = BVH_FILE_DATA.Model.GlobalRef;
     BVHOriginRef = {
+      // Set origin and axes only for the primary use of class template.
+      #if REPEAT_USE == 0
       Origin = {.NAME_PARA_OPT[0], .NAME_PARA_OPT[1], .NAME_PARA_OPT[2]};
       Axes = RotMat(.NAME_PARA_OPT[3],x)
             *RotMat(.NAME_PARA_OPT[4],y)
             *RotMat(.NAME_PARA_OPT[5],z);
+      #else
+      #endif
     };    
   }; // BVH Origin
   
@@ -378,7 +395,9 @@ HUMAN_MODEL = Main.HumanModel
   AnyFolder &ParaOptStudy = PARAMETER_OPT_STUDY;
   
   ParaOptStudy = {    
-    
+    // Insert design variables only in case of primary use of the class template.
+    #if REPEAT_USE == 0
+    // and only if they are required to be optimized.
     #if OPT_LIN_X == 1
     AnyDesVar NAME_PARA_OPT##_LinX = {
       Val = ..BVHOrigin.NAME_PARA_OPT[0];
@@ -410,11 +429,18 @@ HUMAN_MODEL = Main.HumanModel
     };
     #endif
     
+    #else
+    #endif
     KinematicStudyForParameterIdentification = {
-      // include BVH model in the optimization study
+      
+      #if REPEAT_USE == 0
+      // include BVH model in the optimization study (only for primary use)
       AnyFolder &mocapmodel = BVH_FILE_DATA;
-
-      // Create Drivers between BVH model nodes and target nodes.
+      #else
+      #endif
+      
+      // Create Drivers between BVH model nodes and target nodes. The drivers are
+      // created inside a folder that can be uniquely named using NAME_PARA_OPT
       AnyFolder NAME_PARA_OPT##_OptDrivers = {
                 
         AnyKinMotion Node0 = {
@@ -458,6 +484,21 @@ HUMAN_MODEL = Main.HumanModel
     
   }; // ParaOptStudy
   
+  // Define a sequence of operations to run the the parameter study, update and save values.
+  #if REPEAT_USE == 0
+  Main = { 
+    AnyOperationSequence RunBVH_Origin_Optimization = 
+    {
+      AnyOperation& ParameterOptimization = PARAMETER_OPT_STUDY.ParameterOptimization;
+      AnyOperationMacro UpdateValues = {
+        MacroStr = {"classoperation Main " + strquote("Update Values")};
+      };
+      AnyOperation& SaveParameters = Main.ModelSetup.Macros.Save_parameters;      
+    };
+  };
+  #else
+  #endif
+
   // Error message for wrong choice of HUMAN_SEG
   #else
   AnyInt Error_HumanSeg = assert(0,strformat("Please check choice of HUMAN_SEG. Only one of \x22LFOOT\x22, \x22RFOOT\x22, \x22LHAND\x22, or \x22RHAND\x22 is allowed."));   

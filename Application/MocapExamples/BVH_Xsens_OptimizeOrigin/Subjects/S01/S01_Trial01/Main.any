@@ -45,27 +45,29 @@
 // 
 // To see the class template in action, please:
 // 1. Load the model.
-// 2. Run Studies.ParameterIdentification.ParameterOptimization study.
+// 2. Run "RunBVH_Origin_Optimization" operation sequence that is created by the
+//    class template. It runs the optimization study, updates and saves values.
 // 3. Run Marker Tracking -> Inverse Dynamics.
 //
 // You can also save the optimized parameters by running 
 // ModelSetup.Macros.Save_parameters. Then, subsequently, when you load the model again,
 // you can just run RunAnalysis that will automatically load and update the saved 
 // parameters before running marker tracking and inverse dynamics analysis.
-/////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////
-// Normally, BVH models don't need parameter identification and its loading//
-// is disabled by defining LoadParametersFrom = {""}; in TrialSpecificData.//
-// If you want to run this in your own BVH model, please comment the line  //
-// to let AnyMoCap use the default value of filename. Alternatively, please//
-// provide a name of the file containing the saved parameters.             //
-/////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+// Normally, BVH models don't need parameter identification and its loading //
+// is disabled by defining LoadParametersFrom = {""}; in TrialSpecificData. //
+// If you want to run this in your own BVH model, please comment the line   //
+// to let AnyMoCap use the default value of filename. Alternatively, please //
+// provide a name of the file containing the saved parameters.              //
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 
-// You can select the different applications by defining TARGET_SEG from 1 to 4. 
+// You can select the different applications by defining TARGET_SEG from 1 to 5. 
 // Select any other number to load the model without any changes.
 
-// 1 = LFOOT, 2 = RFOOT, 3 = LHAND, 4 = RHAND
+// 1 = LFOOT, 2 = RFOOT, 3 = LHAND, 4 = RHAND, 
+// 5 = LHAND & RHAND, 6 = LHAND, RHAND & LFOOT
 #ifndef TARGET_SEG
 #define TARGET_SEG 1 
 #endif
@@ -220,5 +222,186 @@ Main = {
   };  
   #endif
   // *********************************************************************************   
+
+  #if TARGET_SEG == 5 
+  // Demonstrate use of class template twice. You can use the class template two times (or more), 
+  // for example, if you know the position of two segments. Then the optimization study will
+  // try to find the best solution considering the given input conditions.
   
+  // Please note, to use the class template twice or more, you must consider one of the 
+  // instances as the primary instance. For the other instances, when you initialize
+  // the class template, you must:
+  //     1.)  Set REPEAT_USE = 1                       (Default value = 0)
+  //     2.)  Set NAME_PARA_OPT = <Unique Name>.       (Default value = BVH_Origin)
+  // These two steps are essential to prevent the class template to set the BVH origin multiple
+  // times and declare drivers in the optimization study using the same name, both of which 
+  // will lead to errors.
+
+  // Code to define segment with target position of LHAND and its driver.
+  EnvironmentModel = {
+    AnySeg Wall = {
+      Mass = 0;
+      Jii = {0,0,0};
+      // Ref node for LHAND target. The ARel of the frame has been set to match the expected 
+      // orientation of the LHAND.
+      AnyRefNode LHandTarget = {
+        sRel = {-0.105,0.28,-0.1};
+        ARel = RotMat(0*pi/180,x)*RotMat(0*pi/180,y)*RotMat(90*pi/180,z);
+        //AnyDrawRefFrame drw = {};
+      };
+      // Ref node for RHAND target. The ARel of the frame has been set to match the expected 
+      // orientation of the RHAND.
+      AnyRefNode RHandTarget = {
+        sRel = {-0.105,0.37,0.1};
+        ARel = RotMat(-20*pi/180,x)*RotMat(180*pi/180,y)*RotMat(-90*pi/180,z);
+        //AnyDrawRefFrame drw = {};
+      };
+      AnyDrawSurf Wall ={
+        FileName = "box";
+        ScaleXYZ ={0.7,7,2};
+        Opacity = 0.1;
+      };
+    };   
+    
+    GlobalRef = {
+      // Create reference node to locate the wall segment.
+      AnyRefNode Target_Wall = {
+        sRel = {0.6,1.0,-0.5};
+        ARel = RotMat(0*pi/180,x)*RotMat(10*pi/180,y)*RotMat(0*pi/180,z);
+      };      
+    };
+    // Define a std joint between wall and GlobalRef.LHandTarget_Wall
+    AnyStdJoint Wall_LHand = {
+      AnyRefFrame &wall = .Wall;
+      AnyRefFrame &LHand = .GlobalRef.Target_Wall;
+    };   
+  };
+  
+  // Optimize BVH Origin
+  OptimizeBVH_Origin BVH_Origin_Modifier_LHand (
+  HUMAN_SEG = "LHAND",
+  REF_FRAME_FOR_TARGET = Main.EnvironmentModel.Wall.LHandTarget,
+  ACTIVE_TIME_START = 1.10,
+  ACTIVE_TIME_END = 1.50   
+  ) = {};
+
+  OptimizeBVH_Origin BVH_Origin_Modifier_RHand (
+  HUMAN_SEG = "RHAND",
+  REF_FRAME_FOR_TARGET = Main.EnvironmentModel.Wall.RHandTarget,
+  ACTIVE_TIME_START = 1.25,
+  ACTIVE_TIME_END = 1.50,
+  NAME_PARA_OPT = RHand_BVH_Origin,
+  REPEAT_USE = 1   
+  ) = {};
+  
+  #endif
+  // *********************************************************************************
+
+    #if TARGET_SEG == 6 
+  // Demonstrate use of class template three times. You can use the class template multiple 
+  // times, for example, if you know the position of two segments or the same segment in two 
+  // different time intervals. Then the optimization study will try to find the best solution 
+  // considering the given input conditions.
+  
+  // Notice that in this example, an offset is added to the LHand and RHand position. Also, the
+  // foot position is at an offset. Please also note that the active time interval has the same
+  // duration for the three segments. This is done to demonstrate that the optimization study
+  // will find the best compromise and end up somewhere in the middle. However, you can influence
+  // the behaviour of the study by setting weights as shown in this example. The weights are set
+  // at their default value (=1) currently. However, feel free to play around with weights. The 
+  // optimal solution will find a closer match for larger weight.
+
+  // Please note, to use the class template twice or more, you must consider one of the 
+  // instances as the primary instance. For the other instances, when you initialize
+  // the class template, you must:
+  //     1.)  Set REPEAT_USE = 1                       (Default value = 0)
+  //     2.)  Set NAME_PARA_OPT = <Unique Name>.       (Default value = BVH_Origin)
+  // These two steps are essential to prevent the class template to set the BVH origin multiple
+  // times and declare drivers in the optimization study using the same name, both of which 
+  // will lead to errors.
+
+
+  // Code to define segment with target position of LHAND and its driver.
+  EnvironmentModel = {
+    AnySeg Wall = {
+      Mass = 0;
+      Jii = {0,0,0};
+      AnyFloat Offset = {0.0,0.0,0.1}; // An offset to be added to both LHand and RHand
+      // Ref node for LHAND target. The ARel of the frame has been set to match the expected 
+      // orientation of the LHAND.
+      AnyRefNode LHandTarget = {
+        sRel = {-0.105,0.28,-0.1} - .Offset;
+        ARel = RotMat(0*pi/180,x)*RotMat(0*pi/180,y)*RotMat(90*pi/180,z);
+        //AnyDrawRefFrame drw = {};
+      };
+      // Ref node for RHAND target. The ARel of the frame has been set to match the expected 
+      // orientation of the RHAND.
+      AnyRefNode RHandTarget = {
+        sRel = {-0.105,0.37,0.1} + .Offset;
+        ARel = RotMat(-20*pi/180,x)*RotMat(180*pi/180,y)*RotMat(-90*pi/180,z);
+        //AnyDrawRefFrame drw = {};
+      };
+      AnyDrawSurf Wall ={
+        FileName = "box";
+        ScaleXYZ ={0.7,7,2};
+        Opacity = 0.1;
+      };
+    };   
+    
+    GlobalRef = {
+      // Create reference node to locate the wall segment.
+      AnyRefNode Target_Wall = {
+        sRel = {0.6,1.0,-0.5};
+        ARel = RotMat(0*pi/180,x)*RotMat(10*pi/180,y)*RotMat(0*pi/180,z);
+      };      
+    };
+    // Define a std joint between wall and GlobalRef.LHandTarget_Wall
+    AnyStdJoint Wall_LHand = {
+      AnyRefFrame &wall = .Wall;
+      AnyRefFrame &LHand = .GlobalRef.Target_Wall;
+    };   
+  };
+  
+  // Optimize BVH Origin
+  // Please note active time interval has the same duration for the three segments.
+  // Please feel free to change Settings.Weight to see how it can change the results
+  // of the optimization study.
+  OptimizeBVH_Origin BVH_Origin_Modifier_LHand (
+  HUMAN_SEG = "LHAND",
+  REF_FRAME_FOR_TARGET = Main.EnvironmentModel.Wall.LHandTarget,
+  ACTIVE_TIME_START = 1.25,
+  ACTIVE_TIME_END = 1.50   
+  ) = {
+        Settings.Weight = 1;
+      };
+
+  OptimizeBVH_Origin BVH_Origin_Modifier_RHand (
+  HUMAN_SEG = "RHAND",
+  REF_FRAME_FOR_TARGET = Main.EnvironmentModel.Wall.RHandTarget,
+  ACTIVE_TIME_START = 1.25,
+  ACTIVE_TIME_END = 1.50,
+  NAME_PARA_OPT = RHand_BVH_Origin,
+  REPEAT_USE = 1   
+  ) = {
+        Settings.Weight = 1;
+      };
+      
+  OptimizeBVH_Origin BVH_Origin_Modifier_LFoot (
+  HUMAN_SEG = "LFOOT",
+  NAME_PARA_OPT = LFoot_BVH_Origin,
+  REPEAT_USE = 1,  
+  ACTIVE_TIME_START = 0.15,  
+  ACTIVE_TIME_END = 0.4   
+  ) = 
+  {
+    Target_Position = {-0.45,0.0,-0.65};  // Translation in x, y, and z axes
+    Target_Orientation= RotMat(0*pi/180,x)
+                        *RotMat(65*pi/180,y)
+                        *RotMat(0*pi/180,z);  // Rotational transformation matrix
+    Settings.Weight = 1;
+  };
+
+  #endif
+  // *********************************************************************************
+
 };// Main
