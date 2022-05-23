@@ -13,6 +13,8 @@
 * Fixed a small syntax error which caused the BVH example `S1/S01_Trial02/` to fail loading. 
 * Fixed a problem with the "interface" morphing between the TLEM2 pelvis and Trunk Pelvis at the tip of the scarum bone. 
   This bug was visible when using `#define BM_LEG_TRUNK_INTERFACE _MORPH_LEG_TO_TRUNK_`, (i.e. when using the trunk pelvis morphology with the TLEM2 model), which is not the default. 
+* Fixed missing calibration for the new latissimus dorsi elements introduced in AMMR 2.4. This fix also ensures that all
+  latissimus dorsi elements are calibrated in the same arm posture.
 
 **Added:**
 * A few previously renamed nodes in pelvis were added back to improve backwards compatibility when loading old seating models. 
