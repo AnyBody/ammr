@@ -138,10 +138,13 @@ joint drivers directly or indirectly through connections to the environment
                                                           to always remain constant
     HumeroUlnarJoint                 Flexion-extension    Revolute joint
                                      of the elbow
-    Proximal/Distal-RadioUlnarJoint  Pronation-supination
-                                     joint or the forearm Combination of joints at the distal and
-                                                          proximal end of the radius bone that
-                                                          leaves one DOF free which is
+    HumeroRadialJoint                Pronation-supination Single linear constraint (5 DOF joint) between radius 
+                                                          and humerus
+    ProximalRadioUlnarJoint          Pronation-supination Trans Spherical joint between radius and ulna at the
+                                                          proximal part.
+    DistalRadioUlnarJoint            Pronation-supination Trans Spherical joint between radius and ulna at the
+                                                          proximal part. The HumeroRadialJoint, ProximalRadioUlnarJoint
+                                                          DistalRadioUlnarJoint leaves one DOF free which is
                                                           pronation/supination of the forearm
     Wrist joint                                           Two successive revolute joints where
                                                           the axes of rotations are not coincident
