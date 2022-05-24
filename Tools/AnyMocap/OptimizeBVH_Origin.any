@@ -43,14 +43,6 @@ HUMAN_SEG: <Optional. Default ="RFOOT">
 Is the human segment that must be positioned and oriented in the 
 target postion and orientation. 
 
-ACTIVE_TIME_START: <Obligatory>
-Is the start of the time interval where the selected human segment
-must be in the target position and orientation. AnyVector 
-
-ACTIVE_TIME_END: <Obligatory>
-Is the end of the time interval where the selected human segment
-must be in the target position and orientation. AnyVector
-
 REPEAT_USE: <Optional. Default = 0>
 Switch to identify if the class template is being used more than one
 time. For multiple use of the of the class template in the same model, 
@@ -91,8 +83,16 @@ HUMAN_MODEL: <Optional. Default = Main.HumanModel>
 Is the pointer to the human model in the model.
 
 {
+  Active_Time_Start: <Obligatory>
+  Is the start of the time interval where the selected human segment
+  must be in the target position and orientation. AnyVector 
+
+  Active_Time_End: <Obligatory>
+  Is the end of the time interval where the selected human segment
+  must be in the target position and orientation. AnyVector
+
   Target_Position: <Optional. Default = {0.0, 0.0, 0.0};>
-  Is the poisition vector of the Target referred in REF_FRAME_FOR_TARGET.
+  Is the position vector of the Target referred in REF_FRAME_FOR_TARGET.
 
   Target_Orientation: <Optional. Default = {{1,0,0},{0,1,0},{0,0,1}};>
   Is the rotational transformation matrix of the Target referred in
@@ -121,9 +121,7 @@ Please note:
 Initialization example:
 ----------------------
 OptimizeBVH_Origin <Object_name> (
-    HUMAN_SEG = "<*RFOOT|LFOOT|RHAND|LHAND>",
-    ACTIVE_TIME_START = 0.1,
-    ACTIVE_TIME_END = 0.15,
+    HUMAN_SEG = "<*RFOOT|LFOOT|RHAND|LHAND>"
     
     // Optional Initialization showing default values
     
@@ -137,6 +135,8 @@ OptimizeBVH_Origin <Object_name> (
     HUMAN_MODEL = Main.HumanModel
     ) = 
       {
+        Active_Time_Start = 0.1; // Obligatory
+        Active_Time_End = 0.15; // Obligatory
         Target_Position = {0.0, 0.0, 0.0};
         Target_Orientation = {{1,0,0},{0,1,0},{0,0,1}};
         Settings = {
@@ -150,8 +150,6 @@ OptimizeBVH_Origin <Object_name> (
 
 #class_template OptimizeBVH_Origin (
 HUMAN_SEG = "RFOOT",
-ACTIVE_TIME_START,
-ACTIVE_TIME_END,
 REPEAT_USE = 0,
 OPT_LIN_X = 1, OPT_LIN_Y = 0, OPT_LIN_Z = 1,
 OPT_ROT_X = 0, OPT_ROT_Y = 1, OPT_ROT_Z = 0,
@@ -162,11 +160,23 @@ BVH_FILE_DATA = Main.ModelSetup.BVHFileData,
 HUMAN_MODEL = Main.HumanModel
 )
 {
+  /// The start of the time interval where the selected human segment must be in the target position and orientation.
+  #var AnyVar Active_Time_Start;
+  /// The end of the time interval where the selected human segment must be in the target position and orientation.  
+  #var AnyVar Active_Time_End;
+  /// A reference to REF_FRAME_FOR_TARGET
+  AnyFolder &Ref_Frame_For_Target = REF_FRAME_FOR_TARGET;
+  /// The position vector of the Target referred in REF_FRAME_FOR_TARGET.
   #var AnyVec3 Target_Position = {0.0, 0.0, 0.0};
+  /// The rotational transformation matrix of the Target referred in REF_FRAME_FOR_TARGET.
   #var AnyMat33 Target_Orientation = {{1,0,0},{0,1,0},{0,0,1}};
   AnyFolder Settings = {
+    /// Initial Guess of the BVH Origin in the order: {lin_x, lin_y, lin_z, rot_x, rot_y, rot_z}. in m or radians.                      
     #var AnyFloat InitialGuess = {0.0,0.0,0.0,0.0,0.0,0.0};
+    /// Weight of the AnyKinMotion drivers during the active time interval
     #var AnyVar Weight = 1;
+    /// Start and end transition time of the weight function expressed as fraction of the active time interval. 
+    /// For more info, please see reference for AnyFunSquareWave
     #var AnyFloat dt_Ratio = {0.1,0.1};
   };
   
@@ -188,7 +198,7 @@ HUMAN_MODEL = Main.HumanModel
                                 "------------------------------------------------------------------------------------------------------"));
     
     // Error for ActiveTimeInterval. 
-    AnyInt Error_ActiveTimeInterval = assert(gtfun(ACTIVE_TIME_END,ACTIVE_TIME_START), "Please ensure ACTIVE_TIME_END is greater than ACTIVE_TIME_START");
+    AnyInt Error_ActiveTimeInterval = assert(gtfun(.Active_Time_End,.Active_Time_Start), "Please ensure Active_Time_End is greater than Active_Time_Start");
         
     #if HUMAN_SEG == "LFOOT"
     // create nodes on the BVH model
@@ -343,7 +353,7 @@ HUMAN_MODEL = Main.HumanModel
     AnyFunSquareWave WeightFun = 
     {
       InitialValues = {0.0} + 0*..InputArgs.Error_ActiveTimeInterval; // Enforce Active Time Interval error
-      Ts = {ACTIVE_TIME_START,ACTIVE_TIME_END};
+      Ts = {..Active_Time_Start,..Active_Time_End};
       Values = {{..Settings.Weight,0}};
       dT = ..Settings.dt_Ratio*(Ts[1]-Ts[0]);
     };
