@@ -86,16 +86,52 @@ AnyRevoluteJoint HumeroUlnarJoint = {
   AnyRefNode &UlnaFE = ..Seg.Ulna.fe;
 };
 
-/// Deprecated, Use the name HumeroUlnarJoint instead. Left here for backwards compatability.
-AnyFolder &FE = HumeroUlnarJoint;
+
+/// This binds one DOF between humerus and Radius. Since AnyBody
+/// does not have a 5 DOF joint type we implement in manually here.
+AnyFolder HumeroRadialJoint = {
+   AnyKinLinear Linear = {
+     AnyRefNode &RadiusPs = ...Seg.Radius.PointPS2;
+     AnyRefNode &UlnaPs = ...Seg.Humerus.fe; 
+     Ref = 0;
+   };
+   AnyKinLinear Orientation = {
+     AnyRefNode &RadiusPs = ...Seg.Radius.PointPS2;
+     AnyRefNode &UlnaPs = ...Seg.Humerus.fe; 
+     Ref = 0;
+   };
+   AnyKinEq Constraints = {
+     AnyKinMeasure& Linear  = .Linear;
+     AnyKinMeasure& Orientation  = .Orientation;
+     MeasureOrganizer = {0};
+     // Reactions are implemented explicitly below
+     Reaction.Type = {Off};
+   };
+
+  // Since the previous implementation implemented reaction forces   
+  // between some explicit points 'ps2Reac' we do the same here. 
+   AnyReacForce ReacForce = 
+   {
+     AnyKinMeasureOrg RadiusHumerus = {
+       MeasureOrganizer = {0};
+       AnyKinLinear Lin = 
+       {
+         Ref = 0;
+         AnyRefFrame &Radius = .....Seg.Radius.PS2Reac;
+         AnyRefFrame &Humerus = .....Seg.Humerus.fe;
+       };
+     };
+   };
+
+};
 
 
-AnySphericalJoint ProximalRadioUlnarJoint = { 
+AnyTransSphericalJoint ProximalRadioUlnarJoint = { 
   AnyRefNode &RadiusPs = ..Seg.Radius.PointPS2;
   AnyRefNode &UlnaPs = ..Seg.Ulna.ps2; 
-  // Default reactions are disabled, so reaction forces can be split
-  // between humerus and ulna
-  Constraints.Reaction.Type={Off,Off,Off};
+  // Reactions are disabled, because the are implemented explicitly below. 
+  Constraints.Reaction.Type={Off,Off};
+  Axis = x;
   Orientation = {
     // These settings are kept to mimic the previous  
     // implementation from the PSRotProximal measure.
@@ -105,20 +141,9 @@ AnySphericalJoint ProximalRadioUlnarJoint = {
     Type = RotAxesAngles;
   };
   
-  AnyReacForce RadioHumeroReacForce = 
-  {
-    AnyKinMeasureOrg RadiusHumerus = {
-      MeasureOrganizer = {0};
-      AnyKinLinear Lin = 
-      {
-        Ref = 0;
-        AnyRefFrame &Radius = .....Seg.Radius.PS2Reac;
-        AnyRefFrame &Humerus = .....Seg.Humerus.fe;
-      };
-    };
-  };
-
-  AnyReacForce RadioUlnarReacForce = 
+  // Since the previous implementation implemented reaction forces   
+  // between some explicit points 'ps2Reac' we do the same here. 
+  AnyReacForce ReacForce = 
   {
     AnyKinMeasureOrg RadiusUlna = {
       MeasureOrganizer = {0,2};
@@ -137,12 +162,7 @@ AnySphericalJoint ProximalRadioUlnarJoint = {
 
 
 
-/// This measure is deprecated. Please use the forearm rotation measure
-/// in the interface folder. Left here for backwards compatibility. 
-AnyKinMeasureOrg PS = {
-  AnyKinRotational &Jnt = .ProximalRadioUlnarJoint.Orientation;
-  MeasureOrganizer = {0};
-};
+
 
 
 AnyTransSphericalJoint DistalRadioUlnarJoint = {
@@ -418,6 +438,18 @@ AnyKinEq SternoClavicularRotationRhythm  =
 
 #endif
 
+
+
+// Deprecated, Use the name HumeroUlnarJoint instead. Left here for backwards compatability.
+AnyFolder &FE = HumeroUlnarJoint;
+
+
+/// Deprecated. Please use the forearm rotation measure
+/// in the interface folder. Left here for backwards compatibility. 
+AnyKinMeasureOrg PS = {
+  AnyKinRotational &Jnt = .ProximalRadioUlnarJoint.Orientation;
+  MeasureOrganizer = {0};
+};
 
 
 
