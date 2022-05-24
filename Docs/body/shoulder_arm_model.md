@@ -120,32 +120,32 @@ joint drivers directly or indirectly through connections to the environment
     :column-wrapping: false true true
     :column-dividers: none none none none
 
-    ================= ==================== =======================================================
-    Name              Description          Joint/Constraint Type
-    ================= ==================== =======================================================
-    SC                SternoClavicular     Spherical joint
-    AC                AcromioClavicular    Spherical joint
-    GH                Glenohumeral joint   Spherical joint (The default joint reactions are
-                                           disabled, since they do not automatically ensure that
-                                           the net force vector passes through the glenoid cavity.
-                                           The special force elements providing these biofidelic
-                                           reaction forces are contained in the file "GHReactions.any")
-    AI                                     One DOF constraint requiring the bony landmark
-                                           AI on the scapula, to stay in contact with the thorax
-    AA                                     One DOF constraint requiring the bony landmark
-                                           AA on the scapula, to stay in contact with the thorax
-    ConoideumLigament                      The length of this ligament is driven
-                                           to always remain constant
-    FE                Flexion-extension    Revolute joint
-                      of the elbow
-    PS                Pronation-supination
-                      joint or the forearm Combination of joints at the distal and
-                                           proximal end of the radius bone that
-                                           leaves one DOF free which is
-                                           pronation/supination of the forearm
-    Wrist joint                            Two successive revolute joints where
-                                           the axes of rotations are not coincident
-    ================= ==================== =======================================================
+    ================================ ==================== =======================================================
+    Name                             Description          Joint/Constraint Type
+    ================================ ==================== =======================================================
+    SternoClavicularJoint            SternoClavicular     Spherical joint
+    AcromioClavicularJoint           AcromioClavicular    Spherical joint
+    GlenoHumeralJoint                Glenohumeral joint   Spherical joint (The default joint reactions are
+                                                          disabled, since they do not automatically ensure that
+                                                          the net force vector passes through the glenoid cavity.
+                                                          The special force elements providing these biofidelic
+                                                          reaction forces are contained in the file "GHReactions.any")
+    AI                                                    One DOF constraint requiring the bony landmark
+                                                          AI on the scapula, to stay in contact with the thorax
+    AA                                                    One DOF constraint requiring the bony landmark
+                                                          AA on the scapula, to stay in contact with the thorax
+    ConoideumLigament                                     The length of this ligament is driven
+                                                          to always remain constant
+    HumeroUlnarJoint                 Flexion-extension    Revolute joint
+                                     of the elbow
+    Proximal/Distal-RadioUlnarJoint  Pronation-supination
+                                     joint or the forearm Combination of joints at the distal and
+                                                          proximal end of the radius bone that
+                                                          leaves one DOF free which is
+                                                          pronation/supination of the forearm
+    Wrist joint                                           Two successive revolute joints where
+                                                          the axes of rotations are not coincident
+    ================================ ==================== =======================================================
 
 
 
