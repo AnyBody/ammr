@@ -6,7 +6,7 @@
 
 (ammr-2.4-changelog)=
 
-## AMMR 2.4.1 (2022-05-25)
+## AMMR 2.4.1 (2022-05-30)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.6533249.svg)](https://doi.org/10.5281/zenodo.6533249)
 
 **New example models:**
@@ -34,13 +34,15 @@
 
   The new names of the explicit joint objects in `ShoulderArm.Jnt` are:
 
-  * `SternoClavicularJoint`
-  * `AcromioClavicularJoint`
-  * `GlenoHumeralJoint`
-  * `HumeroUlnarJoint`
-  * `DistalRadioUlnarJoint`
-  * `ProximalRadioUlnarJoint`
-  
+  * `SternoClavicularJoint` (-3 DOF)
+  * `AcromioClavicularJoint` (-3 DOF)
+  * `GlenoHumeralJoint` (-3 DOF)
+  * `HumeroUlnarJoint` (-5 DOF)
+  * `HumeroRadialJoint` (-1 DOF)
+  * `ProximalRadioUlnarJoint` (-2 DOF)
+  * `DistalRadioUlnarJoint` (-2 DOF)
+
+The `HumeroUlnarJoint` is the elbow flexion extension, and together `HumeroRadialJoint`, `ProximalRadioUlnarJoint` and `DistalRadioUlnarJoint` adds 5 constraints leaving the forearm rotation degree of freedom. 
    
   
 **Added:**
