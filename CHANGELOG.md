@@ -26,7 +26,7 @@
 
 **Changed:**
 
-* The anyscript implemenatation of the acromio-clavicuala, sterno-clavicular, gleno-humeral, and elbow  
+* The anyscript implemenatation of the acromio-clavicuala, sterno-clavicular, gleno-humeral, and elbow
   joints have been refactored. They now use explicit AnyScript joint classes (e.g. `AnySphericalJoint`)
   instead of implementing the joints directly with measures and constraints. This simplifies the 
   implementation, but also changes the structure of the model tree. However, it has no influence 
