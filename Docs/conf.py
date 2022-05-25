@@ -89,7 +89,8 @@ extensions = [
     "cloud_sptheme.ext.table_styling",
     "ammr_directives",
     "inline_highlight",
-    "myst_parser"
+    "myst_parser",
+    "sphinxext.opengraph",
 ]
 
 myst_enable_extensions = [
@@ -157,7 +158,7 @@ pygments_style = "AnyScript"
 
 current_year = os.environ.get("YEAR", datetime.now().year)
 
-ams_version = os.environ.get("AMS_VERSION", "7.3.4")
+ams_version = os.environ.get("AMS_VERSION", "7.4.1")
 if not re.match("^\d\.\d\.\d", ams_version):
     raise ValueError("Wrong format for AMS version, environment variable")
 ams_version_short = ams_version.rpartition(".")[0]
@@ -393,6 +394,15 @@ else:
         )
     else:
         intersphinx_mapping["tutorials"] = ("https://anyscript.org/tutorials/", None)
+
+
+# -- Options for OpenGraph Ext. ----------------------------------------------
+# settings to control how the OpenGraph extension generates meta tags
+ogp_site_url = "https://anyscript.org/"
+ogp_site_name = "AMMR Documentation"
+ogp_image = "https://anyscript.org/ammr-doc/_static/AMMR_Logo.png"
+ogp_use_first_image = True # if not found defaults to 'ogp_image'
+
 
 
 def setup(app):

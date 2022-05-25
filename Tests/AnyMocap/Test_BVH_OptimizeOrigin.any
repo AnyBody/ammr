@@ -1,0 +1,69 @@
+//define = [
+//    {'TARGET_SEG':'1'}, 
+//    {'TARGET_SEG':'2'}, 
+//    {'TARGET_SEG':'3'}, 
+//    {'TARGET_SEG':'4'}, 
+//    {'TARGET_SEG':'5'}, 
+//    {'TARGET_SEG':'6'}, 
+//]
+//ignore_errors = ['FileReader.FileName',"Orientation close to Gimbal Lock"]
+//pytest_markers=["slow"]
+
+#include "../libdef.any"
+
+#path MOCAP_PATH_MAINFILEDIR "<ANYMOCAP_EXAMPLES>\BVH_Xsens_OptimizeOrigin\Subjects\S01\S01_Trial01"
+#path MOCAP_PATH_MAINFILE "<MOCAP_PATH_MAINFILEDIR>/Main.any"
+#define MOCAP_NAME_MAINFILEDIR "S01_Trial01"
+
+
+
+#ifdef TEST_NAME
+#define  MOCAP_TEST_FILENAME_PREFIX  TEST_NAME + "_"
+#else
+#define  MOCAP_TEST_FILENAME_PREFIX  "GUI1_"
+#define CREATE_IMAGE
+#endif
+
+
+#ifdef CREATE_IMAGE
+#undef MOCAP_TEST_FILENAME_PREFIX
+#path TEMP_PATH "<MOCAP_PATH_MAINFILEDIR>/../../../Output"
+#endif
+
+
+
+//// Run Analysis with a reduced number of time steps
+//// to make test go faster. 
+//#define N_STEP_PARAM_OPT 10
+#define N_STEP_KINEMATICS 100
+#define N_STEP 20
+
+
+
+#include "<MOCAP_PATH_MAINFILE>"
+
+Main = 
+{
+  // Define LoadParametersFrom to blank to prevent error
+  // in RunAnalysis.LoadParameters
+  //ModelSetup.TrialSpecificData.LoadParametersFrom = {""};
+  
+  AnyOperationSequence  TestRunApplication = 
+  {
+    AnyOperation& BVH_Origin_Opt = Main.RunBVH_Origin_Optimization;
+    AnyOperation& RunAnalysisLoadParams = Main.RunAnalysis.LoadParameters; 
+    AnyOperation& RunAnalysisMarkerTrack = Main.RunAnalysis.MarkerTracking;    
+  };
+
+  
+  #ifndef CREATE_IMAGE
+    AnyOperation& RunTest = Main.TestRunApplication;
+  #else
+    #include "../Cameras.any"
+    AnyOperation& CameraInitPos = Main.Studies.InverseDynamicStudy.InitialConditions;
+    LoadTimeCam.CameraLookAtPoint = Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.r +{0.2,-0.1,0};
+    LoadTimeCam.CameraFieldOfView = DesignVar(2);
+    LoadTimeCam.CameraDirection  = {-0.5,0.1,0.5};
+  #endif  
+  
+};

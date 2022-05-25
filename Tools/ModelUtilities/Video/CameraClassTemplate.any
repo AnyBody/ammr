@@ -40,8 +40,19 @@ Main = {
 
 #define _CAMERA_MAIN_FILE_DIRECTORY_ ANYBODY_PATH_MAINFILEDIR
 
-#ifndef OPERATION_DISPLAY_PRIORITY
-#define OPERATION_DISPLAY_PRIORITY(x) Settings = {}
+#ifpathexists  "<ANYBODY_PATH_INSTALLDIR>\Assist\ffmpeg.exe"
+  #define _CAMERA_FFMPEG_DEFAULT_PATH_ ANYBODY_PATH_INSTALLDIR + "\Assist\ffmpeg.exe"
+#else #ifpathexists  "c:\ffmpeg\bin\ffmpeg.exe"
+  #define _CAMERA_FFMPEG_DEFAULT_PATH_ "c:\ffmpeg\bin\ffmpeg.exe"
+#else
+  #define _CAMERA_FFMPEG_DEFAULT_PATH_ "ffmpeg.exe"
+#endif #endif
+
+
+#ifpathexists "<ANYBODY_PATH_INSTALLDIR>\Assist\video_overlay.png"
+#define _ANYBODY_OVERLAY_LOGO_ ANYBODY_PATH_INSTALLDIR + "\Assist\video_overlay.png"
+#else
+#define _ANYBODY_OVERLAY_LOGO_ ANYBODY_PATH_MODELUTILS + "video_overlay.png"
 #endif
 
 #class_template VideoLookAtCamera ( 
@@ -52,8 +63,8 @@ Main = {
   _DEBUG = 0,
   _CLEAN_UP_IMAGES = 1,
   _AUTO_OPEN_PREVIEW_ = 1,
-  FFMPEG_ON_PATH = 1,
-  ENABLE_SAVE_SETTINGS=0
+  ENABLE_SAVE_SETTINGS=0,
+  ENABLE_OVERLAY= 1
   ) 
 {
     
@@ -67,7 +78,7 @@ Main = {
   
   /// From FFMPEG: The range of the quantizer scale is 0-51: where 0 is lossless,
   /// and 51 is worst possible. A lower value is a higher quality.
-  #var AnyIntVar ConstantRateFactor = 11;
+  #var AnyIntVar ConstantRateFactor = 30;
   
   /// The ratio between video resolution and input images saved  
   /// from anybody. Default is to save images in same resolution as 
@@ -77,24 +88,23 @@ Main = {
   
   /// The video codec ffmepg will use to create the video. 
   /// Choose "libxvid" for best for compatibility (eg. with PowerPoint)
-  /// or "libx264" for best performance
-  #var AnyString VideoCodec = "libx264";
-  
+  /// or "libvpx-vp9" for best performance
+  #var AnyString VideoCodec = "libvpx-vp9";
+    
   /// This is the start frame used when creating Videos. This can be used to 
   /// for skipping some of the initial frames. 
   #var AnyInt VideoStartFrame = 0; 
+  
+  /// Image used to overlay (e.g. logo) on the final video
+  #var AnyString OverlayImage = _ANYBODY_OVERLAY_LOGO_;
+  
+  /// Height of the overlay image in percent of the video
+  #var AnyVar OverlayImageScale = 0.08;
 
   
-  #if FFMPEG_ON_PATH == 0
-  /// The path to the ffmpeg binary. 
-  #var AnyFileVar RelativeFFMPEGPath = "ffmpeg.exe";
-  #var AnyStringVar VideoPathFFMPEG = FilePathRelativeOf(RelativeFFMPEGPath);
-  #else
-  #var AnyStringVar VideoPathFFMPEG = "ffmpeg.exe";
-  #endif
+  // The path to the ffmpeg binary. 
+  #var AnyStringVar VideoPathFFMPEG = _CAMERA_FFMPEG_DEFAULT_PATH_;
   
-  /// Video BitRate in KiloByte
-  #var AnyInt VideoBitRate = 8000;
   
   /// Determines the speed of the video. Setting it to 
   /// nStep/(tEnd-tStart) make the video run in real time. 
@@ -146,10 +156,13 @@ Main = {
 
   
   
+  
   /// Operation to show a preview of what the camera sees. 
   AnyOperationSequence Preview =  
   {
-    OPERATION_DISPLAY_PRIORITY(PriorityHigh);
+    Settings = {
+      #var DisplayPriority = PriorityNormal;
+    };
     #var AnyStringVar FileName = .VideoName + "_Preview.png";
 
     AnyFileVar preview_file = .VideoOutputPath +"/" + FileName;  
@@ -176,7 +189,9 @@ Main = {
   
   AnyOperationSequence Create_Video =  
   {
-    OPERATION_DISPLAY_PRIORITY(PriorityHigh);
+    Settings = {
+      #var DisplayPriority = PriorityHigh;
+    };
     AnyOperationSequence &PreAnalysis = .PreAnalysis;
     
     AnyOperation& Reset = .Operations.Reset;
@@ -300,7 +315,12 @@ Main = {
   
   AnyFolder Operations =
   {
-    
+     #if _DEBUG
+     AnyStringVar PostCmd = " &&set /p=DEBUG: Hit ENTER to continue...";
+     #else
+     AnyStringVar PostCmd = "";
+     #endif
+
     AnyOperationSequence Convert_video_to_animated_gif =  
     {  
       AnyFileVar video_file = ..VideoOutputPath+ "/"+ ..VideoName + ".mp4";
@@ -309,11 +329,6 @@ Main = {
       AnyStringVar filters = "fps="+strval(..GifOutputFrameRate)+",scale=w=" + strval(..GifResolution[0]) +
                               ":h=" + strval(..GifResolution[1]) + 
                               ":force_original_aspect_ratio=decrease:flags=lanczos";
-      #if _DEBUG
-        AnyStringVar CmdOpt = "/K TITLE Generate pallete&&";
-      #else
-        AnyStringVar CmdOpt = "/C ";
-      #endif
        
       /// Run through the video to calculate a color pallete to use when 
       /// generating the gif file. This improves quality a lot.
@@ -321,13 +336,12 @@ Main = {
       {
         FileName = "cmd.exe";      
         
-        Arguments = .CmdOpt +
-        "call "+strquote(...VideoPathFFMPEG) +
+        Arguments = "/C call "+strquote(...VideoPathFFMPEG) +
         " -v warning" + 
         " -i " + strquote(FilePathCompleteOf(.video_file)) + 
         " -vf " + strquote(.filters + ",palettegen=stats_mode=diff") +
         " -y " +
-        strquote(FilePathCompleteOf(.palette_file));
+        strquote(FilePathCompleteOf(.palette_file))+..PostCmd;
         #var WorkDir = ...VideoOutputPath;
         #var Show = _DEBUG;
         Wait = 1;
@@ -338,14 +352,13 @@ Main = {
       {
         FileName = "cmd.exe";      
         //
-        Arguments = .CmdOpt +
-        "call "+strquote(...VideoPathFFMPEG) +
+        Arguments = "/C call "+strquote(...VideoPathFFMPEG) +
         " -v warning" + 
         " -i " + strquote(FilePathCompleteOf(.video_file)) + 
         " -i " + strquote(FilePathCompleteOf(.palette_file)) +
         " -lavfi " + strquote(.filters + " [x]; [x][1:v] paletteuse=dither=floyd_steinberg:diff_mode=rectangle") +
         iffun(_OVER_WRITE, " -y "," ") +
-        strquote(FilePathCompleteOf(.gif_file));
+        strquote(FilePathCompleteOf(.gif_file))+..PostCmd;
         #var WorkDir = ...VideoOutputPath;
         #var Show = _DEBUG;   
         Wait = 1;
@@ -353,7 +366,7 @@ Main = {
       AnyOperationShellExec DeletePallete = 
       {
         FileName = "cmd.exe";      
-        Arguments = .CmdOpt + "del " + strquote(FilePathCompleteOf(.palette_file));
+        Arguments = "/C del " + strquote(FilePathCompleteOf(.palette_file))+..PostCmd;
           
         #var WorkDir = ...VideoOutputPath;
         #var Show = _DEBUG;
@@ -363,12 +376,7 @@ Main = {
     AnyOperationShellExec Open_gif = 
     {
       FileName = "cmd.exe"; 
-      #if _DEBUG
-      AnyStringVar CmdOpt = "/K TITLE Open Gif&&";
-      #else
-      AnyStringVar CmdOpt = "/C ";
-      #endif
-      #var Arguments = CmdOpt +"call "+ strquote(FilePathCompleteOf(.Convert_video_to_animated_gif.gif_file));
+      #var Arguments = "/C call "+ strquote(FilePathCompleteOf(.Convert_video_to_animated_gif.gif_file))+.PostCmd;
       #var Show = _DEBUG;
       Wait = _DEBUG;
     };      
@@ -377,12 +385,7 @@ Main = {
     AnyOperationShellExec OpenPreview = 
     {
       FileName = "cmd.exe"; 
-      #if _DEBUG
-      AnyStringVar CmdOpt = "/K TITLE Open Preview&&";
-      #else
-      AnyStringVar CmdOpt = "/C ";
-      #endif
-      #var Arguments = CmdOpt +"call "+ strquote(FilePathCompleteOf(..Preview.preview_file));
+      #var Arguments = "/C TITLE Open Preview&&" +"call "+ strquote(FilePathCompleteOf(..Preview.preview_file))+.PostCmd;
       #var Show = _DEBUG;
       Wait = _DEBUG;
     };    
@@ -403,46 +406,60 @@ Main = {
     /// Convert video using FFMPEG
     AnyOperationShellExec ConvertVideo = 
     {
+      
+      
       #var FileName = "cmd.exe";
       #var AnyStringVar inputfile = ..VideoName + "_" + ..Camera.Recorder.CounterFormat +".png";
       
+      
       #var AnyFileVar out_file = ..VideoOutputPath+ "/"+ ..VideoName + ".mp4";
       
-      
-      #if _DEBUG
-      AnyStringVar CmdOpt = "/K TITLE Creating Video&&";
+
+      #if ENABLE_OVERLAY
+      #var AnyString OverLayFilter = "[bg];[1:v]scale=-2:2*trunc("+strval(..VideoResolution[1])+"*"+strval(..OverlayImageScale)+"/2)[overlay];[bg][overlay]overlay=W-w:H-h";
+      //Option to fade out overlay: ":enable='between(t,0,2)'"
+      //Option to make transparent overlay: "format=argb,geq=r='r(X,Y)':a='1.0*alpha(X,Y)'"
       #else
-      AnyStringVar CmdOpt = "/C ";
+      #var AnyString OverLayFilter = "";
       #endif
+
+
       AnyFloat InputOutputScale = ..VideoInputScale;
 
-      #var Arguments = CmdOpt +
+      #var AnyStringVar ffmpegBaseArg = 
       "call "+strquote(..VideoPathFFMPEG) +
       iffun(_OVER_WRITE, " -y","") +
       " -r " + strval(..VideoInputFrameRate) +
-      " -start_number " + strval(..VideoStartFrame,..Camera.Recorder.CounterFormat) +
+      " -start_number " + strval(..VideoStartFrame,..Camera.Recorder.CounterFormat) + 
       " -i "+strquote(inputfile) +
-      "  -c:v " + ..VideoCodec + " -crf "+ strval(..ConstantRateFactor)+" -profile:v baseline -level 3.0 -pix_fmt yuv420p -c:a aac -ac 2 -strict experimental -b:a 128k -movflags faststart"+
-      " -vf "+ strquote("fps="+strval(..VideoOutputFrameRate))+
-      " -vf "+ strquote("scale=trunc(iw/(2*"+strval(InputOutputScale,"%g" )+"))*2:trunc(ih/(2*"+strval(InputOutputScale,"%g" )+"))*2")+
-      " -metadata comment="+strquote("Created with the AnyBody Modeling System.")+" " +
-      strquote(FilePathCompleteOf(out_file));
+      " -i " + strquote(..OverlayImage) + 
+      " -filter_complex " + strquote("[0:v]fps="+strval(..VideoOutputFrameRate)+ ",scale=trunc(iw/(2*"+strval(InputOutputScale,"%g" )+"))*2:trunc(ih/(2*"+strval(InputOutputScale,"%g" )+"))*2" + OverLayFilter + "[outv]") +
+      " -map [outv]" +
+      " -an" +
+      " -metadata comment=" + strquote("Created with the AnyBody Modeling System.") 
+      ;
+
+      #var AnyStringVar CodecArgs = "  -c:v " + ..VideoCodec + " -crf " + strval(..ConstantRateFactor)+" -level 3.0 -pix_fmt yuv420p -strict experimental -movflags +faststart ";
+      #var AnyStringVar CodecArgs_VP9 = " -c:v libvpx-vp9" + " -crf " + strval(..ConstantRateFactor)+" -pix_fmt yuv420p -row-mt 1 ";
+
+
+      #var AnyStringVar OutputArg = strquote(FilePathCompleteOf(out_file));
       
+      #var Arguments = "/C TITLE Creating Video && "+iffun(neqfun(..VideoCodec,"libvpx-vp9"),
+                 ffmpegBaseArg + CodecArgs + OutputArg,
+                 ffmpegBaseArg + CodecArgs_VP9 +" -pass 1 -f null NUL && " + ffmpegBaseArg + CodecArgs_VP9 + " -pass 2 " + OutputArg
+      ) + .PostCmd;
       #var WorkDir = ..VideoOutputPath;
-      #var Show = _DEBUG;
+      #var Show = DesignVar(_DEBUG);
     };
+    
+    
     
     /// 
     AnyOperationShellExec RemoveImageFiles = 
     {
-      #if _DEBUG
-      AnyStringVar CmdOpt = "/K TITLE Removing Images&&";
-      #else
-      AnyStringVar CmdOpt = "/C ";
-      #endif
-      
       #var FileName = "cmd.exe";
-      #var  Arguments = CmdOpt + "del " + strquote(..VideoName+ "_" + "*.png");
+      #var  Arguments = "/C TITLE Removing Images&&" + "del " + strquote(..VideoName+ "_" + "*.png") + " && del ffmpeg2pass-0.log"+.PostCmd;
       
       #var WorkDir = ..VideoOutputPath;
       #var Show = _DEBUG;
@@ -452,13 +469,8 @@ Main = {
     AnyOperationShellExec PlayVideo = 
     {
       FileName = "cmd.exe"; 
-      #if _DEBUG
-      AnyStringVar CmdOpt = "/K TITLE Play Video&&";
-      #else
-      AnyStringVar CmdOpt = "/C ";
-      #endif
       
-      #var Arguments = CmdOpt + "call "+ strquote(FilePathCompleteOf(..Create_Video.ConvertVideo.out_file));
+      #var Arguments = "/C TITLE Play Video&& call "+ strquote(FilePathCompleteOf(..Create_Video.ConvertVideo.out_file))+.PostCmd;
       #var Show =  _DEBUG;
       Wait = _DEBUG;
     };
@@ -470,6 +482,7 @@ Main = {
   /// Operations which will be executed before recording starts
   AnyOperationSequence PreAnalysis = 
   {
+    Settings.DisplayPriority = PriorityLow;
     AnyOperationDummy no_op = {};
   }; 
   

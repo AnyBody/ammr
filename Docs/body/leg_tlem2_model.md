@@ -68,8 +68,8 @@ full list of configuration parameters.
 
 More details on the TLEM2 model can be found online:
 
-- Webcast: [TLEMsafe: Personalization of musculoskeletal models and prediction of functional outcome](https://www.anybodytech.com/downloads/documentation/#20150903)
-- Webcast: [TLEMsafe: An integrated system to improve predictability of functional recovery of patients requiring musculoskeletal surgery](https://www.anybodytech.com/downloads/documentation/#20130305)
+- Webcast: [TLEMsafe: Personalization of musculoskeletal models and prediction of functional outcome](https://www.anybodytech.com/tlemsafe-personalization-of-musculoskeletal-models-and-prediction-of-functional-outcome/)
+- Webcast: [TLEMsafe: An integrated system to improve predictability of functional recovery of patients requiring musculoskeletal surgery](https://www.anybodytech.com/tlemsafe-an-integrated-system-to-improve-predictability-of-functional-recovery-of-patients-requiring-musculoskeletal-surgery/)
 
 ## References
 
