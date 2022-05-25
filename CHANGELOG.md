@@ -24,6 +24,25 @@
 * Fixed missing calibration for the new latissimus dorsi elements introduced in AMMR 2.4. This fix also ensures that all
   latissimus dorsi elements are calibrated in the same arm posture.
 
+**Changed:**
+
+* The anyscript implemenatation of the acromio-clavicuala, sterno-clavicular, gleno-humeral, and elbow  
+  joints have been refactored. They now use explicit AnyScript joint classes (e.g. `AnySphericalJoint`)
+  instead of implementing the joints directly with measures and constraints. This simplifies the 
+  implementation, but also changes the structure of the model tree. However, it has no influence 
+  the kinematics of the model, which remains identical. 
+
+  The new names of the explicit joint objects in `ShoulderArm.Jnt` are:
+
+  * `SternoClavicularJoint`
+  * `AcromioClavicularJoint`
+  * `GlenoHumeralJoint`
+  * `HumeroUlnarJoint`
+  * `DistalRadioUlnarJoint`
+  * `ProximalRadioUlnarJoint`
+  
+   
+  
 **Added:**
 * A few previously renamed nodes in pelvis were added back to improve backwards compatibility when loading old seating models. 
 
