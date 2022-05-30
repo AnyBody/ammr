@@ -7,8 +7,7 @@ studies, thus ensuring high accuracy and anatomical fidelity.
 
 See the section below for a more detailed description of the models and the underlying anatomical data.
 
-```{rubric} Background
-```
+## Background
 
 The body models live in the `Body/` subfolder within your AMMR directory. The folder names and organization here depend on
 the origin of the models.
@@ -39,8 +38,7 @@ mandible) are by default assembled together into a full body model.
 See {doc}`/bm_config/index` for re-configuring the model to for example, only represent the trunk, or use a different leg/muscle model.
 :::
 
-```{rubric} Models
-```
+## Models
 
 ```{toctree}
 :caption: Trunk

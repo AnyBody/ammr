@@ -29,9 +29,8 @@ import os
 import re
 import sys
 import subprocess
+from pathlib import Path
 from datetime import datetime
-
-import cloud_sptheme
 
 
 sys.path.insert(0, os.path.abspath("exts"))
@@ -81,16 +80,13 @@ extensions = [
     "sphinx.ext.githubpages",
     # 3rd party extensions
     # 'sphinxcontrib.fulltoc',
-    "sphinx_gallery.gen_gallery",
-    "cloud_sptheme.ext.index_styling",
-    "cloud_sptheme.ext.relbar_toc",
-    "cloud_sptheme.ext.escaped_samp_literals",
-    "cloud_sptheme.ext.issue_tracker",
-    "cloud_sptheme.ext.table_styling",
+    # "sphinx_gallery.gen_gallery",
     "ammr_directives",
     "inline_highlight",
     "myst_parser",
     "sphinxext.opengraph",
+    "sphinx_design"
+
 ]
 
 myst_enable_extensions = [
@@ -99,28 +95,28 @@ myst_enable_extensions = [
     "dollarmath",
     "amsmath",
     "html_image",
-    "substitution"
+    "substitution",
 ]
 
 
 
-sphinx_gallery_conf = {
-    # path to your examples scripts
-    "examples_dirs": "Applications",
-    # path where to save gallery generated examples
-    "gallery_dirs": "auto_examples",
-    "backreferences_dir": "auto_examples/backreferences",
-    "doc_module": ("gallery",),
-    "backreferences_heading": False,
-    # directory where function granular galleries are stored
-    "download_section_examples": False,
-    "download_all_examples": False,
-    "min_reported_time": 100,
-    "show_code_section": False,
-    "default_thumb_file": "_static/no_image.png",
-    "thumbnail_size": (320, 280),
-    "is_egg_file": True,
-}
+# sphinx_gallery_conf = {
+#     # path to your examples scripts
+#     "examples_dirs": "Applications",
+#     # path where to save gallery generated examples
+#     "gallery_dirs": "auto_examples",
+#     "backreferences_dir": "auto_examples/backreferences",
+#     "doc_module": ("gallery",),
+#     "backreferences_heading": False,
+#     # directory where function granular galleries are stored
+#     "download_section_examples": False,
+#     "download_all_examples": False,
+#     "min_reported_time": 100,
+#     "show_code_section": False,
+#     "default_thumb_file": "_static/no_image.png",
+#     "thumbnail_size": (320, 280),
+#     "is_egg_file": True,
+# }
 
 
 # Add any paths that contain templates here, relative to this directory.
@@ -149,7 +145,7 @@ language = "en"
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ["_build", "README.md", "Thumbs.db", ".DS_Store", "exts" ]
+exclude_patterns = ["_build", "README.md", "Thumbs.db", ".DS_Store", "exts", "auto_examples" ]
 
 # The name of the Pygments (syntax highlighting) style to use.
 highlight_language = "AnyScriptDoc"
@@ -260,17 +256,17 @@ def setup(app):
     app.add_stylesheet("theme_override.css")
 
 
-html_sidebars = {
-    "**": ["searchbox.html", "globaltoc.html"],  # 'sourcelink.html', ],
-    "using/windows": ["windowssidebar.html", "searchbox.html"],
-}
+# html_sidebars = {
+#     "**": ["searchbox.html", "globaltoc.html"],  # 'sourcelink.html', ],
+#     "using/windows": ["windowssidebar.html", "searchbox.html"],
+# }
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "cloud"
+html_theme = "sphinx_book_theme"
 
-html_theme_path = [cloud_sptheme.get_theme_dir()]
+
 
 html_copy_source = False
 
@@ -297,17 +293,16 @@ html_title = "%s v%s Documentation" % (project, release)
 #     'headlinkcolor': '#953337',
 # }
 
+
 html_theme_options = {
-    "roottarget": index_doc,
-    "max_width": "1100px",
-    "minimal_width": "700px",
-    "borderless_decor": True,
-    "lighter_header_decor": False,
-    "inline_admonitions": True,
-    # 'sidebar_master_title':'TEST2'
-    # 'sidebarwidth': "3.8in",
-    "fontcssurl": "https://fonts.googleapis.com/css?family=Noticia+Text|Open+Sans|Droid+Sans+Mono",
+  # 'single_page': True,
+   "extra_navbar": "",
+   "logo_only": True,
+   "home_page_in_toc": False,
+   "show_navbar_depth": 1,
 }
+
+
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
@@ -402,6 +397,33 @@ ogp_site_url = "https://anyscript.org/"
 ogp_site_name = "AMMR Documentation"
 ogp_image = "https://anyscript.org/ammr-doc/_static/AMMR_Logo.png"
 ogp_use_first_image = True # if not found defaults to 'ogp_image'
+
+
+# Generate gallery files
+import jinja2 
+import frontmatter
+
+gallery = {}
+galleryfolders = [x for x in Path("Applications").iterdir() if x.is_dir()]
+for folder in galleryfolders: 
+    gallery[folder] = []
+    for file in folder.glob("*.md"):
+        post = frontmatter.load(file)
+        if "gallery_title" in post: 
+            gallery[folder].append({
+                "doc": file.with_suffix("").as_posix(),
+                "title": post["gallery_title"],
+                "image": post["gallery_image"],
+            })
+
+with open('Applications/gallery.txt.jinja2') as fh:
+    gallery_template = jinja2.Template(fh.read())
+
+for folder, section in gallery.items():
+    gallery_txt= folder / "gallery.txt"
+    with open( gallery_txt, "w") as fh:
+        fh.write(gallery_template.render(examples=section))
+
 
 
 

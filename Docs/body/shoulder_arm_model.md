@@ -109,53 +109,40 @@ joint drivers directly or indirectly through connections to the environment
 
 ## Joint terminology
 
-```{rst-class} centered
-```
 
-```{eval-rst}
-.. table:: Joints and kinematic contraints of the arm model
-    :widths: 1 2 4
-    :align: center
-    :column-alignment: center left left
-    :column-wrapping: false true true
-    :column-dividers: none none none none
+**Joints and kinematic contraints of the arm model**
 
-    ================================ ==================== =======================================================
-    Name                             Description          Joint/Constraint Type
-    ================================ ==================== =======================================================
-    SternoClavicularJoint            SternoClavicular     Spherical joint
-    AcromioClavicularJoint           AcromioClavicular    Spherical joint
-    GlenoHumeralJoint                Glenohumeral joint   Spherical joint (The default joint reactions are
-                                                          disabled, since they do not automatically ensure that
-                                                          the net force vector passes through the glenoid cavity.
-                                                          The special force elements providing these biofidelic
-                                                          reaction forces are contained in the file "GHReactions.any")
-    AI                                                    One DOF constraint requiring the bony landmark
-                                                          AI on the scapula, to stay in contact with the thorax
-    AA                                                    One DOF constraint requiring the bony landmark
-                                                          AA on the scapula, to stay in contact with the thorax
-    ConoideumLigament                                     The length of this ligament is driven
-                                                          to always remain constant
-    HumeroUlnarJoint                 Flexion-extension    Revolute joint
-                                     of the elbow
-    HumeroRadialJoint                Pronation-supination Single linear constraint (5 DOF joint) between radius 
-                                                          and humerus
-    ProximalRadioUlnarJoint          Pronation-supination Trans Spherical joint between radius and ulna at the
-                                                          proximal part.
-    DistalRadioUlnarJoint            Pronation-supination Trans Spherical joint between radius and ulna at the
-                                                          proximal part. The HumeroRadialJoint, ProximalRadioUlnarJoint
-                                                          DistalRadioUlnarJoint leaves one DOF free which is
-                                                          pronation/supination of the forearm
-    Wrist joint                                           Two successive revolute joints where
-                                                          the axes of rotations are not coincident
-    ================================ ==================== =======================================================
+================================  ====================  =============================================================
+Name                              Description           Joint/Constraint Type
+================================  ====================  =============================================================
+SternoClavicularJoint             SternoClavicular      Spherical joint
+AcromioClavicularJoint            AcromioClavicular     Spherical joint
+GlenoHumeralJoint                 Glenohumeral joint    Spherical joint (The default joint reactions are
+                                                        disabled, since they do not automatically ensure that
+                                                        the net force vector passes through the glenoid cavity.
+                                                        The special force elements providing these biofidelic
+                                                        reaction forces are contained in the file "GHReactions.any")
+AI                                                      One DOF constraint requiring the bony landmark
+                                                        AI on the scapula, to stay in contact with the thorax
+AA                                                      One DOF constraint requiring the bony landmark
+                                                        AA on the scapula, to stay in contact with the thorax
+ConoideumLigament                                       The length of this ligament is driven
+                                                        to always remain constant
+HumeroUlnarJoint                  Flexion-extension     Revolute joint
+                                  of the elbow 
+HumeroRadialJoint                 Pronation-supination  Single linear constraint (5 DOF joint) between radius 
+                                                        and humerus
+ProximalRadioUlnarJoint           Pronation-supination  Trans Spherical joint between radius and ulna at the
+                                                        proximal part.
+DistalRadioUlnarJoint             Pronation-supination  Trans Spherical joint between radius and ulna at the
+                                                        proximal part. The HumeroRadialJoint, ProximalRadioUlnarJoint
+                                                        DistalRadioUlnarJoint leaves one DOF free which is
+                                                        pronation/supination of the forearm
+Wrist joint                                             Two successive revolute joints where
+                                                        the axes of rotations are not coincident
+================================  ====================  =============================================================
 
 
-
-
-
-
-```
 
 ## Resources
 
