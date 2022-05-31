@@ -13,10 +13,13 @@
 // -----------------------------------------------------
 // Please note that objects that are declared elsewhere in the model can be accessed
 // in other parts of the the script.
-Main.Model.ModelEnvironmentConnection = {
+Main.Model = {
   AnyFolder ModelParameters = {
-    AnyFloat HandLoad = {0,-100,0}; // for each hand
+    AnyFloat HandLoad = {0,-100,0};  // for each hand
     AnyFloat ExoSpringConstant = 30; // for right arm
+    AnyFloat UArmIntElbDist = 0.20;  // Longitudinal distance between U ARM interface and elbow joint
+    AnyFloat LArmIntElbDist = 0.15;  // Longitudinal distance between L ARM interface and elbow joint 
+    AnyFloat IntElbHorDist = 0.07;   // Horizontal distance between interface centre point and elbow joint
   };
 };
 
@@ -27,12 +30,12 @@ Main.Model.ModelEnvironmentConnection = {
 Main.Model.ModelEnvironmentConnection = {  
   AnyFolder HandLoads = {
     AnyForce3D RHand = {
-      F = ..ModelParameters.HandLoad;
+      F = ...ModelParameters.HandLoad;
       AnyRefFrame &RHand = Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Glove.ConnectionNode;
       AnyDrawForce drw = {};
     };
     AnyForce3D LHand = {
-      F = ..ModelParameters.HandLoad;
+      F = ...ModelParameters.HandLoad;
       AnyRefFrame &LHand = Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Glove.ConnectionNode;
       AnyDrawForce drw = {};
     };    
@@ -57,7 +60,7 @@ Main.Model.Environment = {
         Jii = 0.3*{0.01,0.002,0.01};
         
         AnyRefNode ElbowNode = { // Reference node for joint with ExoLowerArm
-          sRel = {0.0,-0.2,0};
+          sRel = {0.0,-.....ModelParameters.UArmIntElbDist,0};
           AnySurfCylinder Cyl_Visual = { // visualize cylinder at the elbow joint
             Radius = 0.03;
             Length = 0.03;
@@ -69,7 +72,7 @@ Main.Model.Environment = {
         };
         
         AnyRefNode UArmNode = { // Reference node for attaching to human upper arm
-          sRel = {0.0,0.0,-0.07};
+          sRel = {0.0,0.0,-.....ModelParameters.IntElbHorDist};
           // AnyDrawRefFrame drw = {RGB = {0.0, 0.5, 1.0};};
         };
 
@@ -94,7 +97,7 @@ Main.Model.Environment = {
         Jii = 0.3*{0.01,0.002,0.01};
         
         AnyRefNode ElbowNode = { // Reference node for joint with ExoUpperArm
-          sRel = {0,0.15,0};
+          sRel = {0,.....ModelParameters.LArmIntElbDist,0};
           ARel = RotMat(pi,z);
           AnySurfCylinder Cyl_Visual = { // visualize cylinder at the elbow joint
             Radius = 0.03;
@@ -107,7 +110,7 @@ Main.Model.Environment = {
         };
         
         AnyRefNode LArmNode = { // Reference node for attaching to human lower arm
-          sRel = {0,0.0,-0.07};
+          sRel = {0,0.0,-.....ModelParameters.IntElbHorDist};
           // AnyDrawRefFrame drw = {RGB = {0.0, 1.0, 1.0};};
         };
 
@@ -133,7 +136,7 @@ Main.Model.Environment = {
       
       // Add Assistive Torque at Exo Elbow Joint
       AnyForce ExoTorque = {
-        AnyFloat k = ....ModelEnvironmentConnection.ModelParameters.ExoSpringConstant;
+        AnyFloat k = ....ModelParameters.ExoSpringConstant;
         AnyJoint& Jnt = .ExoElbowJnt;
         F = -k*Jnt.Pos;  
         AnyDrawForce drw = {
@@ -192,7 +195,7 @@ Main.Model.ModelEnvironmentConnection = {
         AnyStdJoint HumExoUArm = {
           AnyRefFrame &HumUpperArmNode = ..Hum_UArm_Elb.ExoConNode;
           AnyRefFrame &ExoUpperArmNode = Main.Model.Environment.Exoskeleton.Right.ExoUpperArm.UArmNode;
-          // Switch of reaction forces. These will be provided by contact elements
+          // Switch off reaction forces. These will be provided by contact elements
           Constraints.Reaction.Type = {Off,Off,Off,Off,Off,Off};
         }; 
         AnyKinEq HumExoLArm = {
@@ -202,7 +205,7 @@ Main.Model.ModelEnvironmentConnection = {
             Ref = 1;
           };
           MeasureOrganizer = {0};
-          // Switch of reaction forces. These will be provided by contact elements
+          // Switch off reaction forces. These will be provided by contact elements
           Reaction.Type = {Off};
         }; 
       }; // KinematicConnection
@@ -241,7 +244,9 @@ Main.Model.ModelEnvironmentConnection = {
         NUMBER_OF_NODES = 16, 
         SHOW_TRIGGER_VOLUME = 1
         ) =
-        {          
+        {
+          Settings.ElementForceDrawScaleFactor = 0.2;
+
           EllipticCylinderPointsGrid ExoNodes (
           CENTER_FRAME = Main.Model.Environment.Exoskeleton.Right.ExoUpperArm.UArmNode,
           AXIS = "Y",
@@ -281,6 +286,8 @@ Main.Model.ModelEnvironmentConnection = {
         SHOW_TRIGGER_VOLUME = 1
         ) =
         {
+          Settings.ElementForceDrawScaleFactor = 0.2;
+
           EllipticCylinderPointsGrid ExoNodes (
           CENTER_FRAME = Main.Model.Environment.Exoskeleton.Right.ExoLowerArm.LArmNode,
           AXIS = "Y",
