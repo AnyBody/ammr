@@ -4,9 +4,7 @@ Example of full body MoCap model using the Plug-in-Gait marker protocol but
 without force plates. The external forces are instead predicted using the GRF
 algorithms.
 
-```{eval-rst}
-.. rst-class:: without-title
-```
+
 
 :::{seealso}
 **Main file location in AMMR:**

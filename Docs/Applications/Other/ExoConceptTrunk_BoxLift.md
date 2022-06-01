@@ -5,9 +5,7 @@ Trunk exoskeleton concept model.
 This simple example shows how the effects of an exoskeleton can be investigated by applying assistive torque
 directly at the human joints.
 
-```{eval-rst}
-.. rst-class:: without-title
-```
+
 
 :::{seealso}
 **Main file location in AMMR:**

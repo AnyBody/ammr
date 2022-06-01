@@ -1,16 +1,29 @@
+---
+gallery_title: "BVH driven box lift"
+gallery_image: "/Applications/images/BVH_BoxLift.jpg"
+---
+
+
 # BVH driven box lift example
+
+
+````{sidebar}
+
+```{admonition} **Main file Example:**
+:class: seealso
+{menuselection}`Application --> MocapExamples --> BVH_BoxLift --> Subjects --> S01 -->
+S01_T01 --> Main.any`
+```
+![](/Applications/images/BVH_BoxLift.jpg)
+````
 
 Example of a MoCap model using data from an inertial measurement unit (IMU) based suit.
 The model uses a BVH file with data from an Xsens suit. The ground reaction forces are
 predicted using the GRF prediction algorithm.
 
 
-:::{seealso}
-**Main file Example:**
 
-{menuselection}`Application --> MocapExamples --> BVH_BoxLift --> Subjects --> S01 -->
-S01_T01 --> Main.any`
-:::
+
 
 The model works using virtual markers placed on the BVH rig (i.e. the stick-figure model
 specified by the BVH file). The virtual markers are used to make the Musculoskeletal model
@@ -36,4 +49,5 @@ BVH improvements in AnyBody v.7.3.
 1. **Important**: Make sure your use the new AMMR (>=2.3) and new AnyBody Modeling System
    (>=7.3). You can copy your existing model folder into the new AMMR, or edit the local
    `libdef.any` file to point to the new AMMR.
+
 

@@ -1,12 +1,10 @@
-# Ergonomics and ADLs
-
+# Orthopedics
 
 :::{toctree}
 :hidden: true
 :glob:
 
 *
-
 :::
 
 :::{include} gallery.txt

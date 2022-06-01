@@ -6,9 +6,7 @@ The model was developed to better understand the muscles forces in the finger du
 The model contains seven muscles/tendons which connects the metacarpal with the three phalangeal finger segments.
 This model is good example of small stand alone model to answer specific research questions.
 
-```{eval-rst}
-.. rst-class:: without-title
-```
+
 
 :::{seealso}
 **Main file location in AMMR:**

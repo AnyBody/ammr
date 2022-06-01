@@ -1,11 +1,11 @@
-# Motion Capture and gait analysis
+# MoCap
 
 
 :::{toctree}
 :hidden: true
+:glob:
 
-ADL_Gait
-AnyMocapFeatures
+*
 :::
 
 :::{include} gallery.txt

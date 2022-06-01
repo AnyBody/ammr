@@ -9,12 +9,13 @@ gallery_image: "/Applications/images/force_plate_offset.jpg"
 A collection of small models that show-off special features of the
 *AnyMoCap* framework.
 
-
-:::{admonition} **Main file location in AMMR:**
-:class: see-also
-
-  {menuselection}`Application --> MocapExamples --> SpecialFeatures`
-:::
+````{sidebar}
+```{admonition} **Main file location in AMMR:**
+:class: seealso
+{menuselection}`Application --> MocapExamples --> SpecialFeatures`
+```
+![](/Applications/images/force_plate_offset.jpg)
+````
 
 
 This includes:

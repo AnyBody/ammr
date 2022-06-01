@@ -2,9 +2,7 @@
 
 Example of an Arm Curl fitness machine.
 
-```{eval-rst}
-.. rst-class:: without-title
-```
+
 
 :::{seealso}
 **Main file location in AMMR:**

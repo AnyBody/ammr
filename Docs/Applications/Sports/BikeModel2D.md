@@ -3,9 +3,7 @@
 A simple bicycle rider model using a planar
 leg model.
 
-```{eval-rst}
-.. rst-class:: without-title
-```
+
 
 :::{seealso}
 **Main file location in AMMR:**

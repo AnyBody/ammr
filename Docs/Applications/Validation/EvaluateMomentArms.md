@@ -18,9 +18,7 @@ This  will include a lot of studies (one per DOF) so they will
 affect performance when loading and switching between tabs/operations.
 :::
 
-```{eval-rst}
-.. rst-class:: without-title
-```
+
 
 :::{seealso}
 **Main file location in AMMR:**

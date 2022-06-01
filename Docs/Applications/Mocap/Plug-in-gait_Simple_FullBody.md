@@ -5,9 +5,7 @@ walking on three typ4 force platforms. The model is fairly simple and a good
 starting point for new users. If you plan to have many trials/subjects, take
 a look at the example which better support multiple trails.
 
-```{eval-rst}
-.. rst-class:: without-title
-```
+
 
 :::{seealso}
 **Main file location in AMMR:**

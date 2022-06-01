@@ -2,9 +2,7 @@
 
 Mandible model example.
 
-```{eval-rst}
-.. rst-class:: without-title
-```
+
 
 :::{seealso}
 **Main file location in AMMR:**

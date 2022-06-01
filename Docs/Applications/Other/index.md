@@ -1,4 +1,4 @@
-# Ergonomics and ADLs
+# Other
 
 
 :::{toctree}
@@ -6,7 +6,6 @@
 :glob:
 
 *
-
 :::
 
 :::{include} gallery.txt

@@ -7,9 +7,7 @@ small app which allows you to simply specify a few anatomical or functional
 parameters when scaling the model. The plugin calculates the remaining (free)
 anthropometric variables based on the ANSUR [^f1] anthropometrical database.
 
-```{eval-rst}
-.. rst-class:: without-title
-```
+
 
 :::{seealso}
 **Main file location in AMMR:**

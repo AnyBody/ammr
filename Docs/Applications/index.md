@@ -28,3 +28,54 @@ MoCap/index
 
 :::{include} MoCap/gallery.txt
 :::
+
+
+## Orthopedics and rehabilitation
+
+
+:::{toctree}
+:hidden: true
+
+Orthopedics_and_rehab/index
+:::
+
+:::{include} Orthopedics_and_rehab/gallery.txt
+:::
+
+
+## Sports
+
+
+:::{toctree}
+:hidden: true
+
+Sports/index
+:::
+
+:::{include} Sports/gallery.txt
+:::
+
+
+## Other
+
+
+:::{toctree}
+:hidden: true
+
+Other/index
+:::
+
+:::{include} Other/gallery.txt
+:::
+
+## Validation
+
+
+:::{toctree}
+:hidden: true
+
+Validation/index
+:::
+
+:::{include} Validation/gallery.txt
+:::

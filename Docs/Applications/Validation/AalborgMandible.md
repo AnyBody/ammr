@@ -17,9 +17,7 @@ Journal of Biomechanical Engineering, 139(9), 091001. DOI: 10.1115/1.4037100.
 The work was supported by the Sapere Aude program of the Danish Council for
 Independent Research under grant number: DFF-4184-00018.
 
-```{eval-rst}
-.. rst-class:: without-title
-```
+
 
 :::{seealso}
 **Model location in AMMR:**

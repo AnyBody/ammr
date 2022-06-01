@@ -2,9 +2,6 @@
 
 This application shows all the scaling laws available.
 
-```{eval-rst}
-.. rst-class:: without-title
-```
 
 :::{seealso}
 **Main file location in AMMR:**

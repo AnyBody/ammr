@@ -3,9 +3,7 @@
 Bicycle rider model that runs either as
 FullBody or as LowerExtremity version.
 
-```{eval-rst}
-.. rst-class:: without-title
-```
+
 
 :::{seealso}
 **Main file location in AMMR:**

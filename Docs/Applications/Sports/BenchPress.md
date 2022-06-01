@@ -2,9 +2,7 @@
 
 A full-body model doing push-ups with assumed drivers.
 
-```{eval-rst}
-.. rst-class:: without-title
-```
+
 
 :::{seealso}
 **Main file location in AMMR:**
