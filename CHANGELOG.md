@@ -5,6 +5,27 @@
 
 
 (ammr-2.4-changelog)=
+## AMMR 2.x.x (2022-xx-xx)
+
+
+**New example models:**
+
+- 
+
+
+**Fixed:**
+* Fixed a problem that caused the OptimizeBVH_Origin class template to fail if the same human segment was optimized 
+  more than one time in the same model (for example, at different time intervals). The class template has been fixed
+  and the {ref}`BVH optimize origin example model <sphx_glr_auto_examples_Mocap_plot_BVH_OptimizeOrigin.py>` has been
+  updated to add a demo for optimizing the BVH model origin considering the same human segment at different time intervals.
+
+**Changed:**
+
+* 
+  
+**Added:**
+* 
+
 
 ## AMMR 2.4.1 (2022-05-30)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.6533249.svg)](https://doi.org/10.5281/zenodo.6533249)
