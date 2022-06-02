@@ -1,4 +1,16 @@
+---
+gallery_title: "Evaluate joint strength"
+gallery_image: "/Applications/images/EvaluateJointStrength.jpg"
+---
+
+(sphx_glr_auto_examples_Validation_plot_EvaluateJointStrength.py)=
+
 # Evaluate joint strength
+
+````{sidebar}
+<img src="/Applications/images/EvaluateJointStrength.jpg" width="70%" align="center">
+````
+
 
 This model shows how to enable the built-in studies to evaluate joint strength.
 The studies can be enabled by setting the switch: `#define EVALUATE_JOINT_STRENGTH 1`

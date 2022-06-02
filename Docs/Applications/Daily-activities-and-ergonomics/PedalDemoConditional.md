@@ -7,6 +7,11 @@ gallery_image: "/Applications/images/PedalDemoConditional.jpg"
 
 # Pedel demo
 
+````{sidebar}
+<img src="/Applications/images/PedalDemoConditional.jpg" width="70%" align="center">
+
+````
+
 A leg pressing down a pedal. This
 demonstrates conditional contact between the foot and the
 pedal.
@@ -27,5 +32,3 @@ has conditional contact between the foot and the pedal, such that
 the contact becomes active when the two elements are in proximity
 with each other
 
-
-![](/Applications/images/PedalDemoConditional.jpg)

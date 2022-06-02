@@ -1,4 +1,16 @@
+---
+gallery_title: "Knee Simulator Model"
+gallery_image: "/Applications/images/KneeSimulator.jpg"
+---
+
+(sphx_glr_auto_examples_Orthopedics_and_rehab_plot_KneeSimulator.py)=
+
 # Knee Simulator Model
+
+
+````{sidebar}
+<img src="/Applications/images/KneeSimulator.jpg" width="70%" align="center">
+````
 
 Model of a Knee Simulator using a knee implant model and force-dependent kinematics (FDK).
 For an indepth description of the mathematics and mechanics behind FDK please see [^cite_azdn17].
@@ -39,11 +51,11 @@ Ligaments in the model, abbreviations adopted from [^cite_sbtp06] Figure 1.
 Three STL-based rigid-rigid contact models were defined: between the patella and femoral component,  the femoral component and tibia insert (lateral side),
 and the femoral component and tibia insert (medial side).
 
-:::{figure} /Applications/images/KneeSimulator_Contacts.jpg
+```{figure} /Applications/images/KneeSimulator_Contacts.jpg
 :align: center
 
-Contact surfaces in the model
-:::
+Contact surfaces in the model.
+```
 
 ## Settings
 
@@ -70,7 +82,6 @@ Other adjustable settings include: ligament parameters, femur and tibia mass rat
 
 Please note that this simulation is only a demo example.
 
-## References
 
 [^cite_azdn17]: Andersen, M. S., de Zee, M., Damsgaard, M., Nolte, D., & Rasmussen, J. Introduction to Force-Dependent Kinematics: Theory and Application
     to Mandible Modeling. J Biomech Eng. 139(9), 091001 (2017). doi: [10.1115/1.4037100](https://doi.org/10.1115/1.4037100)

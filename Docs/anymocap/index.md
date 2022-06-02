@@ -64,13 +64,12 @@ The AnyBody tutorials, and the lesson on using the
 
 The following gallery shows different examples using the AnyMoCap framework.
 
-```{eval-rst}
-.. include:: /auto_examples/backreferences/gallery.anymocap.examples
-```
 
-```{raw} html
-<div style='clear:both'></div>
-```
+
+:::{include} /Applications/MoCap/gallery.txt
+:::
+
+
 
 :::{note}
 The *Multi trial MoCap model* is likely the best starting point when

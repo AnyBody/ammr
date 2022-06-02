@@ -1,4 +1,16 @@
+---
+gallery_title: "Trunk exoskeleton model"
+gallery_image: "/Applications/images/ExoskeletonConceptTrunk_BoxLift.jpg"
+---
+
+(sphx_glr_auto_examples_Other_plot_ExoConceptTrunk_BoxLift.py)=
+
 # Trunk exoskeleton concept model
+
+
+````{sidebar}
+<img src="/Applications/images/ExoskeletonConceptTrunk_BoxLift.jpg" width="70%" align="center">
+````
 
 Trunk exoskeleton concept model.
 

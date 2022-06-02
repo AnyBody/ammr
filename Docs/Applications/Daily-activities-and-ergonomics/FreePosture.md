@@ -7,12 +7,22 @@ gallery_image: "/Applications/images/FreePostureFullBodyShoulderRhythmStatic.jpg
 
 # Free posture Models
 
+
+````{sidebar}
+<img src="/Applications/images/FreePostureFullBodyShoulderRhythmStatic.jpg" width="70%" align="center">
+
+````
+
 A basic static full-body model standing on a floor.
 
 
-:::{seealso}
-**Model location in AMMR:**
+This model uses the full body model, i.e. most of the body parts available
+in the AAUHuman part of the Body directory. The model is grounded at the
+pelvis and the posture if the model is controlled through a `mannequin.any`
+file by means of joint angles.
 
+```{admonition} **Main file location in AMMR:**
+:class: seealso
 {menuselection}`Application --> Examples --> FreePosture -->`
 
 {menuselection}`FreePostureFullBodyMove.Main.any`
@@ -22,12 +32,7 @@ A basic static full-body model standing on a floor.
 {menuselection}`FreePostureFullBodyShoulderRhythmStatic.Main.any`
 
 {menuselection}`FreePostureFullBodyShoulderRhythmStatic.Main.any`
-:::
-
-This model uses the full body model, i.e. most of the body parts available
-in the AAUHuman part of the Body directory. The model is grounded at the
-pelvis and the posture if the model is controlled through a `mannequin.any`
-file by means of joint angles.
+```
 
 This application is a really good starting point for new applications
 involving the entire body.
@@ -43,7 +48,3 @@ FullBodyModelSRHand is a fullbody model with a detailed hand and shoulder rhythm
 CONFIGURATION2 can be either "FreePostureStatic" or "FreePostureMove"
 FreePostureStatic is a static model which do not move its joint angles are controlled in the "mannequin.any" file
 FreePostureMove is a dynamic model controlled through angles which can be set in the "MannequinInterpolation.any" file
-
-
-```{image} /Applications/images/FreePostureFullBodyShoulderRhythmStatic.jpg
-```

@@ -1,4 +1,15 @@
+---
+gallery_title: "Arm curl"
+gallery_image: "/Applications/images/ArmCurl.jpg"
+---
+
+(sphx_glr_auto_examples_Sports_plot_ArmCurl.py)=
+
 # Arm curl
+
+````{sidebar}
+<img src="/Applications/images/ArmCurl.jpg" width="70%" align="center">
+````
 
 Example of an Arm Curl fitness machine.
 

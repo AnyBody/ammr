@@ -7,22 +7,23 @@ gallery_image: "/Applications/images/AirlinePassenger.jpg"
 
 # Airline passenger
 
-The airline passenger example.
+````{sidebar}
+<img src="/Applications/images/AirlinePassenger.jpg" align="center" width="70%" align="center">
 
-
-:::{seealso}
-**Main file location in AMMR:**
-
-{menuselection}`Application --> Examples --> AirlinePassenger -->
-AirlinePassenger.main.any`
-:::
-
-This is a model of a coach class airline passenger seat
+````
+The airline passenger example. This is a model of a coach class airline passenger seat
 characterized by the following:
 
 - No arm rests (you always lose the battle for the armrest  to the person next to you)
 - Horizontal seat pan
 - Limited ability to incline the backrest due to the lack of clearance to the person behind
+
+```{admonition} **Main file location in AMMR:**
+:class: seealso
+{menuselection}`Application --> Examples --> AirlinePassenger -->
+AirlinePassenger.main.any`
+```
+
 
 The model assesses the comfort of the passenger in terms of
 the following:
@@ -46,5 +47,3 @@ backrest backwards from an initial 10 degree forward
 inclination to a 30 degree backward inclination, which
 is on the very upper limit of coach class passenger seats.
 
-```{image} /Applications/images/AirlinePassenger.jpg
-```

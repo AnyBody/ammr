@@ -1,4 +1,16 @@
+---
+gallery_title: "Facet Joint Model"
+gallery_image: "/Applications/images/FacetJointModel.jpg"
+---
+
+(sphx_glr_auto_examples_Orthopedics_and_rehab_plot_FacetJointModel.py)=
+
 # Facet Joint Model
+
+
+````{sidebar}
+<img src="/Applications/images/FacetJointModel.jpg" width="70%" align="center">
+````
 
 A spine model with facet joints.
 

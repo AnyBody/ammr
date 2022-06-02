@@ -1,4 +1,16 @@
+---
+gallery_title: "Push Up"
+gallery_image: "/Applications/images/PushUp.jpg"
+---
+
+(sphx_glr_auto_examples_Sports_plot_PushUp.py)=
+
 # Push Up
+
+````{sidebar}
+<img src="/Applications/images/PushUp.jpg" width="70%" align="center">
+````
+
 
 A full-body model doing push-ups with assumed drivers.
 

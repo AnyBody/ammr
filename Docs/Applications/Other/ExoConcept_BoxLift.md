@@ -1,4 +1,17 @@
+---
+gallery_title: "Exoskeleton concept model"
+gallery_image: "/Applications/images/ExoskeletonConcept_BoxLift.jpg"
+---
+
+(sphx_glr_auto_examples_Other_plot_ExoConcept_BoxLift.py)=
+
 # Exoskeleton concept model
+
+
+````{sidebar}
+<img src="/Applications/images/ExoskeletonConcept_BoxLift.jpg" width="70%" align="center">
+````
+
 
 Exoskeleton concept model.
 

@@ -1,4 +1,16 @@
+---
+gallery_title: "Femoral Torsion tool"
+gallery_image: "/Applications/images/FemoralTorsion.jpg"
+---
+
+(sphx_glr_auto_examples_Orthopedics_and_rehab_plot_FemoralTorsionTool.py)=
+
 # Femoral Torsion tool
+
+
+````{sidebar}
+<img src="/Applications/images/FemoralTorsion.jpg" width="70%" align="center">
+````
 
 This is an example of modifying the femoral torsion of the default leg
 ({ref}`TLEM 2.0 <tlem2>`) geometry by using a model utility tool included within
@@ -67,17 +79,15 @@ publication.
 :::
 
 The Femoral torsion tool uses a functionality override scaling for thigh segments. In this case
-the include file sets `#define CUSTOM_SCALING_Right_Thigh` and `#define
-CUSTOM_SCALING_Left_Thigh` to override the default scaling for the right/left
+the include file sets `#define CUSTOM_SCALING_Right_Thigh` and `#define CUSTOM_SCALING_Left_Thigh` to override the default scaling for the right/left
 thigh.
 
-:::{seealso}
-See the {doc}`scaling tutorial <tutorials:Scaling/lesson4>` for
+:::{seealso} See the {doc}`scaling tutorial <tutorials:Scaling/lesson4>` for
 more information on how to use the custom scaling functionality in the
 general case.
 :::
 
-## References
+
 
 [^cite_dflm21]: De Pieri E, Friesenbichler B, List R, Monn S, Casartelli NC, Leunig
     M, Ferguson SJ. Subject-Specific Modeling of Femoral Torsion Influences the

@@ -1,4 +1,16 @@
+---
+gallery_title: "Total Hip Arthroplasty"
+gallery_image: "/Applications/images/THA-KneeBendDemo.jpg"
+---
+
+(sphx_glr_auto_examples_Orthopedics_and_rehab_plot_THA-KneeBendDemo.py)=
+
 # Total Hip Arthroplasty (THA) Model
+
+
+````{sidebar}
+<img src="/Applications/images/THA-KneeBendDemo.jpg" width="70%" align="center">
+````
 
 Model of a total hip replacement using a contact implant model and
 force-dependent kinematics (FDK).

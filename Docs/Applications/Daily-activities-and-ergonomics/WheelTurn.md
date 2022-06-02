@@ -5,7 +5,11 @@ gallery_image: "/Applications/images/WheelTurn.jpg"
 
 (sphx_glr_auto_examples_ADLs_and_ergonomics_plot_WheelTurn.py)=
 
-# Hand cranck model
+# Hand crank model
+
+````{sidebar}
+<img src="/Applications/images/WheelTurn.jpg" width="70%" align="center">
+````
 
 This is a model of a person turning a horizontal wheel by means of a handle.
 The purpose of the model is shoulder validation.
@@ -16,6 +20,4 @@ The purpose of the model is shoulder validation.
   {menuselection}`Application --> Examples --> WheelTurn --> WheelTurn.Main.any`
 
 :::
-
-![](/Applications/images/Squat.jpg)
 

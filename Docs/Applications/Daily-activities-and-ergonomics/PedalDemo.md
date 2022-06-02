@@ -7,6 +7,12 @@ gallery_image: "/Applications/images/PedalDemo.jpg"
 
 # Pedel demo simple
 
+
+````{sidebar}
+<img src="/Applications/images/PedalDemo.jpg" width="70%" align="center">
+
+````
+
 This model demonstrates the construction
 of a foot pedal example.
 
@@ -21,5 +27,3 @@ PedalDemo.main.any`
 This model is for design of a pedal that is comfortable to use
 for a seated operator depending on the stiffness of the embedded
 spring and the distance of the seat from the pedal.
-
-![](/Applications/images/PedalDemo.jpg)

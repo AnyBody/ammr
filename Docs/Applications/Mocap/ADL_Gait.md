@@ -3,8 +3,13 @@ gallery_title: "ADL Gait (beta)"
 gallery_image: "/Applications/images/Rehazenter-adult-walking-model.jpg"
 ---
 
+(sphx_glr_auto_examples_MoCap_plot_ADL_Gait.py)=
+
 # ADL Gait (beta)
 
+````{sidebar}
+<img src="/Applications/images/Rehazenter-adult-walking-model.jpg" width="70%" align="center">
+````
 
 Fullbody MoCap model with multiple subjects and trials based on the 
 "Rehazenter Adult Walking Dataset" by [Schreiber and Moissenet (2019)](https://doi.org/10.1038/s41597-019-0124-4).
@@ -31,7 +36,7 @@ standing reference trial is used to identify a number parameters:
 These parameters are then loaded in the matching dynamic trials. 
 
 :::{warning} The model is a starting point for analysing the 
-"`Rehazenter adult walking dataset <https://doi.org/10.1038/s41597-019-0124-4>`__". 
+[Rehazenter adult walking dataset](https://doi.org/10.1038/s41597-019-0124-4). 
 The model has not been through *any* kind of validation or publication. It is likely that 
 some results will not be correct without further adjustments.
 :::

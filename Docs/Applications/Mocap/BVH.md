@@ -1,8 +1,20 @@
+---
+gallery_title: "Inertial MoCap (Xsens)"
+gallery_image: "/Applications/images/BVH.jpg"
+---
+
+(sphx_glr_auto_examples_Mocap_plot_BVH.py)=
+
 # Inertial MoCap example
+
+````{sidebar}
+<img src="/Applications/images/BVH.jpg" width="70%" align="center">
+````
 
 Example of a MoCap model using data from an inertial motion capture suit.
 The model uses a BVH file with data from an Xsens suit. The ground reaction
 forces are predicted using the GRF prediction algorithm.
+
 
 
 :::{seealso}

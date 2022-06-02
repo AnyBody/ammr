@@ -1,4 +1,16 @@
+---
+gallery_title: "Index finger model"
+gallery_image: "/Applications/images/IndexFingerModel.jpg"
+---
+
+(sphx_glr_auto_examples_Other_plot_IndexFingerModel.py)=
+
 # Index finger model
+
+
+````{sidebar}
+<img src="/Applications/images/IndexFingerModel.jpg" width="70%" align="center">
+````
 
 The Index finger model is developed by John Z. Wu (NIOSH, Morgantwon, WV 26505, USA) in 2008.
 

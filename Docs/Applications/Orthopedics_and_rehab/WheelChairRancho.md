@@ -1,4 +1,16 @@
+---
+gallery_title: "Wheel Chair model"
+gallery_image: "/Applications/images/WheelChairRancho.jpg"
+---
+
+(sphx_glr_auto_examples_Orthopedics_and_rehab_plot_WheelChairRancho.py)=
+
 # Wheel Chair model
+
+
+````{sidebar}
+<img src="/Applications/images/WheelChairRancho.jpg" width="70%" align="center">
+````
 
 A model of a person sitting in a wheelchair, the model is driven by motion
 capture data.

@@ -1,4 +1,16 @@
+---
+gallery_title: "Bike Model 2D"
+gallery_image: "/Applications/images/BikeModel2D.jpg"
+---
+
+(sphx_glr_auto_examples_Sports_plot_BikeModel2D.py)=
+
 # Bike Model 2D
+
+````{sidebar}
+<img src="/Applications/images/BikeModel2D.jpg" width="70%" align="center">
+````
+
 
 A simple bicycle rider model using a planar
 leg model.

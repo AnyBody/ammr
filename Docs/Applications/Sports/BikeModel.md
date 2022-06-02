@@ -1,4 +1,16 @@
+---
+gallery_title: "Bike Model"
+gallery_image: "/Applications/images/BikeModel.jpg"
+---
+
+(sphx_glr_auto_examples_Sports_plot_BikeModel.py)=
+
 # Bike Model
+
+````{sidebar}
+<img src="/Applications/images/BikeModel.jpg" width="70%" align="center">
+````
+
 
 Bicycle rider model that runs either as
 FullBody or as LowerExtremity version.

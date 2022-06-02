@@ -1,4 +1,16 @@
+---
+gallery_title: "Symmetric Mandible example"
+gallery_image: "/Applications/images/MandibleChewingAndClenching.jpg"
+---
+
+(sphx_glr_auto_examples_Validation_plot_MandibleModel.py)=
+
 # Symmetric Mandible example
+
+````{sidebar}
+<img src="/Applications/images/MandibleChewingAndClenching.jpg" width="70%" align="center">
+````
+
 
 Mandible model example.
 

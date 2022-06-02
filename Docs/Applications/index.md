@@ -1,3 +1,5 @@
+
+(example-gallery)=
 # Application examples
 
 In the repository, you can find musculoskeletal applications from a wide area of
@@ -5,6 +7,7 @@ interests. These models are from various AnyBody users, and all demonstrate
 features from the AnyBody Modeling System.
 
 
+(adl_examples)=
 ## Daily activities and ergonomics
 
 :::{toctree}
@@ -16,7 +19,7 @@ Daily-activities-and-ergonomics/index
 :::{include} Daily-activities-and-ergonomics/gallery.txt
 :::
 
-
+(mocap_examples)=
 ## Motion Capture and gait analysis
 
 
@@ -30,6 +33,8 @@ MoCap/index
 :::
 
 
+(ortho_and_rehab_examples)=
+
 ## Orthopedics and rehabilitation
 
 
@@ -42,6 +47,7 @@ Orthopedics_and_rehab/index
 :::{include} Orthopedics_and_rehab/gallery.txt
 :::
 
+(sports_examples)=
 
 ## Sports
 
@@ -55,7 +61,7 @@ Sports/index
 :::{include} Sports/gallery.txt
 :::
 
-
+(other_examples)=
 ## Other
 
 
@@ -67,6 +73,8 @@ Other/index
 
 :::{include} Other/gallery.txt
 :::
+
+(validation_examples)=
 
 ## Validation
 

@@ -1,4 +1,16 @@
+---
+gallery_title: "Simple Lower extremity model"
+gallery_image: "/Applications/images/LowerExtremity-Plug-in-gait.jpg"
+---
+
+(sphx_glr_auto_examples_Mocap_plot_Plug-in-gait_Simple_LowerExtremity)=
+
 # Simple Lower extremity model
+
+
+````{sidebar}
+<img src="/Applications/images/LowerExtremity-Plug-in-gait.jpg" width="70%" align="center">
+````
 
 Example of lower body MoCap model using the Plug-in-Gait marker protocol,
 and walking on three typ4 force platforms. The model is fairly simple and a

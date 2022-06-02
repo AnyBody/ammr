@@ -1,4 +1,16 @@
+---
+gallery_title: "Bench Press"
+gallery_image: "/Applications/images/BenchPress.jpg"
+---
+
+(sphx_glr_auto_examples_Sports_plot_BenchPress.py)=
+
 # Bench Press
+
+````{sidebar}
+<img src="/Applications/images/BenchPress.jpg" width="70%" align="center">
+````
+
 
 A full-body model doing push-ups with assumed drivers.
 

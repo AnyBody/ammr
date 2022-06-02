@@ -1,4 +1,17 @@
+---
+gallery_title: "The Aalborg Mandible model"
+gallery_image: "/Applications/images/AalborgMandibleValidation.jpg"
+---
+
+(sphx_glr_auto_examples_Validation_plot_AalborgMandible.py)=
+
 # The Aalborg Mandible model
+
+````{sidebar}
+<img src="/Applications/images/AalborgMandibleValidation.jpg" width="70%" align="center">
+````
+
+
 
 This is a validation example of mandible model based on a CT scan of a 40 year old male.
 

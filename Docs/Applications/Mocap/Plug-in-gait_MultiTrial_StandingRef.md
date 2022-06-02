@@ -1,4 +1,16 @@
+---
+gallery_title: "Multi trial MoCap model"
+gallery_image: "/Applications/images/Plug-in-gait_Squat_Flywheel.jpg"
+---
+
+(sphx_glr_auto_examples_Mocap_plot_Plug-in-gait_MultiTrial_StandingRef.py)=
+
 # Multi trial MoCap model
+
+
+````{sidebar}
+<img src="/Applications/images/Plug-in-gait_Squat_Flywheel.jpg" width="70%" align="center">
+````
 
 Example of a MoCap model structured for analyzing data from multiple subjects
 and trials. This special structure makes it much easier to work with large

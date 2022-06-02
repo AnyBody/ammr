@@ -1,4 +1,15 @@
+---
+gallery_title: "Statistical Scaling Plugin"
+gallery_image: "/Applications/images/StatisticalScalingPlugin.jpg"
+---
+
+(sphx_glr_auto_examples_Other_plot_StatisticalScalingPlugin.py)=
+
 # Statistical Scaling Plugin
+
+````{sidebar}
+<img src="/Applications/images/StatisticalScalingPlugin.jpg" width="70%" align="center">
+````
 
 Plugin for scaling subjects based on an anthropometric database.
 

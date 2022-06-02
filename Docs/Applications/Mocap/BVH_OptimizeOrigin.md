@@ -3,20 +3,24 @@ gallery_title: "Optimize BVH Origin"
 gallery_image: "/Applications/images/BVH_OptimizeOrigin_Merged.jpg"
 ---
 
+(sphx_glr_auto_examples_Mocap_plot_BVH_OptimizeOrigin.py)=
+
 # Optimize BVH Origin example
+
+
+````{sidebar}
+<img src="/Applications/images/BVH_OptimizeOrigin_Merged.jpg" width="70%" align="center">
+````
 
 Example of a MoCap model using data from an inertial motion capture suit.
 The model uses a BVH file with data from an Xsens suit. The ground reaction
 forces are predicted using the GRF prediction algorithm.
 
-````{sidebar}
+
 ```{admonition} **Main file location in AMMR:**
 :class: seealso
 {menuselection}`Application --> MocapExamples --> BVH_Xsens_OptimizeOrigin --> Subjects --> S1 --> S01_Trial01 --> Main.any`
 ```
-![](/Applications/images/BVH_OptimizeOrigin_Merged.jpg)
-````
-
 
 This particular example demonstrates a class template that can be used to optimize the origin of the
 BVH recording. The class template can be useful when BVH recordings consist of interaction of the subject
@@ -25,6 +29,7 @@ the subject. The origin of the BVH model (recording) can be set to another posit
 respect to the Global Ref. This class template can optimize the origin of the BVH model such that a
 target segment of the human model (Left/Right Foot/Hand) hits a known position and orientation in a
 given time interval while following the recorded motion from the trial.
+
 
 Normally, in BVH models, AnyBody automatically calculates the virtual markers positions, and the model is scaled directly from
 the size of the BVH stick figure. Hence the model contains no *Parameter identification* step to find the parameters.

@@ -1,4 +1,16 @@
+---
+gallery_title: "GRF prediction model"
+gallery_image: "/Applications/images/GRFPrediction-Plug-in-gait.jpg"
+---
+
+(sphx_glr_auto_examples_Mocap_plot_Plug-in-gait_Simple_FullBody_GRFPrediction.py)=
+
 # Simple GRF prediction model
+
+
+````{sidebar}
+<img src="/Applications/images/GRFPrediction-Plug-in-gait.jpg" width="70%" align="center">
+````
 
 Example of full body MoCap model using the Plug-in-Gait marker protocol but
 without force plates. The external forces are instead predicted using the GRF

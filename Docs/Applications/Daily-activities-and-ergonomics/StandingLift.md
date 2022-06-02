@@ -3,12 +3,15 @@ gallery_title: "Standing Model"
 gallery_image: "/Applications/images/StandingLift.jpg"
 ---
 
-
+(sphx_glr_auto_examples_ADLs_and_ergonomics_plot_StandingLift.py)=
 # Lifting Model
 
+````{sidebar}
+<img src="/Applications/images/StandingLift.jpg" width="70%" align="center">
+
+````
+
 Standing body model lifting a box.
-
-
 
 :::{seealso}
 **Main files location in AMMR:**
@@ -29,5 +32,3 @@ Please note that this model can also output computed forces to be used by FEA. I
 used by FEA tutorial.
 
 
-```{image} /Applications/images/StandingLift.jpg
-```

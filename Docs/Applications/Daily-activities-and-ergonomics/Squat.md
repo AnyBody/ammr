@@ -3,7 +3,13 @@ gallery_title: "Squat"
 gallery_image: "/Applications/images/Squat.jpg"
 ---
 
+(sphx_glr_auto_examples_ADLs_and_ergonomics_plot_Squat.py)=
 # Squat
+
+````{sidebar}
+<img src="/Applications/images/Squat.jpg" width="70%" align="center">
+
+````
 
 This model demonstrates parameterized squating motion.
 
@@ -27,7 +33,4 @@ Users can try to change different parameters of this model in the 'Input\Paramet
 Ground reaction force(GRF) of the human model is predicted and you can check the implementation of this GRF prediction in 'Model\Supports.any' file.
 
 The parametric motion elements are defined in 'Model\JointsAndDrivers.any'.
-
-
-![](/Applications/images/Squat.jpg)
 

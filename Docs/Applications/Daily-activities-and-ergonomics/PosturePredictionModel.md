@@ -2,9 +2,17 @@
 gallery_title: "Posture Prediction Model"
 gallery_image: "/Applications/images/StandingPosturePredictionModel.jpg"
 ---
-(sphx-glr-auto-examples-adls-and-ergonomics-plot-posturepredictionmodel-py)=
+
+
+(sphx_glr_auto_examples_adls_and_ergonomics_plot_PosturePredictionModel.py)=
 
 # Posture Prediction Model
+
+
+````{sidebar}
+<img src="/Applications/images/StandingPosturePredictionModel.jpg" width="70%" align="center">
+
+````
 
 This is a model which can predict the posture as a consequence of applied loads in hands.
 It does this by minimizing joint torques and applying balance drivers which account for external
@@ -88,5 +96,3 @@ Your browser does not support the video tag.
 
 **Please note the speed of the video was increased for viewing purposes.**
 
-```{image} /Applications/images/StandingPosturePredictionModel.jpg
-```

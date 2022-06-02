@@ -1,4 +1,15 @@
+---
+gallery_title: "Rat Hindlimb model"
+gallery_image: "/Applications/images/UlmRatHindLimbModel.jpg"
+---
+
+(sphx_glr_auto_examples_Other_plot_UlmRatHindLimbModel.py)=
+
 # Rat Hindlimb model
+
+````{sidebar}
+<img src="/Applications/images/UlmRatHindLimbModel.jpg" width="70%" align="center">
+````
 
 The Ulm Rat hindlimb model is a simlation of the internal forces and moments in
 the femur of a rat during gait. The model is based on the work of Tim Wehner and
