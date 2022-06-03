@@ -85,8 +85,8 @@ extensions = [
     "inline_highlight",
     "myst_parser",
     "sphinxext.opengraph",
-    "sphinx_design"
-
+    "sphinx_design",
+    "sphinx_togglebutton"
 ]
 
 myst_enable_extensions = [

@@ -36,6 +36,12 @@ the TLEMsafe project ([www.tlemsafe.eu](http://www.tlemsafe.eu)).
 Short example of how to configure the model with the TLEM model, Hill type
 muscle model and only one leg:
 
+:::{seealso}
+:class: margin
+See {doc}`Leg configuration parameters <../bm_config/leg>` for a
+full list of configuration parmaeters.
+:::
+
 ```AnyScriptDoc
 #define BM_LEG_MODEL _LEG_MODEL_TLEM1_
 #define BM_LEG_RIGHT ON
@@ -43,14 +49,7 @@ muscle model and only one leg:
 #define BM_LEG_MUSCLE _MUSCLES_3E_HILL_
 ```
 
-```{rst-class} float-right
-```
 
-:::{seealso}
-See {doc}`Leg configuration parameters <../bm_config/leg>` for a
-full list of configuration parmaeters or {doc}`configuration section <../bm_config/index>`
-for more information on BM parameters.
-:::
 
 ## Resources
 

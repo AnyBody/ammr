@@ -27,12 +27,15 @@ fidelity and joint force prediction accuracy were improved by De Pieri et al.
 
 Key feature of this TLEM 2.1 model in the AMMR is:
 
-- Unlike the old TLEM model, the dataset consisted of muscle attachment data &
+Consistent dataset
+: Unlike the old TLEM model, the dataset consisted of muscle attachment data &
   bone surface scans from the same subject. This makes TLEM2 the more
   anatomically consistent model. Bone contact at joints such as the knee thus
   consists of naturally congruent surfaces, making it easier to implement
   Force Dependent Kinematics on joint moments ({doc}`see tutorial <tutorials:ForceDependentKinematics/index>`)
-- Updated the wrapping surfaces for several muscles. These changes were engineered to
+
+Better wrapping
+: Updated the wrapping surfaces for several muscles. These changes were engineered to
   result in realistic muscle coordination and hip contact forces as documented
   in the publication by De Pieri et al. [^cite_dlgr17]
 
@@ -49,6 +52,12 @@ from the publication by De Pieri et al.* [^cite_dlgr17]
 Short example of how to configure the model with the TLEM model, Hill type
 muscle model and only one leg:
 
+:::{seealso}
+:class: margin
+The {doc}`Leg configuration parameters <../bm_config/leg>` for a
+full list of configuration parameters.
+:::
+
 ```AnyScriptDoc
 #define BM_LEG_MODEL _LEG_MODEL_TLEM2_
 #define BM_LEG_RIGHT ON
@@ -56,13 +65,8 @@ muscle model and only one leg:
 #define BM_LEG_MUSCLE _MUSCLES_3E_HILL_
 ```
 
-```{rst-class} float-right
-```
 
-:::{seealso}
-The {doc}`Leg configuration parameters <../bm_config/leg>` for a
-full list of configuration parameters.
-:::
+
 
 ## Resources
 
@@ -71,9 +75,10 @@ More details on the TLEM2 model can be found online:
 - Webcast: [TLEMsafe: Personalization of musculoskeletal models and prediction of functional outcome](https://www.anybodytech.com/tlemsafe-personalization-of-musculoskeletal-models-and-prediction-of-functional-outcome/)
 - Webcast: [TLEMsafe: An integrated system to improve predictability of functional recovery of patients requiring musculoskeletal surgery](https://www.anybodytech.com/tlemsafe-an-integrated-system-to-improve-predictability-of-functional-recovery-of-patients-requiring-musculoskeletal-surgery/)
 
-## References
+## Citing and references
 
-If you need to cite the model use the following references:
+If you need to cite the model use the following references [^cite_dlgr17], [^cite_cfpk15]. Other usefull papers using or related to the TLEM2 model are: [^cite_ca16] and [^cite_ckkv16]. 
+
 
 [^cite_dlgr17]: De Pieri,E., Lund,ME., Gopalakrishnan, A, Rasmussen, KP., Lunn, DE., Ferguson, SJ.
     “Refining muscle geometry and wrapping in the TLEM 2 model for improved hip contact force prediction”
@@ -84,7 +89,6 @@ If you need to cite the model use the following references:
     "Tlem 2.0–A comprehensive musculoskeletal geometry dataset for subject-specific
     modeling of lower extremity", J. Biomech.,48(5) (2015) 734-741.
 
-Other usefull papers using or related to the TLEM2 model are:
 
 [^cite_ca16]: Carbone,V., "Subject-specific lower extremity modeling: personalization of
     musculoskeletal models using medical imaging and functional measurements",

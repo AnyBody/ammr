@@ -1,10 +1,8 @@
 # Regensburg-Ulm Hand Model (RUHM)
 
-```{rst-class} without-title
-```
-
-:::{caution}
-**Unreleased model:** The model is under development and not yet included in the managed model repository.
+:::{admonition} **Unreleased model:** 
+:class: caution
+The model is under development and not yet included in the managed model repository.
 The model is used in various research projects and access to the development version
 can be given on request.
 :::
@@ -26,12 +24,15 @@ The hand model consists of 22 hand segments
 linked by physiological idealized joints giving a total of 31 DOF.
 For the sake of reduced complexity the carpal bones where treated as one rigid body.
 
+:::{seealso}
+:class: margin
+See also other resources on the hand model:  [^cite_mesl21] [^cite_webcast20]
+:::
+
 The Regensburg-Ulm-Hand-Model was developed by Lucas Engelhardt and Maximilian Melzner [^cite_emhf20]
 from Ulm University and OTH Regensburg respectively.
 
-:::{seealso}
-See also other resources on the hand model:  [^cite_mesl21] [^cite_webcast20]
-:::
+
 
 % EMBED a rotatable 3D version of the hand model.
 
@@ -111,8 +112,6 @@ See also other resources on the hand model:  [^cite_mesl21] [^cite_webcast20]
 
 % full list of configuration parameters.
 
-```{rst-class} without-title
-```
 
 ## References
 

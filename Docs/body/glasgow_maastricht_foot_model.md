@@ -1,10 +1,8 @@
 # The Glasgow-Maastricht Foot Model (GM Foot)
 
-```{rst-class} without-title
-```
-
-:::{caution}
-**External model:** The model is under development and not yet included in the managed model repository.
+:::{admonition} **External model:** 
+:class: caution 
+The model is under development and not yet included in the managed model repository.
 You can find this model in a public [repository on GitHub](https://github.com/AnyBody/gm-foot).
 :::
 
@@ -18,6 +16,12 @@ The model can be used with the
 anatomy and recorded motion from different subjects. It has been through
 a validation process comparing it with other experimental and computational studies.
 
+:::{admonition} **Complex model:**
+:class: warning
+The GM Foot model is very complex and not recommended for
+beginners in musculoskeletal modeling and AnyBody.
+:::
+
 ```{raw} html
 <video width="45%" style="display:block; margin: 0 auto;" controls autoplay loop>
     <source src="../_static/footgm.mp4" type="video/mp4">
@@ -25,13 +29,8 @@ Your browser does not support the video tag.
 </video>
 ```
 
-```{rst-class} without-title
-```
 
-:::{warning}
-**Complex model:** The GM Foot model is very complex and not recommended for
-beginners in musculoskeletal modeling and AnyBody.
-:::
+
 
 ## Usage:
 

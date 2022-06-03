@@ -4,18 +4,16 @@ The ShoulderArm model contains data from two different persons. Most of this dat
 comes from the Dutch Shoulder Group and their
 [shoulder model available online](http://homepage.tudelft.nl/g6u61/repository/shoulder/overview.htm)
 
-```{eval-rst}
-.. todo:: What is the VU and MAYO study shown below? Need to add references?
-```
 
-:::{versionadded} 2.2 A new wrapping implementation of the deltoid muscles was recently added by Marta Strzelczak from École de technologie supérieure, Montreal, CA. See :ref:`DeltoidWrapping` below.
+:::{versionadded} 2.2
+A new wrapping implementation of the deltoid muscles was added by Marta Strzelczak from École de technologie supérieure, Montreal, CA. See {ref}`DeltoidWrapping` below.
 :::
 
 The model is built using data from subject 2 from the VU study and subject 2
 from the MAYO study. The files, which contains the name "forearm", are
-built on data from the MAYO study
+built on data from the MAYO study.
 
-The shoulder is the site of complex, mutually coupled motions of the scapula,
+The shoulder is a complex joint with mutually coupled motions of the scapula,
 clavicle and the humerus. To balance realism with model simplicity, the model
 defines motions of the scapula and clavicle as mathematical functions of the
 glenohumeral joint angles, also known as a "Shoulder rhythms".
@@ -27,13 +25,12 @@ Report](https://paperpile.com/app/p/0349b48d-cb2b-0414-8a26-656f9b663e49).
 
 ```{raw} html
 <video width="45%" style="display:block; margin: 0 auto;" controls autoplay loop>
-    <source src="../_static/ShoulderArm_rotating_model.mp4" type="video/mp4">
+    <source src="../_static/ShouderArm_rotalting_model.mp4" type="video/mp4">
 Your browser does not support the video tag.
 </video>
 <!--<img src="../_static/ShoulderCloseupBack.jpg" alt="Smiley face" width="45%">-->
 ```
 
-% .. centered:: *Figure shoulder model*
 
 ## Example Configuration
 
@@ -47,19 +44,15 @@ Short example of how to configure the Shoulder Arm model:
 #define BM_ARM_MUSCLE _MUSCLES_3E_HILL_
 ```
 
-```{rst-class} float-right
-```
 
 :::{seealso}
+:class: margin
 See {doc}`Arm configuration parameters <../bm_config/arm>` for a
 full list of configuration parmaeters or {doc}`configuration section <../bm_config/index>`
 for more information on BM parameters.
 :::
 
-The model consists of the following joints:
 
-```{rst-class} centered
-```
 
 % .. Image:arm.png
 
@@ -67,11 +60,11 @@ The model consists of the following joints:
 
 ## Deltoid wrapping
 
-A new implementation of the deltoid muscles have been added. The implementation
-uses multiple wrapping cylinders for each element of the deltoid muscle. The new
-approach ensures a more realistic path of the muscle fibers compared to the
-previous implementaiton which used a dedicated rake segment to hold the detoid
-fibers in place.
+An wrapping implementation of the deltoid muscles have been added after the
+model was first built. The implementation uses multiple wrapping cylinders for
+each element of the deltoid muscle. The new approach ensures a more realistic
+path of the muscle fibers compared to the previous implementaiton which used a
+dedicated rake segment to hold the detoid fibers in place.
 
 ```{raw} html
 <video width="45%" style="display:block; margin: 0 auto;" controls autoplay loop>
@@ -80,10 +73,10 @@ Your browser does not support the video tag.
 </video>
 ```
 
-New deltoid wrapping can be disabled/enabled with the switch
+Deltoid wrapping can be disabled/enabled with the switch
 {ammr:bm_statement}`BM_ARM_DELTOID_WRAPPING`.
 
-The new deltoid wrapping was developed by Marta Strzelczak from Département de
+The deltoid wrapping was developed by Marta Strzelczak from Département de
 génie de la production automatisée, École de technologie supérieure, Montreal,
 CA. Please cite the following work if you need it:
 
@@ -110,38 +103,43 @@ joint drivers directly or indirectly through connections to the environment
 ## Joint terminology
 
 
+The model consists of the following joints:
+
 **Joints and kinematic contraints of the arm model**
 
-================================  ====================  =============================================================
-Name                              Description           Joint/Constraint Type
-================================  ====================  =============================================================
-SternoClavicularJoint             SternoClavicular      Spherical joint
-AcromioClavicularJoint            AcromioClavicular     Spherical joint
-GlenoHumeralJoint                 Glenohumeral joint    Spherical joint (The default joint reactions are
-                                                        disabled, since they do not automatically ensure that
-                                                        the net force vector passes through the glenoid cavity.
-                                                        The special force elements providing these biofidelic
-                                                        reaction forces are contained in the file "GHReactions.any")
-AI                                                      One DOF constraint requiring the bony landmark
-                                                        AI on the scapula, to stay in contact with the thorax
-AA                                                      One DOF constraint requiring the bony landmark
-                                                        AA on the scapula, to stay in contact with the thorax
-ConoideumLigament                                       The length of this ligament is driven
-                                                        to always remain constant
-HumeroUlnarJoint                  Flexion-extension     Revolute joint
-                                  of the elbow 
-HumeroRadialJoint                 Pronation-supination  Single linear constraint (5 DOF joint) between radius 
-                                                        and humerus
-ProximalRadioUlnarJoint           Pronation-supination  Trans Spherical joint between radius and ulna at the
-                                                        proximal part.
-DistalRadioUlnarJoint             Pronation-supination  Trans Spherical joint between radius and ulna at the
-                                                        proximal part. The HumeroRadialJoint, ProximalRadioUlnarJoint
-                                                        DistalRadioUlnarJoint leaves one DOF free which is
-                                                        pronation/supination of the forearm
-Wrist joint                                             Two successive revolute joints where
-                                                        the axes of rotations are not coincident
-================================  ====================  =============================================================
+```{eval-rst} 
 
+================================  ======================  ===============================================================
+Name                              Description             Joint/Constraint Type
+================================  ======================  ===============================================================
+SternoClavicularJoint             SternoClavicular        Spherical joint
+AcromioClavicularJoint            AcromioClavicular       Spherical joint
+GlenoHumeralJoint                 Glenohumeral joint      Spherical joint (The default joint reactions are
+                                                          disabled, since they do not automatically ensure that
+                                                          the net force vector passes through the glenoid cavity.
+                                                          The special force elements providing these biofidelic
+                                                          reaction forces are contained in the file "GHReactions.any")
+AI                                                        One DOF constraint requiring the bony landmark
+                                                          AI on the scapula, to stay in contact with the thorax
+AA                                                        One DOF constraint requiring the bony landmark
+                                                          AA on the scapula, to stay in contact with the thorax
+ConoideumLigament                                         The length of this ligament is driven
+                                                          to always remain constant
+HumeroUlnarJoint                  Flexion-extension       Revolute joint
+                                  of the elbow                                                               
+HumeroRadialJoint                 Pronation-supination    Single linear constraint (5 DOF joint) between radius 
+                                                          and humerus
+ProximalRadioUlnarJoint           Pronation-supination    Trans Spherical joint between radius and ulna at the
+                                                          proximal part.
+DistalRadioUlnarJoint             Pronation-supination    Trans Spherical joint between radius and ulna at the
+                                                          proximal part. The HumeroRadialJoint, ProximalRadioUlnarJoint
+                                                          DistalRadioUlnarJoint leaves one DOF free which is
+                                                          pronation/supination of the forearm
+Wrist joint                                               Two successive revolute joints where
+                                                          the axes of rotations are not coincident
+================================  ======================  ===============================================================
+
+```
 
 
 ## Resources
