@@ -288,6 +288,32 @@ class AMMRDomain(Domain):
             if doc == docname:
                 del bm_constant_list[var]
 
+    def search_doc(self, key):
+        zret = []
+        roles_to_search =  ["bm_statement", "bm_constant"]
+        for role in roles_to_search:
+            if key in self.data[role]:
+                zret.append( (self.data[role][key], role) )
+        return zret
+
+    def resolve_any_xref(self, env, src_doc, builder, target, node, cont_node):
+        role_matches = self.search_doc(target)
+        condidate_node =  []
+        for (dst_doc, role) in role_matches:
+            newnode = sphinx.util.nodes.make_refnode(
+                builder,
+                src_doc,
+                dst_doc,
+                nodes.make_id(target),
+                cont_node,
+                target,
+            )
+            condidate_node.append((f"ammr:{role}", newnode))
+
+        return condidate_node
+
+
+
     def find_doc(self, key, obj_type):
         zret = None
 
@@ -312,7 +338,7 @@ class AMMRDomain(Domain):
                 dst_doc,
                 nodes.make_id(target),
                 cont_node,
-                "records.config",
+                target,
             )
 
     def get_objects(self):
