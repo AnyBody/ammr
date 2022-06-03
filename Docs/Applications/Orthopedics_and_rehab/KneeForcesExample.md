@@ -4,7 +4,7 @@ gallery_image: "/Applications/images/KneeForceExample.jpg"
 ---
 
 (sphx_glr_auto_examples_Orthopedics_and_rehab_plot_KneeForcesExample.py)=
-
+(example_knee_forces_estimate)=
 # Knee forces example
 
 
@@ -17,12 +17,8 @@ Example of calculating the medial/lateral knee force from the total force and mo
 Most musculoskeletal models uses a simplified knee joint (revolute joint). But we can still estimate
 what the medial and lateral femoral condyle contact forces are on the tibial plateau.
 
-> :::{figure} /Applications/Orthopedics_and_rehab/KneeForces2.png
-> :align: center
-> :width: 50%
-> :::
 
-:::{note}
+:::{caution}
 The medial and lateral knee forces calculated here are only crude
 estimate for the actual knee condyle contact force.
 :::
@@ -58,3 +54,8 @@ F_{med} = F_{total} - F_{lat}
 $$
 
 The model shows how this can be added to any model and walks through the AnyScript code.
+
+> :::{figure} /Applications/Orthopedics_and_rehab/KneeForces2.png
+> :align: center
+> :width: 50%
+> :::

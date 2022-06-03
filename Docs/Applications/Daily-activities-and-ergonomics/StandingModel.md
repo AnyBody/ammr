@@ -4,7 +4,7 @@ gallery_image: "/Applications/images/StandingModel.jpg"
 ---
 
 (sphx_glr_auto_examples_ADLs_and_ergonomics_plot_StandingModel.py)=
-
+(example_standingmodel)=
 # Standing Model
 
 ````{sidebar}

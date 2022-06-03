@@ -4,6 +4,7 @@ gallery_image: "/Applications/images/Squat.jpg"
 ---
 
 (sphx_glr_auto_examples_ADLs_and_ergonomics_plot_Squat.py)=
+(example_squat)=
 # Squat
 
 ````{sidebar}

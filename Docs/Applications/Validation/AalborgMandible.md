@@ -4,7 +4,7 @@ gallery_image: "/Applications/images/AalborgMandibleValidation.jpg"
 ---
 
 (sphx_glr_auto_examples_Validation_plot_AalborgMandible.py)=
-
+(example_aalborgmandible)=
 # The Aalborg Mandible model
 
 ````{sidebar}

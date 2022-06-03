@@ -4,7 +4,7 @@ gallery_image: "/Applications/images/CrossTrainer.jpg"
 ---
 
 (sphx_glr_auto_examples_Sports_plot_CrossTrainer.py)=
-
+(example_crosstrainer)=
 # Cross Trainer
 
 ````{sidebar}

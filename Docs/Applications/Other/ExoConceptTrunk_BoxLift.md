@@ -4,7 +4,7 @@ gallery_image: "/Applications/images/ExoskeletonConceptTrunk_BoxLift.jpg"
 ---
 
 (sphx_glr_auto_examples_Other_plot_ExoConceptTrunk_BoxLift.py)=
-
+(example_exo_concept_trunk)=
 # Trunk exoskeleton concept model
 
 
@@ -25,5 +25,5 @@ directly at the human joints.
 {menuselection}`Application --> Examples --> ExoskeletonTrunk --> ExoConceptTrunk_BoxLift.main.any`
 :::
 
-The model points to the existing {ref}`BVH Box Lift model <sphx_glr_auto_examples_Mocap_plot_BVH_BoxLift.py>` in the AMMR and implements
+The model points to the existing {ref}`BVH Box Lift model <example_bvh_boxlift>` in the AMMR and implements
 the trunk exoskeleton concept. In this example, a spring force is applied at the pelvis-thorax extension measure of the body model.

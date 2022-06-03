@@ -4,7 +4,7 @@ gallery_image: "/Applications/images/MandibleChewingAndClenching.jpg"
 ---
 
 (sphx_glr_auto_examples_Validation_plot_MandibleModel.py)=
-
+(example_mandiblemodel)=
 # Symmetric Mandible example
 
 ````{sidebar}

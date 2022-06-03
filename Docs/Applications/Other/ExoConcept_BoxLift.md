@@ -4,7 +4,7 @@ gallery_image: "/Applications/images/ExoskeletonConcept_BoxLift.jpg"
 ---
 
 (sphx_glr_auto_examples_Other_plot_ExoConcept_BoxLift.py)=
-
+(example_exo_concept_boxlift)=
 # Exoskeleton concept model
 
 
@@ -26,7 +26,7 @@ This example shows how to study different exoskeleton concepts on an activity. T
 based on the [webcast](https://www.anybodytech.com/simulation-driven-conceptual-design-of-exoskeletons/)
 presented by Prof. John Rasmussen from Aalborg University on March 28, 2022.
 
-The model points to the existing {ref}`BVH Box Lift model <sphx_glr_auto_examples_Mocap_plot_BVH_BoxLift.py>` in the AMMR and implements
+The model points to the existing {ref}`BVH Box Lift model <example_bvh_boxlift>` in the AMMR and implements
 the different steps described in the webcast. In this model, two different concepts can be studied:
 
 > - Rotational springs at the knees

@@ -2,6 +2,7 @@
 gallery_title: "Seated Human"
 gallery_image: "/Applications/images/SeatedHuman.jpg"
 ---
+
 (sphx-glr-auto-examples-adls-and-ergonomics-plot-seatedhuman-py)=
 
 # Seated Human

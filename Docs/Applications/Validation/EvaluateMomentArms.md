@@ -4,7 +4,7 @@ gallery_image: "/Applications/images/EvaluateMomentArms.jpg"
 ---
 
 (sphx_glr_auto_examples_Validation_plot_EvaluateMomentArms.py)=
-
+(example_evaluate_momentarms)=
 # Evaluate moment arms
 
 ````{sidebar}

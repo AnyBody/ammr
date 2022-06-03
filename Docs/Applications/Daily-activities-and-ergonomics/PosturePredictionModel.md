@@ -5,7 +5,7 @@ gallery_image: "/Applications/images/StandingPosturePredictionModel.jpg"
 
 
 (sphx_glr_auto_examples_adls_and_ergonomics_plot_PosturePredictionModel.py)=
-
+(example_posture_prediction)=
 # Posture Prediction Model
 
 
@@ -26,15 +26,18 @@ applied loads.
 StandingPosturePrediction.main.any`
 :::
 
-:::{figure} /Applications/images/StandingPosturePredictionModel_UpwardsForce.jpg
-:align: center
-:::
 
 The model is driven by a combination of the following drivers:
 : - Drivers which minimize the joint moments (arising from gravity and applied loads in hands) in elbow, shoulder, L4L5 and knee
   - Driver which tries to keep the CoP inside the foot stance area.
   - Feet maintain contact with the ground, but the position can be controlled by widgets
   - Hands are linked to an object, of which positioning can be altered using widgets
+
+
+:::{figure} /Applications/images/StandingPosturePredictionModel_UpwardsForce.jpg
+:align: center
+:::
+
 
 Two type of loads can be applied, either a fixed weight of the object and/or a force vector.
 

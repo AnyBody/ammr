@@ -4,7 +4,7 @@ gallery_image: "/Applications/images/SpinePressureStanding.jpg"
 ---
 
 (sphx_glr_auto_examples_Validation_plot_WilkeSpinePressure.py)=
-
+(example_wilkespinepressure)=
 # Wilke Spine Disc Pressure Model
 
 ````{sidebar}

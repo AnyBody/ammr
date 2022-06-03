@@ -4,7 +4,7 @@ gallery_image: "/Applications/images/FemoralTorsion.jpg"
 ---
 
 (sphx_glr_auto_examples_Orthopedics_and_rehab_plot_FemoralTorsionTool.py)=
-
+(example_femoral_torsion)=
 # Femoral Torsion tool
 
 

@@ -4,7 +4,7 @@ gallery_image: "/Applications/images/EvaluateJointStrength.jpg"
 ---
 
 (sphx_glr_auto_examples_Validation_plot_EvaluateJointStrength.py)=
-
+(example_evaluate_joint_strength)=
 # Evaluate joint strength
 
 ````{sidebar}

@@ -4,7 +4,7 @@ gallery_image: "/Applications/images/KneeSimulator.jpg"
 ---
 
 (sphx_glr_auto_examples_Orthopedics_and_rehab_plot_KneeSimulator.py)=
-
+(example_kneesimulator)=
 # Knee Simulator Model
 
 
@@ -17,11 +17,6 @@ For an indepth description of the mathematics and mechanics behind FDK please se
 
 **Main file:** `Application/Examples/KneeSimulator/AnyKneeSimulator.Main.any`
 
-:::{figure} /Applications/images/KneeSimulator_Full.jpg
-:align: center
-
-Overview of the knee simulator
-:::
 
 This is stand alone demo model of a knee simulator device resembling the principles of the Kansas Knee simulator [^cite_hcmt10].
 The model is contructed as a stand-alone model and doesn't use any elements and body parts from the model repository (AMMR).
@@ -33,6 +28,12 @@ The model is constructed of five main segments (femur, patella, tibia, ankle-fix
 In practice more segments are included. The mass of the femur/tibia is implemented as separate segments
 for easier specification of the moments of inertia. Likewise, the trans-spherical mechanism between ankle
 and ground segments is implmented using three segments connected with revolute and slider joints.
+
+:::{figure} /Applications/images/KneeSimulator_Full.jpg
+:align: center
+
+Overview of the knee simulator
+:::
 
 ## Ligaments
 
