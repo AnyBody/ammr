@@ -7,7 +7,7 @@ gallery_image: "/Applications/images/WheelTurn.jpg"
 
 # Hand crank model
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/WheelTurn.jpg" width="70%" align="center">
 ````
 

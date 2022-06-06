@@ -8,7 +8,7 @@ gallery_image: "/Applications/images/KneeForceExample.jpg"
 # Knee forces example
 
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/KneeForceExample.jpg" width="70%" align="center">
 ````
 

@@ -8,7 +8,7 @@ gallery_image: "/Applications/images/WheelChairRancho.jpg"
 # Wheel Chair model
 
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/WheelChairRancho.jpg" width="70%" align="center">
 ````
 

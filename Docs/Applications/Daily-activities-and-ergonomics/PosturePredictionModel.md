@@ -9,7 +9,7 @@ gallery_image: "/Applications/images/StandingPosturePredictionModel.jpg"
 # Posture Prediction Model
 
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/StandingPosturePredictionModel.jpg" width="70%" align="center">
 
 ````

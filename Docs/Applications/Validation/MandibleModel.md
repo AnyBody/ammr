@@ -7,7 +7,7 @@ gallery_image: "/Applications/images/MandibleChewingAndClenching.jpg"
 (example_mandiblemodel)=
 # Symmetric Mandible example
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/MandibleChewingAndClenching.jpg" width="70%" align="center">
 ````
 

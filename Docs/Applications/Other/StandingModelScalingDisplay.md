@@ -8,7 +8,7 @@ gallery_image: "/Applications/images/StandingModelScalingDisplay.jpg"
 # Standing Model Scaling Display
 
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/StandingModelScalingDisplay.jpg" width="70%" align="center">
 ````
 

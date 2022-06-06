@@ -7,7 +7,7 @@ gallery_image: "/Applications/images/StandingLift.jpg"
 (example_standinglift)=
 # Lifting Model
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/StandingLift.jpg" width="70%" align="center">
 
 ````

@@ -7,7 +7,7 @@ gallery_image: "/Applications/images/EvaluateJointStrength.jpg"
 (example_evaluate_joint_strength)=
 # Evaluate joint strength
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/EvaluateJointStrength.jpg" width="70%" align="center">
 ````
 

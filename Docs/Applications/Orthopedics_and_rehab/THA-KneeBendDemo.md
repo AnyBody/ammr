@@ -8,7 +8,7 @@ gallery_image: "/Applications/images/THA-KneeBendDemo.jpg"
 # Total Hip Arthroplasty (THA) Model
 
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/THA-KneeBendDemo.jpg" width="70%" align="center">
 ````
 

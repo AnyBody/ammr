@@ -7,7 +7,7 @@ gallery_image: "/Applications/images/PushUp.jpg"
 
 # Push Up
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/PushUp.jpg" width="70%" align="center">
 ````
 

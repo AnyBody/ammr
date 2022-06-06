@@ -7,7 +7,7 @@ gallery_image: "/Applications/images/Squat.jpg"
 (example_squat)=
 # Squat
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/Squat.jpg" width="70%" align="center">
 
 ````

@@ -8,7 +8,7 @@ gallery_image: "/Applications/images/FemoralTorsion.jpg"
 # Femoral Torsion tool
 
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/FemoralTorsion.jpg" width="70%" align="center">
 ````
 

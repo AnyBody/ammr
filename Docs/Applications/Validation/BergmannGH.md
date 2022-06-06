@@ -7,7 +7,7 @@ gallery_image: "/Applications/images/BergmannGH.jpg"
 
 # Bergmann GH
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/BergmannGH.jpg" width="70%" align="center">
 ````
 

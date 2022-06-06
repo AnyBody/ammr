@@ -7,7 +7,7 @@ gallery_image: "/Applications/images/StandingModel.jpg"
 (example_standingmodel)=
 # Standing Model
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/StandingModel.jpg" width="70%" align="center">
 ````
 

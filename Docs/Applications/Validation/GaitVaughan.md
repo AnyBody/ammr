@@ -7,7 +7,7 @@ gallery_image: "/Applications/images/GaitVaughan.jpg"
 
 # Gait Vaughan
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/GaitVaughan.jpg" width="70%" align="center">
 ````
 

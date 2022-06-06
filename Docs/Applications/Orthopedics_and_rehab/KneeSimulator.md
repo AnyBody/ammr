@@ -8,7 +8,7 @@ gallery_image: "/Applications/images/KneeSimulator.jpg"
 # Knee Simulator Model
 
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/KneeSimulator.jpg" width="70%" align="center">
 ````
 

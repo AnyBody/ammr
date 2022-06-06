@@ -7,7 +7,7 @@ gallery_image: "/Applications/images/StatisticalScalingPlugin.jpg"
 
 # Statistical Scaling Plugin
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/StatisticalScalingPlugin.jpg" width="70%" align="center">
 ````
 

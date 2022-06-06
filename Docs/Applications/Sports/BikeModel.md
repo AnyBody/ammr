@@ -7,7 +7,7 @@ gallery_image: "/Applications/images/BikeModel.jpg"
 
 # Bike Model
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/BikeModel.jpg" width="70%" align="center">
 ````
 

@@ -7,7 +7,7 @@ gallery_image: "/Applications/images/BenchPress.jpg"
 
 # Bench Press
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/BenchPress.jpg" width="70%" align="center">
 ````
 

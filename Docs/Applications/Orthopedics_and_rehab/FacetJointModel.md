@@ -8,7 +8,7 @@ gallery_image: "/Applications/images/FacetJointModel.jpg"
 # Facet Joint Model
 
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/FacetJointModel.jpg" width="70%" align="center">
 ````
 

@@ -7,7 +7,7 @@ gallery_image: "/Applications/images/CrossTrainer.jpg"
 (example_crosstrainer)=
 # Cross Trainer
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/CrossTrainer.jpg" width="70%" align="center">
 ````
 

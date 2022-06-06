@@ -7,7 +7,7 @@ gallery_image: "/Applications/images/AalborgMandibleValidation.jpg"
 (example_aalborgmandible)=
 # The Aalborg Mandible model
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/AalborgMandibleValidation.jpg" width="70%" align="center">
 ````
 

@@ -7,7 +7,7 @@ gallery_image: "/Applications/images/LegPressMachine.jpg"
 
 # Leg Press Machine
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/LegPressMachine.jpg" width="70%" align="center">
 ````
 

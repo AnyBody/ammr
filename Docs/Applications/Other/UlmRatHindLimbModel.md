@@ -7,7 +7,7 @@ gallery_image: "/Applications/images/UlmRatHindLimbModel.jpg"
 
 # Rat Hindlimb model
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/UlmRatHindLimbModel.jpg" width="70%" align="center">
 ````
 

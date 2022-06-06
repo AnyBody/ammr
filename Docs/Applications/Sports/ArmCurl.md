@@ -7,7 +7,7 @@ gallery_image: "/Applications/images/ArmCurl.jpg"
 
 # Arm curl
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/ArmCurl.jpg" width="70%" align="center">
 ````
 

@@ -7,7 +7,7 @@ gallery_image: "/Applications/images/PedalDemoConditional.jpg"
 
 # Pedel demo
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/PedalDemoConditional.jpg" width="70%" align="center">
 
 ````

@@ -8,7 +8,7 @@ gallery_image: "/Applications/images/FreePostureFullBodyShoulderRhythmStatic.jpg
 # Free posture Models
 
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/FreePostureFullBodyShoulderRhythmStatic.jpg" width="70%" align="center">
 
 ````

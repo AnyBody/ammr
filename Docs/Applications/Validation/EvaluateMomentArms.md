@@ -7,7 +7,7 @@ gallery_image: "/Applications/images/EvaluateMomentArms.jpg"
 (example_evaluate_momentarms)=
 # Evaluate moment arms
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/EvaluateMomentArms.jpg" width="70%" align="center">
 ````
 

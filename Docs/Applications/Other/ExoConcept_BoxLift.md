@@ -8,7 +8,7 @@ gallery_image: "/Applications/images/ExoskeletonConcept_BoxLift.jpg"
 # Exoskeleton concept model
 
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/ExoskeletonConcept_BoxLift.jpg" width="70%" align="center">
 ````
 

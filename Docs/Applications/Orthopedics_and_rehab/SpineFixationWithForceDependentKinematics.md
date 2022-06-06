@@ -8,7 +8,7 @@ gallery_image: "/Applications/images/SpineFixationWithForceDependentKinematics.j
 # Spine Fixation Model using Force Dependent Kinematics
 
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/SpineFixationWithForceDependentKinematics.jpg" width="70%" align="center">
 ````
 

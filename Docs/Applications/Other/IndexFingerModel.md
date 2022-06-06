@@ -8,7 +8,7 @@ gallery_image: "/Applications/images/IndexFingerModel.jpg"
 # Index finger model
 
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/IndexFingerModel.jpg" width="70%" align="center">
 ````
 

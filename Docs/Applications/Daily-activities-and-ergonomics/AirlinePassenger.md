@@ -7,7 +7,7 @@ gallery_image: "/Applications/images/AirlinePassenger.jpg"
 
 # Airline passenger
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/AirlinePassenger.jpg" align="center" width="70%" align="center">
 
 ````

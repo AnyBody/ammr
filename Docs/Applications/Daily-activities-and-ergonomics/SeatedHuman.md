@@ -8,7 +8,7 @@ gallery_image: "/Applications/images/SeatedHuman.jpg"
 # Seated Human
 
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/SeatedHuman.jpg" width="70%" align="center">
 
 ````

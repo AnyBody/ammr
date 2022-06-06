@@ -8,7 +8,7 @@ gallery_image: "/Applications/images/JumpingJack.jpg"
 # Jumping Jack
 
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/JumpingJack.jpg" width="70%" align="center">
 ````
 

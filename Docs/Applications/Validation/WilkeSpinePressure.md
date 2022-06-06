@@ -7,7 +7,7 @@ gallery_image: "/Applications/images/SpinePressureStanding.jpg"
 (example_wilkespinepressure)=
 # Wilke Spine Disc Pressure Model
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/SpinePressureStanding.jpg" width="70%" align="center">
 ````
 
