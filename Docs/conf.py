@@ -34,8 +34,6 @@ from datetime import datetime
 
 
 sys.path.insert(0, os.path.abspath("exts"))
-sys.path.insert(0, os.path.abspath("exts/sphinx_gallery-0.7.0.custom.egg"))
-
 
 try:
     import pygments_anyscript
@@ -86,7 +84,9 @@ extensions = [
     "myst_parser",
     "sphinxext.opengraph",
     "sphinx_design",
-    "sphinx_togglebutton"
+    "sphinx_togglebutton",
+    "sphinx_copybutton",
+
 ]
 
 myst_enable_extensions = [
@@ -294,13 +294,15 @@ html_theme_options = {
    "logo_only": True,
    "home_page_in_toc": False,
    "show_navbar_depth": 1,
+   "use_download_button": False,
+
 }
 
 
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = "_static/AMMR_Logo.png"
+html_logo = "_static/AMMR.svg"
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
