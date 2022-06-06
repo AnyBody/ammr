@@ -26,10 +26,10 @@ Daily-activities-and-ergonomics/index
 :::{toctree}
 :hidden: true
 
-MoCap/index
+Mocap/index
 :::
 
-:::{include} MoCap/gallery.txt
+:::{include} Mocap/gallery.txt
 :::
 
 

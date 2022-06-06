@@ -403,7 +403,7 @@ gallery = {}
 galleryfolders = [x for x in Path("Applications").iterdir() if x.is_dir()]
 for folder in galleryfolders: 
     gallery[folder] = []
-    for file in folder.glob("*.md"):
+    for file in sorted(folder.glob("*.md")):
         post = frontmatter.load(file)
         if "gallery_title" in post: 
             gallery[folder].append({

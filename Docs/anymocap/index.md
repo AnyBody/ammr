@@ -67,7 +67,7 @@ working with many trials/subjects from a MoCap experiment.
 :::
 
 
-:::{include} /Applications/MoCap/gallery.txt
+:::{include} /Applications/Mocap/gallery.txt
 :::
 
 
