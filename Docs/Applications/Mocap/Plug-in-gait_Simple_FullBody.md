@@ -8,7 +8,7 @@ gallery_image: "/Applications/images/Plug-in-gait_Main.jpg"
 # Simple Full body model
 
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/Plug-in-gait_Main.jpg" width="70%" align="center">
 ````
 
@@ -27,15 +27,3 @@ a look at the example which better support multiple trails.
 FullBody.main.any`
 :::
 
-"""
-
-import sys
-sys.path.insert(0, '../../exts')
-import gallery
-
-\# dummy call to categorize as certain
-\# type for back referencing.
-gallery.anymocap()
-
-gallery.plot("../images/Plug-in-gait_Main.jpg")
-gallery.show()

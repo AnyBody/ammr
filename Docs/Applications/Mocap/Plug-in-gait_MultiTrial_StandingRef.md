@@ -4,11 +4,12 @@ gallery_image: "/Applications/images/Plug-in-gait_Squat_Flywheel.jpg"
 ---
 
 (sphx_glr_auto_examples_Mocap_plot_Plug-in-gait_MultiTrial_StandingRef.py)=
+(example_mocap_multitrial)=
 
 # Multi trial MoCap model
 
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/Plug-in-gait_Squat_Flywheel.jpg" width="70%" align="center">
 ````
 

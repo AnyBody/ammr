@@ -4,10 +4,10 @@ gallery_image: "/Applications/images/Rehazenter-adult-walking-model.jpg"
 ---
 
 (sphx_glr_auto_examples_MoCap_plot_ADL_Gait.py)=
-
+(example_adlgait)=
 # ADL Gait (beta)
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/Rehazenter-adult-walking-model.jpg" width="70%" align="center">
 ````
 
@@ -45,7 +45,7 @@ Choices of model parameters are in some cases arbitrary as this model is a work 
 with improvements to the model please share them back. 
 
 The model was created by [Enrico De Pieri](https://www.linkedin.com/in/enrico-de-pieri-13096a7a), 
-[Anderson de Souza Castelo Oliveira](https://vbn.aau.dk/en/persons/121260), and [Morten Enemark Lund](https://www.linkedin.com/in/biomedical)but has not yet been used for publication.
+[Anderson de Souza Castelo Oliveira](https://vbn.aau.dk/en/persons/121260), and [Morten Enemark Lund](https://www.linkedin.com/in/biomedical) but has not yet been used for publication.
 
 
 ## Dataset

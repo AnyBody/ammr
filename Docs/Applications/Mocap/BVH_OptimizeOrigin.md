@@ -5,10 +5,12 @@ gallery_image: "/Applications/images/BVH_OptimizeOrigin_Merged.jpg"
 
 (sphx_glr_auto_examples_Mocap_plot_BVH_OptimizeOrigin.py)=
 
+(examples_mocap_bvhorigin)=
+
 # Optimize BVH Origin example
 
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/BVH_OptimizeOrigin_Merged.jpg" width="70%" align="center">
 ````
 

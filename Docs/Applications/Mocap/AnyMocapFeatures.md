@@ -7,7 +7,7 @@ gallery_image: "/Applications/images/force_plate_offset.jpg"
 
 # AnyMoCap Features
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/force_plate_offset.jpg" width="70%" align="center">
 ````
 

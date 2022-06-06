@@ -4,11 +4,12 @@ gallery_image: "/Applications/images/GRFPrediction-Plug-in-gait.jpg"
 ---
 
 (sphx_glr_auto_examples_Mocap_plot_Plug-in-gait_Simple_FullBody_GRFPrediction.py)=
+(example_mocap_grf_prediction)=
 
 # Simple GRF prediction model
 
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/GRFPrediction-Plug-in-gait.jpg" width="70%" align="center">
 ````
 
@@ -32,16 +33,3 @@ you can make inverse dynamics models based on recorded motion without GRF force
 measurement (Fluit et al., 2014; Jung et al., 2014).
 
 More information is available in the {doc}`documentation for the GRF prediction </anymocap/grf-prediction>`.
-
-"""
-
-import sys
-sys.path.insert(0, '../../exts')
-import gallery
-
-\# dummy call to categorize as certain
-\# type for back referencing.
-gallery.anymocap()
-
-gallery.plot("../images/GRFPrediction-Plug-in-gait.jpg")
-gallery.show()

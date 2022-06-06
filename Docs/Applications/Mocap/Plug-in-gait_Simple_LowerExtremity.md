@@ -8,7 +8,7 @@ gallery_image: "/Applications/images/LowerExtremity-Plug-in-gait.jpg"
 # Simple Lower extremity model
 
 
-````{sidebar}
+````{sidebar} **Example**
 <img src="/Applications/images/LowerExtremity-Plug-in-gait.jpg" width="70%" align="center">
 ````
 
@@ -25,16 +25,3 @@ take a look at the example which better support multiple trails.
 {menuselection}`Application --> MocapExamples --> Plug-in-gait_Simple -->
 LowerExtremity.main.any`
 :::
-
-"""
-
-import sys
-sys.path.insert(0, '../../exts')
-import gallery
-
-\# dummy call to categorize as certain
-\# type for back referencing.
-gallery.anymocap()
-
-gallery.plot("../images/LowerExtremity-Plug-in-gait.jpg")
-gallery.show()
