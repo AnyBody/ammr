@@ -66,21 +66,8 @@ If you have any questions or comments, please do not hesitate to contact the aut
 
 On behalf of the authors
 
-Associate Professor
+> Associate Professor
+> Michael Skipper Andersen, PhD
+> <mailto:msa@mp.aau.dk>
 
-Michael Skipper Andersen, PhD
 
-<mailto:msa@mp.aau.dk>
-
-"""
-
-import sys
-sys.path.insert(0, '../../exts')
-import gallery
-
-\# dummy call to categorize as certain
-\# type for back referencing.
-gallery.mandible()
-
-gallery.plot("../images/AalborgMandibleValidation.jpg")
-gallery.show()

@@ -49,15 +49,3 @@ Do not hesitate to contact the author for questions and/or suggestions.
 > Aalborg University, Denmark
 > E-mail: <mailto:mdz@hst.aau.dk>
 
-"""
-
-import sys
-sys.path.insert(0, '../../exts')
-import gallery
-
-\# dummy call to categorize as certain
-\# type for back referencing.
-gallery.mandible()
-
-gallery.plot("../images/MandibleChewingAndClenching.jpg")
-gallery.show()
