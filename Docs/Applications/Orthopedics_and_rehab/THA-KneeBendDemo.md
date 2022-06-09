@@ -39,4 +39,4 @@ should be checked to be aware of the influence of this spring on the results.
 ```
 
 [^fn1]: The geometry data of the femoral component was kindly provided by
-    Edmundo Fuentes via GrabCAD.com <http://edmundofuentes.com>
+    [Edmundo Fuentes](https://www.edmundofuentes.com/about/) via https://grabcad.com/

@@ -422,6 +422,18 @@ for folder, section in gallery.items():
 
 
 
+linkcheck_ignore = [
+    r'.*linkcheck_ignore',
+    "https://doi.org/10.1115/1.4037100", # asme.org prevents the linkcheck 
+    "https://doi.org/10.1115/1.4052115", # asme.org prevents the linkcheck 
+    "https://dx.doi.org/10.1115/1.4001678", # asme.org prevents the linkcheck 
+    "https://dx.doi.org/10.1115/1.4029258", # asme.org prevents the linkcheck 
+    ]
+
+linkcheck_allowed_redirects = {
+   "https://doi.org.*":  ".*"
+}
+
 
 def setup(app):
     app.add_css_file("custom.css")

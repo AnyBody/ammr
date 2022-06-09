@@ -14,7 +14,7 @@ Your browser does not support the video tag.
 ```
 
 The model is based on published anatomical data produced from a cadaver study in
-the [TLEMsafe EU project](https://www.tlemsafe.eu/) (see the study by Carbone
+the [TLEMsafe EU project](https://tlemsafe.eu/) (see the study by Carbone
 et al. at the University of Twente, The Netherlands). The first implmentation of
 the musculoskeletal model was created by Vincenzo Carbone and René Fluit from
 the University of Twente [^cite_cfpk15].

@@ -28,7 +28,7 @@ sd_hide_title: true
 
 Documentation for the AnyBody Managed Model Repository - AMMR
 
-```{button-link} changelog.html
+```{button-link} ./changelog.html#linkcheck_ignore
 :outline:
 :color: white
 :class: sd-px-4 sd-fs-5
@@ -104,7 +104,7 @@ be used together as full body, scalable musculoskeletal model.
 ```{admonition} **First time user?**
 :class: hint dropdown
 
-If you are a new user check the [AnyBody Tutorials](https://anyscript.org/tutorials) and the getting started video on AnyBody.
+If you are a new user check the [AnyBody Tutorials](https://anyscript.org/tutorials/) and the getting started video on AnyBody.
 
 The following {doc}`Getting Started section </getting_started>` on the AMMR provides insight into how AMMR is structured, how to
 install it and how to use it.

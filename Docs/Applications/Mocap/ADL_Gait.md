@@ -55,7 +55,7 @@ released the data under a Creative Commons license (CC BY 4.0).
 
 You must download the data sepearately from this model:
 
-* [Rehazenter adult walking dataset](https://figshare.com/articles/A_multimodal_dataset_of_human_gait_at_different_walking_speeds/7734767)
+* [Rehazenter adult walking dataset](https://figshare.com/articles/dataset/A_multimodal_dataset_of_human_gait_at_different_walking_speeds/7734767)
 
 After downloading extract the data into the `C3DFiles` sub folder. 
 
@@ -120,7 +120,7 @@ The model is structured as outlined below:
 The model also contains a batch processing Python script for running all models. The script 
 `batchprocess.py` is located in the top-level folder. 
 
-To use the scirpt install the [Anaconda Python Distribution](https://www.anaconda.com/distribution/#download-section). 
+To use the scirpt install the [Anaconda Python Distribution](https://www.anaconda.com/products/distribution#Downloads). 
 
 The script uses the [AnyPyTools](https://github.com/AnyBody-Research-Group/AnyPyTools) library for working with the
 AnyBody Model System ( [Lund 2019](https://doi.org/10.21105/joss.01108) ). The library can be installed with:

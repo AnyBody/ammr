@@ -122,7 +122,7 @@ If you need to cite the model use the following references:
 
 [^cite_hazi20]: Havelková L., Zítka T., Fiala P., Rybarova M., Tupý R., Kalis V., & Ismail K.M. (2020).
     Data for: Hand muscles attachments: A Geometrical model (Version pre pub sc v1.1) \[Data set\]. Zenodo.
-    ([link](http://doi.org/10.5281/zenodo.3954024))
+    ([link](https://doi.org/10.5281/zenodo.3954024))
 
 [^cite_mesl21]: Melzner, M., Engelhardt, L., Simon, U., & Dendorfer, S. (2021). Electromyography Based Validation of a Musculoskeletal Hand Model. Journal of Biomechanical Engineering. ([link](https://doi.org/10.1115/1.4052115))
 

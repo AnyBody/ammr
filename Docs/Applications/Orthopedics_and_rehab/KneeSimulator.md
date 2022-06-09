@@ -89,13 +89,13 @@ Please note that this simulation is only a demo example.
 
 [^cite_hcmt10]: Halloran JP, Clary CW, Maletsky LP, Taylor M, Petrella AJ, Rullkoetter PJ. Verification
     of predicted knee replacement kinematics during simulated gait in the Kansas knee simulator. J
-    Biomech Eng. 132(8), 081010 (2010). doi:[10.1115/1.4001678](http://dx.doi.org/10.1115/1.4001678)
+    Biomech Eng. 132(8), 081010 (2010). doi:[10.1115/1.4001678](https://dx.doi.org/10.1115/1.4001678)
 
 [^cite_bkhg91]: Blankevoort, L., Kuiper, J. H., Huiskes, R., and Grootenboer, H. J., “Articular Contact
     in a Three-Dimensional Model of the Knee,” J. Biomech., 24(11), pp. 1019–1031, (1991). doi:[10.1016/0021-9290(91)90019](<https://doi.org/10.1016/0021-9290(91)90019-J>)
 
 [^cite_mvfk15]: Marra, M. A. et al. A subject-specific musculoskeletal modeling framework to predict in
-    vivo mechanics of total knee arthroplasty. J. Biomech. Eng. 137, 020904 (2015). doi:[10.1115/1.4029258](http://dx.doi.org/10.1115/1.4029258)
+    vivo mechanics of total knee arthroplasty. J. Biomech. Eng. 137, 020904 (2015). doi:[10.1115/1.4029258](https://dx.doi.org/10.1115/1.4029258)
 
 [^cite_sbtp06]: Shelburne, K. B., Torry, M. R. & Pandy, M. G. Contributions of muscles, ligaments, and the ground-reaction force to tibiofemoral joint loading
-    during normal gait. J. Orthop. Res. 24, 1983–1990 (2006). doi:[10.1002/jor.20255](http://dx.doi.org/10.1002/jor.20255)
+    during normal gait. J. Orthop. Res. 24, 1983–1990 (2006). doi:[10.1002/jor.20255](https://dx.doi.org/10.1002/jor.20255)

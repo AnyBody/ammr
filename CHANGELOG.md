@@ -374,7 +374,7 @@ requested body height.
 
 - Fixed incorrect volume of Satorius muscle in TLEM1 and TLEM2. Thanks to Dr. Adam D. Sylvester
   from Johns Hopkins School of Medicine and Dr. Patricia A. Kramer from the University of
-  Washington for pointing out the error. The error occurred since the satorius in the original [TLEM1 paper](http://linkinghub.elsevier.com/retrieve/pii/S0268003306001896) was muscles
+  Washington for pointing out the error. The error occurred since the satorius in the original [TLEM1 paper](https://linkinghub.elsevier.com/retrieve/pii/S0268003306001896) was muscles
   in series with a pseudo insertion/origin on the femur. Both of these muscle
   elements were therefore listed with the full PSCA of Satorius. This detail was
   missed in the AnyBody TLEM1 and TLEM2 implementation where Satorius was
@@ -408,7 +408,7 @@ requested body height.
   Example based on the "Rehazenter Adult Walking Dataset" by [Schreiber and Moissenet (2019)](https://doi.org/10.1038/s41597-019-0124-4).
   The model is configured to run all 50 subjects and 1145 trials in the data set. However, you must
   download the actual data separately from
-  [FigShare](https://figshare.com/articles/A_multimodal_dataset_of_human_gait_at_different_walking_speeds/7734767)
+  [FigShare](https://figshare.com/articles/dataset/A_multimodal_dataset_of_human_gait_at_different_walking_speeds/7734767)
   where it is hosted under a Creative Commons license.
 
 - New GUI plugin which uses statistical information from the ANSUR database to set anthropometric values in AnyBody. A small example model
@@ -1030,7 +1030,7 @@ the driver values are updated.
 
 - Updated the AAU Mandible Model introduced in AMMR 2.0.0. By accident the authors did
   not share the exact same version of the model that was used in the publication by
-  [Andersen et al. 2017](https://www.anybodytech.com/downloads/publications/#Skipper_Andersen2017-zd)
+  [Andersen et al. 2017](https://doi.org/10.1115/1.4037100)
   This is now corrected and the validation  example produces the same results as
   published version.
 
@@ -1128,7 +1128,7 @@ the driver values are updated.
 
 #### New lower extremity model (TLEM2.1)
 
-- The [Twente Lower Extremity Model version 2.0 dataset](http://dx.doi.org/10.1016/j.jbiomech.2014.12.034), developed in the
+- The [Twente Lower Extremity Model version 2.0 dataset](https://doi.org/10.1016/j.jbiomech.2014.12.034), developed in the
   TLEM*safe* EU project was implemented in the AMMR repository. The model is not
   the default model, but can be enabled with the {ref}`BM parameter
   <bm-config>` `#define BM_LEG_MODEL _LEG_MODEL_TLEM2_`

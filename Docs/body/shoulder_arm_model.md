@@ -21,7 +21,7 @@ glenohumeral joint angles, also known as a "Shoulder rhythms".
 The AnyBody shoulder model's rhythm can be switched on
 and off, the full details of which can be seen in this report
 [Shoulder Rhythm
-Report](https://paperpile.com/app/p/0349b48d-cb2b-0414-8a26-656f9b663e49).
+Report](https://paperpile.com/shared/TUqWjt).
 
 ```{raw} html
 <video width="45%" style="display:block; margin: 0 auto;" controls autoplay loop>
@@ -174,7 +174,7 @@ More details on the ShoulderArm model can be found online:
   first conference of the ISG,1997
 - The segment coordinatesystem are according to the ISB proposal,
   please see
-  <http://internationalshouldergroup.org/files/standards97.pdf>
+  <https://media.isbweb.org/images/documents/standards/frans_c.t._van_der_helm_shoulder_protocol.pdf>
 - H.E.J. Veeger, Bing Yu, Kai-Nan An and R.H. Rozendal, Parameters for
   modeling the upper extremity, Journal of Biomechanics, Vol. 30, No.
   6, pp. 647-652, 1997

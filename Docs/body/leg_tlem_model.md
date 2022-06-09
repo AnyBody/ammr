@@ -29,7 +29,7 @@ finished by the AnyBody Technology.
 The current version has been updated several times and is still being
 maintained in collaboration with The AnyBody Research Group at Aalborg
 University (DK) (www.anybody.aau.dk) and University of Twente (NL) under
-the TLEMsafe project ([www.tlemsafe.eu](http://www.tlemsafe.eu)).
+the TLEMsafe project ([www.tlemsafe.eu](https://tlemsafe.eu/)).
 
 ## Example Configuration
 
@@ -56,7 +56,7 @@ full list of configuration parmaeters.
 More details can be found online:
 
 1. Dendorfer and Toerholm 2008: Report containing moment arm validation for [ESA:
-   report](https://paperpile.com/app/p/28bfe52d-29e1-0c5f-bdfb-68a0597117ff)
+   report](https://paperpile.com/shared/WHZjrt)
 2. Horsman 2007: Klein Horsman, M. D., Koopman, H. F. J. M., van der Helm, F. C. T.,
    Prosé, L. P., and Veeger, H. E. J., 2007, “Morphological Muscle and Joint Parameters for
    Musculoskeletal Modelling of the Lower Extremity,” Clin. Biomech. , 22(2), pp. 239–247.
