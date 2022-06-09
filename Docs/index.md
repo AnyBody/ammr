@@ -113,26 +113,30 @@ install it and how to use it.
 [anybody modeling system]: https://www.anybodytech.com/software/anybodymodelingsystem/
 
 
+
 ```{toctree}
+:caption: Examples and applications
 :includehidden: true
 :hidden:
 
 getting_started
-About the model repository <about>
-```
-
-```{toctree}
-:caption: Reference
-:includehidden: true
-:hidden:
-:maxdepth: 2
-:titlesonly:
-
-bm_config/index
-Body Models <body/models>
 Example Gallery <Applications/index>
 
 ```
+
+
+```{toctree}
+:caption: Body Models
+:includehidden: true
+:hidden:
+
+Body Models <body/models>
+bm_config/index
+
+```
+
+
+
 
 ```{toctree}
 :caption: Guides
@@ -144,4 +148,19 @@ Example Gallery <Applications/index>
 creating_model_from_scratch
 Scaling/intro
 anymocap/index
+
+```
+
+
+```{toctree}
+:caption: ━━━━━━━━
+:includehidden: true
+:hidden: true
+:maxdepth: 2
+:titlesonly: true
+
+
+
+About the model repository <about>
+
 ```

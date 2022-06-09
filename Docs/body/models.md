@@ -1,6 +1,6 @@
 (the-body-model)=
 
-# The Body Models
+# Overview of Body Models
 
 Each body part is implemented utilizing data from detailed cadaver/anatomy
 studies, thus ensuring high accuracy and anatomical fidelity.

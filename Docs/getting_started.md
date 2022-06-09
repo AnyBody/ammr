@@ -1,4 +1,4 @@
-# Getting Started with AMMR
+# Getting Started
 
 ## AMMR Intallation
 
