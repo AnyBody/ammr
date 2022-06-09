@@ -59,7 +59,7 @@ System][anybody modeling system]. The AnyBody Managed Model Repository consists 
 <span class="material-symbols-outlined">
 </span>
 
-::::{grid} 1 3 3 3
+::::{grid} 1 3 2 3
 :margin: 2 2 0 0
 :gutter: 2
 

@@ -418,14 +418,11 @@ with open('Applications/gallery.txt.jinja2') as fh:
 for folder, section in gallery.items():
     gallery_txt= folder / "gallery.txt"
     content = gallery_template.render(examples=section)
-    needs_update = False
-    with open(gallery_txt) as fh:
+    with open(gallery_txt, encoding='utf8') as fh:
         previous_content = fh.read()
-        if content != previous_content:
-            update = True
-    if needs_update:
-        with open( gallery_txt, "w") as fh:
-            fh.write(gallery_template.render(examples=section))
+    if content != previous_content:
+        with open( gallery_txt, "w", encoding='utf8') as fh:
+            fh.write(content)
 
 
 
