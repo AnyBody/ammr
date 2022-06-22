@@ -1,0 +1,193 @@
+ 
+ #class_template RhytmDriverLinear(__CLASS__=AnyKinEq, INDEPENDENT_DOF=-1,  _REDEFINE_VARIABLES=Off){
+
+   #if _REDEFINE_VARIABLES != On
+   // The class declares expected RhythmCoefficients variables
+   #var AnyVector RhythmCoefficients = ones(1,Measures.Dependent.nDim)[0];
+   #endif
+   
+   AnyInt DependentDOFs = set_difference(iarr(0, NumElemOf(Measures.Input.MeasureOrganizer)-1), {INDEPENDENT_DOF});
+   
+   
+   AnyFolder Measures = 
+   {
+      AnyKinMeasureOrg Input = 
+      {
+        #var MeasureOrganizer = #default;
+      };
+   };
+      
+   AnyKinMeasureLinComb RhythmMeasure = {
+      AnyKinMeasureOrg Dependent = {
+        AnyKinMeasure& ref = ..Measures.Input;
+          #var MeasureOrganizer = ..DependentDOFs;
+      };
+      #if INDEPENDENT_DOF != -1
+      AnyKinMeasureOrg InDependent = {
+        AnyKinMeasure& ref = ..Measures.Input;
+        #var MeasureOrganizer = {INDEPENDENT_DOF}; 
+      };
+      #endif
+      
+      OutDim = NumElemOf(.Measures.Input.MeasureOrganizer)-1;
+      #var Const = zeros(1, OutDim)[0];
+      
+      #if INDEPENDENT_DOF != -1
+      AnyVector LinWeights = take(.RhythmCoefficients, INDEPENDENT_DOF)/take(.RhythmCoefficients, .DependentDOFs);
+      #var Coef = reshape(arrcat(-eye(OutDim), {LinWeights})', {OutDim, OutDim+1});
+      #else
+      AnyVector LinWeights = .RhythmCoefficients^-1;
+      #var Coef = reshape(
+          arrcat(reshape(diag(take(LinWeights, iarr(0, OutDim-1)))',{OutDim,OutDim}), zeros(1,OutDim))'
+          - arrcat(zeros(1,OutDim), diag( take(LinWeights, iarr(1,OutDim))))'
+          , {OutDim,OutDim+1});
+      #endif
+      
+   };
+   
+   AnyFolder Weights = {
+       AnyFunConst Fun ={
+           Value ??= repmat(..nDim, 0.01); 
+       };  
+   };
+   
+   CType ??= repmat(nDim, Hard);
+   WeightFun ??= {&Weights.Fun};
+   
+    Reaction ={
+      Type ??= repmat(nDim, Off);
+    };     
+ 
+ };
+ 
+ 
+
+
+#class_template RhytmDriverFunInterpol(IDX=0, ARG1=0.2, ARG2=0, ARG3=0, ARG4=0,
+  __CLASS__= AnyFunInterpol) {
+    
+    
+        
+    AnyVector x_arr = linspace(ARG1/2, max({20*ARG1/2, 2*pi}), 100);
+    Type=Bspline;
+    T =     arrcat(-1*flip(x_arr), {0.0}, x_arr); 
+    Data = { arrcat(
+          .CoefficientsNeg[IDX]*-1*flip(x_arr),
+          {0.0}, 
+          .CoefficientsPos[IDX]* x_arr
+        )};
+ //   
+//   Type = Bspline;
+//   T = arrcat(flip(-1*...abs1), {0.0}, ...abs1);
+//   Data = {arrcat( ...RhythmWeightsNegative[IDX]*flip(-1*...abs1), {0.0}, ...RhythmWeights[IDX]*...abs1) };
+
+};
+
+
+#class_template RhytmDriverTwoWayLinear(__CLASS__=AnyKinEq, NDIM=2, INDEPENDENT_DOF=-1, _REDEFINE_VARIABLES=Off){
+     
+   #if _REDEFINE_VARIABLES != On
+   #var AnyVector RhythmCoefficients;
+   #var AnyVector RhythmCoefficientsNegative = RhythmCoefficients;
+   
+   #var AnyVar TransitionInterval=0.1;
+   #endif
+   
+   
+   #var AnyInt InDependentDOF = {INDEPENDENT_DOF};
+   AnyInt DependentDOFs = set_difference(iarr(0,NDIM-1), InDependentDOF);
+   
+   
+   
+   
+   AnyFolder Weights = {
+       AnyFunConst Fun ={
+           Value ??= repmat(..nDim, 0.01); 
+       };  
+   };
+   
+   CType ??= repmat(nDim, Hard);
+   WeightFun ??= {&Weights.Fun};
+   
+   Reaction ={
+     Type ??= repmat(nDim, Off);
+   };
+   
+   
+   
+   AnyKinMeasureLinComb CombinedMeasure = {
+      AnyKinMeasure& Dependent = .Measures.GearedMeasure;
+      #if INDEPENDENT_DOF != -1
+      AnyKinMeasureOrg InDependent = {
+        AnyKinMeasure& ref = ..Measures.Input;
+        MeasureOrganizer = ..InDependentDOF; 
+      };
+      #endif
+      
+      OutDim = NDIM-1;
+      Const = zeros(1, OutDim)[0];
+      
+      #if INDEPENDENT_DOF != -1 
+      
+      Coef = reshape(arrcat(-eye(OutDim), ones(1,OutDim))', {OutDim,OutDim+1});
+      #else
+      Coef = reshape(
+          arrcat(eye(OutDim), zeros(1,OutDim))'
+          - arrcat(zeros(1,OutDim), eye(OutDim))'
+          , {OutDim,OutDim+1});
+      #endif
+      
+   };
+   
+   
+   AnyFolder Measures = {
+      AnyKinMeasureOrg Input = 
+      {
+      };
+            
+      AnyKinMeasureFunComb1 GearedMeasure =
+      {
+        AnyKinMeasureOrg Dependent = 
+        {
+          AnyKinMeasure& ref = ..Input;
+          MeasureOrganizer = ...DependentDOFs;
+        };
+        
+        Functions = ObjSearch("ParamFuns.Fun*", "AnyFunInterpol");
+        #if INDEPENDENT_DOF != -1
+        MultipleSubTemplates ParamFuns(
+           NUM=NDIM-1,
+           CLASS_TEMPLATE = "RhytmDriverFunInterpol",
+           NAME_PREFIX=Fun,
+           ARG1 = ....TransitionInterval
+         ) = {
+           #var AnyVector CoefficientsPos = take(...RhythmCoefficients, ...InDependentDOF[0]) /take(...RhythmCoefficients, ...DependentDOFs );
+           #var AnyVector CoefficientsNeg = take(...RhythmCoefficientsNegative, ...InDependentDOF[0])/take(...RhythmCoefficientsNegative, ...DependentDOFs );
+         };
+         #endif
+         
+         #if INDEPENDENT_DOF == -1
+         MultipleSubTemplates ParamFuns(
+            NUM=NDIM,
+            CLASS_TEMPLATE="RhytmDriverFunInterpol",
+            NAME_PREFIX=Fun,
+            ARG1 = ....TransitionInterval
+          ) = {
+           #var AnyVector CoefficientsPos = 1/...RhythmCoefficients;
+           #var AnyVector CoefficientsNeg = 1/...RhythmCoefficientsNegative; 
+        };
+        #endif
+
+      };
+      
+      
+   };
+   
+};
+
+
+
+
+
+
+
