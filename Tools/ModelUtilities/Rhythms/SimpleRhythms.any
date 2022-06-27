@@ -1,5 +1,5 @@
  
- #class_template RhytmDriverLinear(__CLASS__=AnyKinEq, INDEPENDENT_DOF=-1,  _REDEFINE_VARIABLES=Off){
+ #class_template RhytmDriverLinear(__CLASS__=AnyKinEq, RELATIVE_TO_DOF=-1,  _REDEFINE_VARIABLES=Off){
 
    #if _REDEFINE_VARIABLES != On
    // The class declares expected RhythmCoefficients variables
@@ -8,7 +8,7 @@
    
    
    
-   AnyInt DependentDOFs = set_difference(iarr(0, InputDim-1), {INDEPENDENT_DOF});
+   AnyInt DependentDOFs = set_difference(iarr(0, InputDim-1), {RELATIVE_TO_DOF});
    
    AnyIntVar InputDim = iffun(NumElemOf(Measures.Input.MeasureOrganizer), NumElemOf(Measures.Input.MeasureOrganizer), Measures.Input.nDim);
    
@@ -25,18 +25,18 @@
         AnyKinMeasure& ref = ..Measures.Input;
           #var MeasureOrganizer = ..DependentDOFs;
       };
-      #if INDEPENDENT_DOF != -1
+      #if RELATIVE_TO_DOF != -1
       AnyKinMeasureOrg InDependent = {
         AnyKinMeasure& ref = ..Measures.Input;
-        #var MeasureOrganizer = {INDEPENDENT_DOF}; 
+        #var MeasureOrganizer = {RELATIVE_TO_DOF}; 
       };
       #endif
       
       OutDim = .InputDim-1;
       #var Const = zeros(1, OutDim)[0];
       
-      #if INDEPENDENT_DOF != -1
-      AnyVector LinWeights = take(.RhythmCoefficients, .DependentDOFs)/take(.RhythmCoefficients, INDEPENDENT_DOF);
+      #if RELATIVE_TO_DOF != -1
+      AnyVector LinWeights = take(.RhythmCoefficients, .DependentDOFs)/take(.RhythmCoefficients, RELATIVE_TO_DOF);
       #var Coef = reshape(arrcat(-eye(OutDim), {LinWeights})', {OutDim, OutDim+1});
       #else
       AnyVector LinWeights = REPLACE_ZEROS(.RhythmCoefficients, 10^-3)^-1;
@@ -87,7 +87,7 @@
 };
 
 
-#class_template RhytmDriverTwoWayLinear(__CLASS__=AnyKinEq, NDIM, INDEPENDENT_DOF=-1, _REDEFINE_VARIABLES=Off){
+#class_template RhytmDriverTwoWayLinear(__CLASS__=AnyKinEq, NDIM, RELATIVE_TO_DOF=-1, _REDEFINE_VARIABLES=Off){
      
    #if _REDEFINE_VARIABLES != On
    #var AnyVector RhythmCoefficients;
@@ -99,7 +99,7 @@
    
    
    
-   AnyInt DependentDOFs = set_difference(iarr(0, InputDim-1), {INDEPENDENT_DOF});
+   AnyInt DependentDOFs = set_difference(iarr(0, InputDim-1), {RELATIVE_TO_DOF});
    
    AnyIntVar InputDim = iffun(NumElemOf(Measures.Input.MeasureOrganizer), NumElemOf(Measures.Input.MeasureOrganizer), Measures.Input.nDim);
 
@@ -121,17 +121,17 @@
    
    AnyKinMeasureLinComb CombinedMeasure = {
       AnyKinMeasure& Dependent = .Measures.GearedMeasure;
-      #if INDEPENDENT_DOF != -1
+      #if RELATIVE_TO_DOF != -1
       AnyKinMeasureOrg InDependent = {
         AnyKinMeasure& ref = ..Measures.Input;
-        MeasureOrganizer = {INDEPENDENT_DOF}; 
+        MeasureOrganizer = {RELATIVE_TO_DOF}; 
       };
       #endif
       
       OutDim = NDIM-1;
       Const = zeros(1, OutDim)[0];
       
-      #if INDEPENDENT_DOF != -1 
+      #if RELATIVE_TO_DOF != -1 
       
       Coef = reshape(arrcat(-eye(OutDim), ones(1,OutDim))', {OutDim,OutDim+1});
       #else
@@ -158,19 +158,19 @@
         };
         
         Functions = ObjSearch("ParamFuns.Fun*", "AnyFunInterpol");
-        #if INDEPENDENT_DOF != -1
+        #if RELATIVE_TO_DOF != -1
         MultipleSubTemplates ParamFuns(
            NUM=NDIM-1,
            CLASS_TEMPLATE = "RhytmDriverFunInterpol",
            NAME_PREFIX=Fun,
            ARG1 = ....TransitionInterval
          ) = {
-           #var AnyVector CoefficientsPos = take(...RhythmCoefficients, INDEPENDENT_DOF) /take(REPLACE_ZEROS(...RhythmCoefficients, 10^-3), ...DependentDOFs );
-           #var AnyVector CoefficientsNeg = take(...RhythmCoefficientsNegative, INDEPENDENT_DOF)/take(REPLACE_ZEROS(...RhythmCoefficientsNegative, 10^-3), ...DependentDOFs );
+           #var AnyVector CoefficientsPos = take(...RhythmCoefficients, RELATIVE_TO_DOF) /take(REPLACE_ZEROS(...RhythmCoefficients, 10^-3), ...DependentDOFs );
+           #var AnyVector CoefficientsNeg = take(...RhythmCoefficientsNegative, RELATIVE_TO_DOF)/take(REPLACE_ZEROS(...RhythmCoefficientsNegative, 10^-3), ...DependentDOFs );
          };
          #endif
          
-         #if INDEPENDENT_DOF == -1
+         #if RELATIVE_TO_DOF == -1
          MultipleSubTemplates ParamFuns(
             NUM=NDIM,
             CLASS_TEMPLATE="RhytmDriverFunInterpol",
