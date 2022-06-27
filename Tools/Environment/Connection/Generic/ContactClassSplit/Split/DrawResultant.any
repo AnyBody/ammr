@@ -1,0 +1,73 @@
+#class_template DrawResultant (
+ARG1, // Base Frame
+ARG2, // FLocal vec3
+ARG3, // MLocal vec3
+ARG_INI_SWITCH = 0,
+ARG_INI = NOT_DEFINED
+) {
+  
+#if ARG_INI_SWITCH == 0
+    #var AnyVec3 FLocal = ARG2;
+    #var AnyVec3 MLocal = ARG3;
+
+//    #var AnyVec3 FLocal;
+//    #var AnyVec3 MLocal;
+    #var AnyVar ResultantForceDrawScaleFactor = DesignVar(1);
+    #var AnyVar ResultantMomentDrawScaleFactor = DesignVar(1);
+    #var AnyVar ForceOnOffThreshold = 10.0;
+    #var AnySwitchVar Visible = On;
+#else
+//    #var AnyVec3 FLocal = ARG_INI.FLocal;
+//    #var AnyVec3 MLocal = ARG_INI.MLocal;
+    #var AnyVar ResultantForceDrawScaleFactor = ARG_INI.ResultantForceDrawScaleFactor;
+    #var AnyVar ResultantMomentDrawScaleFactor = ARG_INI.ResultantMomentDrawScaleFactor;
+    #var AnyVar ForceOnOffThreshold = ARG_INI.ForceOnOffThreshold;
+    #var AnySwitchVar Visible = ARG_INI.Visible;
+#endif
+
+    
+    AnyRefFrame& BaseFrame = ARG1;
+    AnyFloat FMagnitude = vnorm({FLocal[0],FLocal[1],FLocal[2]});
+
+    AnyIntVar Opacity = iffun(gtfun(FMagnitude,10.0),1,0);
+
+       
+    //Resultant Force and Moment lines.
+  AnyDrawLine ResultantForce_line=
+  {
+    AnyRefFrame & ref = .BaseFrame;
+    p0 = {0.0,0.0,0.0}; 
+    p1 = p0 + 0.001 * .ResultantForceDrawScaleFactor * {.FLocal[0],.FLocal[1],.FLocal[2]} ;
+    Line.Thickness = 0.01;
+    Line.RGB = {1, 0, 0};
+    GlobalCoord=Off;
+    Opacity = .Opacity;
+    Visible = .Visible;
+  };
+  
+  AnyDrawLine ResultantMoment_line=
+  {
+    AnyRefFrame & ref = .BaseFrame;
+    p0 = {0.0,0.0,0.0};
+    p1 = p0 + 0.001 * .ResultantMomentDrawScaleFactor *  {.MLocal[0],.MLocal[1],.MLocal[2]} ;
+    Line.Thickness = 0.01;
+    Line.RGB = {0.8, 0.8, 0.8};
+    GlobalCoord=Off;
+    Opacity = .Opacity;
+    Visible = .Visible;
+  };
+  
+  //Resultant Force Point
+  AnyDrawSphere RF_point = 
+  {
+    AnyRefFrame & ref = .BaseFrame ;
+    Position = ref.r ;
+    RGB = {0, 1, 1};
+    ScaleXYZ = 0.015*{1, 1, 1};
+    GlobalCoord = On;    
+    Opacity = .Opacity;
+    Visible = .Visible;
+  };
+     
+
+};

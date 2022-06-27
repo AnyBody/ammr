@@ -1,0 +1,332 @@
+#class_template ContactConditionSmoothing (
+IDX=0,
+ARG1 = "FUNC_PROFILE_LINEAR", // Smoothing Function Profile
+ARG2=0,
+ARG3=0,
+ARG4=0,
+ARG5=0,
+ARG_INI_SWITCH = 0,
+ARG_INI = NOT_DEFINED)
+{
+
+//  #ifdef _SMOOTHING_FUNCTION_PROFILE_
+////  #undef _SMOOTHING_FUNCTION_PROFILE_
+//  #endif
+  
+  //#define _SMOOTHING_FUNCTION_PROFILE_ "FUNC_PROFILE_SW"
+  //#define _SMOOTHING_FUNCTION_PROFILE_ "FUNC_PROFILE_BSPLINE"
+  //#define _SMOOTHING_FUNCTION_PROFILE_ "FUNC_PROFILE_COSINE"
+//  #define _SMOOTHING_FUNCTION_PROFILE_ "FUNC_PROFILE_LINEAR"
+  //#define _SMOOTHING_FUNCTION_PROFILE_ "FUNC_PROFILE_TEST"
+
+
+#if ARG_INI_SWITCH == 0
+#var AnyFloatVar HeightRatio;
+#var AnyFloatVar RadiusRatio;
+#var AnyVar VelRatio;
+#else
+#if IDX < 10
+#var AnyFloatVar HeightRatio = ARG_INI._00##IDX.HeightRatio;
+#var AnyFloatVar RadiusRatio = ARG_INI._00##IDX.RadiusRatio;
+#var AnyVar VelRatio = ARG_INI._00##IDX.VelRatio;
+#endif
+#if (IDX > 9) & (IDX < 100)
+#var AnyFloatVar HeightRatio = ARG_INI._0##IDX.HeightRatio;
+#var AnyFloatVar RadiusRatio = ARG_INI._0##IDX.RadiusRatio;
+#var AnyVar VelRatio = ARG_INI._0##IDX.VelRatio;
+#endif
+#if IDX > 99
+#var AnyFloatVar HeightRatio = ARG_INI._##IDX.HeightRatio;
+#var AnyFloatVar RadiusRatio = ARG_INI._##IDX.RadiusRatio;
+#var AnyVar VelRatio = ARG_INI._##IDX.VelRatio;
+#endif
+
+#endif
+
+
+/*
+FirstControlVelRatio
+SecondControlVelRatio
+FirstControlHeightRatio
+SecondControlHeightRatio
+FirstControlRadiusRatio
+SecondControlRadiusRatio
+*/
+
+
+//  AnyFloatVar FirstControlVel = .UserDefinedVelLimitHigh * FirstControlVelRatio ;
+//  AnyFloatVar SecondControlVel = .UserDefinedVelLimitHigh * SecondControlVelRatio ;
+  
+  AnyIntVar FirstControlVelCheck = lteqfun(VelRatio, FirstControlVelRatio );
+  AnyIntVar SecondControlVelCheck = lteqfun(VelRatio, SecondControlVelRatio );  
+    
+  AnyIntVar FirstControlHeightCheck = lteqfun(HeightRatio, FirstControlHeightRatio);
+  AnyIntVar SecondControlHeightCheck = lteqfun(HeightRatio, SecondControlHeightRatio);
+  
+  AnyIntVar FirstControlRadiusCheck = lteqfun(RadiusRatio, FirstControlRadiusRatio);
+  AnyIntVar SecondControlRadiusCheck = lteqfun(RadiusRatio, SecondControlRadiusRatio);  
+  
+
+
+  AnyFunPolynomial VelFactorFun_Lin = 
+  {
+    AnyVar v1 = .FirstControlVelRatio;
+    AnyVar v2 = .SecondControlVelRatio ;
+    PolyCoef = (1.0/(v2-v1))*{-v1, 1.0};
+  };
+  
+  AnyFunPolynomial HeightFactorFun_Lin = 
+  {
+    AnyVar h1 = .FirstControlHeightRatio;
+    AnyVar h2 = .SecondControlHeightRatio ;
+    PolyCoef = (1.0/(h2-h1))*{-h1, 1.0};
+  };
+  
+  AnyFunPolynomial RadiusFactorFun_Lin = 
+  {
+    AnyVar r1 = .FirstControlRadiusRatio;
+    AnyVar r2 = .SecondControlRadiusRatio ;
+    PolyCoef = (1.0/(r2-r1))*{-r1, 1.0};
+  };  
+  
+  AnyFunSquareWave VelFactorFun_SW = 
+  {
+    AnyVar v1 = .FirstControlVelRatio;
+    AnyVar v2 = .SecondControlVelRatio ;
+    InitialValues = {1.0};
+    Ts = {v1};
+    Values = {{0.0}};
+    dT = {abs(v1-v2)};    
+  };
+  
+  AnyFunSquareWave HeightFactorFun_SW = 
+  {
+    AnyVar h1 = .FirstControlHeightRatio;
+    AnyVar h2 = .SecondControlHeightRatio ;
+    InitialValues = {1.0};
+    Ts = {h1};
+    Values = {{0.0}};
+    dT = {abs(h1-h2)};        
+  };
+  
+  AnyFunSquareWave RadiusFactorFun_SW = 
+  {
+    AnyVar r1 = .FirstControlRadiusRatio;
+    AnyVar r2 = .SecondControlRadiusRatio ;
+    InitialValues = {1.0};
+    Ts = {r1};
+    Values = {{0.0}};
+    dT = {abs(r1-r2)};        
+  };  
+  
+  AnyFunInterpol VelFactorFun_BSpline4 = 
+  {
+    AnyVar v1 = .FirstControlVelRatio;    
+    AnyVar v2 = .SecondControlVelRatio;
+    AnyVar delta = abs(v1-v2);
+    
+    AnyVar SlopeControl = 25/100;
+    
+    Type = Bspline;
+    BsplineOrder = 4;
+    T = { v2-delta*100/100, v2-delta*50/100, v2-delta*SlopeControl, 
+      v2,  
+      v2+delta*SlopeControl,
+      (v2+v1)*50/100, 
+      v1-delta*SlopeControl, 
+      v1, 
+      v1+delta*SlopeControl, v1+delta*50/100, v1+delta*100/100};
+    Data = {{1.0, 1.0, 1.0, 
+        1.0, //v2
+        1.0,
+        0.5, // average of v2 and v1
+        0.0, 
+        0.0, //v1
+        0.0, 0.0, 0.0}};
+  };
+  
+  AnyFunInterpol HeightFactorFun_BSpline4 = 
+  {
+    AnyVar h1 = .FirstControlHeightRatio;
+    AnyVar h2 = .SecondControlHeightRatio ;
+    AnyVar delta = abs(h1-h2);
+    
+    AnyVar SlopeControl = 25/100;
+    
+    Type = Bspline;
+    BsplineOrder = 4;
+    T = { h2-delta*100/100, h2-delta*50/100, h2-delta*SlopeControl, 
+      h2,  
+      h2+delta*SlopeControl,
+      (h2+h1)*50/100, 
+      h1-delta*SlopeControl, 
+      h1, 
+      h1+delta*SlopeControl, h1+delta*50/100, h1+delta*100/100};
+    Data = {{1.0, 1.0, 1.0, 
+        1.0, //h2
+        1.0,
+        0.5, // average of h2 and h1
+        0.0, 
+        0.0, //h1
+        0.0, 0.0, 0.0}};
+  };
+  
+  AnyFunInterpol RadiusFactorFun_BSpline4 = 
+  {
+    AnyVar r1 = .FirstControlRadiusRatio;
+    AnyVar r2 = .SecondControlRadiusRatio ;
+    AnyVar delta = abs(r1-r2);
+    
+    AnyVar SlopeControl = 25/100;
+    
+    Type = Bspline;
+    BsplineOrder = 4;
+    T = { r2-delta*100/100*10, r2-delta*50/100, r2-delta*SlopeControl, 
+      r2,  
+      r2+delta*SlopeControl,
+      (r2+r1)*50/100, 
+      r1-delta*SlopeControl, 
+      r1, 
+      r1+delta*SlopeControl, r1+delta*50/100, r1+delta*100/100*10};
+    Data = {{1.0, 1.0, 1.0, 
+        1.0, //r2
+        1.0,
+        0.5, // average of r2 and r1
+        0.0, 
+        0.0, //r1
+        0.0, 0.0, 0.0}};
+  };     
+  
+  
+  
+  #if ARG1 == "FUNC_PROFILE_SW"
+  AnyVar FirstControlHeightRatio = 1.0;
+  AnyVar SecondControlHeightRatio = 0.1;    
+  AnyVar FirstControlRadiusRatio = 1.0;
+  AnyVar SecondControlRadiusRatio = 0.9;  
+  AnyVar FirstControlVelRatio = 1.0;
+  AnyVar SecondControlVelRatio = 0.1;
+  
+  AnyVar HeightFactorFun = iffun(FirstControlHeightCheck, HeightFactorFun_SW(HeightRatio)[0], 0.0);
+  AnyVar RadiusFactorFun = iffun(FirstControlRadiusCheck, RadiusFactorFun_SW(RadiusRatio)[0], 0.0);
+  AnyVar VelFactorFun    = iffun(FirstControlVelCheck, VelFactorFun_SW(VelRatio)[0], 0.0);
+  #endif 
+  
+  #if ARG1 == "FUNC_PROFILE_BSPLINE"
+  AnyVar FirstControlHeightRatio = 1.0;
+  AnyVar SecondControlHeightRatio = 0.1;    
+  AnyVar FirstControlRadiusRatio = 1.0;
+  AnyVar SecondControlRadiusRatio = 0.9;  
+  AnyVar FirstControlVelRatio = 1.0;
+  AnyVar SecondControlVelRatio = 0.1;
+  
+  //Ensure the heightratio is not outside the interpol fun
+  AnyVar  HeightRatioMaxInSplineFun =max(HeightFactorFun_BSpline4.T)-0.0001; //find max "T" in spline function subtract tol 
+  AnyVar  HeightRatioMinInSplineFun =min(HeightFactorFun_BSpline4.T)+0.0001;//find min "T" in spline function add tol 
+  AnyVar  HeightRatioCapped_max = iffun(gtfun(HeightRatio,HeightRatioMaxInSplineFun),HeightRatioMaxInSplineFun,HeightRatio) ;  //cap ratio 
+  AnyVar  HeightRatioCapped = iffun(ltfun(HeightRatioCapped_max,HeightRatioMinInSplineFun),HeightRatioMinInSplineFun,HeightRatioCapped_max) ;
+
+  //Ensure the radiusratio is not outside the interpol fun
+  AnyVar  RadiusRatioMaxInSplineFun =max(RadiusFactorFun_BSpline4.T)-0.0001; //find max "T" in spline function subtract tol 
+  AnyVar  RadiusRatioMinInSplineFun =min(RadiusFactorFun_BSpline4.T)+0.0001;//find min "T" in spline function add tol 
+  AnyVar  RadiusRatioCapped_max = iffun(gtfun(RadiusRatio,RadiusRatioMaxInSplineFun),RadiusRatioMaxInSplineFun,RadiusRatio) ;  //cap ratio 
+  AnyVar  RadiusRatioCapped = iffun(ltfun(RadiusRatioCapped_max,RadiusRatioMinInSplineFun),RadiusRatioMinInSplineFun,RadiusRatioCapped_max) ;
+  
+  //Ensure the Velatio is not outside the interpol fun
+  AnyVar  VelRatioMaxInSplineFun =max(VelFactorFun_BSpline4.T)-0.0001; //find max "T" in spline function subtract tol 
+  AnyVar  VelRatioMinInSplineFun =min(VelFactorFun_BSpline4.T)+0.0001;//find min "T" in spline function add tol 
+  AnyVar  VelRatioCapped_max = iffun(gtfun(VelRatio,VelRatioMaxInSplineFun),VelRatioMaxInSplineFun,VelRatio) ;  //cap ratio 
+  AnyVar  VelRatioCapped = iffun(ltfun(VelRatioCapped_max,VelRatioMinInSplineFun),VelRatioMinInSplineFun,VelRatioCapped_max) ;
+    
+  
+  AnyVar HeightFactorFun = iffun(lteqfun(HeightRatio, FirstControlHeightRatio),
+ // iffun(ltfun(HeightRatio, SecondControlHeightRatio), 1.0, HeightFactorFun_BSpline4(HeightRatio)[0]),
+  iffun(ltfun(HeightRatio, SecondControlHeightRatio), 1.0, HeightFactorFun_BSpline4(HeightRatioCapped)[0]),
+
+  0.0);
+  AnyVar RadiusFactorFun = iffun(lteqfun(RadiusRatio, FirstControlRadiusRatio),
+  //iffun(ltfun(RadiusRatio, SecondControlRadiusRatio), 1.0, RadiusFactorFun_BSpline4(RadiusRatio)[0]),
+  iffun(ltfun(RadiusRatio, SecondControlRadiusRatio), 1.0, RadiusFactorFun_BSpline4(RadiusRatioCapped)[0]),
+
+  0.0);
+  AnyVar VelFactorFun    = iffun(lteqfun(VelRatio, FirstControlVelRatio),
+//  iffun(ltfun(VelRatio, SecondControlVelRatio), 1.0, VelFactorFun_BSpline4(VelRatio)[0]),
+  iffun(ltfun(VelRatio, SecondControlVelRatio), 1.0, VelFactorFun_BSpline4(VelRatioCapped)[0]),
+  0.0);
+  #endif  
+  
+  #if ARG1 == "FUNC_PROFILE_COSINE"
+  AnyVar FirstControlHeightRatio = 1.0;
+  AnyVar SecondControlHeightRatio = 0.8;    
+  AnyVar FirstControlRadiusRatio = 1.0;
+  AnyVar SecondControlRadiusRatio = 0.9;  
+  AnyVar FirstControlVelRatio = 1.0;
+  AnyVar SecondControlVelRatio = 0.15;
+  
+  AnyVar HeightFactorFun = iffun(lteqfun(HeightRatio, FirstControlHeightRatio),
+                                 iffun(ltfun(HeightRatio, SecondControlHeightRatio), 1.0,
+                                 (cos((HeightRatio-SecondControlHeightRatio)/(FirstControlHeightRatio-SecondControlHeightRatio)*pi)+1)*0.5),
+                                 0.0);  
+  AnyVar RadiusFactorFun = iffun(lteqfun(RadiusRatio, FirstControlRadiusRatio),
+                                 iffun(ltfun(RadiusRatio, SecondControlRadiusRatio), 1.0,
+                                 (cos((RadiusRatio-SecondControlRadiusRatio)/(FirstControlRadiusRatio-SecondControlRadiusRatio)*pi)+1)*0.5),
+                                 0.0);
+  AnyVar VelFactorFun    = iffun(lteqfun(VelRatio, FirstControlVelRatio),
+                                 iffun(ltfun(VelRatio, SecondControlVelRatio), 1.0,
+                                 (cos((VelRatio-SecondControlVelRatio)/(FirstControlVelRatio-SecondControlVelRatio)*pi)+1)*0.5),
+                                 0.0);
+  #endif   
+  
+  #if ARG1 == "FUNC_PROFILE_LINEAR"
+  AnyVar FirstControlHeightRatio = 1.0;
+  AnyVar SecondControlHeightRatio = 0.8;    
+  AnyVar FirstControlRadiusRatio = 1.0;
+  AnyVar SecondControlRadiusRatio = 0.9;  
+  AnyVar FirstControlVelRatio = 1.0;
+  AnyVar SecondControlVelRatio = 0.15;
+  
+  AnyVar HeightFactorFun = iffun(lteqfun(HeightRatio, FirstControlHeightRatio),
+                                 iffun(ltfun(HeightRatio, SecondControlHeightRatio), 1.0, HeightFactorFun_Lin(HeightRatio)),
+                                 0.0);
+  AnyVar RadiusFactorFun = iffun(lteqfun(RadiusRatio, FirstControlRadiusRatio),
+                                 iffun(ltfun(RadiusRatio, SecondControlRadiusRatio), 1.0, RadiusFactorFun_Lin(RadiusRatio)),
+                                 0.0);
+  AnyVar VelFactorFun    = iffun(lteqfun(VelRatio, FirstControlVelRatio),
+                                 iffun(ltfun(VelRatio, SecondControlVelRatio), 1.0, VelFactorFun_Lin(VelRatio)),
+                                 0.0);
+  #endif     
+  
+  #if ARG1 == "FUNC_PROFILE_TEST"
+  AnyVar FirstControlHeightRatio = 1.0;
+  AnyVar SecondControlHeightRatio = 0.8;    
+  AnyVar FirstControlRadiusRatio = 1.0;
+  AnyVar SecondControlRadiusRatio = 0.9;  
+  AnyVar FirstControlVelRatio = 1.0;
+  AnyVar SecondControlVelRatio = 0.15;
+  
+  AnyVar HeightFactorFun = iffun(FirstControlHeightCheck,
+                                 iffun(SecondControlHeightCheck, 1.0, HeightFactorFun_Lin(HeightRatio)),
+                                 0.0);
+  AnyVar RadiusFactorFun = iffun(FirstControlRadiusCheck,
+                                 iffun(SecondControlRadiusCheck, 1.0, RadiusFactorFun_Lin(RadiusRatio)),
+                                 0.0);
+//  AnyVar VelFactorFun    = iffun(FirstControlVelCheck,
+//                                 iffun(SecondControlVelCheck, 1.0, VelFactorFun_BSpline4(VelRatio)[0]),
+//                                 0.0);
+//  AnyVar VelFactorFun    = iffun(FirstControlVelCheck, 
+//                                 VelFactorFun_SW(VelRatio)[0], 
+//                                 0.0);
+  
+  AnyVar VelFactorFun    = iffun(FirstControlVelCheck,
+                                 iffun(SecondControlVelCheck , 1.0,
+                                 (cos((VelRatio-SecondControlVelRatio)/(FirstControlVelRatio-SecondControlVelRatio)*pi)+1)*0.5),
+                                 0.0);
+  #endif    
+  
+//  #undef _SMOOTHING_FUNCTION_PROFILE_
+  
+  AnyVar DisFactorFun    = HeightFactorFun * RadiusFactorFun;  
+  AnyVar SmoothingFunction = DisFactorFun * VelFactorFun;
+  
+
+};

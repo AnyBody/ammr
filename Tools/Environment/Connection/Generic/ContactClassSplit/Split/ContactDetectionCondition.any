@@ -1,0 +1,57 @@
+/*
+BaseFrame
+TargetFrame
+
+UserDefinedDistLimitLow
+UserDefinedDistLimitHigh
+UserDefinedRadiusLimit
+UserDefinedVelLimitHigh
+UserDefinedGroundVel
+
+*/
+
+
+  AnyKinLinear LinS={
+    Ref=0;
+    AnyRefFrame &BaseObject=..BaseObject;
+    AnyRefFrame &TargetObject=..StrengthObject;
+  };
+    
+  AnyKinMeasureOrg LinMeasureOrg0 ={
+    AnyKinLinear &ref=.LinS;
+    MeasureOrganizer={..Direction[0]};
+  };
+  
+  AnyKinMeasureOrg LinMeasureOrg1 ={
+    AnyKinLinear &ref=.LinS;
+    MeasureOrganizer={..Direction[1]};
+  };
+  
+  AnyKinMeasureOrg LinMeasureOrg2 ={
+    AnyKinLinear &ref=.LinS;
+    MeasureOrganizer={..Direction[2]};
+  };
+  
+  
+  AnyVar UserDefinedDistMeasure=LinMeasureOrg0.Pos[0];
+  AnyVar RadiusMeasure=sqrt(LinMeasureOrg1.Pos[0]^2+LinMeasureOrg2.Pos[0]^2);
+  AnyVar UserDefinedVelMeasure = vnorm(LinS.Vel-.UserDefinedGroundVel,2);
+  
+  AnyFloatVar LowerThanHighDistLimit = ltfun(UserDefinedDistMeasure,.UserDefinedDistLimitHigh);
+  AnyFloatVar GreaterThanLowDistLimit = gtfun(UserDefinedDistMeasure,.UserDefinedDistLimitLow);
+  AnyFloatVar LowerThanRadiusLimit = ltfun(RadiusMeasure,.UserDefinedRadiusLimit);
+  AnyFloatVar LowerThanHighVelLimit = ltfun(UserDefinedVelMeasure,.UserDefinedVelLimitHigh);
+  AnyVar UserDefinedStrengthFunction= .Strength;
+  
+  AnyVar VelSize = UserDefinedVelMeasure;//vnorm(LinS.Vel, 2);
+  AnyVar VelRatio = VelSize /.UserDefinedVelLimitHigh ;  
+  
+  AnyFloatVar ContactDisCheck = andfun(andfun(LowerThanHighDistLimit,GreaterThanLowDistLimit),LowerThanRadiusLimit);
+  AnyFloatVar HeightRatio = iffun(gteqfun(UserDefinedDistMeasure, 0.0), 
+                                  UserDefinedDistMeasure/.UserDefinedDistLimitHigh,
+                                  iffun(lteqfun(abs(UserDefinedDistMeasure/.UserDefinedDistLimitLow), 1.0), 0.0, 1.0));
+  AnyFloatVar RadiusRatio = RadiusMeasure/.UserDefinedRadiusLimit;
+
+  AnyVar ContactCondDisAndVel = iffun(andfun(andfun(andfun(LowerThanHighDistLimit,GreaterThanLowDistLimit),LowerThanRadiusLimit),LowerThanHighVelLimit), 1.0, 0.0);
+  AnyVar ContactCondDis = iffun( andfun(andfun(LowerThanHighDistLimit,GreaterThanLowDistLimit),LowerThanRadiusLimit),1.0,0.0);
+
