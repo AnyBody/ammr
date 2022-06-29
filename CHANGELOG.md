@@ -26,6 +26,8 @@
 * In BVH example models (BVH_BoxLift, BVH_Xsens, & BVH_Xsens_OptimizeOrigin), the calculation of PelvisWidth from BVH stick figure has been 
   changed to use the sRel values of RightHip and LeftHip reference nodes on the "Hips" segment. Previously, it was calculated using r0 values
   of the RightHip and LeftHip segments. There should be no change in the calculated value of PelvisWidth due to this change.
+* Changed defintion (sign) of the `SkullThoraxRotation` and `SkullThoraxLateralbending` variable
+  in the `interface` folder. They are now consistent with similar difinitions in the rest of the spine. 
   
   
 **Added:**
