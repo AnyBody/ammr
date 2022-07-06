@@ -23,9 +23,9 @@ The AnyBody Managed Model Repository consists of two parts:
   workplace-specific scenarios).
 
 The models are developed in research projects at academic institutions or by
-[AnyBody Technology](https://anybodytech.com) in collaboration with academic
+[AnyBody Technology](https://www.anybodytech.com) in collaboration with academic
 institutions. The models are maintained by [AnyBody
-Technology](https://anybodytech.com) who ensure that various body part models
+Technology](https://www.anybodytech.com) who ensure that various body part models
 can be used together as a full body, scalable musculoskeletal model.
 
 
