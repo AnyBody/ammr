@@ -3,6 +3,20 @@
 % To minimize the risk of merge conflicts insert the your changes at a
 % random empty or make a new entry a random place in the bullet lists.
 
+## AMMR beta 
+
+**Added:**
+
+* Added a few utility helper class templates (`Template_OperationSaveValues`/`Template_OperationLoadValues`/`Template_OperationUpdateValues`) 
+  to make it easier to do common class operations without manually having to create the operations with macros.
+
+  To create a operation which loads a file do: 
+
+  ```{code-block} AnyScriptDoc
+  Template_OperationLoadValues LoadAnySetFile = {
+     FileName= "MyFile.anyset";
+  };
+  ```
 
 (ammr-2.4-changelog)=
 ## AMMR 2.4.2 (2022-07-08)
