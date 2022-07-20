@@ -18,6 +18,11 @@
   };
   ```
 
+**Changed:**
+* It is no longer necessasry to supply the `MarkerName` argument in the CreateMarkerDriver template
+  MoCap models. The argument can still be used if the marker name and the data entry in the c3d file 
+  are different. 
+
 (ammr-2.4-changelog)=
 ## AMMR 2.4.2 (2022-07-08)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.6809697.svg)](https://doi.org/10.5281/zenodo.6809697)
