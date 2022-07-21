@@ -3,6 +3,25 @@
 % To minimize the risk of merge conflicts insert the your changes at a
 % random empty or make a new entry a random place in the bullet lists.
 
+## AMMR beta 
+
+**Added:**
+
+* Added a few utility helper class templates (`Template_OperationSaveValues`/`Template_OperationLoadValues`/`Template_OperationUpdateValues`) 
+  to make it easier to do common class operations without manually having to create the operations with macros.
+
+  To create a operation which loads a file do: 
+
+  ```{code-block} AnyScriptDoc
+  Template_OperationLoadValues LoadAnySetFile = {
+     FileName= "MyFile.anyset";
+  };
+  ```
+
+**Changed:**
+* It is no longer necessasry to supply the `MarkerName` argument in the CreateMarkerDriver template
+  MoCap models. The argument can still be used if the marker name and the data entry in the c3d file 
+  are different. 
 
 (ammr-2.4-changelog)=
 ## AMMR 2.4.2 (2022-07-08)
