@@ -20,11 +20,11 @@ moved similar to marker based MoCap models.
 
 AnyBody automatically calculates the virtual markers positions, and the model is scaled
 directly from the size of the BVH stick figure. Hence the model contains no *Parameter
-identification* step to find The remaining parts of the model are equivalent to other
+identification* step to find the parameters. The remaining parts of the model are equivalent to other
 :ref:`MoCap model <anymocap>`  based on C3D files. 
 
 This particular example shows how to model a box which connects to the hand segments.
-This is usefull when investigation the effects of interaction with environment objects
+This is useful when investigation the effects of interaction with environment objects
 even when there is no kinematic data for that object.
 
 
