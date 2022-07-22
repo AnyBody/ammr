@@ -3,7 +3,11 @@
 % To minimize the risk of merge conflicts insert the your changes at a
 % random empty or make a new entry a random place in the bullet lists.
 
-## AMMR beta 
+## AMMR beta
+
+**Fixed:**
+* The `Main.ModelSetup.CreateVideo` operation was missing in some of the
+  MoCap examples. This has been fixed. If you have this problem update the `CreateVideo.any` file in your application. 
 
 **Added:**
 
