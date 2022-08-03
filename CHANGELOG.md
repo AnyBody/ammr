@@ -9,6 +9,18 @@
 * The `Main.ModelSetup.CreateVideo` operation was missing in some of the
   MoCap examples. This has been fixed. If you have this problem update the `CreateVideo.any` file in your application. 
 
+**Changed:**
+
+* The glenoid reaction forces are now epressed in the coordinate system of the
+  glenoid cup instead of the general scapula coordinate system. This means that
+  the three force variables `GlenoHumeral_DistractionForce`,
+  `GlenoHumeral_InferoSuperiorForce`, `GlenoHumeral_AnteroPosteriorForce` now
+  represents the three direction given by the glenoid cup. 
+
+  This means that the variables will be slightly different even though the force is the same. 
+
+
+
 **Added:**
 
 * Added a few utility helper class templates (`Template_OperationSaveValues`/`Template_OperationLoadValues`/`Template_OperationUpdateValues`) 
