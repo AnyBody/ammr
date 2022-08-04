@@ -1,0 +1,518 @@
+/* Class Template OptimizeBVH_Origin
+
+This class template can be useful when BVH recordings consist
+of interaction of the subject with environment objects. In such
+trials, it can be hard to locate the environment object relative
+to the subject. An example could be a subject lifting a box, 
+where the position of the box is known but the BVH recordings of 
+different trials results in the subject being located inconsistently
+with respect to the box.
+
+This class template optimizes the origin of the BVH model. 
+Normally, the origin of the BVH recording is coincident with the
+Global Ref of the model in AnyMoCap models. The BVH stick figure
+and consequently, the movement of the human subject is reconstructed
+from the origin of the BVH recording. Whereas environment objects
+are normally located with respect to the Global Ref of the model.
+
+The origin of the BVH model (recording) can be set to another position 
+and orientation with respect to the Global Ref. This class template
+can optimize the origin of the BVH model such that a target segment
+of the human model (L/R Foot/Hand) is positioned and oriented in a
+known way for a known time interval while following the recorded
+motion. For example, the class template can set the origin of the BVH 
+recording such that the right hand is positioned and oriented in a 
+known way (such as on a box) in a known and definite time interval 
+of the recording (such as the time interval in which the subject 
+grasps the box).
+
+The class works by defining three ref nodes on the BVH stick figure
+and three corresponding nodes at the target. To help visualization, 
+a drawing of the selected human segment is generated at the target.
+The corresponding nodes are driven to be coincident by using 
+AnyKinMotion driver. These drivers are active only during the active 
+time interval. This is implemented by a square wave function that is 
+set to 1 during the active period and zero outside the active period. 
+Finally, the origin of the BVH recording is set using a design 
+variable that is optimized through the default parameter optimization 
+study of the AnyMoCap model.
+
+Class arguments:
+---------------
+HUMAN_SEG: <Optional. Default ="RFOOT">
+Is the human segment that must be positioned and oriented in the 
+target postion and orientation. 
+
+REPEAT_USE: <Optional. Default = 0>
+Switch to identify if the class template is being used more than one
+time. For multiple use of the of the class template in the same model, 
+the switch must be set to 0 only one time and to 1 for other times. 
+This switch prevents error due to the class template defining the same
+objects multiple times.
+
+OPT_LIN_X: <Optional. Default = 1>
+Switch to enable optimization of BVH origin in translation in X axis.
+
+OPT_LIN_Y: <Optional. Default = 0>
+Switch to enable optimization of BVH origin in translation in Y axis.
+
+OPT_LIN_Z: <Optional. Default = 1>
+Switch to enable optimization of BVH origin in translation in Z axis.
+
+OPT_ROT_X: <Optional. Default = 0>
+Switch to enable optimization of BVH origin in rotation in X axis.
+
+OPT_ROT_Y: <Optional. Default = 1>
+Switch to enable optimization of BVH origin in rotation in Y axis.
+
+OPT_ROT_Z: <Optional. Default = 0>
+Switch to enable optimization of BVH origin in rotation in Z axis.
+
+NAME_PARA_OPT: <Optional. Default = BVH_Origin>
+Is the name of the parameter that will be included in the parameter
+optimization study with suffix for direction (eg: NAME_PARA_OPT_LinX)
+
+REF_FRAME_FOR_TARGET: <Optional. Default = Main.EnvironmentModel.GlobalRef>
+Is the reference frame for defining the target position and orientation.
+
+BVH_FILE_DATA: <Optional. Default = Main.ModelSetup.BVHFileData>
+Is the pointer to the AnyInputBVH object in the model. This is the class
+that reads the BVH file.
+
+HUMAN_MODEL: <Optional. Default = Main.HumanModel>
+Is the pointer to the human model in the model.
+
+{
+  Active_Time_Start: <Obligatory>
+  Is the start of the time interval where the selected human segment
+  must be in the target position and orientation. AnyVector 
+
+  Active_Time_End: <Obligatory>
+  Is the end of the time interval where the selected human segment
+  must be in the target position and orientation. AnyVector
+
+  Target_Position: <Optional. Default = {0.0, 0.0, 0.0};>
+  Is the position vector of the Target referred in REF_FRAME_FOR_TARGET.
+
+  Target_Orientation: <Optional. Default = {{1,0,0},{0,1,0},{0,0,1}};>
+  Is the rotational transformation matrix of the Target referred in
+  REF_FRAME_FOR_TARGET.
+  
+  Optional initialization:
+  -----------------------
+  Settings: 
+    InitialGuess    : Initial guess for the BVH Origin in the order: {lin_x,
+                      lin_y, lin_z, rot_x, rot_y, rot_z}. in m or radians.
+    Weight          : Weight of the AnyKinMotion drivers in the active time interval
+    dt_Ratio        : Start and end transition time of the weight function 
+                      expressed as fraction of the active time interval. For more info,
+                      please see reference for AnyFunSquareWave
+
+}
+
+Please note:
+------------
+* When you implement this class in a copy of the BVH Xsens model from the AMMR, it is possible
+  that the TrialSpecificData.any file defines LoadParametersFrom = {""};. If you want to save the
+  optimized origin and load it again in the future, please comment the definition of 
+  LoadParametersFrom so that the AnyMoCap model can use the default definition of the filename.
+  The class template will provide a warning if LoadParametersFrom = {""};
+
+Initialization example:
+----------------------
+OptimizeBVH_Origin <Object_name> (
+    HUMAN_SEG = "<*RFOOT|LFOOT|RHAND|LHAND>"
+    
+    // Optional Initialization showing default values
+    
+    REPEAT_USE = 0,
+    OPT_LIN_X = 1, OPT_LIN_Y = 0, OPT_LIN_Z = 1,
+    OPT_ROT_X = 0, OPT_ROT_Y = 1, OPT_ROT_Z = 0,
+    NAME_PARA_OPT = BVH_Origin,
+    PARAMETER_OPT_STUDY = Main.Studies.ParameterIdentification,
+    REF_FRAME_FOR_TARGET = Main.EnvironmentModel.GlobalRef,
+    BVH_FILE_DATA = Main.ModelSetup.BVHFileData,
+    HUMAN_MODEL = Main.HumanModel
+    ) = 
+      {
+        Active_Time_Start = 0.1; // Obligatory
+        Active_Time_End = 0.15; // Obligatory
+        Target_Position = {0.0, 0.0, 0.0};
+        Target_Orientation = {{1,0,0},{0,1,0},{0,0,1}};
+        Settings = {
+          InitialGuess = {0.0,0.0,0.0,0.0,0.0,0.0};
+          Weight = 1;
+          dt_Ratio = {0.1,0.1};
+        };
+      };
+
+*/
+
+#class_template OptimizeBVH_Origin (
+HUMAN_SEG = "RFOOT",
+REPEAT_USE = 0,
+OPT_LIN_X = 1, OPT_LIN_Y = 0, OPT_LIN_Z = 1,
+OPT_ROT_X = 0, OPT_ROT_Y = 1, OPT_ROT_Z = 0,
+NAME_PARA_OPT = BVH_Origin,
+PARAMETER_OPT_STUDY = Main.Studies.ParameterIdentification,
+REF_FRAME_FOR_TARGET = Main.EnvironmentModel.GlobalRef,
+BVH_FILE_DATA = Main.ModelSetup.BVHFileData,
+HUMAN_MODEL = Main.HumanModel
+)
+{
+  /// The start of the time interval where the selected human segment must be in the target position and orientation.
+  #var AnyVar Active_Time_Start;
+  /// The end of the time interval where the selected human segment must be in the target position and orientation.  
+  #var AnyVar Active_Time_End;
+  /// A reference to REF_FRAME_FOR_TARGET
+  AnyFolder &Ref_Frame_For_Target = REF_FRAME_FOR_TARGET;
+  /// The position vector of the Target referred in REF_FRAME_FOR_TARGET.
+  #var AnyVec3 Target_Position = {0.0, 0.0, 0.0};
+  /// The rotational transformation matrix of the Target referred in REF_FRAME_FOR_TARGET.
+  #var AnyMat33 Target_Orientation = {{1,0,0},{0,1,0},{0,0,1}};
+  AnyFolder Settings = {
+    /// Initial Guess of the BVH Origin in the order: {lin_x, lin_y, lin_z, rot_x, rot_y, rot_z}. in m or radians.                      
+    #var AnyFloat InitialGuess = {0.0,0.0,0.0,0.0,0.0,0.0};
+    /// Weight of the AnyKinMotion drivers during the active time interval
+    #var AnyVar Weight = 1;
+    /// Start and end transition time of the weight function expressed as fraction of the active time interval. 
+    /// For more info, please see reference for AnyFunSquareWave
+    #var AnyFloat dt_Ratio = {0.1,0.1};
+  };
+  
+  // Implement code only if HUMAN_SEG is correctly defined, else give appropriate error. 
+  // Error is defined at the end of the class template.
+  #if  (HUMAN_SEG =="LFOOT")|(HUMAN_SEG =="RFOOT")|(HUMAN_SEG =="LHAND")|(HUMAN_SEG =="RHAND")  
+  
+  AnyFolder InputArgs = {
+    // warning for LoadParametersFrom value. BVH models normally don't have any parameters to be optimized. Thus, the anyset file with 
+    // parameters won't exist and LoadParametersFrom value is defined as {""}; in TrialSpecificData.any to avoid issues with 
+    // RunAnalysis.LoadParameters Operation. The definition of LoadParametersFrom in TrialSpecificData.any must be commented out 
+    // so that AnyBody can define the default value for LoadParametersFrom value. Alternatively, provide the name of the file from 
+    // which parameters should be loaded.
+    AnyInt Warning_LoadParams = warn(neqfun(Main.ModelSetup.TrialSpecificData.LoadParametersFrom,""), strformat("\n" +
+                                "------------------------------------------------------------------------------------------------------\n"+
+                                "Main.ModelSetup.TrialSpecificData.LoadParametersFrom is defined as empty. Loading parameters operation will not work!\n" + 
+                                "Please comment its definition in TrialSpecificData.any to let AnyBody define this value automatically \n" +
+                                "or, provide the name of the file from which parameters should be loaded.\n" +
+                                "------------------------------------------------------------------------------------------------------"));
+    
+    // Error for ActiveTimeInterval. 
+    AnyInt Error_ActiveTimeInterval = assert(gtfun(.Active_Time_End,.Active_Time_Start), "Please ensure Active_Time_End is greater than Active_Time_Start");
+        
+    #if HUMAN_SEG == "LFOOT"
+    // create nodes on the BVH model
+    AnyRefFrame &BVHSeg = BVH_FILE_DATA.Model.Hips.LeftHip.LeftKnee.LeftAnkle.Seg;
+    BVHSeg = {
+      AnyRefNode NAME_PARA_OPT##_Node0 = {
+        sRel = {0,.LeftToe.sRel[1],0};
+        AnyDrawRefFrame drw ={};  
+        AnyRefNode Node1 = {
+          sRel = {-0.02,0,..LeftToe.sRel[2]};
+          AnyDrawNode drw ={};
+        };
+        AnyRefNode Node2 = {
+          sRel = {0.05,0,..LeftToe.sRel[2]};
+          AnyDrawNode drw ={};
+        };
+      }; // Heel Node      
+    }; // BVHSeg  
+    
+    // Define values for drawing the HUMAN_SEG at the target point and orientation.
+    TargetFrameRef.NAME_PARA_OPT##_Node0 = {
+      AnyFileVar STLFilename = HUMAN_MODEL.BodyModel.Left.Leg.Seg.STL.FilenameFoot;
+      AnyFloat STLPos = -..BVHSeg.NAME_PARA_OPT##_Node0.sRel + {0,HUMAN_MODEL.BodyModel.Left.Leg.Seg.Talus.SubTalarJoint.sRel[1],0};
+      AnyMat33 STLOrientation = RotMat(-pi/2,y);
+      AnyFloat STLScale = {1,1,-1};
+      AnyFunTransform3D &STLTransform = HUMAN_MODEL.BodyModel.Left.Leg.Seg.Foot.Scale;      
+    };    
+    #endif
+    
+    #if HUMAN_SEG == "RFOOT"
+    // create nodes on the BVH model
+    AnyRefFrame &BVHSeg = BVH_FILE_DATA.Model.Hips.RightHip.RightKnee.RightAnkle.Seg;
+    BVHSeg = {
+      AnyRefNode NAME_PARA_OPT##_Node0 = {
+        sRel = {0,.RightToe.sRel[1],0};
+        AnyDrawRefFrame drw ={};  
+        AnyRefNode Node1 = {
+          sRel = {0.02,0,..RightToe.sRel[2]};
+          AnyDrawNode drw ={};
+        };
+        AnyRefNode Node2 = {
+          sRel = {-0.05,0,..RightToe.sRel[2]};
+          AnyDrawNode drw ={};
+        };
+      }; // Heel Node      
+    }; // BVHSeg  
+    
+    // Define values for drawing the HUMAN_SEG at the target point and orientation.
+    TargetFrameRef.NAME_PARA_OPT##_Node0 = {
+      AnyFolder &HumRef = HUMAN_MODEL.BodyModel.Right.Leg.Seg;
+      AnyFileVar STLFilename = HUMAN_MODEL.BodyModel.Right.Leg.Seg.STL.FilenameFoot;
+      AnyFloat STLPos = -..BVHSeg.NAME_PARA_OPT##_Node0.sRel + {0,HUMAN_MODEL.BodyModel.Right.Leg.Seg.Talus.SubTalarJoint.sRel[1],0};
+      AnyMat33 STLOrientation = RotMat(-pi/2,y);
+      AnyFloat STLScale = {1,1,1};
+      AnyFunTransform3D &STLTransform = HUMAN_MODEL.BodyModel.Right.Leg.Seg.Foot.Scale;      
+    };
+    #endif
+    
+    #if HUMAN_SEG == "LHAND"
+    // create nodes on the BVH model
+    AnyRefFrame &BVHSeg = BVH_FILE_DATA.Model.Hips.Chest.Chest2.Chest3.Chest4.LeftCollar.LeftShoulder.LeftElbow.LeftWrist.Seg;
+    BVHSeg = {
+      AnyRefNode NAME_PARA_OPT##_Node0 = {
+        sRel = {0,0,0};
+        AnyDrawRefFrame drw ={};  
+        AnyRefNode Node1 = {
+          sRel = ..LHT1.sRel; 
+          AnyDrawNode drw ={};
+        };
+        AnyRefNode Node2 = {
+          sRel = ..LHT2.sRel;
+          AnyDrawNode drw ={};
+        };
+      }; // Wrist Node      
+    }; // BVHSeg  
+    
+    // Define values for drawing the HUMAN_SEG at the target point and orientation.
+    TargetFrameRef.NAME_PARA_OPT##_Node0 = {
+      AnyFileVar STLFilename = HUMAN_MODEL.BodyModel.Left.ShoulderArm.STL.FileNameHand;
+      AnyFloat STLPos = -..BVHSeg.NAME_PARA_OPT##_Node0.sRel+HUMAN_MODEL.BodyModel.Left.ShoulderArm.Seg.Hand.Ref.wj.sRel;
+      AnyMat33 STLOrientation = RotMat(-pi/2,x)*RotMat(-pi,y);
+      AnyFloat STLScale = {1,1,-1};
+      AnyFunTransform3D &STLTransform = HUMAN_MODEL.Scaling.GeometricalScaling.Left.Hand.ScaleFunction;
+    };    
+    #endif
+    
+    #if HUMAN_SEG == "RHAND"
+    // create nodes on the BVH model
+    AnyRefFrame &BVHSeg = BVH_FILE_DATA.Model.Hips.Chest.Chest2.Chest3.Chest4.RightCollar.RightShoulder.RightElbow.RightWrist.Seg;
+    BVHSeg = {
+      AnyRefNode NAME_PARA_OPT##_Node0 = {
+        sRel = {0,0,0};
+        AnyDrawRefFrame drw ={};  
+        AnyRefNode Node1 = {
+          sRel = ..RHT1.sRel; 
+          AnyDrawNode drw ={};
+        };
+        AnyRefNode Node2 = {
+          sRel = ..RHT2.sRel;
+          AnyDrawNode drw ={};
+        };
+      }; // Wrist Node      
+    }; // BVHSeg  
+    
+    // Define values for drawing the HUMAN_SEG at the target point and orientation.
+    TargetFrameRef.NAME_PARA_OPT##_Node0 = {
+      AnyFileVar STLFilename = HUMAN_MODEL.BodyModel.Right.ShoulderArm.STL.FileNameHand;
+      AnyFloat STLPos = -..BVHSeg.NAME_PARA_OPT##_Node0.sRel-HUMAN_MODEL.BodyModel.Right.ShoulderArm.Seg.Hand.Ref.wj.sRel;
+      AnyMat33 STLOrientation = RotMat(-pi/2,x);
+      AnyFloat STLScale = {1,1,1};
+      AnyFunTransform3D &STLTransform = HUMAN_MODEL.Scaling.GeometricalScaling.Right.Hand.ScaleFunction;
+    };    
+    #endif
+    
+    // Create Target nodes corresponding to the nodes defined on the BVH model
+    AnyRefFrame &TargetFrameRef = REF_FRAME_FOR_TARGET;
+    TargetFrameRef = {
+      AnyRefNode NAME_PARA_OPT##_Node0 = {
+        sRel = ...Target_Position;
+        ARel = ...Target_Orientation;
+        AnyDrawRefFrame drw ={ScaleXYZ = 0.15*{1,1,1}; RGB = {0.65,0.65,0.65};};
+        // Visualize target human segment
+        AnyDrawSurf drwSurf = {
+          FileName = .STLFilename;
+          RelPos = .STLPos;
+          RelRotMat = .STLOrientation;
+          ScaleXYZ = .STLScale;
+          Opacity = 0.3 + ....Functions.WeightFun(.t)[0]*0.5;
+//          RGB ={....Functions.WeightFun(.t)[0]*0.5,(....Settings.Weight-....Functions.WeightFun(.t)[0])*0.7,0.7*....Settings.Weight}/....Settings.Weight;
+          RGB = iffun(gtfun(....Functions.WeightFun(.t)[0],0),{0.2,0.8,0.2},{0.65,0.65,0.65});
+          AnyFunTransform3D &Scale = .STLTransform;
+        };
+        
+      };
+      AnyRefNode NAME_PARA_OPT##_Node1 = {
+        sRel = ..BVHSeg.NAME_PARA_OPT##_Node0.Node1.sRel*...Target_Orientation'+...Target_Position;
+        AnyDrawNode drw ={ScaleXYZ = 0.015*{1,1,1}; RGB = {0.65,0.65,0.65};Opacity = 0.5;};
+      };
+      AnyRefNode NAME_PARA_OPT##_Node2 = {
+        sRel = ..BVHSeg.NAME_PARA_OPT##_Node0.Node2.sRel*...Target_Orientation'+...Target_Position;
+        AnyDrawNode drw ={ScaleXYZ = 0.015*{1,1,1}; RGB = {0.65,0.65,0.65};Opacity = 0.5;};
+      };
+    }; // TargetFrameRef    
+    
+  }; // InputArgs
+  
+  // Define functions needed for the parameter optimization.
+  AnyFolder Functions = {
+    // WeightFun makes a square wave function to consider the active time interval.
+    // WeightFun is equal to the weight value in the active time interval and zero
+    // outside the active time interval
+    AnyFunSquareWave WeightFun = 
+    {
+      InitialValues = {0.0} + 0*..InputArgs.Error_ActiveTimeInterval; // Enforce Active Time Interval error
+      Ts = {..Active_Time_Start,..Active_Time_End};
+      Values = {{..Settings.Weight,0}};
+      dT = ..Settings.dt_Ratio*(Ts[1]-Ts[0]);
+    };
+    
+    // Create constant interpol functions that will be used to drive the linear measure between
+    // BVH model nodes and target nodes to zero.
+    AnyFunInterpol DriverPosNode0 = {
+      Type = ConstantValue;
+      T = BVH_FILE_DATA.Data.Abscissa.Sample*BVH_FILE_DATA.Header.FrameTime;
+      Data = {repmat(SizesOf(T)[0], 0),
+              repmat(SizesOf(T)[0], 0),
+              repmat(SizesOf(T)[0], 0)};
+    };
+    AnyFunInterpol DriverPosNode1 = {
+      Type = ConstantValue;
+      T = BVH_FILE_DATA.Data.Abscissa.Sample*BVH_FILE_DATA.Header.FrameTime;
+      Data = {repmat(SizesOf(T)[0], 0),
+              repmat(SizesOf(T)[0], 0),
+              repmat(SizesOf(T)[0], 0)};
+    };  
+    AnyFunInterpol DriverPosNode2 = {
+      Type = ConstantValue;
+      T = BVH_FILE_DATA.Data.Abscissa.Sample*BVH_FILE_DATA.Header.FrameTime;
+      Data = {repmat(SizesOf(T)[0], 0),
+              repmat(SizesOf(T)[0], 0),
+              repmat(SizesOf(T)[0], 0)};
+    };
+    
+  };// Functions
+  
+  // Define a variable that will be used to set the Origin and Axes value of the BVH origin
+  AnyFolder BVHOrigin = {
+    AnyFloat NAME_PARA_OPT = .Settings.InitialGuess;
+    AnyFixedRefFrame &BVHOriginRef = BVH_FILE_DATA.Model.GlobalRef;
+    BVHOriginRef = {
+      // Set origin and axes only for the primary use of class template.
+      #if REPEAT_USE == 0
+      Origin = {.NAME_PARA_OPT[0], .NAME_PARA_OPT[1], .NAME_PARA_OPT[2]};
+      Axes = RotMat(.NAME_PARA_OPT[3],x)
+            *RotMat(.NAME_PARA_OPT[4],y)
+            *RotMat(.NAME_PARA_OPT[5],z);
+      #else
+      #endif
+    };    
+  }; // BVH Origin
+  
+  // Insert conditionally the parameter used to set the BVH origin in the existing parameter optimization study
+  // and create drivers between BVH model nodes and target nodes.  
+  AnyFolder &ParaOptStudy = PARAMETER_OPT_STUDY;
+  
+  ParaOptStudy = {    
+    // Insert design variables only in case of primary use of the class template.
+    #if REPEAT_USE == 0
+    // and only if they are required to be optimized.
+    #if OPT_LIN_X == 1
+    AnyDesVar NAME_PARA_OPT##_LinX = {
+      Val = ..BVHOrigin.NAME_PARA_OPT[0];
+    };
+    #endif
+    #if OPT_LIN_Y == 1
+    AnyDesVar NAME_PARA_OPT##_LinY = {
+      Val = ..BVHOrigin.NAME_PARA_OPT[1];
+    };
+    #endif
+    #if OPT_LIN_Z == 1
+    AnyDesVar NAME_PARA_OPT##_LinZ = {
+      Val = ..BVHOrigin.NAME_PARA_OPT[2];
+    };
+    #endif
+    #if OPT_ROT_X == 1
+    AnyDesVar NAME_PARA_OPT##_RotX = {
+      Val = ..BVHOrigin.NAME_PARA_OPT[3];
+    };
+    #endif
+    #if OPT_ROT_Y == 1
+    AnyDesVar NAME_PARA_OPT##_RotY = {
+      Val = ..BVHOrigin.NAME_PARA_OPT[4];
+    };
+    #endif
+    #if OPT_ROT_Z == 1
+    AnyDesVar NAME_PARA_OPT##_RotZ = {
+      Val = ..BVHOrigin.NAME_PARA_OPT[5];
+    };
+    #endif
+    
+    #else
+    #endif
+    KinematicStudyForParameterIdentification = {
+      
+      #if REPEAT_USE == 0
+      // include BVH model in the optimization study (only for primary use)
+      AnyFolder &mocapmodel = BVH_FILE_DATA;
+      #else
+      #endif
+      
+      // Create Drivers between BVH model nodes and target nodes. The drivers are
+      // created inside a folder that can be uniquely named using NAME_PARA_OPT
+      AnyFolder NAME_PARA_OPT##_OptDrivers = {
+                
+        AnyKinMotion Node0 = {
+          viewKinMeasure.Size = 0.2;
+          WeightFun = {&....Functions.WeightFun,
+                       &....Functions.WeightFun,
+                       &....Functions.WeightFun};
+          AnyKinLinear Lin = {
+            AnyRefFrame &BVHPoint = .....InputArgs.BVHSeg.NAME_PARA_OPT##_Node0;
+            AnyRefFrame &TargetPoint = .....InputArgs.TargetFrameRef.NAME_PARA_OPT##_Node0;
+          };
+          AnyParamFun &target = ....Functions.DriverPosNode0;
+        };
+        
+        AnyKinMotion Node1 = {
+          viewKinMeasure.Size = 0.2;
+          WeightFun = {&....Functions.WeightFun,
+                       &....Functions.WeightFun,
+                       &....Functions.WeightFun};
+          AnyKinLinear Lin = {
+            AnyRefFrame &BVHPoint = .....InputArgs.BVHSeg.NAME_PARA_OPT##_Node0.Node1;
+            AnyRefFrame &TargetPoint = .....InputArgs.TargetFrameRef.NAME_PARA_OPT##_Node1;
+          };
+          AnyParamFun &target = ....Functions.DriverPosNode1;
+        };
+        
+        AnyKinMotion Node2 = {
+          viewKinMeasure.Size = 0.2;
+          WeightFun = {&....Functions.WeightFun,
+                       &....Functions.WeightFun,
+                       &....Functions.WeightFun};
+          AnyKinLinear Lin = {
+            AnyRefFrame &BVHPoint = .....InputArgs.BVHSeg.NAME_PARA_OPT##_Node0.Node2;
+            AnyRefFrame &TargetPoint = .....InputArgs.TargetFrameRef.NAME_PARA_OPT##_Node2;
+          };
+          AnyParamFun &target = ....Functions.DriverPosNode2;
+        }; 
+         
+      }; // OptDriver
+    };//KinStudyForParaIden
+    
+  }; // ParaOptStudy
+  
+  // Define a sequence of operations to run the the parameter study, update and save values.
+  #if REPEAT_USE == 0
+  Main = { 
+    AnyOperationSequence RunBVH_Origin_Optimization = 
+    {
+      AnyOperation& ParameterOptimization = PARAMETER_OPT_STUDY.ParameterOptimization;
+      AnyOperationMacro UpdateValues = {
+        MacroStr = {"classoperation Main " + strquote("Update Values")};
+      };
+      AnyOperation& SaveParameters = Main.ModelSetup.Macros.Save_parameters;      
+    };
+  };
+  #else
+  #endif
+
+  // Error message for wrong choice of HUMAN_SEG
+  #else
+  AnyInt Error_HumanSeg = assert(0,strformat("Please check choice of HUMAN_SEG. Only one of \x22LFOOT\x22, \x22RFOOT\x22, \x22LHAND\x22, or \x22RHAND\x22 is allowed."));   
+  #endif
+  
+}; // class template
+
