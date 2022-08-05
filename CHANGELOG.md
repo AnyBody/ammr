@@ -23,6 +23,10 @@
   ```
 
 **Changed:**
+* The load-time position of the box in the {ref}`BVH_BoxLift model <sphx_glr_auto_examples_Mocap_plot_BVH_BoxLift.py>` is now 
+  calculated using the position of the hands. Also, `Main.ModelSetup.EnvironmentParameters.GravityDirection` defined in `box.any` file
+  is now calculated automatically from `Main.ModelSetup.LabSpecificData.Gravity` defined in `LabSpecificData.any` file. These changes should 
+  make the model more robust when dealing with different bvh files.
 * It is no longer necessasry to supply the `MarkerName` argument in the CreateMarkerDriver template
   MoCap models. The argument can still be used if the marker name and the data entry in the c3d file 
   are different. 
