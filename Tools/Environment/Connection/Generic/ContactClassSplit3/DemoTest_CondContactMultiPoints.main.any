@@ -1,19 +1,22 @@
 #include "../../../../libdef.any"
 #include "EllipticCylinderPointsGrid.any"
+//#include "Split/CondContPackageCT.any"
+//#include "Split/ContDetAndEleClass.any"
 #include "Split/FMM2.any"
 #include "Split/DrawResultant.any"
+
+#include "Split/ContDetClass.any"
+#include "Split/ContactConditionSmoothingClass.any"
+#include "Split/CreateContactElementClass.any"
+#include "Split/RepeaterCT.any"
 
 #include "Split/KinMsrClass.any"
 #include "Split/CylContDetClass.any"
 #include "Split/CylContDetClass2.any"
-#include "Split/ContactConditionSmoothingClass.any"
 #include "Split/ContactConditionSmoothingClass2.any"
-#include "Split/CreateContactElementClass.any"
-#include "Split/CreateContactElementClass2.any"
-#include "Split/RepeaterCT.any"
+#include "Split/CreateContactElementClass3.any"
 
-
-//#include "ConditionalContactMultiPoints.any"
+#include "ConditionalContactMultiPoints.any"
 //#include "ConditionalContactDistanceAndVelocityDepClass.any"
 
 /**
@@ -71,12 +74,12 @@ Main = {
         r0 = {0.2,0.1,0.0};
         Mass = 20.0;
         Jii = {0.05,0.1,0.1};
-//        AnyDrawSeg DrwSeg= { RGB = {1,0,0};Opacity = 0.2;};
+        AnyDrawSeg DrwSeg= { RGB = {1,0,0};Opacity = 0.2;};
       }; // seg1
 
       AnySeg Seg2 = {
         r0 = {0.2,0.1,0.0};
-        Mass = 10.0;
+        Mass = 0.0;
         Jii = {0.05,0.1,0.1};
         AnyRefNode LoadNode = {sRel = {0.5,0.0,0};};        
         AnyDrawSeg DrwSeg= { RGB = {0,1,0};Opacity = 0.2;};
@@ -97,28 +100,12 @@ Main = {
       
       // Joint between Seg2 and Global ref. Note, reactions from the joint
       // are disabled. These will be provided by the contact elements
-//      AnyStdJoint JntS2 = {
-//        AnyRefFrame &Ground = Main.Model.GlobalRef.N1;
-//        AnySeg &Seg = Main.Model.Seg2;
-//        // Switch off reaction forces between S2 and ground
-//        Constraints.Reaction.Type = repmat(6,Off);
-//      };
-      
-      AnyCylindricalJoint JntS2 = {
+      AnyStdJoint JntS2 = {
         AnyRefFrame &Ground = Main.Model.GlobalRef.N1;
         AnySeg &Seg = Main.Model.Seg2;
-        Axis = x;
         // Switch off reaction forces between S2 and ground
-        Constraints.Reaction.Type = repmat(Constraints.nDim,Off);
+        Constraints.Reaction.Type = repmat(6,Off);
       };
-      
-      AnyKinEqSimpleDriver rotation = {
-      AnyJoint &Jnt = .JntS2;
-      DriverPos = {0,0};
-      DriverVel = {0.0, 0*pi/180};
-      Reaction.Type = {Off,Off};      
-};
-      
     }; // Joints
     
     
@@ -133,21 +120,21 @@ Main = {
       AnyFloat tEnd = Main.Study.tEnd;
       AnyFloat tSim = tEnd - tStart;
       // Rotating force on Seg2 in YZ plane for first half interval
-      AnyForce3D ForceYZPlane = {
-        AnyRefFrame &Seg2 = Main.Model.Seg2.LoadNode;        
-        F = iffun(ltfun(t,.tStart+0.5*.tSim),300*{0,sin(2*(t-.tStart)*2*pi/.tSim),cos(2*(t-.tStart)*2*pi/.tSim)},{0.0,0.0,0.0});
-        AnyDrawForce drw = {};
-      };
-      // Rotating force on Seg2 in XZ plane for second half interval
-      AnyForce3D ForceXZPlane = {
-        AnyRefFrame &Seg2 = Main.Model.Seg2.LoadNode;
-        F = iffun(gtfun(t,.tStart+0.5*.tSim),300*{sin(2*(t-.tStart)*2*pi/.tSim),0,cos(2*(t-.tStart)*2*pi/.tSim)},{0.0,0.0,0.0});
-        AnyDrawForce drw = {};
-      };
+//      AnyForce3D ForceYZPlane = {
+//        AnyRefFrame &Seg2 = Main.Model.Seg2.LoadNode;        
+//        F = iffun(ltfun(t,.tStart+0.5*.tSim),300*{0,sin(2*(t-.tStart)*2*pi/.tSim),cos(2*(t-.tStart)*2*pi/.tSim)},{0.0,0.0,0.0});
+//        AnyDrawForce drw = {};
+//      };
+//      // Rotating force on Seg2 in XZ plane for second half interval
+//      AnyForce3D ForceXZPlane = {
+//        AnyRefFrame &Seg2 = Main.Model.Seg2.LoadNode;
+//        F = iffun(gtfun(t,.tStart+0.5*.tSim),300*{sin(2*(t-.tStart)*2*pi/.tSim),0,cos(2*(t-.tStart)*2*pi/.tSim)},{0.0,0.0,0.0});
+//        AnyDrawForce drw = {};
+//      };
       // Static Force on Seg2 
       AnyForce3D StaticForce = {
         AnyRefFrame &Seg2 = Main.Model.Seg2.LoadNode;
-        F = {0,-200,0};
+        F = {200,0,0};
         AnyDrawForce drw = {};
       };
       
@@ -158,8 +145,8 @@ Main = {
           CENTER_FRAME = Main.Model.Seg2,
           AXIS = "X") = {
             Length = 0.20;
-            Maj_ax = 0.10 + 0.0;
-            Min_ax = 0.08 + 0.0;
+            Maj_ax = 0.10;
+            Min_ax = 0.08;
             nRows = 4;
             nCols = 4;
           };
@@ -171,12 +158,13 @@ Main = {
             Maj_ax = 0.10;
             Min_ax = 0.08;
             nRows = .SplitBaseNodes.nRows;
-            nCols = .SplitBaseNodes.nCols; Settings.NodesRotOffset = RotMat(0*pi/180,x);
+            nCols = .SplitBaseNodes.nCols;
           };
           AnyInt nPoints = SplitBaseNodes.nRows*SplitBaseNodes.nCols;
         }; // Points 
-        
-        
+    //////////////////////////////////////////////////////7777777777777777777777777777777777777777777777777777    
+    //////////////////////////////////////////////////////7777777777777777777777777777777777777777777777777777    
+
         AnyFolder InitializationArgs = {
           AnyVar UserDefinedDistLimitLow = -0.01;
           AnyVar UserDefinedDistLimitHigh = 0.01;
@@ -216,6 +204,11 @@ Main = {
 //          AnyObjectPtr Vels2 = ObjSearchRecursive(CompleteNameOf(&), "*.ref.Vel","AnyFloat",3);
          
           };
+//          AnyKinMeasureOrg MeasuresOrgNormal = {};
+//          AnyKinMeasureOrg MeasuresOrgFriction1 = {};
+//          AnyKinMeasureOrg MeasuresOrgFriction2 = {};
+          
+          
           CreateManySubTemplates Measures (
           NUM=16,
           T_NAME= "KinMsrClass",
@@ -227,7 +220,19 @@ Main = {
           ARG5="Y"
           //        ARG_INI_SWITCH = 1,
           //        ARG_INI =..InitializationArgs
-          )={};
+          )={
+          
+          AnyKinMeasureOrg MeasuresNormal = {};
+          AnyKinMeasureOrg MeasuresFriction1 = {};
+          AnyKinMeasureOrg MeasuresFriction2 = {};
+          AnyFloat NormalPos = MeasuresNormal.Pos;
+          AnyFloat Friction1Pos = MeasuresFriction1.Pos;
+          AnyFloat Friction2Pos = MeasuresFriction2.Pos;
+
+          AnyFloat NormalVel = MeasuresNormal.Vel;
+          AnyFloat Friction1Vel = MeasuresNormal.Vel;
+          AnyFloat Friction2Vel = MeasuresNormal.Vel;
+        };
         };
         
         AnyFolder ContDetect = {
@@ -235,22 +240,22 @@ Main = {
           
           
           CylContDetClass2 ContCheck (
-          ARG1 = Main.Model.Kinetics.ContClassSplit.KinMeasures.MeasuresOrg,
+          ARG1 = Main.Model.Kinetics.ContClassSplit.KinMeasures.Measures,
           ARG_INI_SWITCH = 1,
           ARG_INI =..InitializationArgs) = {};
           
-          CreateManySubTemplates ContDet (
-          NUM=16,
-          T_NAME= "CylContDetClass",
-          NAME_PREFIX="",
-          ARG1=...KinMeasures.Measures,
-          ARG2="",
-          ARG3=1,
-          ARG4=1,
-          ARG5="Y",
-          ARG_INI_SWITCH = 1,
-          ARG_INI =...InitializationArgs
-          )={};
+//          CreateManySubTemplates ContDet (
+//          NUM=16,
+//          T_NAME= "CylContDetClass",
+//          NAME_PREFIX="",
+//          ARG1=...KinMeasures.Measures,
+//          ARG2="",
+//          ARG3=1,
+//          ARG4=1,
+//          ARG5="Y",
+//          ARG_INI_SWITCH = 1,
+//          ARG_INI =...InitializationArgs
+//          )={};
         };
         AnyFolder ContDetectSmooth = {
           ContactConditionSmoothing2 RadiusSmoothing (
@@ -273,26 +278,26 @@ Main = {
 
           AnyFloat SmoothingFun = mult(mult(RadiusSmoothing.SmoothingFun,HeightSmoothing.SmoothingFun),VelocitySmoothing.SmoothingFun);
 
-          CreateManySubTemplates ContDetSmoothing (
-          NUM=16,
-          T_NAME= "ContactConditionSmoothing",
-          NAME_PREFIX="",
-          ARG1="FUNC_PROFILE_LINEAR",
-          ARG2=Main.Model.Seg1.SplitTargetNodes,
-          ARG3=0,
-          ARG4=0,
-          ARG5="Y",
-          ARG_INI_SWITCH = 1,
-          ARG_INI =...ContDetect.ContDet
-          )={};
+//////          CreateManySubTemplates ContDetSmoothing (
+//////          NUM=16,
+//////          T_NAME= "ContactConditionSmoothing",
+//////          NAME_PREFIX="",
+//////          ARG1="FUNC_PROFILE_LINEAR",
+//////          ARG2=Main.Model.Seg1.SplitTargetNodes,
+//////          ARG3=0,
+//////          ARG4=0,
+//////          ARG5="Y",
+//////          ARG_INI_SWITCH = 1,
+//////          ARG_INI =...ContDetect.ContDet
+//////          )={};
         };
         AnyFolder ContElements = {
           CreateManySubTemplates ContEles (
           NUM=16,
-          T_NAME= "CreateContactElements2",
+          T_NAME= "CreateContactElements3",
           NAME_PREFIX="",
           ARG1=...KinMeasures.Measures,
-          ARG2=...ContDetect.ContDet,
+          ARG2=0,
 //          ARG3=0,
 //          ARG4=0,
           ARG5=...ContDetectSmooth.SmoothingFun,
@@ -313,28 +318,112 @@ Main = {
 //          ARG_INI =...InitializationArgs
 //          )={};
         };
-        
-        AnyFolder ResultantForce = {
-          
-          FMM2 fmm (
-          BASE_FRAME =Main.Model.Seg2,
-          BASE_SEG = Main.Model.Seg2,
-          FORCE_FOLDER = ..ContElements.ContEles) = {}; 
-          
-        };
-        
-        AnyFolder Visualization = {
-          DrawResultant DrawFMM (
-          ARG1 = Main.Model.Seg2,
-          ARG2 = ..ResultantForce.fmm.FLocal,
-          ARG3 = ..ResultantForce.fmm.MLocal
-          ) ={
-            //  FLocal = ..ResultantForce.fmm.FLocal;
-            //  MLocal = ..ResultantForce.fmm.MLocal;
-          };
-        };
-        
-        
+
+
+    //////////////////////////////////////////////////////7777777777777777777777777777777777777777777777777777    
+    //////////////////////////////////////////////////////7777777777777777777777777777777777777777777777777777    
+//          AnyFolder InitializationArgs = {
+//            AnyVar UserDefinedDistLimitLow = -0.01;
+//            AnyVar UserDefinedDistLimitHigh = 0.01;
+//            AnyVar UserDefinedRadiusLimit=0.02;
+//            AnyVar UserDefinedVelLimitHigh= 0.8;
+//            AnyVec3 UserDefinedGroundVel = {0,0,0};
+//            AnyVar Strength = 500;
+//            AnyVar StaticFrictionCoefficient = 0.5;
+//            AnyVar ScaleFactor = 1;
+//          };
+//
+//AnyFolder KinMeasures = {
+//  AnyKinMeasureOrg MeasureOrg = {};
+//CreateManySubTemplates Measures (
+//        NUM=16,
+//        T_NAME= "KinMsrClass",
+//        NAME_PREFIX="",
+//        ARG1=...Points.SplitBaseNodes.CenterFrame.SplitBaseNodes,
+//        ARG2=...Points.SplitTargetNodes.CenterFrame.SplitTargetNodes,
+//        ARG3=AnyKinLinear, 
+//        ARG4=..MeasureOrg,
+//        ARG5="Y"
+////        ARG_INI_SWITCH = 1,
+////        ARG_INI =..InitializationArgs
+//        )={
+//          AnyKinMeasureOrg MeasuresNormal = {};
+//          AnyKinMeasureOrg MeasuresFriction1 = {};
+//          AnyKinMeasureOrg MeasuresFriction2 = {};
+//        };
+//};
+//
+//AnyFolder ContDetect = {
+//AnyInt f = 16;
+//CreateManySubTemplates ContDet (
+//        NUM=16,
+//        T_NAME= "CylContDetClass",
+//        NAME_PREFIX="",
+////        ARG1=Main.Model.Seg2.SplitBaseNodes,
+//        ARG1=...KinMeasures.Measures,
+//        ARG2="",
+//        ARG3=1,
+//        ARG4=1,
+//        ARG5="Y",
+//        ARG_INI_SWITCH = 1,
+//        ARG_INI =...InitializationArgs
+//        )={};
+//};
+//AnyFolder ContDetectSmooth = {
+//CreateManySubTemplates ContDetSmoothing (
+//        NUM=16,
+//        T_NAME= "ContactConditionSmoothing",
+//        NAME_PREFIX="",
+////        ARG1=Main.Model.Seg2.SplitBaseNodes,
+//        ARG1="FUNC_PROFILE_LINEAR",
+//        ARG2=Main.Model.Seg1.SplitTargetNodes,
+//        ARG3=0,
+//        ARG4=0,
+//        ARG5="Y",
+//        ARG_INI_SWITCH = 1,
+//        ARG_INI =...ContDetect.ContDet
+//        )={};
+//};
+//AnyFolder ContElements = {
+//CreateManySubTemplates ContEles (
+//        NUM=16,
+//        T_NAME= "CreateContactElements",
+//        NAME_PREFIX="",
+//        ARG1=...KinMeasures.Measures,
+//        ARG2=...ContDetect.ContDet,
+//        ARG3=1000,
+//        ARG4=0.5,
+//        ARG5=...ContDetectSmooth.ContDetSmoothing,
+//        ARG_INI_SWITCH = 1,
+//        ARG_INI =...InitializationArgs
+//        )={};
+//};
+
+
+    //////////////////////////////////////////////////////7777777777777777777777777777777777777777777777777777    
+    //////////////////////////////////////////////////////7777777777777777777777777777777777777777777777777777    
+
+AnyFolder ResultantForce = {
+
+FMM2 fmm (
+BASE_FRAME =Main.Model.Seg2,
+BASE_SEG = Main.Model.Seg2,
+FORCE_FOLDER = ..ContElements.ContEles) = {}; 
+
+};
+
+AnyFolder Visualization = {
+  DrawResultant DrawFMM (
+  ARG1 = Main.Model.Seg2,
+ARG2 = ..ResultantForce.fmm.FLocal,
+ARG3 = ..ResultantForce.fmm.MLocal
+) ={
+//  FLocal = ..ResultantForce.fmm.FLocal;
+//  MLocal = ..ResultantForce.fmm.MLocal;
+  };
+};
+
+
       }; // ContClassSplit
       
       
@@ -419,7 +508,6 @@ Main = {
     AnyFolder& Model = Main.Model;
     Gravity = {0,-9.81,0};    
     nStep = 100;
-    tEnd= 20;
   };
   
   // Switch to define an automatic save of results to the Output folder
