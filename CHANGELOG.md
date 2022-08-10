@@ -8,6 +8,8 @@
 **Fixed:**
 * The `Main.ModelSetup.CreateVideo` operation was missing in some of the
   MoCap examples. This has been fixed. If you have this problem update the `CreateVideo.any` file in your application. 
+* Fixed wrapping problem with the posterior deltoid muscle in the 2 parameter shoulder calibration. 
+
 
 **Added:**
 
@@ -21,6 +23,7 @@
      FileName= "MyFile.anyset";
   };
   ```
+* 
 
 **Changed:**
 * It is no longer necessasry to supply the `MarkerName` argument in the CreateMarkerDriver template
