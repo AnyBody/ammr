@@ -1,0 +1,405 @@
+#class_template CylContDetClass2 (
+IDX = 0,
+ARG1 = KinMsr, // Name until the index
+ARG2 = 0, // Unused
+ARG3 = 0, // DisplayTriggerVolume
+ARG4 = 0, // DisplayTargetNode
+ARG5 = "Z", // Normal Direction
+ARG_INI_SWITCH = 0, 
+ARG_INI = NOT_DEFINED)
+
+{
+//#if IDX < 10
+//  AnyKinMeasure &Lin = ARG1.ARG2##_00##IDX.Lin;
+//#endif
+//#if (IDX > 9) & (IDX < 100)
+//AnyKinMeasure &Lin = ARG1.ARG2##_0##IDX.Lin;
+//#endif
+//#if IDX > 99
+//  AnyKinMeasure &Lin = ARG1.ARG2##_##IDX.Lin;
+//#endif
+
+
+#if ARG_INI_SWITCH == 0
+  //low limit for the strength measure function, if the distance measured along Direction[0] is below this val. the strength will be zero (negative)
+  #var AnyVar UserDefinedDistLimitLow = DesignVar(-0.01); 
+  //high limit for the strength measure function, if the distance measured along Direction[0] is above this val. the strength will be zero
+  #var AnyVar UserDefinedDistLimitHigh = DesignVar(0.01) ;   
+  //high limit for the strength measure function, if the radius measured along the plane with Direction[0] as normal is above this val. the strength will be zero
+  #var AnyVar UserDefinedRadiusLimit= DesignVar(0.02);  
+  //high limit for the strength measure function, if the velocity measured is above this val. the strength will be zero
+  #var AnyVar UserDefinedVelLimitHigh= DesignVar(0.8); 
+  
+  #var AnyVec3 UserDefinedGroundVel = {0,0,0};
+  
+  #var AnyVar Strength = DesignVar(1000);  //strength of muscles
+  #var AnyVar StaticFrictionCoefficient = DesignVar(0.5); //Friction coefficient
+  #var AnyVar ScaleFactor = DesignVar(1); //scale factor for draw vectors it can be set differently than by the drawsettings
+    
+#else
+  AnyFolder& InitializationArgs = ARG_INI;
+  //low limit for the strength measure function, if the distance measured along Direction[0] is below this val. the strength will be zero (negative)
+  #var AnyVar UserDefinedDistLimitLow = ARG_INI.UserDefinedDistLimitLow; 
+  //high limit for the strength measure function, if the distance measured along Direction[0] is above this val. the strength will be zero
+  #var AnyVar UserDefinedDistLimitHigh = ARG_INI.UserDefinedDistLimitHigh ;   
+  //high limit for the strength measure function, if the radius measured along the plane with Direction[0] as normal is above this val. the strength will be zero
+  #var AnyVar UserDefinedRadiusLimit = ARG_INI.UserDefinedRadiusLimit;  
+  //high limit for the strength measure function, if the velocity measured is above this val. the strength will be zero
+  #var AnyVar UserDefinedVelLimitHigh = ARG_INI.UserDefinedVelLimitHigh; 
+  
+  #var AnyVec3 UserDefinedGroundVel = ARG_INI.UserDefinedGroundVel;
+#endif
+  
+  AnyFloat LinMeasureOrgPosNormal = ARG1.MeasuresNormal.Pos;
+  AnyFloat LinMeasureOrgPosFriction1 = ARG1.MeasuresFriction1.Pos;
+  AnyFloat LinMeasureOrgPosFriction2 = ARG1.MeasuresFriction2.Pos;
+  AnyFloat LinVel = {ARG1.MeasuresNormal.Vel, ARG1.MeasuresFriction1.Vel, ARG1.MeasuresFriction2.Vel};
+  AnyFloat GroundVel = repmat(1,SizesOf(LinMeasureOrgPosNormal)[0],UserDefinedGroundVel);
+
+
+  AnyFloat UserDefinedDistMeasure=LinMeasureOrgPosNormal;
+  AnyFloat RadiusMeasure=sqrt(LinMeasureOrgPosFriction1^2+LinMeasureOrgPosFriction2^2);
+  AnyFloat UserDefinedVelMeasure = vnorm(LinVel'-repmat(1,SizesOf(LinVel)[1],UserDefinedGroundVel)',2);
+//  
+  AnyFloat LowerThanHighDistLimit = ltfun(UserDefinedDistMeasure,UserDefinedDistLimitHigh);
+  AnyFloat GreaterThanLowDistLimit = gtfun(UserDefinedDistMeasure,UserDefinedDistLimitLow);
+  AnyFloat LowerThanRadiusLimit = ltfun(RadiusMeasure,UserDefinedRadiusLimit);
+  AnyFloat LowerThanHighVelLimit = ltfun(UserDefinedVelMeasure,UserDefinedVelLimitHigh);
+////  AnyVar UserDefinedStrengthFunction= .Strength;
+//  
+  AnyFloat VelSize = UserDefinedVelMeasure;//vnorm(LinS.Vel, 2);
+  AnyFloat VelRatio = VelSize /UserDefinedVelLimitHigh ;  
+//  
+  AnyFloat ContactDisCheck = andfun(andfun(LowerThanHighDistLimit,GreaterThanLowDistLimit),LowerThanRadiusLimit);
+  AnyFloat HeightRatio = iffun(gteqfun(UserDefinedDistMeasure, 0.0), 
+                                  UserDefinedDistMeasure/UserDefinedDistLimitHigh,
+                                  iffun(lteqfun(abs(UserDefinedDistMeasure/UserDefinedDistLimitLow), 1.0), 0.0, 1.0));
+  AnyFloat RadiusRatio = RadiusMeasure/UserDefinedRadiusLimit;
+
+  AnyFloat ContactCondDisAndVel = iffun(andfun(andfun(andfun(LowerThanHighDistLimit,GreaterThanLowDistLimit),LowerThanRadiusLimit),LowerThanHighVelLimit), 1.0, 0.0);
+  AnyFloat ContactCondDis = iffun( andfun(andfun(LowerThanHighDistLimit,GreaterThanLowDistLimit),LowerThanRadiusLimit),1.0,0.0);
+  
+};
+
+/////////////////////// STILL MISSING CODE FOR DRAWING OBJECTS /////////////////////////////////
+//  #if (ARG3)
+//  Lin.BaseObject = {
+//    AnyRefNode CylRotNode = {
+//      sRel = {0,0,0};
+//      ARel = RotMat(...RotCoefY*...GlobalRotCoef*pi/2,y)*RotMat(...RotCoefX*...GlobalRotCoef*pi/2,x);
+//      AnyRefNode CylNode = {
+//        sRel = {0,0,....UserDefinedDistLimitLow};
+//        AnySurfCylinder TriggerCyl = 
+//        {
+//          Radius = .....UserDefinedRadiusLimit;
+//          Length = - .....UserDefinedDistLimitLow + .....UserDefinedDistLimitHigh;
+//          CapRatio = 0.001;
+//          AnyDrawParamSurf Draw = 
+//          {
+//            Visible = On;
+//            Opacity = 0.5;
+//          };
+//        };
+//      };
+//    };
+//  };
+//  #endif
+//  
+//  #if (ARG4)
+//  Lin.TargetObject = {
+//    AnyDrawNode DrawContactTarget = {
+//      ScaleXYZ = {1,1,1}*0.015;
+//    };
+//  };
+//  #endif
+//  
+//      #if ARG5 == "Z"
+//    #var AnyInt NormalDirection = 2;
+//    #var AnyInt FrictionDirection1 = 0;
+//    #var AnyInt FrictionDirection2 = 1;
+//    #endif
+//    
+//    #if ARG5 == "Y"
+//    #var AnyInt NormalDirection = 1;
+//    #var AnyInt FrictionDirection1 = 0;
+//    #var AnyInt FrictionDirection2 = 2;
+//    #endif
+//    
+//    #if ARG5 == "X"
+//    #var AnyInt NormalDirection = 0;
+//    #var AnyInt FrictionDirection1 = 1;
+//    #var AnyInt FrictionDirection2 = 2;
+//    #endif 
+//
+////  AnyInt X = 0;
+////  AnyInt Y = 1;
+////  AnyInt Z = 2;
+//  
+//  AnyVar GlobalRotCoef = iffun(2-NormalDirection,1,0); // 0 if z is normal, if not 1
+//  AnyVar RotCoefY = iffun(NormalDirection,0,1);
+//  AnyVar RotCoefX = iffun(NormalDirection,-1,0);
+//  
+//  AnyIntArray Direction = {NormalDirection,FrictionDirection1,FrictionDirection2}; //first element gives normal direction
+//
+//  AnyKinMeasureOrg LinMeasureOrg0 ={
+//    AnyKinLinear &ref=.Lin;
+//    MeasureOrganizer={.Direction[0]};
+//  };
+//  
+//  AnyKinMeasureOrg LinMeasureOrg1 ={
+//    AnyKinLinear &ref=.Lin;
+//    MeasureOrganizer={.Direction[1]};
+//  };
+//  
+//  AnyKinMeasureOrg LinMeasureOrg2 ={
+//    AnyKinLinear &ref=.Lin;
+//    MeasureOrganizer={.Direction[2]};
+//  };
+//  
+//  
+//  AnyVar UserDefinedDistMeasure=LinMeasureOrg0.Pos[0];
+//  AnyVar RadiusMeasure=sqrt(LinMeasureOrg1.Pos[0]^2+LinMeasureOrg2.Pos[0]^2);
+//  AnyVar UserDefinedVelMeasure = vnorm(Lin.Vel-UserDefinedGroundVel,2);
+//  
+//  AnyFloatVar LowerThanHighDistLimit = ltfun(UserDefinedDistMeasure,UserDefinedDistLimitHigh);
+//  AnyFloatVar GreaterThanLowDistLimit = gtfun(UserDefinedDistMeasure,UserDefinedDistLimitLow);
+//  AnyFloatVar LowerThanRadiusLimit = ltfun(RadiusMeasure,UserDefinedRadiusLimit);
+//  AnyFloatVar LowerThanHighVelLimit = ltfun(UserDefinedVelMeasure,UserDefinedVelLimitHigh);
+////  AnyVar UserDefinedStrengthFunction= .Strength;
+//  
+//  AnyVar VelSize = UserDefinedVelMeasure;//vnorm(LinS.Vel, 2);
+//  AnyVar VelRatio = VelSize /UserDefinedVelLimitHigh ;  
+//  
+//  AnyFloatVar ContactDisCheck = andfun(andfun(LowerThanHighDistLimit,GreaterThanLowDistLimit),LowerThanRadiusLimit);
+//  AnyFloatVar HeightRatio = iffun(gteqfun(UserDefinedDistMeasure, 0.0), 
+//                                  UserDefinedDistMeasure/UserDefinedDistLimitHigh,
+//                                  iffun(lteqfun(abs(UserDefinedDistMeasure/UserDefinedDistLimitLow), 1.0), 0.0, 1.0));
+//  AnyFloatVar RadiusRatio = RadiusMeasure/UserDefinedRadiusLimit;
+//
+//  AnyVar ContactCondDisAndVel = iffun(andfun(andfun(andfun(LowerThanHighDistLimit,GreaterThanLowDistLimit),LowerThanRadiusLimit),LowerThanHighVelLimit), 1.0, 0.0);
+//  AnyVar ContactCondDis = iffun( andfun(andfun(LowerThanHighDistLimit,GreaterThanLowDistLimit),LowerThanRadiusLimit),1.0,0.0);
+//
+
+
+//
+//    AnyFolder Push = {
+//     #include  "ContactDetectionCondition.any"
+////     #include  "ContactConditionSmoothing.any"
+////     #include  "CreateContactElement.any" 
+//   };
+
+
+//  AnyRefFrame &BaseObject = ARG1.Node##IDX;
+//  AnyRefFrame &TargetObject = ARG2.Node##IDX;
+//  AnyRefFrame &StrengthObject = ARG2.Node##IDX;
+//  AnyComponentDefinition obj = {};
+//  AnyFolder &DrawRef=Main.DrawSettings; //reference to the folder which contains drawsettings
+//  
+//
+//  
+//#if ARG_INI_SWITCH == 0
+//  //low limit for the strength measure function, if the distance measured along Direction[0] is below this val. the strength will be zero (negative)
+//  #var AnyVar UserDefinedDistLimitLow = DesignVar(-0.01); 
+//  //high limit for the strength measure function, if the distance measured along Direction[0] is above this val. the strength will be zero
+//  #var AnyVar UserDefinedDistLimitHigh = DesignVar(0.01) ;   
+//  //high limit for the strength measure function, if the radius measured along the plane with Direction[0] as normal is above this val. the strength will be zero
+//  #var AnyVar UserDefinedRadiusLimit= DesignVar(0.02);  
+//  //high limit for the strength measure function, if the velocity measured is above this val. the strength will be zero
+//  #var AnyVar UserDefinedVelLimitHigh= DesignVar(0.8); 
+//  
+//  #var AnyVec3 UserDefinedGroundVel = {0,0,0};
+//  
+//  #var AnyVar Strength = DesignVar(1000);  //strength of muscles
+//  #var AnyVar StaticFrictionCoefficient = DesignVar(0.5); //Friction coefficient
+//  #var AnyVar ScaleFactor = DesignVar(1); //scale factor for draw vectors it can be set differently than by the drawsettings
+//    
+//#else
+//  AnyFolder& InitializationArgs = ARG_INI;
+//  //low limit for the strength measure function, if the distance measured along Direction[0] is below this val. the strength will be zero (negative)
+//  #var AnyVar UserDefinedDistLimitLow = ARG_INI.UserDefinedDistLimitLow; 
+//  //high limit for the strength measure function, if the distance measured along Direction[0] is above this val. the strength will be zero
+//  #var AnyVar UserDefinedDistLimitHigh = ARG_INI.UserDefinedDistLimitHigh ;   
+//  //high limit for the strength measure function, if the radius measured along the plane with Direction[0] as normal is above this val. the strength will be zero
+//  #var AnyVar UserDefinedRadiusLimit = ARG_INI.UserDefinedRadiusLimit;  
+//  //high limit for the strength measure function, if the velocity measured is above this val. the strength will be zero
+//  #var AnyVar UserDefinedVelLimitHigh = ARG_INI.UserDefinedVelLimitHigh; 
+//  
+//  #var AnyVec3 UserDefinedGroundVel = ARG_INI.UserDefinedGroundVel;
+//  
+//  #var AnyVar Strength = ARG_INI.Strength;  //strength of muscles
+//  #var AnyVar StaticFrictionCoefficient = ARG_INI.StaticFrictionCoefficient; //Friction coefficient
+//  #var AnyVar ScaleFactor = ARG_INI.ScaleFactor; //scale factor for draw vectors it can be set differently than by the drawsettings
+//  
+////  //low limit for the strength measure function, if the distance measured along Direction[0] is below this val. the strength will be zero (negative)
+////  #var AnyVar UserDefinedDistLimitLow = InitializationArgs.UserDefinedDistLimitLow; 
+////  //high limit for the strength measure function, if the distance measured along Direction[0] is above this val. the strength will be zero
+////  #var AnyVar UserDefinedDistLimitHigh = InitializationArgs.UserDefinedDistLimitHigh ;   
+////  //high limit for the strength measure function, if the radius measured along the plane with Direction[0] as normal is above this val. the strength will be zero
+////  #var AnyVar UserDefinedRadiusLimit = InitializationArgs.UserDefinedRadiusLimit;  
+////  //high limit for the strength measure function, if the velocity measured is above this val. the strength will be zero
+////  #var AnyVar UserDefinedVelLimitHigh = InitializationArgs.UserDefinedVelLimitHigh; 
+////  
+////  #var AnyVec3 UserDefinedGroundVel = InitializationArgs.UserDefinedGroundVel;
+////  
+////  #var AnyVar Strength = InitializationArgs.Strength;  //strength of muscles
+////  #var AnyVar StaticFrictionCoefficient = InitializationArgs.StaticFrictionCoefficient; //Friction coefficient
+////  #var AnyVar ScaleFactor = InitializationArgs.ScaleFactor; //scale factor for draw vectors it can be set differently than by the drawsettings
+//  
+//
+//#endif
+//  
+////  #var AnyInt NormalDirection = Z;
+////  #var AnyInt FrictionDirection1 = X;
+////  #var AnyInt FrictionDirection2 = Y;
+//  
+//  
+//  
+//  #if (ARG3)
+//  BaseObject = {
+//    AnyRefNode CylRotNode = {
+//      sRel = {0,0,0};
+//      ARel = RotMat(..RotCoefY*..GlobalRotCoef*pi/2,y)*RotMat(..RotCoefX*..GlobalRotCoef*pi/2,x);
+//      AnyRefNode CylNode = {
+//        sRel = {0,0,...UserDefinedDistLimitLow};
+//        AnySurfCylinder TriggerCyl = 
+//        {
+//          Radius = ....UserDefinedRadiusLimit;
+//          Length = - ....UserDefinedDistLimitLow + ....UserDefinedDistLimitHigh;
+//          CapRatio = 0.001;
+//          AnyDrawParamSurf Draw = 
+//          {
+//            Visible = On;
+//            Opacity = 0.5;
+//          };
+//        };
+//      };
+//    };
+//  };
+//  #endif
+//  
+//  #if (ARG4)
+//  TargetObject = {
+//    AnyDrawNode DrawContactTarget = {
+//      ScaleXYZ = {1,1,1}*0.015;
+//    };
+//  };
+//  #endif
+//  
+//      #if ARG5 == "Z"
+//    #var AnyInt NormalDirection = 2;
+//    #var AnyInt FrictionDirection1 = 0;
+//    #var AnyInt FrictionDirection2 = 1;
+//    #endif
+//    
+//    #if ARG5 == "Y"
+//    #var AnyInt NormalDirection = 1;
+//    #var AnyInt FrictionDirection1 = 0;
+//    #var AnyInt FrictionDirection2 = 2;
+//    #endif
+//    
+//    #if ARG5 == "X"
+//    #var AnyInt NormalDirection = 0;
+//    #var AnyInt FrictionDirection1 = 1;
+//    #var AnyInt FrictionDirection2 = 2;
+//    #endif 
+//
+////  AnyInt X = 0;
+////  AnyInt Y = 1;
+////  AnyInt Z = 2;
+//  
+//  AnyVar GlobalRotCoef = iffun(2-NormalDirection,1,0); // 0 if z is normal, if not 1
+//  AnyVar RotCoefY = iffun(NormalDirection,0,1);
+//  AnyVar RotCoefX = iffun(NormalDirection,-1,0);
+//  
+//  AnyIntArray Direction = {NormalDirection,FrictionDirection1,FrictionDirection2}; //first element gives normal direction
+//  
+//  InitializationArgs = {
+////        AnyIntArray Direction = Main.Model.Kinetics.ContClassSplit.ContactDetection.ContDet.ContDet_000.Direction;
+//        AnyIntArray Direction = .Direction;
+//
+//};
+////  #include  "ContDetAndContEleInclude.any"
+//
+//  AnyFolder Push = {
+//     #include  "ContactDetectionCondition.any"
+////     #include  "ContactConditionSmoothing.any"
+////     #include  "CreateContactElement.any" 
+//   };
+//  
+//};
+
+
+
+
+
+/*
+#class_template ContDetClass (AnyRefFrame &BaseObject, AnyRefFrame &TargetObject, DisplayTriggerVolume = 0, DisplayTargetNode=0)
+  {
+    AnyComponentDefinition obj = {};
+    AnyRefFrame &StrengthObject=TargetObject; //Node used for strength measurement, occasionally this is different from the target object
+    
+    AnyFolder &DrawRef=Main.DrawSettings; //reference to the folder which contains drawsettings
+    //low limit for the strength measure function, if the distance measured along Direction[0] is below this val. the strength will be zero (negative)
+    #var AnyVar UserDefinedDistLimitLow; 
+    //high limit for the strength measure function, if the distance measured along Direction[0] is above this val. the strength will be zero
+    #var AnyVar UserDefinedDistLimitHigh ; 
+
+    //high limit for the strength measure function, if the radius measured along the plane with Direction[0] as normal is above this val. the strength will be zero
+    #var AnyVar UserDefinedRadiusLimit;
+
+    //high limit for the strength measure function, if the velocity measured is above this val. the strength will be zero
+    #var AnyVar UserDefinedVelLimitHigh; 
+    
+    #var AnyVec3 UserDefinedGroundVel = {0,0,0};
+    
+    #if (DisplayTriggerVolume)
+    BaseObject = {
+      AnyRefNode CylRotNode = {
+        sRel = {0,0,0};
+        ARel = RotMat(..RotCoefY*..GlobalRotCoef*pi/2,y)*RotMat(..RotCoefX*..GlobalRotCoef*pi/2,x);
+        AnyRefNode CylNode = {
+          sRel = {0,0,...UserDefinedDistLimitLow};
+          AnySurfCylinder TriggerCyl = 
+          {
+            Radius = ....UserDefinedRadiusLimit;
+            Length = - ....UserDefinedDistLimitLow + ....UserDefinedDistLimitHigh;
+            CapRatio = 0.001;
+            AnyDrawParamSurf Draw = 
+            {
+              Visible = On;
+              Opacity = 0.5;
+            };
+          };
+        };
+      };
+    };
+    #endif
+    
+    #if (DisplayTargetNode)
+    TargetObject = {
+      AnyDrawNode DrawContactTarget = {
+        ScaleXYZ = {1,1,1}*0.015;
+      };
+    };
+    #endif
+    
+    #var AnyVar Strength;  //strength of muscles
+    #var AnyVar StaticFrictionCoefficient; //Friction coefficient
+    #var AnyVar ScaleFactor =1; //scale factor for draw vectors it can be set differently than by the drawsettings
+    
+    #var AnyInt NormalDirection = Z;
+    #var AnyInt FrictionDirection1 = X;
+    #var AnyInt FrictionDirection2 = Y;
+    
+    AnyInt X = 0;
+    AnyInt Y = 1;
+    AnyInt Z = 2;
+    
+    AnyVar GlobalRotCoef = iffun(2-NormalDirection,1,0); // 0 if z is normal, if not 1
+    AnyVar RotCoefY = iffun(NormalDirection,0,1);
+    AnyVar RotCoefX = iffun(NormalDirection,-1,0);
+    
+    AnyIntArray Direction = {NormalDirection,FrictionDirection1,FrictionDirection2}; //first element gives normal direction
+   
+    #include  "ContDetAndContEleInclude.any"
+  };
