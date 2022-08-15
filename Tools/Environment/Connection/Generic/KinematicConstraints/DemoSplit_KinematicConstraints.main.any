@@ -63,6 +63,14 @@ Main = {
       AnyRefNode N2 = {
         sRel = {1.0,0.0,0};
       };
+      
+      AnyRefNode StartFrame = {
+        sRel = {1.0,0.0,0};
+      };
+      AnyRefNode EndFrame = {
+        sRel = {1.5,0.0,0};
+      };
+
 
       AnyDrawRefFrame DrwGlobalRef = {ScaleXYZ = 0.3*{1,1,1};};    
     };
@@ -92,8 +100,8 @@ Main = {
           };
           Radius = 0.5;
           Length = 0.01;
-          //CapRatio = 0.1;
-          //CapRatio2 = 0.1;
+          CapRatio = 0.01;
+          CapRatio2 = 0.01;
           //CircularCap = Off;
           //CircularCap2 = Off;
         };
@@ -119,10 +127,6 @@ Main = {
           };
           Radius = 0.1;
           Length = 0.1;
-          //CapRatio = 0.1;
-          //CapRatio2 = 0.1;
-          //CircularCap = Off;
-          //CircularCap2 = Off;
         };
 
 //        AnyRefNode LoadNode = {sRel = {0.5,0.0,0};};        
@@ -142,35 +146,15 @@ Main = {
         Axis = x;
         // Reaction forces between S1 and ground are enabled by default
       };
-      
-      AnyKinEqSimpleDriver TranslationS1 = {
-        AnyJoint &Jnt = .JntS1;
-        DriverPos = {0};
-        DriverVel = 2*{0.2};
-        DriverAcc = 0.9*{-0.1};
-        Reaction.Type = {On};
-      };
-      
+            
       AnyPrismaticJoint JntS2 = {
-        AnyRefFrame &Ground = Main.Model.GlobalRef.N2;
+        AnyRefFrame &Ground = Main.Model.GlobalRef.StartFrame;
         AnySeg &Seg = Main.Model.Seg2;
         Axis = x;
         // Switch off reaction forces between S2 and ground
         Constraints.Reaction.Type = repmat(Constraints.nDim,On);
       };
-      
-//      AnyKinEqSimpleDriver TranslationS2 = {
-//        AnyJoint &Jnt = .JntS2;
-//        DriverPos = {0};
-//        DriverVel = {0.000};
-//        Reaction.Type = {On};
-//        CType = {Soft};
-//        WeightFun = {&DrvWeight};
-//        AnyFunConst DrvWeight  ={
-//          Value = {0.001};
-//        };
-//      };
-      
+            
     }; // Joints
     
     AnyFolder InitializationArgs = {
@@ -205,115 +189,312 @@ Main = {
       };
     };
     
-     AnyFolder ContDetect = {
-          CylContDetClass2 ContCheck (
-          ARG1 =..KinMeasures.Measures,
-          ARG_INI_SWITCH = 1,
-          ARG_INI =..InitializationArgs) = {};
-          
+    AnyFolder ContDetect = {
+      CylContDetClass2 ContCheck (
+      ARG1 =..KinMeasures.Measures,
+      ARG_INI_SWITCH = 1,
+      ARG_INI =..InitializationArgs) = {};
+      
+    };
+    
+    AnyFolder ContDetectSmooth = {
+      ContactConditionSmoothing2 RadiusSmoothing (
+      ARG1="FUNC_PROFILE_LINEAR",
+      ARG2=..ContDetect.ContCheck.RadiusRatio,
+      ARG3=1.0,
+      ARG4=0.9) = {};
+      
+      ContactConditionSmoothing2 HeightSmoothing (
+      ARG1="FUNC_PROFILE_LINEAR",
+      ARG2=..ContDetect.ContCheck.HeightRatio,
+      ARG3=1.0,
+      ARG4=0.8) = {};
+      
+      //          ContactConditionSmoothing2 VelocitySmoothing (
+      //          ARG1="FUNC_PROFILE_LINEAR",
+      //          ARG2=..ContDetect.ContCheck.VelRatio,
+      //          ARG3=1.0,
+      //          ARG4=0.15) = {};
+      
+      //          AnyFloat SmoothingFun = mult(mult(RadiusSmoothing.SmoothingFun,HeightSmoothing.SmoothingFun),VelocitySmoothing.SmoothingFun);
+      AnyFloat SmoothingFun = mult(RadiusSmoothing.SmoothingFun,HeightSmoothing.SmoothingFun);
+    };
+//    AnyMatrix M = {
+//                      {0, .LowerLimitHard-1e1*LowPhaseIn-1e1*TotalRange},
+//                      {80, .LowerLimitHard-1e1*LowPhaseIn},
+//                      {160,  .LowerLimitHard},
+//                      {490, .LowerLimit},
+//                      {510, .HighLimit},
+//                      {840, .HighLimitHard},
+//                      {920, .HighLimitHard+1e1*HighPhaseIn},
+//                      {999, .HighLimitHard+1e1*HighPhaseIn+1e1*TotalRange}                    
+//                    }; 
+    AnyFolder MeasuresAndDrivers = {
+      
+      // Function to generate a -1, +1 signal for producing absolute value
+      AnyFunInterpol AbsoluteFun = {
+        Type = PiecewiseLinear;
+        T = {-100,-0.000001,0,0.000001,100};
+        Data = {{-1,-1,0,1,1}};
+      };
+      
+      // Generate a -1 signal if Meas is neg or +1 signal if Meas is positive
+      AnyKinMeasureFunComb1 PosNegSignalS1StartFrame = {
+        AnyKinMeasure &meas = ..KinMeasures.Measures.MeasuresNormal;
+        Functions = {&.AbsoluteFun};
+      };
+      
+      // Take absolute value of the measure. Multiply neg measure with -1 and vice versa
+      AnyKinMeasureQuadComb AbsMeas_S1_S2 = {
+        AnyKinMeasure &measFun = .PosNegSignalS1StartFrame;
+        AnyKinMeasure &measNorm = .PosNegSignalS1StartFrame.meas;
+        AnyFloat Check = measNorm.Pos[0]*measFun.Pos[0];
+        OutDim = 1;
+        // Product of two measures
+        CoefQuadTensor = {{{0.0, 1.0}, {0.0, 0.0}}};
+      };
+      
+      // Generate a rising edge when value reaches zero
+      AnyFunInterpol ZeroOnFun = {
+        Type = PiecewiseLinear;
+        T = {-100,-0.0001,0,0.01,100};
+        Data = {{1,1,1,0,0}};
+      };
+      
+      // Generate a falling edge when value reaches zero
+      AnyFunInterpol ZeroOffFun = {
+        Type = PiecewiseLinear;
+        T = {-100,-0.0001,0,0.01,100};
+        Data = {{0,0,0,1,1}};
+      };
+      
+      // Generate a rising edge signal when S1 reaches S2 (which is at start frame)
+      AnyKinMeasureFunComb1 ActiveSignalS1StartFrame = {
+        AnyKinMeasure &meas = .AbsMeas_S1_S2;
+        Functions = {&.ZeroOnFun};
+      };
+      
+      // Generate a falling edge signal when S1 reaches S2 (which is at start frame)
+      AnyKinMeasureFunComb1 InactiveSignalS1StartFrame = {
+        AnyKinMeasure &meas = .AbsMeas_S1_S2;
+        Functions = {&.ZeroOffFun};
+      };
+
+
+      // Take product of rising edge when S1 is close to S2 and distance between S1 and S2.
+      AnyKinMeasureQuadComb CombMeas2 = {
+        AnyKinMeasure &measFun = .ActiveSignalS1StartFrame;
+        AnyKinMeasure &measNorm = Main.Model.KinMeasures.Measures.MeasuresNormal;
+        AnyFloat Check = measNorm.Pos[0]*measFun.Pos[0];
+        OutDim = 1;
+        CoefQuadTensor = {{{0.0, 1.0}, {0.0, 0.0}}};
+      };
+      
+      // Generate end condition:
+      AnyKinMeasureOrg Meas_S2_EndFrame = {
+        AnyKinLinear Lin_S2_EndFrame = {
+          AnyRefFrame &seg = ...Seg2;
+          AnyRefFrame &refFrame = ...GlobalRef.EndFrame;
         };
-        
-        AnyFolder ContDetectSmooth = {
-          ContactConditionSmoothing2 RadiusSmoothing (
-          ARG1="FUNC_PROFILE_LINEAR",
-          ARG2=..ContDetect.ContCheck.RadiusRatio,
-          ARG3=1.0,
-          ARG4=0.9) = {};
-          
-          ContactConditionSmoothing2 HeightSmoothing (
-          ARG1="FUNC_PROFILE_LINEAR",
-          ARG2=..ContDetect.ContCheck.HeightRatio,
-          ARG3=1.0,
-          ARG4=0.8) = {};
-          
-          //          ContactConditionSmoothing2 VelocitySmoothing (
-          //          ARG1="FUNC_PROFILE_LINEAR",
-          //          ARG2=..ContDetect.ContCheck.VelRatio,
-          //          ARG3=1.0,
-          //          ARG4=0.15) = {};
-          
-          //          AnyFloat SmoothingFun = mult(mult(RadiusSmoothing.SmoothingFun,HeightSmoothing.SmoothingFun),VelocitySmoothing.SmoothingFun);
-          AnyFloat SmoothingFun = mult(RadiusSmoothing.SmoothingFun,HeightSmoothing.SmoothingFun);
-          
-          AnyFunInterpol interpol = {
-            Type = PiecewiseLinear;
-            T = {-100,-0.15,-0.1,-0.09,0,0.09,0.1,0.15,100};
-//            Data = {{0,0,0,1,1,1,0,0,0}};
-            Data = {{0,0,0,0,0,1,1,1,1}};
-          };
-          AnyFunInterpol interpolInv = {
-            Type = PiecewiseLinear;
-            T = .interpol.T;
-            Data = {{1,1,1,1,0,1,1,1,1}};
-          };
-
-          AnyFloat dd = interpol(Main.Model.KinMeasures.Measures.MeasuresNormal.Pos[0]);
-          
-          AnyKinMeasureFunComb1 measureFun = {
-            AnyKinMeasure &normalmeasure = Main.Model.KinMeasures.Measures.MeasuresNormal;
-            Functions = {&.interpol};
-          };
-          AnyKinMeasureFunComb1 measureFunInv = {
-            AnyKinMeasure &normalmeasure = Main.Model.KinMeasures.Measures.MeasuresNormal;
-            Functions = {&.interpolInv};
-          };
-
-          
-          AnyKinMeasureQuadComb CombMeas = {
-            AnyKinMeasure &measFun = .measureFun;
-            AnyKinMeasure &measNorm = Main.Model.KinMeasures.Measures.MeasuresNormal;
-            AnyFloat Check = measNorm.Pos[0]*measFun.Pos[0];
-            OutDim = 1;
-            CoefQuadTensor = {{{0.0, 1.0}, {0.0, 0.0}}};
-          };
-          
-          AnyKinMeasureQuadComb CombMeasInv = {
-            AnyKinMeasure &measFun = .measureFunInv;
-            AnyKinMeasure &measNorm = Main.Model.KinMeasures.Measures.MeasuresNormal;
-            AnyFloat Check = measNorm.Pos[0]*measFun.Pos[0];
-            OutDim = 1;
-            CoefQuadTensor = {{{0.0, 1.0}, {0.0, 0.0}}};
-          };
-          
-          AnyKinMeasureQuadComb HoldS2Meas = {
-            AnyKinMeasure &measFun = .measureFunInv;
-            AnyKinMeasure &HoldS2 = Main.Model.Joints.JntS2;
-//            AnyFloat Check = measNorm.Pos[0]*measFun.Pos[0];
-            OutDim = 1;
-            CoefQuadTensor = {{{0.0, 1.0}, {0.0, 0.0}}};
-          };
+        MeasureOrganizer = {0};
+      };
+      
+      // Generate a -1 signal if Meas is neg or +1 signal if Meas is positive
+      AnyKinMeasureFunComb1 PosNegSignalS2EndFrame = {
+        AnyKinMeasure &meas = .Meas_S2_EndFrame;
+        Functions = {&.AbsoluteFun};
+      };
+      
+      // Take absolute value of the measure. Multiply neg measure with -1 and vice versa
+      AnyKinMeasureQuadComb AbsMeas_S2_EndFrame = {
+        AnyKinMeasure &measFun = .PosNegSignalS2EndFrame;
+        AnyKinMeasure &measNorm = .PosNegSignalS2EndFrame.meas;
+        AnyFloat Check = measNorm.Pos[0]*measFun.Pos[0];
+        OutDim = 1;
+        // Product of two measures
+        CoefQuadTensor = {{{0.0, 1.0}, {0.0, 0.0}}};
+      };
+      
+      // Generate a rising edge signal when S2 reaches end frame
+      AnyKinMeasureFunComb1 ActiveSignalS2EndFrame = {
+        AnyKinMeasure &meas = .AbsMeas_S2_EndFrame;
+        Functions = {&.ZeroOnFun};
+      };
+    
+      // Generate a rising edge signal when S2 reaches end frame
+      AnyKinMeasureFunComb1 InactiveSignalS2EndFrame = {
+        AnyKinMeasure &meas = .AbsMeas_S2_EndFrame;
+        Functions = {&.ZeroOffFun};
+      };
+    
+      // Take product of rising edge when S1 is close to S2 and distance between S1 and S2.
+      AnyKinMeasureQuadComb CombMeas3 = {
+        AnyKinMeasure &measFun = .InactiveSignalS2EndFrame;
+        AnyKinMeasure &measNorm = .ActiveSignalS1StartFrame;
+        AnyFloat Check = measNorm.Pos[0]*measFun.Pos[0];
+        OutDim = 1;
+        CoefQuadTensor = {{{0.0, 1.0}, {0.0, 0.0}}};
+      };
+    
+      // Product of active signal with measure between S1 and S2.
+      AnyKinMeasureQuadComb CombMeas4 = {
+        AnyKinMeasure &measFun = .CombMeas3;
+        AnyKinMeasure &measNorm = Main.Model.KinMeasures.Measures.MeasuresNormal;
+        AnyFloat Check = measNorm.Pos[0]*measFun.Pos[0];
+        OutDim = 1;
+        CoefQuadTensor = {{{0.0, 1.0}, {0.0, 0.0}}};
+      };
+    
+      AnyKinMeasureQuadComb MeasHoldS2Start = {
+        AnyKinMeasure &measFun = .InactiveSignalS1StartFrame;
+        AnyKinMeasure &measNorm = Main.Model.Joints.JntS2;
+        //            AnyFloat Check = measNorm.Pos[0]*measFun.Pos[0];
+        OutDim = 1;
+        CoefQuadTensor = {{{0.0, 1.0}, {0.0, 0.0}}};
+      };
+    
+      AnyKinMeasureQuadComb MeasHoldS2End = {
+        AnyKinMeasure &measFun = .ActiveSignalS2EndFrame;
+        AnyKinMeasure &measNorm = Main.Model.Joints.JntS2;
+        //            AnyFloat Check = measNorm.Pos[0]*measFun.Pos[0];
+        OutDim = 1;
+        CoefQuadTensor = {{{0.0, 1.0}, {0.0, 0.0}}};
+      };
 
 
-          AnyKinEqSimpleDriver Drv = {
-//            AnyKinMeasure &meas = .measureFun;
-            AnyKinMeasure &combMeas = .CombMeas;
-            DriverPos = {0.0};
-            DriverVel = {0.0};
-            CType = {Soft};
-            WeightFun = {&DrvWeight};
-            AnyFunConst DrvWeight  ={
-              Value = {0.05};
-            };          
-            Reaction.Type = {Off};
-          };
-        
-        AnyKinEqSimpleDriver DrvS2 = {
-//            AnyKinMeasure &meas = .measureFun;
-            AnyKinMeasure &combMeas = .HoldS2Meas;
-            DriverPos = {0.0};
-            DriverVel = {0.0};
-            CType = {Soft};
-            WeightFun = {&DrvWeight};
-            AnyFunConst DrvWeight  ={
-              Value = {0.05};
-            };          
-            Reaction.Type = {Off};
-          };
 
-        
-        
-        };
-        
+
+
+      
+      AnyFunInterpol interpol = {
+        Type = PiecewiseLinear;
+        T = {-100,-0.15,-0.1,-0.009,0,0.009,0.1,0.15,100};
+        //            Data = {{0,0,0,1,1,1,0,0,0}};
+        Data = {{0,0,0,0,0,1,1,1,1}};
+      };
+      AnyFunInterpol interpolInv = {
+        Type = PiecewiseLinear;
+        T = .interpol.T;
+        Data = {{1,1,1,1,0,1,1,1,1}};
+      };
+      
+      AnyFloat dd = interpol(Main.Model.KinMeasures.Measures.MeasuresNormal.Pos[0]);
+      
+      AnyKinMeasureFunComb1 measureFun = {
+        AnyKinMeasure &normalmeasure = Main.Model.KinMeasures.Measures.MeasuresNormal;
+        Functions = {&.interpol};
+      };
+      AnyKinMeasureFunComb1 measureFunInv = {
+        AnyKinMeasure &normalmeasure = Main.Model.KinMeasures.Measures.MeasuresNormal;
+        Functions = {&.interpolInv};
+      };
+      
+      
+      AnyKinMeasureQuadComb CombMeas = {
+        AnyKinMeasure &measFun = .measureFun;
+        AnyKinMeasure &measNorm = Main.Model.KinMeasures.Measures.MeasuresNormal;
+        AnyFloat Check = measNorm.Pos[0]*measFun.Pos[0];
+        OutDim = 1;
+        CoefQuadTensor = {{{0.0, 1.0}, {0.0, 0.0}}};
+      };
+      
+      AnyKinMeasureQuadComb CombMeasInv = {
+        AnyKinMeasure &measFun = .measureFunInv;
+        AnyKinMeasure &measNorm = Main.Model.KinMeasures.Measures.MeasuresNormal;
+        AnyFloat Check = measNorm.Pos[0]*measFun.Pos[0];
+        OutDim = 1;
+        CoefQuadTensor = {{{0.0, 1.0}, {0.0, 0.0}}};
+      };
+      
+      AnyKinMeasureQuadComb HoldS2Meas = {
+        AnyKinMeasure &measFun = .measureFunInv;
+        AnyKinMeasure &HoldS2 = Main.Model.Joints.JntS2;
+        //            AnyFloat Check = measNorm.Pos[0]*measFun.Pos[0];
+        OutDim = 1;
+        CoefQuadTensor = {{{0.0, 1.0}, {0.0, 0.0}}};
+      };
+      
+      
+      AnyKinEqSimpleDriver DriverS1 = {
+        AnyJoint &Jnt = ..Joints.JntS1;
+        DriverPos = {0};
+        DriverVel = 2*{0.2};
+        DriverAcc = 0.9*{-0.1};
+        Reaction.Type = {On};
+      };
+      
+//      AnyKinEqSimpleDriver DefaultFixS2 = {
+//        AnyJoint &Jnt = ..Joints.JntS2;
+//        DriverPos = {0};
+//        DriverVel = {0.000};
+//        Reaction.Type = {On};
+//        CType = {Soft};
+//        WeightFun = {&DrvWeight};
+//        AnyFunConst DrvWeight  ={
+//          Value = {0.001};
+//        };
+//      };
+
+      
+      
+      AnyKinEqSimpleDriver Drv = {
+        //            AnyKinMeasure &meas = .measureFun;
+        AnyKinMeasure &combMeas = .CombMeas4;
+//        AnyKinMeasure &combMeas = .ActiveSignalS1StartFrame;
+        DriverPos = {0.0};
+        DriverVel = {0.0};
+        CType = {Soft};
+        WeightFun = {&DrvWeight};
+        AnyFunConst DrvWeight  ={
+          Value = {0.05};
+        };          
+        Reaction.Type = {Off};
+      };
+      
+      AnyKinEqSimpleDriver DrvS2 = {
+        //            AnyKinMeasure &meas = .measureFun;
+        AnyKinMeasure &combMeas = .HoldS2Meas;
+        DriverPos = {0.0};
+        DriverVel = {0.0};
+        CType = {Soft};
+        WeightFun = {&DrvWeight};
+        AnyFunConst DrvWeight  ={
+          Value = {0.05};
+        };          
+        Reaction.Type = {Off};
+      };
+//      
+//      AnyKinEqSimpleDriver DrvHoldS2Start = {
+//        //            AnyKinMeasure &meas = .measureFun;
+//        AnyKinMeasure &combMeas = .MeasHoldS2Start;
+//        DriverPos = {0.0};
+//        DriverVel = {0.0};
+//        CType = {Soft};
+//        WeightFun = {&DrvWeight};
+//        AnyFunConst DrvWeight  ={
+//          Value = {0.5};
+//        };          
+//        Reaction.Type = {Off};
+//      };
+//
+//AnyKinEqSimpleDriver DrvHoldS2End = {
+//        //            AnyKinMeasure &meas = .measureFun;
+//        AnyKinMeasure &combMeas = .MeasHoldS2End;
+//        DriverPos = {0.0};
+//        DriverVel = {0.0};
+//        CType = {Soft};
+//        WeightFun = {&DrvWeight};
+//        AnyFunConst DrvWeight  ={
+//          Value = {0.5};
+//        };          
+//        Reaction.Type = {Off};
+//      };
+
+      
+      
+      
+    }; // Measures and drivers
+    
         
     
   }; // Model
@@ -321,7 +502,7 @@ Main = {
   AnyBodyStudy Study = {
     AnyFolder& Model = Main.Model;
     Gravity = {0,-9.81,0};    
-    nStep = 100;
+    nStep = 200;
     tEnd= 10;
     Kinematics.SolverType = KinSolOverDeterminate;
   };
