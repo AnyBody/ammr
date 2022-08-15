@@ -396,9 +396,9 @@ back to the AnyMan file:
 
 ```AnyScriptDoc
 // Scaling laws using joint to joint measures
-§//#define BM_SCALING CONST_SCALING_UNIFORM
-  #define BM_SCALING CONST_SCALING_LENGTHMASS§
-//  #define BM_SCALING CONST_SCALING_LENGTHMASSFAT
+§//#define BM_SCALING _SCALING_UNIFORM_
+  #define BM_SCALING _SCALING_LENGTHMASS_§
+//  #define BM_SCALING _SCALING_LENGTHMASSFAT_
 ...
 // Anthropometric data file (unchanged files can be found in AAUHuman\Scaling\AnyFamily)
 §#path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyMan.any"
@@ -531,13 +531,13 @@ of the general configuration block:
 
 ```AnyScriptDoc
 §//#ifndef BM_LEG_MUSCLES_BOTH
-//  #define BM_LEG_MUSCLES_BOTH _MUSCLES_NONE_
+//  #define BM_LEG_MUSCLES_BOTH OFF
 //#endif
 //#ifndef BM_ARM_MUSCLES_BOTH
-//  #define BM_ARM_MUSCLES_BOTH _MUSCLES_NONE_
+//  #define BM_ARM_MUSCLES_BOTH OFF
 //#endif
 //#ifndef BM_TRUNK_MUSCLES
-//  #define BM_TRUNK_MUSCLES _MUSCLES_NONE_
+//  #define BM_TRUNK_MUSCLES OFF
 //#endif
     §
 ```
@@ -702,9 +702,9 @@ ScalingLengthMassFat law:
 
 ```AnyScriptDoc
 // Scaling laws using joint to joint measures
-//  #define BM_SCALING CONST_SCALING_UNIFORM
-§//  #define BM_SCALING CONST_SCALING_LENGTHMASS
-#define BM_SCALING CONST_SCALING_LENGTHMASSFAT§
+//  #define BM_SCALING _SCALING_UNIFORM_
+§//  #define BM_SCALING _SCALING_LENGTHMASS_
+#define BM_SCALING _SCALING_LENGTHMASSFAT_§
 ```
 
 Once again load the model and run the inverse dynamics
@@ -726,9 +726,8 @@ AnyManUniform file.
 
 This completes scaling Lesson 1: Joint to joint scaling methods.
 
-```{rst-class} without-title
-```
 
-:::{seealso}
-**Next lesson:** {doc}`lesson2`.
+:::{admonition} **Next lesson:**
+:class: seealso
+{doc}`lesson2`.
 :::

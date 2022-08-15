@@ -45,18 +45,37 @@ jobs:
           cd ..
           mkdir -p public/beta
           cp -rT Docs/_build/html public/beta
+
+      - name: Link check
+        shell: bash -l {0}
+        run: |
+          set -e
+          cd Docs
+          make linkcheck
           
       - name: Build last tagged version
         if: github.ref == 'refs/heads/master'
         shell: bash -l {0}
         run: |
           git fetch --shallow-since=2020-07-07
-          git checkout $(git describe --tags `git rev-list --tags --max-count=1`);
+          git checkout $(git describe --tags `git rev-list --tags=ammr* --max-count=1`);
           cd Docs
           make clean
           make html
           cd ..
           cp -rT Docs/_build/html public
+          
+      - name: Build new theme
+        if: github.ref == 'refs/heads/master'
+        shell: bash -l {0}
+        run: |
+          git checkout new_docs_theme;
+          cd Docs
+          make clean
+          make html-dev
+          cd ..
+          cp -rT Docs/_build/html public/new
+          
            
       - name: Deploy 🚀
         if: github.ref == 'refs/heads/master'

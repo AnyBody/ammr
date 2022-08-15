@@ -1,15 +1,13 @@
 # The Glasgow-Maastricht Foot Model (GM Foot)
 
-```{rst-class} without-title
-```
-
-:::{caution}
-**External model:** The model is under development and not yet included in the managed model repository.
+:::{admonition} **External model:** 
+:class: caution 
+The model is under development and not yet included in the managed model repository.
 You can find this model in a public [repository on GitHub](https://github.com/AnyBody/gm-foot).
 :::
 
 AnyBody Technology developed in corporation with Glasgow Caledonian
-University and University of Maastricht inside the [AFootprint EU project](http://www.afootprint.eu/)
+University and University of Maastricht inside the [AFootprint EU project](https://www.afootprint.eu/)
 a detailed multisegmental foot model, which is fully dynamic and
 contains 26 segments representing all the foot bones, muscles,
 ligaments, and joints connecting them.
@@ -18,6 +16,12 @@ The model can be used with the
 anatomy and recorded motion from different subjects. It has been through
 a validation process comparing it with other experimental and computational studies.
 
+:::{admonition} **Complex model:**
+:class: warning
+The GM Foot model is very complex and not recommended for
+beginners in musculoskeletal modeling and AnyBody.
+:::
+
 ```{raw} html
 <video width="45%" style="display:block; margin: 0 auto;" controls autoplay loop>
     <source src="../_static/footgm.mp4" type="video/mp4">
@@ -25,13 +29,8 @@ Your browser does not support the video tag.
 </video>
 ```
 
-```{rst-class} without-title
-```
 
-:::{warning}
-**Complex model:** The GM Foot model is very complex and not recommended for
-beginners in musculoskeletal modeling and AnyBody.
-:::
+
 
 ## Usage:
 
@@ -114,9 +113,8 @@ More information can be found online:
   20\. September, 2012)
 
   [Presentation
-  (2Mb)](http://www.anybodytech.com/download.html?did=webcasts.files&fname=AnyBodyWebcast-2012-09-20-FootModel.pdf&t=1&tt=wc),
-  [Playback
-  (36Mb)](http://www.anybodytech.com/download.html?did=webcasts.files&fname=AnyBodyWebcast-2012-09-20-FootModel.wmv&t=1&tt=wc)
+  (2Mb)](https://www.anybodytech.com/the-new-glasgow-maastricht-anybody-foot-model/?wpdmdl=3101&ind=0),
+  [YouTube](https://www.anybodytech.com/the-new-glasgow-maastricht-anybody-foot-model/)
 
   This webcast presents a detailed AnyBody musculoskeletal foot model
   which includes all bones and joints of a real foot. Developed in

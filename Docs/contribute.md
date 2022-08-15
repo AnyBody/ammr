@@ -8,7 +8,7 @@ development version of the AMMR. Development takes place in a semi-closed
 repository. The repository is closed to protect academic contributors who also
 often need to publish their models before release.
 
-However, access is given on request. Please \[submit an issue here\](<https://github.com/AnyBody/ammr-doc/issues>), to request access.
+However, access is given on request. Please [submit an issue here](https://github.com/AnyBody/ammr-doc/issues), to request access.
 
 You can also view other freely available models and resources hosted on [GitHub](https://github.com/anybody).
 
@@ -46,7 +46,7 @@ You can also view other freely available models and resources hosted on [GitHub]
 
 \# Upload ammr zip file to Zenodo
 
-> # Either use the AMMR zip file created by the AMS build. This  (it con or create a
+> \# Either use the AMMR zip file created by the AMS build. This  (it con or create a
 >
 > : released zip file by running:
 >
@@ -60,10 +60,6 @@ You can also view other freely available models and resources hosted on [GitHub]
 >
 > \# Edit the draft Zenodo release to upload a zip file with AMMR.
 
-```{rubric} To do list
-```
 
-```{eval-rst}
-.. todolist::
-```
+
 :::

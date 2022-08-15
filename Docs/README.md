@@ -23,9 +23,9 @@ The AnyBody Managed Model Repository consists of two parts:
   workplace-specific scenarios).
 
 The models are developed in research projects at academic institutions or by
-[AnyBody Technology](https://anybodytech.com) in collaboration with academic
+[AnyBody Technology](https://www.anybodytech.com) in collaboration with academic
 institutions. The models are maintained by [AnyBody
-Technology](https://anybodytech.com) who ensure that various body part models
+Technology](https://www.anybodytech.com) who ensure that various body part models
 can be used together as a full body, scalable musculoskeletal model.
 
 
@@ -34,7 +34,7 @@ can be used together as a full body, scalable musculoskeletal model.
 This is the development version of the AMMR repository, which contain a number
 extra files for testing and building the documentation. Official releases which
 also include documentation are distributed with the [AnyBody Modeling
-System](https://www.anybodytech.com/software/ams/), or available with a DOI from
+System](https://www.anybodytech.com/software/anybodymodelingsystem/), or available with a DOI from
 [zendo.org/communities/anybody](https://zenodo.org/communities/anybody/). 
 
 Please see the [AMMR documentation](https://anyscript.org/ammr-doc/beta) for more
