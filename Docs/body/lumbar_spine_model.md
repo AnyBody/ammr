@@ -61,18 +61,16 @@ resulting forces.
 The lumbar spine model is always part of the AnyBody Human model. The muscles can
 be enabled/disabled, and the lumbar disc stiffness can be controlled.
 
+:::{seealso}
+:class: margin
+The {doc}`Trunk configuration parameters <../bm_config/trunk>` for a
+full list of Trunk parameters.
+:::
+
 ```AnyScriptDoc
 #define BM_TRUNK_MUSCLES ON
 #define BM_TRUNK_DISC_STIFNESS _DISC_STIFFNESS_LINEAR_
 ```
-
-```{rst-class} float-right
-```
-
-:::{seealso}
-The {doc}`Trunk configuration parameters <../bm_config/trunk>` for a
-full list of Trunk parameters.
-:::
 
 ## Resources
 
