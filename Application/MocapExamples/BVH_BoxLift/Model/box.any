@@ -1,7 +1,7 @@
 Main.ModelSetup ={
   /// Various EnvironmentParameters for adjusting the Box
   AnyFolder EnvironmentParameters = {
-    AnyInt GravityDirection  = 1 ; // y
+    AnyInt GravityDirection  = iffun(Main.ModelSetup.LabSpecificData.Gravity[0],0,iffun(Main.ModelSetup.LabSpecificData.Gravity[1],1,2)); // 0 if x, 1 if y, 2 if z
     AnyVar BoxWeight = 10; // kg
     AnyVec3 BoxJii= {0.1,0.1,0.1}; // Inertia
     AnyVec3 BoxDimensions ={0.36,0.40,0.53}; // m (length, height, width)
@@ -15,6 +15,13 @@ Main.ModelSetup ={
 AnySeg Box ={
   Mass= Main.ModelSetup.EnvironmentParameters.BoxWeight;
   Jii= Main.ModelSetup.EnvironmentParameters.BoxJii;
+  
+  // Position and orient the box according to the hands
+  r0 = (Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Hand.r0 +Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Hand.r0)/2 -
+       (Main.ModelSetup.EnvironmentParameters.RightHandle + Main.ModelSetup.EnvironmentParameters.LeftHandle)/2*Axes0';
+  Axes0 = RotMat(Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Hand.r0, 
+                 Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Hand.r0, 
+                 Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Hand.r0 - Main.ModelSetup.LabSpecificData.Gravity)*RotMat(pi/2,y);
   
   AnyFunTransform3DLin GeomScale = {
     ScaleMat ={{1,0,0},{0,1,0},{0,0,1}};
