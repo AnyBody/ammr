@@ -5,22 +5,18 @@ several branches (elements). Strength parameters are split between the branches,
 typically by uniform split.
 */
 
-DEFAULT_PARAMETER_FOLDER SubjectMusPar(
-    NPARAM = 4,
-    PARAM_1 = Jt, PARAM_1_TYPE = AnyVar,
-    PARAM_2 = Jpe, PARAM_2_TYPE = AnyVar,
-    PARAM_3 = PEFactor, PARAM_3_TYPE = AnyVar,
-    PARAM_4 = PCSAfactor, PARAM_4_TYPE = AnyVar
-) = {
-  Default.Jt = DesignVar(3.0); // Shape parameter for the tendon stiffness
-  Default.Jpe = DesignVar(3.0); // Shape parameter for the parallel stiffness
-  Default.PEFactor = DesignVar(5); // Parameter for influence of parallel stiffness    
-  Default.PCSAfactor = ......HumanModel.StrengthParameters.SpecificMuscleTensionShoulderArm; // = PCSAfactor in N/cm^2 , the PCSA itself is given in cm^2 so F0 is in Newton`s.
-
-  // Subject specific (scaled) muscle parameters.
-  #include "SubjectMusPar.any"
+AnyFolder DefaultMusPar = {
+  AnyVar Jt ??= DesignVar(3.0); ///< Shape parameter for the tendon stiffness
+  AnyVar Jpe ??= DesignVar(3.0); ///< Shape parameter for the parallel stiffness
+  AnyVar PEFactor ??= DesignVar(5); ///< Parameter for influence of parallel stiffness    
+  AnyVar PCSAfactor ??= ......HumanModel.StrengthParameters.SpecificMuscleTensionShoulderArm; ///< PCSAfactor in N/cm^2 , the PCSA itself is given in cm^2 so F0 is in Newton`s.
 
 };
+
+AnyVar StrengthScaleHumerus =  .StrengthScaling.Humerus.StrengthScale;
+AnyVar StrengthScaleUlna = .StrengthScaling.Ulna.StrengthScale;
+AnyVar StrengthScaleHand = .StrengthScaling.Hand.StrengthScale;
+
 
 
 {% for name, param in muscles.items() %}
@@ -34,12 +30,12 @@ DEFAULT_PARAMETER_FOLDER SubjectMusPar(
 {% for MuscleNo in range(param['elements']) -%}
 AnyMuscleModel3E {{ name }}{{"_" + loop.index|string if loop.length > 1}} =
 {
-  AnyFolder& MuscleParameters = .SubjectMusPar.{{name}};
+  AnyFolder& MuscleParameters = ..ModelParameters.Muscles.{{name}};
   AnyIntVar MuscleElemNo = {{loop.index}}; ///< The number of this element of the muscle
   AnyIntVar MuscleElemAmount = MuscleParameters.MuscleElemAmount; ///< The total amount of elements for this muscle
-  F0 = .SubjectMusPar.PCSAfactor*PCSA; ///< Maximum force output at optimum fiber length
-  Lf0 = MuscleParameters.OptimalFiberlength; ///< Optimum fiber length
-  AnyVar PCSA = 1e-2*MuscleParameters.MuscleVolume/(
+  F0 ??= .DefaultMusPar.PCSAfactor*PCSA; ///< Maximum force output at optimum fiber length
+  Lf0 ??= MuscleParameters.OptimalFiberlength; ///< Optimum fiber length
+  AnyVar PCSA ??= 1e4*.StrengthScale{{param['scaling']}}*MuscleParameters.MuscleVolumeSIScaled/(
   {%- if loop.length == 1 -%}
     Lf0
   {%- else  -%} 
@@ -47,25 +43,17 @@ AnyMuscleModel3E {{ name }}{{"_" + loop.index|string if loop.length > 1}} =
      .{{ name + "_" + loop.index|string }}.Lf0 {{"+" if not loop.last}}
     {%- endfor -%}    
   {%- endif -%}
-  ); //< PCSA (cm2) of the individual element is total volumen divided by the sum of muscle element fiber lengths.
+  ); ///< PCSA (cm2) of the individual element is total volumen divided by the sum of muscle element fiber lengths.
   Vol0 = PCSA * Lf0; // New calculation of the vol for the specific muscle branch
-  {#-{%- if param["distribution"] %}
-  {%- set vol_fraction = param["distribution"].split(",")[loop.index0] | float %}
-  Vol0 = 1e-6*MuscleParameters.MuscleVolume * {{vol_fraction}}; ///< Muscle volume in (m3)
-  {%- else -%}
-  Vol0 = 1e-6*MuscleParameters.MuscleVolume/MuscleElemAmount; ///< Muscle volume in (m3)
-  {%- endif %}#}
-  {#-//AnyVar PCSA = 1e4*Vol0/Lf0;///< PCSA (cm2) is calculated as muscle volume divided between muscle branches and divided by fiber length
-  #}
-  Lt0 = max({MuscleParameters.TotalTendonLength, 0.001}); ///< Tendon slack length (Cannot be zero)
-  Gamma0 = MuscleParameters.Pennationangle*(pi/180); ///< Pennation angle in radian
-  Epsilon0 = MuscleParameters.Epsilon0; ///< Tendon strain at F0
-  K1 = MuscleParameters.K1; ///< Factor for determining shortening speed at optimum length
-  K2 = MuscleParameters.K2; ///< Factor for determining shortening speed at optimum length
-  Fcfast = MuscleParameters.Fcfast; ///< Factor for determining shortening speed at optimum length
-  Jt = .SubjectMusPar.Jt; ///< Shape parameter for the tendon stiffness
-  Jpe = .SubjectMusPar.Jpe; ///< Shape parameter for the parallel stiffness
-  PEFactor = .SubjectMusPar.PEFactor; ///< Parameter for influence of parallel stiffness
+  Lt0 ??= max({MuscleParameters.TotalTendonLength, 0.001}); ///< Tendon slack length (Cannot be zero)
+  Gamma0 ??= MuscleParameters.Pennationangle*(pi/180); ///< Pennation angle in radian
+  Epsilon0 ??= MuscleParameters.Epsilon0; ///< Tendon strain at F0
+  K1 ??= MuscleParameters.K1; ///< Factor for determining shortening speed at optimum length
+  K2 ??= MuscleParameters.K2; ///< Factor for determining shortening speed at optimum length
+  Fcfast ??= MuscleParameters.Fcfast; ///< Factor for determining shortening speed at optimum length
+  Jt ??= .DefaultMusPar.Jt; ///< Shape parameter for the tendon stiffness
+  Jpe ??= .DefaultMusPar.Jpe; ///< Shape parameter for the parallel stiffness
+  PEFactor ??= .DefaultMusPar.PEFactor; ///< Parameter for influence of parallel stiffness
 };
  
 {% endfor %}

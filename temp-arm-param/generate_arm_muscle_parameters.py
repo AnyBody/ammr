@@ -56,7 +56,6 @@ def create_arm_parameter_files(ammr):
     ammr = Path(ammr)
     files = [
         ammr / "Body/AAUHuman/Arm/ArmData1.1/ArmModelMuscleParameters.any",
-        ammr / "Body/AAUHuman/Arm/SubjectMusPar.any",
         ammr / "Body/AAUHuman/Arm/Muscle-parameters-shoulder.any",
         ammr / "Body/AAUHuman/Arm/Muscle-parameters-shoulder-simple.any",
     ]
