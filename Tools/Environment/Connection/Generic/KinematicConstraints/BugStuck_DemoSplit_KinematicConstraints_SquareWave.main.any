@@ -1,0 +1,711 @@
+#include "../../../../libdef.any"
+#include "Split/KinMsrClass.any"
+#include "Split/CylContDetClass2.any"
+#include "Split/ContactConditionSmoothingClass2.any"
+#include "Split/RepeaterCT.any"
+
+
+/**
+This model shows a simple use case of object attach and release.
+There are two segments in the model: S1 and S2. S1 is the driving
+segment and S2 is the driven segment. The model shows that as S1
+reaches S2, they are attached and move together till S2 reaches
+its destinatation, at which point S1 continues its motion. The
+model generates a number of conditions to consider the different
+events. The signals are generated using measures of S1 and S2 to 
+start and end frames.
+
+This results in the following limitations in the model:
+1.) Only unidirectional motion is supported. The objects must 
+move in one sense only (push) and the end frame must be after the
+start frame.
+2.) If the motion is bi-directional, the S1-S2 attach signal will 
+be switched off as soon as S1 returns to the starting side.
+
+To invert the direction, several changes will be required. 
+The on-off signals must be inverted so that they are able to 
+generate the right condition when moving from negative to positive
+direction.
+*/
+Main = {
+  // Create folder with Draw Settings. These valuese are used by
+  // the ConditionalContactMultiPoints class. This folder is 
+  // generated normally whenever a human model is present in the
+  // model.
+  Template_DrawSettings DrawSettings = {}; 
+  AnyFolder Model = {
+    // -----------------------------------------------------
+    // Basic Reference Frames (Global Ref)
+    // -----------------------------------------------------
+    AnyFixedRefFrame GlobalRef = {
+      AnyRefNode N1 = {
+        sRel = {0.5,0.0,0};
+      };
+      AnyRefNode N2 = {
+        sRel = {1.0,0.0,0};
+      };
+      
+      AnyRefNode StartFrame = {
+        sRel = {1.0,0.0,0}; 
+        viewRefFrame.Visible = On;
+      };
+      
+      // End frame must be forward of start frame (in positive x)
+      AnyRefNode EndFrame = {
+        sRel = {1.35,0.0,0};
+        viewRefFrame.Visible = On;
+      };
+
+
+      AnyDrawRefFrame DrwGlobalRef = {ScaleXYZ = 0.3*{1,1,1};};    
+    };
+    
+    AnyFolder Parameters = {
+      AnyFloat S1_Vel = 2*{0.2};
+      AnyFloat S1_Acc = 0.9*{-0.1};
+      AnyInt Study_nStep = 500;
+      AnyFloat Study_TEnd = 10;
+      AnyFloat DistanceThreshold = 0.015;
+      AnyFloat TransitionDistance = 0.0015;
+    };
+    
+    // -----------------------------------------------------
+    // Segments
+    // -----------------------------------------------------   
+    // Create two segments      
+    
+      AnySeg Seg1 = {
+        r0 = {0.5,0.0,0.0};
+        Mass = 20.0;
+        Jii = {0.05,0.1,0.1};
+        AnyRefNode Node0 ={};
+        AnySurfCylinder Disc = 
+        {
+          //sRel = {0.0, 0.0, 0.0};
+          ARel = RotMat(pi/2,y); //{{1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}};
+          viewSurface = 
+          {
+          Visible = On;
+          Opacity = 1.0;
+          Pickable = On;
+          PickableZOrdering = 0;
+          RGB = {0.85, 0.05, 0.05};
+          ScaleXYZ = {1.0, 1.0, 1.0};
+          };
+          Radius = 0.5;
+          Length = 0.01;
+          CapRatio = 0.01;
+          CapRatio2 = 0.01;
+          //CircularCap = Off;
+          //CircularCap2 = Off;
+        };
+      }; // seg1
+
+      AnySeg Seg2 = {
+        r0 = {1.0,0.0,0.0};
+        Mass = 0.0;
+        Jii = {0.05,0.1,0.1};
+        AnyRefNode Node0 ={};
+        AnySurfCylinder Disc = 
+        {
+          sRel = {0.0, 0.0, 0.0};
+          ARel = RotMat(pi/2,y); //{{1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}};
+          viewSurface = 
+          {
+          Visible = On;
+          Opacity = 1.0;
+          Pickable = On;
+          PickableZOrdering = 0;
+          RGB = {0.05, 0.85, 0.05};
+          ScaleXYZ = {1.0, 1.0, 1.0};
+          };
+          Radius = 0.1;
+          Length = 0.1;
+        };
+
+      }; // seg2         
+
+      
+    // -----------------------------------------------------
+    // Joints
+    // -----------------------------------------------------
+    
+    AnyFolder Joints = {
+      // Joint between Seg1 and Global ref
+      AnyPrismaticJoint JntS1 = {
+        AnyRefNode &Ground = Main.Model.GlobalRef.N1;
+        AnySeg &Seg = Main.Model.Seg1;
+        Axis = x;
+        // Reaction forces between S1 and ground are enabled by default
+      };
+            
+      AnyPrismaticJoint JntS2 = {
+        AnyRefFrame &Ground = Main.Model.GlobalRef.StartFrame;
+        AnySeg &Seg = Main.Model.Seg2;
+        Axis = x;
+        // Switch off reaction forces between S2 and ground
+        Constraints.Reaction.Type = repmat(Constraints.nDim,On);
+      };
+      
+      
+            
+    }; // Joints
+    
+    AnyFolder InitializationArgs = {
+          AnyVar UserDefinedDistLimitLow = -0.01;
+          AnyVar UserDefinedDistLimitHigh = 0.01;
+          AnyVar UserDefinedRadiusLimit=0.02;
+          AnyVar UserDefinedVelLimitHigh= 0.8;
+          AnyVec3 UserDefinedGroundVel = {0.0,0.0,0};
+        };
+
+    AnyFolder KinMeasures = {
+      
+      CreateManySubTemplates Measures (
+      NUM=1,
+      T_NAME= "KinMsrClass",
+      NAME_PREFIX="",
+      ARG1=Main.Model.Seg2,
+      ARG2=Main.Model.Seg1,
+      ARG3=AnyKinLinear, 
+      ARG4=..MeasuresOrg,
+      ARG5="X"
+      //        ARG_INI_SWITCH = 1,
+      //        ARG_INI =..InitializationArgs
+      )={
+        
+        AnyKinMeasureOrg MeasuresNormal = {};
+        AnyKinMeasureOrg MeasuresFriction1 = {};
+        AnyKinMeasureOrg MeasuresFriction2 = {};
+      };
+    };
+    
+    AnyFolder ContDetect = {
+      CylContDetClass2 ContCheck (
+      ARG1 =..KinMeasures.Measures,
+      ARG_INI_SWITCH = 1,
+      ARG_INI =..InitializationArgs) = {};
+      
+    };
+    
+    AnyFolder ContDetectSmooth = {
+      ContactConditionSmoothing2 RadiusSmoothing (
+      ARG1="FUNC_PROFILE_LINEAR",
+      ARG2=..ContDetect.ContCheck.RadiusRatio,
+      ARG3=1.0,
+      ARG4=0.9) = {};
+      
+      ContactConditionSmoothing2 HeightSmoothing (
+      ARG1="FUNC_PROFILE_LINEAR",
+      ARG2=..ContDetect.ContCheck.HeightRatio,
+      ARG3=1.0,
+      ARG4=0.8) = {};
+      
+      //          ContactConditionSmoothing2 VelocitySmoothing (
+      //          ARG1="FUNC_PROFILE_LINEAR",
+      //          ARG2=..ContDetect.ContCheck.VelRatio,
+      //          ARG3=1.0,
+      //          ARG4=0.15) = {};
+      
+      //          AnyFloat SmoothingFun = mult(mult(RadiusSmoothing.SmoothingFun,HeightSmoothing.SmoothingFun),VelocitySmoothing.SmoothingFun);
+      AnyFloat SmoothingFun = mult(RadiusSmoothing.SmoothingFun,HeightSmoothing.SmoothingFun);
+    };
+
+    AnyFolder MeasuresAndDrivers = {
+      
+      // Function to generate a -1, +1 signal for producing absolute value
+      AnyFunInterpol AbsoluteFun = {
+        Type = PiecewiseLinear;
+        T = {-100,-0.000001,0,0.000001,100};
+        Data = {{-1,-1,0,1,1}};
+      };
+      
+      AnyFunSquareWave FallingEdgeFun = {
+        InitialValues = {0.0};
+        Ts = {Main.Model.Parameters.DistanceThreshold};
+        Values = {{1.0}};
+        dT = {Main.Model.Parameters.TransitionDistance};
+      };
+      
+      AnyFunSquareWave RisingEdgeFun = {
+        InitialValues = {1.0};
+        Ts = {Main.Model.Parameters.DistanceThreshold};
+        Values = {{0.0}};
+        dT = {Main.Model.Parameters.TransitionDistance};
+      };
+
+      
+      AnyKinMeasureFunComb1 InactiveSignalS1S2_SqWave = {
+        AnyKinMeasure &meas = .AbsMeas_S1_S2;
+        Functions = {&.FallingEdgeFun};
+      };
+      
+      AnyKinMeasureFunComb1 ActiveSignalS1S2_SqWave = {
+        AnyKinMeasure &meas = .AbsMeas_S1_S2;
+        Functions = {&.RisingEdgeFun};
+      };
+
+      // Generate a falling edge signal when S2 reaches end frame
+      AnyKinMeasureFunComb1 InactiveSignalS2EndFrame_SqWave = {
+        AnyKinMeasure &meas = .AbsMeas_S2_EndFrame;
+        Functions = {&.FallingEdgeFun};
+      };
+      
+      // Generate a falling edge signal when S2 reaches end frame
+      AnyKinMeasureFunComb1 ActiveSignalS2EndFrame_SqWave = {
+        AnyKinMeasure &meas = .AbsMeas_S2_EndFrame;
+        Functions = {&.RisingEdgeFun};
+      };
+      
+      // Take product of rising edge when S1 is close to S2 and distance between S1 and S2.
+      AnyKinMeasureQuadComb CombMeas3_SqWave = {
+        AnyKinMeasure &measFun = .InactiveSignalS2EndFrame_SqWave;
+        AnyKinMeasure &measFun2 = .ActiveSignalS1S2_SqWave;
+        AnyFloat Check = measFun2.Pos[0]*measFun.Pos[0];
+        OutDim = 1;
+        CoefQuadTensor = {{{0.0, 1.0}, {0.0, 0.0}}};
+      };
+    
+      // Product of active signal with measure between S1 and S2.
+      AnyKinMeasureQuadComb CombMeas4_SqWave = {
+        AnyKinMeasure &measFun = .CombMeas3_SqWave;
+//        AnyKinMeasure &measNorm = Main.Model.KinMeasures.Measures.MeasuresNormal;
+        AnyKinMeasure &measDist = .AbsMeas_S1_S2;
+        AnyFloat Check = measDist.Pos[0]*measFun.Pos[0];
+        OutDim = 1;
+        CoefQuadTensor = {{{0.0, 1.0}, {0.0, 0.0}}};
+      };
+
+      AnyKinMeasureQuadComb MeasHoldS2Start_int_SqWave = {
+        AnyKinMeasure &measFun = .InactiveSignalS1S2_SqWave;
+//        AnyKinMeasure &measNorm = Main.Model.Joints.JntS2;
+        AnyKinMeasure &measFun2 = .InactiveSignalS2EndFrame_SqWave;
+        //            AnyFloat Check = measNorm.Pos[0]*measFun.Pos[0];
+        OutDim = 1;
+        CoefQuadTensor = {{{0.0, 1.0}, {0.0, 0.0}}};
+      };
+    
+      AnyKinMeasureQuadComb MeasHoldS2Start_SqWave = {
+        AnyKinMeasure &measFun = .MeasHoldS2Start_int_SqWave;
+        AnyKinMeasure &measDist = .Meas_S2_StartFrame;
+//        AnyKinMeasure &measNorm = Main.Model.Joints.JntS2;
+        //            AnyFloat Check = measNorm.Pos[0]*measFun.Pos[0];
+        OutDim = 1;
+        CoefQuadTensor = {{{0.0, 1.0}, {0.0, 0.0}}};
+      };
+
+      
+      AnyKinMeasureQuadComb MeasHoldS2End_SqWave = {
+        AnyKinMeasure &measFun = .ActiveSignalS2EndFrame_SqWave;
+//        AnyKinMeasure &measNorm = Main.Model.Joints.JntS2;
+        AnyKinMeasure &measDist = .Meas_S2_EndFrame;
+        //            AnyFloat Check = measNorm.Pos[0]*measFun.Pos[0];
+        OutDim = 1;
+        CoefQuadTensor = {{{0.0, 1.0}, {0.0, 0.0}}};
+      };
+      
+      
+      
+      
+      
+      
+      
+      // Generate a -1 signal if Meas is neg or +1 signal if Meas is positive
+      AnyKinMeasureFunComb1 PosNegSignalS1StartFrame = {
+        AnyKinMeasure &meas = ..KinMeasures.Measures.MeasuresNormal;
+        Functions = {&.AbsoluteFun};
+      };
+      
+      // Take absolute value of the measure. Multiply neg measure with -1 and vice versa
+      AnyKinMeasureQuadComb AbsMeas_S1_S2 = {
+        AnyKinMeasure &measFun = .PosNegSignalS1StartFrame;
+        AnyKinMeasure &measNorm = .PosNegSignalS1StartFrame.meas;
+        AnyFloat Check = measNorm.Pos[0]*measFun.Pos[0];
+        OutDim = 1;
+        // Product of two measures
+        CoefQuadTensor = {{{0.0, 1.0}, {0.0, 0.0}}};
+      };
+      
+      // Generate a rising edge when value reaches zero
+      AnyFunInterpol ZeroOnFun = {
+        Type = PiecewiseLinear;
+//        T = {-100,-0.0001,0,0.01,100};
+//        Data = {{1,1,1,0,0}};
+        AnyMatrix M = {
+                        {-100     ,   1},
+                        {-0.0001  ,   1},
+                        {0        ,   1},
+                        {0.01     ,   0},
+                        {100      ,   0}
+                      };
+        T = M'[0];
+        Data = {M'[1]};
+      };
+      
+      // Generate a falling edge when value reaches zero
+      AnyFunInterpol ZeroOffFun = {
+        Type = PiecewiseLinear;
+//        T = {-100,-0.0001,0,0.02,100};
+//        Data = {{0,0,0,1,1}};
+        AnyMatrix M = {
+                        {-100     ,   0},
+                        {-0.0001  ,   0},
+                        {0        ,   0},
+                        {0.02     ,   1},
+                        {100      ,   1}
+                      };
+        T = M'[0];
+        Data = {M'[1]};
+      };
+      
+      // Generate a falling edge when value reaches zero
+      AnyFunInterpol ZeroOffFun_advance = {
+        Type = PiecewiseLinear;
+//        T = {-100,-0.0001,0,0.01,0.02,100};
+//        Data = {{0,0,0,0,1,1}};
+        AnyMatrix M = {
+                        {-100     ,   0},
+                        {-0.0001  ,   0},
+                        {0        ,   0},
+                        {0.01     ,   0},
+                        {0.02     ,   1},
+                        {100      ,   1}
+                      };
+        T = M'[0];
+        Data = {M'[1]};
+      };
+
+      AnyFunInterpol ZeroOnFun_advance = {
+        Type = PiecewiseLinear;
+//        T = {-100,-0.0001,0,0.01,0.02,100};
+//        Data = {{1,1,1,1,0,0}};
+        AnyMatrix M = {
+                        {-100     ,   1},
+                        {-0.0001  ,   1},
+                        {0        ,   1},
+                        {0.01     ,   1},
+                        {0.02     ,   0},
+                        {100      ,   0}
+                      };
+        T = M'[0];
+        Data = {M'[1]};
+      };
+
+      
+      // Generate a rising edge signal when S1 reaches S2 (which is at start frame)
+      AnyKinMeasureFunComb1 ActiveSignalS1S2 = {
+        AnyKinMeasure &meas = .AbsMeas_S1_S2;
+        Functions = {&.ZeroOnFun};
+      };
+      
+
+//      // Generate a rising edge signal when S1 reaches S2 (which is at start frame)
+//      AnyKinMeasureFunComb1 ActiveSignalS1S2 = {
+//        AnyKinMeasure &meas = .PosNegSignalS1StartFrame.meas;
+//        Functions = {&.ZeroOnFun};
+//      };
+
+      
+      // Generate a falling edge signal when S1 reaches S2 (which is at start frame)
+      AnyKinMeasureFunComb1 InactiveSignalS1S2 = {
+        AnyKinMeasure &meas = .AbsMeas_S1_S2;
+        Functions = {&.ZeroOffFun};
+      };
+      
+      // Generate a falling edge signal when S1 reaches S2 (which is at start frame)
+      AnyKinMeasureFunComb1 InactiveSignalS1S2_advance = {
+        AnyKinMeasure &meas = .AbsMeas_S1_S2;
+        Functions = {&.ZeroOffFun_advance};
+      };
+
+      
+//      // Generate a falling edge signal when S1 reaches S2 (which is at start frame)
+//      AnyKinMeasureFunComb1 InactiveSignalS1S2 = {
+//        AnyKinMeasure &meas = .PosNegSignalS1StartFrame.meas;
+//        Functions = {&.ZeroOffFun};
+//      };
+
+
+
+      // Take product of rising edge when S1 is close to S2 and distance between S1 and S2.
+      AnyKinMeasureQuadComb CombMeas2 = {
+        AnyKinMeasure &measFun = .ActiveSignalS1S2;
+        AnyKinMeasure &measNorm = Main.Model.KinMeasures.Measures.MeasuresNormal;
+        AnyFloat Check = measNorm.Pos[0]*measFun.Pos[0];
+        OutDim = 1;
+        CoefQuadTensor = {{{0.0, 1.0}, {0.0, 0.0}}};
+      };
+      
+      // Generate end condition:
+      AnyKinMeasureOrg Meas_S2_EndFrame = {
+        AnyKinLinear Lin_S2_EndFrame = {
+          AnyRefFrame &seg = ...Seg2;
+          AnyRefFrame &refFrame = ...GlobalRef.EndFrame;
+//          Ref = 1;
+        };
+        MeasureOrganizer = {0};
+      };
+      
+      AnyKinMeasureOrg Meas_S2_StartFrame = {
+        AnyKinLinear Lin_S2_StartFrame = {
+          AnyRefFrame &seg = ...Seg2;
+          AnyRefFrame &refFrame = ...GlobalRef.StartFrame;
+        };
+        MeasureOrganizer = {0};
+      };
+
+      
+      // Generate a -1 signal if Meas is neg or +1 signal if Meas is positive
+      AnyKinMeasureFunComb1 PosNegSignalS2EndFrame = {
+        AnyKinMeasure &meas = .Meas_S2_EndFrame;
+        Functions = {&.AbsoluteFun};
+      };
+      
+      // Take absolute value of the measure. Multiply neg measure with -1 and vice versa
+      AnyKinMeasureQuadComb AbsMeas_S2_EndFrame = {
+        AnyKinMeasure &measFun = .PosNegSignalS2EndFrame;
+        AnyKinMeasure &measNorm = .PosNegSignalS2EndFrame.meas;
+        AnyFloat Check = measNorm.Pos[0]*measFun.Pos[0];
+        OutDim = 1;
+        // Product of two measures
+        CoefQuadTensor = {{{0.0, 1.0}, {0.0, 0.0}}};
+      };
+      
+      // Generate a rising edge signal when S2 reaches end frame
+      AnyKinMeasureFunComb1 ActiveSignalS2EndFrame = {
+        AnyKinMeasure &meas = .AbsMeas_S2_EndFrame;
+        Functions = {&.ZeroOnFun};
+      };
+      
+//      // Generate a rising edge signal when S2 reaches end frame
+//      AnyKinMeasureFunComb1 ActiveSignalS2EndFrame = {
+//        AnyKinMeasure &meas = .Meas_S2_EndFrame;
+//        Functions = {&.ZeroOnFun};
+//      };
+
+      // Generate a rising edge signal when S2 reaches end frame
+      AnyKinMeasureFunComb1 ActiveSignalS2EndFrame_advance = {
+        AnyKinMeasure &meas = .AbsMeas_S2_EndFrame;
+        Functions = {&.ZeroOnFun_advance};
+      };
+
+    
+      // Generate a falling edge signal when S2 reaches end frame
+      AnyKinMeasureFunComb1 InactiveSignalS2EndFrame = {
+        AnyKinMeasure &meas = .AbsMeas_S2_EndFrame;
+        Functions = {&.ZeroOffFun};
+      };
+      
+      // Generate a falling edge signal when S2 reaches end frame
+      AnyKinMeasureFunComb1 InactiveSignalS2EndFrame_advance = {
+        AnyKinMeasure &meas = .AbsMeas_S2_EndFrame;
+        Functions = {&.ZeroOffFun_advance};
+      };
+
+    
+      // Take product of rising edge when S1 is close to S2 and distance between S1 and S2.
+      AnyKinMeasureQuadComb CombMeas3 = {
+        AnyKinMeasure &measFun = .InactiveSignalS2EndFrame;
+        AnyKinMeasure &measNorm = .ActiveSignalS1S2;
+        AnyFloat Check = measNorm.Pos[0]*measFun.Pos[0];
+        OutDim = 1;
+        CoefQuadTensor = {{{0.0, 1.0}, {0.0, 0.0}}};
+      };
+    
+      // Product of active signal with measure between S1 and S2.
+      AnyKinMeasureQuadComb CombMeas4 = {
+        AnyKinMeasure &measFun = .CombMeas3;
+        AnyKinMeasure &measNorm = Main.Model.KinMeasures.Measures.MeasuresNormal;
+        AnyFloat Check = measNorm.Pos[0]*measFun.Pos[0];
+        OutDim = 1;
+        CoefQuadTensor = {{{0.0, 1.0}, {0.0, 0.0}}};
+      };
+    
+      AnyKinMeasureQuadComb MeasHoldS2Start_int = {
+        AnyKinMeasure &measFun = .InactiveSignalS1S2_advance;
+//        AnyKinMeasure &measNorm = Main.Model.Joints.JntS2;
+        AnyKinMeasure &measNorm = .InactiveSignalS2EndFrame_advance;
+        //            AnyFloat Check = measNorm.Pos[0]*measFun.Pos[0];
+        OutDim = 1;
+        CoefQuadTensor = {{{0.0, 1.0}, {0.0, 0.0}}};
+      };
+    
+      AnyKinMeasureQuadComb MeasHoldS2Start = {
+        AnyKinMeasure &measFun = .Meas_S2_StartFrame;
+//        AnyKinMeasure &measNorm = Main.Model.Joints.JntS2;
+        AnyKinMeasure &measNorm = .MeasHoldS2Start_int;
+        //            AnyFloat Check = measNorm.Pos[0]*measFun.Pos[0];
+        OutDim = 1;
+        CoefQuadTensor = {{{0.0, 1.0}, {0.0, 0.0}}};
+      };
+
+      
+      AnyKinMeasureQuadComb MeasHoldS2End = {
+        AnyKinMeasure &measFun = .ActiveSignalS2EndFrame_advance;
+//        AnyKinMeasure &measNorm = Main.Model.Joints.JntS2;
+        AnyKinMeasure &measNorm = .Meas_S2_EndFrame;
+        //            AnyFloat Check = measNorm.Pos[0]*measFun.Pos[0];
+        OutDim = 1;
+        CoefQuadTensor = {{{0.0, 1.0}, {0.0, 0.0}}};
+      };
+
+
+
+
+
+      
+//      AnyFunInterpol interpol = {
+//        Type = PiecewiseLinear;
+//        T = {-100,-0.15,-0.1,-0.009,0,0.009,0.1,0.15,100};
+//        //            Data = {{0,0,0,1,1,1,0,0,0}};
+//        Data = {{0,0,0,0,0,1,1,1,1}};
+//      };
+//      AnyFunInterpol interpolInv = {
+//        Type = PiecewiseLinear;
+//        T = .interpol.T;
+//        Data = {{1,1,1,1,0,1,1,1,1}};
+//      };
+//      
+//      AnyFloat dd = interpol(Main.Model.KinMeasures.Measures.MeasuresNormal.Pos[0]);
+//      
+//      AnyKinMeasureFunComb1 measureFun = {
+//        AnyKinMeasure &normalmeasure = Main.Model.KinMeasures.Measures.MeasuresNormal;
+//        Functions = {&.interpol};
+//      };
+//      AnyKinMeasureFunComb1 measureFunInv = {
+//        AnyKinMeasure &normalmeasure = Main.Model.KinMeasures.Measures.MeasuresNormal;
+//        Functions = {&.interpolInv};
+//      };
+//      
+//      
+//      AnyKinMeasureQuadComb CombMeas = {
+//        AnyKinMeasure &measFun = .measureFun;
+//        AnyKinMeasure &measNorm = Main.Model.KinMeasures.Measures.MeasuresNormal;
+//        AnyFloat Check = measNorm.Pos[0]*measFun.Pos[0];
+//        OutDim = 1;
+//        CoefQuadTensor = {{{0.0, 1.0}, {0.0, 0.0}}};
+//      };
+//      
+//      AnyKinMeasureQuadComb CombMeasInv = {
+//        AnyKinMeasure &measFun = .measureFunInv;
+//        AnyKinMeasure &measNorm = Main.Model.KinMeasures.Measures.MeasuresNormal;
+//        AnyFloat Check = measNorm.Pos[0]*measFun.Pos[0];
+//        OutDim = 1;
+//        CoefQuadTensor = {{{0.0, 1.0}, {0.0, 0.0}}};
+//      };
+//      
+//      AnyKinMeasureQuadComb HoldS2Meas = {
+//        AnyKinMeasure &measFun = .measureFunInv;
+//        AnyKinMeasure &HoldS2 = Main.Model.Joints.JntS2;
+//        //            AnyFloat Check = measNorm.Pos[0]*measFun.Pos[0];
+//        OutDim = 1;
+//        CoefQuadTensor = {{{0.0, 1.0}, {0.0, 0.0}}};
+//      };
+      
+      
+      AnyKinEqSimpleDriver DriverS1 = {
+        AnyJoint &Jnt = ..Joints.JntS1;
+        DriverPos = {0};
+        DriverVel = Main.Model.Parameters.S1_Vel;
+        DriverAcc = Main.Model.Parameters.S1_Acc;
+        Reaction.Type = {On};
+      };
+      
+//      AnyKinEqSimpleDriver DefaultFixS2 = {
+//        AnyJoint &Jnt = ..Joints.JntS2;
+//        DriverPos = {0};
+//        DriverVel = {0.000};
+//        Reaction.Type = {On};
+//        CType = {Soft};
+//        WeightFun = {&DrvWeight};
+//        AnyFunConst DrvWeight  ={
+//          Value = {0.001};
+//        };
+//      };
+
+      
+      
+      AnyKinEqSimpleDriver Drv = {
+        //            AnyKinMeasure &meas = .measureFun;
+        AnyKinMeasure &combMeas = .CombMeas4_SqWave;
+//        AnyKinMeasure &combMeas = .ActiveSignalS1S2;
+        DriverPos = {0.0};
+        DriverVel = {0.0};
+        CType = {Soft};
+        WeightFun = {&DrvWeight};
+        AnyFunConst DrvWeight  ={
+          Value = {0.5};
+        };          
+//        Reaction.Type = {Off};
+      };
+      
+      
+      AnyKinEqSimpleDriver DrvHoldS2Start = {
+        //            AnyKinMeasure &meas = .measureFun;
+        AnyKinMeasure &combMeas = .MeasHoldS2Start_SqWave;
+        DriverPos = {0.0};
+        DriverVel = {0.0};
+        CType = {Soft};
+        WeightFun = {&DrvWeight};
+        AnyFunConst DrvWeight  ={
+          Value = {0.05};
+        };          
+//        Reaction.Type = {Off};
+      };
+
+AnyKinEqSimpleDriver DrvHoldS2End = {
+        //            AnyKinMeasure &meas = .measureFun;
+        AnyKinMeasure &combMeas = .MeasHoldS2End_SqWave;
+        DriverPos = {0.0};
+        DriverVel = {0.0};
+        CType = {Soft};
+        WeightFun = {&DrvWeight};
+        AnyFunConst DrvWeight  ={
+          Value = {0.05};
+        };          
+//        Reaction.Type = {Off};
+      };
+//
+//      
+      AnyKinPLine LineMeasure = {
+        AnyRefFrame &s1 = Main.Model.Seg1;
+        AnyRefFrame &s2 = Main.Model.Seg2;
+      };
+      
+    }; // Measures and drivers
+    
+        
+    
+  }; // Model
+  
+  AnyBodyStudy Study = {
+    AnyFolder& Model = Main.Model;
+    Gravity = {0,-9.81,0};    
+    nStep = Main.Model.Parameters.Study_nStep;
+    tEnd= Main.Model.Parameters.Study_TEnd;
+    Kinematics.SolverType = KinSolOverDeterminate;
+  };
+  
+  // Switch to define an automatic save of results to the Output folder
+  #ifndef AutoSaveOption 
+  #define AutoSaveOption 0
+  #endif
+  
+  /**Execute this operation to run the model in the intended operation sequence.  
+  It is also possible to run operations seperately, by manual selections in the operation tree*/
+  AnyOperationSequence RunApplication = {
+    
+    ///This operation is the inverse dynamic analysis
+    AnyOperation &InvAnal=Main.Study.InverseDynamics;
+    
+    #if AutoSaveOption 
+    /// This operation saves the output of the study to an h5 file in the Output folder
+    AnyOperationMacro save = {
+      MacroStr={ "classoperation Main.Study.Output " + strquote("Save data") + " --type=Deep" + " --file="+ strquote(ANYBODY_PATH_OUTPUT + ANYBODY_NAME_MAINFILE + ".anydata.h5")};
+    };
+    #endif
+  };  
+  
+
+  
+};
