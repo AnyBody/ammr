@@ -233,9 +233,8 @@ percentile is specified in exactly the same way.
 We are extremely grateful to Ford Forschungszentrum Aachen, Germany, for
 sponsoring the scaling implementation.
 
-```{rst-class} without-title
-```
 
-:::{seealso}
-**Next lesson:** {doc}`lesson3`.
+:::{seealso} **Next lesson:**
+:class: seealso
+{doc}`lesson3`.
 :::
