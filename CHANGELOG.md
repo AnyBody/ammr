@@ -30,9 +30,40 @@
   calculated using the position of the hands. Also, `Main.ModelSetup.EnvironmentParameters.GravityDirection` defined in `box.any` file
   is now calculated automatically from `Main.ModelSetup.LabSpecificData.Gravity` defined in `LabSpecificData.any` file. These changes should 
   make the model more robust when dealing with different bvh files.
+
 * It is no longer necessasry to supply the `MarkerName` argument in the CreateMarkerDriver template
   MoCap models. The argument can still be used if the marker name and the data entry in the c3d file 
-  are different. 
+  are different.
+  
+* The implementaion of muscles parameters section of the models have changed to ultize
+  the the new `??=` (optional assigment) operator introduced in AnyBody 7.4.1.
+  
+  It is now possible to directy override/redefine the muscle paramters and muscle volumes. 
+  
+  For example overriding the muscle volumes with a new set of data: 
+  ```{code-block} AnyScriptDoc
+  Main.HumanModel.BodyModel.Right.Leg.ModelParameters.Muscles = {
+     SoleusMedialis.MuscleVolume = 540; //ml
+     SoleusLateralis.MuscleVolume = 450; /ml
+  };
+  ```
+  The TLEM leg model previously had a similar functionality using 
+  `class_template`s and an extra level of indirection of the muscle paramters
+  (the `SubjectMusPar` section in the muscle model folder). This functionality has 
+  been replaced by the new simpler implementation.
+
+* Changed the methods for distributing muscle volume among discretized muscle
+  elements. This new method allows for different optimal
+  fiber lengths among elements of a muscle. If one element of a muscle get a
+  smaller optimal fiber length (i.e. through calibration) the volume of the muscles
+  element gets redistributed, and PCSA remains contant across elements. 
+  
+  If the optimal fiber length of the different elements are the same, then this method 
+  will yield the same result as before.
+
+
+* In many body parts the folder holding muscles models were named shortly as `MusPar`. 
+  It is now renamed to `MuscleModels` for better clarity.  
 
 (ammr-2.4-changelog)=
 ## AMMR 2.4.2 (2022-07-08)
