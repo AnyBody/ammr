@@ -4,6 +4,7 @@
 #include "Split/DrawResultant.any"
 
 #include "Split/KinMsrClass.any"
+#include "Split/KinMsrMultiInputClass.any"
 //#include "Split/CylContDetClass.any"
 #include "Split/CylContDetClass2.any"
 //#include "Split/ContactConditionSmoothingClass.any"
@@ -11,6 +12,7 @@
 //#include "Split/CreateContactElementClass.any"
 //#include "Split/CreateContactElementClass2.any"
 #include "Split/CreateContactElementClass3.any"
+#include "Split/CreateContactElementClass3_MultiInput.any"
 #include "Split/RepeaterCT.any"
 
 
@@ -175,6 +177,8 @@ Main = {
             nCols = .SplitBaseNodes.nCols; Settings.NodesRotOffset = RotMat(0*pi/180,x);
           };
           AnyInt nPoints = SplitBaseNodes.nRows*SplitBaseNodes.nCols;
+          AnyObjectPtr BaseNodesPtr = ObjSearchRecursive(CompleteNameOf(&SplitBaseNodes.CenterFrame.SplitBaseNodes),"Node*","AnyRefNode",1);
+          AnyObjectPtr TargetNodesPtr = ObjSearchRecursive(CompleteNameOf(&SplitTargetNodes.CenterFrame.SplitTargetNodes),"Node*","AnyRefNode",1);
         }; // Points 
         
         
@@ -190,7 +194,31 @@ Main = {
         };
         
         AnyFolder KinMeasures = {
-         
+          
+          AnyFloat AnyBodyV1 = ANYBODY_V1 ;
+          AnyFloat AnyBodyV2 = ANYBODY_V2 ;
+          AnyFloat AnyBodyV3 = ANYBODY_V3 ;
+          AnyFloat AnyBodyV4 = ANYBODY_V4 ;
+          
+          #if ANYBODY_V1 >= 7 & ANYBODY_V2 >= 5 & ANYBODY_V3 >= 0 & ANYBODY_V4 >= 9764
+          KinMsrMultiInputClass Measures (
+          ARG1 = ..Points.BaseNodesPtr,
+          ARG2 = ..Points.TargetNodesPtr,
+          ARG3 = "Y") = {};
+          
+          AnyKinMeasureOrg check = {
+            AnyKinMeasure &nor = .Measures.MeasuresNormal;
+            MeasureOrganizer = {0};
+          };
+          AnyObjectPtr Nodecheck = check.nor.ref.RefFrames[0][0][0];
+          AnyString Nodecheckstr = (CompleteNameOf(Nodecheck));
+//          #define NODE Nodecheckstr
+//          AnyRefFrame &node = NODE;
+
+//          NameOf(NodeCheck) = {};
+          AnyRefFrame &ref = Main.Model.Seg1.SplitTargetNodes.Node0;
+
+          #else
           CreateManySubTemplates Measures (
           NUM=16,
           T_NAME= "KinMsrClass",
@@ -203,12 +231,13 @@ Main = {
           //        ARG_INI_SWITCH = 1,
           //        ARG_INI =..InitializationArgs
           )={
-          
-          AnyKinMeasureOrg MeasuresNormal = {};
-          AnyKinMeasureOrg MeasuresFriction1 = {};
-          AnyKinMeasureOrg MeasuresFriction2 = {};
-        };
-        };
+            
+            AnyKinMeasureOrg MeasuresNormal = {};
+            AnyKinMeasureOrg MeasuresFriction1 = {};
+            AnyKinMeasureOrg MeasuresFriction2 = {};
+          };
+          #endif
+        }; // Kin Measures
         
         AnyFolder ContDetect = {
           AnyInt f = 16;
@@ -245,6 +274,21 @@ Main = {
         };
         
         AnyFolder ContElements = {
+          #if ANYBODY_V1 >= 7 & ANYBODY_V2 >= 5 & ANYBODY_V3 >= 0 & ANYBODY_V4 >= 9764
+          CreateManySubTemplates ContEles (
+          NUM=16,
+          T_NAME= "CreateContactElements3_MultiInput",
+          NAME_PREFIX="",
+          ARG1=...KinMeasures.Measures,
+          ARG2=0,
+          ARG3=1,
+          ARG4=1,
+          ARG5=...ContDetectSmooth.SmoothingFun,
+          ARG_INI_SWITCH = 1,
+          ARG_INI =...InitializationArgs
+          )={};
+
+          #else
           CreateManySubTemplates ContEles (
           NUM=16,
           T_NAME= "CreateContactElements3",
@@ -257,7 +301,8 @@ Main = {
           ARG_INI_SWITCH = 1,
           ARG_INI =...InitializationArgs
           )={};
-
+          #endif
+          
         };
         
         AnyFolder ResultantForce = {
