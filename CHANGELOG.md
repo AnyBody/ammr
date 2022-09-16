@@ -9,7 +9,8 @@
 * The `Main.ModelSetup.CreateVideo` operation was missing in some of the
   MoCap examples. This has been fixed. If you have this problem update the `CreateVideo.any` file in your application. 
 * Fixed wrapping problem with the posterior deltoid muscle in the 2 parameter shoulder calibration. 
-
+* Inconsistencies in arm muscles paramaeters have been resolved. The same underlying parameters are now used for both
+  the simple and the 3-element muscle models. 
 
 **Added:**
 
@@ -26,6 +27,20 @@
 * 
 
 **Changed:**
+* The implemenation of the muscle parameter in the arm model have been refactored. All parematers are now given as
+  muscle volume, optimal fiberlenth and tendon slacklength. The physiological cross sectional area (PCSA),
+  was previously hard coded parameter, but is now only an intermediate value used for calculating muscle strength from the muscle volume and optimal fiber length.
+
+  This new structure allows for overwritting the the complete set of muscles volumes. For example with alternative dataset. 
+
+  ```{code-block} AnyScriptDoc
+  Main.HumanModel.BodyModel.Right.ShoulderArm.ModelParameters.Muscles = {
+     biceps_brachii_caput_breve.MuscleVolume = 25.8;
+
+  };
+  ```
+
+
 * The load-time position of the box in the {ref}`BVH_BoxLift model <sphx_glr_auto_examples_Mocap_plot_BVH_BoxLift.py>` is now 
   calculated using the position of the hands. Also, `Main.ModelSetup.EnvironmentParameters.GravityDirection` defined in `box.any` file
   is now calculated automatically from `Main.ModelSetup.LabSpecificData.Gravity` defined in `LabSpecificData.any` file. These changes should 
@@ -212,6 +227,22 @@ The `HumeroUlnarJoint` is the elbow flexion extension, and together `HumeroRadia
 
 
 **Changed:**
+
+- Ensure consistency of arm muscle parameters when switching between simple muscle models and 3 element muscle models.
+  The two muscles had a few differences in the underlying parameters. Mostly due
+  to the 3 element models being implemented based on newer publications, and
+  some changes not being backported properly to the simple muscle model. The two muscle models now give the same overall muscles strength `F0` when switching.
+
+  - Fix a bug in Anconeus_1 PCSA for the 3 element muscle model. 
+  - Fix the distribution of PCSA in simple muscle models for Latisimus dorsi to match 3 element muscle models.
+  - Fix the total PCSA of the 3-element muscle models of the Latisimus dorsi muscles to match the simple muscles.
+  - Fixed a typo in the calculation of the PCSA for one element of the pronator quadratus (`Pron_quadr_2`) with the simple muscle models.
+  - Fixed the PCSA of pectoralis major muscle model to match the 3-element muscle models. 
+  - Corrected Coracobrachialis pennation angle for 3-element muscle models.
+  - Fixed the PCSA of the deltoid simple muscle models to match the 3 element muscle models.
+  - Fixed the PCSA of the subscapularis simple muscle models to match the 3 element muscle models.
+
+
 
 - Improve the trunk model's strength for trunk external rotation. This change
   improves the implementation of the internal/external obliques and latissimus
