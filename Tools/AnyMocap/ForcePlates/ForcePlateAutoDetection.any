@@ -444,36 +444,30 @@
     
     #include "ContactDetection.any"
     
-    AnyMuscleModelUsr1 InContactMuscle = {
-      /// If the ALLOW_MULTI_LIMB_CONTACT option is OFF this ensures that two limbs can't
-      /// have contact with the plate at the same time
-      /// UseOppositeLimb is 1 if the opposite limb has contact and a lower velocity that limb1
-      AnyVar UseOppositeLimb = not(ALLOW_MULTI_LIMB_CONTACT)*
-            andfun(..ContactDetectionLimb2.NodeWithInBox.WithinBoxAndVelBelowThreshold,
-                   ltfun(..ContactDetectionLimb2.P1Vel, .P1Vel));
-     
-      F0 = 0;
-      S = .NodeWithInBox.WithinBoxAndVelBelowThreshold *10000*not(UseOppositeLimb);
-    };
+    /// If the ALLOW_MULTI_LIMB_CONTACT option is OFF this ensures that two limbs can't
+    /// have contact with the plate at the same time
+    /// UseOppositeLimb is 1 if the opposite limb has contact and a lower velocity that limb1
+    AnyVar UseOppositeLimb = not(ALLOW_MULTI_LIMB_CONTACT)*
+          andfun(.ContactDetectionLimb2.NodeWithInBox.WithinBoxAndVelBelowThreshold,
+                 ltfun(.ContactDetectionLimb2.P1Vel, P1Vel));
+   
+    AnyVar InContactStrength = NodeWithInBox.WithinBoxAndVelBelowThreshold *10000*not(UseOppositeLimb);
     
-    AnyMuscleModelUsr1 NoContactMuscle = {
-      AnyVar Limb2NoContact=iffun(eqfun(..ContactDetectionLimb2.NodeWithInBox.WithinBoxAndVelBelowThreshold ,1.0),0.0,1.0); //equal 0 if limb2 in contact
-      S =Limb2NoContact*.NodeWithInBox.OutsideBoxOrVelHigherThanThreshold*10000;
-      F0 = 0;
-    };
+    AnyVar Limb2NoContact=iffun(eqfun(.ContactDetectionLimb2.NodeWithInBox.WithinBoxAndVelBelowThreshold ,1.0),0.0,1.0); //equal 0 if limb2 in contact
+    AnyVar NoContactStrength =Limb2NoContact*NodeWithInBox.OutsideBoxOrVelHigherThanThreshold*10000;
     
     
     AnyFolder PlateFootReactions = {
       AnyRefFrame& ref1=..ForcePlate.ForcePlateSeg;
       AnyRefFrame&ref2=..Limb1;
-      AnyMuscleModel &MusMdl=.InContactMuscle;
+      AnyVar Strength =.InContactStrength;
       #include "<ANYBODY_PATH_TOOLBOX>/Mocap/ArtificialMuscleConnection.any"
     };
     
     AnyFolder PlateGroundReactions={
       AnyRefFrame& ref1=..Corners.PlateCenter;
       AnyRefFrame& ref2=..ForcePlate.ForcePlateSeg;
-      AnyMuscleModel &MusMdl=.NoContactMuscle;
+      AnyVar Strength =.NoContactStrength;
       #include "<ANYBODY_PATH_TOOLBOX>/Mocap/ArtificialMuscleConnection.any"
     };
   };
@@ -491,29 +485,24 @@
     
     #include "ContactDetection.any"
     
-    AnyMuscleModelUsr1 InContactMuscle = {
-      /// If the ALLOW_MULTI_LIMB_CONTACT option is OFF this ensures that two limbs can't
-      /// have contact with the plate at the same time
-      /// UseOppositeLimb is 1 if the opposite limb has contact and a lower velocity that limb2
-      AnyVar UseOppositeLimb = not(ALLOW_MULTI_LIMB_CONTACT)*
-            andfun(..ContactDetectionLimb1.NodeWithInBox.WithinBoxAndVelBelowThreshold,
-                   ltfun(..ContactDetectionLimb1.P1Vel, .P1Vel));
+    /// If the ALLOW_MULTI_LIMB_CONTACT option is OFF this ensures that two limbs can't
+    /// have contact with the plate at the same time
+    /// UseOppositeLimb is 1 if the opposite limb has contact and a lower velocity that limb2
+    AnyVar UseOppositeLimb = not(ALLOW_MULTI_LIMB_CONTACT)*
+            andfun(.ContactDetectionLimb1.NodeWithInBox.WithinBoxAndVelBelowThreshold,
+                   ltfun(.ContactDetectionLimb1.P1Vel, P1Vel));
      
-      F0 = 0;
-      S = .NodeWithInBox.WithinBoxAndVelBelowThreshold *10000*not(UseOppositeLimb);
-    };
+    AnyVar InContactStrength = NodeWithInBox.WithinBoxAndVelBelowThreshold *10000*not(UseOppositeLimb);
+
     
-    AnyMuscleModelUsr1 NoContactMuscle = {
-      AnyVar Limb1NoContact=iffun(eqfun(..ContactDetectionLimb1.NodeWithInBox.WithinBoxAndVelBelowThreshold ,1.0),0.0,1.0); //equal 0 if limb1 in contact
-      S =Limb1NoContact*.NodeWithInBox.OutsideBoxOrVelHigherThanThreshold*10000;
-      F0 = 0;
-    };
+    AnyVar Limb1NoContact=iffun(eqfun(.ContactDetectionLimb1.NodeWithInBox.WithinBoxAndVelBelowThreshold ,1.0),0.0,1.0); //equal 0 if limb1 in contact
+    AnyVar NoContactStrength =Limb1NoContact*NodeWithInBox.OutsideBoxOrVelHigherThanThreshold*10000;
     
     
     AnyFolder PlateFootReactions={
       AnyRefFrame& ref1=..ForcePlate.ForcePlateSeg;
       AnyRefFrame& ref2=..Limb2;
-      AnyMuscleModel &MusMdl=.InContactMuscle;
+      AnyVar Strength=.InContactStrength;
       #include "<ANYBODY_PATH_TOOLBOX>/Mocap/ArtificialMuscleConnection.any"
     };
     
@@ -521,7 +510,7 @@
     AnyFolder PlateGroundReactions={
       AnyRefFrame &ref1=..Corners.PlateCenter;
       AnyRefFrame& ref2=..ForcePlate.ForcePlateSeg;
-      AnyMuscleModel &MusMdl=.NoContactMuscle;
+      AnyVar Strength =.NoContactStrength;
       #include "<ANYBODY_PATH_TOOLBOX>/Mocap/ArtificialMuscleConnection.any"
     };
   };
