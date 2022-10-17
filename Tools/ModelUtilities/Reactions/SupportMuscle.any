@@ -2,6 +2,10 @@
 #define EXCLUDE_MUSCLE_METABOLISM AnyMetabModelSimple ZeroMetabolicMdl = {EtaCon = 2e22; EtaEcc = 2e22;}; MetabModel = &ZeroMetabolicMdl;
 #endif
 
+#ifndef SET_DEFAULT_ACTUATOR_VOLUME
+#define SET_DEFAULT_ACTUATOR_VOLUME Volume = 1
+#endif
+
 AnyKinLinear Lin={
   AnyRefFrame &ref1=..StartNode;
   AnyRefFrame &ref2=..EndNode;
@@ -19,16 +23,15 @@ AnyMuscleModel MuscleModel={
 };
 
 AnyRecruitedActuator ArtificialSupportMuscle={
-  AnyMuscleModel &ref1=.MuscleModel;
+  Strength = .Strength;
   AnyKinMeasure& ref2=.LinMeasureOrg;
-  Type = iffun(eqfun(.DirectionOfForce,1), NonNegative, NonPositive);;
-  EXCLUDE_MUSCLE_METABOLISM
-   
+  Type = iffun(eqfun(.DirectionOfForce,1), NonNegative, NonPositive);
+  SET_DEFAULT_ACTUATOR_VOLUME;
 };
 
 AnyDrawVector DrawSupport = {
   AnyRefFrame &ref = .Lin.ref2;
-  Vec = ..ScaleFactor*..DrawRef.DrawSettingsSupport.Lin.ScaleFactor*.Direction*.ArtificialSupportMuscle.Ft*.Lin.ref1.Axes';
+  Vec = ..ScaleFactor*..DrawRef.DrawSettingsSupport.Lin.ScaleFactor*.Direction*.ArtificialSupportMuscle.Fout[0]*.Lin.ref1.Axes';
 
   //Use this line to plot support muscles strength
   //Vec = 0.1*..ScaleFactor*..DrawRef.DrawSettingsSupport.Lin.ScaleFactor*.Direction*.ArtificialSupportMuscle.Strength*.Lin.ref1.Axes'; 
