@@ -3,6 +3,36 @@
 % To minimize the risk of merge conflicts insert the your changes at a
 % random empty or make a new entry a random place in the bullet lists.
 
+## AMMR beta
+
+**Fixed:**
+* The `Main.ModelSetup.CreateVideo` operation was missing in some of the
+  MoCap examples. This has been fixed. If you have this problem update the `CreateVideo.any` file in your application. 
+* Fixed wrapping problem with the posterior deltoid muscle in the 2 parameter shoulder calibration. 
+
+
+**Added:**
+
+* Added a few utility helper class templates (`Template_OperationSaveValues`/`Template_OperationLoadValues`/`Template_OperationUpdateValues`) 
+  to make it easier to do common class operations without manually having to create the operations with macros.
+
+  To create a operation which loads a file do: 
+
+  ```{code-block} AnyScriptDoc
+  Template_OperationLoadValues LoadAnySetFile = {
+     FileName= "MyFile.anyset";
+  };
+  ```
+* 
+
+**Changed:**
+* The load-time position of the box in the {ref}`BVH_BoxLift model <sphx_glr_auto_examples_Mocap_plot_BVH_BoxLift.py>` is now 
+  calculated using the position of the hands. Also, `Main.ModelSetup.EnvironmentParameters.GravityDirection` defined in `box.any` file
+  is now calculated automatically from `Main.ModelSetup.LabSpecificData.Gravity` defined in `LabSpecificData.any` file. These changes should 
+  make the model more robust when dealing with different bvh files.
+* It is no longer necessasry to supply the `MarkerName` argument in the CreateMarkerDriver template
+  MoCap models. The argument can still be used if the marker name and the data entry in the c3d file 
+  are different. 
 
 (ammr-2.4-changelog)=
 ## AMMR 2.4.2 (2022-07-08)
