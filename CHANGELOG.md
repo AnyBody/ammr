@@ -24,7 +24,8 @@
      FileName= "MyFile.anyset";
   };
   ```
-* 
+* Added two small helper code macro `NON_UNIQUE_VALUES()`/`NON_UNIQUE_POINTERS()` to 
+  find duplicate (i.e. non-unique) entries in arrays of values and pointers.
 
 **Changed:**
 * The implemenation of the muscle parameter in the arm model have been refactored. All parematers are now given as
