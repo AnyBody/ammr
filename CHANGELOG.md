@@ -28,6 +28,12 @@
   find duplicate (i.e. non-unique) entries in arrays of values and pointers.
 
 **Changed:**
+
+* The anatomical frame of the pelvis segment has been changed. Before a frame rotated with
+  the pelvic tilt was used for scaling and connecting the remaining body parts. Now a
+  neutral frame with respect to the global coordinate system is used for scaling. ISB
+  coordinates still use the "old" rotated frame.
+
 * The implemenation of the muscle parameter in the arm model have been refactored. All parematers are now given as
   muscle volume, optimal fiberlenth and tendon slacklength. The physiological cross sectional area (PCSA),
   was previously hard coded parameter, but is now only an intermediate value used for calculating muscle strength from the muscle volume and optimal fiber length.
