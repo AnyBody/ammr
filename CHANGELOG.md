@@ -79,7 +79,9 @@
 
 
 * In many body parts the folder holding muscles models were named shortly as `MusPar`. 
-  It is now renamed to `MuscleModels` for better clarity.  
+  It is now renamed to `MuscleModels` for better clarity. 
+   
+* The references to muscle models in the joint muscles of the detailed hand have been renamed to avoid future naming conflicts.
 
 (ammr-2.4-changelog)=
 ## AMMR 2.4.2 (2022-07-08)
