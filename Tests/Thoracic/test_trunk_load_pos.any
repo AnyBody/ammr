@@ -1,90 +1,50 @@
+//define = (
+//  [
+//    {'BM_SCALING': '_SCALING_NONE_'},
+//    {'BM_SCALING': '_SCALING_UNIFORM_'},
+//    {'BM_SCALING': '_SCALING_XYZ_'},
+//  ],
+//  [
+//    {'BM_LEG_TRUNK_INTERFACE': '_MORPH_NONE_'},
+//    {'BM_LEG_TRUNK_INTERFACE': '_MORPH_TRUNK_TO_LEG_'},
+//    {'BM_LEG_TRUNK_INTERFACE': '_MORPH_LEG_TO_TRUNK_'},
+//  ] 
+//)
 
 #include "../libdef.any"
 #include "../tools.any"
 
-#define BM_SCALING _SCALING_NONE_
-#define BM_LEG_TRUNK_INTERFACE _MORPH_NONE_
+#ifndef TEST_NAME
+  #define BM_SCALING _SCALING_NONE_
+  #define BM_LEG_TRUNK_INTERFACE _MORPH_NONE_
+  #define TEST_NAME "TrunkLoadPosTest"
+#endif
+
 #define BM_MANNEQUIN_DRIVER_DEFAULT ON
 #define BM_MANNEQUIN_DRIVER_PELVIS_THORAX_EXTENSION OFF
 #define BM_MANNEQUIN_DRIVER_PELVIS_THORAX_ROTATION OFF
 #define BM_MANNEQUIN_DRIVER_PELVIS_THORAX_LATERAL_BENDING OFF
 
 Main = {
-
   #include "<ANYBODY_PATH_BODY>/HumanModel.any"
-
-  // Place the pelvis at global origin
-  Main.HumanModel.Mannequin.Posture.PelvisPosX = 0;
-  Main.HumanModel.Mannequin.Posture.PelvisPosY = 0;
-  Main.HumanModel.Mannequin.Posture.PelvisPosZ = 0;
-
-  Main.HumanModel.DefaultMannequinDrivers = {
-    PelvisGroundDriverPosX.Reaction.Type = {On};
-    PelvisGroundDriverPosY.Reaction.Type = {On};
-    PelvisGroundDriverPosZ.Reaction.Type = {On};
-    PelvisGroundDriverRotZ.Reaction.Type = {On};
-    PelvisGroundDriverRotY.Reaction.Type = {On};
-    PelvisGroundDriverRotX.Reaction.Type = {On};
-  };
-
-  AnyOperationMacro UpdateValues = {
-    MacroStr = {"classoperation Main " + strquote("Update Values")};
-  };
-  
-  AnyOperationSetValue SetLoadTestTrigger = {
-    AnyInt dummy = 1;
-    Source = {&dummy};
-    Target = {&.TestLoadTrigger};
-  };
-  AnyOperationSetValue ResetLoadTestTrigger = {
-    AnyInt dummy = 0;
-    Source = {&dummy};
-    Target = {&.TestLoadTrigger};
-  };
-  AnyOperationSetValue SetInitPosTestTrigger = {
-    AnyInt dummy = 1;
-    Source = {&dummy};
-    Target = {&.TestInitPosTrigger};
-  };
     
-  AnyOperationSequence RunTest = {
-    AnyOperation& test_load_pos = Main.TestLoadPos;
-    AnyOperation& test_init_pos = Main.TestInitPos;
-  };
-  
-  AnyOperationSequence TestLoadPos = {
-    AnyOperation& set_trigger = .SetLoadTestTrigger;
-    AnyOperation& reevaluate_test = .UpdateValues;
-    AnyOperation& reset_trigger = .ResetLoadTestTrigger;
-  };
-
-  AnyOperationSequence TestInitPos = {
-    AnyOperation& init_cond = Main.Study.InitialConditions;
-    AnyOperation& set_trigger = .SetInitPosTestTrigger;
-    AnyOperation& reevaluate_test = .UpdateValues;
-  };
- 
-
-  AnyInt TestLoadTrigger = DesignVar(0);
-  AnyInt TestInitPosTrigger = DesignVar(0);
-  
   AnyFolder Tests = {
+    AnyFloatVar abs_tol = 1e-15;
     
     AnyInt test_load_positions = expect(
       orfun(
-        not(Main.TestLoadTrigger),
+        not(Main.Operations.TestLoadTrigger),
         eqfun(SegmentPositions.diff, 0)
       )
     );
     AnyInt test_initial_positions = expect(
       orfun(
-        not(Main.TestInitPosTrigger), 
-        ltfun(SegmentPositions.diff, 1e-15)
+        not(Main.Operations.TestInitPosTrigger), 
+        ltfun(SegmentPositions.diff, abs_tol)
       )
     );
     
     AnyFolder SegmentPositions = {
-      
       AnyObjectPtrArray all_segments = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk", "*", "AnySeg");
       AnyObjectPtrArray buckle = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Buckle", "*", "AnySeg");
       /// Array of all relevant segments to compare positions for
@@ -100,6 +60,11 @@ Main = {
       AnyFloat diff = ObjSort(max(abs(seg_r0_vals - seg_pos_vals))); 
       AnyObjectPtrArray segment_sorted_by_diff = ObjSort(segments, &diff);
     };
+  };
+  
+  AnyOperationSequence RunTest = {
+    AnyOperation& test_load_pos = Main.Operations.TestLoadPos;
+    AnyOperation& test_init_pos = Main.Operations.TestInitPos;
   };
 
   AnyBodyStudy Study = {
@@ -119,5 +84,56 @@ Main = {
     tEnd = 1;
     Gravity = {0, -9.81, 0};
     nStep = 1;
+  };
+  
+  // Place the pelvis at global origin
+  Main.HumanModel.Mannequin.Posture.PelvisPosX = 0;
+  Main.HumanModel.Mannequin.Posture.PelvisPosY = 0;
+  Main.HumanModel.Mannequin.Posture.PelvisPosZ = 0;
+
+  Main.HumanModel.DefaultMannequinDrivers = {
+    PelvisGroundDriverPosX.Reaction.Type = {On};
+    PelvisGroundDriverPosY.Reaction.Type = {On};
+    PelvisGroundDriverPosZ.Reaction.Type = {On};
+    PelvisGroundDriverRotZ.Reaction.Type = {On};
+    PelvisGroundDriverRotY.Reaction.Type = {On};
+    PelvisGroundDriverRotX.Reaction.Type = {On};
+  };
+  
+  AnyFolder Operations = {
+    AnyOperationMacro UpdateValues = {
+      MacroStr = {"classoperation Main " + strquote("Update Values")};
+    };
+    
+    AnyOperationSetValue SetLoadTestTrigger = {
+      AnyInt dummy = 1;
+      Source = {&dummy};
+      Target = {&.TestLoadTrigger};
+    };
+    AnyOperationSetValue ResetLoadTestTrigger = {
+      AnyInt dummy = 0;
+      Source = {&dummy};
+      Target = {&.TestLoadTrigger};
+    };
+    AnyOperationSetValue SetInitPosTestTrigger = {
+      AnyInt dummy = 1;
+      Source = {&dummy};
+      Target = {&.TestInitPosTrigger};
+    };
+    
+    AnyOperationSequence TestLoadPos = {
+      AnyOperation& set_trigger = .SetLoadTestTrigger;
+      AnyOperation& reevaluate_test = .UpdateValues;
+      AnyOperation& reset_trigger = .ResetLoadTestTrigger;
+    };
+    
+    AnyOperationSequence TestInitPos = {
+      AnyOperation& init_cond = Main.Study.InitialConditions;
+      AnyOperation& set_trigger = .SetInitPosTestTrigger;
+      AnyOperation& reevaluate_test = .UpdateValues;
+    };
+    
+    AnyInt TestLoadTrigger = DesignVar(0);
+    AnyInt TestInitPosTrigger = DesignVar(0);
   };
 };
