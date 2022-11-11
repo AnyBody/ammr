@@ -34,6 +34,10 @@
   neutral frame with respect to the global coordinate system is used for scaling. ISB
   coordinates still use the "old" rotated frame.
 
+* The trend validation in the ["Wilke Spine Pressure validation models"](example_wilkespinepressure) have been updated to 
+  reflect the changes to thoracic model and pelvis frames. Although the absolute pressures in the spine have changed, the 
+  trends (relative changes in spine pressure between models) remains the same. 
+
 * The implemenation of the muscle parameter in the arm model have been refactored. All parematers are now given as
   muscle volume, optimal fiberlenth and tendon slacklength. The physiological cross sectional area (PCSA),
   was previously hard coded parameter, but is now only an intermediate value used for calculating muscle strength from the muscle volume and optimal fiber length.
@@ -46,7 +50,6 @@
 
   };
   ```
-
 
 * The load-time position of the box in the {ref}`BVH_BoxLift model <sphx_glr_auto_examples_Mocap_plot_BVH_BoxLift.py>` is now 
   calculated using the position of the hands. Also, `Main.ModelSetup.EnvironmentParameters.GravityDirection` defined in `box.any` file
