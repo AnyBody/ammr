@@ -14,8 +14,8 @@
 **Changed:**
 
 * The glenoid reaction forces are now epressed in the coordinate system of the
-  glenoid cup instead of the general scapula coordinate system. This means that
-  the three force variables `GlenoHumeral_DistractionForce`,
+  glenoid cup instead of the general scapula coordinate system.
+  The three force variables `GlenoHumeral_DistractionForce`,
   `GlenoHumeral_InferoSuperiorForce`, `GlenoHumeral_AnteroPosteriorForce` now
   represents the three direction given by the glenoid cup. 
 
