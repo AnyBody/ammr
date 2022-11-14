@@ -9,7 +9,8 @@
 * The `Main.ModelSetup.CreateVideo` operation was missing in some of the
   MoCap examples. This has been fixed. If you have this problem update the `CreateVideo.any` file in your application. 
 * Fixed wrapping problem with the posterior deltoid muscle in the 2 parameter shoulder calibration. 
-
+* Inconsistencies in arm muscles paramaeters have been resolved. The same underlying parameters are now used for both
+  the simple and the 3-element muscle models. 
 
 **Added:**
 
@@ -23,16 +24,63 @@
      FileName= "MyFile.anyset";
   };
   ```
-* 
+* Added two small helper code macro `NON_UNIQUE_VALUES()`/`NON_UNIQUE_POINTERS()` to 
+  find duplicate (i.e. non-unique) entries in arrays of values and pointers.
 
 **Changed:**
+* The implemenation of the muscle parameter in the arm model have been refactored. All parematers are now given as
+  muscle volume, optimal fiberlenth and tendon slacklength. The physiological cross sectional area (PCSA),
+  was previously hard coded parameter, but is now only an intermediate value used for calculating muscle strength from the muscle volume and optimal fiber length.
+
+  This new structure allows for overwritting the the complete set of muscles volumes. For example with alternative dataset. 
+
+  ```{code-block} AnyScriptDoc
+  Main.HumanModel.BodyModel.Right.ShoulderArm.ModelParameters.Muscles = {
+     biceps_brachii_caput_breve.MuscleVolume = 25.8;
+
+  };
+  ```
+
+
 * The load-time position of the box in the {ref}`BVH_BoxLift model <sphx_glr_auto_examples_Mocap_plot_BVH_BoxLift.py>` is now 
   calculated using the position of the hands. Also, `Main.ModelSetup.EnvironmentParameters.GravityDirection` defined in `box.any` file
   is now calculated automatically from `Main.ModelSetup.LabSpecificData.Gravity` defined in `LabSpecificData.any` file. These changes should 
   make the model more robust when dealing with different bvh files.
+
 * It is no longer necessasry to supply the `MarkerName` argument in the CreateMarkerDriver template
   MoCap models. The argument can still be used if the marker name and the data entry in the c3d file 
   are different.
+  
+* The implementaion of muscles parameters section of the models have changed to ultize
+  the the new `??=` (optional assigment) operator introduced in AnyBody 7.4.1.
+  
+  It is now possible to directy override/redefine the muscle paramters and muscle volumes. 
+  
+  For example overriding the muscle volumes with a new set of data: 
+  ```{code-block} AnyScriptDoc
+  Main.HumanModel.BodyModel.Right.Leg.ModelParameters.Muscles = {
+     SoleusMedialis.MuscleVolume = 540; //ml
+     SoleusLateralis.MuscleVolume = 450; /ml
+  };
+  ```
+  The TLEM leg model previously had a similar functionality using 
+  `class_template`s and an extra level of indirection of the muscle paramters
+  (the `SubjectMusPar` section in the muscle model folder). This functionality has 
+  been replaced by the new simpler implementation.
+
+* Changed the methods for distributing muscle volume among discretized muscle
+  elements. This new method allows for different optimal
+  fiber lengths among elements of a muscle. If one element of a muscle get a
+  smaller optimal fiber length (i.e. through calibration) the volume of the muscles
+  element gets redistributed, and PCSA remains contant across elements. 
+  
+  If the optimal fiber length of the different elements are the same, then this method 
+  will yield the same result as before.
+
+
+* In many body parts the folder holding muscles models were named shortly as `MusPar`. 
+  It is now renamed to `MuscleModels` for better clarity. 
+   
 * The references to muscle models in the joint muscles of the detailed hand have been renamed to avoid future naming conflicts.
 
 (ammr-2.4-changelog)=
@@ -68,7 +116,7 @@ AMMR version 2.4.2 contains only a few minor changes and fixes compared to  vers
 - Added a model using a new class template to optimize the origin of BVH model. This model shows how to optimize
   the origin of the BVH model such that a target segment of the human model (Left/Right Foot/Hand) hits a known 
   position and orientation in a given time interval while following the recorded motion from the trial.
-  <{ref}`See more <sphx_glr_auto_examples_Mocap_plot_BVH_OptimizeOrigin.py>`>
+  <[See more](examples_mocap_bvhorigin)>
 
 
 **Fixed:**
@@ -111,21 +159,21 @@ The `HumeroUlnarJoint` is the elbow flexion extension, and together `HumeroRadia
 
 - Added a new trunk exoskeleton concept model 
   for simulating assistance at the trunk in a box lifting task. This simple example shows how to apply assistive torque directly
-  to the human model. <{ref}`See more <sphx_glr_auto_examples_Other_plot_ExoConceptTrunk_BoxLift.py>`>
+  to the human model. <[See more](example_exo_concept_trunk)>
 - Added a new exoskeleton concept model 
   for simulation-driven conceptual design of exoskeletons. The model was developed by Prof. John Rasmussen from
   Aalborg University. Please see the [web cast](https://www.anybodytech.com/simulation-driven-conceptual-design-of-exoskeletons/)
-  for more details. <{ref}`See more <sphx_glr_auto_examples_Other_plot_ExoConcept_BoxLift.py>`>
+  for more details. <[See more](example_exo_concept_boxlift)>
 - Added a new femoral torsion tool to apply femoral torsion to the TLEM2.0 leg model.
   This model tool was developed by Dr. Enrico De Pieri from University of Basel
   Children’s Hospital (UKBB). Please see the documentation 
   or the [web cast](https://www.anybodytech.com/modeling-subject-specific-femoral-torsion-for-the-analysis-of-lower-limb-joint-loads/)
-  by Enrico on his work and publication on femoral torsion. <{ref}`See more <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_FemoralTorsionTool.py>`>
+  by Enrico on his work and publication on femoral torsion. <[See more](example_femoral_torsion)>
 - Added a new knee force model 
-  example. The model shows how to calculate a simple estimate of the medial and lateral knee force. <{ref}`See more <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_KneeForcesExample.py>`>
+  example. The model shows how to calculate a simple estimate of the medial and lateral knee force. <[See more](example_knee_forces_estimate)>
 - A new box lifting motion capture model has been added. The model is based on data from an inertial measurement 
   unit based suit ([Xsens](https://www.xsens.com/products/mtw-awinda)), and illustrates how to connect MoCap models with objects in the environment. 
-  <{ref}`See more <sphx_glr_auto_examples_mocap_plot_bvh_boxlift.py>`>
+  <[See more](example_bvh_boxlift)>
 
 
 **New features:**
@@ -177,11 +225,27 @@ The `HumeroUlnarJoint` is the elbow flexion extension, and together `HumeroRadia
   with the remaining body parts and handled in the cadaver data files.
 - Fixed a problem in MoCap models where calibration studies were not run automatically in models 
   that only had 3-element muscles on the upper body.
-- The {ref}`example to evaluate moments arms <sphx_glr_auto_examples_Validation_plot_EvaluateMomentArms.py>` 
+- The [example to evaluate moments arms](example_evaluate_momentarms) 
   now works when the shoulder rhythm is enabled. 
 
 
 **Changed:**
+
+- Ensure consistency of arm muscle parameters when switching between simple muscle models and 3 element muscle models.
+  The two muscles had a few differences in the underlying parameters. Mostly due
+  to the 3 element models being implemented based on newer publications, and
+  some changes not being backported properly to the simple muscle model. The two muscle models now give the same overall muscles strength `F0` when switching.
+
+  - Fix a bug in Anconeus_1 PCSA for the 3 element muscle model. 
+  - Fix the distribution of PCSA in simple muscle models for Latisimus dorsi to match 3 element muscle models.
+  - Fix the total PCSA of the 3-element muscle models of the Latisimus dorsi muscles to match the simple muscles.
+  - Fixed a typo in the calculation of the PCSA for one element of the pronator quadratus (`Pron_quadr_2`) with the simple muscle models.
+  - Fixed the PCSA of pectoralis major muscle model to match the 3-element muscle models. 
+  - Corrected Coracobrachialis pennation angle for 3-element muscle models.
+  - Fixed the PCSA of the deltoid simple muscle models to match the 3 element muscle models.
+  - Fixed the PCSA of the subscapularis simple muscle models to match the 3 element muscle models.
+
+
 
 - Improve the trunk model's strength for trunk external rotation. This change
   improves the implementation of the internal/external obliques and latissimus
@@ -238,18 +302,18 @@ The `HumeroUlnarJoint` is the elbow flexion extension, and together `HumeroRadia
   override the default implicit global reference frame and thus output pelvis rotation relative to
   a custom frame.
 - Add a new ability to evaluate trunk strength into the built-in studies for
-  {ref}`joint strength evaluation <sphx_glr_auto_examples_Validation_plot_EvaluateJointStrength.py>`.
+  [joint strength evaluation](example_evaluate_joint_strength).
 - New ligaments connecting the Sacrum and Pelvis segments are added. They are enabled
   togehter with the ligaments on the lumbar spine through the `BM_TRUNK_LUMBAR_LIGAMENTS`
   define statement.
 
 **Changed:**
 
-- The {ref}`"ADL gait (MoCap model)" <sphx_glr_auto_examples_MoCap_plot_ADL_Gait.py>` has been updated with
+- The ["ADL gait (MoCap model)"](example_adlgait) has been updated with
   most recent improvements from our internal projects. The marker protocol has
   been adjust and a lot of small data problems (marker dropouts etc) has been
   fixed.
-- The posture of the {ref}`standing lift example <sphx_glr_auto_examples_ADLs_and_ergonomics_plot_StandingLift.py>`
+- The posture of [the standing lift example](example_standinglift)
   have been modified to make the example more robust.
 - The `Tuber_ischiadicum` node to `Seat_contact` as it was misaligned to the actual bony
   landmark position. New `Tuber_ischiadicum` nodes have been added at the bony landmark.
@@ -281,7 +345,7 @@ The `HumeroUlnarJoint` is the elbow flexion extension, and together `HumeroRadia
 
 **Changed:**
 
-- The settings of the {ref}`Knee Simulator example <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_KneeSimulator.py>` has been
+- The settings of the [Knee Simulator example](example_kneesimulator) has been
   tweaked to make it run faster.
 
 ## AMMR 2.3.2 (2021-01-21)
@@ -320,8 +384,7 @@ requested body height.
   models) and {bm_constant}`_SCALING_STANDARD_` (50 percentile) which were both
   correct.
 - Fixed a problem with foot support in the
-  {ref}`"Spine Pressure validation model"
-  <sphx_glr_auto_examples_Validation_plot_WilkeSpinePressure.py>` lying flat on
+  ["Spine Pressure validation model"](example_wilkespinepressure) lying flat on
   the back. The foot is now supported in the right direction.
 - Fixed a problem with the Standing Model template which was using an alternate
   mode where foot constraints were disabled.
@@ -347,12 +410,11 @@ requested body height.
   the surface is now used for both the straight and reflected head of the rectus
   femoris.
 - Increase the discretization (StringMesh) on approx 30 muscles to improve wrapping.
-- The results for the {ref}`"Wilke Spine Pressure"
-  <sphx_glr_auto_examples_Validation_plot_WilkeSpinePressure.py>`
+- The results for the ["Wilke Spine Pressure"](example_wilkespinepressure)
   validation model has been updated due to the fix for the
   {bm_constant}`_SCALING_UNIFORM_`. The updated model improved the validation
   results slightly.
-- The new large scale {ref}`" MoCap model (ADL gait)" <sphx_glr_auto_examples_MoCap_plot_ADL_Gait.py>`
+- The new large scale ["MoCap model (ADL gait)"](example_adlgait)
   has been updated so the results of running all standing reference trials have
   been added to the model. This means that all the dynamic trials will work even
   if the user forgets to first run the standing reference trials. It is still
@@ -386,7 +448,7 @@ requested body height.
 
 **Changed:**
 
-- Improvements to the new {ref}`"ADL Gait" <sphx_glr_auto_examples_MoCap_plot_ADL_Gait.py>`
+- Improvements to the new ["ADL Gait"](example_adlgait)
   example. The model now has muscles enabled and the marker protocol has been adjusted
   for a better shoulder posture. Also, the batch processing script now runs all trials without hickups.
 - Improve the shoulder rhythm. Scapula position when using the shoulder rhythm
@@ -430,7 +492,7 @@ requested body height.
 
 - Fixed incorrect volume of Satorius muscle in TLEM1 and TLEM2. Thanks to Dr. Adam D. Sylvester
   from Johns Hopkins School of Medicine and Dr. Patricia A. Kramer from the University of
-  Washington for pointing out the error. The error occurred since the satorius in the original [TLEM1 paper](http://linkinghub.elsevier.com/retrieve/pii/S0268003306001896) was muscles
+  Washington for pointing out the error. The error occurred since the satorius in the original [TLEM1 paper](https://linkinghub.elsevier.com/retrieve/pii/S0268003306001896) was muscles
   in series with a pseudo insertion/origin on the femur. Both of these muscle
   elements were therefore listed with the full PSCA of Satorius. This detail was
   missed in the AnyBody TLEM1 and TLEM2 implementation where Satorius was
@@ -460,11 +522,11 @@ requested body height.
 
 **Added:**
 
-- Added a new Full Body {ref}`"ADL Gait" <sphx_glr_auto_examples_MoCap_plot_ADL_Gait.py>` MoCap
+- Added a new Full Body {ref}`"ADL Gait" <example_adlgait>` MoCap
   Example based on the "Rehazenter Adult Walking Dataset" by [Schreiber and Moissenet (2019)](https://doi.org/10.1038/s41597-019-0124-4).
   The model is configured to run all 50 subjects and 1145 trials in the data set. However, you must
   download the actual data separately from
-  [FigShare](https://figshare.com/articles/A_multimodal_dataset_of_human_gait_at_different_walking_speeds/7734767)
+  [FigShare](https://figshare.com/articles/dataset/A_multimodal_dataset_of_human_gait_at_different_walking_speeds/7734767)
   where it is hosted under a Creative Commons license.
 
 - New GUI plugin which uses statistical information from the ANSUR database to set anthropometric values in AnyBody. A small example model
@@ -578,7 +640,7 @@ requested body height.
 - Fixed a bug in the FreePosture model, where input for the Left/Right arm drivers was switched in some places.
 - Fixed missing visual color indication of force plate forces for type 3 force plates in the MoCap models.
 - Fixed a bug with in the built-in studies to
-  {ref}`evaluate arm joint strength <sphx_glr_auto_examples_Validation_plot_EvaluateJointStrength.py>`.
+  {ref}`evaluate arm joint strength <example_evaluate_joint_strength>`.
   The range of motion for the left arm elbow pronation/supination were not correct.
 - Fixed a bug preventing the model from loading with with {bm_constant}`_SCALING_XYZ_` and both legs excluded.
 - Fixed the load-time position of the head segment when neck scaling is changed.
@@ -619,7 +681,7 @@ requested body height.
   solutions to the Euler angle equations when gimbal locks occur.
   The fix requires a new structure of the BVH model,
   where virtual marker trajectories are calculated by the `AnyInputBVH` class.
-  See the updated {ref}`BVH_Xsens example <sphx_glr_auto_examples_Mocap_plot_BVH.py>`,
+  See the updated {ref}`BVH_Xsens example <example_adlgait>`,
   and port your existing BVH models to the new example structure.
 - Fixed a problem in {ref}`AnyMoCap models <anymocap>`, where model view operations in
   `Main.ModelSetup.Views.SetViewMacros` would not trigger
@@ -704,8 +766,8 @@ requested body height.
 **Changed:**
 
 - Changed the recruitment criterion to the power of 2 (quadratic) in the two MoCap examples using GRF prediction and weak human-ground residuals.
-  ({ref}`link 1 <sphx_glr_auto_examples_MoCap_plot_Plug-in-gait_Simple_FullBody_GRFPrediction.py>`
-  and {ref}`link 2 <sphx_glr_auto_examples_MoCap_plot_BVH.py>`). This greatly increases the robustness of recruitment solver
+  ({ref}`link 1 <example_mocap_grf_prediction>`
+  and {ref}`link 2 <example_mocap_bvh>`). This greatly increases the robustness of recruitment solver
   and prevents many muscle recruitment failures.
 
 **Added:**
@@ -735,7 +797,7 @@ requested body height.
   {ref}`Shoulder-Arm Documentation <DeltoidWrapping>` for more information.
 
 - Added new example model of a Knee Simulator using a knee implant model and force-dependent kinematics (FDK).
-  See the {ref}`Knee Simulator example <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_KneeSimulator.py>`
+  See the {ref}`Knee Simulator example <example_kneesimulator>`
   for more information.
 
 - New model plugin (BodyModel Configurator) which provides a graphical user interface
@@ -743,12 +805,12 @@ requested body height.
   the [blog post](https://anyscript.org/tools/body-model-configurator/)
   introducing the BM plugin.
 
-- Added a new {ref}`Posture prediction model <sphx_glr_auto_examples_ADLs_and_ergonomics_plot_PosturePredictionModel.py>`
+- Added a new {ref}`Posture prediction model <example_posture_prediction>`
   based on standing posture. The model can predict posture as a consequence of applied loads in hands.
   It does this by minimizing joint torques and applying balance drivers which account for external applied loads.
 
 - Added new standing model example which uses soft constraints and GRF
-  prediction. {ref}`See this link <sphx_glr_auto_examples_ADLs_and_ergonomics_plot_StandingModel.py>`.
+  prediction. {ref}`See this link <example_standingmodel>`.
   This new model is good starting point for making
   standing/balancing models, and the corresponding standing model in the template
   generator has also been updated.
@@ -950,7 +1012,7 @@ requested body height.
 - Fixed missing possibility for overriding the reaction forces for the Trunk flexion/extension/rotation
   drivers in `HumanModel.DefaultMannequinDrivers`.
 - Add missing strength scaling factor to `pectoralis_major_thoracic_part_3` in the simple muscle configuration.
-- Fixed issue with the {ref}`Standing Model example <sphx_glr_auto_examples_ADLs_and_ergonomics_plot_StandingModel.py>`,
+- Fixed issue with the {ref}`Standing Model example <example_standingmodel>`,
   where the elbow flexion velocity was incorrectly set to a non zero value.
 - Fixed the problem with over-constraint models when adding the
   shoulder rhythm.
@@ -998,7 +1060,7 @@ This is handled by [Zenodo.org](https://zenodo.org/) (The European Open Science 
 **Changed:**
 
 - Enhanced the {ref}`multi-trial MoCap example
-  <sphx_glr_auto_examples_Mocap_plot_Plug-in-gait_MultiTrial_StandingRef.py>` for best practice for
+  <example_mocap_multitrial>` for best practice for
   MoCap trials with multiple subjects and trials. The example now shows how to deal with multiple
   subjects and storing the c3d files in a separate folder.
 
@@ -1033,7 +1095,7 @@ This is handled by [Zenodo.org](https://zenodo.org/) (The European Open Science 
 
 **Added:**
 
-- New {ref}`squat example <sphx_glr_auto_examples_ADLs_and_ergonomics_plot_Squat.py>`
+- New {ref}`squat example <example_squat>`
   model which demonstrates a parameterized squatting motion.
 
 - New `#class_template` for adding limit drivers to kinematic measures.
@@ -1086,7 +1148,7 @@ the driver values are updated.
 
 - Updated the AAU Mandible Model introduced in AMMR 2.0.0. By accident the authors did
   not share the exact same version of the model that was used in the publication by
-  [Andersen et al. 2017](https://www.anybodytech.com/downloads/publications/#Skipper_Andersen2017-zd)
+  [Andersen et al. 2017](https://doi.org/10.1115/1.4037100)
   This is now corrected and the validation  example produces the same results as
   published version.
 
@@ -1184,7 +1246,7 @@ the driver values are updated.
 
 #### New lower extremity model (TLEM2.1)
 
-- The [Twente Lower Extremity Model version 2.0 dataset](http://dx.doi.org/10.1016/j.jbiomech.2014.12.034), developed in the
+- The [Twente Lower Extremity Model version 2.0 dataset](https://doi.org/10.1016/j.jbiomech.2014.12.034), developed in the
   TLEM*safe* EU project was implemented in the AMMR repository. The model is not
   the default model, but can be enabled with the {ref}`BM parameter
   <bm-config>` `#define BM_LEG_MODEL _LEG_MODEL_TLEM2_`
@@ -1224,7 +1286,7 @@ the driver values are updated.
   for more information.
 - Algorithms and file for Ground reaction force prediction are added to: `ammr/tools/GRFPrediction/`.
   See the
-  {ref}`MoCap examples <sphx_glr_auto_examples_Mocap_plot_Plug-in-gait_Simple_FullBody_GRFPrediction.py>`
+  {ref}`MoCap examples <example_mocap_grf_prediction>`
   for how they are used.
 
 #### TLEM 1 updates
@@ -1269,7 +1331,7 @@ the driver values are updated.
 
 - Added new mandible model based on a CT scan of a 40 year old male.
   For more information see {doc}`the documentation for the model </body/aalborg_mandible>` or the
-  {ref}`validation example <sphx_glr_auto_examples_Validation_plot_AalborgMandible.py>`.
+  {ref}`validation example <example_aalborgmandible>`.
 
 #### Spine model
 
@@ -1345,7 +1407,7 @@ the driver values are updated.
 - Added new initial guess for wrapping muscles, which make the wrapping
   more when the model starts in extreme postures.
 
-- Update many examples to use the TLEM 2.1 model. See the {ref}`example gallery <examples-index>`.
+- Update many examples to use the TLEM 2.1 model. See the {ref}`example gallery <example-gallery>`.
 
 - BM mannequin drivers are now implemented with a class_template allowing all weights and other settings to be customized.
 
@@ -1411,9 +1473,9 @@ the driver values are updated.
 - Fixed a symmetry problem for the Deltoid muscles at the shoulder.
 - Fixed a symmetry problem for the Disc stiffness from L1 to L5
 - Fix white surfaces in examples with flat STL surfaces. For example
-  {ref}`sphx_glr_auto_examples_Sports_plot_CrossTrainer.py`.
+  {ref}`example_crosstrainer`.
 - Fixed an issue preventing
-  {ref}`sphx_glr_auto_examples_ADLs_and_ergonomics_plot_StandingModel.py`
+  {ref}`example_standingmodel`
   from working with one leg.
 - Fixed a problem with the drawings of the bones in the Arm model which were not
   always symmetrical.

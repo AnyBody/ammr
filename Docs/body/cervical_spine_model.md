@@ -11,9 +11,13 @@ The cervical spine model is part of the Trunk model, and the segments,
 joints and kinematics are therefore included by default.
 
 The segments of the cervical spine model are always present, but the muscles are
-not enabled by default. **Some of the neck muscles are defined by the shoulder
+not enabled by default. 
+
+:::{note}
+Some of the neck muscles are defined by the shoulder
 model, so the muscles of the cervical spine model can only be enbled when both
-arms with muscles are present.**
+arms with muscles are present.
+:::
 
 ```{raw} html
 <video width="49%" style="display:block; margin: 0 auto;" controls autoplay loop>
@@ -28,6 +32,12 @@ Your browser does not support the video tag.
 Enabling muscles from the cervical spine model, requires that the arms
 also enabled.
 
+:::{seealso}
+:class: margin
+The {doc}`Trunk configuration parameters <../bm_config/trunk>` for a
+full list of Trunk parmaeters.
+:::
+
 ```{code-block} AnyScriptDoc
 :emphasize-lines: 4
 
@@ -37,13 +47,8 @@ also enabled.
 #define BM_TRUNK_CERVICAL_MUSCLES ON
 ```
 
-```{rst-class} float-right
-```
 
-:::{seealso}
-The {doc}`Trunk configuration parameters <../bm_config/trunk>` for a
-full list of Trunk parmaeters.
-:::
+
 
 ## Resources
 

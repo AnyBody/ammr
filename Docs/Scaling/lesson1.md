@@ -726,9 +726,8 @@ AnyManUniform file.
 
 This completes scaling Lesson 1: Joint to joint scaling methods.
 
-```{rst-class} without-title
-```
 
-:::{seealso}
-**Next lesson:** {doc}`lesson2`.
+:::{admonition} **Next lesson:**
+:class: seealso
+{doc}`lesson2`.
 :::

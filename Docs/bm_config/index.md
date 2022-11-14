@@ -5,20 +5,20 @@
 The body model can be configured in multiple ways. This include what limb
 segments are include, the type of muscles, scaling etc.
 
-:::{note}
-To easily configure the body model, you can also use the
-{doc}`/bm_config/bm_plugin`.
-:::
-
 All these choises are controlled through a number of switches called Body Model
 (BM) parameters. BM parameters are always prefixed with `BM_` and written in
 uppercase.
 
-```{rubric} Simple example
-```
+## Simple example
 
 The example below configures a model with no arms and enables the 3-element Hill
 muscles model on the legs.
+
+:::{note}
+:class: margin
+Some parameters have simple {ammr:bm_constant}`ON`/{ammr:bm_constant}`OFF`
+options, while others have more options. 
+:::
 
 ```{code-block} AnyScriptDoc
 :emphasize-lines: 1-3
@@ -31,15 +31,17 @@ muscles model on the legs.
 #include "<ANYBODY_PATH_BODY>\HumanModel.any"
 ```
 
-:::{note}
-Some parameters have simple {ammr:bm_constant}`ON`/{ammr:bm_constant}`OFF`
-options, while others have more options.
-:::
+
 
 The next section shows an overview of what BM statements are available for the different body parts.
 
-```{rubric} BM parameters
-```
+## BM parameters
+
+:::{tip}
+:class: margin
+Most models can also be configured using the
+{doc}`BM plugin </bm_config/bm_plugin>`.
+:::
 
 There are body model parameters for configuring each body part, controlling scaling, controlling the default
 mannequin drivers (click to see tutorial on {ref}`modelling from scratch <MannequinDriver>`), as well as other global options for the model.
