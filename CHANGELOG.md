@@ -29,10 +29,13 @@
 
 **Changed:**
 
-* The anatomical frame of the pelvis segment has been changed. Before a frame rotated with
-  the pelvic tilt was used for scaling and connecting the remaining body parts. Now a
-  neutral frame with respect to the global coordinate system is used for scaling. ISB
-  coordinates still use the "old" rotated frame.
+* A new `AnatomicalFrameTrunk` reference frame has been added to the pelvis segment. The frame is
+  consistent with the anatomical frames in the rest of the trunk model. Also, all joint angles in relative to the pelvis segment now uses this frame. This implies that the neutral position of the model is identical to the neutral position of the trunk dataset. 
+
+  The result is more pelvic tilt in the neutral position, which seem to better reflect reported 
+  values in the litterature. 
+
+  The existing `PelvisSeg.AnatomicalFrame` defined ASIS/PSIS bony landmarks remains unchanged.
 
 * The trend validation in the ["Wilke Spine Pressure validation models"](example_wilkespinepressure) have been updated to 
   reflect the changes to thoracic model and pelvis frames. Although the absolute pressures in the spine have changed, the 
