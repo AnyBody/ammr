@@ -2,17 +2,24 @@
    #define MOCAP_FILTER_JOINT_ANGLES OFF
 #endif
 
+#ifndef _MOCAP_FULL_TARRAY
+#define _MOCAP_FULL_TARRAY Main.Studies.MarkerTracking.tArray
+#endif
+
+#ifndef _MOCAP_MAIN_STUDY_REF
+#define _MOCAP_MAIN_STUDY_REF Main.Studies.InverseDynamicStudy
+#endif
 
 AnyFunInterpol InterpolatedData = 
 {
-  Type  = iffun(gtfun(.FileReader.Length0, 1), Bspline, ConstantValue);
-  BsplineOrder = min({4,.FileReader.Length0});
+  Type  ??= iffun(gtfun(.FileReader.Length0, 1), Bspline, ConstantValue);
+  BsplineOrder ??= min({4,.FileReader.Length0});
   T = .FileReader.T;
 
   #if MOCAP_FILTER_JOINT_ANGLES == ON
   Data = Main.ModelSetup.JointAngleFilter.FilterFun(.FileReader.Data);
   #else 
-  Data = .FileReader.Data;
+  Data ??= .FileReader.Data;
   #endif
 };
 
@@ -24,22 +31,22 @@ AnyInputFile FileReader = {
    
   AnyFloat TFileMin = arrcat(TFile, {0.0})[0];
   AnyFloat TFileMax = arrcat(TFile, {0.0})[ max({ min({TFileNumRead,Length0})-1,0})];
-  AnyInt ValidStartTime = andfun( gtfun(....tArray[0],TFileMin-1e-13),
-                                  ltfun(....tArray[0], TFileMax+1e-13));
+  AnyInt ValidStartTime = andfun( gtfun(_MOCAP_MAIN_STUDY_REF.tArray[0],TFileMin-1e-13),
+                                  ltfun(_MOCAP_MAIN_STUDY_REF.tArray[0], TFileMax+1e-13));
 
     
   AnyInt ValidData = andfun(ValidStartTime, bool(TFileIsMonotoneIncreasing));
   
   // If there is problems with the file data, force the use of default data. 
-  AlwaysUseData0 = not(ValidData); 
+  AlwaysUseData0 ??= not(ValidData); 
   
   // FileName: This is set externally to this include file.
   FileErrorContinueOnOff = On;
   ReloadOnOff = On;
   SuppressWarningsOnOff = On;
   
-  AnyInt Length0 = NumElemOf(Main.Studies.MarkerTracking.tArray);
-  T0 = Main.Studies.MarkerTracking.tArray;
+  AnyInt Length0 = NumElemOf(_MOCAP_FULL_TARRAY);
+  T0 = _MOCAP_FULL_TARRAY;
 };
 
 #ifndef _ANYMOCAP_JOINT_ANGLE_WARNING_MSG_
@@ -49,7 +56,7 @@ AnyMessage AnyMoCap_msg1=
   AnyInt LastTimeIdx = max({0,.FileReader.TFileNumRead-1});
   AnyVar LastTimeInFile =  .FileReader.T[min({LastTimeIdx, NumElemOf(.FileReader.T)-1})];
   TriggerRuntime = andfun(.FileReader.ValidData,
-                          andfun(Main.Studies.InverseDynamicStudy.iStep, gtfun(Main.Studies.InverseDynamicStudy.t,  LastTimeInFile ))); 
+                          andfun(_MOCAP_MAIN_STUDY_REF.iStep, gtfun(_MOCAP_MAIN_STUDY_REF.t,  LastTimeInFile ))); 
   Type = MSG_ErrorFatal;
   Message = DesignVar(strformat("\n"+
   "----------------------------------------------------------------------------------------------------------\n"+
@@ -59,7 +66,7 @@ AnyMessage AnyMoCap_msg1=
 };
 AnyMessage AnyMoCap_msg2= 
 {                                          
-  TriggerRuntime = andfun(eqfun(....iStep,1), not(.FileReader.ValidData)); 
+  TriggerRuntime = andfun(eqfun(_MOCAP_MAIN_STUDY_REF.iStep,1), not(.FileReader.ValidData)); 
   Type = MSG_ErrorFatal;
   Message = DesignVar(strformat("\n"+
   "----------------------------------------------------------------------------------------------------------\n"+
