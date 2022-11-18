@@ -96,7 +96,7 @@ class AMMR_BMStatement(std.Target):
         node["domain"] = "ammr"
         node.document = self.state.document
         node["objtype"] = "bm_statement"
-        node.set_class("section")
+        node['classes'].append("section")
 
         # Add the signature child node for permalinks.
         title = sphinx.addnodes.desc_signature(var_name, "")
@@ -106,8 +106,8 @@ class AMMR_BMStatement(std.Target):
         title["first"] = False
         title["objtype"] = node["objtype"]
         self.add_name(title)
-        title.set_class("ammr-bm_statement-title")
-        # title.set_class("sd-d-none")
+        title["classes"].append("ammr-bm_statement-title")
+        # title["classes"].append("sd-d-none")
 
         title += sphinx.addnodes.desc_name(var_name, var_name)
         node.append(title)
@@ -197,7 +197,7 @@ class AMMR_BMConstant(std.Target):
         node = sphinx.addnodes.desc()
         node.document = self.state.document
         node["objtype"] = "bm_constant"
-        node.set_class("section")
+        node['classes'].append("section")
 
         # Add the signature child node for permalinks.
         title = sphinx.addnodes.desc_signature(var_name, "")
@@ -207,8 +207,8 @@ class AMMR_BMConstant(std.Target):
         title["first"] = False
         title["objtype"] = node["objtype"]
         self.add_name(title)
-        title.set_class("ammr-bm_constant-title")
-        # title.set_class("sd-d-none")
+        title["classes"].append("ammr-bm_constant-title")
+        # title["classes"].append("sd-d-none")
 
 
         title += sphinx.addnodes.desc_name(var_name, var_name)
