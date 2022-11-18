@@ -32,7 +32,8 @@
   make the model more robust when dealing with different bvh files.
 * It is no longer necessasry to supply the `MarkerName` argument in the CreateMarkerDriver template
   MoCap models. The argument can still be used if the marker name and the data entry in the c3d file 
-  are different. 
+  are different.
+* The references to muscle models in the joint muscles of the detailed hand have been renamed to avoid future naming conflicts.
 
 (ammr-2.4-changelog)=
 ## AMMR 2.4.2 (2022-07-08)
