@@ -9,7 +9,7 @@ models and examples ready to be used with the [AnyBody Modeling
 System](https://www.anybodytech.com/software/ams/).
 
 <p align="center">
-  <img src = "https://anyscript.org/ammr-doc/_images/ammr_bodyparts.png" width=350>
+  <img src = "https://github.com/AnyBody/ammr/blob/master/Docs/_static/ammr_bodyparts.png" width=350>
 </p>
 
 The AnyBody Managed Model Repository consists of two parts:
