@@ -12,6 +12,18 @@
 * Inconsistencies in arm muscles paramaeters have been resolved. The same underlying parameters are now used for both
   the simple and the 3-element muscle models. 
 
+**Changed:**
+
+* The glenoid reaction forces are now expressed in the coordinate system of the
+  glenoid cup instead of the general scapula coordinate system.
+  The three force variables `GlenoHumeral_DistractionForce`,
+  `GlenoHumeral_InferoSuperiorForce`, `GlenoHumeral_AnteroPosteriorForce` now
+  represents the three directions given by the glenoid cup. 
+
+  This means that the variables will be slightly different even though the force is the same. 
+
+
+
 **Added:**
 
 * Added a few utility helper class templates (`Template_OperationSaveValues`/`Template_OperationLoadValues`/`Template_OperationUpdateValues`) 
