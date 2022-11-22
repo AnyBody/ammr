@@ -94,6 +94,7 @@
   It is now renamed to `MuscleModels` for better clarity. 
    
 * The references to muscle models in the joint muscles of the detailed hand have been renamed to avoid future naming conflicts.
+* The "via-points" for the Psoas Major muscle has been adjusted to ensure that the muscles can better act the role of stabilizing muscle for the lumbar spine.
 
 (ammr-2.4-changelog)=
 ## AMMR 2.4.2 (2022-07-08)
