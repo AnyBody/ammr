@@ -7,8 +7,21 @@
 
 **Fixed:**
 * The `Main.ModelSetup.CreateVideo` operation was missing in some of the
-  MoCap examples. This has been fixed. If you have this problem update the `CreateVideo.any` file in your application. 
-* Fixed wrapping problem with the posterior deltoid muscle in the 2 parameter shoulder calibration. 
+  MoCap examples. This has been fixed. If you have this problem, update the `CreateVideo.any` file in your application. 
+* Fixed wrapping problem with the posterior deltoid muscle in the two-parameter shoulder calibration. 
+
+**Changed:**
+
+* The glenoid reaction forces are now expressed in the coordinate system of the
+  glenoid cup instead of the general scapula coordinate system.
+  The three force variables `GlenoHumeral_DistractionForce`,
+  `GlenoHumeral_InferoSuperiorForce`, `GlenoHumeral_AnteroPosteriorForce` now
+  represents the three directions given by the glenoid cup. 
+
+  This means that the variables will be slightly different even though the force is the same. 
+* Inconsistencies in arm muscles parameters have been resolved. The same underlying parameters are now used for both
+  the simple and the 3-element muscle models. 
+
 
 
 **Added:**
@@ -16,23 +29,72 @@
 * Added a few utility helper class templates (`Template_OperationSaveValues`/`Template_OperationLoadValues`/`Template_OperationUpdateValues`) 
   to make it easier to do common class operations without manually having to create the operations with macros.
 
-  To create a operation which loads a file do: 
+  To create an operation which loads a file do: 
 
   ```{code-block} AnyScriptDoc
   Template_OperationLoadValues LoadAnySetFile = {
      FileName= "MyFile.anyset";
   };
   ```
-* 
+* Added two small helper code macro `NON_UNIQUE_VALUES()`/`NON_UNIQUE_POINTERS()` to 
+  find duplicate (i.e. non-unique) entries in arrays of values and pointers.
 
 **Changed:**
+* The implementation of the muscle parameter in the arm model have been refactored. All parameters are now given as
+  muscle volume, optimal fiber-length and tendon slacklength. The physiological cross-sectional area (PCSA),
+  was previously a hard coded parameter, but is now only an intermediate value used for calculating muscle strength from the muscle volume and optimal fiber length.
+
+  This new structure allows for overwriting the complete set of muscles volumes. For example, with alternative dataset. 
+
+  ```{code-block} AnyScriptDoc
+  Main.HumanModel.BodyModel.Right.ShoulderArm.ModelParameters.Muscles = {
+     biceps_brachii_caput_breve.MuscleVolume = 25.8;
+
+  };
+  ```
+
+
 * The load-time position of the box in the {ref}`BVH_BoxLift model <sphx_glr_auto_examples_Mocap_plot_BVH_BoxLift.py>` is now 
   calculated using the position of the hands. Also, `Main.ModelSetup.EnvironmentParameters.GravityDirection` defined in `box.any` file
   is now calculated automatically from `Main.ModelSetup.LabSpecificData.Gravity` defined in `LabSpecificData.any` file. These changes should 
   make the model more robust when dealing with different bvh files.
-* It is no longer necessasry to supply the `MarkerName` argument in the CreateMarkerDriver template
-  MoCap models. The argument can still be used if the marker name and the data entry in the c3d file 
-  are different. 
+
+* It is no longer necessary  to supply the `MarkerName` argument in the CreateMarkerDriver template
+  MoCap models. The argument can still be used if the marker class and the data entry in the c3d file 
+  are different.
+  
+* The implementation of muscles parameters section of the models have changed to utilize 
+  the the new `??=` (optional assignment) operator introduced in AnyBody 7.4.1.
+  
+  It is now possible to directly override/redefine the muscle parameters and muscle volumes. 
+  
+  For example, overriding the muscle volumes with a new set of data: 
+  ```{code-block} AnyScriptDoc
+  Main.HumanModel.BodyModel.Right.Leg.ModelParameters.Muscles = {
+     SoleusMedialis.MuscleVolume = 540; //ml
+     SoleusLateralis.MuscleVolume = 450; /ml
+  };
+  ```
+  The TLEM leg model previously had a similar functionality using 
+  `class_template`s and an extra level of indirection of the muscle parameters
+  (the `SubjectMusPar` section in the muscle model folder). This functionality has 
+  been replaced by the new simpler implementation.
+
+* Changed the methods for distributing muscle volume among discretised muscle
+  elements. This new method allows for different optimal
+  fiber lengths among elements of a muscle. If one element of a muscle gets a
+  smaller optimal fiber length (i.e. through calibration) the volume of the muscles
+  element gets redistributed, and PCSA remains constant across elements. 
+  
+  If the optimal fiber length of the different elements is the same, then this method 
+  will yield the same result as before.
+
+
+* In many body parts the folder holding muscles models were named shortly as `MusPar`. 
+  It is now renamed to `MuscleModels` for better clarity. 
+   
+* The references to muscle models in the joint muscles of the detailed hand have been renamed to avoid future naming conflicts.
+* The "via-points" for the Psoas Major muscle has been adjusted to ensure that the muscles can better act the role of stabilizing muscle for the lumbar spine.
 
 (ammr-2.4-changelog)=
 ## AMMR 2.4.2 (2022-07-08)
@@ -181,6 +243,22 @@ The `HumeroUlnarJoint` is the elbow flexion extension, and together `HumeroRadia
 
 
 **Changed:**
+
+- Ensure consistency of arm muscle parameters when switching between simple muscle models and 3 element muscle models.
+  The two muscles had a few differences in the underlying parameters. Mostly due
+  to the 3 element models being implemented based on newer publications, and
+  some changes not being backported properly to the simple muscle model. The two muscle models now give the same overall muscles strength `F0` when switching.
+
+  - Fix a bug in Anconeus_1 PCSA for the 3 element muscle model. 
+  - Fix the distribution of PCSA in simple muscle models for Latisimus dorsi to match 3 element muscle models.
+  - Fix the total PCSA of the 3-element muscle models of the Latisimus dorsi muscles to match the simple muscles.
+  - Fixed a typo in the calculation of the PCSA for one element of the pronator quadratus (`Pron_quadr_2`) with the simple muscle models.
+  - Fixed the PCSA of pectoralis major muscle model to match the 3-element muscle models. 
+  - Corrected Coracobrachialis pennation angle for 3-element muscle models.
+  - Fixed the PCSA of the deltoid simple muscle models to match the 3 element muscle models.
+  - Fixed the PCSA of the subscapularis simple muscle models to match the 3 element muscle models.
+
+
 
 - Improve the trunk model's strength for trunk external rotation. This change
   improves the implementation of the internal/external obliques and latissimus
