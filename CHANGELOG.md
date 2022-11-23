@@ -9,6 +9,7 @@
 * The `Main.ModelSetup.CreateVideo` operation was missing in some of the
   MoCap examples. This has been fixed. If you have this problem update the `CreateVideo.any` file in your application. 
 * Fixed wrapping problem with the posterior deltoid muscle in the 2 parameter shoulder calibration. 
+* Fix an bug in LegPressMachine example which caused the model view to zoom to infinity. 
 
 
 **Added:**
