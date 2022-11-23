@@ -7,10 +7,8 @@
 
 **Fixed:**
 * The `Main.ModelSetup.CreateVideo` operation was missing in some of the
-  MoCap examples. This has been fixed. If you have this problem update the `CreateVideo.any` file in your application. 
-* Fixed wrapping problem with the posterior deltoid muscle in the 2 parameter shoulder calibration. 
-* Inconsistencies in arm muscles paramaeters have been resolved. The same underlying parameters are now used for both
-  the simple and the 3-element muscle models. 
+  MoCap examples. This has been fixed. If you have this problem, update the `CreateVideo.any` file in your application. 
+* Fixed wrapping problem with the posterior deltoid muscle in the two-parameter shoulder calibration. 
 
 **Changed:**
 
@@ -21,6 +19,8 @@
   represents the three directions given by the glenoid cup. 
 
   This means that the variables will be slightly different even though the force is the same. 
+* Inconsistencies in arm muscles parameters have been resolved. The same underlying parameters are now used for both
+  the simple and the 3-element muscle models. 
 
 
 
@@ -29,7 +29,7 @@
 * Added a few utility helper class templates (`Template_OperationSaveValues`/`Template_OperationLoadValues`/`Template_OperationUpdateValues`) 
   to make it easier to do common class operations without manually having to create the operations with macros.
 
-  To create a operation which loads a file do: 
+  To create an operation which loads a file do: 
 
   ```{code-block} AnyScriptDoc
   Template_OperationLoadValues LoadAnySetFile = {
@@ -40,11 +40,11 @@
   find duplicate (i.e. non-unique) entries in arrays of values and pointers.
 
 **Changed:**
-* The implemenation of the muscle parameter in the arm model have been refactored. All parematers are now given as
-  muscle volume, optimal fiberlenth and tendon slacklength. The physiological cross sectional area (PCSA),
-  was previously hard coded parameter, but is now only an intermediate value used for calculating muscle strength from the muscle volume and optimal fiber length.
+* The implementation of the muscle parameter in the arm model have been refactored. All parameters are now given as
+  muscle volume, optimal fiber-length and tendon slacklength. The physiological cross-sectional area (PCSA),
+  was previously a hard coded parameter, but is now only an intermediate value used for calculating muscle strength from the muscle volume and optimal fiber length.
 
-  This new structure allows for overwritting the the complete set of muscles volumes. For example with alternative dataset. 
+  This new structure allows for overwriting the complete set of muscles volumes. For example, with alternative dataset. 
 
   ```{code-block} AnyScriptDoc
   Main.HumanModel.BodyModel.Right.ShoulderArm.ModelParameters.Muscles = {
@@ -59,16 +59,16 @@
   is now calculated automatically from `Main.ModelSetup.LabSpecificData.Gravity` defined in `LabSpecificData.any` file. These changes should 
   make the model more robust when dealing with different bvh files.
 
-* It is no longer necessasry to supply the `MarkerName` argument in the CreateMarkerDriver template
-  MoCap models. The argument can still be used if the marker name and the data entry in the c3d file 
+* It is no longer necessary  to supply the `MarkerName` argument in the CreateMarkerDriver template
+  MoCap models. The argument can still be used if the marker class and the data entry in the c3d file 
   are different.
   
-* The implementaion of muscles parameters section of the models have changed to ultize
-  the the new `??=` (optional assigment) operator introduced in AnyBody 7.4.1.
+* The implementation of muscles parameters section of the models have changed to utilize 
+  the the new `??=` (optional assignment) operator introduced in AnyBody 7.4.1.
   
-  It is now possible to directy override/redefine the muscle paramters and muscle volumes. 
+  It is now possible to directly override/redefine the muscle parameters and muscle volumes. 
   
-  For example overriding the muscle volumes with a new set of data: 
+  For example, overriding the muscle volumes with a new set of data: 
   ```{code-block} AnyScriptDoc
   Main.HumanModel.BodyModel.Right.Leg.ModelParameters.Muscles = {
      SoleusMedialis.MuscleVolume = 540; //ml
@@ -76,17 +76,17 @@
   };
   ```
   The TLEM leg model previously had a similar functionality using 
-  `class_template`s and an extra level of indirection of the muscle paramters
+  `class_template`s and an extra level of indirection of the muscle parameters
   (the `SubjectMusPar` section in the muscle model folder). This functionality has 
   been replaced by the new simpler implementation.
 
-* Changed the methods for distributing muscle volume among discretized muscle
+* Changed the methods for distributing muscle volume among discretised muscle
   elements. This new method allows for different optimal
-  fiber lengths among elements of a muscle. If one element of a muscle get a
+  fiber lengths among elements of a muscle. If one element of a muscle gets a
   smaller optimal fiber length (i.e. through calibration) the volume of the muscles
-  element gets redistributed, and PCSA remains contant across elements. 
+  element gets redistributed, and PCSA remains constant across elements. 
   
-  If the optimal fiber length of the different elements are the same, then this method 
+  If the optimal fiber length of the different elements is the same, then this method 
   will yield the same result as before.
 
 
