@@ -295,9 +295,7 @@ html_theme_options = {
    "home_page_in_toc": False,
    "show_navbar_depth": 1,
    "use_download_button": False,
-   "default_mode": "dark",
-
-
+   #"default_mode": "dark",
 }
 
 
