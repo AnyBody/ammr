@@ -12,6 +12,18 @@
 * Inconsistencies in arm muscles paramaeters have been resolved. The same underlying parameters are now used for both
   the simple and the 3-element muscle models. 
 
+**Changed:**
+
+* The glenoid reaction forces are now expressed in the coordinate system of the
+  glenoid cup instead of the general scapula coordinate system.
+  The three force variables `GlenoHumeral_DistractionForce`,
+  `GlenoHumeral_InferoSuperiorForce`, `GlenoHumeral_AnteroPosteriorForce` now
+  represents the three directions given by the glenoid cup. 
+
+  This means that the variables will be slightly different even though the force is the same. 
+
+
+
 **Added:**
 
 * Added a few utility helper class templates (`Template_OperationSaveValues`/`Template_OperationLoadValues`/`Template_OperationUpdateValues`) 
@@ -29,10 +41,13 @@
 
 **Changed:**
 
-* The anatomical frame of the pelvis segment has been changed. Before a frame rotated with
-  the pelvic tilt was used for scaling and connecting the remaining body parts. Now a
-  neutral frame with respect to the global coordinate system is used for scaling. ISB
-  coordinates still use the "old" rotated frame.
+* A new `AnatomicalFrameTrunk` reference frame has been added to the pelvis segment. The frame is
+  consistent with the anatomical frames in the rest of the trunk model. Also, all joint angles in relative to the pelvis segment now uses this frame. This implies that the neutral position of the model is identical to the neutral position of the trunk dataset. 
+
+  The result is more pelvic tilt in the neutral position, which seem to better reflect reported 
+  values in the litterature. 
+
+  The existing `PelvisSeg.AnatomicalFrame` defined ASIS/PSIS bony landmarks remains unchanged.
 
 * The trend validation in the ["Wilke Spine Pressure validation models"](example_wilkespinepressure) have been updated to 
   reflect the changes to thoracic model and pelvis frames. Although the absolute pressures in the spine have changed, the 
@@ -88,7 +103,10 @@
 
 
 * In many body parts the folder holding muscles models were named shortly as `MusPar`. 
-  It is now renamed to `MuscleModels` for better clarity.  
+  It is now renamed to `MuscleModels` for better clarity. 
+   
+* The references to muscle models in the joint muscles of the detailed hand have been renamed to avoid future naming conflicts.
+* The "via-points" for the Psoas Major muscle has been adjusted to ensure that the muscles can better act the role of stabilizing muscle for the lumbar spine.
 
 (ammr-2.4-changelog)=
 ## AMMR 2.4.2 (2022-07-08)

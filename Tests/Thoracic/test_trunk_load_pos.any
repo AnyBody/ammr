@@ -24,6 +24,9 @@
 #define BM_ARM_LEFT OFF
 #define BM_LEG_MODEL OFF
 #define BM_MANNEQUIN_DRIVER_DEFAULT ON
+#define BM_MANNEQUIN_DRIVER_PELVIS_POS_X OFF
+#define BM_MANNEQUIN_DRIVER_PELVIS_POS_Y OFF
+#define BM_MANNEQUIN_DRIVER_PELVIS_POS_Z OFF
 
 Main = {
   #include "<ANYBODY_PATH_BODY>/HumanModel.any"
@@ -141,12 +144,24 @@ Main = {
   AnyKinStudy Study = {
     AnyFolder& BodyModel = Main.HumanModel.BodyModel;
     AnyFolder& DefaultDrivers = Main.HumanModel.DefaultMannequinDrivers;
+    
+    
+    // Correct the load time position of the Pelvis so we can drive the AnatomicalFrameTrunk to zero, without the model moving
+    Main.HumanModel.Mannequin.Posture.PelvisPosX = Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.AnatomicalFrame.sRel[0];
+    Main.HumanModel.Mannequin.Posture.PelvisPosY = Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.AnatomicalFrame.sRel[1];
+    Main.HumanModel.Mannequin.Posture.PelvisPosZ = Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.AnatomicalFrame.sRel[2];
+    
+    // Add driver to fix the pelvis AnatomicalFrameTrunk with the global reference frame.
+    AnyKinDriver PelvisFix = {
+       AnyKinLinear Lin = {
+         AnyRefFrame& PelvisTrunkFrame = Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.AnatomicalFrameTrunk;
+       };
+    };
+    
+    
     nStep = 1;
   };
   
-  // Place the pelvis at global origin
-  Main.HumanModel.Mannequin.Posture.PelvisPosX = 0;
-  Main.HumanModel.Mannequin.Posture.PelvisPosY = 0;
   
   AnyFolder Operations = {
     AnyOperationMacro UpdateValues = {
