@@ -120,7 +120,7 @@ install it and how to use it.
 :hidden:
 
 getting_started
-Example Gallery <Applications/index>
+Gallery of examples <Applications/index>
 
 ```
 
@@ -130,7 +130,7 @@ Example Gallery <Applications/index>
 :includehidden: true
 :hidden:
 
-Body Models <body/models>
+Overview <body/models>
 bm_config/index
 
 ```
