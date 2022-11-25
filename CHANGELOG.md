@@ -23,7 +23,6 @@
   This means that the variables will be slightly different even though the force is the same. 
 
 
-
 **Added:**
 
 * Added a few utility helper class templates (`Template_OperationSaveValues`/`Template_OperationLoadValues`/`Template_OperationUpdateValues`) 
@@ -38,6 +37,12 @@
   ```
 * Added two small helper code macro `NON_UNIQUE_VALUES()`/`NON_UNIQUE_POINTERS()` to 
   find duplicate (i.e. non-unique) entries in arrays of values and pointers.
+* A new set of hip joint measures (`Interface.Right.HipISB`) have been added which  
+  measures the hip joint strictly according to the definition by the 
+  International Society of Biomechanics (ISB).  
+  These measures are almost identical to the existing angles except that they do not
+  have zero hip-flexion in they neutral postion. This is because they define the pelvis 
+  coordinate system with respect to a plane define by the ASIS-PSIS points.   
 
 **Changed:**
 
