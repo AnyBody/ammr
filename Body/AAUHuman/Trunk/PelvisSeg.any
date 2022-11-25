@@ -38,15 +38,17 @@ AnySeg PelvisSeg =
 
  
   AnyFloat pUnscaled_Trunk_Pelvis =  {StdPar.Right.ASIS, StdPar.Left.ASIS, StdPar.Right.PT, StdPar.Left.PT};
-  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(p, SIGN) 0.5*(p[0]+p[1])
-  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(p, SIGN) RotMat(0.5*(p[0]+p[1]), p[0], 0.5*(p[2]+p[3]))*RotMat(pi/2, y)*RotMat(pi,z)
+  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(p, SIGN) (0.5*(p[0]+p[1]))
+  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(p, SIGN) (RotMat(0.5*(p[0]+p[1]), p[0], 0.5*(p[2]+p[3]))*RotMat(pi/2, y)*RotMat(pi,z))
   
   #include "PelvisInterfaceMorphing.any"
 
   AnyFunTransform3D &GeomScale =..Scaling.GeometricalScaling.PelvisSeg.ScaleFunction;
 
   /// This is the anatomical frame that has axes alligned with the global coordinate system of the trunk dataset
-  AnyRefNode AnatomicalFrameTrunk = {};
+  AnyRefNode AnatomicalFrameTrunk = {
+     sRel = .AnatomicalFrame.sRel;
+  };
 
   /// This is the pelvis anatomical frame that rotated accordingly to the pelvic tilt
   /// This one is used for ISB coordinates  
@@ -93,6 +95,11 @@ AnySeg PelvisSeg =
      AnyFunTransform3D& GeomScale = ..GeomScale;
 
      #include "..\Scaling\SegScaleFunWrtAnatomicalFrame.any"
+     // Pelvis scaling shouldn't not happen in the ASIS-PSIS defined anatomical frame. 
+     // But in the Trunk Anatomical (i.e. the segmental trunk frame), which also define the neutral position
+     // So we owerride the scale matrices here.
+     Scale.T0.ScaleMat = eye(3); 
+     Scale.T1.ScaleMat = eye(3);
     };
 
     PreTransforms =
@@ -116,6 +123,12 @@ AnySeg PelvisSeg =
        AnyFunTransform3D& GeomScale = ..GeomScale;
 
        #include "..\Scaling\SegScaleFunWrtAnatomicalFrame.any"
+       // Pelvis scaling shouldn't not happen in the ASIS-PSIS defined anatomical frame. 
+       // But in the Trunk Anatomical (i.e. the segmental trunk frame), which also define the neutral position
+       // So we owerride the scale matrices here, so points are rotated into the trunk frame 
+       // before scaling.
+       Scale.T0.ScaleMat = ( Scale.T0.A0 * ..Scale_Trunk_Pelvis.ScaleAfterInterfaceMorphingDef.Scale.T0.A0')';       
+       Scale.T1.ScaleMat = ( Scale.T1.A1 * ..Scale_Trunk_Pelvis.ScaleAfterInterfaceMorphingDef.Scale.T1.A1')';                   
      };
 
      PreTransforms =
