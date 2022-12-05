@@ -38,14 +38,28 @@ AnySeg PelvisSeg =
 
  
   AnyFloat pUnscaled_Trunk_Pelvis =  {StdPar.Right.ASIS, StdPar.Left.ASIS, StdPar.Right.PT, StdPar.Left.PT};
-  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(p, SIGN) 0.5*(p[0]+p[1])
-  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(p, SIGN) RotMat(0.5*(p[0]+p[1]), p[0], 0.5*(p[2]+p[3]))*RotMat(pi/2, y)*RotMat(pi,z)
+  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(p, SIGN) (0.5*(p[0]+p[1]))
+  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(p, SIGN) (RotMat(0.5*(p[0]+p[1]), p[0], 0.5*(p[2]+p[3]))*RotMat(pi/2, y)*RotMat(pi,z))
   
   #include "PelvisInterfaceMorphing.any"
 
   AnyFunTransform3D &GeomScale =..Scaling.GeometricalScaling.PelvisSeg.ScaleFunction;
 
+  /// This is the anatomical frame that has axes aligned with the global coordinate system of the trunk dataset. 
+  /// This frame defines the neutral orientation of the pelvis segment.
+  AnyRefNode AnatomicalFrameTrunk = {
+     sRel = .AnatomicalFrame.sRel;
+  };
+  
+  /// This is the anatomical frame that has axes aligned with the global coordinate system of the trunk dataset. 
+  /// This frame defines the neutral orientation of the pelvis segment (AMMR<2.5)
+  AnyRefNode AnatomicalFrameISB = {
+     sRel = 0.5*(.Scale(.StdPar.Right.ASIS)+.Scale(.StdPar.Left.ASIS));
+     ARel = RotMat(sRel, .Scale(.StdPar.Right.ASIS), 0.5*(.Scale(.StdPar.Right.PSIS)+.Scale(.StdPar.Left.PSIS)))*RotMat(-pi/2,x)*RotMat(pi/2,y);
+  };
 
+  /// This is an anatomical frame aligned with the ASIS and Pubic tubercle bony landmarks
+  /// This was previously used as the neutral frame for pelvis. 
   AnyRefNode AnatomicalFrame =
   {
     AnyFloat pScaled = .Scale_Trunk_Pelvis(.pUnscaled_Trunk_Pelvis);
@@ -85,7 +99,22 @@ AnySeg PelvisSeg =
   {
     AnyFolder ScaleAfterInterfaceMorphingDef =
     {
-     AnyFloat pUnscaled = ..InterfaceMorphingDef.IM_Trunk_To_Leg_Unscaled(..pUnscaled_Trunk_Pelvis );
+    #ifndef SCALE_TYPE
+    #define SCALE_TYPE 1
+    #endif
+      
+     AnyFloat pUnscaledOrg = ..InterfaceMorphingDef.IM_Trunk_To_Leg_Unscaled(..pUnscaled_Trunk_Pelvis );
+     AnyVar fixedX = 0.5*(pUnscaledOrg[0][0]+pUnscaledOrg[1][0]);
+     // Pelvis scaling shouldn't not happen in the ASIS-PT defined anatomical frame. 
+     // But in the Trunk Anatomical (i.e. the segmental trunk frame), which also define the neutral position
+     // So we we project the ASIS-PT points into the same vertical plane. 
+     AnyFloat pUnscaled = {
+         {fixedX, pUnscaledOrg[0][1], pUnscaledOrg[0][2]},
+         {fixedX, pUnscaledOrg[1][1], pUnscaledOrg[1][2]},
+         {fixedX, pUnscaledOrg[2][1], pUnscaledOrg[2][2]},
+         {fixedX, pUnscaledOrg[3][1], pUnscaledOrg[3][2]},
+       };
+     
      AnyFunTransform3D& GeomScale = ..GeomScale;
 
      #include "..\Scaling\SegScaleFunWrtAnatomicalFrame.any"
@@ -108,7 +137,19 @@ AnySeg PelvisSeg =
    {
      AnyFolder ScaleAfterInterfaceMorphingDef =
      {
-       AnyFloat pUnscaled = ..InterfaceMorphingDef.IM_Leg_To_Trunk_Unscaled(..pUnscaled_Leg_Pelvis );
+       AnyFloat pUnscaledOrg = ..InterfaceMorphingDef.IM_Leg_To_Trunk_Unscaled(..pUnscaled_Leg_Pelvis );
+     
+     // Pelvis scaling shouldn't not happen in the ASIS-PT defined anatomical frame. 
+     // But in the Trunk Anatomical (i.e. the segmental trunk frame), which also define the neutral position
+     // So we we project the ASIS-PT points into the same vertical plane. 
+      AnyVar fixedX = 0.5*(pUnscaledOrg[0][0]+pUnscaledOrg[1][0]);
+      AnyFloat pUnscaled = {
+         {fixedX, pUnscaledOrg[0][1], pUnscaledOrg[0][2]},
+         {fixedX, pUnscaledOrg[1][1], pUnscaledOrg[1][2]},
+         {fixedX, pUnscaledOrg[2][1], pUnscaledOrg[2][2]},
+         {fixedX, pUnscaledOrg[3][1], pUnscaledOrg[3][2]},
+       };
+       
        AnyFunTransform3D& GeomScale = ..GeomScale;
 
        #include "..\Scaling\SegScaleFunWrtAnatomicalFrame.any"
@@ -125,7 +166,7 @@ AnySeg PelvisSeg =
   #endif
 
 
-  AnyRefNode& ScalingNode=AnatomicalFrame;
+  AnyRefNode& ScalingNode=AnatomicalFrameTrunk;
 
   AnyFunTransform3D& Scale = Scale_Trunk_Pelvis;
 
@@ -160,7 +201,6 @@ AnySeg PelvisSeg =
   JaboutCoMOnOff = On;
 
   AnyRefNode GroundPelvisJntNode = {sRel = .Scale(.StdPar.GroundPelvisJntNode_pos);};
-  AnyRefNode L5PelvisJntNode     = {sRel = .Scale(.StdPar.L5PelvisJntNode_pos);};
   AnyRefNode PelvisSacrumJntNode = {sRel = .Scale(.StdPar.PelvisSacrumJntNode_pos);};
  
   /// The Right node is used by different body part for adding mirrored nodes

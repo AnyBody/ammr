@@ -24,7 +24,6 @@
   the simple and the 3-element muscle models. 
 
 
-
 **Added:**
 
 * Added a few utility helper class templates (`Template_OperationSaveValues`/`Template_OperationLoadValues`/`Template_OperationUpdateValues`) 
@@ -39,8 +38,31 @@
   ```
 * Added two small helper code macro `NON_UNIQUE_VALUES()`/`NON_UNIQUE_POINTERS()` to 
   find duplicate (i.e. non-unique) entries in arrays of values and pointers.
+* A new set of hip joint measures (`Interface.Right.HipISB`) have been added which  
+  measures the hip joint strictly according to the definition by the 
+  International Society of Biomechanics (ISB).  
+  These measures are almost identical to the existing angles except that they do not
+  have zero hip-flexion in they neutral postion. This is because they define the pelvis 
+  coordinate system with respect to a plane define by the ASIS-PSIS points.   
 
 **Changed:**
+
+* A new `AnatomicalFrameTrunk` reference frame has been added to the pelvis segment. The frame is
+  consistent with the anatomical frames in the rest of the trunk model. Also, all joint angles in relative to the pelvis segment now uses this frame. This implies that the neutral position of the model is identical to the neutral position of the trunk dataset. 
+
+  The result is more pelvic tilt in the neutral position, which seem to better reflect reported 
+  values in the litterature. 
+
+  The existing `PelvisSeg.AnatomicalFrame` defined ASIS/PSIS bony landmarks remains unchanged.
+
+* The trend validation in the ["Wilke Spine Pressure validation models"](example_wilkespinepressure) have been updated to 
+  reflect the changes to thoracic model and pelvis frames. Although the absolute pressures in the spine have changed, the 
+  trends (relative changes in spine pressure between models) remains the same. 
+
+* The implemenation of the muscle parameter in the arm model have been refactored. All parematers are now given as
+  muscle volume, optimal fiberlenth and tendon slacklength. The physiological cross sectional area (PCSA),
+  was previously hard coded parameter, but is now only an intermediate value used for calculating muscle strength from the muscle volume and optimal fiber length.
+
 * The implementation of the muscle parameter in the arm model have been refactored. All parameters are now given as
   muscle volume, optimal fiber-length and tendon slacklength. The physiological cross-sectional area (PCSA),
   was previously a hard coded parameter, but is now only an intermediate value used for calculating muscle strength from the muscle volume and optimal fiber length.
@@ -53,7 +75,6 @@
 
   };
   ```
-
 
 * The load-time position of the box in the {ref}`BVH_BoxLift model <sphx_glr_auto_examples_Mocap_plot_BVH_BoxLift.py>` is now 
   calculated using the position of the hands. Also, `Main.ModelSetup.EnvironmentParameters.GravityDirection` defined in `box.any` file
