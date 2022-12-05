@@ -4,7 +4,7 @@ Definitions of the Joints of the cervical spine spine. From T1C7 to Skull
 AnyFolder JointsCervicalSpine = {
   
   AnySphericalJoint T1C7Jnt = {
-    AnyRefNode &T1Node = ..SegmentsThorax.ThoraxSeg.T1C7JntNode;
+    AnyRefNode &T1Node = ..SegmentsThorax.T1Seg.T1C7JntNode;
     AnyRefNode &C7Node = ..SegmentsCervicalSpine.C7Seg.T1C7JntNode;
   };
   
@@ -42,18 +42,13 @@ AnyFolder JointsCervicalSpine = {
   AnyRevoluteJoint C1C0Jnt = {
     Axis = z;
     AnyRefNode &C1Node = ..SegmentsCervicalSpine.C1Seg.C1C0JntNode;
-    AnyRefNode &C0Node = ..SegmentsThorax.SkullSeg.C1C0JntNode;
+    AnyRefNode &C0Node = ..SegmentsCervicalSpine.SkullSeg.C1C0JntNode;
   };
   
-  //@! Should be handled by 
-//  //  There is no muscles attached to skull 
-//  AnyReacForce NeckJntReaction = {
-//    AnyRevoluteJoint &ref=.C1C0Jnt;
-//  };
-  
+
   AnyKinRotational SkullThoraxRotMeasure = {
-    AnyRefFrame &Skull = ..SegmentsThorax.SkullSeg.AnatomicalFrame; 
-    AnyRefFrame &Thorax = ..SegmentsThorax.ThoraxSeg.AnatomicalFrame;  
+    AnyRefFrame &Thorax = ..SegmentsThorax.T1Seg.AnatomicalFrame;  
+    AnyRefFrame &Skull = ..SegmentsCervicalSpine.SkullSeg.AnatomicalFrame; 
     Type = RotVector;
   };
   
@@ -62,49 +57,25 @@ AnyFolder JointsCervicalSpine = {
   
   AnyFolder Flexion = {
     
-    AnyKinMeasureOrg C3C2JntFlexion  = {
-      MeasureOrganizer = {2};
-      AnyKinMeasure& ref = ..C3C2Jnt;
-    };  
+    AnyKinMeasureOrg Measure  = {
+      AnyKinMeasure& ref1 = ..C3C2Jnt;
+      AnyKinMeasure& ref2 = ..C4C3Jnt;
+      AnyKinMeasure& ref3 = ..C5C4Jnt;
+      AnyKinMeasure& ref4 = ..C6C5Jnt;
+      AnyKinMeasure& ref5 = ..C7C6Jnt;
+      AnyKinMeasure& ref6 = ..T1C7Jnt;
+      MeasureOrganizer = iarr(0, 3, 17)+2;
+    };   
     
-    AnyKinMeasureOrg C4C3JntFlexion  = {
-      MeasureOrganizer = {2};
-      AnyKinMeasure& ref = ..C4C3Jnt;
-    };  
-    
-    AnyKinMeasureOrg C5C4JntFlexion  = {
-      MeasureOrganizer = {2};
-      AnyKinMeasure& ref = ..C5C4Jnt;
-    };  
-    
-    AnyKinMeasureOrg C6C5JntFlexion  = {
-      MeasureOrganizer = {2};
-      AnyKinMeasure& ref = ..C6C5Jnt;
-    };  
-    
-    AnyKinMeasureOrg C7C6JntFlexion  = {
-      MeasureOrganizer = {2};
-      AnyKinMeasure& ref = ..C7C6Jnt;
-    };  
-    
-    AnyKinMeasureOrg T1C7JntFlexion  = {
-      MeasureOrganizer = {2};
-      AnyKinMeasure& ref = ..T1C7Jnt;
-    };  
-    
-    #if BM_TRUNK_CERVICAL_RHYTHM
-    AnyKinEqSimpleDriver CervicalFlexionRhythmDrv = {
+    #if BM_TRUNK_CERVICAL_RHYTHM != OFF
+    AnyKinEqSimpleDriver RhythmDriver = {
       
       AnyKinMeasureLinComb Measure = {
         
         AnyKinMeasure& u0 = ..SkullThoraxFlexion;
-        AnyKinMeasure& u1 = ...C1C0Jnt;
-        AnyKinMeasure& u2 = ..C3C2JntFlexion;
-        AnyKinMeasure& u3 = ..C4C3JntFlexion;
-        AnyKinMeasure& u4 = ..C5C4JntFlexion;
-        AnyKinMeasure& u5 = ..C6C5JntFlexion;
-        AnyKinMeasure& u6 = ..C7C6JntFlexion;
-        AnyKinMeasure& u7 = ..T1C7JntFlexion;
+        AnyKinMeasure& u1 = ...C1C0Jnt;  // z direction
+        AnyKinMeasure& u2 = ..Measure;
+
         OutDim = 6;
         Const = {0, 0, 0, 0, 0, 0};
         Coef = {
@@ -114,9 +85,7 @@ AnyFolder JointsCervicalSpine = {
           {0, 0, 0, 0, 1, -1,  0,  0},
           {0, 0, 0, 0, 0,  1, -1,  0},
           {0, 0, 0, 0, 0,  0,  1, -1}};
-        
-      }; // Measure
-      
+      }; // Measure      
       
     #if BM_TRUNK_CERVICAL_RHYTHM == _RHYTHM_SOFT_
       // Use a template to create the weight function, so
@@ -127,65 +96,46 @@ AnyFolder JointsCervicalSpine = {
         WeightFun ={&Weights.Fun};
     #endif
       
-      DriverPos = {0, 0, 0, 0, 0, 0};
-      DriverVel = {0, 0, 0, 0, 0, 0};
-      Reaction.Type = {Off,Off,Off, Off,Off,Off};
+      DriverPos = repmat(nDim, 0);
+      DriverVel = repmat(nDim, 0);
+      Reaction.Type = repmat(nDim, Off);
       
     }; // CervicalFlexionRhythmDrv
     #endif
-    
-    
-    AnyKinMeasureOrg SkullThoraxFlexion  = {
+        
+  AnyKinMeasureLinComb SkullThoraxFlexion  = {
+    AnyKinMeasureOrg select ={
+      AnyKinMeasure& ref = ...SkullThoraxRotMeasure;
       MeasureOrganizer = {2};
-      AnyKinMeasure& ref = ..SkullThoraxRotMeasure;
     };
+    Coef ={{-1}};
+    Const = {0};
+    OutDim=1;
+  };
+
     
   };//Flexion
   
   
   AnyFolder LateralBending = {
     
-    AnyKinMeasureOrg C3C2JntLateralBending  = {
-      MeasureOrganizer = {0};
-      AnyKinMeasure& ref = ..C3C2Jnt;
+    AnyKinMeasureOrg Measure  = {
+      AnyKinMeasure& ref1 = ..C3C2Jnt;
+      AnyKinMeasure& ref2 = ..C4C3Jnt;
+      AnyKinMeasure& ref3 = ..C5C4Jnt;
+      AnyKinMeasure& ref4 = ..C6C5Jnt;
+      AnyKinMeasure& ref5 = ..C7C6Jnt;
+      AnyKinMeasure& ref6 = ..T1C7Jnt;
+      MeasureOrganizer = iarr(0, 3, 17)+0;
     };  
     
-    AnyKinMeasureOrg C4C3JntLateralBending  = {
-      MeasureOrganizer = {0};
-      AnyKinMeasure& ref = ..C4C3Jnt;
-    };  
     
-    AnyKinMeasureOrg C5C4JntLateralBending  = {
-      MeasureOrganizer = {0};
-      AnyKinMeasure& ref = ..C5C4Jnt;
-    };  
-    
-    AnyKinMeasureOrg C6C5JntLateralBending  = {
-      MeasureOrganizer = {0};
-      AnyKinMeasure& ref = ..C6C5Jnt;
-    };  
-    
-    AnyKinMeasureOrg C7C6JntLateralBending  = {
-      MeasureOrganizer = {0};
-      AnyKinMeasure& ref = ..C7C6Jnt;
-    };  
-    
-    AnyKinMeasureOrg T1C7JntLateralBending  = {
-      MeasureOrganizer = {0};
-      AnyKinMeasure& ref = ..T1C7Jnt;
-    };  
-    
-    #if BM_TRUNK_CERVICAL_RHYTHM
-    AnyKinEqSimpleDriver CervicalLateralBendingRhythmDrv = {
+    #if BM_TRUNK_CERVICAL_RHYTHM != OFF
+    AnyKinEqSimpleDriver RhythmDriver = {
       
-      AnyKinMeasureLinComb Measure = {
-        
-        AnyKinMeasure& u2 = ..C3C2JntLateralBending;
-        AnyKinMeasure& u3 = ..C4C3JntLateralBending;
-        AnyKinMeasure& u4 = ..C5C4JntLateralBending;
-        AnyKinMeasure& u5 = ..C6C5JntLateralBending;
-        AnyKinMeasure& u6 = ..C7C6JntLateralBending;
-        AnyKinMeasure& u7 = ..T1C7JntLateralBending;
+      AnyKinMeasureLinComb Measure = {        
+        AnyKinMeasure& u = ..Measure;
+
         OutDim = 5;
         Const = {0, 0, 0, 0, 0};
         Coef = {
@@ -204,9 +154,9 @@ AnyFolder JointsCervicalSpine = {
       WeightFun ={&Weights.Fun};
      #endif
 
-      DriverPos = {0, 0, 0, 0, 0};
-      DriverVel = {0, 0, 0, 0, 0};
-      Reaction.Type = {Off,Off,Off, Off,Off};
+      DriverPos = repmat(nDim, 0);
+      DriverVel = repmat(nDim, 0);
+      Reaction.Type = repmat(nDim, Off);
       
     }; // CervicalLateralBendingRhythmDrv
     #endif
@@ -218,63 +168,35 @@ AnyFolder JointsCervicalSpine = {
     
   };//LateralBending
   
-  
-  
   AnyFolder Rotation = {
     
-    AnyKinMeasureOrg C3C2JntRotation  = {
-      MeasureOrganizer = {1};
-      AnyKinMeasure& ref = ..C3C2Jnt;
+    AnyKinMeasureOrg Measure  = {
+      AnyKinMeasure& ref1 = ..C3C2Jnt;
+      AnyKinMeasure& ref2 = ..C4C3Jnt;
+      AnyKinMeasure& ref3 = ..C5C4Jnt;
+      AnyKinMeasure& ref4 = ..C6C5Jnt;
+      AnyKinMeasure& ref5 = ..C7C6Jnt;
+      AnyKinMeasure& ref6 = ..T1C7Jnt;
+      MeasureOrganizer = iarr(0, 3, 17)+1;
     };  
     
-    AnyKinMeasureOrg C4C3JntRotation  = {
-      MeasureOrganizer = {1};
-      AnyKinMeasure& ref = ..C4C3Jnt;
-    };  
-    
-    AnyKinMeasureOrg C5C4JntRotation  = {
-      MeasureOrganizer = {1};
-      AnyKinMeasure& ref = ..C5C4Jnt;
-    };  
-    
-    AnyKinMeasureOrg C6C5JntRotation  = {
-      MeasureOrganizer = {1};
-      AnyKinMeasure& ref = ..C6C5Jnt;
-    };  
-    
-    AnyKinMeasureOrg C7C6JntRotation  = {
-      MeasureOrganizer = {1};
-      AnyKinMeasure& ref = ..C7C6Jnt;
-    };  
-    
-    AnyKinMeasureOrg T1C7JntRotation  = {
-      MeasureOrganizer = {1};
-      AnyKinMeasure& ref = ..T1C7Jnt;
-    };  
-    
-    #if BM_TRUNK_CERVICAL_RHYTHM
-    AnyKinEqSimpleDriver CervicalRotationRhythmDrv = {
+    #if BM_TRUNK_CERVICAL_RHYTHM != OFF
+    AnyKinEqSimpleDriver RhythmDriver = {
       
       AnyKinMeasureLinComb Measure = {
         
         AnyKinMeasure& u0 = ..SkullThoraxRotation;
-        AnyKinMeasure& u1 = ...C2C1Jnt;
-        AnyKinMeasure& u2 = ..C3C2JntRotation;
-        AnyKinMeasure& u3 = ..C4C3JntRotation;
-        AnyKinMeasure& u4 = ..C5C4JntRotation;
-        AnyKinMeasure& u5 = ..C6C5JntRotation;
-        AnyKinMeasure& u6 = ..C7C6JntRotation;
-        AnyKinMeasure& u7 = ..T1C7JntRotation;
+        AnyKinMeasure& u1 = ...C2C1Jnt;  // y direction
+        AnyKinMeasure& u2 = ..Measure;
         OutDim = 6;
         Const = {0, 0, 0, 0, 0, 0};
         Coef = {
-          {77/132, 1, 0, 0, 0, 0, 0, 0},
+          {77/132, -1, 0, 0, 0, 0, 0, 0},
           {0, 0, 1, -1, 0, 0,  0,  0},
           {0, 0, 0, 1, -1, 0,  0,  0},
           {0, 0, 0, 0, 1, -1,  0,  0},
           {0, 0, 0, 0, 0,  1, -1,  0},
-          {0, 0, 0, 0, 0,  0,  1, -1}};
-        
+          {0, 0, 0, 0, 0,  0,  1, -1}};        
       }; // Measure
 
       
@@ -286,9 +208,9 @@ AnyFolder JointsCervicalSpine = {
       WeightFun ={&Weights.Fun};
      #endif
 
-      DriverPos = {0, 0, 0, 0, 0, 0};
-      DriverVel = {0, 0, 0, 0, 0, 0};
-      Reaction.Type = {Off,Off,Off, Off,Off,Off};
+      DriverPos = repmat(nDim, 0);
+      DriverVel = repmat(nDim, 0);
+      Reaction.Type = repmat(nDim, Off);
       
     }; // CervicalRotationRhythmDrv
     #endif

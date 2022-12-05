@@ -16,9 +16,9 @@ AnySeg Clavicula ={
   AnyFunTransform3D& GeomScale = Scale;
     
 
-  AnyRefNode NeutralPositionOnPelvis = {
+  AnyFolder NeutralPositionOnPelvis = {
     AnyVec3 StandardsRel =.Data.NeutralPositionOnPelvis_pos;
-    sRel=.Scale(StandardsRel*.Mirror);
+    //sRel=.Scale(StandardsRel*.Mirror);
     
     AnyMat33 Clavicula_Axes = {
       {.Data.Clavicula_Axes[0][0],...Sign*.Data.Clavicula_Axes[0][1],.Data.Clavicula_Axes[0][2]},
@@ -27,20 +27,20 @@ AnySeg Clavicula ={
     };
     
     AnyMat33 Pelvis_Axes = {{1.000000, 0.000000, 0.000000}, {0.000000, 1.000000, 0.000000}, {0.000000, 0.000000, 1.000000}};
-    ARel=Clavicula_Axes'*Pelvis_Axes;
+    AnyMat33 ARel=Clavicula_Axes'*Pelvis_Axes;
   };
 
   #if _LEFT_RIGHT_ == "RIGHT"
-    AnyFolder &TrunkIJRef = ....Trunk.SegmentsThorax.ThoraxSeg.ij;
+    AnyFolder &TrunkIJRef = ....Trunk.SegmentsRibCage.SternumSeg.ij;
   #else
-    AnyFolder &TrunkIJRef = ....Trunk.SegmentsThorax.ThoraxSeg.iji;
+    AnyFolder &TrunkIJRef = ....Trunk.SegmentsRibCage.SternumSeg.iji;
   #endif
 
-  r0 = ....Trunk.SegmentsThorax.ThoraxSeg.r0 
-       + (TrunkIJRef.sRel + TrunkIJRef.scj.sRel * TrunkIJRef.ARel')*....Trunk.SegmentsThorax.ThoraxSeg.Axes0'
+  r0 = ....Trunk.SegmentsRibCage.SternumSeg.r0 
+       + (TrunkIJRef.sRel + TrunkIJRef.scj.sRel * TrunkIJRef.ARel')*....Trunk.SegmentsRibCage.SternumSeg.Axes0'
        - scj.sRel*Axes0';
 
-  Axes0= ....Trunk.SegmentsThorax.ThoraxSeg.Axes0*NeutralPositionOnPelvis.ARel';
+  Axes0= ....Trunk.SegmentsRibCage.SternumSeg.Axes0*NeutralPositionOnPelvis.ARel';
 
   #include "../DrawSettings/Nodes.any"
   
@@ -101,11 +101,11 @@ AnySeg Scapula ={
   AnyFunTransform3D& GeomScale = Scale;
 
   
-  AnyRefNode NeutralPositionOnPelvis = {
+  AnyFolder NeutralPositionOnPelvis = {
     
     
     AnyVec3 StandardsRel=  .Data.NeutralPositionOnPelvis_pos; 
-    sRel = .Scale( StandardsRel*.Mirror);
+    //sRel = .Scale( StandardsRel*.Mirror);
     
     AnyMat33 Scapula_Axes = {
       {.Data.Scapula_Axes[0][0],...Sign*.Data.Scapula_Axes[0][1],.Data.Scapula_Axes[0][2]},
@@ -118,13 +118,15 @@ AnySeg Scapula ={
       {0.000000, 1.000000, 0.000000},
       {0.000000, 0.000000, 1.000000}};
     
-    ARel=Scapula_Axes'*Pelvis_Axes;
+    AnyMat33 ARel=Scapula_Axes'*Pelvis_Axes;
     
   
   };
   
   r0 = .Clavicula.acj.sRel*.Clavicula.Axes0'+.Clavicula.r0 -  acj.sRel*Axes0';
-  Axes0= ....Trunk.SegmentsThorax.ThoraxSeg.Axes0*NeutralPositionOnPelvis.ARel';  
+  Axes0= ....Trunk.SegmentsRibCage.SternumSeg.Axes0*NeutralPositionOnPelvis.ARel';  
+  AnyMat33  As= ....Trunk.SegmentsThorax.T1Seg.Axes0*NeutralPositionOnPelvis.ARel';
+  AnyVec3   RThorax = ....Trunk.SegmentsThorax.T1Seg.r0;
   
   #include "../DrawSettings/Nodes.any"
   #include "../DrawSettings/SegmentAxes.any"
@@ -163,6 +165,17 @@ AnySeg Scapula ={
   
   AnyRefNode acj = {sRel = .Scale(.Data.acj_pos*.Mirror);};
   
+  /// Used for scapula sliding on the thorax
+  /// when BM_ARM_THORAX_SCAPULA_CONTACT == _ELLIPSOID_CONTACT_
+  AnyRefNode ScapulaSlidingTS = {
+    sRel = .Scale((.Data.ts_pos+ {0,0,-0.015})*.Mirror);
+    #include "../DrawSettings/BML.any"
+  };  
+  
+  AnyRefNode ScapulaSlidingAI = {
+    sRel = .Scale((.Data.ai_pos +{-0.00,0.000,-0.008})*.Mirror);
+    #include "../DrawSettings/BML.any"
+  };  
   
   AnyRefNode ts = {
     sRel = .Scale(.Data.ts_pos*.Mirror);
@@ -420,6 +433,12 @@ AnySeg Radius ={
     sRel = .Scale(.Data.PointPS2_pos*.Mirror);
   };
   
+  AnyRefNode PointHumeralRadialJoint = {
+    #include "../DrawSettings/JointAxesProximal.any"
+    sRel = .Scale(.Data.PointHumeroRadialJoint_pos*.Mirror);
+    ARel = .PS2Reac.ARel;
+  };
+
   AnyRefNode PS2Reac = {
     sRel = .Scale(.Data.PS2Reac_pos*.Mirror);
     ARel = RotMat(.PointPS2.sRel, .PS.sRel, .rs.sRel);
