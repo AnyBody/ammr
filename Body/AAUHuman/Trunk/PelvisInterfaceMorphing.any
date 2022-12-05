@@ -1,201 +1,153 @@
-AnyFolder InterfaceMorphingDef =
-{
-#if (BM_LEG_MODEL != _LEG_MODEL_TLEM_) & (BM_LEG_MODEL != _LEG_MODEL_TLEM2_)
-   AnyFunTransform3DIdentity IM_Leg_To_Trunk_Unscaled= {};
-   AnyFunTransform3DIdentity IM_Trunk_To_Leg_Unscaled= {};     
-#else
-   /// IM landmarks of the trunk's pelvis 
-   AnyMatrix points_RBF_TrunkPelvis_Unscaled = .StdPar.points_RBF_unscaled;
+AnyFolder InterfaceMorphingDef = {
+  #if (BM_LEG_MODEL != _LEG_MODEL_TLEM_) & (BM_LEG_MODEL != _LEG_MODEL_TLEM2_)
+    AnyFunTransform3DIdentity IM_Leg_To_Trunk_Unscaled= {};
+    AnyFunTransform3DIdentity IM_Trunk_To_Leg_Unscaled= {};     
+  #else
+    /// IM landmarks of the trunk's pelvis 
+    AnyMatrix points_RBF_TrunkPelvis_Unscaled = .StdPar.points_RBF_unscaled;
     #if (BM_LEG_MODEL == _LEG_MODEL_TLEM_) | (BM_LEG_MODEL == _LEG_MODEL_TLEM2_)
-   /// IM landmarks of the leg's pelvis  
-   AnyMatrix points_RBF_LegPelvis_Unscaled = ....LEG_MODEL_PARAM_DIRECTION.Leg.ModelParameters.Pelvis.points_RBF_unscaled;
-   #endif
-
-   #ifndef BM_LEG_TRUNK_INTERFACE
-    #define BM_LEG_TRUNK_INTERFACE _MORPH_NONE_
-   #endif
-
-   /// Interface morphing function
-   IM_Leg_To_Trunk_Unscaled = {};
-   
-   #if BM_LEG_TRUNK_INTERFACE == _MORPH_NONE_
-   ///^ Interface morphing was switched off. 
-   ///^ Neither trunk nor leg pelvis are modified by the interface morphing.
-   
-    AnyFunTransform3DIdentity IM_Trunk_To_Leg_Unscaled = {};
-
-    #if (BM_LEG_MODEL == _LEG_MODEL_TLEM_) | (BM_LEG_MODEL == _LEG_MODEL_TLEM2_)
-    /// A rigid body transformation from the leg to the trunk 
-    /// coordinate systems using the anatomical ref. frame as intermediate system.
-    /// No morphing is applied.
-     AnyFunTransform3D IM_Leg_To_Trunk_Unscaled =
-     {
-
-       AnyFloat Trunk_Pelvis_AnatomicalFrame_s = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(..pUnscaled_Trunk_Pelvis, 1) ;
-       AnyFloat Trunk_Pelvis_AnatomicalFrame_A = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(..pUnscaled_Trunk_Pelvis, 1) ;
-       AnyFloat Leg_Pelvis_AnatomicalFrame_s = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(..pUnscaled_Leg_Pelvis, 1) ;
-       AnyFloat Leg_Pelvis_AnatomicalFrame_A = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(..pUnscaled_Leg_Pelvis, 1) ;
-
-       AnyFunTransform3DLin tr1 =
-       {
-         ScaleMat = (.Leg_Pelvis_AnatomicalFrame_A)' ;
-         Offset = -.Leg_Pelvis_AnatomicalFrame_s ;
-       };
-
-       AnyFunTransform3DLin tr2 =
-       {
-         ScaleMat = (.Trunk_Pelvis_AnatomicalFrame_A);
-         Offset = .Trunk_Pelvis_AnatomicalFrame_s * .Trunk_Pelvis_AnatomicalFrame_A ;
-       };
-
-       PreTransforms =
-       {
-         &tr1, &tr2
-       };
-
-     };
+      /// IM landmarks of the leg's pelvis  
+      AnyMatrix points_RBF_LegPelvis_Unscaled = ....LEG_MODEL_PARAM_DIRECTION.Leg.ModelParameters.Pelvis.points_RBF_unscaled;
     #endif
-   #endif
 
-   #if BM_LEG_TRUNK_INTERFACE == _MORPH_TRUNK_TO_LEG_
-    ///^ Interface morphing for morphing trunk pelvis into the leg pelvis 
+    #ifndef BM_LEG_TRUNK_INTERFACE
+      #define BM_LEG_TRUNK_INTERFACE _MORPH_NONE_
+    #endif
 
-    /// An affine transformation to deform trunk pelvis into the leg pelvis 
-    /// It serves a purpose of being a pretransform for the RBF transformation.
-    AnyFunTransform3DLin2 IM_Trunk_To_Leg_Affine =
-    {
-      Points0 = .points_RBF_TrunkPelvis_Unscaled;
-      Points1 = .points_RBF_LegPelvis_Unscaled;
-      Mode = VTK_LANDMARK_AFFINE ;
-    };
-
-    /// An non-linear RBF deformation transformation to deform trunk pelvis into the leg pelvis 
-    /// This will result in the trunk geomtries in coordinate system of the leg pelvis.
-    AnyFunTransform3DRBF IM_Trunk_To_Leg_RBF =
-    {
-      PreTransforms =
-      {
-        &.IM_Trunk_To_Leg_Affine
-      };
-      Points0 = .points_RBF_TrunkPelvis_Unscaled;
-      Points1 = .points_RBF_LegPelvis_Unscaled;
-
-      RBFDef.Type = RBF_MultiQuadratic;
-      RBFDef.Param = 0.4;
-
-      BoundingBox.ScaleXYZ = 5*{1, 1, 1};
-      BoundingBox.DivisionFactorXYZ = 2*{1, 1, 1};
-      BoundingBoxOnOff = On;
-      BoundingBox.Type = BB_Cartesian ;
-    };
-
-    /// A rigid body registration transformation from the leg pelvis into the 
-    /// trunk pelvis coordinate system done in a least square manner using landmarks.
-    AnyFunTransform3DLin2 IM_Leg_To_Trunk_RigidBody =
-    {
-      Points0 = .points_RBF_LegPelvis_Unscaled;
-      Points1 = .points_RBF_TrunkPelvis_Unscaled;
-      Mode = VTK_LANDMARK_RIGIDBODY;
-    };
-
-    /// A rigid body registration transformation from the trunk pelvis into the 
-    /// leg pelvis coordinate system done in a least square manner using landmarks.
-    AnyFunTransform3DLin2 IM_Trunk_To_Leg_RigidBody=
-    {
-      Points0 = .points_RBF_TrunkPelvis_Unscaled;
-      Points1 = .points_RBF_LegPelvis_Unscaled;
-      Mode = VTK_LANDMARK_RIGIDBODY;
-    };
-    
-    
-    /// Interface morphing function that morphs trunk pelvis into the leg pelvis 
-    /// and registers back into the trunk coordinate system.
-    AnyFunTransform3D IM_Trunk_To_Leg_Unscaled =
-    {
-      PreTransforms =
-      {
-        &.IM_Trunk_To_Leg_RBF ,
-        &.IM_Leg_To_Trunk_RigidBody
-      };
-    };
-
-   /// Interface morphing function that morphs leg pelvis into the trunk pelvis 
-    AnyFunTransform3DLin2 IM_Leg_To_Trunk_Unscaled =
-    {
-      Points0 = .points_RBF_LegPelvis_Unscaled;
-      Points1 = .IM_Trunk_To_Leg_Unscaled(.points_RBF_TrunkPelvis_Unscaled);
-      Mode = VTK_LANDMARK_RIGIDBODY;
-    };
-
-   #endif
-
-   #if BM_LEG_TRUNK_INTERFACE == _MORPH_LEG_TO_TRUNK_
-   ///^ Interface morphing for morphing trunk pelvis into the leg pelvis 
+    #if BM_LEG_TRUNK_INTERFACE == _MORPH_NONE_
+      ///^ Interface morphing was switched off. 
+      ///^ Neither trunk nor leg pelvis are modified by the interface morphing.
    
-   
-    /// An affine transformation to deform leg pelvis into the trunk pelvis 
-    /// It serves a purpose of being a pretransform for the RBF transformation.
-    AnyFunTransform3DLin2 IM_Leg_To_Trunk_Affine =
-    {
-      Points0 = .points_RBF_LegPelvis_Unscaled;
-      Points1 = .points_RBF_TrunkPelvis_Unscaled;
-      Mode = VTK_LANDMARK_AFFINE ;
-    };
+      AnyFunTransform3DIdentity IM_Trunk_To_Leg_Unscaled = {};
 
-    /// An non-linear RBF deformation transformation to deform leg pelvis into the trunk pelvis 
-    /// This will result in the trunk geomtries in coordinate system of the trunk pelvis.
-    AnyFunTransform3DRBF IM_Leg_To_Trunk_RBF =
-    {
-      PreTransforms =
-      {
-        &.IM_Leg_To_Trunk_Affine
+      #if (BM_LEG_MODEL == _LEG_MODEL_TLEM_) | (BM_LEG_MODEL == _LEG_MODEL_TLEM2_)
+        /// A rigid body transformation from the leg to the trunk 
+        /// coordinate systems using the anatomical ref. frame as intermediate system.
+        /// No morphing is applied.
+        AnyFunTransform3D IM_Leg_To_Trunk_Unscaled = {
+
+          AnyFloat Trunk_Pelvis_AnatomicalFrame_s = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(..AnatomicalFrame.pUnscaled_Trunk_Pelvis, 1) ;
+          AnyFloat Trunk_Pelvis_AnatomicalFrame_A = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(..AnatomicalFrame.pUnscaled_Trunk_Pelvis, 1) ;
+          AnyFloat Leg_Pelvis_AnatomicalFrame_s = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(..AnatomicalFrame.pUnscaled_Leg_Pelvis, 1) ;
+          AnyFloat Leg_Pelvis_AnatomicalFrame_A = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(..AnatomicalFrame.pUnscaled_Leg_Pelvis, 1) ;
+
+          AnyFunTransform3DLin tr1 = {
+            ScaleMat = (.Leg_Pelvis_AnatomicalFrame_A)' ;
+            Offset = -.Leg_Pelvis_AnatomicalFrame_s ;
+          };
+
+          AnyFunTransform3DLin tr2 = {
+            ScaleMat = (.Trunk_Pelvis_AnatomicalFrame_A);
+            Offset = .Trunk_Pelvis_AnatomicalFrame_s * .Trunk_Pelvis_AnatomicalFrame_A ;
+          };
+          PreTransforms = {&tr1, &tr2 };
+        };
+      #endif
+    #endif
+
+    #if BM_LEG_TRUNK_INTERFACE == _MORPH_TRUNK_TO_LEG_
+      ///^ Interface morphing for morphing trunk pelvis into the leg pelvis 
+
+      /// An affine transformation to deform trunk pelvis into the leg pelvis 
+      /// It serves a purpose of being a pretransform for the RBF transformation.
+      AnyFunTransform3DLin2 IM_Trunk_To_Leg_Affine = {
+        Points0 = .points_RBF_TrunkPelvis_Unscaled;
+        Points1 = .points_RBF_LegPelvis_Unscaled;
+        Mode = VTK_LANDMARK_AFFINE ;
       };
-      Points0 = .points_RBF_LegPelvis_Unscaled;
-      Points1 = .points_RBF_TrunkPelvis_Unscaled;
 
-      RBFDef.Type = RBF_MultiQuadratic;
-      RBFDef.Param = 0.4;
+      /// An non-linear RBF deformation transformation to deform trunk pelvis into the leg pelvis 
+      /// This will result in the trunk geomtries in coordinate system of the leg pelvis.
+      AnyFunTransform3DRBF IM_Trunk_To_Leg_RBF = {
+        PreTransforms = {&.IM_Trunk_To_Leg_Affine};
+        Points0 = .points_RBF_TrunkPelvis_Unscaled;
+        Points1 = .points_RBF_LegPelvis_Unscaled;
 
-      BoundingBox.ScaleXYZ = 5*{1, 1, 1};
-      BoundingBox.DivisionFactorXYZ = 2*{1, 1, 1};
-      BoundingBoxOnOff = On;
-      BoundingBox.Type = BB_Cartesian ;
-    };
+        RBFDef.Type = RBF_MultiQuadratic;
+        RBFDef.Param = 0.4;
 
-    /// Interface morphing function that morphs leg pelvis into the trunk pelvis 
-    AnyFunTransform3D IM_Leg_To_Trunk_Unscaled =
-    {
-      PreTransforms =
-      {
-        &.IM_Leg_To_Trunk_RBF
+        BoundingBox.ScaleXYZ = 5*{1, 1, 1};
+        BoundingBox.DivisionFactorXYZ = 2*{1, 1, 1};
+        BoundingBoxOnOff = On;
+        BoundingBox.Type = BB_Cartesian ;
       };
-    };
 
-    /// An identity transformation that implies usage of the trunk pelvis 
-    AnyFunTransform3DIdentity IM_Trunk_To_Leg_Unscaled = {};
-   #endif
-#endif
+      /// A rigid body registration transformation from the leg pelvis into the 
+      /// trunk pelvis coordinate system done in a least square manner using landmarks.
+      AnyFunTransform3DLin2 IM_Leg_To_Trunk_RigidBody = {
+        Points0 = .points_RBF_LegPelvis_Unscaled;
+        Points1 = .points_RBF_TrunkPelvis_Unscaled;
+        Mode = VTK_LANDMARK_RIGIDBODY;
+      };
 
+      /// A rigid body registration transformation from the trunk pelvis into the 
+      /// leg pelvis coordinate system done in a least square manner using landmarks.
+      AnyFunTransform3DLin2 IM_Trunk_To_Leg_RigidBody = {
+        Points0 = .points_RBF_TrunkPelvis_Unscaled;
+        Points1 = .points_RBF_LegPelvis_Unscaled;
+        Mode = VTK_LANDMARK_RIGIDBODY;
+      };
+      
+      /// Interface morphing function that morphs trunk pelvis into the leg pelvis 
+      /// and registers back into the trunk coordinate system.
+      AnyFunTransform3D IM_Trunk_To_Leg_Unscaled = {
+        PreTransforms = {&.IM_Trunk_To_Leg_RBF, &.IM_Leg_To_Trunk_RigidBody};
+      };
 
+      /// Interface morphing function that morphs leg pelvis into the trunk pelvis 
+      AnyFunTransform3DLin2 IM_Leg_To_Trunk_Unscaled = {
+        Points0 = .points_RBF_LegPelvis_Unscaled;
+        Points1 = .IM_Trunk_To_Leg_Unscaled(.points_RBF_TrunkPelvis_Unscaled);
+        Mode = VTK_LANDMARK_RIGIDBODY;
+      };
+
+    #endif
+
+    #if BM_LEG_TRUNK_INTERFACE == _MORPH_LEG_TO_TRUNK_
+      ///^ Interface morphing for morphing trunk pelvis into the leg pelvis 
+    
+      /// An affine transformation to deform leg pelvis into the trunk pelvis 
+      /// It serves a purpose of being a pretransform for the RBF transformation.
+      AnyFunTransform3DLin2 IM_Leg_To_Trunk_Affine = {
+        Points0 = .points_RBF_LegPelvis_Unscaled;
+        Points1 = .points_RBF_TrunkPelvis_Unscaled;
+        Mode = VTK_LANDMARK_AFFINE ;
+      };
+
+      /// An non-linear RBF deformation transformation to deform leg pelvis into the trunk pelvis 
+      /// This will result in the trunk geomtries in coordinate system of the trunk pelvis.
+      AnyFunTransform3DRBF IM_Leg_To_Trunk_RBF = {
+        PreTransforms = {&.IM_Leg_To_Trunk_Affine};
+        Points0 = .points_RBF_LegPelvis_Unscaled;
+        Points1 = .points_RBF_TrunkPelvis_Unscaled;
+
+        RBFDef.Type = RBF_MultiQuadratic;
+        RBFDef.Param = 0.4;
+
+        BoundingBox.ScaleXYZ = 5*{1, 1, 1};
+        BoundingBox.DivisionFactorXYZ = 2*{1, 1, 1};
+        BoundingBoxOnOff = On;
+        BoundingBox.Type = BB_Cartesian ;
+      };
+
+      /// Interface morphing function that morphs leg pelvis into the trunk pelvis 
+      AnyFunTransform3D IM_Leg_To_Trunk_Unscaled = {
+        PreTransforms = {&.IM_Leg_To_Trunk_RBF};
+      };
+
+      /// An identity transformation that implies usage of the trunk pelvis 
+      AnyFunTransform3DIdentity IM_Trunk_To_Leg_Unscaled = {};
+    #endif
+  #endif
   /// A combined transformation that prepares trunk pelvis geometry 
   /// prior to applying geometric scaling
-  AnyFunTransform3DIdentity IM_Trunk_To_Leg =
-  {
-    PreTransforms =
-    {
-      &.IM_Trunk_To_Leg_Unscaled,
-      &..GeomScale
-    };
+  AnyFunTransform3DIdentity IM_Trunk_To_Leg = {
+    PreTransforms = {&.IM_Trunk_To_Leg_Unscaled, &..GeomScale};
   };
   
   /// A combined transformation that prepares leg pelvis geometry 
   /// prior to applying geometric scaling
-  AnyFunTransform3DIdentity IM_Leg_To_Trunk =
-  {
-    PreTransforms =
-    {
-      &.IM_Leg_To_Trunk_Unscaled,
-      &..GeomScale
-    };
+  AnyFunTransform3DIdentity IM_Leg_To_Trunk = {
+    PreTransforms = {&.IM_Leg_To_Trunk_Unscaled, &..GeomScale};
   };
 };
