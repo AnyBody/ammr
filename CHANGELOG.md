@@ -21,7 +21,13 @@
 
   This means that the variables will be slightly different even though the force is the same. 
 * Inconsistencies in arm muscles parameters have been resolved. The same underlying parameters are now used for both
-  the simple and the 3-element muscle models. 
+  the simple and the 3-element muscle models.
+
+* MoCap marker protocols: User must now explicitly specify which coordinate system the 
+  markers is placed relative to on a segment. This is done with the `PlaceMarkerAt` argument
+  to the class template. Previoulsly this defaulted to the `AnatomicalFrame` of the segment. 
+  
+
 
 
 **Added:**
