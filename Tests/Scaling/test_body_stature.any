@@ -46,15 +46,16 @@ Main =
     HumanModel.Anthropometrics.BodyMass = BODY_MASS;
   #endif
   
+  AnyFixedRefFrame GlobalRef = {};
   
   AnyFolder Test = {
     // Absolute tolerance on the testmeasure
     AnyFloat abstol = 5e-3;
 
-    // The test measure of the stature
+    /// The test measure of the stature. We have placed the heel at global origin to be
+    ///able to read out the stature from this point
     AnyFloat Stature = (
-      .HumanModel.BodyModel.Trunk.SegmentsThorax.SkullSeg.TopOfHead.r[1] - 
-      .HumanModel.BodyModel.Right.Leg.Seg.Foot.HeelContactNode.r[1]
+      .HumanModel.BodyModel.Trunk.SegmentsThorax.SkullSeg.TopOfHead.r[1]
     );
     
     // Test helper to evaluate the measure between the limits
@@ -76,5 +77,17 @@ Main =
     AnyFolder &testref = Main.Test;
     Gravity={0.0, -9.81, 0.0};
     nStep = 1;
+    Kinematics.SolverType = KinSolOverDeterminate;
+    InitialConditions.SolverType = Kinematics.SolverType;
+
+    /// We place the right heel at global origin - this allows us to read out the stature
+    /// from the top of the head
+    AnyKinEq HeelFloorConstraint = {     
+      AnyKinLinear measure = {
+        AnyRefFrame &origin = Main.GlobalRef;
+        AnyRefFrame &Heel = Main.HumanModel.BodyModel.Left.Leg.Seg.Foot.HeelContactNode;
+      };
+      Reaction.Type = {Off,Off,Off};
+    };
   };
 };
