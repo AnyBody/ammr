@@ -164,6 +164,32 @@ AnySeg PelvisSeg = {
   #else
     AnyFunTransform3D& Scale_Leg_Pelvis = Scale_Trunk_Pelvis;
   #endif
+
+    /// Folder containing the origins for defining each body region
+    /// each region has it's own scalefunction that needs to know where the region starts.
+    /// The joint position in segmental reference frame is interface morphed and 
+    /// transfered into the trunk anatomical frame 
+    AnyFolder ScalingOrigins = {
+      AnyVec3 Pelvis = 0.5 * (
+        ..InterfaceMorphingDef.IM_Trunk_To_Leg_Unscaled(....ModelParameters.Pelvis.Right.ASIS) 
+        + ..InterfaceMorphingDef.IM_Trunk_To_Leg_Unscaled(....ModelParameters.Pelvis.Left.ASIS)
+      );
+
+      AnyVec3 Lumbar = (
+        ..InterfaceMorphingDef.IM_Trunk_To_Leg_AboveSacrum(....ModelParameters.Sacrum.SacrumL5JntNode_pos)
+        - Pelvis
+      );
+
+      AnyVec3 Thorax = (
+        ..InterfaceMorphingDef.IM_Trunk_To_Leg_AboveSacrum(....ModelParameters.Thorax.T12L1JntNode_pos)
+        - Pelvis
+      );
+
+      AnyVec3 Cervical = (
+        ..InterfaceMorphingDef.IM_Trunk_To_Leg_AboveSacrum(....ModelParameters.C7.T1C7JntNode_pos)
+        - Pelvis
+      );
+    };
   };
 
   AnyRefNode& ScalingNode = AnatomicalFrameTrunk;
@@ -175,10 +201,12 @@ AnySeg PelvisSeg = {
 
   // (Trunk to Leg Interface Morphing) -> Use the mass property of pelvis from the Leg
   #if BM_LEG_TRUNK_INTERFACE == _MORPH_TRUNK_TO_LEG_ & ((BM_LEG_MODEL == _LEG_MODEL_TLEM_) | (BM_LEG_MODEL == _LEG_MODEL_TLEM2_)) 
+    AnyVar MassStandard = ...LEG_MODEL_PARAM_DIRECTION.Leg.ModelParameters.Pelvis.MassStandard;
     Jii = ...LEG_MODEL_PARAM_DIRECTION.Leg.ModelParameters.Pelvis.Jii;
     Jij = ...LEG_MODEL_PARAM_DIRECTION.Leg.ModelParameters.Pelvis.Jij;
     sCoM = AnatomicalFrame.Scale_Leg_Pelvis(...LEG_MODEL_PARAM_DIRECTION.Leg.ModelParameters.Pelvis.sCoM);
   #else //(Leg to Trunk Interface Morphing) or (No Interface Morphing) -> Use the mass property of pelvis from the Trunk
+    AnyVar MassStandard = ..StandardParameters.Pelvis.Mass;
     Jii = {0.0221,0.01,0.0221}; //Taken from SimpleSpineModel
     Jij = {0, 0, 0};
     sCoM = AnatomicalFrame.Scale_Trunk_Pelvis(StdPar.sCoM_pos);
