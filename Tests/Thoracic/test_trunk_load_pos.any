@@ -3,6 +3,8 @@
 //    {'BM_SCALING': '_SCALING_NONE_'},
 //    {'BM_SCALING': '_SCALING_UNIFORM_'},
 //    {'BM_SCALING': '_SCALING_XYZ_'},
+//    {'BM_SCALING': '_SCALING_LENGTHMASS_'},
+//    {'BM_SCALING': '_SCALING_LENGTHMASSFAT_'},
 //  ],
 //  [
 //    {'BM_LEG_TRUNK_INTERFACE': '_MORPH_NONE_'},
@@ -15,14 +17,18 @@
 #include "../tools.any"
 
 #ifndef TEST_NAME
-  #define BM_SCALING _SCALING_NONE_
-  #define BM_LEG_TRUNK_INTERFACE _MORPH_LEG_TO_TRUNK_
+  #define BM_SCALING _SCALING_XYZ_
+//  #define BM_LEG_TRUNK_INTERFACE _MORPH_NONE_
+//  #define BM_LEG_TRUNK_INTERFACE _MORPH_LEG_TO_TRUNK_
+  #define BM_LEG_TRUNK_INTERFACE _MORPH_TRUNK_TO_LEG_
   #define TEST_NAME "TrunkLoadPosTest"
 #endif
 
 #define BM_ARM_RIGHT OFF
 #define BM_ARM_LEFT OFF
 #define BM_LEG_MODEL _LEG_MODEL_TLEM2_
+#define BM_LEG_MUSCLES_BOTH OFF
+#define BM_TRUNK_MUSCLES OFF
 #define BM_MANNEQUIN_DRIVER_DEFAULT ON
 
 Main = {
@@ -39,7 +45,6 @@ Main = {
       )
     );
 
-    #if (BM_SCALING == _SCALING_NONE_) & (BM_LEG_TRUNK_INTERFACE != _MORPH_TRUNK_TO_LEG_)
       // This is a test of all trunk nodes sRel vs. r at load time
       AnyInt test_node_load_positions = expect(
         orfun(
@@ -47,7 +52,6 @@ Main = {
           ltfun(NodeVars.pos_diff, abs_tol)
         )
       );
-    #endif
     
     /// Test to ensure Axes0 and Axes is equal upon load
     AnyInt test_seg_load_axes = expect(
@@ -65,7 +69,6 @@ Main = {
       )
     );
 
-    #if (BM_SCALING == _SCALING_NONE_) & (BM_LEG_TRUNK_INTERFACE != _MORPH_TRUNK_TO_LEG_)
       // This test ensures that all thorax node sRels are equal to their r pos vector after
       // kinematics are solved
       AnyInt test_node_initial_positions = expect(
@@ -74,7 +77,7 @@ Main = {
           ltfun(NodeVars.pos_diff, abs_tol)
         )
       );
-    #endif
+    
     /// Test that Axes0 and Axes are equal after kinematics are solved
     AnyInt test_seg_initial_axes = expect(
       orfun(
@@ -126,10 +129,9 @@ Main = {
               ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.Left.HipJoint", "*", "AnyRefNode"),
               );
             
-      
-      /// The skull is filtered out since it has another reference system than the remaining trunk so sRel will not be equal to r
-      /// The buckle is removed since it is kinematically solved and thereby will move during the kinematics.
-      /// The ij sub nodes are removed since they are the interface nodes for the arm reference system
+      // The skull is filtered out since it has another reference system than the remaining trunk so sRel will not be equal to r
+      // The buckle is removed since it is kinematically solved and thereby will move during the kinematics.
+      // The ij sub nodes are removed since they are the interface nodes for the arm reference system
       AnyObjectPtrArray nodes = set_difference(all_nodes, skull_nodes, buckle_nodes, ij_nodes, iji_nodes, cyl_nodes, HipSubNodes);
       
       AnyObjectPtrArray node_srel = ObjGetMember(nodes, "sRel");
@@ -137,10 +139,11 @@ Main = {
 
       AnyObjectPtrArray node_pos = ObjGetMember(nodes, "r");
       AnyFloat node_pos_vals = Obj2Num(node_pos) + (0 * Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.r[0]);
-      
-      AnyFloat pos_diff = (max(abs(node_srel_vals - node_pos_vals)));
-      AnyFloat pos_diffSort = ObjSort(pos_diff, &pos_diff);
+      AnyFloat _diff = node_srel_vals - node_pos_vals;
+      AnyFloat pos_diff = max(abs(_diff));
+      AnyFloat pos_diff_sorted = ObjSort(pos_diff);
       AnyObjectPtrArray sorted_by_pos_diff = ObjSort(nodes, &pos_diff);
+      AnyString paired_diff = transpose({strval(pos_diff), Obj2Str(&nodes)});
     };
   };
   
@@ -153,12 +156,10 @@ Main = {
     AnyFolder& BodyModel = Main.HumanModel.BodyModel;
     AnyFolder& DefaultDrivers = Main.HumanModel.DefaultMannequinDrivers;
     
-    
     // Correct the load time position of the Pelvis so we can drive the AnatomicalFrameTrunk to zero, without the model moving
     Main.HumanModel.Mannequin.Posture.PelvisPosX = Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.AnatomicalFrameTrunk.sRel[0];
     Main.HumanModel.Mannequin.Posture.PelvisPosY = Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.AnatomicalFrameTrunk.sRel[1];
     Main.HumanModel.Mannequin.Posture.PelvisPosZ = Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.AnatomicalFrameTrunk.sRel[2];
-    
     
     nStep = 1;
   };
