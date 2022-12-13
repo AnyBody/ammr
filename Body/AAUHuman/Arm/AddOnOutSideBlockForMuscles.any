@@ -99,99 +99,54 @@ ThoraxSegRef ={
   
   AnyRefNode SternocleidomastoidNode = {sRel = .Scale({-0.025, 0.002, 0.018}*.M)*.Mirror; };
   
-  // Ellipsoid which are used for wrapping of serratus anterior.
-  AnyRefNode EllipsoidOrigin = { 
-    sRel = .Scale({0, -0.2960, 0.07780})*.Mirror;  // Helm 1992 subject k2.
-    
-    //This is the standard values of the elipsoid before any scaling
-    AnyVec3 Radius =  {0.1530, 0.365,0.13 }; 
-    
-    //Creating three "points" using the original sizes of the elipsoid
-    //standard scaling are used on these points
-    AnyVec3 P1 = sRel+.Scale({Radius[0],0,0})*.Mirror; 
-    AnyVec3 P2 = sRel+.Scale({0,Radius[1],0})*.Mirror; 
-    AnyVec3 P3 = sRel+.Scale({0,0,Radius[2]})*.Mirror;    
-    
-    AnySurfEllipsoid EllipsoidSurf = { 
-      //The length of the three axis are calculated using the scaled points
-      AnyVar R1=((.sRel[0]-.P1[0])^2+(.sRel[1]-.P1[1])^2+(.sRel[2]-.P1[2])^2)^0.5;
-      AnyVar R2=((.sRel[0]-.P2[0])^2+(.sRel[1]-.P2[1])^2+(.sRel[2]-.P2[2])^2)^0.5;
-      AnyVar R3=((.sRel[0]-.P3[0])^2+(.sRel[1]-.P3[1])^2+(.sRel[2]-.P3[2])^2)^0.5;
-      Radius = {R1,R2,R3 }; 
-      
-    };
-  };
-  
   // Ellipsoid which are used for wrapping of pectoralis.
-  AnyRefNode EllipsoidPectoralisOrigin = { 
-    
-    sRel = .Scale({0.00, -0.12, 0.07})*.Mirror;  // Helm 1992 subject k2.
+  AnySurfEllipsoid PectoralisWrappingSurface = { 
+    sRel = .Scale(...Trunk.SegmentsThorax.ThoraxSeg.StdPar.Thorax.ij_EllipsoidPectoralisOrigin_pos)*.Mirror;  // Helm 1992 subject k2.
     
     //This is the standard values of the elipsoid before any scaling
-    AnyVec3 Radius = {0.15, 0.145, 0.10}; 
+    AnyVec3 RadiusUnscaled = {0.15, 0.145, 0.10}; 
     
-    //Creating three "points" using the original sizes of the elipsoid
-    //standard scaling are used on these points
-    AnyVec3 P1 = sRel+.Scale({Radius[0],0,0})*.Mirror; 
-    AnyVec3 P2 = sRel+.Scale({0,Radius[1],0})*.Mirror; 
-    AnyVec3 P3 = sRel+.Scale({0,0,Radius[2]})*.Mirror;    
-    
-    AnySurfEllipsoid EllipsoidSurf = { 
-      //The length of the three axis are calculated using the scaled points
-      AnyVar R1=((.sRel[0]-.P1[0])^2+(.sRel[1]-.P1[1])^2+(.sRel[2]-.P1[2])^2)^0.5;
-      AnyVar R2=((.sRel[0]-.P2[0])^2+(.sRel[1]-.P2[1])^2+(.sRel[2]-.P2[2])^2)^0.5;
-      AnyVar R3=((.sRel[0]-.P3[0])^2+(.sRel[1]-.P3[1])^2+(.sRel[2]-.P3[2])^2)^0.5;
-      Radius = {R1,R2,R3 }; 
-      //AnyDrawParamSurf drw={  RGB={0,1,0};  };
-    }; 
+    /// Creating three "points" representing the ellipsoid main axes in the ellipsoid origin frame.
+    /// Scaling is done in the parent reference frame
+    AnyMat33 P = .Scale((diag(RadiusUnscaled) * .Mirror) + repmat(1, 3, ...Trunk.SegmentsThorax.ThoraxSeg.StdPar.Thorax.ij_EllipsoidPectoralisOrigin_pos))' - repmat(1, 3, sRel)'; 
+    Radius = vnorm(P);
   };
   
   
-  
-  
   // Ellipsoid which are used for wrapping of serratus anterior.
-  AnyRefNode EllipsoidSerratusAnteriorOrigin = { 
+  AnySurfEllipsoid SerratusAnteriorWrappingSurface = { 
+    sRel = .Scale(...Trunk.SegmentsThorax.ThoraxSeg.StdPar.Thorax.ij_EllipsoidSerratusAnteriorOrigin_pos)*.Mirror; 
+    ARel = RotMat(sRel, P1, P3);
+
     //These three points are sued for controlling the elipsoid
     AnyVec3 P1 = .Scale({-0.165000, -0.296000, 0.037000})*.Mirror; 
     AnyVec3 P2 = .Scale({0.000000, -0.278635, -0.061481})*.Mirror; 
     AnyVec3 P3 = .Scale({0.000000, 0.038835+0.025,0.096040})*.Mirror; 
     
-    sRel = .Scale({0.0, -0.2960, 0.037})*.Mirror; 
-    
-    ARel = RotMat(sRel,P1,P3);
-    
-    AnySurfEllipsoid EllipsoidSurf = { 
-      AnyVar R1=((.sRel[0]-.P1[0])^2+(.sRel[1]-.P1[1])^2+(.sRel[2]-.P1[2])^2)^0.5;
-      AnyVar R2=((.sRel[0]-.P2[0])^2+(.sRel[1]-.P2[1])^2+(.sRel[2]-.P2[2])^2)^0.5;
-      AnyVar R3=((.sRel[0]-.P3[0])^2+(.sRel[1]-.P3[1])^2+(.sRel[2]-.P3[2])^2)^0.5;
-      Radius={R1,R3,R2};
-      //AnyDrawParamSurf drw={RGB={1,0,0};};
-    };
-    
+    AnyVar R1=((sRel[0]-P1[0])^2+(sRel[1]-P1[1])^2+(sRel[2]-P1[2])^2)^0.5;
+    AnyVar R2=((sRel[0]-P2[0])^2+(sRel[1]-P2[1])^2+(sRel[2]-P2[2])^2)^0.5;
+    AnyVar R3=((sRel[0]-P3[0])^2+(sRel[1]-P3[1])^2+(sRel[2]-P3[2])^2)^0.5;
+    Radius = {R1,R3,R2};
   };
   
   
   // Ellipsoid which are used for wrapping of Latisimus dorsi
-  AnyRefNode EllipsoidLatissimusOrigin = { 
-    AnyVar A=0.05;
-    AnyVec3 P1 = .Scale({0.160000,-0.200000+A, 0.050000})*.Mirror;  
-    AnyVec3 P2 = .Scale({0.0150000,-0.050000+A, 0.050000})*.Mirror;  
-    AnyVec3 P3 = .Scale({0.0150000,-0.200000+A,0.1550000})*.Mirror;  
-    
+  AnySurfEllipsoid LatissimusWrappingSurface = { 
     ARel = RotMat(sRel,P1,P3);
-    sRel = .Scale({0.015, -0.2+A, 0.05})*.Mirror;  
+    sRel = .Scale(
+      ...Trunk.SegmentsThorax.ThoraxSeg.StdPar.Thorax.ij_EllipsoidLatissimusOrigin_pos
+    )*.Mirror;  
+
+    AnyVec3 P1 = .Scale({0.16, -0.15, 0.05})*.Mirror;  
+    AnyVec3 P2 = .Scale({0.015, 0.0, 0.05})*.Mirror;  
+    AnyVec3 P3 = .Scale({0.015, -0.15,0.155})*.Mirror;  
     
-    AnySurfEllipsoid EllipsoidSurf = { 
-      //The length of the three axis are calculated using the scaled points
-      AnyVar R1=((.sRel[0]-.P1[0])^2+(.sRel[1]-.P1[1])^2+(.sRel[2]-.P1[2])^2)^0.5;
-      AnyVar R2=((.sRel[0]-.P2[0])^2+(.sRel[1]-.P2[1])^2+(.sRel[2]-.P2[2])^2)^0.5;
-      AnyVar R3=((.sRel[0]-.P3[0])^2+(.sRel[1]-.P3[1])^2+(.sRel[2]-.P3[2])^2)^0.5;
-      Radius = {R1,R3,R2 }; 
-      //AnyDrawParamSurf drw={RGB={0,0,1};};
-    }; 
-  };
-  
-  
+    //The length of the three axis are calculated using the scaled points
+    AnyVar R1=((sRel[0]-P1[0])^2+(sRel[1]-P1[1])^2+(sRel[2]-P1[2])^2)^0.5;
+    AnyVar R2=((sRel[0]-P2[0])^2+(sRel[1]-P2[1])^2+(sRel[2]-P2[2])^2)^0.5;
+    AnyVar R3=((sRel[0]-P3[0])^2+(sRel[1]-P3[1])^2+(sRel[2]-P3[2])^2)^0.5;
+    Radius = {R1, R3, R2}; 
+  };  
 };
 
 
