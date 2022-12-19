@@ -106,8 +106,8 @@ class AMMR_BMStatement(std.Target):
         title["first"] = False
         title["objtype"] = node["objtype"]
         self.add_name(title)
-        title['classes'].append("ammr-bm_statement-title")
-        # title['classes'].append("sd-d-none")
+        title["classes"].append("ammr-bm_statement-title")
+        # title["classes"].append("sd-d-none")
 
         title += sphinx.addnodes.desc_name(var_name, var_name)
         node.append(title)
@@ -207,8 +207,8 @@ class AMMR_BMConstant(std.Target):
         title["first"] = False
         title["objtype"] = node["objtype"]
         self.add_name(title)
-        title['classes'].append("ammr-bm_constant-title")
-        # title['classes'].append("sd-d-none")
+        title["classes"].append("ammr-bm_constant-title")
+        # title["classes"].append("sd-d-none")
 
 
         title += sphinx.addnodes.desc_name(var_name, var_name)

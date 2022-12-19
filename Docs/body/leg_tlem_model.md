@@ -29,12 +29,18 @@ finished by the AnyBody Technology.
 The current version has been updated several times and is still being
 maintained in collaboration with The AnyBody Research Group at Aalborg
 University (DK) (www.anybody.aau.dk) and University of Twente (NL) under
-the TLEMsafe project ([www.tlemsafe.eu](http://www.tlemsafe.eu)).
+the TLEMsafe project ([www.tlemsafe.eu](https://tlemsafe.eu/)).
 
 ## Example Configuration
 
 Short example of how to configure the model with the TLEM model, Hill type
 muscle model and only one leg:
+
+:::{seealso}
+:class: margin
+See {doc}`Leg configuration parameters <../bm_config/leg>` for a
+full list of configuration parmaeters.
+:::
 
 ```AnyScriptDoc
 #define BM_LEG_MODEL _LEG_MODEL_TLEM1_
@@ -43,21 +49,14 @@ muscle model and only one leg:
 #define BM_LEG_MUSCLE _MUSCLES_3E_HILL_
 ```
 
-```{rst-class} float-right
-```
 
-:::{seealso}
-See {doc}`Leg configuration parameters <../bm_config/leg>` for a
-full list of configuration parmaeters or {doc}`configuration section <../bm_config/index>`
-for more information on BM parameters.
-:::
 
 ## Resources
 
 More details can be found online:
 
 1. Dendorfer and Toerholm 2008: Report containing moment arm validation for [ESA:
-   report](https://paperpile.com/app/p/28bfe52d-29e1-0c5f-bdfb-68a0597117ff)
+   report](https://paperpile.com/shared/WHZjrt)
 2. Horsman 2007: Klein Horsman, M. D., Koopman, H. F. J. M., van der Helm, F. C. T.,
    Prosé, L. P., and Veeger, H. E. J., 2007, “Morphological Muscle and Joint Parameters for
    Musculoskeletal Modelling of the Lower Extremity,” Clin. Biomech. , 22(2), pp. 239–247.

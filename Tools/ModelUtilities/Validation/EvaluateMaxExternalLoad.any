@@ -1,0 +1,128 @@
+
+#class_template EvaluateMaxLoad(
+  __CLASS__=AnyOperationSequence,
+  STUDY,
+  SET_MIN_MAX_STRICT=0,
+  ){
+
+  #var AnyObjectPtr LoadPtr;
+  
+  
+  STUDY = {
+     AnyOutputFun MaxMusActFun_##__NAME__ = {
+        Val = .MaxMuscleActivity;
+     };
+     
+     #if SET_MIN_MAX_STRICT == 1
+     InverseDynamics.Criterion.Type = MR_MinMaxStrict;
+     #endif
+     
+     
+  };
+  
+  
+  
+  AnyFolder Calculations = {
+    
+      AnyVar EnsureMinMaxStrict = assert(eqfun(STUDY.InverseDynamics.Criterion.Type, MR_MinMaxStrict), "Study must use MR_MinMaxStrict criterion to caclucate the correct maximum loading");
+      
+      #var AnyVar InitialLoad = DesignVar(1);
+
+      #var AnyVar Load1 = InitialLoad;
+      #var AnyVar Load2 = 2*InitialLoad;
+      AnyVector MaxMuscleActivityTemp = take(arrcat(STUDY.MaxMusActFun_##__NAME__(), zeros(STUDY.nStep)), iarr(0,STUDY.nStep-1));
+      AnyVector MaxMuscleActivity1 = DesignVar(MaxMuscleActivityTemp);
+      AnyVector MaxMuscleActivity2 = DesignVar(MaxMuscleActivityTemp);
+      AnyVector MaxMuscleActivityDiff = (MaxMuscleActivity2 - MaxMuscleActivity1);
+      AnyVector a = (MaxMuscleActivityDiff)/(Load2 -Load1) + 0.01*not(MaxMuscleActivityDiff);
+      AnyVector MaxLoad = 1/a - div(MaxMuscleActivity1, a) + Load1;
+  };
+ 
+
+  AnyFolder Operations = {
+     AnyOperation& RunStudy = STUDY.InverseDynamics;
+     AnyOperationMacro UpdateValues = {MacroStr = {"classoperation Main " + strquote("Update Values")}; };
+     AnyOperationSetValue SetLoad1 = {
+       Source = {&..Calculations.Load1}; 
+       Target = {..LoadPtr};
+     };
+     AnyOperationSetValue SetLoad2 = {
+       Source = {&..Calculations.Load2};
+       Target = {..LoadPtr};
+     };
+     AnyOperationSetValue StoreMaxActivity1 = { 
+       Source = {&..Calculations.MaxMuscleActivityTemp};
+       Target = {&..Calculations.MaxMuscleActivity1};
+     };
+     AnyOperationSetValue StoreMaxActivity2 = { 
+       Source = {&..Calculations.MaxMuscleActivityTemp};
+       Target = {&..Calculations.MaxMuscleActivity2};
+     };
+     AnyOperationSetValue CopyInitialLoadValue = { 
+       Source = {..LoadPtr};
+       Target = {&..Calculations.InitialLoad};
+     };
+     AnyOperationSetValue StoreFinalMaxLoad = { 
+       Source = {&..Calculations.MaxLoad};
+       Target = {&..MaxLoad};
+     };
+     
+     AnyOperationSequence CheckLoadPointerEvaluationMoment = {
+        AnyInt testTrigger = DesignVar(0);
+        AnyVar testRandomValue = 3.142443356676544;
+        AnyMessage LoadPointerError = {
+          TriggerRuntime = andfun(.testTrigger, neqfun(Obj2Num(...LoadPtr), .testRandomValue) ); 
+          Type = MSG_ErrorFatal;
+          Message = strformat("\n"+
+              "------------------------------------------------------------------------------------------------------\n"+
+              "                              EVALUATE MAX LOADING ERROR                                              \n"+
+              "    The loading variable: " + strquote(CompleteNameOf(...LoadPtr)) + " is not editable/designvar.     \n"+
+              "    It must be editable/designvar for this tool to work.                                              \n"+
+              "                                                                                                      \n"+
+              "    Try to wrap variable in a `DesignVar()` function to force it to be editable.                      \n"+
+              "------------------------------------------------------------------------------------------------------\n");
+        };
+        AnyOperationSetValue SetTestValue = {
+            AnyInt OnVal = 1;
+            Source = {&OnVal, &.testRandomValue};
+            Target = {&.testTrigger, ...LoadPtr};
+        };
+        AnyOperation& evaltest = .UpdateValues;
+        AnyOperationSetValue ResetTestValue = {
+            AnyInt OffVal = 0;
+            Source = {&OffVal, &...Calculations.InitialLoad};
+            Target = {&.testTrigger, ...LoadPtr};
+        };
+     };
+     
+     AnyOperationMacro PrintMaxLoad = {MacroStr = {"classoperation " + CompleteNameOf(&..MaxLoad) +" "+ strquote("Dump")}; };
+  };
+  AnyOperationSequence PreAnalysis = {
+    AnyOperationDummy NoOp = {}; 
+  };
+  
+  AnyOperationSequence Evaluate = {
+    AnyOperation& CopyInitialLoadValue = .Operations.CopyInitialLoadValue;
+    AnyOperation& CheckLoadPointer = .Operations.CheckLoadPointerEvaluationMoment;
+    AnyOperation& Update0 = .Operations.UpdateValues;
+    AnyOperation& SetLoad1 = .Operations.SetLoad1;
+    AnyOperation& Update1 = .Operations.UpdateValues;
+    AnyOperation& RunWithLoad1 = .Operations.RunStudy;
+    AnyOperation& Update2 = .Operations.UpdateValues;
+    AnyOperation& StoreMaxActivity1 = .Operations.StoreMaxActivity1;
+    AnyOperation& SetLoad2 = .Operations.SetLoad2;
+    AnyOperation& Update3 = .Operations.UpdateValues;
+    AnyOperation& RunWithLoad2 = .Operations.RunStudy;
+    AnyOperation& Update4 = .Operations.UpdateValues;
+    AnyOperation& StoreMaxActivity2 = .Operations.StoreMaxActivity2;
+    AnyOperation& Update5 = .Operations.UpdateValues;
+    AnyOperation& StoreFinalMaxLoad = .Operations.StoreFinalMaxLoad;
+    AnyOperation& PrintFinalResult =  .Operations.PrintMaxLoad;
+  };
+  
+   AnyVector MaxLoad = Calculations.MaxLoad;
+
+};
+
+
+
