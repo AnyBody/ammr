@@ -36,7 +36,10 @@ AnyFolder SegmentsThorax = {
     
     r0=..SegmentsLumbar.L1Seg.T12L1JntNode.sRel*..SegmentsLumbar.L1Seg.Axes0'+..SegmentsLumbar.L1Seg.r0-T12L1JntNode.sRel*Axes0';
     
-    AnyFunTransform3D &Scale =..ScalingTrunk.ThoraxSeg.ScaleFunction;
+    // This file includes the trunk specifc scaling function
+    // and anatomical reference system
+    AnyFunTransform3D &GeomScale = ..Scaling.GeometricalScaling.ThoraxSeg.ScaleFunction;
+    #include "TrunkScalingAndAnatomicalFrame.any"
     AnyVar MassS = ..Scaling.MassScaling.Thorax.MassScale;
         
     AnyVar MassStandard = ..StandardParameters.Trunk.Mass;
@@ -48,19 +51,15 @@ AnyFolder SegmentsThorax = {
     AnyVar Izz = Ixx;
     AnyVar Iyy = 0.5*Mass*Radius^2;
     
-    AnyMat33 JMatRot = AnatomicalFrame.ARel*{{Ixx,0,0},{0,Iyy,0},{0,0,Izz}}*AnatomicalFrame.ARel';
+    AnyMat33 JMatRot = AnatomicalFrameTrunk.ARel*{{Ixx,0,0},{0,Iyy,0},{0,0,Izz}}*AnatomicalFrameTrunk.ARel';
     Jii = {JMatRot[0][0], JMatRot[1][1], JMatRot[2][2]};
     Jij = {JMatRot[1][0], JMatRot[2][1], JMatRot[2][0]};
 
     
     sCoM = Scale(StdPar.Thorax.sCoM_pos);
     JaboutCoMOnOff = On;
-    
-    AnyRefNode AnatomicalFrame = {};
-    AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards compatability with AMMR 2.4 MoCap Marker protocols
-    AnyRefNode& ScalingNode = AnatomicalFrame;
-    AnyFunTransform3D& GeomScale = Scale;
-    
+        
+    AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards compatability with AMMR 2.4 MoCap Marker protocols    
     //Incisura jungularis right and left
     //the nodes are used for attachment of ShoulderArm block
     AnyRefNode ij = {
@@ -71,7 +70,7 @@ AnyFolder SegmentsThorax = {
       AnyVec3 sRelStd = .StdPar.Thorax.ij_pos;  
       sRel = .Scale(sRelStd);
       // The rotation is adjusted to give same values as before the pelvic tilt adjust in AMMR 2.5.
-      ARel = .AnatomicalFrame.ARel * RotMat(6.491948543235*pi/180,z) * {{0, 0, -1}, {0, 1, 0}, {1, 0, 0}};
+      ARel = .AnatomicalFrameTrunk.ARel * RotMat(6.491948543235*pi/180,z) * {{0, 0, -1}, {0, 1, 0}, {1, 0, 0}};
     };
     
     AnyRefNode iji = {
@@ -83,7 +82,7 @@ AnyFolder SegmentsThorax = {
       AnyVec3 sRelStd = .StdPar.Thorax.iji_pos;    
       sRel = .Scale(sRelStd);      
       // The rotation is adjusted to give same values as before the pelvic tilt adjust in AMMR 2.5.
-      ARel = .AnatomicalFrame.ARel*RotMat(6.491948543235*pi/180,z) * {{0, 0, -1}, {0, 1, 0}, {1, 0, 0}};
+      ARel = .AnatomicalFrameTrunk.ARel*RotMat(6.491948543235*pi/180,z) * {{0, 0, -1}, {0, 1, 0}, {1, 0, 0}};
     };
         
     AnyRefNode T1C7JntNode = {sRel = .Scale(.StdPar.Thorax.T1C7JntNode_pos);};    

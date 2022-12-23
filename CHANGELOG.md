@@ -11,24 +11,9 @@
 * Fixed wrapping problem with the posterior deltoid muscle in the two-parameter shoulder calibration.
 * Fix an bug in LegPressMachine example which caused the model view to zoom to infinity.
 
-**Changed:**
-
-* The glenoid reaction forces are now expressed in the coordinate system of the
-  glenoid cup instead of the general scapula coordinate system.
-  The three force variables `GlenoHumeral_DistractionForce`,
-  `GlenoHumeral_InferoSuperiorForce`, `GlenoHumeral_AnteroPosteriorForce` now
-  represents the three directions given by the glenoid cup. 
-
-  This means that the variables will be slightly different even though the force is the same. 
-* Inconsistencies in arm muscles parameters have been resolved. The same underlying parameters are now used for both
-  the simple and the 3-element muscle models.
-
-* MoCap marker protocols: User must now explicitly specify which coordinate system the 
-  markers is placed relative to on a segment. This is done with the `PlaceMarkerAt` argument
-  to the class template. Previoulsly this defaulted to the `AnatomicalFrame` of the segment. 
-  
-
-
+* The segments in the trunk model (lumbar, thoracic and cervical) have changed their
+  scaling functions (`Scale`). They now account for the fact that the pelvis segment can
+  morph into the leg pelvis coordinate system using the `BM_LEG_TRUNK_INTERFACE` setting.
 
 **Added:**
 
@@ -51,7 +36,30 @@
   have zero hip-flexion in they neutral postion. This is because they define the pelvis 
   coordinate system with respect to a plane define by the ASIS-PSIS points.   
 
+* The segments in the trunk model (lumbar, thoracic and cervical) now explicitly define a
+  `ScalingNode` node with indicate the coordinate system the segment scales in.
+
 **Changed:**
+
+* The scaling laws defined by the `BM_SCALING` setting have changed. Now the scaling
+  laws calculate the offset between different scaling regions and apply these at
+  load time. The scaling remains the same but users can now adopt the method to create
+  scaling functions that account for offsets between the regions that apply different
+  scaling.
+
+* The glenoid reaction forces are now expressed in the coordinate system of the
+  glenoid cup instead of the general scapula coordinate system.
+  The three force variables `GlenoHumeral_DistractionForce`,
+  `GlenoHumeral_InferoSuperiorForce`, `GlenoHumeral_AnteroPosteriorForce` now
+  represents the three directions given by the glenoid cup.
+
+  This means that the variables will be slightly different even though the force is the same.
+* Inconsistencies in arm muscles parameters have been resolved. The same underlying parameters are now used for both
+  the simple and the 3-element muscle models.
+
+* MoCap marker protocols: User must now explicitly specify which coordinate system the
+  markers is placed relative to on a segment. This is done with the `PlaceMarkerAt` argument
+  to the class template. Previoulsly this defaulted to the `AnatomicalFrame` of the segment
 
 * A new `AnatomicalFrameTrunk` reference frame has been added to the pelvis segment. The frame is
   consistent with the anatomical frames in the rest of the trunk model. Also, all joint angles in relative to the pelvis segment now uses this frame. This implies that the neutral position of the model is identical to the neutral position of the trunk dataset. 
