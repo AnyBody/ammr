@@ -11,25 +11,6 @@
 * Fixed wrapping problem with the posterior deltoid muscle in the two-parameter shoulder calibration.
 * Fix an bug in LegPressMachine example which caused the model view to zoom to infinity.
 
-**Changed:**
-
-* The glenoid reaction forces are now expressed in the coordinate system of the
-  glenoid cup instead of the general scapula coordinate system.
-  The three force variables `GlenoHumeral_DistractionForce`,
-  `GlenoHumeral_InferoSuperiorForce`, `GlenoHumeral_AnteroPosteriorForce` now
-  represents the three directions given by the glenoid cup. 
-
-  This means that the variables will be slightly different even though the force is the same. 
-* Inconsistencies in arm muscles parameters have been resolved. The same underlying parameters are now used for both
-  the simple and the 3-element muscle models.
-
-* MoCap marker protocols: User must now explicitly specify which coordinate system the 
-  markers is placed relative to on a segment. This is done with the `PlaceMarkerAt` argument
-  to the class template. Previoulsly this defaulted to the `AnatomicalFrame` of the segment. 
-  
-
-
-
 **Added:**
 
 * Added a few utility helper class templates (`Template_OperationSaveValues`/`Template_OperationLoadValues`/`Template_OperationUpdateValues`) 
@@ -52,6 +33,20 @@
   coordinate system with respect to a plane define by the ASIS-PSIS points.   
 
 **Changed:**
+
+* The glenoid reaction forces are now expressed in the coordinate system of the
+  glenoid cup instead of the general scapula coordinate system.
+  The three force variables `GlenoHumeral_DistractionForce`,
+  `GlenoHumeral_InferoSuperiorForce`, `GlenoHumeral_AnteroPosteriorForce` now
+  represents the three directions given by the glenoid cup.
+
+  This means that the variables will be slightly different even though the force is the same.
+* Inconsistencies in arm muscles parameters have been resolved. The same underlying parameters are now used for both
+  the simple and the 3-element muscle models.
+
+* MoCap marker protocols: User must now explicitly specify which coordinate system the
+  markers is placed relative to on a segment. This is done with the `PlaceMarkerAt` argument
+  to the class template. Previoulsly this defaulted to the `AnatomicalFrame` of the segment
 
 * A new `AnatomicalFrameTrunk` reference frame has been added to the pelvis segment. The frame is
   consistent with the anatomical frames in the rest of the trunk model. Also, all joint angles in relative to the pelvis segment now uses this frame. This implies that the neutral position of the model is identical to the neutral position of the trunk dataset. 
