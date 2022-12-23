@@ -11,6 +11,10 @@
 * Fixed wrapping problem with the posterior deltoid muscle in the two-parameter shoulder calibration.
 * Fix an bug in LegPressMachine example which caused the model view to zoom to infinity.
 
+* The segments in the trunk model (lumbar, thoracic and cervical) have changed their
+  scaling functions (`Scale`). They now account for the fact that the pelvis segment can
+  morph into the leg pelvis coordinate system using the `BM_LEG_TRUNK_INTERFACE` setting.
+
 **Added:**
 
 * Added a few utility helper class templates (`Template_OperationSaveValues`/`Template_OperationLoadValues`/`Template_OperationUpdateValues`) 
@@ -32,7 +36,16 @@
   have zero hip-flexion in they neutral postion. This is because they define the pelvis 
   coordinate system with respect to a plane define by the ASIS-PSIS points.   
 
+* The segments in the trunk model (lumbar, thoracic and cervical) now explicitly define a
+  `ScalingNode` node with indicate the coordinate system the segment scales in.
+
 **Changed:**
+
+* The scaling laws defined by the `BM_SCALING` setting have changed. Now the scaling
+  laws calculate the offset between different scaling regions and apply these at
+  load time. The scaling remains the same but users can now adopt the method to create
+  scaling functions that account for offsets between the regions that apply different
+  scaling.
 
 * The glenoid reaction forces are now expressed in the coordinate system of the
   glenoid cup instead of the general scapula coordinate system.
