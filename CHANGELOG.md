@@ -24,7 +24,7 @@
      FileName= "MyFile.anyset";
   };
   ```
-* 
+* A more helpfull error message is now printed when MoCap markers in the marker protocol are missing the C3D file.
 
 **Changed:**
 * The load-time position of the box in the {ref}`BVH_BoxLift model <sphx_glr_auto_examples_Mocap_plot_BVH_BoxLift.py>` is now 
