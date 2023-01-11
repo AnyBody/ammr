@@ -5,6 +5,16 @@
 
 ## AMMR beta
 
+  :::{Warning} 
+  Due to the change in pelvic tilt in AMMR 2.5, the PSIS markers in your MoCap models
+  will have shifted. This is due to the fact that markers now oriented along the scaling directions. 
+  
+  If you migrate the models from AMMR 2.4, be sure to
+  check the posterior markers on the pelvis. The Y component usually needs to
+  be adjusted a few cm upward to achvive the same marker position.
+  :::
+
+
 **Fixed:**
 * The `Main.ModelSetup.CreateVideo` operation was missing in some of the
   MoCap examples. This has been fixed. If you have this problem, update the `CreateVideo.any` file in your application.
@@ -40,6 +50,11 @@
   `ScalingNode` node with indicate the coordinate system the segment scales in.
 
 **Changed:**
+
+* The orientation of the MoCap markers in the Pelvis segment have changed because the 
+  adjustments to pelvic tilt. This means that MoCap markers with 'hard' coded positions on 
+  the pelvis may also have moved. This most notable for makers for the PSIS markers which are furthest from origin between the ASIS. These will usually move 2 cm lower if models are migrated from 
+  AMMR 2.4 models, without adjusts to their positions.
 
 * The scaling laws defined by the `BM_SCALING` setting have changed. Now the scaling
   laws calculate the offset between different scaling regions and apply these at
