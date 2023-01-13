@@ -48,6 +48,7 @@
 
 * The segments in the trunk model (lumbar, thoracic and cervical) now explicitly define a
   `ScalingNode` node with indicate the coordinate system the segment scales in.
+* A more helpfull error message is now printed when MoCap markers in the marker protocol are missing the C3D file.
 
 **Changed:**
 
