@@ -180,6 +180,104 @@
    };
 };
 
+
+
+
+/*
+Create a sorted string array of {Name, value} pairs. 
+
+Arrays in AMS must all have only one type (no dictionary objects). So this functions
+creates a string represenation of the values.
+
+E.g.:
+
+ {"Main.HumanModel.BodyModel.Right.Leg.Mus.VastusIntermedius6.Activity", "0.10421"},
+ {"Main.HumanModel.BodyModel.Right.Leg.Mus.VastusIntermedius5.Activity", "0.03122"},
+ {"Main.HumanModel.BodyModel.Right.Leg.Mus.VastusIntermedius4.Activity", "0.01232"}, 
+
+ This template is useful for attaching names to values which are searched out using functions
+ such as ObjectSearch or ObjectSearch recursive. 
+ 
+ Arguments:
+ 
+   NAME_OF_FUN = CompleteNameOf
+     The funciton use to generate the names in the map. 
+     Default is the complete name of the objects. 
+   ORDER = "Desending"
+     The order which the values are sorted. Default is desending.
+     Anything else will give Assending order
+    FORMAT="%.4f"
+      The format specifier used when generating a string represenation of the values
+      default is 4 digits.
+    STUDY_T = .t
+      A link to a t (time) value. In either a study or mechanical object. This is a necesssary 
+      hack to make sure the values are evaluated at every time step. 
+      This has a default value which allows the class_template to be used in studies or
+      in mechanical objects without modifing the default value.
+      
+ Members:
+
+   ValuePtrs: AnyObjectPtr (Required)
+     - An array of pointers to AnyValues objects which will be used to generate 
+       the <Name, Value> map
+   NamePtr : AnyObjectPtr (Optional)
+     - An array of pointers to AnyObjects which will be used when generating the names 
+       in the <name, values> map. This default to the `ValuePtrs` array, but can be different 
+       if needed. 
+       
+    
+  Output member:
+  
+    Output: AnyString
+       A string array of sorted <name, value> pairs 
+  
+       
+       
+ Examples: 
+    
+  NameValueMap RightLegActivity() = {
+     ValuePtrs = ObjSearchRecursive("Main.HumanModel.BodyModel.Right.Leg.Mus", "Activity", "AnyVar"); 
+  };      
+  
+  
+   NameValueMap AllMuscleActivity(
+   NAMEOF_FUN=NameOf
+   ) = {
+     ValuePtrs = ObjSearchRecursive(NamePtrs, "Activity", "AnyVar", 1); 
+     NamePtrs = ObjSearchRecursive("Main", "*", "AnyMuscle"); 
+   };
+   
+  
+*/
+
+
+
+#class_template NameValueMap(
+   NAMEOF_FUN = CompleteNameOf,
+   ORDER = "Desending",
+   FORMAT="%.4f",
+   STUDY_T = .t,
+){
+  #var AnyObjectPtr ValuePtrs;
+  #var AnyObjectPtr NamePtrs = ValuePtrs;
+   
+    AnyFloat Values = Obj2Num(ValuePtrs)+ 0*STUDY_T;
+    AnyString Names = NAMEOF_FUN(NamePtrs);
+
+    #if ORDER == "Desending"
+    AnyString Output = flip(transpose( {ObjSort(Names, &Values), strval(ObjSort(Values), FORMAT) }),1);
+    #else
+    AnyString Output = transpose( {ObjSort(Names, &Values), strval(ObjSort(Values), FORMAT) });
+    #endif
+  
+};
+
+
+
+
+
+
+
 /*
 Template to easily create a folder with default 
 values which can be overriden from other places in 
