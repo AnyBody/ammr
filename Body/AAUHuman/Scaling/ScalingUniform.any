@@ -265,39 +265,41 @@
     AnyFolder Pelvis = {
       AnyVar GeomScale = (...Anthropometrics.SegmentDimensions.PelvisWidth / ..StandardParameters.Pelvis.Width);
       AnyFunTransform3DLin ScaleFunction = {
-        ScaleMat ={{.GeomScale,0,0},{0,.GeomScale,0},{0,0,.GeomScale}};
+        ScaleMat = diag({.GeomScale, .GeomScale, .GeomScale});
+        AnyMatrix ScaleMatInverse = diag({1/.GeomScale, 1/.GeomScale, 1/.GeomScale});
         Offset = {0,0,0};
       };
     };
-    
     AnyFolder Thorax = {
       AnyVar GeomScale = (...Anthropometrics.SegmentDimensions.TrunkHeight / ..StandardParameters.Trunk.Height);
+
+      AnyFloat OriginUnscaled ??= warn(
+        0, "To ensure continuity in the scaling law the thorax origin must be specified"
+      );
+
       AnyFunTransform3DLin ScaleFunction = {
-        ScaleMat ={{.GeomScale,0,0},{0,.GeomScale,0},{0,0,.GeomScale}};
-        Offset = {0,0,0};
+        ScaleMat = diag({.GeomScale, .GeomScale, .GeomScale});
+        AnyMatrix ScaleMatInverse = diag({1/.GeomScale, 1/.GeomScale, 1/.GeomScale});
+        Offset = (
+          ..Pelvis.ScaleFunction(.OriginUnscaled) - (.OriginUnscaled * ScaleMat')
+        ) * ScaleMatInverse;
       };
     };
     
     AnyFolder Head = {
       AnyVar GeomScale = (...Anthropometrics.SegmentDimensions.HeadHeight / ..StandardParameters.Head.Height);
+
       AnyFunTransform3DLin ScaleFunction = {
-        ScaleMat ={{.GeomScale,0,0},{0,.GeomScale,0},{0,0,.GeomScale}};
+        ScaleMat = diag({.GeomScale, .GeomScale, .GeomScale});
+        AnyMatrix ScaleMatInverse = diag({1/.GeomScale, 1/.GeomScale, 1/.GeomScale});
         Offset = {0,0,0};
       };
     };
     
     
-    AnyFolder Cervical = {
-      AnyFunTransform3DLin &ScaleFunction = .Head.ScaleFunction;
-    };
+    AnyFolder &Cervical = Thorax;
     
-    AnyFolder Lumbar = {
-      AnyVar GeomScale = (...Anthropometrics.SegmentDimensions.TrunkHeight / ..StandardParameters.Trunk.Height);
-      AnyFunTransform3DLin ScaleFunction = {
-        ScaleMat ={{.GeomScale,0,0},{0,.GeomScale,0},{0,0,.GeomScale}};
-        Offset = {0,0,0};
-      };
-    };
+    AnyFolder &Lumbar = Thorax;
 
     AnyFolder &PelvisSeg = Pelvis;    
     AnyFolder &SkullSeg = Head;

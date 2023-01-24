@@ -1,0 +1,208 @@
+//define = (
+//  [
+//    {'BM_SCALING': '_SCALING_NONE_'},
+//    {'BM_SCALING': '_SCALING_STANDARD_'},
+//    {'BM_SCALING': '_SCALING_UNIFORM_'},
+//    {'BM_SCALING': '_SCALING_UNIFORM_EXTMEASUREMENTS_'},
+//    {'BM_SCALING': '_SCALING_XYZ_'},
+//    {'BM_SCALING': '_SCALING_LENGTHMASS_'},
+//    {'BM_SCALING': '_SCALING_LENGTHMASSFAT_'},
+//    {'BM_SCALING': '_SCALING_LENGTHMASS_EXTMEASUREMENTS_'},
+//    {'BM_SCALING': '_SCALING_LENGTHMASSFAT_EXTMEASUREMENTS_'},
+//  ],
+//  [
+//    {'BM_LEG_TRUNK_INTERFACE': '_MORPH_NONE_'},
+//    {'BM_LEG_TRUNK_INTERFACE': '_MORPH_TRUNK_TO_LEG_'},
+//    {'BM_LEG_TRUNK_INTERFACE': '_MORPH_LEG_TO_TRUNK_'},
+//  ] 
+//)
+
+#include "../libdef.any"
+#include "../tools.any"
+
+#ifndef TEST_NAME
+  #define BM_SCALING _SCALING_XYZ_
+//  #define BM_LEG_TRUNK_INTERFACE _MORPH_NONE_
+//  #define BM_LEG_TRUNK_INTERFACE _MORPH_LEG_TO_TRUNK_
+  #define BM_LEG_TRUNK_INTERFACE _MORPH_TRUNK_TO_LEG_
+  #define TEST_NAME "TrunkLoadPosTest"
+#endif
+
+#define BM_ARM_RIGHT OFF
+#define BM_ARM_LEFT OFF
+#define BM_LEG_MODEL _LEG_MODEL_TLEM2_
+#define BM_LEG_MUSCLES_BOTH OFF
+#define BM_TRUNK_MUSCLES OFF
+#define BM_MANNEQUIN_DRIVER_DEFAULT ON
+
+Main = {
+  #include "<ANYBODY_PATH_BODY>/HumanModel.any"
+    
+  AnyFolder Tests = {
+    AnyFloatVar abs_tol = 1e-15;
+    
+    /// This test is merely a test that AMS sets r to r0 upon load
+    AnyInt test_seg_load_positions = expect(
+      orfun(
+        not(Main.Operations.TestLoadTrigger),
+        eqfun(SegmentVars.pos_diff, 0)
+      )
+    );
+
+      // This is a test of all trunk nodes sRel vs. r at load time
+      AnyInt test_node_load_positions = expect(
+        orfun(
+          not(Main.Operations.TestLoadTrigger),
+          ltfun(NodeVars.pos_diff, abs_tol)
+        )
+      );
+    
+    /// Test to ensure Axes0 and Axes is equal upon load
+    AnyInt test_seg_load_axes = expect(
+      orfun(
+        not(Main.Operations.TestLoadTrigger),
+        ltfun(SegmentVars.axes_diff, abs_tol)
+      )
+    );
+    
+    /// This test ensures that all thorax segments r0 is equal to r after solving the kinematics
+    AnyInt test_seg_initial_positions = expect(
+      orfun(
+        not(Main.Operations.TestInitPosTrigger), 
+        ltfun(SegmentVars.pos_diff, abs_tol)
+      )
+    );
+
+      // This test ensures that all thorax node sRels are equal to their r pos vector after
+      // kinematics are solved
+      AnyInt test_node_initial_positions = expect(
+        orfun(
+          not(Main.Operations.TestInitPosTrigger),
+          ltfun(NodeVars.pos_diff, abs_tol)
+        )
+      );
+    
+    /// Test that Axes0 and Axes are equal after kinematics are solved
+    AnyInt test_seg_initial_axes = expect(
+      orfun(
+        not(Main.Operations.TestInitPosTrigger), 
+        ltfun(SegmentVars.axes_diff, abs_tol)
+      )
+    );
+    
+    AnyFolder SegmentVars = {
+      AnyObjectPtrArray all_segments = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk", "*", "AnySeg");
+      AnyObjectPtrArray buckle = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Buckle", "*", "AnySeg");
+      
+      /// Array of all relevant segments to compare positions for
+      /// The buckle segments are removed since their positions are solved during the kinematic analysis
+      AnyObjectPtrArray segments = set_difference(all_segments,buckle);
+      
+      AnyObjectPtrArray seg_r0 = ObjGetMember(segments, "r0");
+      AnyFloat seg_r0_vals = Obj2Num(seg_r0) + (0 * Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.r[0]);
+      
+      AnyObjectPtrArray seg_axes0 = ObjGetMember(segments, "Axes0");
+      AnyFloat seg_axes0_vals = Obj2Num(seg_axes0) + (0 * Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.r[0]);
+      
+      AnyObjectPtrArray seg_pos = ObjGetMember(segments, "r"); 
+      AnyFloat seg_pos_vals = Obj2Num(seg_pos) + (0 * Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.r[0]);
+      
+      AnyObjectPtrArray seg_axes = ObjGetMember(segments, "Axes"); 
+      AnyFloat seg_axes_vals = Obj2Num(seg_axes) + (0 * Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.r[0]);
+      
+      AnyFloat pos_diff = max(abs(seg_r0_vals - seg_pos_vals)); 
+      AnyFloat pos_diffSort = ObjSort(pos_diff, &pos_diff);
+      AnyFloat axes_diff = ObjSort(max(abs(seg_axes0_vals - seg_axes_vals))); 
+
+      AnyObjectPtrArray sorted_by_pos_diff = ObjSort(segments, &pos_diff);
+      AnyObjectPtrArray sorted_by_axes_diff = ObjSort(segments, &axes_diff);
+    };
+
+    AnyFolder NodeVars = {
+      AnyObjectPtrArray all_nodes = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk", "*", "AnyRefNode");
+      AnyObjectPtrArray skull_nodes = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.SkullSeg", "*", "AnyRefNode");
+      AnyObjectPtrArray buckle_nodes = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Buckle", "*", "AnyRefNode");      
+      AnyObjectPtrArray ij_nodes = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.SegmentsThorax.ThoraxSeg.ij", "*", "AnyRefNode");             
+      AnyObjectPtrArray iji_nodes = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.SegmentsThorax.ThoraxSeg.iji", "*", "AnyRefNode");             
+      AnyObjectPtrArray cyl_nodes = arrcat(
+              ObjSearch("Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.*.Muscles.GlueteusMaximusWrapSurfaces.*.cyl"),
+              ObjSearch("Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.*.Muscles.*.cyl"),
+              );
+      AnyObjectPtrArray HipSubNodes = arrcat(
+              ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.Right.HipJoint", "*", "AnyRefNode"),          
+              ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.Left.HipJoint", "*", "AnyRefNode"),
+              );
+            
+      // The skull is filtered out since it has another reference system than the remaining trunk so sRel will not be equal to r
+      // The buckle is removed since it is kinematically solved and thereby will move during the kinematics.
+      // The ij sub nodes are removed since they are the interface nodes for the arm reference system
+      AnyObjectPtrArray nodes = set_difference(all_nodes, skull_nodes, buckle_nodes, ij_nodes, iji_nodes, cyl_nodes, HipSubNodes);
+      
+      AnyObjectPtrArray node_srel = ObjGetMember(nodes, "sRel");
+      AnyFloat node_srel_vals = Obj2Num(node_srel) + (0 * Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.r[0]);
+
+      AnyObjectPtrArray node_pos = ObjGetMember(nodes, "r");
+      AnyFloat node_pos_vals = Obj2Num(node_pos) + (0 * Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.r[0]);
+      AnyFloat _diff = node_srel_vals - node_pos_vals;
+      AnyFloat pos_diff = max(abs(_diff));
+      AnyFloat pos_diff_sorted = ObjSort(pos_diff);
+      AnyObjectPtrArray sorted_by_pos_diff = ObjSort(nodes, &pos_diff);
+      AnyString paired_diff = transpose({strval(pos_diff), Obj2Str(&nodes)});
+    };
+  };
+  
+  AnyOperationSequence RunTest = {
+    AnyOperation& test_load_pos = Main.Operations.TestLoadPos;
+    AnyOperation& test_init_pos = Main.Operations.TestInitPos;
+  };
+
+  AnyKinStudy Study = {
+    AnyFolder& BodyModel = Main.HumanModel.BodyModel;
+    AnyFolder& DefaultDrivers = Main.HumanModel.DefaultMannequinDrivers;
+    
+    // Correct the load time position of the Pelvis so we can drive the AnatomicalFrameTrunk to zero, without the model moving
+    Main.HumanModel.Mannequin.Posture.PelvisPosX = Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.AnatomicalFrameTrunk.sRel[0];
+    Main.HumanModel.Mannequin.Posture.PelvisPosY = Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.AnatomicalFrameTrunk.sRel[1];
+    Main.HumanModel.Mannequin.Posture.PelvisPosZ = Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.AnatomicalFrameTrunk.sRel[2];
+    
+    nStep = 1;
+  };
+  
+  
+  AnyFolder Operations = {
+    AnyOperationMacro UpdateValues = {
+      MacroStr = {"classoperation Main " + strquote("Update Values")};
+    };
+    
+    AnyOperationSetValue SetLoadTestTrigger = {
+      AnyInt dummy = 1;
+      Source = {&dummy};
+      Target = {&.TestLoadTrigger};
+    };
+    AnyOperationSetValue ResetLoadTestTrigger = {
+      AnyInt dummy = 0;
+      Source = {&dummy};
+      Target = {&.TestLoadTrigger};
+    };
+    AnyOperationSetValue SetInitPosTestTrigger = {
+      AnyInt dummy = 1;
+      Source = {&dummy};
+      Target = {&.TestInitPosTrigger};
+    };
+    
+    AnyOperationSequence TestLoadPos = {
+      AnyOperation& set_trigger = .SetLoadTestTrigger;
+      AnyOperation& reevaluate_test = .UpdateValues;
+      AnyOperation& reset_trigger = .ResetLoadTestTrigger;
+    };
+    
+    AnyOperationSequence TestInitPos = {
+      AnyOperation& init_cond = Main.Study.InitialConditions;
+      AnyOperation& set_trigger = .SetInitPosTestTrigger;
+      AnyOperation& reevaluate_test = .UpdateValues;
+    };
+    
+    AnyInt TestLoadTrigger = DesignVar(0);
+    AnyInt TestInitPosTrigger = DesignVar(0);
+  };
+};

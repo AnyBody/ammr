@@ -5,24 +5,25 @@
 
 ## AMMR beta
 
+  :::{Warning} 
+  Due to the change in pelvic tilt in AMMR 2.5, the PSIS markers in your MoCap models
+  will have shifted. This is due to the fact that markers now oriented along the scaling directions. 
+  
+  If you migrate the models from AMMR 2.4, be sure to
+  check the posterior markers on the pelvis. The Y component usually needs to
+  be adjusted a few cm upward to achvive the same marker position.
+  :::
+
+
 **Fixed:**
 * The `Main.ModelSetup.CreateVideo` operation was missing in some of the
-  MoCap examples. This has been fixed. If you have this problem, update the `CreateVideo.any` file in your application. 
-* Fixed wrapping problem with the posterior deltoid muscle in the two-parameter shoulder calibration. 
+  MoCap examples. This has been fixed. If you have this problem, update the `CreateVideo.any` file in your application.
+* Fixed wrapping problem with the posterior deltoid muscle in the two-parameter shoulder calibration.
+* Fix an bug in LegPressMachine example which caused the model view to zoom to infinity.
 
-**Changed:**
-
-* The glenoid reaction forces are now expressed in the coordinate system of the
-  glenoid cup instead of the general scapula coordinate system.
-  The three force variables `GlenoHumeral_DistractionForce`,
-  `GlenoHumeral_InferoSuperiorForce`, `GlenoHumeral_AnteroPosteriorForce` now
-  represents the three directions given by the glenoid cup. 
-
-  This means that the variables will be slightly different even though the force is the same. 
-* Inconsistencies in arm muscles parameters have been resolved. The same underlying parameters are now used for both
-  the simple and the 3-element muscle models. 
-
-
+* The segments in the trunk model (lumbar, thoracic and cervical) have changed their
+  scaling functions (`Scale`). They now account for the fact that the pelvis segment can
+  morph into the leg pelvis coordinate system using the `BM_LEG_TRUNK_INTERFACE` setting.
 
 **Added:**
 
@@ -38,8 +39,60 @@
   ```
 * Added two small helper code macro `NON_UNIQUE_VALUES()`/`NON_UNIQUE_POINTERS()` to 
   find duplicate (i.e. non-unique) entries in arrays of values and pointers.
+* A new set of hip joint measures (`Interface.Right.HipISB`) have been added which  
+  measures the hip joint strictly according to the definition by the 
+  International Society of Biomechanics (ISB).  
+  These measures are almost identical to the existing angles except that they do not
+  have zero hip-flexion in they neutral postion. This is because they define the pelvis 
+  coordinate system with respect to a plane define by the ASIS-PSIS points.   
+
+* The segments in the trunk model (lumbar, thoracic and cervical) now explicitly define a
+  `ScalingNode` node with indicate the coordinate system the segment scales in.
+* A more helpfull error message is now printed when MoCap markers in the marker protocol are missing the C3D file.
 
 **Changed:**
+
+* The orientation of the MoCap markers in the Pelvis segment have changed because the 
+  adjustments to pelvic tilt. This means that MoCap markers with 'hard' coded positions on 
+  the pelvis may also have moved. This most notable for makers for the PSIS markers which are furthest from origin between the ASIS. These will usually move 2 cm lower if models are migrated from 
+  AMMR 2.4 models, without adjusts to their positions.
+
+* The scaling laws defined by the `BM_SCALING` setting have changed. Now the scaling
+  laws calculate the offset between different scaling regions and apply these at
+  load time. The scaling remains the same but users can now adopt the method to create
+  scaling functions that account for offsets between the regions that apply different
+  scaling.
+
+* The glenoid reaction forces are now expressed in the coordinate system of the
+  glenoid cup instead of the general scapula coordinate system.
+  The three force variables `GlenoHumeral_DistractionForce`,
+  `GlenoHumeral_InferoSuperiorForce`, `GlenoHumeral_AnteroPosteriorForce` now
+  represents the three directions given by the glenoid cup.
+
+  This means that the variables will be slightly different even though the force is the same.
+* Inconsistencies in arm muscles parameters have been resolved. The same underlying parameters are now used for both
+  the simple and the 3-element muscle models.
+
+* MoCap marker protocols: User must now explicitly specify which coordinate system the
+  markers is placed relative to on a segment. This is done with the `PlaceMarkerAt` argument
+  to the class template. Previoulsly this defaulted to the `AnatomicalFrame` of the segment
+
+* A new `AnatomicalFrameTrunk` reference frame has been added to the pelvis segment. The frame is
+  consistent with the anatomical frames in the rest of the trunk model. Also, all joint angles in relative to the pelvis segment now uses this frame. This implies that the neutral position of the model is identical to the neutral position of the trunk dataset. 
+
+  The result is more pelvic tilt in the neutral position, which seem to better reflect reported 
+  values in the litterature. 
+
+  The existing `PelvisSeg.AnatomicalFrame` defined ASIS/PSIS bony landmarks remains unchanged.
+
+* The trend validation in the ["Wilke Spine Pressure validation models"](example_wilkespinepressure) have been updated to 
+  reflect the changes to thoracic model and pelvis frames. Although the absolute pressures in the spine have changed, the 
+  trends (relative changes in spine pressure between models) remains the same. 
+
+* The implemenation of the muscle parameter in the arm model have been refactored. All parematers are now given as
+  muscle volume, optimal fiberlenth and tendon slacklength. The physiological cross sectional area (PCSA),
+  was previously hard coded parameter, but is now only an intermediate value used for calculating muscle strength from the muscle volume and optimal fiber length.
+
 * The implementation of the muscle parameter in the arm model have been refactored. All parameters are now given as
   muscle volume, optimal fiber-length and tendon slacklength. The physiological cross-sectional area (PCSA),
   was previously a hard coded parameter, but is now only an intermediate value used for calculating muscle strength from the muscle volume and optimal fiber length.
@@ -52,7 +105,6 @@
 
   };
   ```
-
 
 * The load-time position of the box in the {ref}`BVH_BoxLift model <sphx_glr_auto_examples_Mocap_plot_BVH_BoxLift.py>` is now 
   calculated using the position of the hands. Also, `Main.ModelSetup.EnvironmentParameters.GravityDirection` defined in `box.any` file

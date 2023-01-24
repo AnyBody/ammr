@@ -19,7 +19,7 @@
 
 
 
-#class_template CreateMarkerDriver (MarkerName = _NOT_DEFINED_,
+#class_template CreateMarkerDriver (MarkerName=_NOT_DEFINED_,
                                     MarkerPlacement,
                                     WeightX=1, WeightY=1, WeightZ=1,
                                     OptX=0, OptY=0, OptZ=0,
@@ -30,7 +30,7 @@
                                     PARAMETER_OPT_STUDY = Main.Studies.ParameterIdentification,
                                     C3D_OBJECT = Main.ModelSetup.C3DFileData,
                                     BODY_MODEL_FOLDER = Main.HumanModel.BodyModel,
-                                    PlaceMarkerAt = AnatomicalFrame,
+                                    PlaceMarkerAt = MoCapMarkerFrameAMMR24,
                                     USE_BVH_INPUT = 0,
                                     BVH_OBJECT = Main.ModelSetup.BVHFileData,
                                     MarkerPlacementBVH = REQUIRED_FOR_BVH_INPUT,
@@ -65,6 +65,21 @@
 #endif
 
 
+#if  USE_BVH_INPUT == 0
+
+AnyMessage TestMarkerExist ={
+#if MarkerName == _NOT_DEFINED_
+  TriggerPreProcess = not(sum(eqfun(Main.ModelSetup.C3DFileData.PointLabels, #__NAME__)));
+  AnyString MarkerLabel = #__NAME__;
+  #else
+  TriggerPreProcess = not(sum(eqfun(Main.ModelSetup.C3DFileData.PointLabels, #MarkerName)));
+  AnyString MarkerLabel = #MarkerName;
+#endif
+  Type=MSG_Error;
+  Message = "Marker: " + strquote(MarkerLabel) + " does not exist in the c3d file";
+};     
+
+#endif
                                       
                                       
   #var AnyVar ConstMarkerWeightX = WeightX;  
@@ -144,12 +159,11 @@
 
   AnyFolder &MarkerPlacementSegment = BODY_MODEL_FOLDER.MarkerPlacement;
   MarkerPlacementSegment = {
-    
-    AnyRefNode __NAME__  ={
+    AnyRefNode __NAME__##_Marker  ={
       #if ScaleMarkerPosOnOff == 1
-        AnyVec3 MarkerOffset = (.GeomScale(..sRelOpt) + ..sRelOptEdit )*.AnatomicalFrame.ARel' ;
+        AnyVec3 MarkerOffset = (.GeomScale(..sRelOpt) + ..sRelOptEdit )*.ScalingNode.ARel' ;
         sRel = .PlaceMarkerAt.sRel + MarkerOffset;
-        ARel= .AnatomicalFrame.ARel;
+        ARel= .ScalingNode.ARel;
       #else
         sRel = .PlaceMarkerAt.sRel + (..sRelOpt + ..sRelOptEdit )*.PlaceMarkerAt.ARel';
         ARel= .PlaceMarkerAt.ARel;
@@ -219,7 +233,7 @@
         Linear.Ref=0;
         
         
-        AnyRefFrame &MarkerRef = BODY_MODEL_FOLDER.MarkerPlacement.__NAME__;
+        AnyRefFrame &MarkerRef = BODY_MODEL_FOLDER.MarkerPlacement.__NAME__##_Marker;
         
         #if USE_BVH_INPUT
           AnyFolder &MarkerDataRef = BVH_OBJECT.Markers.__NAME__;
@@ -320,4 +334,5 @@
 
 
 #endif
+
 
