@@ -20,6 +20,8 @@
   MoCap examples. This has been fixed. If you have this problem, update the `CreateVideo.any` file in your application.
 * Fixed wrapping problem with the posterior deltoid muscle in the two-parameter shoulder calibration.
 * Fix an bug in LegPressMachine example which caused the model view to zoom to infinity.
+* The robustness with muscle recruitment of the abdominal muscles (`buckle support`) was futher tweaked by increasing the 
+  the strength of the recruited reaction on the balance of the buckle segment.  
 
 * The segments in the trunk model (lumbar, thoracic and cervical) have changed their
   scaling functions (`Scale`). They now account for the fact that the pelvis segment can
@@ -190,6 +192,7 @@ AMMR version 2.4.2 contains only a few minor changes and fixes compared to  vers
   This bug was visible when using `#define BM_LEG_TRUNK_INTERFACE _MORPH_LEG_TO_TRUNK_`, (i.e. when using the trunk pelvis morphology with the TLEM2 model), which is not the default. 
 * Fixed missing calibration for the new latissimus dorsi elements introduced in AMMR 2.4. This fix also ensures that all
   latissimus dorsi elements are calibrated in the same arm posture.
+  
 
 **Changed:**
 
