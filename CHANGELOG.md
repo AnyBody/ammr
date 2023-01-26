@@ -18,7 +18,7 @@
 
   to make it easier to do common class operations without manually having to create the operations with macros.
 
-  To create a operation which loads a file, do: 
+  To create an operation which loads a file, do: 
 
   ```{code-block} AnyScriptDoc
   Template_OperationLoadValues LoadAnySetFile = {
