@@ -7,18 +7,15 @@
 ## AMMR 2.4.3 (2023-01-27)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.7572879.svg)](https://doi.org/10.5281/zenodo.7572879)
 
-**Fixed:**
-* The `Main.ModelSetup.CreateVideo` operation was missing in some of the
-  MoCap examples. This has been fixed. If you have this problem update the `CreateVideo.any` file in your application. 
-* Fixed wrapping problem with the posterior deltoid muscle in the 2 parameter shoulder calibration. 
-* Fix an bug in LegPressMachine example which caused the model view to zoom to infinity. 
-* The robustness with muscle recruitment of the abdominal muscles (`buckle support`) was futher tweaked by increasing the 
-  the strength of the recruited reaction on the balance of the buckle segment.  
-
 
 **Added:**
 
-* Added a few utility helper class templates (`Template_OperationSaveValues`/`Template_OperationLoadValues`/`Template_OperationUpdateValues`) 
+* Added a few utility helper class templates
+  
+  - `Template_OperationSaveValues`
+  - `Template_OperationLoadValues` 
+  - `Template_OperationUpdateValues`
+
   to make it easier to do common class operations without manually having to create the operations with macros.
 
   To create a operation which loads a file do: 
@@ -32,14 +29,23 @@
 
 **Changed:**
 * The load-time position of the box in the {ref}`BVH_BoxLift model <sphx_glr_auto_examples_Mocap_plot_BVH_BoxLift.py>` is now 
-  calculated using the position of the hands. Also, `Main.ModelSetup.EnvironmentParameters.GravityDirection` defined in `box.any` file
-  is now calculated automatically from `Main.ModelSetup.LabSpecificData.Gravity` defined in `LabSpecificData.any` file. These changes should 
-  make the model more robust when dealing with different bvh files.
+  calculated using the position of the hands. Also, `Main.ModelSetup.EnvironmentParameters.GravityDirection` defined in the `box.any` file
+  is now calculated automatically from `Main.ModelSetup.LabSpecificData.Gravity` defined in the `LabSpecificData.any` file. These changes should 
+  make the model more robust when dealing with different BVH files.
 * It is no longer necessasry to supply the `MarkerName` argument in the CreateMarkerDriver template
   MoCap models. The argument can still be used if the marker name and the data entry in the c3d file 
   are different.
 * The references to muscle models in the joint muscles of the detailed hand have been renamed to avoid future naming conflicts.
 * The "via-points" for the Psoas Major muscle has been adjusted to ensure that the muscles can better act the role of stabilizing muscle for the lumbar spine.
+
+**Fixed:**
+* The `Main.ModelSetup.CreateVideo` operation was missing in some of the
+  MoCap examples. This has been fixed. If you have this problem please update the `CreateVideo.any` file in your application.
+* Fixed a wrapping problem with the posterior deltoid muscle in the two-parameter shoulder calibration. 
+* Fix an bug in LegPressMachine example which caused the model view to zoom to infinity. 
+* The robustness of muscle recruitment with the abdominal muscles (`buckle support`) was futher tweaked by increasing the 
+  the strength of the recruited reactions on the balance of the buckle segment.  
+
 
 ## AMMR 2.4.2 (2022-07-08)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.6809697.svg)](https://doi.org/10.5281/zenodo.6809697)
