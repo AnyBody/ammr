@@ -18,14 +18,14 @@
 
   to make it easier to do common class operations without manually having to create the operations with macros.
 
-  To create a operation which loads a file do: 
+  To create a operation which loads a file, do: 
 
   ```{code-block} AnyScriptDoc
   Template_OperationLoadValues LoadAnySetFile = {
      FileName= "MyFile.anyset";
   };
   ```
-* A more helpfull error message is now printed when MoCap markers in the marker protocol are missing the C3D file.
+* A more helpful error message is now printed when MoCap markers in the marker protocol are missing the C3D file.
 
 **Changed:**
 * The load-time position of the box in the {ref}`BVH_BoxLift model <sphx_glr_auto_examples_Mocap_plot_BVH_BoxLift.py>` is now 
@@ -36,13 +36,13 @@
   MoCap models. The argument can still be used if the marker name and the data entry in the c3d file 
   are different.
 * The references to muscle models in the joint muscles of the detailed hand have been renamed to avoid future naming conflicts.
-* The "via-points" for the Psoas Major muscle has been adjusted to ensure that the muscles can better act the role of stabilizing muscle for the lumbar spine.
+* The "via-points" for the Psoas Major muscle have been adjusted to ensure that the muscles can better act the role of stabilizing muscle for the lumbar spine.
 
 **Fixed:**
 * The `Main.ModelSetup.CreateVideo` operation was missing in some of the
   MoCap examples. This has been fixed. If you have this problem please update the `CreateVideo.any` file in your application.
 * Fixed a wrapping problem with the posterior deltoid muscle in the two-parameter shoulder calibration. 
-* Fix an bug in LegPressMachine example which caused the model view to zoom to infinity. 
+* Fixed a bug in the LegPressMachine example that caused the model view to zoom to infinity. 
 * The robustness of muscle recruitment with the abdominal muscles (`buckle support`) was futher tweaked by increasing the 
   the strength of the recruited reactions on the balance of the buckle segment.  
 
