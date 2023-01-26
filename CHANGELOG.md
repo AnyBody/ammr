@@ -3,7 +3,9 @@
 % To minimize the risk of merge conflicts insert the your changes at a
 % random empty or make a new entry a random place in the bullet lists.
 
-## AMMR beta
+(ammr-2.4-changelog)=
+## AMMR 2.4.3 (2023-01-27)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.7572879.svg)](https://doi.org/10.5281/zenodo.7572879)
 
 **Fixed:**
 * The `Main.ModelSetup.CreateVideo` operation was missing in some of the
@@ -39,7 +41,6 @@
 * The references to muscle models in the joint muscles of the detailed hand have been renamed to avoid future naming conflicts.
 * The "via-points" for the Psoas Major muscle has been adjusted to ensure that the muscles can better act the role of stabilizing muscle for the lumbar spine.
 
-(ammr-2.4-changelog)=
 ## AMMR 2.4.2 (2022-07-08)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.6809697.svg)](https://doi.org/10.5281/zenodo.6809697)
 
