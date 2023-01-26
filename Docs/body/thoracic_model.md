@@ -29,7 +29,7 @@ kinematic joints. All vertebra are linked with rhythm drivers to allow easy use.
 
 
 ```{raw} html
-<video width="95%" style="display:block; margin: 0 auto;" controls autoplay loop>
+<video width="100%" style="display:block; margin: 0 auto;" controls autoplay loop>
     <source src="../_static/rhythms.mp4" type="video/mp4">
 Your browser does not support the video tag.
 </video>
