@@ -48,22 +48,19 @@ for standingref in (mocap_path / "ADL_Gait_[beta]\Subjects").glob("**/*_ST/Main.
 
 macros2 = [
     [
-        mc.Load(mocap_path / "Plug-in-gait_MultiTrial_StandingRef\Subjects\S1\S1_FlywheelSquatb\Main.any"),
+        mc.Load(mocap_path / "Plug-in-gait_MultiTrial_StandingRef\Subjects\S1\S1_FlywheelSquat\Main.any"),
         mc.OperationRun("Main.RunAnalysis.LoadParameters"),
         mc.OperationRun("Main.RunAnalysis.MarkerTracking"),
     ],
 ]
 
-for adlmain in (mocap_path / "ADL_Gait_[beta]\Subjects").glob("**/*_[0-9][0-9]/Main.any"):
-    macros2.append([
-        mc.Load(adlmain),
-        mc.OperationRun("Main.RunAnalysis.LoadParameters"),
-        mc.OperationRun("Main.RunAnalysis.MarkerTracking"),
-    ])
 
-app1 = anypytools.AnyPyProcess()
+abc_path = r"C:\Program Files\AnyBody Technology\AnyBody.7.4\AnyBodyCon.exe"
+
+app1 = anypytools.AnyPyProcess(anybodycon_path=abc_path, num_processes=10)
+
 app1.start_macro(macros1)
 
-app2 = anypytools.AnyPyProcess()
+app2 = anypytools.AnyPyProcess(anybodycon_path=abc_path)
 app2.start_macro(macros2)
 
