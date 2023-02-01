@@ -48,7 +48,7 @@
 
 
 ## AMMR 2.4.2 (2022-07-08)
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.6809697.svg)](https://doi.org/10.5281/zenodo.6809697)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.6809697.svg)](https://doi.org/10.5281/zenodo.6809697) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.4.2-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-4-2-8845_x64/)
 
 AMMR version 2.4.2 contains only a few minor changes and fixes compared to  version 2.4.1.
 
@@ -72,7 +72,8 @@ AMMR version 2.4.2 contains only a few minor changes and fixes compared to  vers
   
 
 ## AMMR 2.4.1 (2022-05-30)
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.6533249.svg)](https://doi.org/10.5281/zenodo.6533249)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.6533249.svg)](https://doi.org/10.5281/zenodo.6533249) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.4.1-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-4-1-8830_x64/)
+
 
 **New example models:**
 
@@ -116,7 +117,7 @@ The `HumeroUlnarJoint` is the elbow flexion extension, and together `HumeroRadia
 
 
 ## AMMR 2.4 (2022-04-28)
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.6471999.svg)](https://doi.org/10.5281/zenodo.6471999)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.6471999.svg)](https://doi.org/10.5281/zenodo.6471999) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.4.0-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-4-0-8782_x64/)
 
 
 **New example models:**
@@ -233,7 +234,7 @@ The `HumeroUlnarJoint` is the elbow flexion extension, and together `HumeroRadia
 - Renamed all deprecated ligament class names. `AnyViaPointLigament`-> `AnyLigamentViaPoint`.
 
 ## AMMR 2.3.4 (2021-07-05)
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.5060249.svg)](https://doi.org/10.5281/zenodo.5060249)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.5060249.svg)](https://doi.org/10.5281/zenodo.5060249) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.3.4-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-3-4-8518_x64/)
 
 **Fixed:**
 
@@ -274,7 +275,7 @@ The `HumeroUlnarJoint` is the elbow flexion extension, and together `HumeroRadia
 
 ## AMMR 2.3.3 (2021-03-24)
 
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.4616316.svg)](https://doi.org/10.5281/zenodo.4616316)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.4616316.svg)](https://doi.org/10.5281/zenodo.4616316) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.3.3-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-3-3-8440_x64/)
 
 
 
@@ -299,7 +300,7 @@ The `HumeroUlnarJoint` is the elbow flexion extension, and together `HumeroRadia
 ## AMMR 2.3.2 (2021-01-21)
 
 
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.4305559.svg)](https://doi.org/10.5281/zenodo.4305559)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.4305559.svg)](https://doi.org/10.5281/zenodo.4305559) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.3.2-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-3-2-8354_x64/)
 
 
 
@@ -381,7 +382,7 @@ requested body height.
  
 ## AMMR 2.3.1 (2020-09-30)
 
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.4023956.svg)](https://doi.org/10.5281/zenodo.4023956)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.4023956.svg)](https://doi.org/10.5281/zenodo.4023956) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.3.1-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-3-1-8217_x64/)
 
 **Added:**
 
@@ -467,7 +468,7 @@ requested body height.
 
 ## AMMR 2.3 (2020-07-07)
 
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.3932764.svg)](https://doi.org/10.5281/zenodo.3932764)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.3932764.svg)](https://doi.org/10.5281/zenodo.3932764) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.3.0-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-3-0-8065_x64/)
 
 
 **Added:**
@@ -611,7 +612,7 @@ requested body height.
 
 ## AMMR 2.2.3 (2019-11-13)
 
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.3521521.svg)](https://doi.org/10.5281/zenodo.3521521)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.3521521.svg)](https://doi.org/10.5281/zenodo.3521521) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.2.3-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-2-3-7075_x64/)
 
 
 **Added:**
@@ -671,7 +672,7 @@ requested body height.
 
 ## AMMR 2.2.2 (2019-09-12)
 
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.3404750.svg)](https://doi.org/10.5281/zenodo.3404750)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.3404750.svg)](https://doi.org/10.5281/zenodo.3404750) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.2.2-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-2-2-7000_x64/)
 
 
 **Fixed:**
@@ -698,7 +699,7 @@ requested body height.
 
 ## AMMR 2.2.1 (2019-05-13)
 
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.2657673.svg)](https://doi.org/10.5281/zenodo.2657673)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.2657673.svg)](https://doi.org/10.5281/zenodo.2657673) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.2.1-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-2-1-6927_x64/)
 
 
 **Fixed:**
@@ -735,7 +736,7 @@ requested body height.
 
 ## AMMR 2.2 (2019-04-03)
 
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.1481635.svg)](https://doi.org/10.5281/zenodo.1481635)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.1481635.svg)](https://doi.org/10.5281/zenodo.1481635) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.2.0-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-2-0-6876_x64/)
 
 
 **Added:**
@@ -992,7 +993,8 @@ requested body height.
 
 ## AMMR 2.1.1 (2018-06-12)
 
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.1287730.svg)](https://doi.org/10.5281/zenodo.1287730)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.1287730.svg)](https://doi.org/10.5281/zenodo.1287730) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.1.2-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-1-2-6044_x64/)
+
 
 The AMMR 2.1.1 version is a minor release of the AMMR with smaller changes and bugfixes.
 The AnyBody Managed Model Repository now has a DOI ([10.5281/zenodo.1250764](https://doi.org/10.5281/zenodo.1250764)).
@@ -1041,7 +1043,8 @@ This is handled by [Zenodo.org](https://zenodo.org/) (The European Open Science 
 
 ## AMMR 2.1.0 (2018-03-22)
 
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.1251276.svg)](https://doi.org/10.5281/zenodo.1251276)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.1251276.svg)](https://doi.org/10.5281/zenodo.1251276) 
+[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.1.1-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-1-1-6029_x64/)
 
 **Added:**
 
@@ -1191,6 +1194,7 @@ the driver values are updated.
 ## AMMR 2.0.0 (2017-11-29)
 
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.1251274.svg)](https://doi.org/10.5281/zenodo.1251274)
+[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.1.0-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-1-0-5957_x64/)
 
 ### Major changes:
 
