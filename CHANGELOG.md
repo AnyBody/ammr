@@ -5,7 +5,7 @@
 
 (ammr-2.4-changelog)=
 ## AMMR 2.4.3 (2023-01-27)
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.7572879.svg)](https://doi.org/10.5281/zenodo.7572879)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.7572879.svg)](https://doi.org/10.5281/zenodo.7572879)  [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.4.3-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-4-3-8899_x64/)
 
 
 **Added:**
