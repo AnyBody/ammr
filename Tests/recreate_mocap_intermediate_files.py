@@ -55,7 +55,7 @@ macros2 = [
 ]
 
 
-abc_path = r"C:\Program Files\AnyBody Technology\AnyBody.7.4\AnyBodyCon.exe"
+abc_path = r"C:\Program Files\AnyBody Technology\AnyBody.7.5_Beta\AnyBodyCon.exe"
 
 app1 = anypytools.AnyPyProcess(anybodycon_path=abc_path, num_processes=10)
 
