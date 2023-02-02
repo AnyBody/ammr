@@ -5,6 +5,14 @@
 
 ## AMMR beta
 
+**Fixed:**
+* The `Main.ModelSetup.CreateVideo` operation was missing in some of the
+  MoCap examples. This has been fixed. If you have this problem update the `CreateVideo.any` file in your application. 
+* Fixed wrapping problem with the posterior deltoid muscle in the 2 parameter shoulder calibration. 
+* Fix an bug in LegPressMachine example which caused the model view to zoom to infinity. 
+* The robustness with muscle recruitment of the abdominal muscles (`buckle support`) was futher
+  tweaked by increasing the    the strength of the recruited reaction on the balance of the buckle segment.  
+  
   :::{Warning} 
   Due to the change in pelvic tilt in AMMR 2.5, the PSIS markers in your MoCap models
   will have shifted. This is due to the fact that markers now oriented along the scaling directions. 
@@ -14,31 +22,12 @@
   be adjusted a few cm upward to achvive the same marker position.
   :::
 
-
-**Fixed:**
-* The `Main.ModelSetup.CreateVideo` operation was missing in some of the
-  MoCap examples. This has been fixed. If you have this problem, update the `CreateVideo.any` file in your application.
-* Fixed wrapping problem with the posterior deltoid muscle in the two-parameter shoulder calibration.
-* Fix an bug in LegPressMachine example which caused the model view to zoom to infinity.
-* The robustness with muscle recruitment of the abdominal muscles (`buckle support`) was futher tweaked by increasing the 
-  the strength of the recruited reaction on the balance of the buckle segment.  
-
 * The segments in the trunk model (lumbar, thoracic and cervical) have changed their
   scaling functions (`Scale`). They now account for the fact that the pelvis segment can
   morph into the leg pelvis coordinate system using the `BM_LEG_TRUNK_INTERFACE` setting.
 
 **Added:**
 
-* Added a few utility helper class templates (`Template_OperationSaveValues`/`Template_OperationLoadValues`/`Template_OperationUpdateValues`) 
-  to make it easier to do common class operations without manually having to create the operations with macros.
-
-  To create an operation which loads a file do: 
-
-  ```{code-block} AnyScriptDoc
-  Template_OperationLoadValues LoadAnySetFile = {
-     FileName= "MyFile.anyset";
-  };
-  ```
 * Added two small helper code macro `NON_UNIQUE_VALUES()`/`NON_UNIQUE_POINTERS()` to 
   find duplicate (i.e. non-unique) entries in arrays of values and pointers.
 * A new set of hip joint measures (`Interface.Right.HipISB`) have been added which  
@@ -108,10 +97,6 @@
   };
   ```
 
-* The load-time position of the box in the {ref}`BVH_BoxLift model <sphx_glr_auto_examples_Mocap_plot_BVH_BoxLift.py>` is now 
-  calculated using the position of the hands. Also, `Main.ModelSetup.EnvironmentParameters.GravityDirection` defined in `box.any` file
-  is now calculated automatically from `Main.ModelSetup.LabSpecificData.Gravity` defined in `LabSpecificData.any` file. These changes should 
-  make the model more robust when dealing with different bvh files.
 
 * It is no longer necessary  to supply the `MarkerName` argument in the CreateMarkerDriver template
   MoCap models. The argument can still be used if the marker class and the data entry in the c3d file 
@@ -147,12 +132,54 @@
 * In many body parts the folder holding muscles models were named shortly as `MusPar`. 
   It is now renamed to `MuscleModels` for better clarity. 
    
-* The references to muscle models in the joint muscles of the detailed hand have been renamed to avoid future naming conflicts.
-* The "via-points" for the Psoas Major muscle has been adjusted to ensure that the muscles can better act the role of stabilizing muscle for the lumbar spine.
+
 
 (ammr-2.4-changelog)=
+## AMMR 2.4.3 (2023-01-27)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.7572879.svg)](https://doi.org/10.5281/zenodo.7572879)  [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.4.3-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-4-3-8899_x64/)
+
+
+**Added:**
+
+* Added a few utility helper class templates
+  
+  - `Template_OperationSaveValues`
+  - `Template_OperationLoadValues` 
+  - `Template_OperationUpdateValues`
+
+  to make it easier to do common class operations without manually having to create the operations with macros.
+
+  To create an operation which loads a file, do: 
+
+  ```{code-block} AnyScriptDoc
+  Template_OperationLoadValues LoadAnySetFile = {
+     FileName= "MyFile.anyset";
+  };
+  ```
+* A more helpful error message is now printed when MoCap markers in the marker protocol are missing the C3D file.
+
+**Changed:**
+* The load-time position of the box in the {ref}`BVH_BoxLift model <sphx_glr_auto_examples_Mocap_plot_BVH_BoxLift.py>` is now 
+  calculated using the position of the hands. Also, `Main.ModelSetup.EnvironmentParameters.GravityDirection` defined in the `box.any` file
+  is now calculated automatically from `Main.ModelSetup.LabSpecificData.Gravity` defined in the `LabSpecificData.any` file. These changes should 
+  make the model more robust when dealing with different BVH files.
+* It is no longer necessasry to supply the `MarkerName` argument in the CreateMarkerDriver template
+  MoCap models. The argument can still be used if the marker name and the data entry in the c3d file 
+  are different.
+* The references to muscle models in the joint muscles of the detailed hand have been renamed to avoid future naming conflicts.
+* The "via-points" for the Psoas Major muscle have been adjusted to ensure that the muscles can better act the role of stabilizing muscle for the lumbar spine.
+
+**Fixed:**
+* The `Main.ModelSetup.CreateVideo` operation was missing in some of the
+  MoCap examples. This has been fixed. If you have this problem please update the `CreateVideo.any` file in your application.
+* Fixed a wrapping problem with the posterior deltoid muscle in the two-parameter shoulder calibration. 
+* Fixed a bug in the LegPressMachine example that caused the model view to zoom to infinity. 
+* The robustness of muscle recruitment with the abdominal muscles (`buckle support`) was futher tweaked by increasing the 
+  the strength of the recruited reactions on the balance of the buckle segment.  
+
+
 ## AMMR 2.4.2 (2022-07-08)
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.6809697.svg)](https://doi.org/10.5281/zenodo.6809697)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.6809697.svg)](https://doi.org/10.5281/zenodo.6809697) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.4.2-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-4-2-8845_x64/)
 
 AMMR version 2.4.2 contains only a few minor changes and fixes compared to  version 2.4.1.
 
@@ -176,14 +203,15 @@ AMMR version 2.4.2 contains only a few minor changes and fixes compared to  vers
   
 
 ## AMMR 2.4.1 (2022-05-30)
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.6533249.svg)](https://doi.org/10.5281/zenodo.6533249)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.6533249.svg)](https://doi.org/10.5281/zenodo.6533249) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.4.1-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-4-1-8830_x64/)
+
 
 **New example models:**
 
 - Added a model using a new class template to optimize the origin of BVH model. This model shows how to optimize
   the origin of the BVH model such that a target segment of the human model (Left/Right Foot/Hand) hits a known 
   position and orientation in a given time interval while following the recorded motion from the trial.
-  <[See more](examples_mocap_bvhorigin)>
+  <{ref}`See more <sphx_glr_auto_examples_Mocap_plot_BVH_OptimizeOrigin.py>`>
 
 
 **Fixed:**
@@ -220,28 +248,28 @@ The `HumeroUlnarJoint` is the elbow flexion extension, and together `HumeroRadia
 
 
 ## AMMR 2.4 (2022-04-28)
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.6471999.svg)](https://doi.org/10.5281/zenodo.6471999)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.6471999.svg)](https://doi.org/10.5281/zenodo.6471999) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.4.0-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-4-0-8782_x64/)
 
 
 **New example models:**
 
 - Added a new trunk exoskeleton concept model 
   for simulating assistance at the trunk in a box lifting task. This simple example shows how to apply assistive torque directly
-  to the human model. <[See more](example_exo_concept_trunk)>
+  to the human model. <{ref}`See more <sphx_glr_auto_examples_Other_plot_ExoConceptTrunk_BoxLift.py>`>
 - Added a new exoskeleton concept model 
   for simulation-driven conceptual design of exoskeletons. The model was developed by Prof. John Rasmussen from
   Aalborg University. Please see the [web cast](https://www.anybodytech.com/simulation-driven-conceptual-design-of-exoskeletons/)
-  for more details. <[See more](example_exo_concept_boxlift)>
+  for more details. <{ref}`See more <sphx_glr_auto_examples_Other_plot_ExoConcept_BoxLift.py>`>
 - Added a new femoral torsion tool to apply femoral torsion to the TLEM2.0 leg model.
   This model tool was developed by Dr. Enrico De Pieri from University of Basel
   Children’s Hospital (UKBB). Please see the documentation 
   or the [web cast](https://www.anybodytech.com/modeling-subject-specific-femoral-torsion-for-the-analysis-of-lower-limb-joint-loads/)
-  by Enrico on his work and publication on femoral torsion. <[See more](example_femoral_torsion)>
+  by Enrico on his work and publication on femoral torsion. <{ref}`See more <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_FemoralTorsionTool.py>`>
 - Added a new knee force model 
-  example. The model shows how to calculate a simple estimate of the medial and lateral knee force. <[See more](example_knee_forces_estimate)>
+  example. The model shows how to calculate a simple estimate of the medial and lateral knee force. <{ref}`See more <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_KneeForcesExample.py>`>
 - A new box lifting motion capture model has been added. The model is based on data from an inertial measurement 
   unit based suit ([Xsens](https://www.xsens.com/products/mtw-awinda)), and illustrates how to connect MoCap models with objects in the environment. 
-  <[See more](example_bvh_boxlift)>
+  <{ref}`See more <sphx_glr_auto_examples_mocap_plot_bvh_boxlift.py>`>
 
 
 **New features:**
@@ -293,27 +321,11 @@ The `HumeroUlnarJoint` is the elbow flexion extension, and together `HumeroRadia
   with the remaining body parts and handled in the cadaver data files.
 - Fixed a problem in MoCap models where calibration studies were not run automatically in models 
   that only had 3-element muscles on the upper body.
-- The [example to evaluate moments arms](example_evaluate_momentarms) 
+- The {ref}`example to evaluate moments arms <sphx_glr_auto_examples_Validation_plot_EvaluateMomentArms.py>` 
   now works when the shoulder rhythm is enabled. 
 
 
 **Changed:**
-
-- Ensure consistency of arm muscle parameters when switching between simple muscle models and 3 element muscle models.
-  The two muscles had a few differences in the underlying parameters. Mostly due
-  to the 3 element models being implemented based on newer publications, and
-  some changes not being backported properly to the simple muscle model. The two muscle models now give the same overall muscles strength `F0` when switching.
-
-  - Fix a bug in Anconeus_1 PCSA for the 3 element muscle model. 
-  - Fix the distribution of PCSA in simple muscle models for Latisimus dorsi to match 3 element muscle models.
-  - Fix the total PCSA of the 3-element muscle models of the Latisimus dorsi muscles to match the simple muscles.
-  - Fixed a typo in the calculation of the PCSA for one element of the pronator quadratus (`Pron_quadr_2`) with the simple muscle models.
-  - Fixed the PCSA of pectoralis major muscle model to match the 3-element muscle models. 
-  - Corrected Coracobrachialis pennation angle for 3-element muscle models.
-  - Fixed the PCSA of the deltoid simple muscle models to match the 3 element muscle models.
-  - Fixed the PCSA of the subscapularis simple muscle models to match the 3 element muscle models.
-
-
 
 - Improve the trunk model's strength for trunk external rotation. This change
   improves the implementation of the internal/external obliques and latissimus
@@ -353,7 +365,7 @@ The `HumeroUlnarJoint` is the elbow flexion extension, and together `HumeroRadia
 - Renamed all deprecated ligament class names. `AnyViaPointLigament`-> `AnyLigamentViaPoint`.
 
 ## AMMR 2.3.4 (2021-07-05)
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.5060249.svg)](https://doi.org/10.5281/zenodo.5060249)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.5060249.svg)](https://doi.org/10.5281/zenodo.5060249) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.3.4-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-3-4-8518_x64/)
 
 **Fixed:**
 
@@ -370,18 +382,18 @@ The `HumeroUlnarJoint` is the elbow flexion extension, and together `HumeroRadia
   override the default implicit global reference frame and thus output pelvis rotation relative to
   a custom frame.
 - Add a new ability to evaluate trunk strength into the built-in studies for
-  [joint strength evaluation](example_evaluate_joint_strength).
+  {ref}`joint strength evaluation <sphx_glr_auto_examples_Validation_plot_EvaluateJointStrength.py>`.
 - New ligaments connecting the Sacrum and Pelvis segments are added. They are enabled
   togehter with the ligaments on the lumbar spine through the `BM_TRUNK_LUMBAR_LIGAMENTS`
   define statement.
 
 **Changed:**
 
-- The ["ADL gait (MoCap model)"](example_adlgait) has been updated with
+- The {ref}`"ADL gait (MoCap model)" <sphx_glr_auto_examples_MoCap_plot_ADL_Gait.py>` has been updated with
   most recent improvements from our internal projects. The marker protocol has
   been adjust and a lot of small data problems (marker dropouts etc) has been
   fixed.
-- The posture of [the standing lift example](example_standinglift)
+- The posture of the {ref}`standing lift example <sphx_glr_auto_examples_ADLs_and_ergonomics_plot_StandingLift.py>`
   have been modified to make the example more robust.
 - The `Tuber_ischiadicum` node to `Seat_contact` as it was misaligned to the actual bony
   landmark position. New `Tuber_ischiadicum` nodes have been added at the bony landmark.
@@ -394,7 +406,7 @@ The `HumeroUlnarJoint` is the elbow flexion extension, and together `HumeroRadia
 
 ## AMMR 2.3.3 (2021-03-24)
 
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.4616316.svg)](https://doi.org/10.5281/zenodo.4616316)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.4616316.svg)](https://doi.org/10.5281/zenodo.4616316) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.3.3-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-3-3-8440_x64/)
 
 
 
@@ -413,13 +425,13 @@ The `HumeroUlnarJoint` is the elbow flexion extension, and together `HumeroRadia
 
 **Changed:**
 
-- The settings of the [Knee Simulator example](example_kneesimulator) has been
+- The settings of the {ref}`Knee Simulator example <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_KneeSimulator.py>` has been
   tweaked to make it run faster.
 
 ## AMMR 2.3.2 (2021-01-21)
 
 
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.4305559.svg)](https://doi.org/10.5281/zenodo.4305559)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.4305559.svg)](https://doi.org/10.5281/zenodo.4305559) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.3.2-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-3-2-8354_x64/)
 
 
 
@@ -452,7 +464,8 @@ requested body height.
   models) and {bm_constant}`_SCALING_STANDARD_` (50 percentile) which were both
   correct.
 - Fixed a problem with foot support in the
-  ["Spine Pressure validation model"](example_wilkespinepressure) lying flat on
+  {ref}`"Spine Pressure validation model"
+  <sphx_glr_auto_examples_Validation_plot_WilkeSpinePressure.py>` lying flat on
   the back. The foot is now supported in the right direction.
 - Fixed a problem with the Standing Model template which was using an alternate
   mode where foot constraints were disabled.
@@ -478,11 +491,12 @@ requested body height.
   the surface is now used for both the straight and reflected head of the rectus
   femoris.
 - Increase the discretization (StringMesh) on approx 30 muscles to improve wrapping.
-- The results for the ["Wilke Spine Pressure"](example_wilkespinepressure)
+- The results for the {ref}`"Wilke Spine Pressure"
+  <sphx_glr_auto_examples_Validation_plot_WilkeSpinePressure.py>`
   validation model has been updated due to the fix for the
   {bm_constant}`_SCALING_UNIFORM_`. The updated model improved the validation
   results slightly.
-- The new large scale ["MoCap model (ADL gait)"](example_adlgait)
+- The new large scale {ref}`" MoCap model (ADL gait)" <sphx_glr_auto_examples_MoCap_plot_ADL_Gait.py>`
   has been updated so the results of running all standing reference trials have
   been added to the model. This means that all the dynamic trials will work even
   if the user forgets to first run the standing reference trials. It is still
@@ -499,7 +513,7 @@ requested body height.
  
 ## AMMR 2.3.1 (2020-09-30)
 
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.4023956.svg)](https://doi.org/10.5281/zenodo.4023956)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.4023956.svg)](https://doi.org/10.5281/zenodo.4023956) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.3.1-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-3-1-8217_x64/)
 
 **Added:**
 
@@ -516,7 +530,7 @@ requested body height.
 
 **Changed:**
 
-- Improvements to the new ["ADL Gait"](example_adlgait)
+- Improvements to the new {ref}`"ADL Gait" <sphx_glr_auto_examples_MoCap_plot_ADL_Gait.py>`
   example. The model now has muscles enabled and the marker protocol has been adjusted
   for a better shoulder posture. Also, the batch processing script now runs all trials without hickups.
 - Improve the shoulder rhythm. Scapula position when using the shoulder rhythm
@@ -560,7 +574,7 @@ requested body height.
 
 - Fixed incorrect volume of Satorius muscle in TLEM1 and TLEM2. Thanks to Dr. Adam D. Sylvester
   from Johns Hopkins School of Medicine and Dr. Patricia A. Kramer from the University of
-  Washington for pointing out the error. The error occurred since the satorius in the original [TLEM1 paper](https://linkinghub.elsevier.com/retrieve/pii/S0268003306001896) was muscles
+  Washington for pointing out the error. The error occurred since the satorius in the original [TLEM1 paper](http://linkinghub.elsevier.com/retrieve/pii/S0268003306001896) was muscles
   in series with a pseudo insertion/origin on the femur. Both of these muscle
   elements were therefore listed with the full PSCA of Satorius. This detail was
   missed in the AnyBody TLEM1 and TLEM2 implementation where Satorius was
@@ -585,16 +599,16 @@ requested body height.
 
 ## AMMR 2.3 (2020-07-07)
 
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.3932764.svg)](https://doi.org/10.5281/zenodo.3932764)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.3932764.svg)](https://doi.org/10.5281/zenodo.3932764) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.3.0-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-3-0-8065_x64/)
 
 
 **Added:**
 
-- Added a new Full Body {ref}`"ADL Gait" <example_adlgait>` MoCap
+- Added a new Full Body {ref}`"ADL Gait" <sphx_glr_auto_examples_MoCap_plot_ADL_Gait.py>` MoCap
   Example based on the "Rehazenter Adult Walking Dataset" by [Schreiber and Moissenet (2019)](https://doi.org/10.1038/s41597-019-0124-4).
   The model is configured to run all 50 subjects and 1145 trials in the data set. However, you must
   download the actual data separately from
-  [FigShare](https://figshare.com/articles/dataset/A_multimodal_dataset_of_human_gait_at_different_walking_speeds/7734767)
+  [FigShare](https://figshare.com/articles/A_multimodal_dataset_of_human_gait_at_different_walking_speeds/7734767)
   where it is hosted under a Creative Commons license.
 
 - New GUI plugin which uses statistical information from the ANSUR database to set anthropometric values in AnyBody. A small example model
@@ -708,7 +722,7 @@ requested body height.
 - Fixed a bug in the FreePosture model, where input for the Left/Right arm drivers was switched in some places.
 - Fixed missing visual color indication of force plate forces for type 3 force plates in the MoCap models.
 - Fixed a bug with in the built-in studies to
-  {ref}`evaluate arm joint strength <example_evaluate_joint_strength>`.
+  {ref}`evaluate arm joint strength <sphx_glr_auto_examples_Validation_plot_EvaluateJointStrength.py>`.
   The range of motion for the left arm elbow pronation/supination were not correct.
 - Fixed a bug preventing the model from loading with with {bm_constant}`_SCALING_XYZ_` and both legs excluded.
 - Fixed the load-time position of the head segment when neck scaling is changed.
@@ -729,7 +743,7 @@ requested body height.
 
 ## AMMR 2.2.3 (2019-11-13)
 
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.3521521.svg)](https://doi.org/10.5281/zenodo.3521521)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.3521521.svg)](https://doi.org/10.5281/zenodo.3521521) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.2.3-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-2-3-7075_x64/)
 
 
 **Added:**
@@ -749,7 +763,7 @@ requested body height.
   solutions to the Euler angle equations when gimbal locks occur.
   The fix requires a new structure of the BVH model,
   where virtual marker trajectories are calculated by the `AnyInputBVH` class.
-  See the updated {ref}`BVH_Xsens example <example_adlgait>`,
+  See the updated {ref}`BVH_Xsens example <sphx_glr_auto_examples_Mocap_plot_BVH.py>`,
   and port your existing BVH models to the new example structure.
 - Fixed a problem in {ref}`AnyMoCap models <anymocap>`, where model view operations in
   `Main.ModelSetup.Views.SetViewMacros` would not trigger
@@ -789,7 +803,7 @@ requested body height.
 
 ## AMMR 2.2.2 (2019-09-12)
 
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.3404750.svg)](https://doi.org/10.5281/zenodo.3404750)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.3404750.svg)](https://doi.org/10.5281/zenodo.3404750) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.2.2-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-2-2-7000_x64/)
 
 
 **Fixed:**
@@ -816,7 +830,7 @@ requested body height.
 
 ## AMMR 2.2.1 (2019-05-13)
 
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.2657673.svg)](https://doi.org/10.5281/zenodo.2657673)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.2657673.svg)](https://doi.org/10.5281/zenodo.2657673) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.2.1-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-2-1-6927_x64/)
 
 
 **Fixed:**
@@ -834,8 +848,8 @@ requested body height.
 **Changed:**
 
 - Changed the recruitment criterion to the power of 2 (quadratic) in the two MoCap examples using GRF prediction and weak human-ground residuals.
-  ({ref}`link 1 <example_mocap_grf_prediction>`
-  and {ref}`link 2 <example_mocap_bvh>`). This greatly increases the robustness of recruitment solver
+  ({ref}`link 1 <sphx_glr_auto_examples_MoCap_plot_Plug-in-gait_Simple_FullBody_GRFPrediction.py>`
+  and {ref}`link 2 <sphx_glr_auto_examples_MoCap_plot_BVH.py>`). This greatly increases the robustness of recruitment solver
   and prevents many muscle recruitment failures.
 
 **Added:**
@@ -853,7 +867,7 @@ requested body height.
 
 ## AMMR 2.2 (2019-04-03)
 
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.1481635.svg)](https://doi.org/10.5281/zenodo.1481635)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.1481635.svg)](https://doi.org/10.5281/zenodo.1481635) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.2.0-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-2-0-6876_x64/)
 
 
 **Added:**
@@ -865,7 +879,7 @@ requested body height.
   {ref}`Shoulder-Arm Documentation <DeltoidWrapping>` for more information.
 
 - Added new example model of a Knee Simulator using a knee implant model and force-dependent kinematics (FDK).
-  See the {ref}`Knee Simulator example <example_kneesimulator>`
+  See the {ref}`Knee Simulator example <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_KneeSimulator.py>`
   for more information.
 
 - New model plugin (BodyModel Configurator) which provides a graphical user interface
@@ -873,12 +887,12 @@ requested body height.
   the [blog post](https://anyscript.org/tools/body-model-configurator/)
   introducing the BM plugin.
 
-- Added a new {ref}`Posture prediction model <example_posture_prediction>`
+- Added a new {ref}`Posture prediction model <sphx_glr_auto_examples_ADLs_and_ergonomics_plot_PosturePredictionModel.py>`
   based on standing posture. The model can predict posture as a consequence of applied loads in hands.
   It does this by minimizing joint torques and applying balance drivers which account for external applied loads.
 
 - Added new standing model example which uses soft constraints and GRF
-  prediction. {ref}`See this link <example_standingmodel>`.
+  prediction. {ref}`See this link <sphx_glr_auto_examples_ADLs_and_ergonomics_plot_StandingModel.py>`.
   This new model is good starting point for making
   standing/balancing models, and the corresponding standing model in the template
   generator has also been updated.
@@ -1080,7 +1094,7 @@ requested body height.
 - Fixed missing possibility for overriding the reaction forces for the Trunk flexion/extension/rotation
   drivers in `HumanModel.DefaultMannequinDrivers`.
 - Add missing strength scaling factor to `pectoralis_major_thoracic_part_3` in the simple muscle configuration.
-- Fixed issue with the {ref}`Standing Model example <example_standingmodel>`,
+- Fixed issue with the {ref}`Standing Model example <sphx_glr_auto_examples_ADLs_and_ergonomics_plot_StandingModel.py>`,
   where the elbow flexion velocity was incorrectly set to a non zero value.
 - Fixed the problem with over-constraint models when adding the
   shoulder rhythm.
@@ -1110,7 +1124,8 @@ requested body height.
 
 ## AMMR 2.1.1 (2018-06-12)
 
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.1287730.svg)](https://doi.org/10.5281/zenodo.1287730)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.1287730.svg)](https://doi.org/10.5281/zenodo.1287730) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.1.2-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-1-2-6044_x64/)
+
 
 The AMMR 2.1.1 version is a minor release of the AMMR with smaller changes and bugfixes.
 The AnyBody Managed Model Repository now has a DOI ([10.5281/zenodo.1250764](https://doi.org/10.5281/zenodo.1250764)).
@@ -1128,7 +1143,7 @@ This is handled by [Zenodo.org](https://zenodo.org/) (The European Open Science 
 **Changed:**
 
 - Enhanced the {ref}`multi-trial MoCap example
-  <example_mocap_multitrial>` for best practice for
+  <sphx_glr_auto_examples_Mocap_plot_Plug-in-gait_MultiTrial_StandingRef.py>` for best practice for
   MoCap trials with multiple subjects and trials. The example now shows how to deal with multiple
   subjects and storing the c3d files in a separate folder.
 
@@ -1159,11 +1174,12 @@ This is handled by [Zenodo.org](https://zenodo.org/) (The European Open Science 
 
 ## AMMR 2.1.0 (2018-03-22)
 
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.1251276.svg)](https://doi.org/10.5281/zenodo.1251276)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.1251276.svg)](https://doi.org/10.5281/zenodo.1251276) 
+[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.1.1-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-1-1-6029_x64/)
 
 **Added:**
 
-- New {ref}`squat example <example_squat>`
+- New {ref}`squat example <sphx_glr_auto_examples_ADLs_and_ergonomics_plot_Squat.py>`
   model which demonstrates a parameterized squatting motion.
 
 - New `#class_template` for adding limit drivers to kinematic measures.
@@ -1216,7 +1232,7 @@ the driver values are updated.
 
 - Updated the AAU Mandible Model introduced in AMMR 2.0.0. By accident the authors did
   not share the exact same version of the model that was used in the publication by
-  [Andersen et al. 2017](https://doi.org/10.1115/1.4037100)
+  [Andersen et al. 2017](https://www.anybodytech.com/downloads/publications/#Skipper_Andersen2017-zd)
   This is now corrected and the validation  example produces the same results as
   published version.
 
@@ -1309,12 +1325,13 @@ the driver values are updated.
 ## AMMR 2.0.0 (2017-11-29)
 
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.1251274.svg)](https://doi.org/10.5281/zenodo.1251274)
+[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.1.0-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-1-0-5957_x64/)
 
 ### Major changes:
 
 #### New lower extremity model (TLEM2.1)
 
-- The [Twente Lower Extremity Model version 2.0 dataset](https://doi.org/10.1016/j.jbiomech.2014.12.034), developed in the
+- The [Twente Lower Extremity Model version 2.0 dataset](http://dx.doi.org/10.1016/j.jbiomech.2014.12.034), developed in the
   TLEM*safe* EU project was implemented in the AMMR repository. The model is not
   the default model, but can be enabled with the {ref}`BM parameter
   <bm-config>` `#define BM_LEG_MODEL _LEG_MODEL_TLEM2_`
@@ -1354,7 +1371,7 @@ the driver values are updated.
   for more information.
 - Algorithms and file for Ground reaction force prediction are added to: `ammr/tools/GRFPrediction/`.
   See the
-  {ref}`MoCap examples <example_mocap_grf_prediction>`
+  {ref}`MoCap examples <sphx_glr_auto_examples_Mocap_plot_Plug-in-gait_Simple_FullBody_GRFPrediction.py>`
   for how they are used.
 
 #### TLEM 1 updates
@@ -1399,7 +1416,7 @@ the driver values are updated.
 
 - Added new mandible model based on a CT scan of a 40 year old male.
   For more information see {doc}`the documentation for the model </body/aalborg_mandible>` or the
-  {ref}`validation example <example_aalborgmandible>`.
+  {ref}`validation example <sphx_glr_auto_examples_Validation_plot_AalborgMandible.py>`.
 
 #### Spine model
 
@@ -1475,7 +1492,7 @@ the driver values are updated.
 - Added new initial guess for wrapping muscles, which make the wrapping
   more when the model starts in extreme postures.
 
-- Update many examples to use the TLEM 2.1 model. See the {ref}`example gallery <example-gallery>`.
+- Update many examples to use the TLEM 2.1 model. See the {ref}`example gallery <examples-index>`.
 
 - BM mannequin drivers are now implemented with a class_template allowing all weights and other settings to be customized.
 
@@ -1541,9 +1558,9 @@ the driver values are updated.
 - Fixed a symmetry problem for the Deltoid muscles at the shoulder.
 - Fixed a symmetry problem for the Disc stiffness from L1 to L5
 - Fix white surfaces in examples with flat STL surfaces. For example
-  {ref}`example_crosstrainer`.
+  {ref}`sphx_glr_auto_examples_Sports_plot_CrossTrainer.py`.
 - Fixed an issue preventing
-  {ref}`example_standingmodel`
+  {ref}`sphx_glr_auto_examples_ADLs_and_ergonomics_plot_StandingModel.py`
   from working with one leg.
 - Fixed a problem with the drawings of the bones in the Arm model which were not
   always symmetrical.
