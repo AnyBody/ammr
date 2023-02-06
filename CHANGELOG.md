@@ -80,6 +80,10 @@
   reflect the changes to thoracic model and pelvis frames. Although the absolute pressures in the spine have changed, the 
   trends (relative changes in spine pressure between models) remains the same. 
 
+* The discretization (number of elements) of pectoralis major and semispinalis was reduced. A few elements were 
+  removed to make the implementation more consistent with textbook anatomy. The pectoralis no longer has an origin on rib 2, 
+  and semispinalis no longer inserts on the lumbar region of the spine.  
+
 * The implemenation of the muscle parameter in the arm model have been refactored. All parematers are now given as
   muscle volume, optimal fiberlenth and tendon slacklength. The physiological cross sectional area (PCSA),
   was previously hard coded parameter, but is now only an intermediate value used for calculating muscle strength from the muscle volume and optimal fiber length.
