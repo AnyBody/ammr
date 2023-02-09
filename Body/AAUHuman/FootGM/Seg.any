@@ -1,0 +1,3493 @@
+
+//This folder is only used for compatibility with references in the LegTD files using the stiff foot originaly.
+//It forwards the references to the coresponding element of the detailed foot.
+AnyFolder Foot = {
+  AnyRefFrame &SubTalarJoint = .Calcaneus.SubTalarJoint;
+  
+  AnyRefFrame &HeelNode = .Calcaneus.HeelNode;
+  
+  AnyRefFrame &ToeMedialContactNode = .Metatarsal1.ToeMedialContactNode;
+  
+  AnyRefFrame &ToeLateralContactNode = .Metatarsal5.ToeLateralContactNode;
+  
+  AnyVar MassS = ..MassScaling.Foot.MassScale;
+  AnyVar MassStandard = ..StandardParameters.Foot.Mass;
+  AnyVar Mass = MassS*MassStandard;
+
+  
+};
+
+
+//This string is used to choose the resolution of the bones anysurf files
+//AnyString AnySurfFolder = "AnySurfHighQuality";
+AnyString AnySurfFolder = "AnySurfLowQuality";
+
+
+
+Shank = {
+  
+AnyRefNode AnkleJoint =
+  {
+       AnyVec3 sRelUnscaled = .StdPar.AnkleJoint+{-0.01, 0.005, 0.002}*.AnatomicalFrame.ARelUnscaled';
+       AnyMat33 ARelUnscaled = RotMat({0.0,0,0}, .StdPar.AnkleJointAxis, .AnatomicalFrame.ARelUnscaled'[1])*RotMat(pi/2,y);
+       /// Control point for the Ankle joint. Found by projecting the malleolus bony landmarks onto the
+       /// ankle axis from the cadaver data set. Thus, scaling that moves the control points will also scale the ankle joint axis
+       AnyVec3 LateralControlPoint = .Scale(.StdPar.AnkleJoint + (.StdPar.LateralMalleolus - .StdPar.AnkleJoint)*.StdPar.AnkleJointAxis'*.StdPar.AnkleJointAxis);
+       /// Control point for the Ankle joint. Found by projecting the malleolus bony landmarks onto the
+       /// ankle axis from the cadaver data set. Thus, scaling that moves the control points will also scale the ankle joint axis
+       AnyVec3 MedialControlPoint = .Scale(.StdPar.AnkleJoint + (.StdPar.MedialMalleolus - .StdPar.AnkleJoint)*.StdPar.AnkleJointAxis'*.StdPar.AnkleJointAxis );
+       /// Ankle Joint defined directly from the cadaver dataset.
+       sRel = .Scale(sRelUnscaled);
+       /// Ankle Joint orientation is calculated based on the direction between the two control points.
+       ARel = RotMat(0.0*{0,0,0}, .Sign*(LateralControlPoint-MedialControlPoint ),  .AnatomicalFrame.ARel'[1] )*RotMat(pi/2,y);
+
+    #include "<ANYBODY_PATH_BODY>/DrawSettings/JointAxesDistal.any"
+
+    #if DRAWAXES
+    AnyDrawLine SJaxis2 =
+    {
+      Visible = On;
+      p0 = ..StdPar.TalocruralsRel + {..StdPar.AnkleJointAxis[2],..StdPar.AnkleJointAxis[1],..StdPar.AnkleJointAxis[0]}*0.2;
+      p1 = ..StdPar.TalocruralsRel - {..StdPar.AnkleJointAxis[2],..StdPar.AnkleJointAxis[1],..StdPar.AnkleJointAxis[0]}*0.2;      //Offset = {0, 0, 0};
+      Line = {Thickness = 0.001; RGB = {0, 0, 0};};
+    };
+    #endif
+    
+
+  };AnyRefNode LigTibioTalarPosterior = {
+    sRel = .Scale({0.005, 0.006, ...Sign*-0.025});
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+  };
+  
+  AnyRefNode LigTibioTalarAnterior = {
+    sRel = .Scale({0.026, 0.008, ...Sign*-0.021});
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+  };
+  
+  AnyRefNode LigTibioCalcaneal = {
+    sRel = .Scale({0.018, 0.002, ...Sign*-0.027});
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+  };
+  
+  AnyRefNode LigTibioNavicular = {
+    sRel = .Scale({0.026, 0.004, ...Sign*-0.021});
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+  };
+  
+  AnyRefNode LigTaloFibularPosterior = {
+    sRel = .Scale({-0.0199,  -0.0085,   ...Sign*0.021});
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+  };
+  
+  AnyRefNode LigTaloFibularAnterior = {
+    sRel = .Scale({-0.00,  -0.004,   ...Sign*0.0255});
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+  };
+  
+  AnyRefNode LigCalcaneoFibular = {
+    sRel = .Scale({-0.013,  -0.0126,   ...Sign*0.0240});
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+  };
+  
+  AnyRefNode PeroneusTertius1Node = {sRel = .Scale({ -0.01402+0.005,0.09700-0.03,0.02065-0.005});};
+  AnyRefNode PeroneusTertius2Node = {sRel = .Scale({ -0.01402+0.01,0.09700-0.05,0.02065-0.005 });};
+  AnyRefNode PeroneusTertius3Node = {sRel = .Scale({ -0.01402+0.01,0.09700-0.04,0.02065-0.005 });};
+
+  AnyRefNode PeroneusTertiusViaNode1 = {sRel = .Scale({ 0.01858+0.008,0.00757+0.0,0.01443+0.01});};
+  
+};
+
+
+
+AnySeg Talus = {
+  
+  r0=.Shank.AnkleJoint.sRel*.Shank.Axes0'+.Shank.r0-AnkleJoint.sRel*Axes0';
+
+  AnyFunTransform3D &Scale = ..GeoScaling.Talus.ScaleFunction;  
+    AnyFunTransform3D &GeomScale =Scale;
+  AnyRefNode AnatomicalFrame = {};
+
+  AnyVar MassS = ..MassScaling.Foot.MassScale;
+  AnyVar MassStandard = ..StandardParameters.Foot.Mass*0.20286341; //calculated from volume ratio
+  Mass = MassS*MassStandard;
+  
+  //AnyDrawSeg Draw = {};
+  //AnyDrawRefFrame Drw = {ScaleXYZ={1,1,1}*0.1;};
+  //AnyDrawNodes Draw = {ScaleXYZ = 0.004*{1,1,1};};
+  sCoM = MedMalleoli.sRel+0.5*(LatMalleoli.sRel - MedMalleoli.sRel);
+  JaboutCoMOnOff = On;
+  
+  AnyVar Ixx = 2/5 * Mass * (vnorm(0.5*(LatMalleoli.sRel - MedMalleoli.sRel)))^2;
+  AnyVar Iyy = Ixx;
+  AnyVar Izz = Ixx;
+  
+  Jii={Ixx, Iyy, Izz};
+  
+  
+  AnyDrawSurf DrwSurf = {
+    FileName = ..AnySurfFolder+"/Talus";
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
+    RGB = Main.DrawSettings.Colors.Segments;
+    AnyFunTransform3D &Scale =.Scale; 
+    Opacity=1;
+    
+  };
+  
+  
+
+
+  AnyRefNode TaloNavicularJoint = 
+  {
+    sRel = ..Navicular.TaloNavicularJoint.sRel;
+    ARel = ..Navicular.TaloNavicularJoint.ARel;
+  };
+ 
+  AnyRefNode MedMalleoli = 
+  {
+    sRel = .Scale({0.0553215, 0.06030982, ...Sign*-0.02834151});
+//    AnyDrawRefFrame drw={ScaleXYZ=2*{0.005,0.005,0.005};RGB={1,0,0};};
+  };
+  
+  AnyRefNode LatMalleoli = 
+  {
+    sRel = .Scale({0.0449248, 0.07027722, ...Sign*0.02751965});
+//    AnyDrawRefFrame drw={ScaleXYZ=2*{0.005,0.005,0.005};RGB={1,0,0};};
+  };
+  
+  
+//  AnyRefNode SubTalarJointReactionNode1= { 
+//    sRel= .Scale({0.04, 0.05, ...Sign*0.01});
+//    ARel = .SubTalarJoint.ARel;
+//    AnyDrawRefFrame drw={ScaleXYZ=0.02*{1,1,1};};
+//  }; 
+//  AnyRefNode SubTalarJointReactionNode2= { 
+//    sRel= .Scale({0.04, 0.06, ...Sign*-0.01});
+//    ARel = .SubTalarJoint.ARel;
+//    AnyDrawRefFrame drw={ScaleXYZ=0.02*{1,1,1};};
+//  }; 
+  
+  
+  AnyRefNode AnkleJoint={
+    //sRel = .MedMalleoli.sRel+0.5*(.LatMalleoli.sRel-.MedMalleoli.sRel) + {0.0071, -0.0021, ...Sign*0.001};
+    sRel = .Scale({0.05072315, 0.06269352, ...Sign*0.003089067});
+    AnyMat33 ARelStandard = RotMat(.MedMalleoli.sRel,.LatMalleoli.sRel,{1.0,0.0,-...Sign*0.1})*RotMat(...Sign*pi/2,y);
+//    AnyMat33 ARelStandard = {{-0.04812958, 0.9836665, -...Sign*0.1734469}, {-0.984744, -0.01765817, ...Sign*0.173111}, {...Sign*0.1672207, ...Sign*0.1791326, 0.9695095}};
+
+    //correction of the axis used when morphing, specialy needed for severe flat foot.
+    AnyVar ARelCorrectionAngle = (..Metatarsal1.MTHeadMedialNode.sRel[0]-..Metatarsal5.MTHeadLateralNode.sRel[0])/(..Metatarsal5.MTHeadLateralNode.sRel[2]-..Metatarsal1.MTHeadMedialNode.sRel[2])*0.6;
+    AnyVar ARelCorrectionAngleCond = iffun(gtfun(ARelCorrectionAngle,0.15),ARelCorrectionAngle,0.0);
+    ARel = ARelStandard * RotMat(ARelCorrectionAngleCond,x);
+    
+//    AnyDrawRefFrame drw={ScaleXYZ=10*{0.005,0.005,0.005};RGB={1,0,0};};
+  };
+  
+  
+  AnyRefNode SubTalarJoint= 
+  {
+    sRel = ..Calcaneus.SubTalarJoint.sRel;
+    ARel = ..Calcaneus.SubTalarJoint.ARel;
+  };
+
+  
+  //***********************
+  //Muscles nodes
+  //***********************
+  
+  //Ligaments nodes
+  //****************
+  AnyRefNode LigTibioTalarPosterior = {
+    sRel = .Scale({0.04580961, 0.08192314, ...Sign*-0.01961863});
+  };
+  
+  AnyRefNode LigTibioTalarAnterior = {
+    sRel = .Scale({0.04588817, 0.0290883, ...Sign*-0.01547349});
+  };
+
+  AnyRefNode LigTaloFibularPosterior = {
+    sRel = .Scale({0.04148086, 0.08878258, ...Sign*0.002125482});
+  };
+  
+  AnyRefNode LigTaloFibularAnterior = {
+    sRel = .Scale({0.0491532, 0.03202142, ...Sign*0.010479483});
+  };
+  
+  
+    AnyRefNode FlexorHallucisLongusViaNode1= 
+  {
+//    AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.02368694+0.0125, 0.0760648+0.01, ...Sign*(-0.01597639-0.002)});
+  };
+  
+}; // End of Talus
+
+
+
+
+AnySeg Calcaneus = {
+  r0=.Talus.SubTalarJoint.sRel*.Talus.Axes0'+.Talus.r0-SubTalarJoint.sRel*Axes0';
+    
+  AnyFunTransform3D &Scale = ..GeoScaling.Calcaneus.ScaleFunction; 
+    AnyFunTransform3D &GeomScale =Scale;
+  AnyRefNode AnatomicalFrame = {};
+    
+
+  
+  AnyVar MassS = ..MassScaling.Foot.MassScale;
+  AnyVar MassStandard = ..StandardParameters.Foot.Mass*0.360683468;
+  Mass = MassS*MassStandard;
+  
+  sCoM = Scale({0.01294929, 0.08385631, ..Sign*0.002736367});
+  JaboutCoMOnOff = On;
+  
+  AnyVar Ixx = 2/5 * Mass * (vnorm(0.5*(SubTalarJoint.sRel - HeelNode.sRel)))^2;
+  AnyVar Iyy = Ixx;
+  AnyVar Izz = Ixx;
+  
+  //AnyDrawRefFrame Drw = {ScaleXYZ={1,1,1}*0.1;};
+  //AnyDrawSeg Draw = {};
+  //AnyDrawNodes Draw = {ScaleXYZ = 0.004*{1,1,1};};
+  Jii={Ixx, Iyy, Izz};
+  
+  AnyDrawSurf DrwSurf = {
+    FileName = ..AnySurfFolder+"/Calcaneus";
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
+    RGB = Main.DrawSettings.Colors.Segments;
+    AnyFunTransform3D &Scale =.Scale; 
+    Opacity=1;
+  };
+  
+  AnyRefNode CalcaneoCuboidJoint = 
+  {
+     //AnyDrawRefFrame drw={ScaleXYZ={0.03,0.03,0.03};RGB={1,0.5,0};};
+    sRel = ..Cuboid.CalcaneoCuboidJoint.sRel;
+    ARel = ..Cuboid.CalcaneoCuboidJoint.ARel;// *RotMat(7*pi/180,z); // modified
+  };
+
+  AnyRefNode SubTalarJoint= 
+  {
+//    AnyDrawRefFrame drw={ScaleXYZ=10*{0.01,0.01,0.01};RGB={1,0,0};};
+    sRel = .Scale({0.03704882, 0.05320177, ...Sign*-0.000740961});
+//    ARel = RotMat((...Sign*25*pi/180),x)*RotMat(-58*pi/180,z)*RotMat(...Sign*-pi/2,y);
+    ARel = RotMat(sRel, .SubTalarJointAxisRef.sRel, ..Talus.AnkleJoint.sRel)*RotMat(...Sign*pi/2,y);
+  };
+    
+  
+  AnyRefNode SubTalarJointAxisRef = 
+  {
+    sRel = .Scale({-0.012, 0.105, ...Sign*0.015});
+    //AnyDrawRefFrame drw2={ScaleXYZ={0.02,0.02,0.02}*2;RGB={0,0,1};};
+  };
+  
+  
+  AnyRefNode HeelNode = 
+  {
+    sRel = .Scale({0.003219995, 0.09723906, ...Sign*-0.01468902}); //Taken from TD leg
+  };
+  
+  
+  AnyRefNode TuberCalcanei = 
+  {
+    sRel = .Scale({-0.001, 0.113, ...Sign*-0.003});
+//    AnyDrawRefFrame drw2={ScaleXYZ={0.02,0.02,0.02}*2;RGB={0,0,1};};
+  };
+  
+  AnyRefNode MedialProcess = 
+  {
+    sRel = .Scale({-0.02043697, 0.08772377, ...Sign*-0.005106899});
+//    AnyDrawRefFrame drw2={ScaleXYZ={0.02,0.02,0.02}*2;RGB={0,0,1};};
+  };
+  
+  AnyRefNode HeelFlatNode = 
+  {
+    sRel = .Scale({-0.02043697, 0.09172377, ...Sign*-0.005106899});
+    ARel = RotMat(pi,x)*RotMat(pi/2,y);
+//    AnyDrawRefFrame drw2={ScaleXYZ={0.02,0.02,0.02};RGB={0,0,1};};
+  };
+  
+  AnyRefNode HeelStrikeNode = 
+  {
+    sRel = .Scale({-0.01643697, 0.10272377, ...Sign*-0.005106899});
+    ARel = RotMat(pi,x)*RotMat(pi/2,y);
+//    AnyDrawRefFrame drw2={ScaleXYZ={0.02,0.02,0.02};RGB={0,0,1};};
+  };
+
+
+  AnyRefNode SustentaculumTali= 
+  {
+//    AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.02883537, 0.05635495, ...Sign*-0.0216453});
+  };
+  
+  
+  AnyRefNode CenterNode= 
+  {
+    sRel = .Scale({0.01294929, 0.08385631, ...Sign*0.002736367}); //this is sCoM
+  };
+
+  
+  AnyRefNode LongitudinalMedialArchNode = {
+      sRel = .Scale({-0.02006503, 0.08246424, ...Sign*-0.008728675});
+      //AnyDrawRefFrame drw = {ScaleXYZ = 0.03*{1,1,1};};
+    };
+    
+    AnyRefNode LongitudinalLateralArchNode = {
+      sRel = .Scale({-0.01604069, 0.08384896, ...Sign*0.006851214});
+      //AnyDrawRefFrame drw = {ScaleXYZ = 0.03*{1,1,1};};
+    };
+  
+  //***********************
+  //Muscles nodes
+  //***********************
+  
+  
+  AnyRefNode TendonCalcaneousNode= 
+  {
+//    AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    //sRel = .Scale({-0.01+0.01702725, 0.01+0.1094617, ...Sign*(0.0008899511+.02)});
+    sRel = .Scale({0.01702725, 0.1094617, ...Sign*(0.0008899511)});
+
+  };
+  
+  
+  AnyRefNode SoleusMedialis1Node= 
+  {
+    sRel = .TendonCalcaneousNode.sRel; //{0.027, 0.103, ...Sign*-0.005}*.ScaleMat;
+  };
+  
+  AnyRefNode SoleusMedialis2Node= 
+  {
+    sRel = .TendonCalcaneousNode.sRel; //{0.027, 0.103, ...Sign*-0.005}*.ScaleMat;
+  };
+
+  AnyRefNode SoleusMedialis3Node= 
+  {
+    sRel = .TendonCalcaneousNode.sRel; //{0.027, 0.103, ...Sign*-0.005}*.ScaleMat;
+  };
+
+  
+  AnyRefNode SoleusLateralis1Node= 
+  {
+    sRel = .TendonCalcaneousNode.sRel; //{0.027, 0.107, ...Sign*0.007}*.ScaleMat;
+  };
+  
+  AnyRefNode SoleusLateralis2Node= 
+  {
+    sRel = .TendonCalcaneousNode.sRel; //{0.027, 0.107, ...Sign*0.007}*.ScaleMat;
+  };
+  
+  AnyRefNode SoleusLateralis3Node= 
+  {
+    sRel = .TendonCalcaneousNode.sRel; //{0.027, 0.107, ...Sign*0.007}*.ScaleMat;
+  };
+
+  
+  AnyRefNode GastrocnemiusLateralis1Node= 
+  {
+    sRel = .TendonCalcaneousNode.sRel; //{0.027, 0.107, ...Sign*0.007}*.ScaleMat;
+  };
+
+  
+  AnyRefNode GastrocnemiusMedialis1Node= 
+  {
+    sRel = .TendonCalcaneousNode.sRel; //{0.020, 0.111, ...Sign*0.001}*.ScaleMat;
+  };
+  
+  
+  AnyRefNode Plantaris1Node= 
+  {
+    sRel = .TendonCalcaneousNode.sRel; //{0.029, 0.102, ...Sign*-0.003}*.ScaleMat;
+  };
+  
+  
+  AnyRefNode FlexorHallucisLongusViaNode6= 
+  {
+    AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.02368694+0.0, 0.0760648-0.005, ...Sign*(-0.01597639+0.00)});
+  };
+
+  
+  AnyRefNode FlexorHallucisLongusViaNode7= 
+  {
+    AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.02368694-0.01, 0.0760648-0.02, ...Sign*(-0.01597639+0.005)});
+  };
+  
+  
+  AnyRefNode FlexorHallucisLongusViaNode8= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.01211299, 0.04574652, ...Sign*-0.01602832});
+  };
+  
+  
+  AnyRefNode PeroneusBrevisViaNode3= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.03133927, 0.08328237, ...Sign*0.02153673});
+  };
+  
+  AnyRefNode PeroneusBrevisViaNode4= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.02350508, 0.07291825, ...Sign*0.02593871});
+  };
+  
+  
+  AnyRefNode PeroneusLongusViaNode3= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.03133927, 0.08328237, ...Sign*0.02153673});
+  };
+  
+  
+  AnyRefNode PeroneusLongusViaNode4= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.02350508, 0.07291825, ...Sign*0.02593871});
+  };
+  
+  
+    AnyRefNode TibialisPosteriorLateralisViaNode8= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.04018413, 0.05800213, ...Sign*-0.02329967});
+  };
+  
+  
+  AnyRefNode TibialisPosteriorMedialisViaNode9= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.04018413, 0.05800213, ...Sign*-0.02329967});
+  };
+  
+  AnyRefNode TibialisPosteriorViaNode10= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.02982681, 0.04620523, ...Sign*-0.02078786});
+  };
+  
+  AnyRefNode TibialisPosteriorViaNode11= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.01982681, 0.03420523, ...Sign*-0.01828786});
+  };
+  
+  AnyRefNode FlexorDigitorumLongusViaNode7= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.04046298, 0.06183172, ...Sign*-0.02262272});
+  };
+  
+  //  Moved from tasrsals to reproduce the extensor retinaculum inferior
+  AnyRefNode PeroneusTertiusViaNode3= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.0408379558, 0.03140739, ...Sign*0.03076334});
+  };
+
+  AnyRefNode ExtensorDigitorumLongusViaNode5= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.05546308, 0.0229197, ...Sign*0.01298886});
+  };
+  
+  AnyRefNode ExtensorDigitorumLongusViaNode5Bis= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.05346308, 0.0200197, ...Sign*0.01348886});
+  };
+  
+  AnyRefNode ExtensorHallucisLongusViaNode7= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.05312341, 0.007704016, ...Sign*-0.001000253});
+  };
+
+  //***********************
+  //Ligaments nodes
+  //***********************
+  AnyRefNode LigAponeurosisPlantaris= 
+  {
+//    AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({-0.02043697, 0.08772377, ...Sign*-0.005106899});
+  };
+  
+//  AnyRefNode LigLateralAponeurosisPlantaris= 
+//  {
+////    AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+//    sRel = .Scale({-0.01843697, 0.08972377, ...Sign*0.008106899});
+//  };
+
+  
+  AnyRefNode LigPlantareLongum = 
+  {
+//    AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+    sRel = .Scale({-0.01080559, 0.07788986, ...Sign*0.007302227});
+  };
+  
+  AnyRefNode LigTibioCalcaneal = {
+    sRel = .SustentaculumTali.sRel;
+  };
+  
+  AnyRefNode LigCalcaneoFibular = {
+    sRel = .Scale({0.0195808, 0.08178937, ...Sign*0.02061121});
+  };
+  
+  AnyRefNode LigCalcaneoNavicularPlantar1 = {
+//    sRel = .Scale({0.02746646, 0.05083057, ...Sign*-0.01806011});
+  sRel = .Scale({0.02675, 0.0499, ...Sign*-0.017598});
+
+  };
+  
+  AnyRefNode LigCalcaneoNavicularPlantar2 = {
+//    sRel = .Scale({0.0250344, 0.04708043, ...Sign*-0.0131952});
+ sRel = .Scale({0.02407, 0.0501, ...Sign*-0.01756});
+  
+
+  };
+  
+
+  
+  AnyRefNode LigCalcaneoNavicularPlantar3 = {
+sRel = .Scale({0.0246272,0.0479734,...Sign*-0.0141797});
+//     AnyDrawNode drw ={ScaleXYZ =0.0005*{1,1,1};};
+
+};
+AnyRefNode LigCalcaneoNavicularPlantar4 = {
+ sRel = .Scale({0.0245362,0.0466405,...Sign*-0.0114098});
+//     AnyDrawNode drw ={ScaleXYZ =0.0005*{1,1,1};};
+ }; 
+ AnyRefNode LigCalcaneoNavicularPlantar5 = {
+//     AnyDrawNode drw ={ScaleXYZ =0.0005*{1,1,1};};
+ sRel = .Scale({0.0246202,0.0453331,...Sign*-0.00826111});
+};
+ AnyRefNode LigCalcaneoNavicularPlantar6 = {
+ sRel = .Scale({0.0249016,0.0444283,...Sign*-0.00519779});
+//     AnyDrawNode drw ={ScaleXYZ =0.0005*{1,1,1};};
+};
+  
+  
+  
+  
+  AnyRefNode LigCalcaneoCuboidPlantar1 = {
+    sRel = .Scale({0.001287836, 0.05222258, ...Sign*0.01243312});
+  };
+  
+  AnyRefNode LigCalcaneoCuboidPlantar2 = {
+    sRel = .Scale({0.005218107, 0.05034289, ...Sign*0.00337628});
+  };
+  
+//AnyDrawRefFrame drw = {};
+
+}; // End of Calcaneus
+
+
+
+
+
+
+
+
+AnySeg Cuboid = {
+  r0=.Calcaneus.CalcaneoCuboidJoint.sRel*.Calcaneus.Axes0'+.Calcaneus.r0-CalcaneoCuboidJoint.sRel*Axes0';
+
+  AnyFunTransform3D &Scale = ..GeoScaling.Cuboid.ScaleFunction;  
+    AnyFunTransform3D &GeomScale =Scale;
+  AnyRefNode AnatomicalFrame = {};
+  AnyVar MassS = ..MassScaling.Foot.MassScale;
+  AnyVar MassStandard = ..StandardParameters.Foot.Mass*0.071723351;
+  Mass = MassS*MassStandard;
+  
+  //AnyDrawRefFrame Drw = {ScaleXYZ={1,1,1}*0.1;};
+  //AnyDrawSeg Draw = {};
+  sCoM = 0.5*(RefDist.sRel + RefProx.sRel);
+  JaboutCoMOnOff = On;
+  
+  AnyVar Ixx = 2/5 * Mass * (vnorm(0.5*(RefDist.sRel - RefProx.sRel)))^2;
+  AnyVar Iyy = Ixx;
+  AnyVar Izz = Ixx;
+  
+  Jii={Ixx, Iyy, Izz};
+
+  AnyDrawSurf DrwSurf = {
+    FileName = ..AnySurfFolder+"/Cuboid";
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
+    RGB = Main.DrawSettings.Colors.Segments;
+    AnyFunTransform3D &Scale =.Scale; 
+    Opacity=1;
+  };
+  
+  AnyRefNode CalcaneoCuboidJoint = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ=4*{0.005,0.005,0.005};RGB={1,0.5,0};};
+    sRel = .Scale({0.01998136, 0.04740945, ...Sign*0.01530706});
+    ARel = .CenterNode.ARel;
+  };
+  
+  AnyRefNode RefDist = 
+  {
+   //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1,0.5,0};};
+    sRel = .Scale({0.0169189, 0.006236519, ...Sign*0.02435441});
+  };
+  
+  AnyRefNode RefProx = 
+  {
+   //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1,0.5,0};};
+    sRel = .Scale({0.01501178, 0.04133683, ...Sign*0.02271292});
+  };
+
+  //Segment center node
+  AnyRefNode CenterNode={
+     //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,1,0};};
+    sRel=0.5*(.CalcaneoCuboidJoint.sRel+.RefDist.sRel);
+    ARel=RotMat(.CalcaneoCuboidJoint.sRel,.RefDist.sRel,.RefProx.sRel)*RotMat(...Sign*-pi/2,x);
+  };
+    
+ AnyRefNode TarsoMt4Joint = 
+  {
+ //    AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1,0,1};};
+    sRel = ..Metatarsal4.TarsoMtJoint.sRel;
+    ARel = ..Metatarsal4.TarsoMtJoint.ARel; // *RotMat(-8*pi/180,z); // modified
+  };
+
+ 
+  AnyRefNode TarsoMt5Joint = 
+  {
+ //    AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1,0,1};};
+    sRel = ..Metatarsal5.TarsoMtJoint.sRel;
+    ARel = ..Metatarsal5.TarsoMtJoint.ARel; // *RotMat(-10*pi/180,z); // modified
+  };
+
+  AnyRefNode TubOsCub = 
+  {
+//    AnyDrawNode drw={ScaleXYZ={0.003,0.003,0.003};RGB={1,0.5,0};};
+    sRel = .Scale({-0.002, 0.033, ...Sign*0.021});
+//    AnyDrawRefFrame drw2 ={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+  };  
+  
+   AnyRefNode LongitudinalLateralArchNode = {
+      sRel = .Scale({-0.00105371, 0.03435358, ...Sign*0.02918606});
+      //AnyDrawRefFrame drw = {ScaleXYZ = 0.03*{1,1,1};};
+    };
+  
+  //***********************
+  //Muscles nodes
+  //***********************
+  AnyRefNode PeroneusLongusViaNode5= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({-0.001156988, 0.0307862, ...Sign*0.03085269});
+  };
+  
+  AnyRefNode PeroneusLongusViaNode6= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.0004379558, 0.01480739, ...Sign*0.01776334});
+  };
+  
+  AnyRefNode PeroneusLongusViaNode7= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.0008379558, 0.01140739, ...Sign*0.01476334});
+  };
+  
+  AnyRefNode TibialisPosteriorNode= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.0004530015, 0.02105248, ...Sign*0.01581421});
+  };
+  
+  
+//  Moved to calcaneus to reproduce the extensor retinaculum inferior
+//  AnyRefNode PeroneusTertiusViaNode3= 
+//  {
+//    AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+//    sRel = .Scale({0.0408379558, 0.03140739, ...Sign*0.03076334});
+//  };
+  
+  //***********************
+  //Ligaments nodes
+  //***********************
+ 
+  AnyRefNode LigPlantareLongumMtII = 
+  {
+//    AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+    sRel = .Scale({-0.0004846412, 0.01922924, ...Sign*0.01212822});
+  };
+  
+  AnyRefNode LigPlantareLongumMtIII = 
+  {
+//    AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+    sRel = .Scale({-0.002242119, 0.02497191, ...Sign*0.01706126});
+  };
+  
+  AnyRefNode LigPlantareLongumMtIV = 
+  {
+//    AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+    sRel = .Scale({-0.002894016, 0.029622, ...Sign*0.02131046});
+  };
+  
+  AnyRefNode LigPlantareLongumMtV = 
+  {
+//    AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+    sRel = .Scale({-0.003003175, 0.03331616, ...Sign*0.02554463});
+  };
+  
+  
+  AnyRefNode LigCalcaneoCuboidPlantar1 = {
+    sRel = .Scale({0.0021128067, 0.03313358, ...Sign*0.01663392});
+  };
+  
+  AnyRefNode LigCalcaneoCuboidPlantar2 = {
+    sRel = .Scale({0.007521058, 0.02705763, ...Sign*0.010644199});
+  };
+  
+//  AnyDrawRefFrame drw = {};
+  
+}; // End of cuboid
+
+
+
+
+
+
+AnySeg Navicular = {
+  r0=.Talus.TaloNavicularJoint.sRel*.Talus.Axes0'+.Talus.r0-TaloNavicularJoint.sRel*Axes0';
+
+  AnyFunTransform3D &Scale = ..GeoScaling.Navicular.ScaleFunction;  
+    AnyFunTransform3D &GeomScale =Scale;
+  AnyRefNode AnatomicalFrame = {};
+  AnyVar MassS = ..MassScaling.Foot.MassScale;
+  AnyVar MassStandard = ..StandardParameters.Foot.Mass*0.048581127;
+  Mass = MassS*MassStandard;
+  
+  //AnyDrawRefFrame Drw = {ScaleXYZ={1,1,1}*0.1;};
+  //AnyDrawSeg Draw = {};
+  sCoM = 0.5*(RefDist.sRel + RefProx.sRel);
+  JaboutCoMOnOff = On;
+  
+  AnyVar Ixx = 2/5 * Mass * (vnorm(0.7*(RefDist.sRel - RefProx.sRel)))^2; //Radius adjusted slightly because not round.
+  AnyVar Iyy = Ixx;
+  AnyVar Izz = Ixx;
+  
+  Jii={Ixx, Iyy, Izz};
+  
+  AnyDrawSurf DrwSurf = {
+    FileName = ..AnySurfFolder+"/Navicular";
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
+    RGB = Main.DrawSettings.Colors.Segments;
+    AnyFunTransform3D &Scale =.Scale; 
+    Opacity=1;
+    
+  };
+  
+
+  AnyRefNode TaloNavicularJoint = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ=4*{0.005,0.005,0.005};RGB={1,0.5,0};};
+    sRel = .Scale({0.0412847, 0.0394277, ...Sign*-0.00418293});
+    ARel = .CenterNode.ARel;
+  };
+  
+  AnyRefNode RefDist = 
+  {
+   //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1,0.5,0};};
+    sRel = .Scale({0.03207851, 0.006374134, ...Sign*-0.00});
+  };
+  
+  AnyRefNode RefProx = 
+  {
+   //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1,0.5,0};};
+    sRel = .Scale({0.04078921, 0.03050495, ...Sign*-0.004127318});
+  };
+
+  //Segment center node
+  AnyRefNode CenterNode={
+//    AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,1,0};};
+    sRel = 0.5*(.TaloNavicularJoint.sRel+.RefDist.sRel);
+    ARel = RotMat(.TaloNavicularJoint.sRel,.RefDist.sRel,{1.0,0.0,-...Sign*0.1});
+  };
+    
+ AnyRefNode MedCuneiNaviJoint = 
+  {
+ //    AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,0,0};};
+    sRel = ..MedialCuneiform.CuneiNaviJoint.sRel;
+    ARel = ..MedialCuneiform.CuneiNaviJoint.ARel;
+  };
+
+ 
+  AnyRefNode IntCuneiNaviJoint = 
+  {
+ //    AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,0,0};};
+    sRel = ..IntermediateCuneiform.CuneiNaviJoint.sRel;
+    ARel = ..IntermediateCuneiform.CuneiNaviJoint.ARel;
+  };
+
+  
+  AnyRefNode LatCuneiNaviJoint = 
+  {
+ //    AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,0,0};};
+    sRel = ..LateralCuneiform.CuneiNaviJoint.sRel;
+    ARel = ..LateralCuneiform.CuneiNaviJoint.ARel;
+  };
+   
+  
+  AnyRefNode LongitudinalMedialArchNode = {
+      sRel = .Scale({0.01951499, 0.02558564, ...Sign*-0.0119657});
+      //AnyDrawRefFrame drw = {ScaleXYZ = 0.03*{1,1,1};};
+    };
+    
+
+  //***********************
+  //Muscles nodes
+  //***********************
+  
+//  Moved to calcaneus to reproduce the extensor retinaculum inferior
+//  AnyRefNode ExtensorHallucisLongusViaNode7= 
+//  {
+//    AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+//    sRel = .Scale({0.05312341, 0.007704016, ...Sign*-0.001000253});
+//  };
+  
+  AnyRefNode TibialisAnteriorViaNode2= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.04531562, 0.007037465, ...Sign*-0.01684052});
+  };
+
+  
+  AnyRefNode TibialisPosteriorNode= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.02541901, 0.02378803, ...Sign*-0.02439365});
+  };
+  
+  AnyRefNode TibialisPosteriorViaNode11= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.01982681, 0.03420523, ...Sign*-0.01828786});
+  };
+  
+  
+  
+//  Moved to calcaneus to reproduce the extensor retinaculum inferior
+//  AnyRefNode ExtensorDigitorumLongusViaNode5= 
+//  {
+//    AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+//    sRel = .Scale({0.05546308, 0.0229197, ...Sign*0.01298886});
+//  };
+//  
+//  AnyRefNode ExtensorDigitorumLongusViaNode5Bis= 
+//  {
+//    AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+//    sRel = .Scale({0.05346308, 0.0200197, ...Sign*0.01348886});
+//  };
+  
+
+  //***********************
+  //Ligaments nodes
+  //***********************
+  
+  AnyRefNode LigTibioNavicular = {
+    sRel = .Scale({0.03749775, 0.0215443, ...Sign*-0.02213777});
+  };
+  
+  AnyRefNode LigCalcaneoNavicularPlantar1 = {
+   // sRel = .Scale({0.03073173, 0.03206972, ...Sign*-0.01952226});
+      sRel = .Scale({0.0286, 0.02998, ...Sign*-0.02464});
+   
+  };
+  
+  AnyRefNode LigCalcaneoNavicularPlantar2 = {
+//    sRel = .Scale({0.02675282, 0.03336712, ...Sign*-0.01096544});
+ sRel = .Scale({0.0256, 0.02888, ...Sign*-0.02468});
+
+
+  };
+  
+ 
+  
+  AnyRefNode LigCalcaneoNavicularPlantar3 = {
+   sRel =.Scale({ 0.0254785,0.0312751,...Sign*-0.0175138});
+//  AnyDrawNode drw ={ScaleXYZ =0.0005*{1,1,1};};
+ };
+
+  
+  AnyRefNode LigCalcaneoNavicularPlantar4 = {
+    sRel =.Scale({   0.02459,0.0324901,...Sign*-0.0126953});
+//  AnyDrawNode drw ={ScaleXYZ =0.0005*{1,1,1};};
+  };
+  AnyRefNode LigCalcaneoNavicularPlantar5 = {
+   sRel =.Scale({ 0.0228703,0.0333343,...Sign*-0.00746194});
+//     AnyDrawNode drw ={ScaleXYZ =0.0005*{1,1,1};};
+
+ };
+  
+  AnyRefNode LigCalcaneoNavicularPlantar6 = {
+  sRel =.Scale({ 0.022755,0.0341731,...Sign*-0.00223565});
+//  AnyDrawNode drw ={ScaleXYZ =0.0005*{1,1,1};};
+};
+
+  AnyRefNode ExtensorHallucisLongusViaNode7= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.05312341, 0.007704016, ...Sign*-0.001000253});
+  };
+  
+  
+  
+}; // End of Navicular
+
+
+
+
+
+
+AnySeg MedialCuneiform = {
+  r0=.Navicular.MedCuneiNaviJoint.sRel*.Navicular.Axes0'+.Navicular.r0-CuneiNaviJoint.sRel*Axes0';
+  
+  AnyFunTransform3D &Scale = ..GeoScaling.MedialCuneiform.ScaleFunction;  
+    AnyFunTransform3D &GeomScale =Scale;
+  AnyRefNode AnatomicalFrame = {};
+  AnyVar MassS = ..MassScaling.Foot.MassScale;
+  AnyVar MassStandard = ..StandardParameters.Foot.Mass*0.048888141;
+  Mass = MassS*MassStandard;
+  
+  //AnyDrawRefFrame Drw = {ScaleXYZ={1,1,1}*0.1;};
+  //AnyDrawSeg Draw = {};
+  sCoM = 0.5*(RefDist.sRel + RefProx.sRel);
+  JaboutCoMOnOff = On;
+  
+  AnyVar Ixx = 2/5 * Mass * (vnorm(0.5*(RefDist.sRel - RefProx.sRel)))^2;
+  AnyVar Iyy = Ixx;
+  AnyVar Izz = Ixx;
+  
+  Jii={Ixx, Iyy, Izz};
+
+  AnyDrawSurf DrwSurf = {
+    FileName = ..AnySurfFolder+"/MedialCuneiForm";
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
+    RGB = Main.DrawSettings.Colors.Segments;
+    AnyFunTransform3D &Scale =.Scale; 
+    Opacity=1;
+  };
+  
+  AnyRefNode CuneiNaviJoint = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005}*4;RGB={1,0,0};};
+    sRel = .Scale({0.03425049, 0.02063769, ...Sign*-0.0120163});
+    ARel = .CenterNode.ARel;
+  };
+  
+  AnyRefNode RefDist = 
+  {
+   //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,0,0};};
+    sRel = .Scale({0.02021981, -0.01710036, ...Sign*-0.00764076});
+  };
+  
+  AnyRefNode RefProx = 
+  {
+   //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,0,0};};
+    sRel = .Scale({0.02274339, 0.01484567, ...Sign*-0.01290666});
+  };
+
+  //Segment center node
+  AnyRefNode CenterNode={
+ //    AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,1,0};};
+    sRel = 0.5*(.CuneiNaviJoint.sRel+.RefDist.sRel);
+    ARel = RotMat(.CuneiNaviJoint.sRel,.RefDist.sRel,{1.0,0.0,-...Sign*0.1});
+  };
+    
+ AnyRefNode TarsoMtJoint = 
+  {
+     AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1,0,1};};
+    sRel = ..Metatarsal1.TarsoMtJoint.sRel;
+    ARel = ..Metatarsal1.TarsoMtJoint.ARel;
+  };
+
+  AnyRefNode FDLSegNode= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.006972241, 0.003908742, ...Sign*-0.01273537});
+  };
+  
+  //***********************
+  //Muscles nodes
+  //***********************
+  AnyRefNode ExtensorHallucisLongusViaNode8= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.03492677, -0.02143653, ...Sign*-0.00564653});
+  };
+  
+  AnyRefNode TibialisAnteriorViaNode3= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+//    sRel = .JntTarsoMt.sRel + {0, 0, ...Sign*-0.014}*.JntTarsoMt.ARel';
+    sRel = .Scale({0.02531562, -0.004037465, ...Sign*-0.02284052});
+  };
+  
+  AnyRefNode TibialisAnteriorNode= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.003783489, -0.001798439, ...Sign*-0.01854955});
+  };
+  
+  AnyRefNode PeroneusLongusNode= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.005196392, -0.001617243, ...Sign*-0.003879015});
+  };
+
+  
+  AnyRefNode TibialisPosteriorNode= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.007535917, 0.0138324, ...Sign*-0.01333547});
+  };
+  
+  //***********************
+  //Ligaments nodes
+  //***********************
+  
+    
+}; // End of MedialCuneiform
+
+
+
+
+
+
+AnySeg IntermediateCuneiform = {
+  r0=.Navicular.IntCuneiNaviJoint.sRel*.Navicular.Axes0'+.Navicular.r0-CuneiNaviJoint.sRel*Axes0';
+
+  AnyFunTransform3D &Scale = ..GeoScaling.IntermediateCuneiform.ScaleFunction;  
+    AnyFunTransform3D &GeomScale =Scale;
+  AnyRefNode AnatomicalFrame = {};
+  AnyVar MassS = ..MassScaling.Foot.MassScale;
+  AnyVar MassStandard = ..StandardParameters.Foot.Mass*0.011344111;
+  Mass = MassS*MassStandard;
+  
+  //AnyDrawRefFrame Drw = {ScaleXYZ={1,1,1}*0.1;};
+  //AnyDrawSeg Draw = {};
+  sCoM = 0.5*(RefDist.sRel + RefProx.sRel);
+  JaboutCoMOnOff = On;
+  
+  AnyVar Ixx = 2/5 * Mass * (vnorm(0.5*(RefDist.sRel - RefProx.sRel)))^2;
+  AnyVar Iyy = Ixx;
+  AnyVar Izz = Ixx;
+  
+  Jii={Ixx, Iyy, Izz};
+
+  AnyDrawSurf DrwSurf = {
+    FileName = ..AnySurfFolder+"/IntermediateCuneiForm";
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
+    RGB = Main.DrawSettings.Colors.Segments;
+    AnyFunTransform3D &Scale =.Scale; 
+    Opacity=1;
+  };  
+  
+  AnyRefNode CuneiNaviJoint = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005}*4;RGB={0,0,0};};
+    sRel = .Scale({0.03425049, 0.02163769, ...Sign*-0.00});
+    ARel = .CenterNode.ARel;
+  };
+  
+  AnyRefNode RefDist = 
+  {
+ //  AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,0,0};};
+    sRel = .Scale({0.02720337, -0.007425747, ...Sign*0.004325873});
+  };
+  
+  AnyRefNode RefProx = 
+  {
+   //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,0,0};};
+    sRel = .Scale({0.02901805, 0.01426308, ...Sign*0.003278877});
+  };
+
+  //Segment center node
+  AnyRefNode CenterNode={
+ //    AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,1,0};};
+    sRel = 0.5*(.CuneiNaviJoint.sRel+.RefDist.sRel);
+    ARel = RotMat(.CuneiNaviJoint.sRel,.RefDist.sRel,{1.0,0.0, ...Sign*0.1});
+  };
+    
+ AnyRefNode TarsoMtJoint = 
+  {
+     //AnyDrawRefFrame drw={ScaleXYZ=10*{0.005,0.005,0.005};RGB={1,0,1};};
+    sRel = ..Metatarsal2.TarsoMtJoint.sRel;
+    ARel = ..Metatarsal2.TarsoMtJoint.ARel;
+
+  };
+
+  
+  //***********************
+  //Muscles nodes
+  //***********************
+  
+  AnyRefNode TibialisPosteriorNode= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.01643715, 0.009019729, ...Sign*0.001469});
+  };
+  
+  //***********************
+  //Ligaments nodes
+  //***********************
+  
+  
+}; // End of IntermediateCuneiform
+
+
+
+
+
+
+AnySeg LateralCuneiform = {
+  r0=.Navicular.LatCuneiNaviJoint.sRel*.Navicular.Axes0'+.Navicular.r0-CuneiNaviJoint.sRel*Axes0';
+
+  AnyFunTransform3D &Scale = ..GeoScaling.LateralCuneiform.ScaleFunction;  
+    AnyFunTransform3D &GeomScale =Scale;
+  AnyRefNode AnatomicalFrame = {};
+  AnyVar MassS = ..MassScaling.Foot.MassScale;
+  AnyVar MassStandard = ..StandardParameters.Foot.Mass*0.021885718;
+  Mass = MassS*MassStandard;
+  
+  //AnyDrawRefFrame Drw = {ScaleXYZ={1,1,1}*0.1;};
+  //AnyDrawSeg Draw = {};
+  sCoM = 0.5*(RefDist.sRel + RefProx.sRel);
+  JaboutCoMOnOff = On;
+  
+  AnyVar Ixx = 2/5 * Mass * (vnorm(0.5*(RefDist.sRel - RefProx.sRel)))^2;
+  AnyVar Iyy = Ixx;
+  AnyVar Izz = Ixx;
+  
+  Jii={Ixx, Iyy, Izz};
+
+  AnyDrawSurf DrwSurf = {
+    FileName = ..AnySurfFolder+"/LateralCuneiForm";
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
+    RGB = Main.DrawSettings.Colors.Segments;
+    AnyFunTransform3D &Scale =.Scale; 
+    Opacity=1;
+  };
+  
+  AnyRefNode CuneiNaviJoint = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005}*4;RGB={0,0,0};};
+    sRel = .Scale({0.03425049, 0.02663769, ...Sign*0.008});
+    ARel = .CenterNode.ARel;
+  };
+  
+  AnyRefNode RefDist = 
+  {
+   //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,0,0};};
+    sRel = .Scale({0.01832511, -0.002470206, ...Sign*0.01754009});
+  };
+  
+  AnyRefNode RefProx = 
+  {
+   //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,0,0};};
+    sRel = .Scale({0.03005463, 0.02050315, ...Sign*0.01087503});
+  };
+
+  //Segment center node
+  AnyRefNode CenterNode={
+ //    AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,1,0};};
+    sRel = 0.5*(.CuneiNaviJoint.sRel+.RefDist.sRel);
+    ARel = RotMat(.CuneiNaviJoint.sRel,.RefDist.sRel,{1.0,0.0, ...Sign*0.4});
+  };
+    
+ AnyRefNode TarsoMtJoint = 
+  {
+ //    AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1,0,1};};
+    sRel = ..Metatarsal3.TarsoMtJoint.sRel;
+    ARel = ..Metatarsal3.TarsoMtJoint.ARel;
+
+  };
+  
+//  AnyRefNode ArticularLateralCunieform={
+//    sRel={0.02,0.01,...Sign*(0.013)};
+//    ARel = RotMat(...Sign*-30*pi/180,x)*RotMat(-10*pi/180,z);
+//  };
+
+
+  
+  //***********************
+  //Muscles nodes
+  //***********************
+  
+  AnyRefNode TibialisPosteriorNode= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.01260536, 0.01329963, ...Sign*0.003394764});
+  };
+  
+  //***********************
+  //Ligaments nodes
+  //***********************
+  
+  
+  
+}; // End of LateralCuneiform 
+
+
+
+
+
+
+
+
+
+
+
+ //************************************************
+ //Metatarsal bones
+ //************************************************
+
+AnySeg Metatarsal1 = {
+  AnyFolder &FootType = ..FootType;
+  r0=.MedialCuneiform.TarsoMtJoint.sRel*.MedialCuneiform.Axes0'+.MedialCuneiform.r0-TarsoMtJoint.sRel*Axes0';
+  
+  AnyFunTransform3D &Scale = ..GeoScaling.Metatarsal1.ScaleFunction;  
+    AnyFunTransform3D &GeomScale =Scale;
+  AnyRefNode AnatomicalFrame = {};
+  
+
+  
+
+  AnyVar MassS = ..MassScaling.Foot.MassScale;
+  AnyVar MassStandard = ..StandardParameters.Foot.Mass*0.079950498;
+  Mass = MassS*MassStandard;
+  
+  //AnyDrawRefFrame Drw = {ScaleXYZ={1,1,1}*0.1;};
+  //AnyDrawSeg Draw = {};
+  sCoM = 0.5*(RefDist.sRel + RefProx.sRel);
+  JaboutCoMOnOff = On;
+  
+  AnyVar Length = vnorm(RefDist.sRel - RefProx.sRel);
+  AnyVar Radius = (Mass/(3.1416*Length*..StandardParameters.Foot.Density))^0.5;
+  
+  AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
+  AnyVar Iyy = 0.5 * Mass * Radius^2;
+  AnyVar Izz = Ixx;
+  
+  AnyMat33 JM = CenterNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode.ARel';
+  Jii = {JM[0][0], JM[1][1], JM[2][2]};
+  Jij = {JM[1][0], JM[2][1], JM[2][0]};
+  
+  AnyDrawSurf DrwSurf = {
+    FileName = ..AnySurfFolder+"/Metatarsal1";
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0}*.FootType.MetaScale;
+    RGB = Main.DrawSettings.Colors.Segments;
+    AnyFunTransform3D &Scale =.Scale; 
+    Opacity=1;
+  };
+  
+  AnyRefNode TarsoMtJoint = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005}*4;RGB={1.0,0.0,1.0};};
+    sRel = .Scale({0.01914963, -0.005595438, ...Sign*-0.007328187}*.FootType.MetaScale);
+    ARel = .CenterNode.ARel;
+  };
+  
+  AnyRefNode RefDist = 
+  {
+   //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1.0,0.0,1.0};};
+    sRel = .Scale({0.001281104, -0.07378177, ...Sign*-0.01694805}*.FootType.MetaScale);
+  };
+  
+  AnyRefNode RefProx = 
+  {
+   //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1.0,0.0,1.0};};
+    sRel = .Scale({0.02043713, -0.01768618, ...Sign*-0.005930602}*.FootType.MetaScale);
+  };
+
+  //Segment center node
+  AnyRefNode CenterNode={
+ //    AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,1,0};};
+    sRel = 0.5*(.TarsoMtJoint.sRel+.RefDist.sRel);    
+    ARel = RotMat(.TarsoMtJoint.sRel,.RefDist.sRel,{1.0,0.0,-...Sign*0.1});
+  };
+    
+ AnyRefNode MtPhalJoint = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,1,0};};
+    sRel = .Scale({0.00461532, -0.0629641, ...Sign*-0.0155316}*.FootType.MetaScale);
+    ARel = ..ProximalPhalange1.MtPhalJoint.ARel;
+  };
+
+  AnyRefNode MtPhalJointTop ={
+     sRel = .MtPhalJoint.sRel+({0, 0.02,0})*.MtPhalJoint.ARel';
+  
+     AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+
+  };
+ 
+  
+
+  AnyRefNode ToeMedialContactNode = 
+  {
+   //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1.0,0.0,1.0};};
+    sRel = .Scale({-0.009935249, -0.06863255, ...Sign*-0.01473953}*.FootType.MetaScale);
+  };
+  
+  //For arch driving
+  AnyRefNode MTHeadPlantarNode = {
+    sRel = .Scale({-0.008955133, -0.06022283, ...Sign*-0.01254332})*.FootType.MetaScale;
+    //AnyDrawRefFrame drw = {ScaleXYZ = 0.03*{1,1,1};};
+  };
+  
+  AnyRefNode MTBasePlantarNode = {
+    sRel = .Scale({0.003362707, -0.01443166, ...Sign*-0.007165866})*.FootType.MetaScale;
+    //AnyDrawRefFrame drw = {ScaleXYZ = 0.03*{1,1,1};};
+  };
+  
+  AnyRefNode MTHeadMedialNode = {
+    sRel = .Scale({0.004, -0.066, ...Sign*-0.031})*.FootType.MetaScale;
+//    AnyDrawRefFrame drw = {ScaleXYZ = 0.03*{1,1,1};};
+  };
+  
+  //***********************
+  //Muscles nodes
+  //***********************
+  AnyRefNode ExtensorHallucisLongusViaNode9= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.01556493, -0.06811287, ...Sign*-0.01827705}*.FootType.MetaScale);
+  };
+  
+  AnyRefNode FlexorHallucisLongusViaNode9= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({-0.014, -0.062, ...Sign*(-0.014+0.003)}*.FootType.MetaScale);
+  };
+  
+  
+  AnyRefNode TibialisAnteriorNode= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.002034105, -0.01681538, ...Sign*-0.01692949}*.FootType.MetaScale);
+  };
+  
+  AnyRefNode PeroneusLongusNode= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.004046949, -0.01758855, ...Sign*-0.00379118}*.FootType.MetaScale);
+  };
+  
+  
+  //***********************
+  //Ligaments nodes
+  //***********************
+  
+  
+  AnyRefNode LigAponeurosisPlantaris = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+    sRel = .Scale({-0.012895353, -0.06379488, ...Sign*-0.01172546}*.FootType.MetaScale);
+  };
+  
+  
+  AnyRefNode LigMtTransversumProfundum = 
+  {
+//   AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+    sRel = .Scale({-0.008019808, -0.05859427, ...Sign*-0.01423272}*.FootType.MetaScale);
+  };
+
+
+  
+      AnyRefNode LigMtTransversumProfundumVia1 = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+    sRel = .Scale({-0.008019808+0.002, -0.05859427-0.001, ...Sign*(-0.01423272+0.01)}*.FootType.MetaScale);
+
+ 
+};
+
+  AnyRefNode LigMtTransversumProfundumVia2 = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+    sRel = .Scale({-0.008019808+0.003, -0.05859427-0.004, ...Sign*(-0.01423272-0.003)}*.FootType.MetaScale);
+ 
+};
+}; // End of Metatarsal1
+
+
+
+
+
+
+AnySeg Metatarsal2 = {
+  r0=.IntermediateCuneiform.TarsoMtJoint.sRel*.IntermediateCuneiform.Axes0'+.IntermediateCuneiform.r0-TarsoMtJoint.sRel*Axes0';
+  
+  AnyFunTransform3D &Scale = ..GeoScaling.Metatarsal2.ScaleFunction;  
+    AnyFunTransform3D &GeomScale =Scale;
+  AnyRefNode AnatomicalFrame = {};
+  
+
+  
+  AnyVar MassS = ..MassScaling.Foot.MassScale;
+  AnyVar MassStandard = ..StandardParameters.Foot.Mass*0.022272746;
+  Mass = MassS*MassStandard;
+  
+  //AnyDrawRefFrame Drw = {ScaleXYZ={1,1,1}*0.1;};
+  //AnyDrawSeg Draw = {};
+  sCoM = 0.5*(RefDist.sRel + RefProx.sRel);
+  JaboutCoMOnOff = On;
+  
+  AnyVar Length = vnorm(RefDist.sRel - RefProx.sRel);
+  AnyVar Radius = (Mass/(3.1416*Length*..StandardParameters.Foot.Density))^0.5;
+  
+  AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
+  AnyVar Iyy = 0.5 * Mass * Radius^2;
+  AnyVar Izz = Ixx;
+  
+  AnyMat33 JM = CenterNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode.ARel';
+  Jii = {JM[0][0], JM[1][1], JM[2][2]};
+  Jij = {JM[1][0], JM[2][1], JM[2][0]};
+
+  AnyDrawSurf DrwSurf = {
+    FileName = ..AnySurfFolder+"/Metatarsal2";
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
+    RGB = Main.DrawSettings.Colors.Segments;
+    AnyFunTransform3D &Scale =.Scale; 
+    Opacity=1;
+  };
+  
+  AnyRefNode TarsoMtJoint = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005}*4;RGB={1.0,0.0,1.0};};
+    sRel = .Scale({0.02818961, 0.00300708, ...Sign*0.005696584});
+    ARel = .CenterNode.ARel;
+  };
+  
+  AnyRefNode RefDist = 
+  {
+   //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1.0,0.0,1.0};};
+    sRel = .Scale({-0.002583532, -0.07378442, ...Sign*0.01133846});
+  };
+  
+  AnyRefNode RefProx = 
+  {
+   //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1.0,0.0,1.0};};
+    sRel = .Scale({0.03360497, -0.003129372, ...Sign*0.00865457});
+  };
+
+  //Segment center node
+  AnyRefNode CenterNode={
+ //    AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,1,0};};
+    sRel = 0.5*(.TarsoMtJoint.sRel+.RefDist.sRel);    
+    ARel = RotMat(.TarsoMtJoint.sRel,.RefDist.sRel,.RefProx.sRel);
+  };
+    
+ AnyRefNode MtPhalJoint = 
+  {
+     //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,1,0};};
+    sRel = ..ProximalPhalange2.MtPhalJoint.sRel;
+    ARel = ..ProximalPhalange2.MtPhalJoint.ARel;
+  };
+  
+  
+  //For arch driving
+  AnyRefNode MTHeadPlantarNode = {
+    sRel = .Scale({-0.006963247, -0.06338102, ...Sign*0.009121777});
+    //AnyDrawRefFrame drw = {ScaleXYZ = 0.03*{1,1,1};};
+  };
+  
+  AnyRefNode MTBasePlantarNode = {
+      sRel = .Scale({0.01356838, -0.005666247, ...Sign*0.00490277});
+      //AnyDrawRefFrame drw = {ScaleXYZ = 0.03*{1,1,1};};
+    };
+  
+  
+  //***********************
+  //Muscles nodes
+  //***********************
+
+  AnyRefNode TibialisPosteriorNode= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.01476131, -0.007845885, ...Sign*0.004612114});
+  };
+  
+  AnyRefNode ExtensorDigitorumLongusViaNode6= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.008556107, -0.06897692, ...Sign*0.01293468});
+  };
+  
+  AnyRefNode ExtensorDigitorumLongusViaNode6Bis= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.010556107, -0.06497692, ...Sign*0.01293468});
+  };
+  
+  AnyRefNode FlexorDigitorumLongusViaNode9= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({-0.009987976, -0.06425791, ...Sign*0.00922974});
+  };
+  
+  //***********************
+  //Ligaments nodes
+  //***********************
+ 
+  
+  AnyRefNode LigAponeurosisPlantaris = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+    sRel = .Scale({-0.008818686, -0.06633225, ...Sign*0.00991033});
+  };
+  
+  AnyRefNode LigPlantareLongum = 
+  {
+//    AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+    sRel = .Scale({0.01366725, -0.008698959, ...Sign*0.006294541});
+  };
+  
+  
+  AnyRefNode LigMtTransversumProfundum = 
+  {
+//   AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+    sRel = .Scale({-0.00756642, -0.06334756, ...Sign*0.01050367});
+  };
+  
+
+    AnyRefNode LigMtTransversumProfundumVia1 = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+    sRel = .Scale({-0.00756642+0.002, -0.06334756+0.002, ...Sign*(0.01050367+0.004)});
+ 
+};
+
+  AnyRefNode LigMtTransversumProfundumVia2 = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+    sRel = .Scale({-0.00756642+0.003, -0.06334756-0.00, ...Sign*(0.01050367-0.004)});
+ 
+};
+
+  
+}; // End of Metatarsal2
+
+
+
+
+
+AnySeg Metatarsal3 = {
+  r0=.LateralCuneiform.TarsoMtJoint.sRel*.LateralCuneiform.Axes0'+.LateralCuneiform.r0-TarsoMtJoint.sRel*Axes0';
+  
+  AnyFunTransform3D &Scale = ..GeoScaling.Metatarsal3.ScaleFunction; 
+    AnyFunTransform3D &GeomScale =Scale;
+  AnyRefNode AnatomicalFrame = {};
+  
+  
+  
+  AnyVar MassS = ..MassScaling.Foot.MassScale;
+  AnyVar MassStandard = ..StandardParameters.Foot.Mass*0.018827431;
+  Mass = MassS*MassStandard;
+  
+  //AnyDrawSeg Draw = {};
+  sCoM = 0.5*(RefDist.sRel + RefProx.sRel);
+  JaboutCoMOnOff = On;
+  
+  AnyVar Length = vnorm(RefDist.sRel - RefProx.sRel);
+  AnyVar Radius = (Mass/(3.1416*Length*..StandardParameters.Foot.Density))^0.5;
+  
+  AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
+  AnyVar Iyy = 0.5 * Mass * Radius^2;
+  AnyVar Izz = Ixx;
+  
+  AnyMat33 JM = CenterNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode.ARel';
+  Jii = {JM[0][0], JM[1][1], JM[2][2]};
+  Jij = {JM[1][0], JM[2][1], JM[2][0]};
+
+  AnyDrawSurf DrwSurf = {
+    FileName = ..AnySurfFolder+"/Metatarsal3";
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
+    RGB = Main.DrawSettings.Colors.Segments;
+    AnyFunTransform3D &Scale =.Scale; 
+    Opacity=1;
+  };
+  
+  AnyRefNode TarsoMtJoint = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005}*4;RGB={1.0,0.0,1.0};};
+    sRel = .Scale({0.02039496, 0.00767156, ...Sign*0.01477314});
+    ARel = .CenterNode.ARel;
+  };
+  
+  AnyRefNode RefDist = 
+  {
+   //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1.0,0.0,1.0};};
+    sRel = .Scale({-0.003279205, -0.06856769, ...Sign*0.02516251});
+  };
+
+  AnyRefNode RefProx = 
+  {
+   //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1.0,0.0,1.0};};
+    sRel = .Scale({0.02540494, 0.001358806, ...Sign*0.02256901});
+  };
+  
+  //Segment center node
+  AnyRefNode CenterNode={
+ //    AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,1,0};};
+    sRel = 0.5*(.TarsoMtJoint.sRel+.RefDist.sRel);    
+    ARel = RotMat(.TarsoMtJoint.sRel,.RefDist.sRel,.RefProx.sRel);
+  };
+    
+ AnyRefNode MtPhalJoint = 
+  {
+ //    AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,1,0};};
+    sRel = ..ProximalPhalange3.MtPhalJoint.sRel;
+    ARel = ..ProximalPhalange3.MtPhalJoint.ARel;
+  };
+  
+  
+  //For arch driving
+  AnyRefNode MTHeadPlantarNode = {
+      sRel = .Scale({-0.008146089, -0.05959793, ...Sign*0.02372242});
+      //AnyDrawRefFrame drw = {ScaleXYZ = 0.03*{1,1,1};};
+    };
+    
+    AnyRefNode MTBasePlantarNode = {
+      sRel = .Scale({0.007215903, -0.002471606, ...Sign*0.01179935});
+      //AnyDrawRefFrame drw = {ScaleXYZ = 0.03*{1,1,1};};
+    };
+    
+
+  //***********************
+  //Muscles nodes
+  //***********************
+
+  AnyRefNode TibialisPosteriorNode= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.009710893, -0.005824256, ...Sign*0.01222676});
+  };
+  
+  AnyRefNode ExtensorDigitorumLongusViaNode9= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.006101825, -0.06353456, ...Sign*0.02756303});
+  };
+  
+  AnyRefNode ExtensorDigitorumLongusViaNode9Bis= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.008101825, -0.05953456, ...Sign*0.02716303});
+  };
+  
+  AnyRefNode FlexorDigitorumLongusViaNode12= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({-0.011, -0.059, ...Sign*0.023});
+  };
+
+  //***********************
+  //Ligaments nodes
+  //***********************
+
+  AnyRefNode LigAponeurosisPlantaris = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+    sRel = .Scale({-0.010482872, -0.06023365, ...Sign*0.02313049});
+  };
+  
+  AnyRefNode LigPlantareLongum = 
+  {
+//    AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+    sRel = .Scale({0.007420158, -0.006300809, ...Sign*0.01260412});
+  };
+  
+  
+  AnyRefNode LigMtTransversumProfundum = 
+  {
+//   AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+    sRel = .Scale({-0.009191576, -0.05713054, ...Sign*0.02343944});
+  };
+
+  
+  AnyRefNode LigMtTransversumProfundumVia1 = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+    sRel = .Scale({-0.009191576+0.002, -0.05713054+0.004, ...Sign*(0.02343944+0.004)});
+  };
+
+  AnyRefNode LigMtTransversumProfundumVia2 = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+sRel = .Scale({-0.009191576+0.004, -0.05713054-0.002, ...Sign*(0.02343944-0.004)});
+  };
+
+  
+  
+  
+}; // End of Metatarsal3
+
+
+
+
+
+AnySeg Metatarsal4 = {
+  r0=.Cuboid.TarsoMt4Joint.sRel*.Cuboid.Axes0'+.Cuboid.r0-TarsoMtJoint.sRel*Axes0';
+  
+  AnyFunTransform3D &Scale = ..GeoScaling.Metatarsal4.ScaleFunction; 
+
+  
+    AnyFunTransform3D &GeomScale =Scale;
+  AnyRefNode AnatomicalFrame = {};
+  
+  AnyVar MassS = ..MassScaling.Foot.MassScale;
+  AnyVar MassStandard = ..StandardParameters.Foot.Mass*0.017399045;
+  Mass = MassS*MassStandard;
+  
+  //AnyDrawSeg Draw = {};
+  sCoM = 0.5*(RefDist.sRel + RefProx.sRel);
+  JaboutCoMOnOff = On;
+  
+  AnyVar Length = vnorm(RefDist.sRel - RefProx.sRel);
+  AnyVar Radius = (Mass/(3.1416*Length*..StandardParameters.Foot.Density))^0.5;
+  
+  AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
+  AnyVar Iyy = 0.5 * Mass * Radius^2;
+  AnyVar Izz = Ixx;
+  
+  AnyMat33 JM = CenterNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode.ARel';
+  Jii = {JM[0][0], JM[1][1], JM[2][2]};
+  Jij = {JM[1][0], JM[2][1], JM[2][0]};
+
+  AnyDrawSurf DrwSurf = {
+    FileName = ..AnySurfFolder+"/Metatarsal4";
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
+    RGB = Main.DrawSettings.Colors.Segments;
+    AnyFunTransform3D &Scale =.Scale; 
+    Opacity=1;
+  };
+  
+  AnyRefNode TarsoMtJoint = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005}*4;RGB={1.0,0.0,1.0};};
+    sRel = .Scale({0.01154973, 0.01612223, ...Sign*0.0229518});
+    ARel = .CenterNode.ARel;
+  };
+  
+  AnyRefNode RefDist = 
+  {
+   //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1.0,0.0,1.0};};
+    sRel = .Scale({-0.004182283, -0.05773099, ...Sign*0.03925701});
+  };
+  
+  AnyRefNode RefProx = 
+  {
+   //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1.0,0.0,1.0};};
+    sRel = .Scale({0.01618675, 0.01049928, ...Sign*0.03054708});
+  };
+
+  //Segment center node
+  AnyRefNode CenterNode={
+//    AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,1,0};};
+    sRel = 0.5*(.TarsoMtJoint.sRel+.RefDist.sRel);
+    ARel = RotMat(.TarsoMtJoint.sRel,.RefDist.sRel,.RefProx.sRel);
+  };
+    
+ AnyRefNode MtPhalJoint = 
+  {
+ //    AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,1,0};};
+    sRel = ..ProximalPhalange4.MtPhalJoint.sRel;
+    ARel = ..ProximalPhalange4.MtPhalJoint.ARel;
+  };
+  
+  
+  //For arch driving
+  AnyRefNode MTHeadPlantarNode = {
+      sRel = .Scale({-0.01083598, -0.0483197, ...Sign*0.03714457});
+      //AnyDrawRefFrame drw = {ScaleXYZ = 0.03*{1,1,1};};
+    };
+    
+    AnyRefNode MTBasePlantarNode = {
+      sRel = .Scale({0.00155934, 1.747418e-005, ...Sign*0.02085457});
+      //AnyDrawRefFrame drw = {ScaleXYZ = 0.03*{1,1,1};};
+    };
+  
+  //***********************
+  //Muscles nodes
+  //***********************
+
+  AnyRefNode TibialisPosteriorNode= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.002704195, -0.002160678, ...Sign*0.02093688});
+  };
+  
+  AnyRefNode ExtensorDigitorumLongusViaNode12= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.005002459, -0.05358112, ...Sign*0.04083552});
+  };
+  
+  AnyRefNode ExtensorDigitorumLongusViaNode12Bis= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.007002459, -0.04958112, ...Sign*0.04013552});
+  };
+  
+  AnyRefNode FlexorDigitorumLongusViaNode15= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({-0.013, -0.048, ...Sign*0.036});
+  };
+  
+  //***********************
+  //Ligaments nodes
+  //***********************
+
+  AnyRefNode LigAponeurosisPlantaris = 
+  {
+//    AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+    sRel = .Scale({-0.01247978, -0.04689572, ...Sign*0.0368894});
+  };
+
+  AnyRefNode LigPlantareLongum = 
+  {
+//    AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+    sRel = .Scale({0.002316924, -0.0005054712, ...Sign*0.02031012});
+  };
+  
+  AnyRefNode LigMtTransversumProfundum = 
+  {
+//    AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+    sRel = .Scale({-0.01114404, -0.0452928, ...Sign*0.03696619});
+  };
+
+  
+   
+  AnyRefNode LigMtTransversumProfundumVia1 = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+      sRel = .Scale({-0.01114404+0.002, -0.0452928+0.004, ...Sign*(0.03696619+0.004)});
+  };
+
+  AnyRefNode LigMtTransversumProfundumVia2 = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+      sRel = .Scale({-0.01114404+0.003, -0.0452928-0.004, ...Sign*(0.03696619-0.004)});
+  };
+
+
+  
+  
+}; // End of Metatarsal4
+
+
+
+
+
+
+AnySeg Metatarsal5 = {
+  
+  r0=.Cuboid.TarsoMt5Joint.sRel*.Cuboid.Axes0'+.Cuboid.r0-TarsoMtJoint.sRel*Axes0';
+  
+  AnyFunTransform3D &Scale = ..GeoScaling.Metatarsal5.ScaleFunction;  
+  
+  
+    
+  AnyFunTransform3D &GeomScale =Scale;
+  AnyRefNode AnatomicalFrame = {};
+  
+  AnyVar MassS = ..MassScaling.Foot.MassScale;
+  AnyVar MassStandard = ..StandardParameters.Foot.Mass*0.038130794;
+  Mass = MassS*MassStandard;
+  
+  //AnyDrawSeg Draw = {};
+  sCoM = 0.5*(RefDist2.sRel + RefProx.sRel);
+  JaboutCoMOnOff = On;
+  
+  AnyVar Length = vnorm(RefDist2.sRel - RefProx.sRel);
+  AnyVar Radius = (Mass/(3.1416*Length*..StandardParameters.Foot.Density))^0.5;
+  
+  AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
+  AnyVar Iyy = 0.5 * Mass * Radius^2;
+  AnyVar Izz = Ixx;
+  
+  AnyMat33 JM = CenterNode2.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode2.ARel';
+  Jii = {JM[0][0], JM[1][1], JM[2][2]};
+  Jij = {JM[1][0], JM[2][1], JM[2][0]};
+
+  AnyDrawSurf DrwSurf = {
+    FileName = ..AnySurfFolder+"/Metatarsal5";
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
+    RGB = Main.DrawSettings.Colors.Segments;
+    AnyFunTransform3D &Scale =.Scale; 
+    Opacity=1;
+  };
+  
+  AnyRefNode TarsoMtJoint = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005}*4;RGB={1.0,0.0,1.0};};
+    sRel = .Scale({0.006738373, 0.02296503, ...Sign*0.02914318});
+    ARel = .CenterNode.ARel;
+  };
+  
+  AnyRefNode RefDist = 
+  {
+   //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1.0,0.0,1.0};};
+    sRel = .Scale({-0.001300164, 0.006966656, ...Sign*0.04349853});
+  };
+  
+  AnyRefNode RefDist2 = 
+  {
+   //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1.0,0.0,1.0};};
+    sRel = .Scale({-0.00878843, -0.04335999, ...Sign*0.05328835});
+  };
+  
+  AnyRefNode RefProx = 
+  {
+   //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1.0,0.0,1.0};};
+    sRel = .Scale({0.007439617, 0.01899536, ...Sign*0.03620561});
+  };
+
+  //Segment center node
+  AnyRefNode CenterNode={
+ //    AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,1,0};};
+    sRel = 0.5*(.TarsoMtJoint.sRel+.RefDist.sRel);    
+    ARel = RotMat(.TarsoMtJoint.sRel,.RefDist.sRel,.RefProx.sRel);
+  };
+  
+    AnyRefNode CenterNode2={
+//     AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005}*2;RGB={0,1,0};};
+    sRel = 0.5*(.RefProx.sRel+.RefDist2.sRel);    
+    ARel = RotMat(.RefProx.sRel,.RefDist2.sRel,{1.0,0.0,0.0});
+  };
+
+    
+ AnyRefNode MtPhalJoint = 
+  {
+     //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,1,0};};
+    sRel = ..ProximalPhalange5.MtPhalJoint.sRel;
+    ARel = ..ProximalPhalange5.MtPhalJoint.ARel;
+  };
+  
+  AnyRefNode ToeLateralContactNode = 
+  {
+   //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1.0,0.0,1.0};};
+    sRel = .Scale({-0.01395678, -0.04078208, ...Sign*0.0500268});
+  };
+  
+
+
+  AnyRefNode FDLSegNode= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({-0.003476697, 0.01189963, ...Sign*0.03306715});
+  };
+  
+  
+  //For arch driving
+  AnyRefNode MTHeadPlantarNode = {
+      sRel = .Scale({-0.01412619, -0.03599002, ...Sign*0.05112629});
+      //AnyDrawRefFrame drw = {ScaleXYZ = 0.03*{1,1,1};};
+    };
+    
+    AnyRefNode MTBasePlantarNode = {
+      sRel = .Scale({-0.007076697, 0.01189963, ...Sign*0.03306715});
+      //AnyDrawRefFrame drw = {ScaleXYZ = 0.03*{1,1,1};};
+    };
+  
+    AnyRefNode MTHeadLateralNode = {
+      sRel = .Scale({-0.01012619, -0.03599002, ...Sign*0.06112629});
+//      AnyDrawRefFrame drw = {ScaleXYZ = 0.03*{1,1,1};};
+    };
+  
+  //***********************
+  //Muscles nodes
+  //***********************1
+  
+  AnyRefNode PeroneusBrevis1Node= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({-0.00299591, 0.02599151, ...Sign*0.03968708});
+  };
+  
+  AnyRefNode PeroneusBrevis2Node= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({-0.00299591-0.003, 0.02599151+0.001, ...Sign*0.03968708});
+  };
+  
+  AnyRefNode PeroneusBrevis3Node= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({-0.00299591-0.005, 0.02599151+0.002, ...Sign*0.03968708});
+  };
+  
+  
+  AnyRefNode PeroneusTertius1Node= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.007367618, 0.00374845, ...Sign*0.04305841});
+  };
+  
+  AnyRefNode PeroneusTertius2Node= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.007367618, 0.00374845, ...Sign*0.04305841});
+  };
+  
+  AnyRefNode PeroneusTertius3Node= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.007367618, 0.00374845, ...Sign*0.04305841});
+  };
+  
+  
+  AnyRefNode ExtensorDigitorumLongusViaNode15= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({-0.000330596, -0.03888475, ...Sign*0.05644042});
+  };
+  
+  AnyRefNode FlexorDigitorumLongusViaNode18= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({-0.0150506, -0.03604911, ...Sign*0.04730838});
+  };
+  
+   
+  //***********************
+  //Ligaments nodes
+  //***********************1
+
+  AnyRefNode LigAponeurosisPlantaris = 
+  {
+ //   AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+    sRel = .Scale({-0.01507671, -0.03593956, ...Sign*0.04811938});
+  };
+  
+//  AnyRefNode LigLateralAponeurosisPlantaris = 
+//  {
+////    AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+//    sRel = .Scale({-0.00999591, 0.02399151, ...Sign*0.03768708});
+//  };
+
+
+  AnyRefNode LigPlantareLongum = 
+  {
+//    AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+    sRel = .Scale({-0.006880364, 0.01088403, ...Sign*0.03285331});
+  };
+  
+  AnyRefNode LigMtTransversumProfundum = 
+  {
+//    AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+    sRel = .Scale({-0.01374553, -0.03369623, ...Sign*0.05109619});
+  };
+
+  
+  AnyRefNode LigMtTransversumProfundumVia1 = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+    sRel = .Scale({-0.01374553+0.002, -0.03369623+0.004, ...Sign*(0.05109619+0.004)});
+  };
+
+  AnyRefNode LigMtTransversumProfundumVia2 = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+    sRel = .Scale({-0.01374553+0.003, -0.03369623-0.004, ...Sign*(0.05109619-0.004)});
+  };
+
+  
+  
+}; // End of Metatarsal5
+
+
+
+
+
+
+
+
+
+
+
+
+
+ //************************************************
+ //Proximal Phalanges  bones
+ //************************************************
+
+AnySeg ProximalPhalange1 = {
+    
+  AnyFolder &FootType = ..FootType;
+  r0=.Metatarsal1.MtPhalJoint.sRel*.Metatarsal1.Axes0'+.Metatarsal1.r0-MtPhalJoint.sRel*Axes0';
+    
+  AnyFunTransform3D &Scale = ..GeoScaling.ProximalPhalanges1.ScaleFunction;  
+    AnyFunTransform3D &GeomScale =Scale;
+  AnyRefNode AnatomicalFrame = {};
+  
+  AnyVar MassS = ..MassScaling.Foot.MassScale;
+  AnyVar MassStandard = ..StandardParameters.Foot.Mass*0.017790222;
+  Mass = MassS*MassStandard;
+
+  //AnyDrawSeg Draw = {};
+  sCoM = 0.5*(RefDist.sRel + MtPhalJoint.sRel);
+  JaboutCoMOnOff = On;
+  
+  AnyVar Length = vnorm(RefDist.sRel - MtPhalJoint.sRel);
+  AnyVar Radius = (Mass/(3.1416*Length*..StandardParameters.Foot.Density))^0.5;
+  
+  AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
+  AnyVar Iyy = 0.5 * Mass * Radius^2;
+  AnyVar Izz = Ixx;
+  
+  AnyMat33 JM = CenterNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode.ARel';
+  Jii = {JM[0][0], JM[1][1], JM[2][2]};
+  Jij = {JM[1][0], JM[2][1], JM[2][0]};
+
+  AnyDrawSurf DrwSurf = {
+    FileName = ..AnySurfFolder+"/ProximalPhalange1";
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0}*.FootType.ProxPhalScale;
+    RGB = Main.DrawSettings.Colors.Segments;
+    AnyFunTransform3D &Scale =.Scale;
+    Opacity=1;
+  };
+  
+  AnyRefNode MtPhalJoint = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ=10*{0.005,0.005,0.005};RGB={0.0,1.0,0.0};};
+    sRel = .Scale({0.00461532, -0.0629641, ...Sign*-0.0155316}*.FootType.ProxPhalScale);
+    ARel = .CenterNode.ARel*RotMat(-20*pi/180,x);
+  };
+  
+  AnyRefNode RefDist = 
+  {
+   //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+    sRel = .Scale({-0.000441674, -0.1014964, ...Sign*-0.006944514}*.FootType.ProxPhalScale);
+  };
+
+  //Segment center node
+  AnyRefNode CenterNode={
+ //    AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,1,0};};
+    sRel = 0.5*(.MtPhalJoint.sRel+.RefDist.sRel);
+    ARel = RotMat(.MtPhalJoint.sRel,.RefDist.sRel,{0.1,0,0} );
+  };
+ 
+  
+  AnyRefNode DistPhalJoint = 
+  {
+     //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,0,1};};
+   // sRel = .Scale({-0.001083079, -0.10166927, ...Sign*-0.008109532}*.FootType.ProxPhalScale);
+   sRel =..DistalPhalange1.DistPhalJoint.sRel;
+    
+    ARel = ..DistalPhalange1.DistPhalJoint.ARel;
+ 
+  };
+    
+    
+  AnyRefNode RefDistTop ={
+     sRel = .DistPhalJoint.sRel+({0, 0.01,0})*.DistPhalJoint.ARel';
+  
+     AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+
+  };
+ 
+  
+  //***********************
+  //Muscles nodes
+  //***********************
+  AnyRefNode ExtensorHallucisLongusViaNode10= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.005761685, -0.09947411, ...Sign*-0.007985534}*.FootType.ProxPhalScale);
+  };
+  
+  AnyRefNode FlexorHallucisLongusViaNode10= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({-0.008933837, -0.09484615, ...Sign*-0.00810336}*.FootType.ProxPhalScale);
+  };
+
+  //***********************
+  //Ligaments nodes
+  //***********************
+  
+  AnyRefNode LigAponeurosisPlantaris = 
+  {
+   //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+    sRel = .Scale({-0.007756465, -0.07420416, ...Sign*-0.01336598}*.FootType.ProxPhalScale);
+  };
+  
+}; // End of ProximalPhalanges1
+
+
+
+
+
+AnySeg ProximalPhalange2 = {
+  r0=.Metatarsal2.MtPhalJoint.sRel*.Metatarsal2.Axes0'+.Metatarsal2.r0-MtPhalJoint.sRel*Axes0';
+  
+  AnyFunTransform3D &Scale = ..GeoScaling.ProximalPhalanges2.ScaleFunction; 
+    AnyFunTransform3D &GeomScale =Scale;
+  AnyRefNode AnatomicalFrame = {};
+  AnyVar MassS = ..MassScaling.Foot.MassScale;
+  AnyVar MassStandard = ..StandardParameters.Foot.Mass*0.007562741;
+  Mass = MassS*MassStandard;
+  
+  //AnyDrawSeg Draw = {};
+  sCoM = 0.5*(RefDist.sRel + MtPhalJoint.sRel);
+  JaboutCoMOnOff = On;
+  
+  AnyVar Length = vnorm(RefDist.sRel - MtPhalJoint.sRel);
+  AnyVar Radius = (Mass/(3.1416*Length*..StandardParameters.Foot.Density))^0.5;
+  
+  AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
+  AnyVar Iyy = 0.5 * Mass * Radius^2;
+  AnyVar Izz = Ixx;
+  
+  AnyMat33 JM = CenterNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode.ARel';
+  Jii = {JM[0][0], JM[1][1], JM[2][2]};
+  Jij = {JM[1][0], JM[2][1], JM[2][0]};
+
+  AnyDrawSurf DrwSurf = {
+    FileName = ..AnySurfFolder+"/ProximalPhalange2";
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0}; 
+    RGB = Main.DrawSettings.Colors.Segments;
+    AnyFunTransform3D &Scale =.Scale; 
+    Opacity=1;
+    
+  };
+  
+  AnyRefNode MtPhalJoint = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0.0,1.0,0.0};};
+    sRel = .Scale({0.0006, -0.0675, ...Sign*0.0126588});
+    ARel = .CenterNode.ARel;
+  };
+  
+  AnyRefNode RefDist = 
+  {
+   //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0.0,1.0,0.0};};
+    sRel = .Scale({-0.001707296, -0.09941698, ...Sign*0.01747704});
+  };
+  
+  AnyRefNode RefProx = 
+  {
+   //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0.0,1.0,0.0};};
+    sRel = .Scale({0.005556107, -0.07297692, ...Sign*0.01393468});
+  };
+
+  //Segment center node
+  AnyRefNode CenterNode={
+ //    AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,1,0};};
+    sRel = 0.5*(.MtPhalJoint.sRel+.RefDist.sRel);
+    ARel = RotMat(.MtPhalJoint.sRel,.RefDist.sRel,.RefProx.sRel);
+  };
+    
+ AnyRefNode ProxPhalJoint = 
+  {
+ //    AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1,0,0};};
+    sRel = ..MiddlePhalange2.ProxPhalJoint.sRel;
+    ARel = ..MiddlePhalange2.ProxPhalJoint.ARel;
+  };
+ 
+    
+
+  //***********************
+  //Muscles nodes
+  //***********************
+
+  AnyRefNode ExtensorDigitorumLongusViaNode7= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.004356564, -0.09994124, ...Sign*0.01804176});
+  };
+  
+  AnyRefNode FlexorDigitorumLongusViaNode10= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({-0.00711984, -0.09624732, ...Sign*0.01596708});
+  };
+  
+  
+  //***********************
+  //Ligaments nodes
+  //***********************
+  
+  AnyRefNode LigAponeurosisPlantaris = 
+  {
+//   AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+    sRel = .Scale({-0.009073988, -0.07490946, ...Sign*0.01194693});
+  };
+
+}; // End of ProximalPhalanges2
+
+
+
+
+AnySeg ProximalPhalange3 = {
+  r0=.Metatarsal3.MtPhalJoint.sRel*.Metatarsal3.Axes0'+.Metatarsal3.r0-MtPhalJoint.sRel*Axes0';
+  
+  AnyFunTransform3D &Scale = ..GeoScaling.ProximalPhalanges3.ScaleFunction;  
+    AnyFunTransform3D &GeomScale =Scale;
+  AnyRefNode AnatomicalFrame = {};
+  AnyVar MassS = ..MassScaling.Foot.MassScale;
+  AnyVar MassStandard = ..StandardParameters.Foot.Mass*0.006408771;
+  Mass = MassS*MassStandard;
+  
+  //AnyDrawSeg Draw = {};
+  sCoM = 0.5*(RefDist.sRel + MtPhalJoint.sRel);
+  JaboutCoMOnOff = On;
+  
+  AnyVar Length = vnorm(RefDist.sRel - MtPhalJoint.sRel);
+  AnyVar Radius = (Mass/(3.1416*Length*..StandardParameters.Foot.Density))^0.5;
+  
+  AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
+  AnyVar Iyy = 0.5 * Mass * Radius^2;
+  AnyVar Izz = Ixx;
+  
+  AnyMat33 JM = CenterNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode.ARel';
+  Jii = {JM[0][0], JM[1][1], JM[2][2]};
+  Jij = {JM[1][0], JM[2][1], JM[2][0]};
+
+  AnyDrawSurf DrwSurf = {
+    FileName = ..AnySurfFolder+"/ProximalPhalange3";
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};  
+    RGB = Main.DrawSettings.Colors.Segments;
+    AnyFunTransform3D &Scale =.Scale; 
+    Opacity=1;
+  };
+  
+  AnyRefNode MtPhalJoint = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0.0,1.0,0.0};};
+    sRel = .Scale({-0.00169444, -0.063321, ...Sign*0.0259938});
+    ARel = .CenterNode.ARel;
+  };
+  
+  AnyRefNode RefDist = 
+  {
+   //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0.0,1.0,0.0};};
+    sRel = .Scale({-0.002001345, -0.09177314, ...Sign*0.03132222});
+  };
+  
+  AnyRefNode RefProx = 
+  {
+   //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0.0,1.0,0.0};};
+    sRel = .Scale({0.003101825, -0.06753456, ...Sign*0.02756303});
+  };
+
+  //Segment center node
+  AnyRefNode CenterNode={
+ //    AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,1,0};};
+    sRel = 0.5*(.MtPhalJoint.sRel+.RefDist.sRel);
+    ARel = RotMat(.MtPhalJoint.sRel,.RefDist.sRel,.RefProx.sRel);
+  };
+    
+ AnyRefNode ProxPhalJoint = 
+  {
+ //    AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1,0,0};};
+    sRel = ..MiddlePhalange3.ProxPhalJoint.sRel;
+    ARel = ..MiddlePhalange3.ProxPhalJoint.ARel;
+
+  };
+ 
+  
+  //***********************
+  //Muscles nodes
+  //***********************
+
+  AnyRefNode ExtensorDigitorumLongusViaNode10= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.003532243, -0.09107391, ...Sign*0.03195742});
+  };
+  
+  AnyRefNode FlexorDigitorumLongusViaNode13= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({-0.007466041, -0.09024897, ...Sign*0.03119982});
+  };
+  
+  //***********************
+  //Ligaments nodes
+  //***********************
+  
+  AnyRefNode LigAponeurosisPlantaris = 
+  {
+//   AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+    sRel = .Scale({-0.010546552, -0.07198454, ...Sign*0.0270324});
+  };
+  
+}; // End of ProximalPhalanges3
+
+
+
+
+
+AnySeg ProximalPhalange4 = {
+  r0=.Metatarsal4.MtPhalJoint.sRel*.Metatarsal4.Axes0'+.Metatarsal4.r0-MtPhalJoint.sRel*Axes0';
+  
+  AnyFunTransform3D &Scale = ..GeoScaling.ProximalPhalanges4.ScaleFunction;
+    AnyFunTransform3D &GeomScale =Scale;
+  AnyRefNode AnatomicalFrame = {};
+  AnyVar MassS = ..MassScaling.Foot.MassScale;
+  AnyVar MassStandard = ..StandardParameters.Foot.Mass*0.00596366;
+  Mass = MassS*MassStandard;
+  
+  //AnyDrawSeg Draw = {};
+  sCoM = 0.5*(RefDist.sRel + MtPhalJoint.sRel);
+  JaboutCoMOnOff = On;
+  
+  AnyVar Length = vnorm(RefDist.sRel - MtPhalJoint.sRel);
+  AnyVar Radius = (Mass/(3.1416*Length*..StandardParameters.Foot.Density))^0.5;
+  
+  AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
+  AnyVar Iyy = 0.5 * Mass * Radius^2;
+  AnyVar Izz = Ixx;
+  
+  AnyMat33 JM = CenterNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode.ARel';
+  Jii = {JM[0][0], JM[1][1], JM[2][2]};
+  Jij = {JM[1][0], JM[2][1], JM[2][0]};
+
+  AnyDrawSurf DrwSurf = {
+    FileName = ..AnySurfFolder+"/ProximalPhalange4";
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
+    RGB = Main.DrawSettings.Colors.Segments;
+    AnyFunTransform3D &Scale =.Scale; 
+    Opacity=1;
+  };
+  
+  AnyRefNode MtPhalJoint = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0.0,1.0,0.0};};
+    sRel = .Scale({-0.00371203, -0.052253, ...Sign*0.0387849});
+    ARel = .CenterNode.ARel;
+  };
+  
+  AnyRefNode RefDist = 
+  {
+   //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0.0,1.0,0.0};};
+    sRel = .Scale({-0.001343082, -0.07598902, ...Sign*0.04605937});
+  };
+  
+  AnyRefNode RefProx = 
+  {
+   //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0.0,1.0,0.0};};
+    sRel = .Scale({0.00141203, -0.056253, ...Sign*0.0417849});
+  };
+
+  //Segment center node
+  AnyRefNode CenterNode={
+ //    AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,1,0};};
+    sRel = 0.5*(.MtPhalJoint.sRel+.RefDist.sRel);
+    ARel = RotMat(.MtPhalJoint.sRel,.RefDist.sRel,.RefProx.sRel);
+  };
+    
+ AnyRefNode ProxPhalJoint = 
+  {
+//    AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1,0,0};};
+    sRel = ..MiddlePhalange4.ProxPhalJoint.sRel;
+    ARel = ..MiddlePhalange4.ProxPhalJoint.ARel;
+
+  };
+ 
+  
+  //***********************
+  //Muscles nodes
+  //***********************
+
+  AnyRefNode ExtensorDigitorumLongusViaNode13= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.002651, -0.0754736, ...Sign*0.04705616});
+  };
+  
+  AnyRefNode FlexorDigitorumLongusViaNode16= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({-0.008409728, -0.07458583, ...Sign*0.04537511});
+  };
+  
+  //***********************
+  //Ligaments nodes
+  //***********************
+  
+  AnyRefNode LigAponeurosisPlantaris = 
+  {
+//   AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+    sRel = .Scale({-0.010898785, -0.06055018, ...Sign*0.04002751});
+  };  
+
+  
+}; // End of ProximalPhalanges4
+
+
+
+
+AnySeg ProximalPhalange5 = {
+  r0=.Metatarsal5.MtPhalJoint.sRel*.Metatarsal5.Axes0'+.Metatarsal5.r0-MtPhalJoint.sRel*Axes0';
+  
+  AnyFunTransform3D &Scale = ..GeoScaling.ProximalPhalanges5.ScaleFunction;  
+    AnyFunTransform3D &GeomScale =Scale;
+  AnyRefNode AnatomicalFrame = {};
+  AnyVar MassS = ..MassScaling.Foot.MassScale;
+  AnyVar MassStandard = ..StandardParameters.Foot.Mass*0.00440014;
+  Mass = MassS*MassStandard;
+  
+  //AnyDrawSeg Draw = {};
+  sCoM = 0.5*(RefDist.sRel + MtPhalJoint.sRel);
+  JaboutCoMOnOff = On;
+  
+  AnyVar Length = vnorm(RefDist.sRel - MtPhalJoint.sRel);
+  AnyVar Radius = (Mass/(3.1416*Length*..StandardParameters.Foot.Density))^0.5;
+  
+  AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
+  AnyVar Iyy = 0.5 * Mass * Radius^2;
+  AnyVar Izz = Ixx;
+  
+  AnyMat33 JM = CenterNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode.ARel';
+  Jii = {JM[0][0], JM[1][1], JM[2][2]};
+  Jij = {JM[1][0], JM[2][1], JM[2][0]};
+
+  AnyDrawSurf DrwSurf = {
+    FileName = ..AnySurfFolder+"/ProximalPhalange5";
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
+    RGB = Main.DrawSettings.Colors.Segments;
+    AnyFunTransform3D &Scale =.Scale; 
+    Opacity=1;
+    
+  };
+  
+  AnyRefNode MtPhalJoint = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0.0,1.0,0.0};};
+    sRel = .Scale({-0.00784451, -0.0350961, ...Sign*0.0532479});
+    ARel = .CenterNode.ARel;
+  };
+  
+  AnyRefNode RefDist = 
+  {
+   //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0.0,1.0,0.0};};
+    sRel = .Scale({-0.006638374, -0.06325011, ...Sign*0.05860036});
+  };
+  
+  AnyRefNode RefProx = 
+  {
+   //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0.0,1.0,0.0};};
+    sRel = .Scale({-0.00484451, -0.0400961, ...Sign*0.0562479});
+  };
+
+  //Segment center node
+  AnyRefNode CenterNode={
+ //    AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,1,0};};
+    sRel = 0.5*(.MtPhalJoint.sRel+.RefDist.sRel);
+    ARel = RotMat(.MtPhalJoint.sRel,.RefDist.sRel,.RefProx.sRel);
+  };
+    
+ AnyRefNode ProxPhalJoint = 
+  {
+ //    AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1,0,0};};
+    sRel = ..MiddlePhalange5.ProxPhalJoint.sRel;
+    ARel = ..MiddlePhalange5.ProxPhalJoint.ARel;
+
+  };
+ 
+  //***********************
+  //Muscles nodes
+  //***********************
+
+  AnyRefNode ExtensorDigitorumLongusViaNode16= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({-0.002418618, -0.06236667, ...Sign*0.06261555});
+  };
+  
+  AnyRefNode FlexorDigitorumLongusViaNode19= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({-0.011552142, -0.06120244, ...Sign*0.05494571});
+  };
+  
+  //***********************
+  //Ligaments nodes
+  //***********************
+  
+  AnyRefNode LigAponeurosisPlantaris = 
+  {
+//   AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={1.0,1.0,0.0};};
+    sRel = .Scale({-0.01350584, -0.04699492, ...Sign*0.04993995});
+  };  
+
+
+  
+
+  
+}; // End of ProximalPhalanges5
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ //************************************************
+ //Middle Phalanges  bones
+ //************************************************
+
+AnySeg MiddlePhalange2 = {
+  r0=.ProximalPhalange2.ProxPhalJoint.sRel*.ProximalPhalange2.Axes0'+.ProximalPhalange2.r0-ProxPhalJoint.sRel*Axes0';
+
+  AnyFunTransform3D &Scale = ..GeoScaling.MiddlePhalanges2.ScaleFunction;  
+    AnyFunTransform3D &GeomScale =Scale;
+  AnyRefNode AnatomicalFrame = {};
+  AnyVar MassS = ..MassScaling.Foot.MassScale;
+  AnyVar MassStandard = ..StandardParameters.Foot.Mass*0.001591376;
+  Mass = MassS*MassStandard;
+  
+  //AnyDrawSeg Draw = {};
+  sCoM = 0.5*(RefDist.sRel + ProxPhalJoint.sRel);
+  JaboutCoMOnOff = On;
+  
+  AnyVar Length = vnorm(RefDist.sRel - ProxPhalJoint.sRel);
+  AnyVar Radius = (Mass/(3.1416*Length*..StandardParameters.Foot.Density))^0.5;
+  
+  AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
+  AnyVar Iyy = 0.5 * Mass * Radius^2;
+  AnyVar Izz = Ixx;
+  
+  AnyMat33 JM = CenterNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode.ARel';
+  Jii = {JM[0][0], JM[1][1], JM[2][2]};
+  Jij = {JM[1][0], JM[2][1], JM[2][0]};
+
+  AnyDrawSurf DrwSurf = {
+    FileName = ..AnySurfFolder+"/MiddlePhalange2";
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
+    RGB = Main.DrawSettings.Colors.Segments;
+    AnyFunTransform3D &Scale =.Scale; 
+    Opacity=1;
+  };
+  
+  AnyRefNode ProxPhalJoint = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1,0,0};};
+    sRel = .Scale({-0.003158194+0.002, -0.0962966, ...Sign*0.01694824});
+    ARel = .CenterNode.ARel;
+  };
+  
+  AnyRefNode RefDist = 
+  {
+     //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1,0,0};};
+    sRel = .Scale({-0.00495792, -0.111385, ...Sign*0.02043704});
+  };
+  
+  AnyRefNode RefProx = 
+  {
+     //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1,0,0};};
+    sRel = .Scale({0.004356564, -0.09994124, ...Sign*0.01804176});
+  };
+
+  //Segment center node
+  AnyRefNode CenterNode={
+ //    AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,1,0};};
+    sRel = 0.5*(.ProxPhalJoint.sRel+.RefDist.sRel);
+    ARel = RotMat(.ProxPhalJoint.sRel,.RefDist.sRel,.RefProx.sRel);
+  };
+    
+   AnyRefNode DistPhalJoint = 
+  {
+ //    AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,0,1};};
+    sRel = ..DistalPhalange2.DistPhalJoint.sRel;
+    ARel = ..DistalPhalange2.DistPhalJoint.ARel;
+  }; 
+  
+  //***********************
+  //Muscles nodes
+  //***********************
+
+  AnyRefNode ExtensorDigitorumLongusViaNode8= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.001242716, -0.1129332, ...Sign*0.0203853});
+  };
+  
+  AnyRefNode ExtensorDigitorumLongusNode= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.003538499, -0.1052887, ...Sign*0.01918585});
+  };
+  
+  AnyRefNode FlexorDigitorumLongusViaNode11= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({-0.008963993, -0.1082601, ...Sign*0.02008046});
+  };
+  
+}; // End of MiddlePhalanges2
+
+
+
+
+
+AnySeg MiddlePhalange3 = {
+  r0=.ProximalPhalange3.ProxPhalJoint.sRel*.ProximalPhalange3.Axes0'+.ProximalPhalange3.r0-ProxPhalJoint.sRel*Axes0';
+
+  AnyFunTransform3D &Scale = ..GeoScaling.MiddlePhalanges3.ScaleFunction;  
+    AnyFunTransform3D &GeomScale =Scale;
+  AnyRefNode AnatomicalFrame = {};
+  AnyVar MassS = ..MassScaling.Foot.MassScale;
+  AnyVar MassStandard = ..StandardParameters.Foot.Mass*0.001243466;
+  Mass = MassS*MassStandard;
+  
+  //AnyDrawSeg Draw = {};
+  sCoM = 0.5*(RefDist.sRel + ProxPhalJoint.sRel);
+  JaboutCoMOnOff = On;
+  
+  AnyVar Length = vnorm(RefDist.sRel - ProxPhalJoint.sRel);
+  AnyVar Radius = (Mass/(3.1416*Length*..StandardParameters.Foot.Density))^0.5;
+  
+  AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
+  AnyVar Iyy = 0.5 * Mass * Radius^2;
+  AnyVar Izz = Ixx;
+  
+  AnyMat33 JM = CenterNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode.ARel';
+  Jii = {JM[0][0], JM[1][1], JM[2][2]};
+  Jij = {JM[1][0], JM[2][1], JM[2][0]};
+
+  AnyDrawSurf DrwSurf = {
+    FileName = ..AnySurfFolder+"/MiddlePhalange3";
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
+    RGB = Main.DrawSettings.Colors.Segments;
+    AnyFunTransform3D &Scale =.Scale; 
+    Opacity=1;
+  };
+  
+  AnyRefNode ProxPhalJoint = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1,0,0};};
+    sRel = .Scale({-0.001918323, -0.08935672, ...Sign*0.03099156});
+    ARel = .CenterNode.ARel;
+  };
+  
+  AnyRefNode RefDist = 
+  {
+     //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1,0,0};};
+    sRel = .Scale({-0.004356479, -0.1043722, ...Sign*0.03404669});
+  };
+  
+  AnyRefNode RefProx = 
+  {
+     //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1,0,0};};
+    sRel = .Scale({0.003532243, -0.09107391, ...Sign*0.03195742});
+  };
+
+  //Segment center node
+  AnyRefNode CenterNode={
+ //    AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,1,0};};
+    sRel = 0.5*(.ProxPhalJoint.sRel+.RefDist.sRel);
+    ARel = RotMat(.ProxPhalJoint.sRel,.RefDist.sRel,.RefProx.sRel);
+  };
+
+   AnyRefNode DistPhalJoint = 
+  {
+ //    AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,0,1};};
+    sRel = ..DistalPhalange3.DistPhalJoint.sRel;
+    ARel = ..DistalPhalange3.DistPhalJoint.ARel;
+  }; 
+ 
+  //***********************
+  //Muscles nodes
+  //***********************
+
+  AnyRefNode ExtensorDigitorumLongusViaNode11= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({-0.001146739, -0.1043938, ...Sign*0.03473453});
+  };
+  
+  AnyRefNode ExtensorDigitorumLongusNode= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.001891965, -0.09497174, ...Sign*0.03286684});
+  };
+  
+  AnyRefNode FlexorDigitorumLongusViaNode14= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({-0.011867984, -0.1033654, ...Sign*0.03382728});
+  };
+  
+}; // End of MiddlePhalanges3
+
+
+
+
+
+
+AnySeg MiddlePhalange4 = {
+  r0=.ProximalPhalange4.ProxPhalJoint.sRel*.ProximalPhalange4.Axes0'+.ProximalPhalange4.r0-ProxPhalJoint.sRel*Axes0';
+  
+  AnyFunTransform3D &Scale = ..GeoScaling.MiddlePhalanges4.ScaleFunction; 
+    AnyFunTransform3D &GeomScale =Scale;
+  AnyRefNode AnatomicalFrame = {};
+  AnyVar MassS = ..MassScaling.Foot.MassScale;
+  AnyVar MassStandard = ..StandardParameters.Foot.Mass*0.001188346;
+  Mass = MassS*MassStandard;
+  
+  //AnyDrawSeg Draw = {};
+  sCoM = 0.5*(RefDist.sRel + ProxPhalJoint.sRel);
+  JaboutCoMOnOff = On;
+  
+  AnyVar Length = vnorm(RefDist.sRel - ProxPhalJoint.sRel);
+  AnyVar Radius = (Mass/(3.1416*Length*..StandardParameters.Foot.Density))^0.5;
+  
+  AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
+  AnyVar Iyy = 0.5 * Mass * Radius^2;
+  AnyVar Izz = Ixx;
+  
+  AnyMat33 JM = CenterNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode.ARel';
+  Jii = {JM[0][0], JM[1][1], JM[2][2]};
+  Jij = {JM[1][0], JM[2][1], JM[2][0]};
+
+  AnyDrawSurf DrwSurf = {
+    FileName = ..AnySurfFolder+"/MiddlePhalange4";
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};  
+    RGB = Main.DrawSettings.Colors.Segments;
+    AnyFunTransform3D &Scale =.Scale; 
+    Opacity=1;
+    
+  };
+  
+  AnyRefNode ProxPhalJoint = 
+  {
+    AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1,0,0};};
+    sRel = .Scale({-0.0027960183, -0.07382266-0.003, ...Sign*0.0455907});
+    ARel = .CenterNode.ARel;
+  };
+  
+  AnyRefNode RefDist = 
+  {
+     //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1,0,0};};
+    sRel = .Scale({-0.008519062, -0.08734421, ...Sign*0.04636958});
+  };
+  
+  AnyRefNode RefProx = 
+  {
+     //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1,0,0};};
+    sRel = .Scale({0.00146524, -0.07926898, ...Sign*0.0481871});
+  };
+
+  //Segment center node
+  AnyRefNode CenterNode={
+ //    AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,1,0};};
+    sRel = 0.5*(.ProxPhalJoint.sRel+.RefDist.sRel);
+    ARel = RotMat(.ProxPhalJoint.sRel,.RefDist.sRel,.RefProx.sRel);
+  };
+  
+  AnyRefNode DistPhalJoint = 
+  {
+ //    AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,0,1};};
+    sRel = ..DistalPhalange4.DistPhalJoint.sRel;
+    ARel = ..DistalPhalange4.DistPhalJoint.ARel;
+  };
+  
+  //***********************
+  //Muscles nodes
+  //***********************
+
+  AnyRefNode ExtensorDigitorumLongusViaNode14= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({-0.003069028, -0.08662697, ...Sign*0.04718238});
+  };
+  
+  AnyRefNode ExtensorDigitorumLongusNode= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.00146524, -0.07926898, ...Sign*0.0471871});
+  };
+  
+  AnyRefNode FlexorDigitorumLongusViaNode17= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({-0.013455604, -0.08522411, ...Sign*0.04647234});
+  };
+  
+}; // End of MiddlePhalanges4
+
+
+
+
+AnySeg MiddlePhalange5 = {
+  r0=.ProximalPhalange5.ProxPhalJoint.sRel*.ProximalPhalange5.Axes0'+.ProximalPhalange5.r0-ProxPhalJoint.sRel*Axes0';
+  
+  AnyFunTransform3D &Scale = ..GeoScaling.MiddlePhalanges5.ScaleFunction;  
+    AnyFunTransform3D &GeomScale =Scale;
+  AnyRefNode AnatomicalFrame = {};
+  AnyVar MassS = ..MassScaling.Foot.MassScale;
+  AnyVar MassStandard = ..StandardParameters.Foot.Mass*0.000644255;
+  Mass = MassS*MassStandard;
+  
+  //AnyDrawSeg Draw = {};
+  sCoM = 0.5*(RefDist.sRel + ProxPhalJoint.sRel);
+  JaboutCoMOnOff = On;
+  
+  AnyVar Length = vnorm(RefDist.sRel - ProxPhalJoint.sRel);
+  AnyVar Radius = (Mass/(3.1416*Length*..StandardParameters.Foot.Density))^0.5;
+  
+  AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
+  AnyVar Iyy = 0.5 * Mass * Radius^2;
+  AnyVar Izz = Ixx;
+  
+  AnyMat33 JM = CenterNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode.ARel';
+  Jii = {JM[0][0], JM[1][1], JM[2][2]};
+  Jij = {JM[1][0], JM[2][1], JM[2][0]};
+
+  AnyDrawSurf DrwSurf = {
+    FileName = ..AnySurfFolder+"/MiddlePhalange5";
+    ScaleXYZ ={1.0, 1.0, ...Sign*1.0};
+    RGB = Main.DrawSettings.Colors.Segments;
+    AnyFunTransform3D &Scale =.Scale; 
+    Opacity=1;
+  };
+  
+  AnyRefNode ProxPhalJoint = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1,0,0};};
+    sRel = .Scale({-0.007358133, -0.06222843, ...Sign*0.05913591});
+    ARel = .CenterNode.ARel;
+ };
+  
+  AnyRefNode RefDist = 
+  {
+     //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1,0,0};};
+    sRel = .Scale({-0.009230679, -0.06886453, ...Sign*0.0593412});
+  };
+  
+  AnyRefNode RefProx = 
+  {
+     //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={1,0,0};};
+    sRel = .Scale({-0.003861642, -0.06663538, ...Sign*0.06283306});
+  };
+
+  //Segment center node
+  AnyRefNode CenterNode={
+ //    AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,1,0};};
+    sRel = 0.5*(.ProxPhalJoint.sRel+.RefDist.sRel);
+    ARel = RotMat(.ProxPhalJoint.sRel,.RefDist.sRel,.RefProx.sRel);
+  };
+    
+  AnyRefNode DistPhalJoint = 
+  {
+    //  AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,0,1};};
+    sRel = ..DistalPhalange5.DistPhalJoint.sRel;
+    ARel = ..DistalPhalange5.DistPhalJoint.ARel;
+  };
+
+  
+  //***********************
+  //Muscles nodes
+  //***********************
+
+  AnyRefNode ExtensorDigitorumLongusViaNode17= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({-0.003813683, -0.06775461, ...Sign*0.06296785});
+  };
+  
+  AnyRefNode ExtensorDigitorumLongusNode= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({-0.003861642, -0.06663538, ...Sign*0.06283306});
+  };
+  
+  AnyRefNode FlexorDigitorumLongusViaNode20= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({-0.012477285, -0.06599057, ...Sign*0.0557292});
+  };
+  
+}; // End of MiddlePhalanges5
+
+
+
+
+
+
+
+
+
+ //************************************************
+ //Distal Phalanges  bones
+ //************************************************
+
+
+AnySeg DistalPhalange1 = {
+  
+  AnyFolder &FootType = ..FootType;
+  r0=.ProximalPhalange1.DistPhalJoint.sRel*.ProximalPhalange1.Axes0'+.ProximalPhalange1.r0-DistPhalJoint.sRel*Axes0';
+  
+  AnyFunTransform3D &Scale = ..GeoScaling.DistalPhalanges1.ScaleFunction;  
+    AnyFunTransform3D &GeomScale =Scale;
+  AnyRefNode AnatomicalFrame = {};
+  AnyVar MassS = ..MassScaling.Foot.MassScale;
+  AnyVar MassStandard = ..StandardParameters.Foot.Mass*0.008262117;
+  Mass = MassS*MassStandard;
+
+  //AnyDrawSeg Draw = {};
+  sCoM = 0.5*(RefDist.sRel + DistPhalJoint.sRel);
+  JaboutCoMOnOff = On;
+  
+  AnyVar Length = vnorm(RefDist.sRel - DistPhalJoint.sRel);
+  AnyVar Radius = (Mass/(3.1416*Length*..StandardParameters.Foot.Density))^0.5;
+  
+  AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
+  AnyVar Iyy = 0.5 * Mass * Radius^2;
+  AnyVar Izz = Ixx;
+  
+  AnyMat33 JM = CenterNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode.ARel';
+  Jii = {JM[0][0], JM[1][1], JM[2][2]};
+  Jij = {JM[1][0], JM[2][1], JM[2][0]};
+
+  AnyDrawSurf DrwSurf = {
+    FileName = ..AnySurfFolder+"/DistalPhalange1";
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0}*.FootType.DistPhalScale;
+    RGB = Main.DrawSettings.Colors.Segments;
+    AnyFunTransform3D &Scale =.Scale; 
+    Opacity=1;
+  };
+  
+  AnyRefNode DistPhalJoint = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,0,1};};
+    sRel = .Scale({-0.001083079, -0.10166927+0.003, ...Sign*-0.008109532}*.FootType.DistPhalScale);
+    ARel = .CenterNode.ARel;
+  };
+  
+  AnyRefNode RefDist = 
+  {
+     //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,0,1};};
+    sRel = .Scale({0.00136714, -0.1228519, ...Sign*0.002927616}*.FootType.DistPhalScale);
+  };
+
+  
+  //Segment center node
+  AnyRefNode CenterNode={
+ //    AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,1,0};};
+    sRel = 0.5*(.DistPhalJoint.sRel+.RefDist.sRel);
+    ARel = RotMat(.DistPhalJoint.sRel,.RefDist.sRel,{1.0,0.0,0.0});
+  };
+    
+
+  AnyRefNode ToeTip = 
+  {
+//     AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,1};};
+    sRel = .Scale({0.00136714, -0.1268519, ...Sign*0.002927616}*.FootType.DistPhalScale);
+  };
+  
+  AnyRefNode GroundContactNode = 
+  {
+//     AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,1};};
+    sRel = .Scale({-0.006705874, -0.1152933, ...Sign*-0.001366105}*.FootType.DistPhalScale);
+  };
+  
+  //***********************
+  //Muscles nodes
+  //***********************
+  AnyRefNode ExtensorHallucisLongus1Node = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.00544894, -0.1095213, ...Sign*-0.001445225}*.FootType.DistPhalScale);
+  };
+  
+  AnyRefNode ExtensorHallucisLongus2Node = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.00544894, -0.1095213, ...Sign*-0.001445225}*.FootType.DistPhalScale);
+  };
+  
+  AnyRefNode ExtensorHallucisLongus3Node = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({0.00544894, -0.1095213, ...Sign*-0.001445225}*.FootType.DistPhalScale);
+  };
+  
+  
+  AnyRefNode FlexorHallucisLongus1Node= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({-0.009178465, -0.1076628, ...Sign*-0.00480216}*.FootType.DistPhalScale);
+  };
+  
+  AnyRefNode FlexorHallucisLongus2Node= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({-0.009178465, -0.1076628, ...Sign*-0.00480216}*.FootType.DistPhalScale);
+  };
+  
+  AnyRefNode FlexorHallucisLongus3Node= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({-0.009178465, -0.1076628, ...Sign*-0.00480216}*.FootType.DistPhalScale);
+  };
+  
+}; // End of DistalPhalanges1
+
+
+
+
+
+AnySeg DistalPhalange2 = {
+  r0=.MiddlePhalange2.DistPhalJoint.sRel*.MiddlePhalange2.Axes0'+.MiddlePhalange2.r0-DistPhalJoint.sRel*Axes0';
+  
+  AnyFunTransform3D &Scale = ..GeoScaling.DistalPhalanges2.ScaleFunction;  
+    AnyFunTransform3D &GeomScale =Scale;
+  AnyRefNode AnatomicalFrame = {};
+  AnyVar MassS = ..MassScaling.Foot.MassScale;
+  AnyVar MassStandard = ..StandardParameters.Foot.Mass*0.000724269;
+  Mass = MassS*MassStandard;
+  
+  //AnyDrawSeg Draw = {};
+  sCoM = 0.5*(RefDist.sRel + DistPhalJoint.sRel);
+  JaboutCoMOnOff = On;
+  
+  AnyVar Length = vnorm(RefDist.sRel - DistPhalJoint.sRel);
+  AnyVar Radius = (Mass/(3.1416*Length*..StandardParameters.Foot.Density))^0.5;
+  
+  AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
+  AnyVar Iyy = 0.5 * Mass * Radius^2;
+  AnyVar Izz = Ixx;
+  
+  AnyMat33 JM = CenterNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode.ARel';
+  Jii = {JM[0][0], JM[1][1], JM[2][2]};
+  Jij = {JM[1][0], JM[2][1], JM[2][0]};
+
+  AnyDrawSurf DrwSurf = {
+    FileName = ..AnySurfFolder+"/DistalPhalange2";
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
+    RGB = Main.DrawSettings.Colors.Segments;
+    AnyFunTransform3D &Scale =.Scale; 
+    Opacity=1;
+  };
+  
+  AnyRefNode DistPhalJoint = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,0,1};};
+    sRel = .Scale({-0.004708046, -0.1116229, ...Sign*0.01957764});
+    ARel = .CenterNode.ARel;
+  };
+  
+  AnyRefNode RefDist = 
+  {
+     //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,0,1};};
+    sRel = .Scale({-0.004763274, -0.1197475, ...Sign*0.02273006});
+  };
+  
+  AnyRefNode RefProx = 
+  {
+     //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,0,1};};
+    sRel = .Scale({0.001242716, -0.1129332, ...Sign*0.0203853});
+  };
+
+  //Segment center node
+  AnyRefNode CenterNode={
+//     AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005}*2;RGB={0,1,0};};
+    sRel = 0.5*(.DistPhalJoint.sRel+.RefDist.sRel);
+    ARel = RotMat(.DistPhalJoint.sRel,.RefDist.sRel,.RefProx.sRel);
+  };
+  
+  AnyRefNode ToeTip = 
+  {
+    sRel = .Scale({-0.005, -0.121, ...Sign*0.022});
+    //AnyDrawRefFrame drw2={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,1};};
+  };
+  
+  AnyRefNode GroundContactNode = 
+  {
+//     AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,1};};
+    sRel = .Scale({-0.009118326, -0.1161024, ...Sign*0.02166108});
+  };
+
+  //***********************
+  //Muscles nodes
+  //***********************
+
+  AnyRefNode ExtensorDigitorumLongusNode= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({6.538419e-006, -0.1161063, ...Sign*0.02165135});
+  };
+  
+  AnyRefNode FlexorDigitorumLongusNode= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({-0.01012872, -0.1122994, ...Sign*0.0213305});
+  };
+
+}; // End of DistalPhalanges2
+
+
+
+
+
+AnySeg DistalPhalange3 = {
+  r0=.MiddlePhalange3.DistPhalJoint.sRel*.MiddlePhalange3.Axes0'+.MiddlePhalange3.r0-DistPhalJoint.sRel*Axes0';
+  
+  AnyFunTransform3D &Scale = ..GeoScaling.DistalPhalanges3.ScaleFunction;  
+    AnyFunTransform3D &GeomScale =Scale;
+  AnyRefNode AnatomicalFrame = {};
+  AnyVar MassS = ..MassScaling.Foot.MassScale;
+  AnyVar MassStandard = ..StandardParameters.Foot.Mass*0.000608694;
+  Mass = MassS*MassStandard;
+  
+  //AnyDrawSeg Draw = {};
+  sCoM = 0.5*(RefDist.sRel + DistPhalJoint.sRel);
+  JaboutCoMOnOff = On;
+  
+  AnyVar Length = vnorm(RefDist.sRel - DistPhalJoint.sRel);
+  AnyVar Radius = (Mass/(3.1416*Length*..StandardParameters.Foot.Density))^0.5;
+  
+  AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
+  AnyVar Iyy = 0.5 * Mass * Radius^2;
+  AnyVar Izz = Ixx;
+  
+  AnyMat33 JM = CenterNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode.ARel';
+  Jii = {JM[0][0], JM[1][1], JM[2][2]};
+  Jij = {JM[1][0], JM[2][1], JM[2][0]};
+
+  AnyDrawSurf DrwSurf = {
+    FileName = ..AnySurfFolder+"/DistalPhalange3";
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
+    RGB = Main.DrawSettings.Colors.Segments;
+    AnyFunTransform3D &Scale =.Scale; 
+    Opacity=1;
+  };
+  
+  AnyRefNode DistPhalJoint = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,0,1};};
+    sRel = .Scale({-0.006065235, -0.1034911, ...Sign*0.03371704});
+    ARel = .CenterNode.ARel;
+  };
+  
+  AnyRefNode RefDist = 
+  {
+     //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,0,1};};
+    sRel = .Scale({-0.008175768, -0.1130482, ...Sign*0.03630654});
+  };
+  
+  AnyRefNode RefProx = 
+  {
+     //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,0,1};};
+    sRel = .Scale({-0.0023865434, -0.1051697, ...Sign*0.03456902});
+  };
+
+  //Segment center node
+  AnyRefNode CenterNode={
+//     AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005}*2;RGB={0,1,0};};
+    sRel = 0.5*(.DistPhalJoint.sRel+.RefDist.sRel);
+    ARel = RotMat(.DistPhalJoint.sRel,.RefDist.sRel,.RefProx.sRel); 
+  };
+  
+  
+  //***********************
+  //Muscles nodes
+  //***********************
+
+  AnyRefNode ExtensorDigitorumLongusNode= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({-0.0023865434, -0.1081697, ...Sign*0.03616902});
+  };
+  
+  AnyRefNode FlexorDigitorumLongusNode= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({-0.012194342, -0.1070788, ...Sign*0.03491143});
+  };
+ 
+}; // End of DistalPhalanges3
+
+
+
+
+
+AnySeg DistalPhalange4 = {
+  r0=.MiddlePhalange4.DistPhalJoint.sRel*.MiddlePhalange4.Axes0'+.MiddlePhalange4.r0-DistPhalJoint.sRel*Axes0';
+  
+  AnyFunTransform3D &Scale = ..GeoScaling.DistalPhalanges4.ScaleFunction;  
+    AnyFunTransform3D &GeomScale =Scale;
+  AnyRefNode AnatomicalFrame = {};
+  AnyVar MassS = ..MassScaling.Foot.MassScale;
+  AnyVar MassStandard = ..StandardParameters.Foot.Mass*0.000541127;
+  Mass = MassS*MassStandard;
+  
+  //AnyDrawSeg Draw = {};
+  sCoM = 0.5*(RefDist.sRel + DistPhalJoint.sRel);
+  JaboutCoMOnOff = On;
+  
+  AnyVar Length = vnorm(RefDist.sRel - DistPhalJoint.sRel);
+  AnyVar Radius = (Mass/(3.1416*Length*..StandardParameters.Foot.Density))^0.5;
+  
+  AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
+  AnyVar Iyy = 0.5 * Mass * Radius^2;
+  AnyVar Izz = Ixx;
+  
+  AnyMat33 JM = CenterNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode.ARel';
+  Jii = {JM[0][0], JM[1][1], JM[2][2]};
+  Jij = {JM[1][0], JM[2][1], JM[2][0]};
+
+  AnyDrawSurf DrwSurf = {
+    FileName = ..AnySurfFolder+"/DistalPhalange4";
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
+    RGB = Main.DrawSettings.Colors.Segments;
+    AnyFunTransform3D &Scale =.Scale; 
+    Opacity=1;
+  };
+  
+  AnyRefNode DistPhalJoint = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,0,1};};
+    sRel = .Scale({-0.007880441, -0.08457409, ...Sign*0.04647917});
+    ARel = .CenterNode.ARel;
+  };
+  
+  AnyRefNode RefDist = 
+  {
+     //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,0,1};};
+    sRel = .Scale({-0.01278651, -0.09533569, ...Sign*0.0466897});
+  };
+  
+  AnyRefNode RefProx = 
+  {
+     //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,0,1};};
+    sRel = .Scale({-0.003069028, -0.08662697, ...Sign*0.04918238});
+  };
+  
+  //Segment center node
+  AnyRefNode CenterNode={
+//     AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005}*2;RGB={0,1,0};};
+    sRel = 0.5*(.DistPhalJoint.sRel+.RefDist.sRel);
+    ARel = RotMat(.DistPhalJoint.sRel,.RefDist.sRel,.RefProx.sRel);
+  };
+    
+  
+  //***********************
+  //Muscles nodes
+  //***********************
+
+  AnyRefNode ExtensorDigitorumLongusNode= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({-0.005394551, -0.09145389, ...Sign*0.04734398});
+  };
+  
+  AnyRefNode FlexorDigitorumLongusNode= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({-0.01565704, -0.08984173, ...Sign*0.04657206});
+  };
+  
+}; // End of DistalPhalanges4
+
+
+
+
+
+AnySeg DistalPhalange5 = {
+  r0=.MiddlePhalange5.DistPhalJoint.sRel*.MiddlePhalange5.Axes0'+.MiddlePhalange5.r0-DistPhalJoint.sRel*Axes0';
+  
+  AnyFunTransform3D &Scale = ..GeoScaling.DistalPhalanges5.ScaleFunction;  
+    AnyFunTransform3D &GeomScale =Scale;
+  AnyRefNode AnatomicalFrame = {};
+  AnyVar MassS = ..MassScaling.Foot.MassScale;
+  AnyVar MassStandard = ..StandardParameters.Foot.Mass*0.000520976;
+  Mass = MassS*MassStandard;
+  
+  //AnyDrawSeg Draw = {};
+  sCoM = 0.5*(RefDist.sRel + DistPhalJoint.sRel);
+  JaboutCoMOnOff = On;
+  
+  AnyVar Length = vnorm(RefDist.sRel - DistPhalJoint.sRel);
+  AnyVar Radius = (Mass/(3.1416*Length*..StandardParameters.Foot.Density))^0.5;
+  
+  AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
+  AnyVar Iyy = 0.5 * Mass * Radius^2;
+  AnyVar Izz = Ixx;
+  
+  AnyMat33 JM = CenterNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode.ARel';
+  Jii = {JM[0][0], JM[1][1], JM[2][2]};
+  Jij = {JM[1][0], JM[2][1], JM[2][0]};
+
+  AnyDrawSurf DrwSurf = {
+    FileName = ..AnySurfFolder+"/DistalPhalange5";
+    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
+    RGB = Main.DrawSettings.Colors.Segments;
+    AnyFunTransform3D &Scale =.Scale; 
+    Opacity=1;
+  };
+  
+  AnyRefNode DistPhalJoint = 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,0,1};};
+    sRel = .Scale({-0.009056971, -0.06675649, ...Sign*0.05883433});
+    ARel = .CenterNode.ARel;
+  };
+  
+  AnyRefNode RefDist = 
+  {
+     //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,0,1};};
+    sRel = .Scale({-0.01316917, -0.0758413, ...Sign*0.05632038});
+  };
+  
+  AnyRefNode RefProx = 
+  {
+     //AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,0,1};};
+    sRel = .Scale({-0.00686618, -0.07157046, ...Sign*0.06129555});
+  };
+
+  //Segment center node
+  AnyRefNode CenterNode={
+ //    AnyDrawRefFrame drw={ScaleXYZ={0.005,0.005,0.005};RGB={0,1,0};};
+    sRel = 0.5*(.DistPhalJoint.sRel+.RefDist.sRel);
+    ARel = RotMat(.DistPhalJoint.sRel,.RefDist.sRel,.RefProx.sRel);
+  };
+
+  //***********************
+  //Muscles nodes
+  //***********************
+
+  AnyRefNode ExtensorDigitorumLongusNode= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({-0.00686618, -0.07357046, ...Sign*0.06129555});
+  };
+  
+  AnyRefNode FlexorDigitorumLongusNode= 
+  {
+    //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
+    sRel = .Scale({-0.014865597, -0.06998953, ...Sign*0.05481513});
+  };
+  
+}; // End of DistalPhalanges5
+
+
+
+
+
+
+
+
+
+
+
+
