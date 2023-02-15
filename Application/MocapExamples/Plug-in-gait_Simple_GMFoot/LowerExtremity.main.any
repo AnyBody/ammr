@@ -1,0 +1,213 @@
+
+//The key preconfigured operations are: 
+//	GMFoot_RunParameterOptimization:  This sequence of operation will run the model parameter optimization of the model which will automatically adjust marker location and scale the bones in the leg.
+//	GMFoot_RunMarkerTrackingAndInverse: This sequence will can be executed after the parameteroptimization has been carried out. It will do the marker tracking using the optimized model and finally to the inverse dynamic analysis.
+//	GMFoot_RunInverse: This sequence is a subset of the previous operation and can be used if markertracking has already been performed.
+
+#define FirstRun 1
+#include "../../libdef.any"
+#include "../../FootGM/GM_Foot_libdef.any"
+
+#define BM_LEG_LEFT OFF
+#define LIGAMENT_DRIVER
+#define SimplifiedContactPlaneMH
+
+//// Enter and edit Trial Specific Data in this file:
+#path MOCAP_TRIAL_SPECIFIC_DATA "Setup/TrialSpecificData_LowerExtremity_foot.any"
+
+//// Enter and edit Subject-Spcific Data in this file:
+#path MOCAP_SUBJECT_SPECIFIC_DATA "Setup/SubjectSpecificData_foot.any"
+
+//// Enter and edit Lab-Specific Data in this file:
+#path MOCAP_LAB_SPECIFIC_DATA "Setup/LabSpecificData_foot.any"
+
+//// Include the AnyMoCap Framwork
+#include "<ANYMOCAP_MODEL>"
+#include "<ANYBODY_PATH_MODELUTILS>\FrictionContactMuscles\ConditionalContactClass.any"
+
+
+Main ={
+  
+  Main.DrawSettings={
+    AnyVar ForceScale =2*0.0000075;
+    Muscle.Bulging=1;
+    Muscle.MaxStress=15000000;
+    Muscle.RGBColorScale ={1,0.95,0.95};
+    AnyFolder Ligaments ={
+      AnyVar Opacity=1;
+    };
+  };
+  
+  Main.HumanModel.BodyModelWithoutMuscles={
+    AnyFolder &ligs_r=Main.HumanModel.BodyModel.Right.Leg.Ligaments;
+  };
+  
+  Main.HumanModel.Calibration ={
+    #define Side "right"
+    #include "<GM_FOOT_PATH>\cal\FootCalibrationStudies.any"
+  };
+  
+  Main.Studies.ParameterIdentification.KinematicStudyForParameterIdentification ={
+    AnyFolder &ref=Main.FootGroundContact;
+    #include "Setup/ToeDrivers.any" //added safety in parameter opt...
+    #include "Setup/SoftDrivers_ForParamStudy.any"
+  };
+  
+  
+  Main.Studies.MarkerTracking={
+    AnyFolder &ref=Main.FootGroundContact;
+    #include "Setup/ToeDrivers.any"
+  };
+  
+  Main.Studies.InverseDynamicStudy ={
+    //this will remove the ligament drivers from the inverse study model
+    AnyMechObjectExcluder ExcludedLigDrivers = {
+      Objects = arrcat(
+      ObjSearch("Main.HumanModel.BodyModel.*.Leg.Ligaments.*.*.*.LigamentDriver.Driver","AnyKinEqSimpleDriver"),
+      ObjSearch("Main.HumanModel.BodyModel.*.Leg.Ligaments.*.*.LigamentDriver.Driver","AnyKinEqSimpleDriver"),
+      ObjSearch("Main.HumanModel.BodyModel.*.Leg.Ligaments.*.LigamentDriver.Driver","AnyKinEqSimpleDriver"),
+      ObjSearch("Main.HumanModel.BodyModel.*.Leg.Ligaments.*.*.*.LigamentDriver.Driver.*","AnyReacForce"),
+      ObjSearch("Main.HumanModel.BodyModel.*.Leg.Ligaments.*.*.LigamentDriver.Driver.*","AnyReacForce"),
+      ObjSearch("Main.HumanModel.BodyModel.*.Leg.Ligaments.*.LigamentDriver.Driver.*","AnyReacForce")    
+     );
+      
+    };
+    
+    //this will remove the contact to floor drivers from the inverse study model
+    AnyMechObjectExcluder FloorContactDrivers = {
+      Objects =  arrcat(      
+      ObjSearch("Main.FootGroundContact.*.LimDriver","AnyKinEqSimpleDriver"),
+      ObjSearch("Main.FootGroundContact.*.LimDriver.*","AnyReacForce") );   
+    };
+    
+    
+  };
+  
+  AnyFolder FootGroundContact ={
+    #include "Setup/Connector.any"  //code which are used for both kin and inv analysis
+  };
+  
+};
+
+
+
+Main={
+  #include "<GM_FOOT_PATH>/GM_foot_model_mocap.any"
+  
+  #include "<GM_FOOT_PATH>/ModelViews.any"
+  
+  Studies.MarkerTracking.JointAngleOutputs ={
+    #include "Setup/JointAnglesFoot.any"
+  };
+  
+  
+  #include "Setup/PressureMapCoefs.any"
+  
+  Studies.MarkerTracking ={
+    AnyFolder &PressureMapCoefs=Main.CreatePressureMapCoefs;
+  };
+  
+  Studies.InverseDynamicStudy ={
+    
+    //This file can be used to detect bottleneck in model... output will show which DOF and segment in model has highest need for support...
+    //The strength are set very low so it will not change solution for real muscles
+    //#include "Setup/Debug/BottleNeckAnalysis.any"
+    
+    InverseDynamics.Criterion.Power=3;
+    
+    ModelEnvironmentConnection.JointsAndDrivers ={
+      #include "Setup/JointAnglesFootDrivers.any"
+      #include "Setup/ToeContact.any"
+    };
+   
+    
+    EnvironmentModel ={
+      #include "Setup/Environment.any"
+    };
+    //add extra output 
+    #include "Setup/FootModelOutputGeneric.any"
+    
+  };
+  
+  
+  AnyOperationSequence GMFoot_RunParamOptimization= {
+    OPERATION_DISPLAY_PRIORITY(PriorityHigh);
+    OPERATION_SELECT_ON_LOAD;
+    //avoid loading params... this will break scaling links...and parameter identification will fail 
+    //    AnyOperationSequence LoadParameters = 
+    //    {
+    //     
+    //      AnyOperationSequence &SubOperations= Main.RunAnalysis.LoadParameters;
+    //    };    
+    
+    AnyOperationSequence LigamentCal = {
+      AnyOperationSequence &Cal= Main.HumanModel.Calibration.FootCalibrationSequence;
+    };
+    
+    AnyOperationSequence ParamOptimization  = {
+      AnyOperationSequence &ParamOpt= Main.RunParameterIdentification;
+    };
+  };
+  
+  
+  AnyOperationSequence GMFoot_RunMarkerTrackingAndInverse= {
+    OPERATION_DISPLAY_PRIORITY(PriorityHigh);
+    OPERATION_SELECT_ON_LOAD;
+    
+    AnyOperationSequence LoadParameters =    {
+      AnyOperationSequence &SubOperations= Main.RunAnalysis.LoadParameters;
+    };    
+    
+    AnyOperationSequence LigamentCal = {
+      AnyOperationSequence &Cal= Main.HumanModel.Calibration.FootCalibrationSequence;
+    };
+    
+    
+    AnyOperationSequence MarkerTracking =     {
+      OPERATION_DISPLAY_PRIORITY(PriorityHigh);
+      AnyOperationSequence &SubOperations= Main.RunAnalysis.MarkerTracking;
+    };
+    
+    AnyOperationSequence InverseDynamics = {
+      OPERATION_DISPLAY_PRIORITY(PriorityHigh);
+      AnyOperationSequence &SubOperations= Main.RunAnalysis.InverseDynamics;
+    };
+    AnyOperationSequence SaveOutput =     {
+      OPERATION_DISPLAY_PRIORITY(PriorityHigh);
+      AnyOperation& SaveHDF5= Main.ModelSetup.Macros.SaveOutputToHDF;
+    };    
+  };
+  
+  AnyOperationSequence GMFoot_RunInvers= {
+    OPERATION_DISPLAY_PRIORITY(PriorityHigh);
+    OPERATION_SELECT_ON_LOAD;
+    
+    
+    AnyOperationSequence LoadParameters =   {
+      AnyOperationSequence &SubOperations= Main.RunAnalysis.LoadParameters;
+    };    
+    
+    AnyOperationSequence LigamentCal = {
+      AnyOperationSequence &Cal= Main.HumanModel.Calibration.FootCalibrationSequence;
+    };
+    
+    AnyOperationSequence InverseDynamics =     {
+      OPERATION_DISPLAY_PRIORITY(PriorityHigh);
+      AnyOperationSequence &SubOperations= Main.RunAnalysis.InverseDynamics;
+    };
+    AnyOperationSequence SaveOutput = 
+    {
+      OPERATION_DISPLAY_PRIORITY(PriorityHigh);
+      AnyOperation& SaveHDF5= Main.ModelSetup.Macros.SaveOutputToHDF;
+    };    
+  };
+  
+  
+};
+
+
+
+
+
+
+
