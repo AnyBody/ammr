@@ -1,0 +1,105 @@
+#include "../libdef.any"
+
+/** ----------------------------------------------------------------------------
+This model uses the full body model, i.e. most of the body parts available
+in the AAUHuman part of the Body directory. The model is grounded at the
+pelvis and the posture if the model is controlled through a mannequin.any 
+file by means of joint angles.
+
+This application is a really good starting point for new applications 
+involving the entire body.
+
+The model do not contain muscles and is only intended for running kinematic analysis
+
+The model has several configurations which can be changed in the file "Config.any"
+
+BodyModelSelection can be either "FullBodyModel"  or "FullBodySRHand" 
+FullBodyModel is a fullbody model
+FullBodyModelSRHand is a fullbody model with a detailed hand and shoulder rhythm
+
+CONFIGURATION2 can be either "FreePostureStatic" or "FreePostureMove"
+FreePostureStatic is a static model which do not move its joint angles are controlled in the "mannequin.any" file 
+FreePostureMove is a dynamic model controlled through angles which can be set in the "MannequinInterpolation.any" file
+
+
+---------------------------------------------------------------------------- */
+Main = {
+
+  // ----------------------------------------------------------
+  // Driver type settings
+  // ----------------------------------------------------------
+  #ifndef DriverSelection
+    #define DriverSelection "FreePostureStatic"
+  #endif
+  
+  // ----------------------------------------------------------
+  // Body Model Configuration
+  // ----------------------------------------------------------
+  #include "Model/BodyModelConfiguration.any"
+  #define BM_FOOT_MODEL _FOOT_MODEL_NONE_
+  #define BM_JOINT_TYPE_ANKLE_RIGHT _JOINT_TYPE_USERDEFINED_
+  #define BM_JOINT_TYPE_ANKLE_LEFT _JOINT_TYPE_USERDEFINED_ 
+  
+  // The Mannequin file specifies load-time positions for all the segments
+  // in the HumanModel. This is important for the model's ablity to resolve
+  // all the kinematic constraints when the model is analyzed.
+  // The mannequin file also drives those degrees of freedom of the human 
+  // model that are not governed by problem-specific drivers at run time.    
+  
+  #if DriverSelection == "FreePostureStatic"
+    // use different initial positions for two configurations
+    #include "Model/Mannequin.any" 
+  #else //#if DriverSelection == "FreePostureMove"
+    // use different initial positions for two configurations
+    #include "Model/MannequinInterpolation.any" 
+  #endif
+  
+  // Model of the human body to be used for the analysis  
+  #include "<ANYBODY_PATH_BODY>/HumanModel.any"
+
+  #ifndef SimplifiedContactMH
+  #define SimplifiedContactMH
+  #endif
+  #include "<ANYBODY_PATH_BODY>/FootGM/GM_foot_model.any"
+  
+  // The actual model where all components are assembled
+  AnyFolder Model={
+    /// Body model without default drivers
+    AnyFolder &BodyModel=.HumanModel.BodyModel;
+    /// Reference to the mannequin folder (used by drivers)
+    AnyFolder &Mannequin =.HumanModel.Mannequin;
+    
+    #include "Model/Environment.any"   
+    
+    /// Constraints and drivers
+    AnyFolder ModelEnvironmentConnection = {    
+     #if DriverSelection == "FreePostureStatic"
+         #include "Model/JointsAndDriversConstant.any"
+     #else //#if DriverSelection == "FreePostureMove"
+         #include "Model/JointsAndDriversInterpolation.any"
+     #endif
+    };
+    
+  };
+  
+  AnyBodyStudy Study = {
+    AnyFolder &Model = .Model;
+    tEnd = 1.0;
+    Gravity = {0.0, -9.81, 0.0};
+    
+    #if DriverSelection=="FreePostureStatic"
+    nStep = 1;
+    #endif
+    
+    #if DriverSelection=="FreePostureMove"
+    nStep = 150;
+    #endif   
+    
+    
+  }; // End of study
+
+  // Include an operation sequence to run all required steps of your application (see Operations tab)
+    #include "<ANYBODY_PATH_MODELUTILS>\Operations\RunAppSequence.any"
+  
+}; //Main
+

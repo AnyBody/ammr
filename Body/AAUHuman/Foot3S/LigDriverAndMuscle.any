@@ -1,0 +1,74 @@
+#include "LigDriver.any"
+
+
+
+AnyMuscleModelUsr1 MusMdlPull = {
+  F0 = 2*2.5*.F1_at_005_strain;
+  S = F0*StrengthCond;
+  AnyVar OnOff = gtfun(.Line.Pos[0], 0.3*.LigMdl.L0); //this means muscle can start earlier if cal is off
+  AnyVar StrengthCond = iffun(OnOff, 1, 0);//..StrengthFactor); //if the lig is not longer than L0 reduce strength
+};
+
+
+AnyVar F1_at_005_strain= 0.05*LigMdl.F1/LigMdl.eps1;
+
+
+AnyMuscleModelUsr1 MusMdlPush = {
+ 
+  F0 = 4*.F1_at_005_strain;  //we make it easier to reduce lig force than create more.
+  S = F0;
+};
+
+AnyGeneralMuscle LigMusclePull = {
+  ForceDirection=-1;
+  AnyMuscleModelUsr1 &musmdl=.MusMdlPull;
+  AnyKinMeasure &measure=.Line;
+  AnyDrawMuscle DrwMus = { RGB = {0,1,0}; Bulging=1; MaxStress=4000000; Opacity =Main.DrawSettings.Ligament.Opacity;
+};
+
+#ifdef FORCE_VIEW 
+AnyDrawForce DrawForceLig ={
+  ForceScale=Main.DrawSettings.ForceScale; 
+ReactionForceColor ={0,0,1};
+AppliedForceColor= ReactionForceColor;
+
+};
+#endif
+};
+
+
+AnyGeneralMuscle LigMusclePush = {
+  ForceDirection=1;
+  AnyMuscleModelUsr1 &musmdl=.MusMdlPush;
+  AnyKinMeasure &measure=.Line;
+  AnyDrawMuscle DrwMus = { RGB = {1,0,0}; Bulging=1; MaxStress=4000000; Opacity =Main.DrawSettings.Ligament.Opacity;
+};
+#ifdef FORCE_VIEW 
+
+AnyDrawForce DrawForceLig ={
+  ReactionForceColor ={0,0,1};
+  ForceScale=Main.DrawSettings.ForceScale;
+  AppliedForceColor = ReactionForceColor;
+};
+#endif
+
+};
+
+#ifdef LIGAMENT_DRIVER
+
+AnyFloat Lig_Force = LigamentDriver.Force_fun(Line.Pos)[0];
+
+////this ensures no push force should not be needed though
+AnyVar Lig_Force_Pos= iffun(gtfun(Lig_Force,0),Lig_Force,0.0);
+
+
+////the Force in the lig is found analytical.... to avoid forcevar dependency
+AnyMuscleActivityBound PosMusBound = {
+  UpperBoundOnOff = On;
+  UpperBound = .Lig_Force_Pos/.MusMdlPush.F0; //this is the max activation allowed for push muscle.... force in lig/strength
+  AnyMuscle &muscle1 = .LigMusclePush;
+};
+
+//note this can be sligthly positive because non-linerarity is not account for ...
+AnyFloat LigMuscleAndTendonTogther = LigMusclePush.Fout+LigMusclePull.Fout+Fout;
+#endif
