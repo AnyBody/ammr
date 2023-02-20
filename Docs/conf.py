@@ -290,12 +290,14 @@ html_title = "%s v%s Documentation" % (project, release)
 
 html_theme_options = {
   # 'single_page': True,
-   "extra_navbar": "",
-   "logo_only": True,
+#    "extra_navbar": "",
+#    "logo_only": True,
    "home_page_in_toc": False,
    "show_navbar_depth": 1,
    "use_download_button": False,
    #"default_mode": "dark",
+   "pygment_light_style": "AnyScript",
+   "pygment_dark_style": "stata-dark"
 }
 
 
