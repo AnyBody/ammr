@@ -36,9 +36,48 @@
 //***********************
 
 AnySeg Toe1 = {
-  Mass = 0;
-  Jii = {0,0,0};
+  Mass = ProximalPhalange1.Mass + DistalPhalange1.Mass;
+  sCoM = (
+          ProximalPhalange1.Mass*ProximalPhalange1.sCoM +
+          DistalPhalange1.Mass*DistalPhalange1.sCoM
+         )/Mass;
   r0=.Midfoot.Metatarsal1.MtPhalJoint.sRel*.Midfoot.Metatarsal1.ARel'+.Midfoot.r0-ProximalPhalange1.MtPhalJoint.sRel*ProximalPhalange1.ARel';
+ 
+  AnyRefNode CoM = {sRel =.sCoM;};        
+  AnyRefNode PPCoM = {sRel =.ProximalPhalange1.sCoM;};
+
+  Jii = EqInertia.Jii;
+  Jij = EqInertia.Jij;
+  JaboutCoMOnOff = On;
+  
+  AnyFolder EqInertia = {
+    // Equivalent inertia is calculated using parallel axis theorem. Jii of constituent segments, expressed about their corresponding
+    // CoM are translated to the CoM of the lumped segment using the formula: JiiNew = JiiCoM + mr^2
+    // r vector is calculated as the difference between constituent segment CoM and lumped segment CoM.
+    // m is the mass of the constituent segment.
+    // JiiCoM is the Jii of the constituent segment about its own CoM
+    // JiiNew is the Jii of the constituent segment about the CoM of the lumped segment.
+          
+    AnyFloat sRelPP1CoM = .ProximalPhalange1.sCoM-.sCoM;
+    AnyFloat JMPP1T = .ProximalPhalange1.Mass*{{sRelPP1CoM[1]^2 + sRelPP1CoM[2]^2, -sRelPP1CoM[0]*sRelPP1CoM[1], -sRelPP1CoM[0]*sRelPP1CoM[2]},
+                                         {-sRelPP1CoM[1]*sRelPP1CoM[0], sRelPP1CoM[2]^2 + sRelPP1CoM[0]^2, -sRelPP1CoM[1]*sRelPP1CoM[2]},
+                                         {-sRelPP1CoM[2]*sRelPP1CoM[0], -sRelPP1CoM[2]*sRelPP1CoM[1], sRelPP1CoM[0]^2 + sRelPP1CoM[1]^2}};
+    AnyFloat JMPP1CoM = .ProximalPhalange1.JM + JMPP1T;
+    AnyFloat JiiPP1CoM = {JMPP1CoM[0][0], JMPP1CoM[1][1], JMPP1CoM[2][2]};
+    AnyFloat JijPP1CoM = {JMPP1CoM[1][0], JMPP1CoM[2][1], JMPP1CoM[2][0]};
+    
+    AnyFloat sRelDP1CoM = .DistalPhalange1.sCoM-.sCoM;
+    AnyFloat JMDP1T = .DistalPhalange1.Mass*{{sRelDP1CoM[1]^2 + sRelDP1CoM[2]^2, -sRelDP1CoM[0]*sRelDP1CoM[1], -sRelDP1CoM[0]*sRelDP1CoM[2]},
+                                         {-sRelDP1CoM[1]*sRelDP1CoM[0], sRelDP1CoM[2]^2 + sRelDP1CoM[0]^2, -sRelDP1CoM[1]*sRelDP1CoM[2]},
+                                         {-sRelDP1CoM[2]*sRelDP1CoM[0], -sRelDP1CoM[2]*sRelDP1CoM[1], sRelDP1CoM[0]^2 + sRelDP1CoM[1]^2}};
+    AnyFloat JMDP1CoM = .DistalPhalange1.JM + JMDP1T;
+    AnyFloat JiiDP1CoM = {JMDP1CoM[0][0], JMDP1CoM[1][1], JMDP1CoM[2][2]};
+    AnyFloat JijDP1CoM = {JMDP1CoM[1][0], JMDP1CoM[2][1], JMDP1CoM[2][0]};
+    
+    
+    AnyFloat Jii = JiiPP1CoM + JiiDP1CoM;
+    AnyFloat Jij = JijPP1CoM + JijDP1CoM;
+  };
   
   AnyRefNode ProximalPhalange1 = {
     
@@ -272,11 +311,55 @@ AnySeg Toe1 = {
 
 
 AnySeg Toe2 = {
-  Mass = 0;
-  Jii = {0,0,0};
+  Mass = ProximalPhalange2.Mass + MiddlePhalange2.Mass + DistalPhalange2.Mass;
+  sCoM = (
+          ProximalPhalange2.Mass*ProximalPhalange2.sCoM +
+          MiddlePhalange2.Mass*MiddlePhalange2.sCoM +
+          DistalPhalange2.Mass*DistalPhalange2.sCoM
+         )/Mass;
   r0=.Midfoot.Metatarsal2.MtPhalJoint.sRel*.Midfoot.Metatarsal2.ARel'+.Midfoot.r0-ProximalPhalange2.MtPhalJoint.sRel*ProximalPhalange2.ARel';
+  AnyRefNode CoM = {sRel =.sCoM;}; 
+  Jii = EqInertia.Jii;
+  Jij = EqInertia.Jij;
+  JaboutCoMOnOff = On;
   
-  
+  AnyFolder EqInertia = {
+    // Equivalent inertia is calculated using parallel axis theorem. Jii of constituent segments, expressed about their corresponding
+    // CoM are translated to the CoM of the lumped segment using the formula: JiiNew = JiiCoM + mr^2
+    // r vector is calculated as the difference between constituent segment CoM and lumped segment CoM.
+    // m is the mass of the constituent segment.
+    // JiiCoM is the Jii of the constituent segment about its own CoM
+    // JiiNew is the Jii of the constituent segment about the CoM of the lumped segment.
+          
+    AnyFloat sRelPP2CoM = .ProximalPhalange2.sCoM-.sCoM;
+    AnyFloat JMPP2T = .ProximalPhalange2.Mass*{{sRelPP2CoM[1]^2 + sRelPP2CoM[2]^2, -sRelPP2CoM[0]*sRelPP2CoM[1], -sRelPP2CoM[0]*sRelPP2CoM[2]},
+                                         {-sRelPP2CoM[1]*sRelPP2CoM[0], sRelPP2CoM[2]^2 + sRelPP2CoM[0]^2, -sRelPP2CoM[1]*sRelPP2CoM[2]},
+                                         {-sRelPP2CoM[2]*sRelPP2CoM[0], -sRelPP2CoM[2]*sRelPP2CoM[1], sRelPP2CoM[0]^2 + sRelPP2CoM[1]^2}};
+    AnyFloat JMPP2CoM = .ProximalPhalange2.JM + JMPP2T;
+    AnyFloat JiiPP2CoM = {JMPP2CoM[0][0], JMPP2CoM[1][1], JMPP2CoM[2][2]};
+    AnyFloat JijPP2CoM = {JMPP2CoM[1][0], JMPP2CoM[2][1], JMPP2CoM[2][0]};
+    
+    AnyFloat sRelMP2CoM = .MiddlePhalange2.sCoM-.sCoM;
+    AnyFloat JMMP2T = .MiddlePhalange2.Mass*{{sRelMP2CoM[1]^2 + sRelMP2CoM[2]^2, -sRelMP2CoM[0]*sRelMP2CoM[1], -sRelMP2CoM[0]*sRelMP2CoM[2]},
+                                         {-sRelMP2CoM[1]*sRelMP2CoM[0], sRelMP2CoM[2]^2 + sRelMP2CoM[0]^2, -sRelMP2CoM[1]*sRelMP2CoM[2]},
+                                         {-sRelMP2CoM[2]*sRelMP2CoM[0], -sRelMP2CoM[2]*sRelMP2CoM[1], sRelMP2CoM[0]^2 + sRelMP2CoM[1]^2}};
+    AnyFloat JMMP2CoM = .MiddlePhalange2.JM + JMMP2T;
+    AnyFloat JiiMP2CoM = {JMMP2CoM[0][0], JMMP2CoM[1][1], JMMP2CoM[2][2]};
+    AnyFloat JijMP2CoM = {JMMP2CoM[1][0], JMMP2CoM[2][1], JMMP2CoM[2][0]};
+
+    AnyFloat sRelDP2CoM = .DistalPhalange2.sCoM-.sCoM;
+    AnyFloat JMDP2T = .DistalPhalange2.Mass*{{sRelDP2CoM[1]^2 + sRelDP2CoM[2]^2, -sRelDP2CoM[0]*sRelDP2CoM[1], -sRelDP2CoM[0]*sRelDP2CoM[2]},
+                                         {-sRelDP2CoM[1]*sRelDP2CoM[0], sRelDP2CoM[2]^2 + sRelDP2CoM[0]^2, -sRelDP2CoM[1]*sRelDP2CoM[2]},
+                                         {-sRelDP2CoM[2]*sRelDP2CoM[0], -sRelDP2CoM[2]*sRelDP2CoM[1], sRelDP2CoM[0]^2 + sRelDP2CoM[1]^2}};
+    AnyFloat JMDP2CoM = .DistalPhalange2.JM + JMDP2T;
+    AnyFloat JiiDP2CoM = {JMDP2CoM[0][0], JMDP2CoM[1][1], JMDP2CoM[2][2]};
+    AnyFloat JijDP2CoM = {JMDP2CoM[1][0], JMDP2CoM[2][1], JMDP2CoM[2][0]};
+    
+    
+    AnyFloat Jii = JiiPP2CoM + JiiMP2CoM + JiiDP2CoM;
+    AnyFloat Jij = JijPP2CoM + JijMP2CoM + JijDP2CoM;
+  };
+
   AnyRefNode ProximalPhalange2 = {
     //  sRel=.Metatarsal2.MtPhalJoint.sRel*.Metatarsal2.Axes0'+.Metatarsal2.r0-MtPhalJoint.sRel*Axes0';
     
@@ -577,9 +660,55 @@ AnySeg Toe2 = {
 
 AnySeg Toe3 = {
   
-  Mass = 0;
-  Jii = {0,0,0};
+  Mass = ProximalPhalange3.Mass + MiddlePhalange3.Mass + DistalPhalange3.Mass;
+  sCoM = (
+          ProximalPhalange3.Mass*ProximalPhalange3.sCoM +
+          MiddlePhalange3.Mass*MiddlePhalange3.sCoM +
+          DistalPhalange3.Mass*DistalPhalange3.sCoM
+         )/Mass;
   r0=.Midfoot.Metatarsal3.MtPhalJoint.sRel*.Midfoot.Metatarsal3.ARel'+.Midfoot.r0-ProximalPhalange3.MtPhalJoint.sRel*ProximalPhalange3.ARel';
+  AnyRefNode CoM = {sRel =.sCoM;}; 
+  Jii = EqInertia.Jii;
+  Jij = EqInertia.Jij;
+  JaboutCoMOnOff = On;
+  
+  AnyFolder EqInertia = {
+    // Equivalent inertia is calculated using parallel axis theorem. Jii of constituent segments, expressed about their corresponding
+    // CoM are translated to the CoM of the lumped segment using the formula: JiiNew = JiiCoM + mr^2
+    // r vector is calculated as the difference between constituent segment CoM and lumped segment CoM.
+    // m is the mass of the constituent segment.
+    // JiiCoM is the Jii of the constituent segment about its own CoM
+    // JiiNew is the Jii of the constituent segment about the CoM of the lumped segment.
+          
+    AnyFloat sRelPP3CoM = .ProximalPhalange3.sCoM-.sCoM;
+    AnyFloat JMPP3T = .ProximalPhalange3.Mass*{{sRelPP3CoM[1]^2 + sRelPP3CoM[2]^2, -sRelPP3CoM[0]*sRelPP3CoM[1], -sRelPP3CoM[0]*sRelPP3CoM[2]},
+                                         {-sRelPP3CoM[1]*sRelPP3CoM[0], sRelPP3CoM[2]^2 + sRelPP3CoM[0]^2, -sRelPP3CoM[1]*sRelPP3CoM[2]},
+                                         {-sRelPP3CoM[2]*sRelPP3CoM[0], -sRelPP3CoM[2]*sRelPP3CoM[1], sRelPP3CoM[0]^2 + sRelPP3CoM[1]^2}};
+    AnyFloat JMPP3CoM = .ProximalPhalange3.JM + JMPP3T;
+    AnyFloat JiiPP3CoM = {JMPP3CoM[0][0], JMPP3CoM[1][1], JMPP3CoM[2][2]};
+    AnyFloat JijPP3CoM = {JMPP3CoM[1][0], JMPP3CoM[2][1], JMPP3CoM[2][0]};
+    
+    AnyFloat sRelMP3CoM = .MiddlePhalange3.sCoM-.sCoM;
+    AnyFloat JMMP3T = .MiddlePhalange3.Mass*{{sRelMP3CoM[1]^2 + sRelMP3CoM[2]^2, -sRelMP3CoM[0]*sRelMP3CoM[1], -sRelMP3CoM[0]*sRelMP3CoM[2]},
+                                         {-sRelMP3CoM[1]*sRelMP3CoM[0], sRelMP3CoM[2]^2 + sRelMP3CoM[0]^2, -sRelMP3CoM[1]*sRelMP3CoM[2]},
+                                         {-sRelMP3CoM[2]*sRelMP3CoM[0], -sRelMP3CoM[2]*sRelMP3CoM[1], sRelMP3CoM[0]^2 + sRelMP3CoM[1]^2}};
+    AnyFloat JMMP3CoM = .MiddlePhalange3.JM + JMMP3T;
+    AnyFloat JiiMP3CoM = {JMMP3CoM[0][0], JMMP3CoM[1][1], JMMP3CoM[2][2]};
+    AnyFloat JijMP3CoM = {JMMP3CoM[1][0], JMMP3CoM[2][1], JMMP3CoM[2][0]};
+
+    AnyFloat sRelDP3CoM = .DistalPhalange3.sCoM-.sCoM;
+    AnyFloat JMDP3T = .DistalPhalange3.Mass*{{sRelDP3CoM[1]^2 + sRelDP3CoM[2]^2, -sRelDP3CoM[0]*sRelDP3CoM[1], -sRelDP3CoM[0]*sRelDP3CoM[2]},
+                                         {-sRelDP3CoM[1]*sRelDP3CoM[0], sRelDP3CoM[2]^2 + sRelDP3CoM[0]^2, -sRelDP3CoM[1]*sRelDP3CoM[2]},
+                                         {-sRelDP3CoM[2]*sRelDP3CoM[0], -sRelDP3CoM[2]*sRelDP3CoM[1], sRelDP3CoM[0]^2 + sRelDP3CoM[1]^2}};
+    AnyFloat JMDP3CoM = .DistalPhalange3.JM + JMDP3T;
+    AnyFloat JiiDP3CoM = {JMDP3CoM[0][0], JMDP3CoM[1][1], JMDP3CoM[2][2]};
+    AnyFloat JijDP3CoM = {JMDP3CoM[1][0], JMDP3CoM[2][1], JMDP3CoM[2][0]};
+    
+    
+    AnyFloat Jii = JiiPP3CoM + JiiMP3CoM + JiiDP3CoM;
+    AnyFloat Jij = JijPP3CoM + JijMP3CoM + JijDP3CoM;
+  };
+
   
   AnyRefNode ProximalPhalange3 = {
     //  r0=.Metatarsal3.MtPhalJoint.sRel*.Metatarsal3.Axes0'+.Metatarsal3.r0-MtPhalJoint.sRel*Axes0';
@@ -866,10 +995,55 @@ AnySeg Toe3 = {
 //***********************
 
 AnySeg Toe4 = {
-  Mass = 0;
-  Jii = {0,0,0};
+  Mass = ProximalPhalange4.Mass + MiddlePhalange4.Mass + DistalPhalange4.Mass;
+  sCoM = (
+          ProximalPhalange4.Mass*ProximalPhalange4.sCoM +
+          MiddlePhalange4.Mass*MiddlePhalange4.sCoM +
+          DistalPhalange4.Mass*DistalPhalange4.sCoM
+         )/Mass;
   r0=.Midfoot.Metatarsal4.MtPhalJoint.sRel*.Midfoot.Metatarsal4.ARel'+.Midfoot.r0-ProximalPhalange4.MtPhalJoint.sRel*ProximalPhalange4.ARel';
+  AnyRefNode CoM = {sRel =.sCoM;}; 
+  Jii = EqInertia.Jii;
+  Jij = EqInertia.Jij;
+  JaboutCoMOnOff = On;
   
+  AnyFolder EqInertia = {
+    // Equivalent inertia is calculated using parallel axis theorem. Jii of constituent segments, expressed about their corresponding
+    // CoM are translated to the CoM of the lumped segment using the formula: JiiNew = JiiCoM + mr^2
+    // r vector is calculated as the difference between constituent segment CoM and lumped segment CoM.
+    // m is the mass of the constituent segment.
+    // JiiCoM is the Jii of the constituent segment about its own CoM
+    // JiiNew is the Jii of the constituent segment about the CoM of the lumped segment.
+          
+    AnyFloat sRelPP4CoM = .ProximalPhalange4.sCoM-.sCoM;
+    AnyFloat JMPP4T = .ProximalPhalange4.Mass*{{sRelPP4CoM[1]^2 + sRelPP4CoM[2]^2, -sRelPP4CoM[0]*sRelPP4CoM[1], -sRelPP4CoM[0]*sRelPP4CoM[2]},
+                                         {-sRelPP4CoM[1]*sRelPP4CoM[0], sRelPP4CoM[2]^2 + sRelPP4CoM[0]^2, -sRelPP4CoM[1]*sRelPP4CoM[2]},
+                                         {-sRelPP4CoM[2]*sRelPP4CoM[0], -sRelPP4CoM[2]*sRelPP4CoM[1], sRelPP4CoM[0]^2 + sRelPP4CoM[1]^2}};
+    AnyFloat JMPP4CoM = .ProximalPhalange4.JM + JMPP4T;
+    AnyFloat JiiPP4CoM = {JMPP4CoM[0][0], JMPP4CoM[1][1], JMPP4CoM[2][2]};
+    AnyFloat JijPP4CoM = {JMPP4CoM[1][0], JMPP4CoM[2][1], JMPP4CoM[2][0]};
+    
+    AnyFloat sRelMP4CoM = .MiddlePhalange4.sCoM-.sCoM;
+    AnyFloat JMMP4T = .MiddlePhalange4.Mass*{{sRelMP4CoM[1]^2 + sRelMP4CoM[2]^2, -sRelMP4CoM[0]*sRelMP4CoM[1], -sRelMP4CoM[0]*sRelMP4CoM[2]},
+                                         {-sRelMP4CoM[1]*sRelMP4CoM[0], sRelMP4CoM[2]^2 + sRelMP4CoM[0]^2, -sRelMP4CoM[1]*sRelMP4CoM[2]},
+                                         {-sRelMP4CoM[2]*sRelMP4CoM[0], -sRelMP4CoM[2]*sRelMP4CoM[1], sRelMP4CoM[0]^2 + sRelMP4CoM[1]^2}};
+    AnyFloat JMMP4CoM = .MiddlePhalange4.JM + JMMP4T;
+    AnyFloat JiiMP4CoM = {JMMP4CoM[0][0], JMMP4CoM[1][1], JMMP4CoM[2][2]};
+    AnyFloat JijMP4CoM = {JMMP4CoM[1][0], JMMP4CoM[2][1], JMMP4CoM[2][0]};
+
+    AnyFloat sRelDP4CoM = .DistalPhalange4.sCoM-.sCoM;
+    AnyFloat JMDP4T = .DistalPhalange4.Mass*{{sRelDP4CoM[1]^2 + sRelDP4CoM[2]^2, -sRelDP4CoM[0]*sRelDP4CoM[1], -sRelDP4CoM[0]*sRelDP4CoM[2]},
+                                         {-sRelDP4CoM[1]*sRelDP4CoM[0], sRelDP4CoM[2]^2 + sRelDP4CoM[0]^2, -sRelDP4CoM[1]*sRelDP4CoM[2]},
+                                         {-sRelDP4CoM[2]*sRelDP4CoM[0], -sRelDP4CoM[2]*sRelDP4CoM[1], sRelDP4CoM[0]^2 + sRelDP4CoM[1]^2}};
+    AnyFloat JMDP4CoM = .DistalPhalange4.JM + JMDP4T;
+    AnyFloat JiiDP4CoM = {JMDP4CoM[0][0], JMDP4CoM[1][1], JMDP4CoM[2][2]};
+    AnyFloat JijDP4CoM = {JMDP4CoM[1][0], JMDP4CoM[2][1], JMDP4CoM[2][0]};
+    
+    
+    AnyFloat Jii = JiiPP4CoM + JiiMP4CoM + JiiDP4CoM;
+    AnyFloat Jij = JijPP4CoM + JijMP4CoM + JijDP4CoM;
+  };
+
   AnyRefNode ProximalPhalange4 = {
     //  r0=.Metatarsal4.MtPhalJoint.sRel*.Metatarsal4.Axes0'+.Metatarsal4.r0-MtPhalJoint.sRel*Axes0';
     
@@ -1155,10 +1329,55 @@ AnySeg Toe4 = {
 //***********************
 
 AnySeg Toe5 = {
-  Mass = 0;
-  Jii = {0,0,0};
+  Mass = ProximalPhalange5.Mass + MiddlePhalange5.Mass + DistalPhalange5.Mass;
+  sCoM = (
+          ProximalPhalange5.Mass*ProximalPhalange5.sCoM +
+          MiddlePhalange5.Mass*MiddlePhalange5.sCoM +
+          DistalPhalange5.Mass*DistalPhalange5.sCoM
+         )/Mass;
   r0=.Midfoot.Metatarsal5.MtPhalJoint.sRel*.Midfoot.Metatarsal5.ARel'+.Midfoot.r0-ProximalPhalange5.MtPhalJoint.sRel*ProximalPhalange5.ARel';
+  AnyRefNode CoM = {sRel =.sCoM;}; 
+  Jii = EqInertia.Jii;
+  Jij = EqInertia.Jij;
+  JaboutCoMOnOff = On;
   
+  AnyFolder EqInertia = {
+    // Equivalent inertia is calculated using parallel axis theorem. Jii of constituent segments, expressed about their corresponding
+    // CoM are translated to the CoM of the lumped segment using the formula: JiiNew = JiiCoM + mr^2
+    // r vector is calculated as the difference between constituent segment CoM and lumped segment CoM.
+    // m is the mass of the constituent segment.
+    // JiiCoM is the Jii of the constituent segment about its own CoM
+    // JiiNew is the Jii of the constituent segment about the CoM of the lumped segment.
+          
+    AnyFloat sRelPP5CoM = .ProximalPhalange5.sCoM-.sCoM;
+    AnyFloat JMPP5T = .ProximalPhalange5.Mass*{{sRelPP5CoM[1]^2 + sRelPP5CoM[2]^2, -sRelPP5CoM[0]*sRelPP5CoM[1], -sRelPP5CoM[0]*sRelPP5CoM[2]},
+                                         {-sRelPP5CoM[1]*sRelPP5CoM[0], sRelPP5CoM[2]^2 + sRelPP5CoM[0]^2, -sRelPP5CoM[1]*sRelPP5CoM[2]},
+                                         {-sRelPP5CoM[2]*sRelPP5CoM[0], -sRelPP5CoM[2]*sRelPP5CoM[1], sRelPP5CoM[0]^2 + sRelPP5CoM[1]^2}};
+    AnyFloat JMPP5CoM = .ProximalPhalange5.JM + JMPP5T;
+    AnyFloat JiiPP5CoM = {JMPP5CoM[0][0], JMPP5CoM[1][1], JMPP5CoM[2][2]};
+    AnyFloat JijPP5CoM = {JMPP5CoM[1][0], JMPP5CoM[2][1], JMPP5CoM[2][0]};
+    
+    AnyFloat sRelMP5CoM = .MiddlePhalange5.sCoM-.sCoM;
+    AnyFloat JMMP5T = .MiddlePhalange5.Mass*{{sRelMP5CoM[1]^2 + sRelMP5CoM[2]^2, -sRelMP5CoM[0]*sRelMP5CoM[1], -sRelMP5CoM[0]*sRelMP5CoM[2]},
+                                         {-sRelMP5CoM[1]*sRelMP5CoM[0], sRelMP5CoM[2]^2 + sRelMP5CoM[0]^2, -sRelMP5CoM[1]*sRelMP5CoM[2]},
+                                         {-sRelMP5CoM[2]*sRelMP5CoM[0], -sRelMP5CoM[2]*sRelMP5CoM[1], sRelMP5CoM[0]^2 + sRelMP5CoM[1]^2}};
+    AnyFloat JMMP5CoM = .MiddlePhalange5.JM + JMMP5T;
+    AnyFloat JiiMP5CoM = {JMMP5CoM[0][0], JMMP5CoM[1][1], JMMP5CoM[2][2]};
+    AnyFloat JijMP5CoM = {JMMP5CoM[1][0], JMMP5CoM[2][1], JMMP5CoM[2][0]};
+
+    AnyFloat sRelDP5CoM = .DistalPhalange5.sCoM-.sCoM;
+    AnyFloat JMDP5T = .DistalPhalange5.Mass*{{sRelDP5CoM[1]^2 + sRelDP5CoM[2]^2, -sRelDP5CoM[0]*sRelDP5CoM[1], -sRelDP5CoM[0]*sRelDP5CoM[2]},
+                                         {-sRelDP5CoM[1]*sRelDP5CoM[0], sRelDP5CoM[2]^2 + sRelDP5CoM[0]^2, -sRelDP5CoM[1]*sRelDP5CoM[2]},
+                                         {-sRelDP5CoM[2]*sRelDP5CoM[0], -sRelDP5CoM[2]*sRelDP5CoM[1], sRelDP5CoM[0]^2 + sRelDP5CoM[1]^2}};
+    AnyFloat JMDP5CoM = .DistalPhalange5.JM + JMDP5T;
+    AnyFloat JiiDP5CoM = {JMDP5CoM[0][0], JMDP5CoM[1][1], JMDP5CoM[2][2]};
+    AnyFloat JijDP5CoM = {JMDP5CoM[1][0], JMDP5CoM[2][1], JMDP5CoM[2][0]};
+    
+    
+    AnyFloat Jii = JiiPP5CoM + JiiMP5CoM + JiiDP5CoM;
+    AnyFloat Jij = JijPP5CoM + JijMP5CoM + JijDP5CoM;
+  };
+
   AnyRefNode ProximalPhalange5 = {
     //  r0=.Metatarsal5.MtPhalJoint.sRel*.Metatarsal5.Axes0'+.Metatarsal5.r0-MtPhalJoint.sRel*Axes0';
     

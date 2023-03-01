@@ -13,10 +13,110 @@
 
 
 AnySeg Midfoot = {
-  Mass = 0;
-  Jii = {0,0,0};
+//  Mass = 0;
+  Mass = Calcaneus.Mass + Cuboid.Mass + Navicular.Mass + MedialCuneiform.Mass + IntermediateCuneiform.Mass + LateralCuneiform.Mass
+         + Metatarsal1.Mass + Metatarsal2.Mass + Metatarsal3.Mass + Metatarsal4.Mass + Metatarsal5.Mass;
+//  Jii = {0,0,0};
   r0=.Talus.SubTalarJoint.sRel*.Talus.Axes0'+.Talus.r0-Calcaneus.SubTalarJoint.sRel*Axes0';
+  sCoM = (
+          Calcaneus.Mass*Calcaneus.sCoM +
+          Cuboid.Mass*Cuboid.sCoM +
+          Navicular.Mass*Navicular.sCoM +
+          MedialCuneiform.Mass*MedialCuneiform.sCoM +
+          IntermediateCuneiform.Mass*IntermediateCuneiform.sCoM +
+          LateralCuneiform.Mass*LateralCuneiform.sCoM +
+          Metatarsal1.Mass*Metatarsal1.sCoM +
+          Metatarsal2.Mass*Metatarsal2.sCoM +
+          Metatarsal3.Mass*Metatarsal3.sCoM +
+          Metatarsal4.Mass*Metatarsal4.sCoM +
+          Metatarsal5.Mass*Metatarsal5.sCoM 
+          )/Mass;
   
+  AnyRefNode CoM = {sRel =.sCoM;};        
+  AnyRefNode CalcaneusCoM = {sRel =.Calcaneus.sCoM;};
+  
+  Jii = EqInertia.Jii;
+  Jij = EqInertia.Jij;
+  JaboutCoMOnOff = On;
+  
+  AnyFolder EqInertia = {
+    // Equivalent inertia is calculated using parallel axis theorem. Jii of constituent segments, expressed about their corresponding
+    // CoM are translated to the CoM of the lumped segment using the formula: JiiNew = JiiCoM + mr^2
+    // r vector is calculated as the difference between constituent segment CoM and lumped segment CoM.
+    // m is the mass of the constituent segment.
+    // JiiCoM is the Jii of the constituent segment about its own CoM
+    // JiiNew is the Jii of the constituent segment about the CoM of the lumped segment.
+    
+    AnyFloat sRelCaCoM = .Calcaneus.sCoM-.sCoM; 
+    AnyFloat JiiCaT = .Calcaneus.Mass*{sRelCaCoM[1]^2 + sRelCaCoM[2]^2, sRelCaCoM[2]^2 + sRelCaCoM[0]^2, sRelCaCoM[0]^2 + sRelCaCoM[1]^2};
+    AnyFloat JiiCaCoM = .Calcaneus.Jii + JiiCaT;
+    
+    AnyFloat sRelCuCoM = .Cuboid.sCoM-.sCoM;
+    AnyFloat JiiCuT = .Cuboid.Mass*{sRelCuCoM[1]^2 + sRelCuCoM[2]^2, sRelCuCoM[2]^2 + sRelCuCoM[0]^2, sRelCuCoM[0]^2 + sRelCuCoM[1]^2};
+    AnyFloat JiiCuCoM = .Cuboid.Jii + JiiCuT;
+    
+    AnyFloat sRelNaCoM = .Navicular.sCoM-.sCoM;
+    AnyFloat JiiNaT = .Navicular.Mass*{sRelNaCoM[1]^2 + sRelNaCoM[2]^2, sRelNaCoM[2]^2 + sRelNaCoM[0]^2, sRelNaCoM[0]^2 + sRelNaCoM[1]^2};
+    AnyFloat JiiNaCoM = .Navicular.Jii + JiiNaT;
+    
+    AnyFloat sRelMCuCoM = .MedialCuneiform.sCoM-.sCoM;
+    AnyFloat JiiMCuT = .MedialCuneiform.Mass*{sRelMCuCoM[1]^2 + sRelMCuCoM[2]^2, sRelMCuCoM[2]^2 + sRelMCuCoM[0]^2, sRelMCuCoM[0]^2 + sRelMCuCoM[1]^2};
+    AnyFloat JiiMCuCoM = .MedialCuneiform.Jii + JiiMCuT;
+    
+    AnyFloat sRelICuCoM = .IntermediateCuneiform.sCoM-.sCoM;
+    AnyFloat JiiICuT = .IntermediateCuneiform.Mass*{sRelICuCoM[1]^2 + sRelICuCoM[2]^2, sRelICuCoM[2]^2 + sRelICuCoM[0]^2, sRelICuCoM[0]^2 + sRelICuCoM[1]^2};
+    AnyFloat JiiICuCoM = .IntermediateCuneiform.Jii + JiiICuT;
+    
+    AnyFloat sRelLCuCoM = .LateralCuneiform.sCoM-.sCoM;
+    AnyFloat JiiLCuT = .LateralCuneiform.Mass*{sRelLCuCoM[1]^2 + sRelLCuCoM[2]^2, sRelLCuCoM[2]^2 + sRelLCuCoM[0]^2, sRelLCuCoM[0]^2 + sRelLCuCoM[1]^2};
+    AnyFloat JiiLCuCoM = .LateralCuneiform.Jii + JiiLCuT;
+        
+    AnyFloat sRelMt1CoM = .Metatarsal1.sCoM-.sCoM;
+    AnyFloat JMMt1T = .Metatarsal1.Mass*{{sRelMt1CoM[1]^2 + sRelMt1CoM[2]^2, -sRelMt1CoM[0]*sRelMt1CoM[1], -sRelMt1CoM[0]*sRelMt1CoM[2]},
+                                         {-sRelMt1CoM[1]*sRelMt1CoM[0], sRelMt1CoM[2]^2 + sRelMt1CoM[0]^2, -sRelMt1CoM[1]*sRelMt1CoM[2]},
+                                         {-sRelMt1CoM[2]*sRelMt1CoM[0], -sRelMt1CoM[2]*sRelMt1CoM[1], sRelMt1CoM[0]^2 + sRelMt1CoM[1]^2}};
+    AnyFloat JMMt1CoM = .Metatarsal1.JM + JMMt1T;
+    AnyFloat JiiMt1CoM = {JMMt1CoM[0][0], JMMt1CoM[1][1], JMMt1CoM[2][2]};
+    AnyFloat JijMt1CoM = {JMMt1CoM[1][0], JMMt1CoM[2][1], JMMt1CoM[2][0]};
+    
+    AnyFloat sRelMt2CoM = .Metatarsal2.sCoM-.sCoM;
+    AnyFloat JMMt2T = .Metatarsal2.Mass*{{sRelMt2CoM[1]^2 + sRelMt2CoM[2]^2, -sRelMt2CoM[0]*sRelMt2CoM[1], -sRelMt2CoM[0]*sRelMt2CoM[2]},
+                                         {-sRelMt2CoM[1]*sRelMt2CoM[0], sRelMt2CoM[2]^2 + sRelMt2CoM[0]^2, -sRelMt2CoM[1]*sRelMt2CoM[2]},
+                                         {-sRelMt2CoM[2]*sRelMt2CoM[0], -sRelMt2CoM[2]*sRelMt2CoM[1], sRelMt2CoM[0]^2 + sRelMt2CoM[1]^2}};
+    AnyFloat JMMt2CoM = .Metatarsal2.JM + JMMt2T;
+    AnyFloat JiiMt2CoM = {JMMt2CoM[0][0], JMMt2CoM[1][1], JMMt2CoM[2][2]};
+    AnyFloat JijMt2CoM = {JMMt2CoM[1][0], JMMt2CoM[2][1], JMMt2CoM[2][0]};
+
+    AnyFloat sRelMt3CoM = .Metatarsal3.sCoM-.sCoM;
+    AnyFloat JMMt3T = .Metatarsal3.Mass*{{sRelMt3CoM[1]^2 + sRelMt3CoM[2]^2, -sRelMt3CoM[0]*sRelMt3CoM[1], -sRelMt3CoM[0]*sRelMt3CoM[2]},
+                                         {-sRelMt3CoM[1]*sRelMt3CoM[0], sRelMt3CoM[2]^2 + sRelMt3CoM[0]^2, -sRelMt3CoM[1]*sRelMt3CoM[2]},
+                                         {-sRelMt3CoM[2]*sRelMt3CoM[0], -sRelMt3CoM[2]*sRelMt3CoM[1], sRelMt3CoM[0]^2 + sRelMt3CoM[1]^2}};
+    AnyFloat JMMt3CoM = .Metatarsal3.JM + JMMt3T;
+    AnyFloat JiiMt3CoM = {JMMt3CoM[0][0], JMMt3CoM[1][1], JMMt3CoM[2][2]};
+    AnyFloat JijMt3CoM = {JMMt3CoM[1][0], JMMt3CoM[2][1], JMMt3CoM[2][0]};
+
+    AnyFloat sRelMt4CoM = .Metatarsal4.sCoM-.sCoM;
+    AnyFloat JMMt4T = .Metatarsal4.Mass*{{sRelMt4CoM[1]^2 + sRelMt4CoM[2]^2, -sRelMt4CoM[0]*sRelMt4CoM[1], -sRelMt4CoM[0]*sRelMt4CoM[2]},
+                                         {-sRelMt4CoM[1]*sRelMt4CoM[0], sRelMt4CoM[2]^2 + sRelMt4CoM[0]^2, -sRelMt4CoM[1]*sRelMt4CoM[2]},
+                                         {-sRelMt4CoM[2]*sRelMt4CoM[0], -sRelMt4CoM[2]*sRelMt4CoM[1], sRelMt4CoM[0]^2 + sRelMt4CoM[1]^2}};
+    AnyFloat JMMt4CoM = .Metatarsal4.JM + JMMt4T;
+    AnyFloat JiiMt4CoM = {JMMt4CoM[0][0], JMMt4CoM[1][1], JMMt4CoM[2][2]};
+    AnyFloat JijMt4CoM = {JMMt4CoM[1][0], JMMt4CoM[2][1], JMMt4CoM[2][0]};
+
+    AnyFloat sRelMt5CoM = .Metatarsal5.sCoM-.sCoM;
+    AnyFloat JMMt5T = .Metatarsal5.Mass*{{sRelMt5CoM[1]^2 + sRelMt5CoM[2]^2, -sRelMt5CoM[0]*sRelMt5CoM[1], -sRelMt5CoM[0]*sRelMt5CoM[2]},
+                                         {-sRelMt5CoM[1]*sRelMt5CoM[0], sRelMt5CoM[2]^2 + sRelMt5CoM[0]^2, -sRelMt5CoM[1]*sRelMt5CoM[2]},
+                                         {-sRelMt5CoM[2]*sRelMt5CoM[0], -sRelMt5CoM[2]*sRelMt5CoM[1], sRelMt5CoM[0]^2 + sRelMt5CoM[1]^2}};
+    AnyFloat JMMt5CoM = .Metatarsal5.JM + JMMt5T;
+    AnyFloat JiiMt5CoM = {JMMt5CoM[0][0], JMMt5CoM[1][1], JMMt5CoM[2][2]};
+    AnyFloat JijMt5CoM = {JMMt5CoM[1][0], JMMt5CoM[2][1], JMMt5CoM[2][0]};
+
+    
+    
+    AnyFloat Jii = JiiCaCoM + JiiCuCoM + JiiNaCoM + JiiMCuCoM + JiiICuCoM + JiiLCuCoM + JiiMt1CoM + JiiMt2CoM + JiiMt3CoM + JiiMt4CoM + JiiMt5CoM;
+    AnyFloat Jij = JijMt1CoM + JijMt2CoM + JijMt3CoM + JijMt4CoM + JijMt5CoM;
+  };
+          
   AnyRefNode Calcaneus = {
 //  sRel=..Talus.SubTalarJoint.sRel*..Talus.Axes0'+..Talus.r0-SubTalarJoint.sRel*ARel';
     
