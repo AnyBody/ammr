@@ -1496,7 +1496,7 @@ the driver values are updated.
 - Added new initial guess for wrapping muscles, which make the wrapping
   more when the model starts in extreme postures.
 
-- Update many examples to use the TLEM 2.1 model. See the {ref}`example gallery <examples-index>`.
+- Updated many examples to use the TLEM 2.1 model. See the {ref}`example gallery <example-gallery>`.
 
 - BM mannequin drivers are now implemented with a class_template allowing all weights and other settings to be customized.
 

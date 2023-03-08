@@ -26,7 +26,7 @@ sd_hide_title: true
 :child-align: justify
 :class: sd-text-white sd-fs-3
 
-Documentation for the AnyBody Managed Model Repository - AMMR
+The AnyBody Managed Model Repository
 
 ```{button-link} ./changelog.html#linkcheck_ignore
 :outline:
