@@ -1,0 +1,529 @@
+/*
+Definitions of Segments in the Thorax Part of the Spine.
+
+Abbrevitations:
+ALL = Anterior Longitudinal Ligament
+PLL = Posterior Longitudinal Ligament
+LS = Ligamentum Supraspinale
+LI = Ligamentum Interspinalia
+
+MF = Multifidi
+ILpl = Iliocostalis Lumborum pars lumborum (part of Erector Spinae)
+LTpl = Longissimus Thoracis pars lumborum (part of Erector Spinae)
+ILpt = Iliocostalis Lumborum pars thoracis (part of Erector Spinae)
+LTpt = Longissimus Thoracis pars thoracis (part of Erector Spinae)
+PM = Psoas Major
+QL = Quadratus Lumborum
+RA = Rectus Abdominis
+OE = Obliquus Externus
+OI = Obliquus Internus
+
+C = Costae
+CI = Crista Iliaca
+CP = Crista Pubica
+SIPS = Spina iliaca posterior superior
+SIPI = Spina iliaca Posterior inferior
+T = Thoracal hvirvel
+L = Lumbal hvirvel
+S = Sacral segment
+*/
+
+
+AnySeg T12Seg = {
+  
+  AnyFolder &StdPar = ..ModelParameters;
+
+  //initial position found as a function of pelvis pos and orientation
+  r0=..Segments.L1Seg.T12L1JntNode.sRel*..Segments.L1Seg.Axes0'+..Segments.L1Seg.r0-T12L1JntNode.sRel*Axes0'; 
+
+  // This file includes the trunk specifc scaling function
+  // and anatomical reference system
+  AnyFunTransform3D &GeomScale = ..Scaling.GeometricalScaling.ThoraxSeg.ScaleFunction;
+  #include "TrunkScalingAndAnatomicalFrame.any"
+  AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards compatability with AMMR 2.4 MoCap Marker protocols
+  
+  // Inertia properties for the segment
+  UseInertiaObjects = On;
+  segmental_inertia_matrix inertiaObject() = {
+    JaboutCoMOnOff = On;
+    sCoM = {(.T11T12JntNode.sRel[0]+.T12L1JntNode.sRel[0])/2,(.T11T12JntNode.sRel[1]+.T12L1JntNode.sRel[1])/2, 0.0} + .Scale({0.041,0,0});
+  };
+  
+  AnyRefNode COMT12 = {
+    sRel = .sCoM;
+  };
+    
+  AnyRefNode T12L1JntNode = {
+    sRel = .Scale(.StdPar.T12.T12L1JntNode_pos);  
+  };  
+  
+  AnyRefNode T11T12JntNode = {
+    sRel = .Scale(.StdPar.T12.T11T12JntNode_pos);
+  };
+  
+  //These nodes are used for adding extra used by other body parts to the right 
+  //and left side of the segment
+  AnyRefNode Right= {AnyMat33 Mirror ={{1,0,0},{0,1,0},{0,0,1}};AnyFunTransform3D &Scale = .Scale;AnyVar Sign = 1;};    
+  AnyRefNode Left= {AnyMat33 Mirror ={{1,0,0},{0,1,0},{0,0,-1}};AnyFunTransform3D &Scale = .Scale;AnyVar Sign = -1;};
+  
+  AnyDrawSurf Th12 = {
+    FileName = ...STL.FilenameT12Seg;
+    RGB = Main.DrawSettings.Colors.Segments;
+    AnyFunTransform3D &Fun = .Scale;
+  };
+}; // End of T12Seg
+
+AnySeg T11Seg = {
+  
+  AnyFolder &StdPar = ..ModelParameters;
+
+  // initial position found as a function of pelvis pos and orientation
+  r0=.T12Seg.T11T12JntNode.sRel*.T12Seg.Axes0'+.T12Seg.r0-T11T12JntNode.sRel*Axes0'; 
+    
+  // This file includes the trunk specifc scaling function
+  // and anatomical reference system
+  AnyFunTransform3D &GeomScale = ..Scaling.GeometricalScaling.ThoraxSeg.ScaleFunction;
+  #include "TrunkScalingAndAnatomicalFrame.any"
+  AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards compatability with AMMR 2.4 MoCap Marker protocols
+  
+  // Inertia properties for the segment
+  UseInertiaObjects = On;
+  segmental_inertia_matrix inertiaObject() = {
+    JaboutCoMOnOff = On;
+    sCoM = {(.T11T12JntNode.sRel[0]+.T10T11JntNode.sRel[0])/2,(.T11T12JntNode.sRel[1]+.T10T11JntNode.sRel[1])/2, 0} + .Scale({0.044, 0, 0});
+  };
+  
+  AnyRefNode T11T12JntNode = {
+    sRel = .Scale(.StdPar.T11.T11T12JntNode_pos);
+  };
+  
+  AnyRefNode T10T11JntNode = {
+    sRel = .Scale(.StdPar.T11.T10T11JntNode_pos);
+  };
+  
+  //These nodes are used for adding extra used by other body parts to the right 
+  //and left side of the segment
+  AnyRefNode Right= {AnyMat33 Mirror ={{1,0,0},{0,1,0},{0,0,1}};AnyFunTransform3D &Scale = .Scale;AnyVar Sign = 1;};    
+  AnyRefNode Left= {AnyMat33 Mirror ={{1,0,0},{0,1,0},{0,0,-1}};AnyFunTransform3D &Scale = .Scale;AnyVar Sign = -1;};
+  
+  AnyDrawSurf Th11 = {
+    FileName =...STL.FilenameT11Seg;
+    RGB = Main.DrawSettings.Colors.Segments;
+    //Opacity = Main.DrawSettings.BonesOpacity.T11;
+    AnyFunTransform3D &Fun = .Scale;
+  };
+}; // End of T11Seg
+
+AnySeg T10Seg = {
+  
+  AnyFolder &StdPar = ..ModelParameters;
+
+  // initial position found as a function of pelvis pos and orientation
+  r0=.T11Seg.T10T11JntNode.sRel*.T11Seg.Axes0'+.T11Seg.r0-T10T11JntNode.sRel*Axes0'; 
+  
+  // This file includes the trunk specifc scaling function
+  // and anatomical reference system
+  AnyFunTransform3D &GeomScale = ..Scaling.GeometricalScaling.ThoraxSeg.ScaleFunction;
+  #include "TrunkScalingAndAnatomicalFrame.any"
+  AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards compatability with AMMR 2.4 MoCap Marker protocols
+  
+  // Inertia properties for the segment
+  UseInertiaObjects = On;
+  segmental_inertia_matrix inertiaObject() = {
+    JaboutCoMOnOff = On;
+    sCoM = {(.T9T10JntNode.sRel[0]+.T10T11JntNode.sRel[0])/2,(.T9T10JntNode.sRel[1]+.T10T11JntNode.sRel[1])/2, 0} + .Scale({0.046, 0, 0});
+  };
+      
+  AnyRefNode T10T11JntNode = {
+    sRel = .Scale(.StdPar.T10.T10T11JntNode_pos);
+  };
+  
+  AnyRefNode T9T10JntNode = {
+    sRel = .Scale(.StdPar.T10.T9T10JntNode_pos);
+  };
+    
+  //These nodes are used for adding extra used by other body parts to the right 
+  //and left side of the segment
+  AnyRefNode Right= {AnyMat33 Mirror ={{1,0,0},{0,1,0},{0,0,1}};AnyFunTransform3D &Scale = .Scale;AnyVar Sign = 1;};    
+  AnyRefNode Left= {AnyMat33 Mirror ={{1,0,0},{0,1,0},{0,0,-1}};AnyFunTransform3D &Scale = .Scale;AnyVar Sign = -1;};
+  
+  AnyDrawSurf Th10 = {
+    FileName =...STL.FilenameT10Seg;
+    RGB = Main.DrawSettings.Colors.Segments;
+    //Opacity = Main.DrawSettings.BonesOpacity.T10;
+    AnyFunTransform3D &Fun = .Scale;
+  };
+}; // End of T10Seg
+  
+AnySeg T9Seg = {
+  
+  AnyFolder &StdPar = ..ModelParameters;
+
+  //initial position found as a function of pelvis pos and orientation
+  r0=.T10Seg.T9T10JntNode.sRel*.T10Seg.Axes0'+.T10Seg.r0-T9T10JntNode.sRel*Axes0'; 
+  
+  // This file includes the trunk specifc scaling function
+  // and anatomical reference system
+  AnyFunTransform3D &GeomScale = ..Scaling.GeometricalScaling.ThoraxSeg.ScaleFunction;
+  #include "TrunkScalingAndAnatomicalFrame.any"
+  AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards compatability with AMMR 2.4 MoCap Marker protocols
+  
+  // Inertia properties for the segment
+  UseInertiaObjects = On;
+  segmental_inertia_matrix inertiaObject() = {
+    JaboutCoMOnOff = On;
+    sCoM = {(.T8T9JntNode.sRel[0]+.T9T10JntNode.sRel[0])/2,(.T8T9JntNode.sRel[1]+.T9T10JntNode.sRel[1])/2, 0} + .Scale({0.046, 0, 0});
+  };
+  
+  AnyRefNode T9T10JntNode = {
+    sRel = .Scale(.StdPar.T9.T9T10JntNode_pos);
+  };
+  
+  AnyRefNode T8T9JntNode = {
+    sRel = .Scale(.StdPar.T9.T8T9JntNode_pos);
+  };
+
+  //These nodes are used for adding extra used by other body parts to the right 
+  //and left side of the segment
+  AnyRefNode Right= {AnyMat33 Mirror ={{1,0,0},{0,1,0},{0,0,1}};AnyFunTransform3D &Scale = .Scale;AnyVar Sign = 1;};    
+  AnyRefNode Left= {AnyMat33 Mirror ={{1,0,0},{0,1,0},{0,0,-1}};AnyFunTransform3D &Scale = .Scale;AnyVar Sign = -1;};
+  
+  AnyDrawSurf Th9 = {
+    FileName =...STL.FilenameT9Seg;
+    RGB = Main.DrawSettings.Colors.Segments;
+    //Opacity = Main.DrawSettings.BonesOpacity.T9;
+    AnyFunTransform3D &Fun = .Scale;
+  };
+}; // End of T9Seg
+
+AnySeg T8Seg = {
+  
+  AnyFolder &StdPar = ..ModelParameters;
+  
+  //initial position found as a function of pelvis pos and orientation
+  r0=.T9Seg.T8T9JntNode.sRel*.T9Seg.Axes0'+.T9Seg.r0-T8T9JntNode.sRel*Axes0'; 
+  
+  // This file includes the trunk specifc scaling function
+  // and anatomical reference system
+  AnyFunTransform3D &GeomScale = ..Scaling.GeometricalScaling.ThoraxSeg.ScaleFunction;
+  #include "TrunkScalingAndAnatomicalFrame.any"
+  AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards compatability with AMMR 2.4 MoCap Marker protocols
+  
+  // Inertia properties for the segment
+  UseInertiaObjects = On;
+  segmental_inertia_matrix inertiaObject() = {
+    JaboutCoMOnOff = On;
+    sCoM = {(.T7T8JntNode.sRel[0]+.T8T9JntNode.sRel[0])/2,(.T7T8JntNode.sRel[1]+.T8T9JntNode.sRel[1])/2, 0} + .Scale({0.046, 0, 0});
+  };
+  
+  AnyRefNode T8T9JntNode = {
+    sRel = .Scale(.StdPar.T8.T8T9JntNode_pos);
+  };
+  
+  AnyRefNode T7T8JntNode = {
+    sRel = .Scale(.StdPar.T8.T7T8JntNode_pos);
+  };
+  
+  //These nodes are used for adding extra used by other body parts to the right 
+  //and left side of the segment
+  AnyRefNode Right= {AnyMat33 Mirror ={{1,0,0},{0,1,0},{0,0,1}};AnyFunTransform3D &Scale = .Scale;AnyVar Sign = 1;};    
+  AnyRefNode Left= {AnyMat33 Mirror ={{1,0,0},{0,1,0},{0,0,-1}};AnyFunTransform3D &Scale = .Scale;AnyVar Sign = -1;};
+
+  AnyDrawSurf Th8 = {
+    FileName =...STL.FilenameT8Seg;
+    RGB = Main.DrawSettings.Colors.Segments;
+    //Opacity = Main.DrawSettings.BonesOpacity.T8;
+    AnyFunTransform3D &Fun = .Scale;
+  };
+}; // End of T8Seg
+
+AnySeg T7Seg = {
+  
+  AnyFolder &StdPar = ..ModelParameters;
+  
+  //initial position found as a function of pelvis pos and orientation
+  r0=.T8Seg.T7T8JntNode.sRel*.T8Seg.Axes0'+.T8Seg.r0-T7T8JntNode.sRel*Axes0'; 
+  
+  // This file includes the trunk specifc scaling function
+  // and anatomical reference system
+  AnyFunTransform3D &GeomScale = ..Scaling.GeometricalScaling.ThoraxSeg.ScaleFunction;
+  #include "TrunkScalingAndAnatomicalFrame.any"
+  AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards compatability with AMMR 2.4 MoCap Marker protocols
+  
+  // Inertia properties for the segment
+  UseInertiaObjects = On;
+  segmental_inertia_matrix inertiaObject() = {
+    JaboutCoMOnOff = On;
+    sCoM = {(.T6T7JntNode.sRel[0]+.T7T8JntNode.sRel[0])/2,(.T6T7JntNode.sRel[1]+.T7T8JntNode.sRel[1])/2, 0} + .Scale({0.043, 0, 0});
+  };
+    
+  AnyRefNode T7T8JntNode = {
+    sRel = .Scale(.StdPar.T7.T7T8JntNode_pos);
+  };
+  
+  AnyRefNode T6T7JntNode = {
+    sRel = .Scale(.StdPar.T7.T6T7JntNode_pos);
+  };
+  
+  //These nodes are used for adding extra used by other body parts to the right 
+  //and left side of the segment
+  AnyRefNode Right= {AnyMat33 Mirror ={{1,0,0},{0,1,0},{0,0,1}};AnyFunTransform3D &Scale = .Scale;AnyVar Sign = 1;};    
+  AnyRefNode Left= {AnyMat33 Mirror ={{1,0,0},{0,1,0},{0,0,-1}};AnyFunTransform3D &Scale = .Scale;AnyVar Sign = -1;};
+  
+  AnyDrawSurf Th7 = {
+    FileName =...STL.FilenameT7Seg;
+    RGB = Main.DrawSettings.Colors.Segments;
+    //Opacity = Main.DrawSettings.BonesOpacity.T7;
+    AnyFunTransform3D &Fun = .Scale;
+  };
+  
+}; // End of T7Seg
+
+AnySeg T6Seg = {
+  
+  AnyFolder &StdPar = ..ModelParameters;
+
+  //initial position found as a function of pelvis pos and orientation
+  r0=.T7Seg.T6T7JntNode.sRel*.T7Seg.Axes0'+.T7Seg.r0-T6T7JntNode.sRel*Axes0'; 
+  
+  // This file includes the trunk specifc scaling function
+  // and anatomical reference system
+  AnyFunTransform3D &GeomScale = ..Scaling.GeometricalScaling.ThoraxSeg.ScaleFunction;
+  #include "TrunkScalingAndAnatomicalFrame.any"
+  AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards compatability with AMMR 2.4 MoCap Marker protocols
+  
+  // Inertia properties for the segment
+  UseInertiaObjects = On;
+  segmental_inertia_matrix inertiaObject() = {
+    JaboutCoMOnOff = On;
+    sCoM = {(.T5T6JntNode.sRel[0]+.T6T7JntNode.sRel[0])/2,(.T5T6JntNode.sRel[1]+.T6T7JntNode.sRel[1])/2, 0} + .Scale({0.039, 0, 0});
+  };
+  
+  
+  AnyRefNode T6T7JntNode = {
+    sRel = .Scale(.StdPar.T6.T6T7JntNode_pos);
+  };
+  
+  AnyRefNode T5T6JntNode = {
+    sRel = .Scale(.StdPar.T6.T5T6JntNode_pos);
+  };
+  
+  //These nodes are used for adding extra used by other body parts to the right 
+  //and left side of the segment
+  AnyRefNode Right= {AnyMat33 Mirror ={{1,0,0},{0,1,0},{0,0,1}};AnyFunTransform3D &Scale = .Scale;AnyVar Sign = 1;};    
+  AnyRefNode Left= {AnyMat33 Mirror ={{1,0,0},{0,1,0},{0,0,-1}};AnyFunTransform3D &Scale = .Scale;AnyVar Sign = -1;};
+  
+  AnyDrawSurf Th6 = {
+    FileName =...STL.FilenameT6Seg;
+    RGB = Main.DrawSettings.Colors.Segments;
+    //Opacity = Main.DrawSettings.BonesOpacity.T6;
+    AnyFunTransform3D &Fun = .Scale;
+  };
+  
+  AnyRefNode SternumNode = {sRel = .Scale(.StdPar.T6.SternumNode_pos);};
+  SternumNode = {AnyDrawNode StNodeDrw = {ScaleXYZ = 0.002*{1,1,1};RGB={0.5,0,0.5};Opacity = 0;};};     
+}; // End of T6Seg
+
+AnySeg T5Seg = {
+  
+  AnyFolder &StdPar = ..ModelParameters;
+
+  //initial position found as a function of pelvis pos and orientation
+  r0=.T6Seg.T5T6JntNode.sRel*.T6Seg.Axes0'+.T6Seg.r0-T5T6JntNode.sRel*Axes0'; 
+  
+  // This file includes the trunk specifc scaling function
+  // and anatomical reference system
+  AnyFunTransform3D &GeomScale = ..Scaling.GeometricalScaling.ThoraxSeg.ScaleFunction;
+  #include "TrunkScalingAndAnatomicalFrame.any"
+  AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards compatability with AMMR 2.4 MoCap Marker protocols
+  
+  // Inertia properties for the segment
+  UseInertiaObjects = On;
+  segmental_inertia_matrix inertiaObject() = {
+    JaboutCoMOnOff = On;
+    sCoM = {(.T4T5JntNode.sRel[0]+.T5T6JntNode.sRel[0])/2,(.T4T5JntNode.sRel[1]+.T5T6JntNode.sRel[1])/2, 0} + .Scale({0.034, 0, 0});
+  };
+  
+  AnyRefNode T5T6JntNode = {
+    sRel = .Scale(.StdPar.T5.T5T6JntNode_pos);
+  };
+  
+  AnyRefNode T4T5JntNode = {
+    sRel = .Scale(.StdPar.T5.T4T5JntNode_pos);
+  };
+  
+  //These nodes are used for adding extra used by other body parts to the right 
+  //and left side of the segment
+  AnyRefNode Right= {AnyMat33 Mirror ={{1,0,0},{0,1,0},{0,0,1}};AnyFunTransform3D &Scale = .Scale;AnyVar Sign = 1;};    
+  AnyRefNode Left= {AnyMat33 Mirror ={{1,0,0},{0,1,0},{0,0,-1}};AnyFunTransform3D &Scale = .Scale;AnyVar Sign = -1;};
+  
+  AnyDrawSurf Th5 = {
+    FileName =...STL.FilenameT5Seg;
+    RGB = Main.DrawSettings.Colors.Segments;
+    //Opacity = Main.DrawSettings.BonesOpacity.T5;
+    AnyFunTransform3D &Fun = .Scale;
+  };
+}; // End of T5Seg
+
+AnySeg T4Seg = {
+  
+  AnyFolder &StdPar = ..ModelParameters;
+
+  //initial position found as a function of pelvis pos and orientation
+  r0=.T5Seg.T4T5JntNode.sRel*.T5Seg.Axes0'+.T5Seg.r0-T4T5JntNode.sRel*Axes0'; 
+  
+  // This file includes the trunk specifc scaling function
+  // and anatomical reference system
+  AnyFunTransform3D &GeomScale = ..Scaling.GeometricalScaling.ThoraxSeg.ScaleFunction;
+  #include "TrunkScalingAndAnatomicalFrame.any"
+  AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards compatability with AMMR 2.4 MoCap Marker protocols
+  
+  // Inertia properties for the segment
+  UseInertiaObjects = On;
+  segmental_inertia_matrix inertiaObject() = {
+    JaboutCoMOnOff = On;
+    sCoM = {(.T3T4JntNode.sRel[0]+.T4T5JntNode.sRel[0])/2,(.T3T4JntNode.sRel[1]+.T4T5JntNode.sRel[1])/2, 0} + .Scale({0.028, 0, 0});
+  };
+    
+  AnyRefNode T4T5JntNode = {
+    sRel = .Scale(.StdPar.T4.T4T5JntNode_pos);
+  };
+  
+  AnyRefNode T3T4JntNode = {
+    sRel = .Scale(.StdPar.T4.T3T4JntNode_pos);
+  };
+  
+  //These nodes are used for adding extra used by other body parts to the right 
+  //and left side of the segment
+  AnyRefNode Right= {AnyMat33 Mirror ={{1,0,0},{0,1,0},{0,0,1}};AnyFunTransform3D &Scale = .Scale;AnyVar Sign = 1;};    
+  AnyRefNode Left= {AnyMat33 Mirror ={{1,0,0},{0,1,0},{0,0,-1}};AnyFunTransform3D &Scale = .Scale;AnyVar Sign = -1;};
+  
+  AnyDrawSurf Th4 = {
+    FileName =...STL.FilenameT4Seg;
+    RGB = Main.DrawSettings.Colors.Segments;
+    //Opacity = Main.DrawSettings.BonesOpacity.T4;
+    AnyFunTransform3D &Fun = .Scale;
+  };
+}; // End of T4Seg
+
+AnySeg T3Seg = {
+  
+  AnyFolder &StdPar = ..ModelParameters;
+
+  //initial position found as a function of pelvis pos and orientation
+  r0=.T4Seg.T3T4JntNode.sRel*.T4Seg.Axes0'+.T4Seg.r0-T3T4JntNode.sRel*Axes0';   
+  
+  // This file includes the trunk specifc scaling function
+  // and anatomical reference system
+  AnyFunTransform3D &GeomScale = ..Scaling.GeometricalScaling.ThoraxSeg.ScaleFunction;
+  #include "TrunkScalingAndAnatomicalFrame.any"
+  AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards compatability with AMMR 2.4 MoCap Marker protocols
+  
+  // Inertia properties for the segment
+  UseInertiaObjects = On;
+  segmental_inertia_matrix inertiaObject() = {
+    JaboutCoMOnOff = On;
+    sCoM = {(.T2T3JntNode.sRel[0]+.T3T4JntNode.sRel[0])/2,(.T2T3JntNode.sRel[1]+.T3T4JntNode.sRel[1])/2, 0} + .Scale({0.02, 0, 0});
+  };
+
+  AnyRefNode T3T4JntNode = {
+    sRel = .Scale(.StdPar.T3.T3T4JntNode_pos);
+  };
+  
+  AnyRefNode T2T3JntNode = {
+    sRel = .Scale(.StdPar.T3.T2T3JntNode_pos);
+  };   
+
+  //These nodes are used for adding extra used by other body parts to the right 
+  //and left side of the segment
+  AnyRefNode Right= {AnyMat33 Mirror ={{1,0,0},{0,1,0},{0,0,1}};AnyFunTransform3D &Scale = .Scale;AnyVar Sign = 1;};    
+  AnyRefNode Left= {AnyMat33 Mirror ={{1,0,0},{0,1,0},{0,0,-1}};AnyFunTransform3D &Scale = .Scale;AnyVar Sign = -1;};
+  
+  AnyDrawSurf Th3 = {
+    FileName =...STL.FilenameT3Seg;
+    RGB = Main.DrawSettings.Colors.Segments;
+    //Opacity = Main.DrawSettings.BonesOpacity.T3;
+    AnyFunTransform3D &Fun = .Scale;
+  };
+}; // End of T3Seg
+
+AnySeg T2Seg = {
+
+  AnyFolder &StdPar = ..ModelParameters;
+  
+  //initial position found as a function of pelvis pos and orientation
+  r0=.T3Seg.T2T3JntNode.sRel*.T3Seg.Axes0'+.T3Seg.r0-T2T3JntNode.sRel*Axes0'; 
+  
+  // This file includes the trunk specifc scaling function
+  // and anatomical reference system
+  AnyFunTransform3D &GeomScale = ..Scaling.GeometricalScaling.ThoraxSeg.ScaleFunction;
+  #include "TrunkScalingAndAnatomicalFrame.any"
+  AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards compatability with AMMR 2.4 MoCap Marker protocols
+  
+  // Inertia properties for the segment
+  UseInertiaObjects = On;
+  segmental_inertia_matrix inertiaObject() = {
+    JaboutCoMOnOff = On;
+    sCoM = {(.T1T2JntNode.sRel[0]+.T2T3JntNode.sRel[0])/2,(.T1T2JntNode.sRel[1]+.T2T3JntNode.sRel[1])/2, 0} + .Scale({0.013, 0, 0});
+  };  
+  
+  AnyRefNode T2T3JntNode = {
+    sRel = .Scale(.StdPar.T2.T2T3JntNode_pos);
+  };
+  
+  AnyRefNode T1T2JntNode = {
+    sRel = .Scale(.StdPar.T2.T1T2JntNode_pos);
+  }; 
+  
+  //These nodes are used for adding extra used by other body parts to the right 
+  //and left side of the segment
+  AnyRefNode Right= {AnyMat33 Mirror ={{1,0,0},{0,1,0},{0,0,1}};AnyFunTransform3D &Scale = .Scale;AnyVar Sign = 1;};    
+  AnyRefNode Left= {AnyMat33 Mirror ={{1,0,0},{0,1,0},{0,0,-1}};AnyFunTransform3D &Scale = .Scale;AnyVar Sign = -1;};
+
+  AnyDrawSurf Th2 = {
+    FileName =...STL.FilenameT2Seg;
+    RGB = Main.DrawSettings.Colors.Segments;
+    //Opacity = Main.DrawSettings.BonesOpacity.T2;
+    AnyFunTransform3D &Fun = .Scale;
+  };
+}; // End of T2Seg
+
+AnySeg T1Seg = {
+  
+  AnyFolder &StdPar = ..ModelParameters;
+  
+  //initial position found as a function of pelvis pos and orientation
+  r0=.T2Seg.T1T2JntNode.sRel*.T2Seg.Axes0'+.T2Seg.r0-T1T2JntNode.sRel*Axes0'; 
+  
+  //AnyFunTransform3D &Scale =..Scaling.GeometricalScaling.T1Seg.ScaleFunction;
+  // This file includes the trunk specifc scaling function
+  // and anatomical reference system
+  AnyFunTransform3D &GeomScale = ..Scaling.GeometricalScaling.ThoraxSeg.ScaleFunction;
+  #include "TrunkScalingAndAnatomicalFrame.any"
+  AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards compatability with AMMR 2.4 MoCap Marker protocols
+  
+  // Inertia properties for the segment
+  UseInertiaObjects = On;
+  segmental_inertia_matrix inertiaObject() = {
+    JaboutCoMOnOff = On;
+    sCoM = {(.T1C7JntNode.sRel[0]+.T1T2JntNode.sRel[0])/2,(.T1C7JntNode.sRel[1]+.T1T2JntNode.sRel[1])/2, 0} + .Scale({0.008, 0, 0});
+  };
+  
+  AnyRefNode T1T2JntNode = {
+    sRel = .Scale(.StdPar.T1.T1T2JntNode_pos);
+  };
+  
+  AnyRefNode T1C7JntNode = { sRel = .Scale(.StdPar.T1.T1C7JntNode_pos);};
+
+  //These nodes are used for adding extra used by other body parts to the right 
+  //and left side of the segment
+  AnyRefNode Right= {AnyMat33 Mirror ={{1,0,0},{0,1,0},{0,0,1}};AnyFunTransform3D &Scale = .Scale;AnyVar Sign = 1;};    
+  AnyRefNode Left= {AnyMat33 Mirror ={{1,0,0},{0,1,0},{0,0,-1}};AnyFunTransform3D &Scale = .Scale;AnyVar Sign = -1;};
+  
+  AnyDrawSurf Th1 = {
+    FileName =...STL.FilenameT1Seg;
+    RGB = Main.DrawSettings.Colors.Segments;
+    //Opacity = Main.DrawSettings.BonesOpacity.T1;
+    AnyFunTransform3D &Fun = .Scale;
+  };    
+}; // End of T1Seg

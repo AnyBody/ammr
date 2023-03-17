@@ -1,6 +1,17 @@
+// Transformation matrix used to mirror node positions between left and right
+AnyFloat MirrorTransform = {{1,0,0},{0,1,0},{0,0, -1}};
+
 #include "LumbarNodes.any"
 
+#if BM_TRUNK_CAVITY_MODEL == _CAVITY_MODEL_VOLUME_
+  AnyFolder Abdominal = {#include "AbdominalNodes.any"};
+#endif
+
 #include "ThoracicNodes.any"
+
+#if BM_TRUNK_THORACIC_MODEL ==_THORACIC_MODEL_FLEXIBLE_
+  AnyFolder ThoracicCavity = {#include "ThoracicCavityNodes.any"};
+#endif
 
 #include "CervicalNodes.any"
 
@@ -21,12 +32,68 @@ AnyVar HeadMass  = 0.081*BodyMass; ///<The mass of the body parts from C7-T1 to 
 AnyVar HeadHeight =  0.14;          ///<The height of the body parts from C7-T1 to ear canal
 AnyVar HeadDepth = 0.2299;          ///<distance from most anterior point on the forehead to the most posterior point on the back of the head
 AnyVar HeadWidth = 0.1800;          ///<distance from  most lateral point to most medial point on head
-AnyVar NeckLength =  0.1390;         ///<vertical distance from .SegmentsThorax.ThoraxSeg.T1C7JntNode.sRel to SegmentsCervicalSpine.C1Seg.C1C0JntNode.sRel
+AnyVar NeckLength =  0.1390;         ///<vertical distance from .Segments.ThoraxSeg.T1C7JntNode.sRel to Segments.C1Seg.C1C0JntNode.sRel
 
 AnyVar LumbarMass = 0.139*BodyMass; ///<Standard mass of the lumbar spine part
 
 AnyVar CervicalSpineMass = 0.26*0.081*BodyMass; ///<Standard mass of the cervical part 
 
-
 AnyVar HeadWithoutNeckMass = 0.74*0.081*BodyMass; ///<Standard mass of the head without neck 
 AnyVar HeadWithoutNeckHeight =  0.14;
+
+
+/// Discretizationfactor used to define number of points for volumes and inertia
+AnyInt DiscretizationFactor = CAVITY_DISCRETIZATION;
+
+/// Defines the number of points to distribute on the posterior part of the abdominal layers
+/// Needs to be a minium of 2
+AnyInt DiscretizationPosterior = max({floor(DiscretizationFactor * 20 / 33), 2});
+
+/// Defines the number of points to distribute on the anterior part of the abdominal layers
+/// Needs to be min 2
+AnyInt DiscretizationAnterior = DiscretizationFactor - DiscretizationPosterior;
+
+// Factors for the individual thoracic parts 
+AnyInt DiscretizationFactorSternum = max({floor(DiscretizationFactor * 6/33), 2}); 
+AnyInt DiscretizationFactorThoracic  = DiscretizationFactorSternum;
+AnyInt DiscretizationFactorRib = (
+  DiscretizationFactor - DiscretizationFactorSternum - DiscretizationFactorThoracic
+);
+
+
+AnyFolder CostoCartilage = {
+
+/* The relative strength of CostoChondrals (CCs) in different levels were defined based on the following reference.
+Reference: Andriacchi, T., Schultz, A., Belytschko, T., Galante, J.: A model for studies of mechanical interactions between the human spine and rib cage. J. Biomech. 7, 497–507 (1974). https://doi.org/10.1016/0021-9290(74)90084-0
+*/
+  /// Coefficient for each CostoChondral joint R1 -> R10
+  AnyFloat Kx = 0.6 * linspace(1, 0.21, 10);
+ 
+  /// The current implementation requires the same weight in x,y,z direction
+  AnyMatrix weights = (ones(6,10) *  diag(Kx))';
+    
+  /// This defines how much strength the CostoCartilage reaction forces has per direction
+  /// 8 N/mm F0 at top relative force for 30mm movement
+  /// 51.85 N/mm F0 at top relative force for 30mm movement
+  AnyMatrix DirectionalScales = diag({
+    0.5 * 8*30, 
+    0.5 * 8*30, 
+    0.5 * 8*30, 
+    0.5 * 8*30, 
+    0.5 * 0.5 * 51.85*30, 
+    0.5 * 51.85*30, 
+  });
+  AnyMatrix ReactionForceStrength = weights * DirectionalScales;
+};
+
+/* The relative strength of CostoChondral (CC) and CostoTransverse (CT) were defined based on cadavar measurements.
+Reference: Schultz, A.B., Benson, D.R., Hirsch, C.: Force-deformation properties of human costo-sternal and costo-vertebral articulations. J. Biomech. 7, 311–318 (1974). https://doi.org/10.1016/0021-9290(74)90024-4
+
+In the top levels:
+From references: Relative Bending Strength of CT/CC= 0.72
+Calculated according to distances and Relative Bending Strength (in upper rib levels) --> Relative linear Strength CT/CC = 3.6
+
+CT_Weight linear_strength = 2 (2 is because we have 2 CT nodes and each gets 1) --> CC_Weight(first rib) = 0.6
+*/
+AnyFloat CostoTransverseWeight = 1;
+AnyFloat InterCostalWeight = 0.1;

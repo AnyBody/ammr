@@ -1,36 +1,53 @@
 
 AnyFolder Model = {
   // Model parts included in the moment arm study
-  AnyFolder &ThoraxRef = .....BodyModel.Trunk.SegmentsThorax.ThoraxSeg;
-  AnyFolder &SkullRef = .....BodyModel.Trunk.SegmentsCervicalSpine.SkullSeg;
-  AnyFolder &CervicalSpineJntRef = .....BodyModel.Trunk.JointsCervicalSpine;
-  AnyFolder &CervicalSpineSegRef = .....BodyModel.Trunk.SegmentsCervicalSpine;
-  AnyFolder &LumbarJntRef = .....BodyModel.Trunk.JointsLumbar;
-  AnyFolder &LumbarSegRef = .....BodyModel.Trunk.SegmentsLumbar;
+  AnyFolder SegmentsRef = {
+    AnyFolder &Pelvis = .....BodyModelRef.Trunk.Segments.PelvisSeg; 
+    AnyFolder &Thorax = ......BodyModel.Trunk.Segments.ThoraxSeg;
+    AnyFolder &Sacrum = ......BodyModel.Trunk.Segments.SacrumSeg;
+    AnyFolder &L5Seg = ......BodyModel.Trunk.Segments.L5Seg;
+    AnyFolder &L4Seg = ......BodyModel.Trunk.Segments.L4Seg;
+    AnyFolder &L3Seg = ......BodyModel.Trunk.Segments.L3Seg;
+    AnyFolder &L2Seg = ......BodyModel.Trunk.Segments.L2Seg;
+    AnyFolder &L1Seg = ......BodyModel.Trunk.Segments.L1Seg;
+    AnyFolder &C7Seg = ......BodyModel.Trunk.Segments.C7Seg;
+    AnyFolder &C6Seg = ......BodyModel.Trunk.Segments.C6Seg;
+    AnyFolder &C5Seg = ......BodyModel.Trunk.Segments.C5Seg;
+    AnyFolder &C4Seg = ......BodyModel.Trunk.Segments.C4Seg;
+    AnyFolder &C3Seg = ......BodyModel.Trunk.Segments.C3Seg;
+    AnyFolder &C2Seg = ......BodyModel.Trunk.Segments.C2Seg;
+    AnyFolder &C1Seg = ......BodyModel.Trunk.Segments.C1Seg;
+    AnyFolder &SkullSeg = ......BodyModel.Trunk.Segments.SkullSeg;
+  };  
+
+  
+  AnyFolder &CervicalSpineJntRef = .....BodyModel.Trunk.Joints.Cervical;
+  AnyFolder &CervicalSpineSegRef = .....BodyModel.Trunk.Segments;
+  AnyFolder &LumbarJntRef = .....BodyModel.Trunk.Joints.Lumbar;
   AnyFolder &ArmSegSideRef = .SideBodyModelRef.ShoulderArm.Seg;
   AnyFolder &ArmJntsRef =  .SideBodyModelRef.ShoulderArm.Jnt;
   AnyFolder &MusRef = .SideBodyModelRef.ShoulderArm.Mus;
   
  AnyFixedRefFrame ground = {
    AnyRefNode node = { 
-      ARel=..ThoraxRef.Axes0;
-     sRel=..ThoraxRef.r0;
+      ARel=..SegmentsRef.Thorax.Axes0;
+     sRel=..SegmentsRef.Thorax.r0;
    };
  };
  
  AnyKinEq FixSkullThoraxPelvis = 
  {
-   AnyKinMeasure& SkullThorax = ......BodyModel.Trunk.JointsCervicalSpine.SkullThoraxRotMeasure;
-   AnyKinMeasure& PelvisThorax = ......BodyModel.Trunk.JointsLumbar.PelvisThoraxRotMeasure;
+   AnyKinMeasure& SkullThorax = ......BodyModel.Trunk.Joints.Cervical.SkullThoraxRotMeasure;
+   AnyKinMeasure& PelvisThorax = ......BodyModel.Trunk.Joints.Lumbar.PelvisThoraxRotMeasure;
  };
  
  AnyReacForce SpineReacForce = 
  {
-   AnyKinMeasure& ref1 =  ......BodyModel.Interface.Trunk.Spine.L5Sacrum;
-   AnyKinMeasure& ref2 =  ......BodyModel.Interface.Trunk.Spine.L4L5;
-   AnyKinMeasure& ref3 =  ......BodyModel.Interface.Trunk.Spine.L3L4;
-   AnyKinMeasure& ref4 =  ......BodyModel.Interface.Trunk.Spine.L2L3;
-   AnyKinMeasure& ref5 =  ......BodyModel.Interface.Trunk.Spine.L1L2;
+   AnyKinMeasure& ref1 =  ......BodyModel.Interface.Trunk.IntervertebralAngles.L5Sacrum.Jnt;
+   AnyKinMeasure& ref2 =  ......BodyModel.Interface.Trunk.IntervertebralAngles.L4L5.Jnt;
+   AnyKinMeasure& ref3 =  ......BodyModel.Interface.Trunk.IntervertebralAngles.L3L4.Jnt;
+   AnyKinMeasure& ref4 =  ......BodyModel.Interface.Trunk.IntervertebralAngles.L2L3.Jnt;
+   AnyKinMeasure& ref5 =  ......BodyModel.Interface.Trunk.IntervertebralAngles.L1L2.Jnt;
  };
  AnyReacForce CervicalSpineReacForce = 
  {
@@ -90,7 +107,7 @@ AnyFolder Model = {
    
    AnyStdJoint TrunkGround={
      AnyRefFrame &Ground = ..ground.node;
-     AnyRefFrame &Thorax= ..ThoraxRef; 
+     AnyRefFrame &Thorax= ..SegmentsRef.Thorax; 
    };
    
 
@@ -146,15 +163,12 @@ AnyProject ModelViews = {};
 
 ModelViews = {
   AnyDrawGroup Selection = {
-    Objects = arrcat(arrcat(
-    ObjSearchRecursive(CompleteNameOf(&..Model.ThoraxRef), "*", "AnyDrawObject"), 
-    ObjSearchRecursive(CompleteNameOf(&..Model.ArmSegSideRef), "*", "AnyDrawObject")),
-    ObjSearchRecursive(CompleteNameOf(&..Model.MusRef), "*", "AnyDrawObject"),
-    ObjSearchRecursive(CompleteNameOf(&..Model.SkullRef), "*", "AnyDrawObject"),
-    ObjSearchRecursive(CompleteNameOf(&..Model.LumbarSegRef), "*", "AnyDrawObject"),
-    ObjSearchRecursive(CompleteNameOf(&..Model.CervicalSpineSegRef), "*", "AnyDrawObject")
-    
-  );
+    Objects = arrcat(
+      ObjSearchRecursive(CompleteNameOf(&..Model.SegmentsRef), "*", "AnyDrawObject"), 
+      ObjSearchRecursive(CompleteNameOf(&..Model.ArmSegSideRef), "*", "AnyDrawObject"),
+      ObjSearchRecursive(CompleteNameOf(&..Model.MusRef), "*", "AnyDrawObject"),
+      ObjSearchRecursive(CompleteNameOf(&..Model.CervicalSpineSegRef), "*", "AnyDrawObject")
+    );
   };
   Views = {
     AnyProjectModelViewDefinition SelectedView = {

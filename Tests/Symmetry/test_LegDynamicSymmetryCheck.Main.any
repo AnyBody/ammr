@@ -12,7 +12,7 @@
 
 
 #include "libdef.any"
-
+#include "../tools.any"
 // ----------------------------------------------------------
 // Model configuration:
 // For more info on body model configuration options please load the model and double click on: 
@@ -29,7 +29,7 @@
   #define TEST_NAME "test_LegDynamicSymmetryCheck.Main_1"
 #endif
 
-
+#define TEST_SEVERITY assert
 #define BM_SCALING _SCALING_LENGTHMASSFAT_
 
 // Use interpolation drivers to define motion
@@ -49,17 +49,47 @@ Main = {
   Main.HumanModel.Anthropometrics.SegmentDimensions.Left.FootLength = 0.25;
   Main.HumanModel.Anthropometrics.SegmentDimensions.Left.TalusLength = 0.05; 
   
-    
+  AnyInt TestTrigger = DesignVar(0);
+ 
+  OPERATION_TEST_TRIGGER(Main.Study.InverseDynamics.PreOperation, Main.TestTrigger);
   
   Main.Study ={
+    AnyFloat kin_tol = 1e-8;
+    AnyFloat force_tol = 1e-6;
+
+    AnyInt LegPositions = TEST_SEVERITY( 
+      orfun( 
+        not(Main.TestTrigger),  
+        ltfun(Main.Study.SymmetryCheck.Leg.Kinematics.pos.NormalizedDifference, kin_tol)
+      ),
+      "Leg model positions asymmetric"
+    );
+
+    AnyInt LegMuscleLengths = TEST_SEVERITY(
+      orfun(
+        not(Main.TestTrigger),
+        ltfun(Main.Study.SymmetryCheck.Leg.Muscle.lmt.NormalizedDifference, kin_tol)
+      ),
+      "Leg muscle lengths asymmetric"
+    );
     
-    AnyInt test1= assert(ltfun(Main.Study.SymmetryCheck.Leg.Muscle.Comparison.MaxFtDif,1.5),
-    "Leg model symmetry");
-    
+    AnyInt LegMuscleLengthVelocities = TEST_SEVERITY(
+      ltfun(Main.Study.SymmetryCheck.Leg.Muscle.lmtDot.NormalizedDifference, kin_tol),
+      "Leg muscle length velocities asymmetric"
+    );
+
+    AnyInt LegMuscleStrengths = TEST_SEVERITY(
+      ltfun(Main.Study.SymmetryCheck.Leg.Muscle.strength.NormalizedDifference, kin_tol),
+      "Leg muscle strength asymmetric"
+    );
+
+    AnyInt LegMusForces = TEST_SEVERITY(
+      ltfun(Main.Study.SymmetryCheck.Leg.Muscle.ft.NormalizedDifference, force_tol),
+      "Leg model muscle forces asymmetric"
+    );
 
   };
-  
-  
+
   AnyOperation& RunTest = Main.RunApplication;
 };
 

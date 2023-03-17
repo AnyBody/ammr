@@ -1,0 +1,117 @@
+//define = (
+//  [
+//    {'EXTENSION_ROM':'{0,0}'}, 
+//    {'EXTENSION_ROM':'{-55,20}'}, 
+//  ],
+//  [
+//    {'ROTATION_ROM':'{0,0}'},
+//    {'ROTATION_ROM':'{-35,35}'},
+//  ],
+//  [
+//    {'LATBEND_ROM':'{0,0}'},
+//    {'LATBEND_ROM':'{-40,40}'},
+//  ],
+//)
+//fatal_warnings = ["Overloaded muscle configuration"]
+//ignore_errors = ['Velocity called before positions']
+
+
+#define ANYBODY_PATH_OUTPUT "."
+#include "../libdef.any"
+
+#include "<ANYBODY_PATH_MODELUTILS>/Drivers/Fourier.any"
+
+#ifndef TEST_NAME 
+  #define EXTENSION_ROM { 0 , 0 }
+  #define ROTATION_ROM { 0 , 0  }
+  #define LATBEND_ROM { -40 , 40  }
+  #define TEST_NAME "test_thoracic.any_0"
+#endif
+
+#define BM_TRUNK_MUSCLES ON
+#define BM_LEG_MODEL OFF
+#define BM_ARM_LEFT OFF
+#define BM_ARM_RIGHT OFF
+#define BM_TRUNK_THORACIC_MODEL _THORACIC_MODEL_FLEXIBLE_
+#define BM_TRUNK_CAVITY_MODEL _CAVITY_MODEL_VOLUME_ 
+#define BM_MANNEQUIN_DRIVER_DEFAULT ON
+#define BM_MANNEQUIN_DRIVER_PELVIS_THORAX_EXTENSION OFF
+#define BM_MANNEQUIN_DRIVER_PELVIS_THORAX_ROTATION OFF
+#define BM_MANNEQUIN_DRIVER_PELVIS_THORAX_LATERAL_BENDING OFF
+
+Main = {
+  #include "<ANYBODY_PATH_BODY>/HumanModel.any"
+  
+  Main.HumanModel.DefaultMannequinDrivers = {
+    PelvisGroundDriverPosX.Reaction.Type = {On};
+    PelvisGroundDriverPosY.Reaction.Type = {On};
+    PelvisGroundDriverPosZ.Reaction.Type = {On};
+    PelvisGroundDriverRotZ.Reaction.Type = {On};
+    PelvisGroundDriverRotY.Reaction.Type = {On};
+    PelvisGroundDriverRotX.Reaction.Type = {On};
+  };
+  
+  AnyOperation& RunTest = Study.InverseDynamics;
+  
+  AnyBodyStudy Study = {
+    
+    AnyFolder& BodyModel = Main.HumanModel.BodyModel;
+    AnyFolder& DefaultDrivers = Main.HumanModel.DefaultMannequinDrivers;
+
+    SimpleFourierDriver Trunk_Extension = {
+      AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxExtension;
+      RangeOfMotion = 0*EXTENSION_ROM * pi/180;
+      Freq = 1/(Main.Study.tEnd-Main.Study.tStart);
+    };
+    
+    SimpleFourierDriver Trunk_LateralBending = {
+      AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxLateralBending;
+      RangeOfMotion = 0*LATBEND_ROM * pi/180;
+      Freq = 1/(Main.Study.tEnd-Main.Study.tStart);
+      Phase = -90*pi/180;
+    };
+
+    SimpleFourierDriver Trunk_AxialRotation = {
+      AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxRotation;
+      RangeOfMotion = 0*ROTATION_ROM * pi/180;
+      Freq = 1/(Main.Study.tEnd-Main.Study.tStart);
+      Phase = 90*pi/180;
+    };
+     AnyObjectPtrArray diaphragm_muscle_right= ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Muscles.Right.Diaphragm", "*", "AnyMuscleShortestPath");
+     AnyObjectPtrArray diaphragm_muscle_left= ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Muscles.Left.Diaphragm", "*", "AnyMuscleShortestPath");
+    
+     
+     //apply a pressure for test
+     AnyForce PressureTest = {
+        AnyKinMeasure &ref =Main.HumanModel.BodyModel.Trunk.ThoracicCavity.Volume;
+        F={5000};
+     };
+     
+     //enable reactions in diaphragm joint
+     AnyReacForce  AbdominalLayerBase_DiaphragmBase = {
+       AnyKinMeasureOrg org ={
+         AnyKinLinear  &ref1 = Main.HumanModel.BodyModel.Trunk.Abdominal.Diaphragm.Joints.AbdominalLayerBase_DiaphragmBase.Linear;
+         AnyKinRotational &ref2 = Main.HumanModel.BodyModel.Trunk.Abdominal.Diaphragm.Joints.AbdominalLayerBase_DiaphragmBase.Orientation;
+         MeasureOrganizer ={0,2,3,4,5};
+       };
+     };
+
+     
+     AnyFloat PressureDiff = Main.HumanModel.BodyModel.Trunk.Abdominal.PressureActuators.UpperCavity.Fout-Main.Study.PressureTest.Fout[0];
+
+     
+     AnyMessage RuntimeErrorFatal = {
+      TriggerRuntime = iffun(gtfun(.PressureDiff[0],1),On,Off);
+      Type = MSG_ErrorFatal;
+      Message = "This error is triggered for pressure diff thoracic vs upper lumbar cavity >1.";
+    };
+
+     
+     //diaphragm excluded to be able to check pressure in thoracic and upper lumbar cavity 
+     MechObjectExclude = arrcat(diaphragm_muscle_right,diaphragm_muscle_left);
+    
+     tEnd = 10.0;
+    Gravity = {0, -9.81, 0};
+    nStep = 5;
+  };  
+};

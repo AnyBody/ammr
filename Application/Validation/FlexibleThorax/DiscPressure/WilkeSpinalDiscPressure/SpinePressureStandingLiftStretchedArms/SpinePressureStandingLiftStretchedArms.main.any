@@ -1,0 +1,116 @@
+#include "../../libdef.any"
+
+// This is a Wilke Spine Pressure Validation Model. To see the documentation click the link below.
+// #path HTML_DOC "<ANYBODY_PATH_BODY>/Documentation/auto_examples/Validation/plot_WilkeSpinePressure.html"
+
+Main = {
+  //  #define BM_LEG_MODEL OFF
+  
+  // Note: Model doesn't yet work with arms
+  #define BM_ARM_LEFT ON
+  #define BM_ARM_RIGHT ON
+  #define  BM_ARM_THORAX_SCAPULA_CONTACT _MULTIPLE_POINT_CONTACT_
+  #define  BM_TRUNK_CERVICAL_MUSCLES ON
+  #define BM_TRUNK_MUSCLES ON
+  
+  //#define BM_TRUNK_LIGAMENTS ON 
+  // New thorax is enabled with
+  #define BM_TRUNK_THORACIC_MODEL _THORACIC_MODEL_FLEXIBLE_
+  #define BM_LEG_TRUNK_INTERFACE _MORPH_LEG_TO_TRUNK_
+
+//#define THORACIC_CAVITY_PRESSURE
+  //////////////////////////////////////////
+
+//  #define BM_MANNEQUIN_DRIVER_DEFAULT OFF
+  
+	AnyDrawOverlayImage wilke = 
+  {
+    Opacity = 1.0;
+    ImageFile = "wilke et al., 2001 Fig3e.jpg";
+  };
+  
+  /**Execute this operation to run the model in the intended operation sequence.  
+  It is also possible to run operations seperately, by manual selections in the operation tree*/
+  AnyOperationSequence RunApplication = {
+
+    /**This operation calibrates the muscles in the model if these are of the type AnyMuscleModel3E.
+    This will just be an empty operation if the model is using a muscle type that does not require calibration.*/
+    AnyOperation &CalibrationAnal = Main.HumanModel.Calibration.CalibrationSequence;  
+
+    ///This operation is the inverse dynamic analysis
+    AnyOperation &InvAnal=Main.Study.InverseDynamics;
+  };
+
+  // ----------------------------------------------------------
+  // Draw settings
+  // ----------------------------------------------------------
+  #include "DrawSettings.any"
+  // ----------------------------------------------------------
+  // Definition of the path for Mannequin.any file
+  // ----------------------------------------------------------  
+  #include "Mannequin.any"
+  // ----------------------------------------------------------
+  // Definition of the path for anthropometric data
+  // ----------------------------------------------------------   
+  #path BM_SCALING_ANTHRO_FILE "AnyManUniform.any"
+  // ----------------------------------------------------------
+  // Scaling method settings
+  // ----------------------------------------------------------    
+  #define BM_SCALING _SCALING_UNIFORM_
+  // ----------------------------------------------------------
+  // BM statements which configure the structure of human model
+  // ----------------------------------------------------------  
+  #define BM_LEG_MODEL _LEG_MODEL_TLEM2_
+  
+  #include "<ANYBODY_PATH_BODY>/HumanModel.any"
+  
+  // This folder collects the elements of the model. It is referred by the
+  // study section below as the target of the analyses.  
+  AnyFolder Model={
+    
+    AnyFolder &BodyModel=.HumanModel.BodyModel;
+    AnyFolder &Mannedriver = .HumanModel.BodyModelWithDefaultDrivers.Drivers;
+
+    
+    #include "Environment.any"   
+    
+    // The Mannequin file specifies load-time positions for all the segments
+    // in the HumanModel. This is important for the model's ablity to resolve
+    // all the kinematic constraints when the model is analyzed.
+    // The mannequin file also drives those degrees of freedom of the human 
+    // model that are not governed by problem-specific drivers at run time.    
+    AnyFolder& Mannequin = .HumanModel.Mannequin;
+    
+    AnyFolder ModelEnvironmentConnection = {
+      #include "JointsAndDrivers.any"
+    };
+    
+  };
+  AnyBodyStudy Study = {
+    AnyFolder &Model = .Model;
+    InitialConditions.SolverType = KinSolOverDeterminate;
+    Kinematics.SolverType = KinSolOverDeterminate;
+   
+    tEnd = 1.0;
+    Gravity = {0.0001, -9.81, 0.0001};
+    nStep = 1;
+    InverseDynamics.Criterion.UpperBoundOnOff = Off;
+    
+    #ifdef THORACIC_CAVITY_PRESSURE
+    AnyReacForce PressureThoracic ={       AnyKinVolumeCylMesh &ref1=Main.HumanModel.BodyModel.Trunk.ThoracicCavity.Volume;    };
+    #endif
+
+	//Size of total force in the L5 Sacrum joint
+    AnyVar L5SacrumReac = (Main.Model.BodyModel.Trunk.Joints.Lumbar.L5Sacrum.Constraints.Reaction.Fout[0]^2+
+    Main.Model.BodyModel.Trunk.Joints.Lumbar.L5Sacrum.Constraints.Reaction.Fout[1]^2+
+    Main.Model.BodyModel.Trunk.Joints.Lumbar.L5Sacrum.Constraints.Reaction.Fout[2]^2)^0.5;   
+    
+    //Size of total force in the L4L5 joint
+    AnyVar L4L5Reac = (Main.Model.BodyModel.Trunk.Joints.Lumbar.L4L5.Constraints.Reaction.Fout[0]^2+
+    Main.Model.BodyModel.Trunk.Joints.Lumbar.L4L5.Constraints.Reaction.Fout[1]^2+
+    Main.Model.BodyModel.Trunk.Joints.Lumbar.L4L5.Constraints.Reaction.Fout[2]^2)^0.5;
+
+  }; // End of study
+  
+}; //Main
+

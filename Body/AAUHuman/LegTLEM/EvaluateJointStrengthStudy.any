@@ -1,9 +1,20 @@
 
 AnyFolder Model = {
   // Model parts included in the moment arm study
-  AnyFolder &ThoraxRef = .....BodyModel.Trunk.SegmentsThorax.ThoraxSeg;
-  AnyFolder &SegLumberRef = .....BodyModel.Trunk.SegmentsLumbar; 
-  AnyFolder &JointsLumberRef = .....BodyModel.Trunk.JointsLumbar; 
+  
+  AnyFolder SegmentsRef = {
+    AnyFolder &PelvisSeg = .....BodyModelRef.Trunk.Segments.PelvisSeg; 
+    AnyFolder &ThoraxSeg= ......BodyModel.Trunk.Segments.ThoraxSeg;
+    AnyFolder &SacrumSeg = ......BodyModel.Trunk.Segments.SacrumSeg;
+    AnyFolder &L5Seg = ......BodyModel.Trunk.Segments.L5Seg;
+    AnyFolder &L4Seg = ......BodyModel.Trunk.Segments.L4Seg;
+    AnyFolder &L3Seg = ......BodyModel.Trunk.Segments.L3Seg;
+    AnyFolder &L2Seg = ......BodyModel.Trunk.Segments.L2Seg;
+    AnyFolder &L1Seg = ......BodyModel.Trunk.Segments.L1Seg;
+  };  
+
+  
+  AnyFolder &JointsLumberRef = .....BodyModel.Trunk.Joints.Lumbar; 
   AnyFolder &LegSegSideRef = .SideBodyModelRef.Leg.Seg; //This is a reference to the folder which holds the human part of the model
   AnyFolder &LegJntsRef =  .SideBodyModelRef.Leg.Jnt;
   AnyFolder &MusRef = .SideBodyModelRef.Leg.EvaluateJointStrengthMusRef ;
@@ -14,8 +25,8 @@ AnyFolder Model = {
   {
     AnyRefNode node = 
     { 
-      ARel=..SegLumberRef.PelvisSeg.Axes0;
-      sRel=..SegLumberRef.PelvisSeg.r0;
+      ARel=..SegmentsRef.PelvisSeg.Axes0;
+      sRel=..SegmentsRef.PelvisSeg.r0;
     };
   };
  
@@ -34,16 +45,16 @@ AnyFolder Drivers = {
    
  AnyStdJoint PelvisGround={
    AnyRefFrame &Ground = ..ground.node;
-   AnyRefFrame &Pelvis= ..SegLumberRef.PelvisSeg; 
+   AnyRefFrame &Pelvis= ..SegmentsRef.PelvisSeg; 
  };
  
  AnyReacForce SpineReacForce = 
  {
-   AnyKinMeasure& ref1 =  .......BodyModel.Interface.Trunk.Spine.L5Sacrum;
-   AnyKinMeasure& ref2 =  .......BodyModel.Interface.Trunk.Spine.L4L5;
-   AnyKinMeasure& ref3 =  .......BodyModel.Interface.Trunk.Spine.L3L4;
-   AnyKinMeasure& ref4 =  .......BodyModel.Interface.Trunk.Spine.L2L3;
-   AnyKinMeasure& ref5 =  .......BodyModel.Interface.Trunk.Spine.L1L2;
+   AnyKinMeasure& ref1 =  .......BodyModel.Interface.Trunk.IntervertebralAngles.L5Sacrum.Jnt;
+   AnyKinMeasure& ref2 =  .......BodyModel.Interface.Trunk.IntervertebralAngles.L4L5.Jnt;
+   AnyKinMeasure& ref3 =  .......BodyModel.Interface.Trunk.IntervertebralAngles.L3L4.Jnt;
+   AnyKinMeasure& ref4 =  .......BodyModel.Interface.Trunk.IntervertebralAngles.L2L3.Jnt;
+   AnyKinMeasure& ref5 =  .......BodyModel.Interface.Trunk.IntervertebralAngles.L1L2.Jnt;
  };
  
  
@@ -91,7 +102,7 @@ AnyBodyStudy Study = {
      
      //AnyVar PsoasMajorT12I = -1*.Model.SpineMusRef.PsoasMajor.PMT12I_TM.LmtDot/.Model.Drivers.AngularVelocity;
   };
-  #if ((BM_LEG_MUSCLES_RIGHT != OFF) & (BM_LEG_MUSCLES_LEFT != OFF) & (BM_TRUNK_LUMBAR_MUSCLES != OFF))
+  #if ((BM_LEG_MUSCLES_RIGHT != OFF) & (BM_LEG_MUSCLES_LEFT != OFF) & (BM_TRUNK_MUSCLES != OFF))
   
   AnyFolder MuscleEffectiveStrengthCalculations = {
     AnyFolder Abscissa = { 
@@ -114,7 +125,7 @@ AnyProject ModelViews = {};
 ModelViews = {
   AnyDrawGroup Selection = {
     Objects = arrcat(
-      ObjSearchRecursive(CompleteNameOf(&..Model.SegLumberRef ), "*", "AnyDrawObject"), 
+      ObjSearchRecursive(CompleteNameOf(&..Model.SegmentsRef ), "*", "AnyDrawObject"), 
       ObjSearchRecursive(CompleteNameOf(&..Model.LegSegSideRef ), "*", "AnyDrawObject"),
       ObjSearchRecursive(CompleteNameOf(&..Model.MusRef.LegMuscles  ), "*", "AnyDrawMuscle"),
       ObjSearchRecursive(CompleteNameOf(&..Model.MusRef.SpineMuscles  ), "*", "AnyDrawMuscle"),

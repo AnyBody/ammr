@@ -1,4 +1,4 @@
-/**
+/*
 Definitions of Segments in the Lumbar Part of the Spine + the pelvis
 Abbrevitations:
 ALL = Anterior Longitudinal Ligament
@@ -26,666 +26,776 @@ T = Thoracal hvirvel
 L = Lumbal hvirvel
 S = Sacral segment
 */
-AnyFolder SegmentsLumbar = {
   
-  #include "PelvisSeg.any"
-  
-  PelvisSeg={
-    AnyFolder &StdPar=..ModelParameters.Pelvis;    
-    #include "PelvisMuscleAttachementNodes.any"
-  };
- 
-  AnySeg SacrumSeg = {
+#include "PelvisSeg.any"
 
-    AnyFolder &StdPar=..ModelParameters.Sacrum;    
-    
-    //initial position found as a function of pelvis pos and orientation
-    r0=.PelvisSeg.PelvisSacrumJntNode.sRel*.PelvisSeg.Axes0'+.PelvisSeg.r0-SacrumPelvisJntNode.sRel*Axes0';    
-    Axes0=.PelvisSeg.Axes0;
-    Mass = 1e-5; // Pelvis contains the mass of Sacrum
+AnySeg SacrumSeg = {
+
+  AnyFolder &StdPar=..ModelParameters.Sacrum;    
+
+  //initial position found as a function of pelvis pos and orientation
+  r0=.PelvisSeg.PelvisSacrumJntNode.sRel*.PelvisSeg.Axes0'+.PelvisSeg.r0-SacrumPelvisJntNode.sRel*Axes0'; 
+  Axes0=.PelvisSeg.Axes0;
+  
+  // Inertia properties for the segment
+  UseInertiaObjects = On;
+  segmental_inertia_matrix inertiaObject() = {
     Jii = {0.001,0.001,0.001};
-    
-    AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards compatability with AMMR 2.4 MoCap Marker protocols
-    
-    // Sacrum is part of the pelvis so they scales together
-    AnyFunTransform3D &GeomScale = ..Scaling.GeometricalScaling.PelvisSeg.ScaleFunction;
-    AnyRefNode& ScalingNode = AnatomicalFrameTrunk;
-    AnyRefNode AnatomicalFrameTrunk = {
-      sRel = ..PelvisSeg.AnatomicalFrameTrunk.sRel;
-      ARel = ..PelvisSeg.AnatomicalFrameTrunk.ARel;
-    };
-    AnyFunTransform3D& Scale = .PelvisSeg.Scale;
+  };
 
-    
-    // Joint nodes
-    AnyRefNode SacrumL5JntNode = {sRel = .Scale(.StdPar.SacrumL5JntNode_pos);};    
-    AnyRefNode SacrumPelvisJntNode = {sRel = .Scale(.StdPar.SacrumPelvisJntNode_pos);};   
-    
+  AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards compatability with AMMR 2.4 MoCap Marker protocols
+
+  // Sacrum is part of the pelvis so they scales together
+  AnyFunTransform3D &GeomScale = ..Scaling.GeometricalScaling.PelvisSeg.ScaleFunction;
+  AnyRefNode& ScalingNode = AnatomicalFrameTrunk;
+  AnyRefNode AnatomicalFrameTrunk = {
+    sRel = ..PelvisSeg.AnatomicalFrameTrunk.sRel;
+    ARel = ..PelvisSeg.AnatomicalFrameTrunk.ARel;
+  };
+  AnyFunTransform3D& Scale = .PelvisSeg.Scale;
+  
+  // Joint nodes
+  AnyRefNode SacrumL5JntNode = {sRel = .Scale(.StdPar.SacrumL5JntNode_pos);};    
+  AnyRefNode SacrumPelvisJntNode = {sRel = .Scale(.StdPar.SacrumPelvisJntNode_pos);};   
+  AnyRefNode SacrumContactNode = {sRel= .Scale(.StdPar.SacrumContactNode_pos);};
+  
+  AnyRefNode SacrumBonyTip ={sRel= .Scale(.StdPar.SacrumBonyTip_pos);};
+
   /// The Right node is used by different body part for adding mirrored nodes
   /// (muscle origins/insertions etc) to the sacrum segment
   AnyRefNode Right= {
     AnyInt Sign = 1;
-      AnyFunTransform3D& Scale = .Scale;
+    AnyFunTransform3D& Scale = .Scale;
+    AnyRefNode SacrumContactNode = {sRel= .Scale(..StdPar.Right.SacrumContactNode_pos);};
   };
 
   /// The Left node is used by different body part for adding mirrored nodes
   /// (muscle origins/insertions etc) to the sacrum segment
   AnyRefNode Left=  {
     AnyInt Sign = -1;
-      AnyFunTransform3D& Scale = .Scale;
+    AnyFunTransform3D& Scale = .Scale;
+    AnyRefNode SacrumContactNode = {sRel= .Scale(..StdPar.Left.SacrumContactNode_pos);};
   };    
+   #if BM_TRUNK_CAVITY_MODEL == _CAVITY_MODEL_VOLUME_ 
+   #include "SacrumMuscleAttactmentNodes.any"
+   #endif
+  
+  // Multifidi Nodes
+  AnyRefNode MFdL4S1NodeR = {sRel = .Scale(.StdPar.Right.MFdL4S1Node_pos);};
+  AnyRefNode MFdL4S1NodeL = {sRel = .Scale(.StdPar.Left.MFdL4S1Node_pos);};
+  AnyRefNode MFdL5S1NodeR = {sRel = .Scale(.StdPar.Right.MFdL5S1Node_pos);};
+  AnyRefNode MFdL5S1NodeL = {sRel = .Scale(.StdPar.Left.MFdL5S1Node_pos);};
+
+  AnyRefNode MFmL3S1NodeR = {sRel = .Scale(.StdPar.Right.MFmL3S1Node_pos);};
+  AnyRefNode MFmL3S1NodeL = {sRel = .Scale(.StdPar.Left.MFmL3S1Node_pos);};
+
+  AnyRefNode MFmL4SacrumNodeR = {sRel = .Scale(.StdPar.Right.MFmL4SacrumNode_pos);};
+  AnyRefNode MFmL4SacrumNodeL = {sRel = .Scale(.StdPar.Left.MFmL4SacrumNode_pos);};
+
+  AnyRefNode MFmL5SacrumNodeR = {sRel = .Scale(.StdPar.Right.MFmL5SacrumNode_pos);};
+  AnyRefNode MFmL5SacrumNodeL = {sRel = .Scale(.StdPar.Left.MFmL5SacrumNode_pos);};
+
+  AnyRefNode MFtsL1S1NodeR = {sRel = .Scale(.StdPar.Right.MFtsL1S1Node_pos);};
+  AnyRefNode MFtsL1S1NodeL = {sRel = .Scale(.StdPar.Left.MFtsL1S1Node_pos);};
+
+  AnyRefNode MFtsL2S1NodeR = {sRel = .Scale(.StdPar.Right.MFtsL2S1Node_pos);};
+  AnyRefNode MFtsL2S1NodeL = {sRel = .Scale(.StdPar.Left.MFtsL2S1Node_pos);};
+
+  AnyRefNode MFtsL3LigamentNodeViaR = {sRel = .Scale(.StdPar.Right.MFtsL3LigamentNodeVia_pos);};
+  AnyRefNode MFtsL3LigamentNodeViaL = {sRel = .Scale(.StdPar.Left.MFtsL3LigamentNodeVia_pos);};
+
+  AnyRefNode MFtsL3LigamentNodeR = {sRel = .Scale(.StdPar.Right.MFtsL3LigamentNode_pos);};
+  AnyRefNode MFtsL3LigamentNodeL = {sRel = .Scale(.StdPar.Left.MFtsL3LigamentNode_pos);};
+
+  AnyRefNode MFtsL4SacrumNodeR = {sRel = .Scale(.StdPar.Right.MFtsL4SacrumNode_pos);};
+  AnyRefNode MFtsL4SacrumNodeL = {sRel = .Scale(.StdPar.Left.MFtsL4SacrumNode_pos);};
+
+  AnyRefNode MFtsL4SacrumViaNodeR = {sRel = .Scale(.StdPar.Right.MFtsL4SacrumViaNode_pos);};
+  AnyRefNode MFtsL4SacrumViaNodeL = {sRel = .Scale(.StdPar.Left.MFtsL4SacrumViaNode_pos);};
+
+  AnyRefNode MFtsL5SacrumViaNodeR = {sRel = .Scale(.StdPar.Right.MFtsL5SacrumViaNode_pos);};
+  AnyRefNode MFtsL5SacrumViaNodeL = {sRel = .Scale(.StdPar.Left.MFtsL5SacrumViaNode_pos);};
+
+  AnyRefNode MFtsL5SacrumNodeR = {sRel = .Scale(.StdPar.Right.MFtsL5SacrumNode_pos);};
+  AnyRefNode MFtsL5SacrumNodeL = {sRel = .Scale(.StdPar.Left.MFtsL5SacrumNode_pos);};
+
+  AnyRefNode LTplL5IliumNodeR = {sRel = .Scale(.StdPar.Right.LTplL5IliumNode_pos);};
+  AnyRefNode LTplL5IliumNodeL = {sRel = .Scale(.StdPar.Left.LTplL5IliumNode_pos);};
+  AnyRefNode LTptT6S1NodeR = {sRel = .Scale(.StdPar.Right.LTptT6S1Node_pos);};
+  AnyRefNode LTptT6S1NodeL = {sRel = .Scale(.StdPar.Left.LTptT6S1Node_pos);};
+
+  AnyRefNode LTptT7S2NodeR = {sRel = .Scale(.StdPar.Right.LTptT7S2Node_pos);};
+  AnyRefNode LTptT7S2NodeL = {sRel = .Scale(.StdPar.Left.LTptT7S2Node_pos);};
+
+  AnyRefNode LTptT8S3NodeR = {sRel = .Scale(.StdPar.Right.LTptT8S3Node_pos);};
+  AnyRefNode LTptT8S3NodeL = {sRel = .Scale(.StdPar.Left.LTptT8S3Node_pos);};
+
+  AnyRefNode LTptT9S4NodeR = {sRel = .Scale(.StdPar.Right.LTptT9S4Node_pos);};
+  AnyRefNode LTptT9S4NodeL = {sRel = .Scale(.StdPar.Left.LTptT9S4Node_pos);};
+
+  AnyRefNode LTptT10SacrumNodeR = {sRel = .Scale(.StdPar.Right.LTptT10SacrumNode_pos);};
+  AnyRefNode LTptT10SacrumNodeL = {sRel = .Scale(.StdPar.Left.LTptT10SacrumNode_pos);};
+
+  AnyRefNode LTptT11SacrumNodeR = {sRel = .Scale(.StdPar.Right.LTptT11SacrumNode_pos);};
+  AnyRefNode LTptT11SacrumNodeL = {sRel = .Scale(.StdPar.Left.LTptT11SacrumNode_pos);};
+
+  AnyRefNode LTptT12SacrumNodeR = {sRel = .Scale(.StdPar.Right.LTptT12SacrumNode_pos);};
+  AnyRefNode LTptT12SacrumNodeL = {sRel = .Scale(.StdPar.Left.LTptT12SacrumNode_pos);};
+
+  AnyRefNode LTptT10SacrumViaNodeR = {sRel = .Scale(.StdPar.Right.LTptT10SacrumViaNode_pos);};
+  AnyRefNode LTptT10SacrumViaNodeL = {sRel = .Scale(.StdPar.Left.LTptT10SacrumViaNode_pos);};
+
+
+  AnyRefNode LTptT11SacrumViaNodeR = {sRel = .Scale(.StdPar.Right.LTptT11SacrumViaNode_pos);};
+  AnyRefNode LTptT11SacrumViaNodeL = {sRel = .Scale(.StdPar.Left.LTptT11SacrumViaNode_pos);};
+
+  AnyRefNode LTptT12SacrumViaNodeR = {sRel = .Scale(.StdPar.Right.LTptT12SacrumViaNode_pos);};
+  AnyRefNode LTptT12SacrumViaNodeL = {sRel = .Scale(.StdPar.Left.LTptT12SacrumViaNode_pos);};
+
 }; // SacrumSeg   
    
    
-   // -------- Drawing object section (pelvis&sacrum)-------- 
-   #if (BM_LEG_MODEL != _LEG_MODEL_TLEM_ & BM_LEG_MODEL != _LEG_MODEL_TLEM2_) | (BM_PELVIS_DISPLAY == _PELVIS_DISPLAY_LEGANDTRUNKPELVIS_)
-   SacrumSeg = {
-     #if (BM_PELVIS_DISPLAY == _PELVIS_DISPLAY_LEGANDTRUNKPELVIS_)
-     DrwSacrumForTrunk.Opacity = Main.DrawSettings.BonesOpacity.Sacrum*0.5;
-     AnyDrawSurf DrwSacrumForTrunk = 
-     #else
-     DrwSacrum.Opacity = Main.DrawSettings.BonesOpacity.Sacrum;
-     AnyDrawSurf DrwSacrum =         
-     #endif
-     {
-       FileName = ...STL.FilenameSacrumSeg;
-       RGB = ...ColorRef.Segments;
-       AnyFunTransform3D &Scale =.Scale;   
-     };
-     
-   }; // SacrumSeg
-   #endif
-   // -------- End of drawing section (pelvis&sacrum)-------- 
-
-  
-  AnySeg L5Seg = {
-   
-    AnyFolder &StdPar=..ModelParameters.L5;    
-    
-    //initial position found as a function of pelvis pos and orientation
-    r0=.SacrumSeg.SacrumL5JntNode.sRel*.SacrumSeg.Axes0'+.SacrumSeg.r0-L5SacrumJntNode.sRel*Axes0'; 
-    
-    // This file includes the trunk specifc scaling function
-    // and anatomical reference system
-    AnyFunTransform3D &GeomScale = ..Scaling.GeometricalScaling.L5Seg.ScaleFunction;
-    #include "TrunkScalingAndAnatomicalFrame.any"
-
-    AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards compatability with AMMR 2.4 MoCap Marker protocols
-    AnyFunTransform3D &ScaleAbdominal =..Scaling.GeometricalScaling.Lumbar.ScaleFunction;
-    AnyVar MassS = ..Scaling.MassScaling.Lumbar.MassScale;
-  
-    AnyVar MassStandard = ..StandardParameters.Lumbar.Mass/5;
-    Mass = MassS*MassStandard;       
-    
-    Jii = {0.001,0.001,0.001};
-    
-    sCoM = Scale(StdPar.sCoM_pos);
-    JaboutCoMOnOff = On;
-    
-    AnyRefNode L5SacrumJntNode = {sRel = .Scale(.StdPar.L5SacrumJntNode_pos);};        
-    AnyRefNode L4L5JntNode = {sRel = .Scale(.StdPar.L4L5JntNode_pos); AnyDrawNodes DrwNode = {ScaleXYZ = 0.003*{1,1,1};RGB = {1,0,0};};};
-    
-    //These nodes are used for adding extra used by other body parts to the right 
-    //and left side of the segment
-    AnyRefNode Right = {AnyFunTransform3D&Scale=.Scale;};
-    AnyRefNode Left = {AnyFunTransform3D&Scale=.Scale;};
-    
-    
-    // Ligament Nodes        
-    AnyRefNode LINodeSuperior = {sRel = .Scale(.StdPar.LINodeSuperior_pos);};
-    // End of ligament Nodes
-    
-    // Multifidi Nodes
-    AnyRefNode MFdL3L5NodeR = {sRel = .Scale(.StdPar.Right.MFdL3L5Node_pos);};
-    AnyRefNode MFdL3L5NodeL = {sRel = .Scale(.StdPar.Left.MFdL3L5Node_pos);};
-    
-    AnyRefNode MFdL5S1NodeR = {sRel = .Scale(.StdPar.Right.MFdL5S1Node_pos);};
-    AnyRefNode MFdL5S1NodeL = {sRel = .Scale(.StdPar.Left.MFdL5S1Node_pos);};
-    
-    AnyRefNode MFmL2L5NodeR = {sRel = .Scale(.StdPar.Right.MFmL2L5Node_pos);};
-    AnyRefNode MFmL2L5NodeL = {sRel = .Scale(.StdPar.Left.MFmL2L5Node_pos);};
-    
-    AnyRefNode MFmL5SacrumNodeR = {sRel = .Scale(.StdPar.Right.MFmL5SacrumNode_pos);};
-    AnyRefNode MFmL5SacrumNodeL = {sRel = .Scale(.StdPar.Left.MFmL5SacrumNode_pos);};
-    
-    AnyRefNode MFtsL1L5NodeR = {sRel = .Scale(.StdPar.Right.MFtsL1L5Node_pos);};
-    AnyRefNode MFtsL1L5NodeL = {sRel = .Scale(.StdPar.Left.MFtsL1L5Node_pos);};
-    
-    AnyRefNode MFtsL2L5NodeR = {sRel = .Scale(.StdPar.Right.MFtsL2L5Node_pos);};
-    AnyRefNode MFtsL2L5NodeL = {sRel = .Scale(.StdPar.Left.MFtsL2L5Node_pos);};
-    
-    AnyRefNode MFtsL5SacrumNodeR = {sRel = .Scale(.StdPar.Right.MFtsL5SacrumNode_pos);};
-    AnyRefNode MFtsL5SacrumNodeL = {sRel = .Scale(.StdPar.Left.MFtsL5SacrumNode_pos);};
-    // End of Multifidi Nodes
-    
-    // Erector Spinae Nodes
-    AnyRefNode LTplL5IliumNodeR = {sRel = .Scale(.StdPar.Right.LTplL5IliumNode_pos);};
-    AnyRefNode LTplL5IliumNodeL = {sRel = .Scale(.StdPar.Left.LTplL5IliumNode_pos);};
-
-    AnyRefNode LTptT5L5NodeR = {sRel = .Scale(.StdPar.Right.LTptT5L5Node_pos);};
-    AnyRefNode LTptT5L5NodeL = {sRel = .Scale(.StdPar.Left.LTptT5L5Node_pos);};
-    
-    AnyRefNode LTptT6S1Via11NodeR = {sRel = .Scale(.StdPar.Right.LTptT6S1Via11Node_pos);};
-    AnyRefNode LTptT6S1Via11NodeL = {sRel = .Scale(.StdPar.Left.LTptT6S1Via11Node_pos);};
-    
-    AnyRefNode LTptT7S2Via10NodeR = {sRel = .Scale(.StdPar.Right.LTptT7S2Via10Node_pos);};
-    AnyRefNode LTptT7S2Via10NodeL = {sRel = .Scale(.StdPar.Left.LTptT7S2Via10Node_pos);};
-    
-    AnyRefNode LTptT8S3Via9NodeR = {sRel = .Scale(.StdPar.Right.LTptT8S3Via9Node_pos);};
-    AnyRefNode LTptT8S3Via9NodeL = {sRel = .Scale(.StdPar.Left.LTptT8S3Via9Node_pos);};
-    
-    AnyRefNode LTptT9S4Via8NodeR = {sRel = .Scale(.StdPar.Right.LTptT9S4Via8Node_pos);};
-    AnyRefNode LTptT9S4Via8NodeL = {sRel = .Scale(.StdPar.Left.LTptT9S4Via8Node_pos);};
-    
-    AnyRefNode LTptT10SacrumVia7NodeR = {sRel = .Scale(.StdPar.Right.LTptT10SacrumVia7Node_pos);};
-    AnyRefNode LTptT10SacrumVia7NodeL = {sRel = .Scale(.StdPar.Left.LTptT10SacrumVia7Node_pos);};
-    
-    AnyRefNode LTptT11SacrumVia6NodeR = {sRel = .Scale(.StdPar.Right.LTptT11SacrumVia6Node_pos);};
-    AnyRefNode LTptT11SacrumVia6NodeL = {sRel = .Scale(.StdPar.Left.LTptT11SacrumVia6Node_pos);};
-    
-    AnyRefNode LTptT12SacrumVia5NodeR = {sRel = .Scale(.StdPar.Right.LTptT12SacrumVia5Node_pos);};
-    AnyRefNode LTptT12SacrumVia5NodeL = {sRel = .Scale(.StdPar.Left.LTptT12SacrumVia5Node_pos);};
-    // End of Erector Spinae Nodes
-    
-    // Psoas Major Nodes
-    AnyRefNode PML5_TMNodeR = {sRel = .Scale(.StdPar.Right.PML5_TMNode_pos);};
-    AnyRefNode PML5_TMNodeL = {sRel = .Scale(.StdPar.Left.PML5_TMNode_pos);};
-    
-    AnyRefNode PML5T_TMNodeR = {sRel = .Scale(.StdPar.Right.PML5T_TMNode_pos);};
-    AnyRefNode PML5T_TMNodeL = {sRel = .Scale(.StdPar.Left.PML5T_TMNode_pos);};
-    
-    AnyRefNode PMT12I_TMVia4NodeR = {sRel = .Scale(.StdPar.Right.PMT12I_TMVia4Node_pos);};
-    AnyRefNode PMT12I_TMVia4NodeL = {sRel = .Scale(.StdPar.Left.PMT12I_TMVia4Node_pos);};
-    
-    AnyRefNode PML1I_TMVia3NodeR = {sRel = .Scale(.StdPar.Right.PML1I_TMVia3Node_pos);};
-    AnyRefNode PML1I_TMVia3NodeL = {sRel = .Scale(.StdPar.Left.PML1I_TMVia3Node_pos);};
-    
-    AnyRefNode PML2I_TMVia2NodeR = {sRel = .Scale(.StdPar.Right.PML2I_TMVia2Node_pos);};
-    AnyRefNode PML2I_TMVia2NodeL = {sRel = .Scale(.StdPar.Left.PML2I_TMVia2Node_pos);};
-    
-    AnyRefNode PML3I_TMVia1NodeR = {sRel = .Scale(.StdPar.Right.PML3I_TMVia1Node_pos);};
-    AnyRefNode PML3I_TMVia1NodeL = {sRel = .Scale(.StdPar.Left.PML3I_TMVia1Node_pos);};
-    
-    AnyRefNode PML1T_TMVia4NodeR = {sRel = .Scale(.StdPar.Right.PML1T_TMVia4Node_pos);};
-    AnyRefNode PML1T_TMVia4NodeL = {sRel = .Scale(.StdPar.Left.PML1T_TMVia4Node_pos);};
-    
-    AnyRefNode PML2T_TMVia3NodeR = {sRel = .Scale(.StdPar.Right.PML2T_TMVia3Node_pos);};
-    AnyRefNode PML2T_TMVia3NodeL = {sRel = .Scale(.StdPar.Left.PML2T_TMVia3Node_pos);};
-    
-    AnyRefNode PML3T_TMVia2NodeR = {sRel = .Scale(.StdPar.Right.PML3T_TMVia2Node_pos);};
-    AnyRefNode PML3T_TMVia2NodeL = {sRel = .Scale(.StdPar.Left.PML3T_TMVia2Node_pos);};
-    
-    AnyRefNode PML4T_TMVia1NodeR = {sRel = .Scale(.StdPar.Right.PML4T_TMVia1Node_pos);};
-    AnyRefNode PML4T_TMVia1NodeL = {sRel = .Scale(.StdPar.Left.PML4T_TMVia1Node_pos);};
-    // End of Psoas Major Nodes
-    
-    // Obliquus Externus Nodes
-    AnyRefNode OEC10_RSNodeR = {sRel = .Scale(.StdPar.Right.OEC10_RSNode_pos);};
-    AnyRefNode OEC10_RSNodeL = {sRel = .Scale(.StdPar.Left.OEC10_RSNode_pos);};
-    // End of Obliquus Externus Nodes
-        
-    AnyDrawSurf DrwSTL = {
-      FileName = ...STL.FilenameL5Seg;
+// -------- Drawing object section (pelvis&sacrum)-------- 
+#if (BM_LEG_MODEL != _LEG_MODEL_TLEM_ & BM_LEG_MODEL != _LEG_MODEL_TLEM2_) | (BM_PELVIS_DISPLAY == _PELVIS_DISPLAY_LEGANDTRUNKPELVIS_)
+  SacrumSeg = {
+    #if (BM_PELVIS_DISPLAY == _PELVIS_DISPLAY_LEGANDTRUNKPELVIS_)
+    DrwSacrumForTrunk.Opacity = Main.DrawSettings.BonesOpacity.Sacrum*0.5;
+    AnyDrawSurf DrwSacrumForTrunk = 
+    #else
+    DrwSacrum.Opacity = Main.DrawSettings.BonesOpacity.Sacrum;
+    AnyDrawSurf DrwSacrum =         
+    #endif
+    {
+      FileName = ...STL.FilenameSacrumSeg;
       RGB = ...ColorRef.Segments;
-      Opacity = Main.DrawSettings.BonesOpacity.L5;
-      AnyFunTransform3D &Scale =.Scale;
+      AnyFunTransform3D &Scale =.Scale;   
     };
-    
-    AnyRefNode MidPoint={sRel=(.L4L5JntNode.sRel+.L5SacrumJntNode.sRel)*0.5;};    
-    AnyRefNode &SupportNode= MidPoint;
-    
-    AnyRefNode BuckleContactNode={sRel= .ScaleAbdominal(.StdPar.BuckleContactNode_pos);};
+  }; // SacrumSeg
+#endif
+// -------- End of drawing section (pelvis&sacrum)-------- 
 
-    
-  }; // End of L5Seg
   
-  AnySeg L4Seg = {
+AnySeg L5Seg = {
   
-    AnyFolder &StdPar=..ModelParameters.L4;    
-	
-	  //initial position found as a function of pelvis pos and orientation
-    r0=.L5Seg.L4L5JntNode.sRel*.L5Seg.Axes0'+.L5Seg.r0-L4L5JntNode.sRel*Axes0'; 
-    
-    // This file includes the trunk specifc scaling function
-    // and anatomical reference system
-    AnyFunTransform3D &GeomScale = ..Scaling.GeometricalScaling.L4Seg.ScaleFunction;
-    #include "TrunkScalingAndAnatomicalFrame.any"
-
-    AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards compatability with AMMR 2.4 MoCap Marker protocols
-    AnyFunTransform3D &ScaleAbdominal =..ScalingTrunk.Lumbar.ScaleFunction;
-    
-    AnyVar MassS = ..Scaling.MassScaling.Lumbar.MassScale;
+  AnyFolder &StdPar=..ModelParameters.L5;    
   
-    AnyVar MassStandard = ..StandardParameters.Lumbar.Mass/5;
-    Mass = MassS*MassStandard;           
-    
+  //initial position found as a function of pelvis pos and orientation
+  r0=.SacrumSeg.SacrumL5JntNode.sRel*.SacrumSeg.Axes0'+.SacrumSeg.r0-L5SacrumJntNode.sRel*Axes0'; 
+  
+  // This file includes the trunk specifc scaling function
+  // and anatomical reference system
+  AnyFunTransform3D &GeomScale = ..Scaling.GeometricalScaling.L5Seg.ScaleFunction;
+  #include "TrunkScalingAndAnatomicalFrame.any"
+  AnyFunTransform3D &ScaleAbdominal =..Scaling.GeometricalScaling.Lumbar.ScaleFunction;
+  
+  // Inertia properties for the segment
+  UseInertiaObjects = On;
+  segmental_inertia_matrix inertiaObject() = {
+    Mass = ...Scaling.MassScaling.Lumbar.MassScale * ...StandardParameters.Lumbar.Mass/5;
     Jii = {0.001,0.001,0.001};
-    
-    sCoM = Scale(StdPar.sCoM_pos);
     JaboutCoMOnOff = On;
-    
-    AnyRefNode L4L5JntNode = {sRel = .Scale(.StdPar.L4L5JntNode_pos);};
-    AnyRefNode L3L4JntNode = {sRel = .Scale(.StdPar.L3L4JntNode_pos); AnyDrawNodes DrwNode = {ScaleXYZ = 0.003*{1,1,1};RGB = {1, 0, 0};};};
-    
-    //These nodes are used for adding extra used by other body parts to the right 
-    //and left side of the segment
-    AnyRefNode Right = {AnyFunTransform3D&Scale=.Scale;};
-    AnyRefNode Left = {AnyFunTransform3D&Scale=.Scale;};
-    
-    // Ligament Nodes        
-    AnyRefNode LSNode = {sRel = .Scale(.StdPar.LSNode_pos);};
-    
-    AnyRefNode LINodeInferior = {sRel = .Scale(.StdPar.LINodeInferior_pos);};
-    AnyRefNode LINodeSuperior = {sRel = .Scale(.StdPar.LINodeSuperior_pos);};
-    // End of ligament Nodes
-    
-    // Multifidi Nodes
-    AnyRefNode MFdL2L4NodeR = {sRel = .Scale(.StdPar.Right.MFdL2L4Node_pos);};
-    AnyRefNode MFdL2L4NodeL = {sRel = .Scale(.StdPar.Left.MFdL2L4Node_pos);};
-    
-    AnyRefNode MFdL4S1NodeR = {sRel = .Scale(.StdPar.Right.MFdL4S1Node_pos);};
-    AnyRefNode MFdL4S1NodeL = {sRel = .Scale(.StdPar.Left.MFdL4S1Node_pos);};
-    
-    AnyRefNode MFmL1L4NodeR = {sRel = .Scale(.StdPar.Right.MFmL1L4Node_pos);};
-    AnyRefNode MFmL1L4NodeL = {sRel = .Scale(.StdPar.Left.MFmL1L4Node_pos);};
-    
-    AnyRefNode MFmL4SacrumNodeR = {sRel = .Scale(.StdPar.Right.MFmL4SacrumNode_pos);};
-    AnyRefNode MFmL4SacrumNodeL = {sRel = .Scale(.StdPar.Left.MFmL4SacrumNode_pos);};
-    
-    AnyRefNode MFtsL4SacrumNodeR = {sRel = .Scale(.StdPar.Right.MFtsL4SacrumNode_pos);};
-    AnyRefNode MFtsL4SacrumNodeL = {sRel = .Scale(.StdPar.Left.MFtsL4SacrumNode_pos);};
-    // End of Multifidi Nodes
-    
-    // Erector Spinae Nodes
-    AnyRefNode ILplL4CINodeR = {sRel = .Scale(.StdPar.Right.ILplL4CINode_pos);};
-    AnyRefNode ILplL4CINodeL = {sRel = .Scale(.StdPar.Left.ILplL4CINode_pos);};
-    
-    AnyRefNode LTplL4SIPSNodeR = {sRel = .Scale(.StdPar.Right.LTplL4SIPSNode_pos);};
-    AnyRefNode LTplL4SIPSNodeL = {sRel = .Scale(.StdPar.Left.LTplL4SIPSNode_pos);};
-    
-    AnyRefNode LTptT4L4NodeR = {sRel = .Scale(.StdPar.Right.LTptT4L4Node_pos);};
-    AnyRefNode LTptT4L4NodeL = {sRel = .Scale(.StdPar.Left.LTptT4L4Node_pos);};
-    
-    AnyRefNode ILplL1CIViaNodeR = {sRel = .Scale(.StdPar.Right.ILplL1CIViaNode_pos);};
-    AnyRefNode ILplL1CIViaNodeL = {sRel = .Scale(.StdPar.Left.ILplL1CIViaNode_pos);};
+    sCoM = .Scale(.StdPar.sCoM_pos);
+  };
 
-    AnyRefNode ILplL2CIViaNodeR = {sRel = .Scale(.StdPar.Right.ILplL2CIViaNode_pos);};
-    AnyRefNode ILplL2CIViaNodeL = {sRel = .Scale(.StdPar.Left.ILplL2CIViaNode_pos);};
-    
-    AnyRefNode LTptT5L5Via11NodeR = {sRel = .Scale(.StdPar.Right.LTptT5L5Via11Node_pos);};
-    AnyRefNode LTptT5L5Via11NodeL = {sRel = .Scale(.StdPar.Left.LTptT5L5Via11Node_pos);};
-    
-    AnyRefNode LTptT6S1Via10NodeR = {sRel = .Scale(.StdPar.Right.LTptT6S1Via10Node_pos);};
-    AnyRefNode LTptT6S1Via10NodeL = {sRel = .Scale(.StdPar.Left.LTptT6S1Via10Node_pos);};
-    
-    AnyRefNode LTptT7S2Via9NodeR = {sRel = .Scale(.StdPar.Right.LTptT7S2Via9Node_pos);};
-    AnyRefNode LTptT7S2Via9NodeL = {sRel = .Scale(.StdPar.Left.LTptT7S2Via9Node_pos);};
-    
-    AnyRefNode LTptT8S3Via8NodeR = {sRel = .Scale(.StdPar.Right.LTptT8S3Via8Node_pos);};
-    AnyRefNode LTptT8S3Via8NodeL = {sRel = .Scale(.StdPar.Left.LTptT8S3Via8Node_pos);};
-    
-    AnyRefNode LTptT9S4Via7NodeR = {sRel = .Scale(.StdPar.Right.LTptT9S4Via7Node_pos);};
-    AnyRefNode LTptT9S4Via7NodeL = {sRel = .Scale(.StdPar.Left.LTptT9S4Via7Node_pos);};
-    
-    AnyRefNode LTptT10SacrumVia6NodeR = {sRel = .Scale(.StdPar.Right.LTptT10SacrumVia6Node_pos);};
-    AnyRefNode LTptT10SacrumVia6NodeL = {sRel = .Scale(.StdPar.Left.LTptT10SacrumVia6Node_pos);};
-    
-    AnyRefNode LTptT11SacrumVia5NodeR = {sRel = .Scale(.StdPar.Right.LTptT11SacrumVia5Node_pos);};
-    AnyRefNode LTptT11SacrumVia5NodeL = {sRel = .Scale(.StdPar.Left.LTptT11SacrumVia5Node_pos);};
-    
-    AnyRefNode LTptT12SacrumVia4NodeR = {sRel = .Scale(.StdPar.Right.LTptT12SacrumVia4Node_pos);};
-    AnyRefNode LTptT12SacrumVia4NodeL = {sRel = .Scale(.StdPar.Left.LTptT12SacrumVia4Node_pos);};
-    // End of Erector Spinae Nodes
-    
-    // Psoas Major Nodes
-    AnyRefNode PML4I_TMNodeR = {sRel = .Scale(.StdPar.Right.PML4I_TMNode_pos);};
-    AnyRefNode PML4I_TMNodeL = {sRel = .Scale(.StdPar.Left.PML4I_TMNode_pos);};
-    
-    AnyRefNode PML4T_TMNodeR = {sRel = .Scale(.StdPar.Right.PML4T_TMNode_pos);};
-    AnyRefNode PML4T_TMNodeL = {sRel = .Scale(.StdPar.Left.PML4T_TMNode_pos);};
-    
-    AnyRefNode PMT12I_TMVia3NodeR = {sRel = .Scale(.StdPar.Right.PMT12I_TMVia3Node_pos);};
-    AnyRefNode PMT12I_TMVia3NodeL = {sRel = .Scale(.StdPar.Left.PMT12I_TMVia3Node_pos);};
-
-    AnyRefNode PML1I_TMVia2NodeR = {sRel = .Scale(.StdPar.Right.PML1I_TMVia2Node_pos);};
-    AnyRefNode PML1I_TMVia2NodeL = {sRel = .Scale(.StdPar.Left.PML1I_TMVia2Node_pos);};
-    
-    AnyRefNode PML2I_TMVia1NodeR = {sRel = .Scale(.StdPar.Right.PML2I_TMVia1Node_pos);};
-    AnyRefNode PML2I_TMVia1NodeL = {sRel = .Scale(.StdPar.Left.PML2I_TMVia1Node_pos);};
-    
-    AnyRefNode PML1T_TMVia3NodeR = {sRel = .Scale(.StdPar.Right.PML1T_TMVia3Node_pos);};
-    AnyRefNode PML1T_TMVia3NodeL = {sRel = .Scale(.StdPar.Left.PML1T_TMVia3Node_pos);};
-    
-    AnyRefNode PML2T_TMVia2NodeR = {sRel = .Scale(.StdPar.Right.PML2T_TMVia2Node_pos);};
-    AnyRefNode PML2T_TMVia2NodeL = {sRel = .Scale(.StdPar.Left.PML2T_TMVia2Node_pos);};
-    
-    AnyRefNode PML3T_TMVia1NodeR = {sRel = .Scale(.StdPar.Right.PML3T_TMVia1Node_pos);};
-    AnyRefNode PML3T_TMVia1NodeL = {sRel = .Scale(.StdPar.Left.PML3T_TMVia1Node_pos);};
-    // End of Psoas Major Nodes
-    
-    // Quadratus Lumborum Nodes
-    AnyRefNode QLL4_CINodeR = {sRel = .Scale(.StdPar.Right.QLL4_CINode_pos);};
-    AnyRefNode QLL4_CINodeL = {sRel = .Scale(.StdPar.Left.QLL4_CINode_pos);};
-    // End of Quadratus Lumborum Nodes
-    
-    // Obliquus Externus Nodes
-    AnyRefNode OEC9_RSNodeR = {sRel = .Scale(.StdPar.Right.OEC9_RSNode_pos);};
-    AnyRefNode OEC9_RSNodeL = {sRel = .Scale(.StdPar.Left.OEC9_RSNode_pos);};
-    // End of Obliquus Externus Nodes
-    
-    // Obliquus Internus Nodes
-    AnyRefNode OICI_RS3NodeR = {sRel = .Scale(.StdPar.Right.OICI_RS3Node_pos);};
-    AnyRefNode OICI_RS3NodeL = {sRel = .Scale(.StdPar.Left.OICI_RS3Node_pos);};   
-    // End of Obliquus Internus Nodes
-    
-    AnyDrawSurf DrwSTL = {
-      FileName = ...STL.FilenameL4Seg;
-      RGB = ...ColorRef.Segments;
-      Opacity = Main.DrawSettings.BonesOpacity.L4;
-      AnyFunTransform3D &Scale =.Scale;
-    };
-     
-    AnyRefNode MidPoint={sRel=(.L3L4JntNode.sRel+.L4L5JntNode.sRel)*0.5;};
-    AnyRefNode SupportNode={sRel = .Scale(.StdPar.SupportNode_pos);};      
-    AnyRefNode BuckleContactNode={sRel= .ScaleAbdominal(.StdPar.BuckleContactNode_pos);};
-    
-
-  }; // End of L4Seg
+  AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards compatability with AMMR 2.4 MoCap Marker protocols
   
-  AnySeg L3Seg = {
-    AnyFolder &StdPar = ..ModelParameters.L3;
-    //initial position found as a function of pelvis pos and orientation
-    r0=.L4Seg.L3L4JntNode.sRel*.L4Seg.Axes0'+.L4Seg.r0-L3L4JntNode.sRel*Axes0'; 
-    
-    // This file includes the trunk specifc scaling function
-    // and anatomical reference system
-    AnyFunTransform3D &GeomScale = ..Scaling.GeometricalScaling.L3Seg.ScaleFunction;
-    #include "TrunkScalingAndAnatomicalFrame.any"
-
-    AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards compatability with AMMR 2.4 MoCap Marker protocols
-    AnyFunTransform3D &ScaleAbdominal =..ScalingTrunk.Lumbar.ScaleFunction;
-        
-    AnyVar MassS = ..Scaling.MassScaling.Lumbar.MassScale;
+  AnyRefNode L5SacrumJntNode = {sRel = .Scale(.StdPar.L5SacrumJntNode_pos);};        
+  AnyRefNode L4L5JntNode = {sRel = .Scale(.StdPar.L4L5JntNode_pos); };
   
-    AnyVar MassStandard = ..StandardParameters.Lumbar.Mass/5;
-    Mass = MassS*MassStandard;
-    
+  //These nodes are used for adding extra used by other body parts to the right 
+  //and left side of the segment
+  AnyRefNode Right = {AnyFunTransform3D&Scale=.Scale;};
+  AnyRefNode Left = {AnyFunTransform3D&Scale=.Scale;};
+  
+  
+  // Ligament Nodes        
+  AnyRefNode LINodeSuperior = {sRel = .Scale(.StdPar.LINodeSuperior_pos);};
+  // End of ligament Nodes
+  
+  // Multifidi Nodes
+  AnyRefNode MFdL3L5NodeR = {sRel = .Scale(.StdPar.Right.MFdL3L5Node_pos);};
+  AnyRefNode MFdL3L5NodeL = {sRel = .Scale(.StdPar.Left.MFdL3L5Node_pos);};
+  
+  AnyRefNode MFdL5S1NodeR = {sRel = .Scale(.StdPar.Right.MFdL5S1Node_pos);};
+  AnyRefNode MFdL5S1NodeL = {sRel = .Scale(.StdPar.Left.MFdL5S1Node_pos);};
+  
+  AnyRefNode MFmL2L5NodeR = {sRel = .Scale(.StdPar.Right.MFmL2L5Node_pos);};
+  AnyRefNode MFmL2L5NodeL = {sRel = .Scale(.StdPar.Left.MFmL2L5Node_pos);};
+  
+  AnyRefNode MFmL5SacrumNodeR = {sRel = .Scale(.StdPar.Right.MFmL5SacrumNode_pos);};
+  AnyRefNode MFmL5SacrumNodeL = {sRel = .Scale(.StdPar.Left.MFmL5SacrumNode_pos);};
+  
+  AnyRefNode MFtsL1L5NodeR = {sRel = .Scale(.StdPar.Right.MFtsL1L5Node_pos);};
+  AnyRefNode MFtsL1L5NodeL = {sRel = .Scale(.StdPar.Left.MFtsL1L5Node_pos);};
+  
+  AnyRefNode MFtsL2L5NodeR = {sRel = .Scale(.StdPar.Right.MFtsL2L5Node_pos);};
+  AnyRefNode MFtsL2L5NodeL = {sRel = .Scale(.StdPar.Left.MFtsL2L5Node_pos);};
+  
+  AnyRefNode MFtsL5SacrumNodeR = {sRel = .Scale(.StdPar.Right.MFtsL5SacrumNode_pos);};
+  AnyRefNode MFtsL5SacrumNodeL = {sRel = .Scale(.StdPar.Left.MFtsL5SacrumNode_pos);};
+  // End of Multifidi Nodes
+  
+  // Erector Spinae Nodes
+  AnyRefNode LTplL5IliumNodeR = {sRel = .Scale(.StdPar.Right.LTplL5IliumNode_pos);};
+  AnyRefNode LTplL5IliumNodeL = {sRel = .Scale(.StdPar.Left.LTplL5IliumNode_pos);};
+
+  AnyRefNode LTptT5L5NodeR = {sRel = .Scale(.StdPar.Right.LTptT5L5Node_pos);};
+  AnyRefNode LTptT5L5NodeL = {sRel = .Scale(.StdPar.Left.LTptT5L5Node_pos);};
+  
+  AnyRefNode LTptT6S1Via11NodeR = {sRel = .Scale(.StdPar.Right.LTptT6S1Via11Node_pos);};
+  AnyRefNode LTptT6S1Via11NodeL = {sRel = .Scale(.StdPar.Left.LTptT6S1Via11Node_pos);};
+  
+  AnyRefNode LTptT7S2Via10NodeR = {sRel = .Scale(.StdPar.Right.LTptT7S2Via10Node_pos);};
+  AnyRefNode LTptT7S2Via10NodeL = {sRel = .Scale(.StdPar.Left.LTptT7S2Via10Node_pos);};
+  
+  AnyRefNode LTptT8S3Via9NodeR = {sRel = .Scale(.StdPar.Right.LTptT8S3Via9Node_pos);};
+  AnyRefNode LTptT8S3Via9NodeL = {sRel = .Scale(.StdPar.Left.LTptT8S3Via9Node_pos);};
+  
+  AnyRefNode LTptT9S4Via8NodeR = {sRel = .Scale(.StdPar.Right.LTptT9S4Via8Node_pos);};
+  AnyRefNode LTptT9S4Via8NodeL = {sRel = .Scale(.StdPar.Left.LTptT9S4Via8Node_pos);};
+  
+  AnyRefNode LTptT10SacrumVia7NodeR = {sRel = .Scale(.StdPar.Right.LTptT10SacrumVia7Node_pos);};
+  AnyRefNode LTptT10SacrumVia7NodeL = {sRel = .Scale(.StdPar.Left.LTptT10SacrumVia7Node_pos);};
+  
+  AnyRefNode LTptT11SacrumVia6NodeR = {sRel = .Scale(.StdPar.Right.LTptT11SacrumVia6Node_pos);};
+  AnyRefNode LTptT11SacrumVia6NodeL = {sRel = .Scale(.StdPar.Left.LTptT11SacrumVia6Node_pos);};
+  
+  AnyRefNode LTptT12SacrumVia5NodeR = {sRel = .Scale(.StdPar.Right.LTptT12SacrumVia5Node_pos);};
+  AnyRefNode LTptT12SacrumVia5NodeL = {sRel = .Scale(.StdPar.Left.LTptT12SacrumVia5Node_pos);};
+  // End of Erector Spinae Nodes
+  
+  // Psoas Major Nodes
+  AnyRefNode PML5_TMNodeR = {sRel = .Scale(.StdPar.Right.PML5_TMNode_pos);};
+  AnyRefNode PML5_TMNodeL = {sRel = .Scale(.StdPar.Left.PML5_TMNode_pos);};
+  
+  AnyRefNode PML5T_TMNodeR = {sRel = .Scale(.StdPar.Right.PML5T_TMNode_pos);};
+  AnyRefNode PML5T_TMNodeL = {sRel = .Scale(.StdPar.Left.PML5T_TMNode_pos);};
+  
+  AnyRefNode PMT12I_TMVia4NodeR = {sRel = .Scale(.StdPar.Right.PMT12I_TMVia4Node_pos);};
+  AnyRefNode PMT12I_TMVia4NodeL = {sRel = .Scale(.StdPar.Left.PMT12I_TMVia4Node_pos);};
+  
+  AnyRefNode PML1I_TMVia3NodeR = {sRel = .Scale(.StdPar.Right.PML1I_TMVia3Node_pos);};
+  AnyRefNode PML1I_TMVia3NodeL = {sRel = .Scale(.StdPar.Left.PML1I_TMVia3Node_pos);};
+  
+  AnyRefNode PML2I_TMVia2NodeR = {sRel = .Scale(.StdPar.Right.PML2I_TMVia2Node_pos);};
+  AnyRefNode PML2I_TMVia2NodeL = {sRel = .Scale(.StdPar.Left.PML2I_TMVia2Node_pos);};
+  
+  AnyRefNode PML3I_TMVia1NodeR = {sRel = .Scale(.StdPar.Right.PML3I_TMVia1Node_pos);};
+  AnyRefNode PML3I_TMVia1NodeL = {sRel = .Scale(.StdPar.Left.PML3I_TMVia1Node_pos);};
+  
+  AnyRefNode PML1T_TMVia4NodeR = {sRel = .Scale(.StdPar.Right.PML1T_TMVia4Node_pos);};
+  AnyRefNode PML1T_TMVia4NodeL = {sRel = .Scale(.StdPar.Left.PML1T_TMVia4Node_pos);};
+  
+  AnyRefNode PML2T_TMVia3NodeR = {sRel = .Scale(.StdPar.Right.PML2T_TMVia3Node_pos);};
+  AnyRefNode PML2T_TMVia3NodeL = {sRel = .Scale(.StdPar.Left.PML2T_TMVia3Node_pos);};
+  
+  AnyRefNode PML3T_TMVia2NodeR = {sRel = .Scale(.StdPar.Right.PML3T_TMVia2Node_pos);};
+  AnyRefNode PML3T_TMVia2NodeL = {sRel = .Scale(.StdPar.Left.PML3T_TMVia2Node_pos);};
+  
+  AnyRefNode PML4T_TMVia1NodeR = {sRel = .Scale(.StdPar.Right.PML4T_TMVia1Node_pos);};
+  AnyRefNode PML4T_TMVia1NodeL = {sRel = .Scale(.StdPar.Left.PML4T_TMVia1Node_pos);};
+  // End of Psoas Major Nodes
+  
+  // Obliquus Externus Nodes
+  AnyRefNode OEC10_RSNodeR = {sRel = .Scale(.StdPar.Right.OEC10_RSNode_pos);};
+  AnyRefNode OEC10_RSNodeL = {sRel = .Scale(.StdPar.Left.OEC10_RSNode_pos);};
+  // End of Obliquus Externus Nodes
+      
+  AnyDrawSurf DrwSTL = {
+    FileName = ...STL.FilenameL5Seg;
+    RGB = ...ColorRef.Segments;
+    Opacity = Main.DrawSettings.BonesOpacity.L5;
+    AnyFunTransform3D &Scale =.Scale;
+  };
+  
+  #if BM_TRUNK_CAVITY_MODEL == _CAVITY_MODEL_VOLUME_ 
+    AnyRefNode TransversusInsNode_R={sRel=.Scale(.StdPar.Right.Transversus_Ins_pos);}; 
+    AnyRefNode TransversusInsNode_L={sRel=.Scale(.StdPar.Left.Transversus_Ins_pos);};
+    AnyRefNode TransversusMid={sRel=0.5*(.TransversusInsNode_R.sRel+.TransversusInsNode_L.sRel) ;};  
+  #endif
+  
+  AnyRefNode MidPoint={sRel=(.L4L5JntNode.sRel+.L5SacrumJntNode.sRel)*0.5;};    
+  AnyRefNode &SupportNode= MidPoint;
+  
+  AnyRefNode BuckleContactNode={sRel= .ScaleAbdominal(.StdPar.BuckleContactNode_pos);};
+  
+  AnyRefNode L5RContactNode = {sRel= .Scale(.StdPar.Right.ContactNode_pos);};
+  AnyRefNode L5LContactNode = {sRel= .Scale(.StdPar.Left.ContactNode_pos);};
+  
+}; // End of L5Seg
+
+AnySeg L4Seg = {
+
+  AnyFolder &StdPar=..ModelParameters.L4;    
+
+//initial position found as a function of pelvis pos and orientation
+  r0=.L5Seg.L4L5JntNode.sRel*.L5Seg.Axes0'+.L5Seg.r0-L4L5JntNode.sRel*Axes0'; 
+  
+  
+  // This file includes the trunk specifc scaling function
+  // and anatomical reference system
+  AnyFunTransform3D &GeomScale = ..Scaling.GeometricalScaling.L4Seg.ScaleFunction;
+  #include "TrunkScalingAndAnatomicalFrame.any"
+  AnyFunTransform3D &ScaleAbdominal =..Scaling.GeometricalScaling.Lumbar.ScaleFunction;
+  
+  // Inertia properties for the segment
+  UseInertiaObjects = On;
+  segmental_inertia_matrix inertiaObject() = {
+    Mass = ...Scaling.MassScaling.Lumbar.MassScale * ...StandardParameters.Lumbar.Mass/5;
     Jii = {0.001,0.001,0.001};
-    
-    sCoM = Scale(StdPar.sCoM_pos);
     JaboutCoMOnOff = On;
+    sCoM = .Scale(.StdPar.sCoM_pos);
+  };
 
-    AnyRefNode L3L4JntNode = {sRel = .Scale(.StdPar.L3L4JntNode_pos);};    
-    AnyRefNode L2L3JntNode = {sRel = .Scale(.StdPar.L2L3JntNode_pos); AnyDrawNodes DrwNode = {ScaleXYZ = 0.003*{1,1,1};RGB = {1,0,0};};};
-    
-    //These nodes are used for adding extra used by other body parts to the right 
-    //and left side of the segment
-    AnyRefNode Right= {AnyFunTransform3D&Scale=.Scale;};
-    AnyRefNode Left = {AnyFunTransform3D&Scale=.Scale;};
-    
-    
-    // Ligament Nodes        
-    AnyRefNode LSNode = {sRel = .Scale(.StdPar.LSNode_pos);};
-    
-    AnyRefNode LINodeInferior = {sRel = .Scale(.StdPar.LINodeInferior_pos);};
-    AnyRefNode LINodeSuperior = {sRel = .Scale(.StdPar.LINodeSuperior_pos);};
-    // End of ligament Nodes
-    
-    // Multifidi Nodes
-    AnyRefNode MFdL1L3NodeR = {sRel = .Scale(.StdPar.Right.MFdL1L3Node_pos);};
-    AnyRefNode MFdL1L3NodeL = {sRel = .Scale(.StdPar.Left.MFdL1L3Node_pos);};
-    
-    AnyRefNode MFdL3L5NodeR = {sRel = .Scale(.StdPar.Right.MFdL3L5Node_pos);};
-    AnyRefNode MFdL3L5NodeL = {sRel = .Scale(.StdPar.Left.MFdL3L5Node_pos);};
-    
-    AnyRefNode MFmL3S1NodeR = {sRel = .Scale(.StdPar.Right.MFmL3S1Node_pos);};
-    AnyRefNode MFmL3S1NodeL = {sRel = .Scale(.StdPar.Left.MFmL3S1Node_pos);};
-    
-    AnyRefNode MFtsL3LigamentNodeR = {sRel = .Scale(.StdPar.Right.MFtsL3LigamentNode_pos);};
-    AnyRefNode MFtsL3LigamentNodeL = {sRel = .Scale(.StdPar.Left.MFtsL3LigamentNode_pos);};
-    // End of Multifidi Nodes
-    
-    // Erector Spinae Nodes
-    AnyRefNode ILplL3CINodeR = {sRel = .Scale(.StdPar.Right.ILplL3CINode_pos);};
-    AnyRefNode ILplL3CINodeL = {sRel = .Scale(.StdPar.Left.ILplL3CINode_pos);};
-    
-    AnyRefNode LTplL3SIPSNodeR = {sRel = .Scale(.StdPar.Right.LTplL3SIPSNode_pos);};
-    AnyRefNode LTplL3SIPSNodeL = {sRel = .Scale(.StdPar.Left.LTplL3SIPSNode_pos);};
-    
-    AnyRefNode LTptT3L3NodeR = {sRel = .Scale(.StdPar.Right.LTptT3L3Node_pos);};
-    AnyRefNode LTptT3L3NodeL = {sRel = .Scale(.StdPar.Left.LTptT3L3Node_pos);};
-    
-    AnyRefNode ILplL1CIViaNodeR = {sRel = .Scale(.StdPar.Right.ILplL1CIViaNode_pos);};
-    AnyRefNode ILplL1CIViaNodeL = {sRel = .Scale(.StdPar.Left.ILplL1CIViaNode_pos);};
-    
-    AnyRefNode ILplL2CIViaNodeR = {sRel = .Scale(.StdPar.Right.ILplL2CIViaNode_pos);};
-    AnyRefNode ILplL2CIViaNodeL = {sRel = .Scale(.StdPar.Left.ILplL2CIViaNode_pos);};
-    
-    AnyRefNode LTplL1SIPSViaNodeR = {sRel = .Scale(.StdPar.Right.LTplL1SIPSViaNode_pos);};
-    AnyRefNode LTplL1SIPSViaNodeL = {sRel = .Scale(.StdPar.Left.LTplL1SIPSViaNode_pos);};
-    
-    AnyRefNode LTplL2SIPSViaNodeR = {sRel = .Scale(.StdPar.Right.LTplL2SIPSViaNode_pos);};
-    AnyRefNode LTplL2SIPSViaNodeL = {sRel = .Scale(.StdPar.Left.LTplL2SIPSViaNode_pos);};
-    
-    AnyRefNode ILptC5SIPSVia9NodeR = {sRel = .Scale(.StdPar.Right.ILptC5SIPSVia9Node_pos);};
-    AnyRefNode ILptC5SIPSVia9NodeL = {sRel = .Scale(.StdPar.Left.ILptC5SIPSVia9Node_pos);};
-    
-    AnyRefNode ILptC6SIPSVia8NodeR = {sRel = .Scale(.StdPar.Right.ILptC6SIPSVia8Node_pos);};
-    AnyRefNode ILptC6SIPSVia8NodeL = {sRel = .Scale(.StdPar.Left.ILptC6SIPSVia8Node_pos);};
-    
-    AnyRefNode ILptC7CIVia7NodeR = {sRel = .Scale(.StdPar.Right.ILptC7CIVia7Node_pos);};
-    AnyRefNode ILptC7CIVia7NodeL = {sRel = .Scale(.StdPar.Left.ILptC7CIVia7Node_pos);};
-    
-    AnyRefNode ILptC8CIVia6NodeR = {sRel = .Scale(.StdPar.Right.ILptC8CIVia6Node_pos);};
-    AnyRefNode ILptC8CIVia6NodeL = {sRel = .Scale(.StdPar.Left.ILptC8CIVia6Node_pos);};
-    
-    AnyRefNode ILptC9CIVia5NodeR = {sRel = .Scale(.StdPar.Right.ILptC9CIVia5Node_pos);};
-    AnyRefNode ILptC9CIVia5NodeL = {sRel = .Scale(.StdPar.Left.ILptC9CIVia5Node_pos);};
-    
-    AnyRefNode ILptC10CIVia4NodeR = {sRel = .Scale(.StdPar.Right.ILptC10CIVia4Node_pos);};
-    AnyRefNode ILptC10CIVia4NodeL = {sRel = .Scale(.StdPar.Left.ILptC10CIVia4Node_pos);};
-    
-    AnyRefNode ILptC11CIVia3NodeR = {sRel = .Scale(.StdPar.Right.ILptC11CIVia3Node_pos);};
-    AnyRefNode ILptC11CIVia3NodeL = {sRel = .Scale(.StdPar.Left.ILptC11CIVia3Node_pos);};
-    
-    AnyRefNode ILptC12CIVia3NodeR = {sRel = .Scale(.StdPar.Right.ILptC12CIVia3Node_pos);};
-    AnyRefNode ILptC12CIVia3NodeL = {sRel = .Scale(.StdPar.Left.ILptC12CIVia3Node_pos);};
-    
-    AnyRefNode LTptT4L4Via11NodeR = {sRel = .Scale(.StdPar.Right.LTptT4L4Via11Node_pos);};
-    AnyRefNode LTptT4L4Via11NodeL = {sRel = .Scale(.StdPar.Left.LTptT4L4Via11Node_pos);};
-    
-    AnyRefNode LTptT5L5Via10NodeR = {sRel = .Scale(.StdPar.Right.LTptT5L5Via10Node_pos);};
-    AnyRefNode LTptT5L5Via10NodeL = {sRel = .Scale(.StdPar.Left.LTptT5L5Via10Node_pos);};
-    
-    AnyRefNode LTptT6S1Via9NodeR = {sRel = .Scale(.StdPar.Right.LTptT6S1Via9Node_pos);};
-    AnyRefNode LTptT6S1Via9NodeL = {sRel = .Scale(.StdPar.Left.LTptT6S1Via9Node_pos);};
-    
-    AnyRefNode LTptT7S2Via8NodeR = {sRel = .Scale(.StdPar.Right.LTptT7S2Via8Node_pos);};
-    AnyRefNode LTptT7S2Via8NodeL = {sRel = .Scale(.StdPar.Left.LTptT7S2Via8Node_pos);};
-    
-    AnyRefNode LTptT8S3Via7NodeR = {sRel = .Scale(.StdPar.Right.LTptT8S3Via7Node_pos);};
-    AnyRefNode LTptT8S3Via7NodeL = {sRel = .Scale(.StdPar.Left.LTptT8S3Via7Node_pos);};
-    
-    AnyRefNode LTptT9S4Via6NodeR = {sRel = .Scale(.StdPar.Right.LTptT9S4Via6Node_pos);};
-    AnyRefNode LTptT9S4Via6NodeL = {sRel = .Scale(.StdPar.Left.LTptT9S4Via6Node_pos);};
-    
-    AnyRefNode LTptT10SacrumVia5NodeR = {sRel = .Scale(.StdPar.Right.LTptT10SacrumVia5Node_pos);};
-    AnyRefNode LTptT10SacrumVia5NodeL = {sRel = .Scale(.StdPar.Left.LTptT10SacrumVia5Node_pos);};
-    
-    AnyRefNode LTptT11SacrumVia4NodeR = {sRel = .Scale(.StdPar.Right.LTptT11SacrumVia4Node_pos);};
-    AnyRefNode LTptT11SacrumVia4NodeL = {sRel = .Scale(.StdPar.Left.LTptT11SacrumVia4Node_pos);};
-    
-    AnyRefNode LTptT12SacrumVia3NodeR = {sRel = .Scale(.StdPar.Right.LTptT12SacrumVia3Node_pos);};
-    AnyRefNode LTptT12SacrumVia3NodeL = {sRel = .Scale(.StdPar.Left.LTptT12SacrumVia3Node_pos);};
-    // End of Erector Spinae Nodes
-    
-    // Psoas Major Nodes
-    AnyRefNode PML3I_TMNodeR = {sRel = .Scale(.StdPar.Right.PML3I_TMNode_pos);};
-    AnyRefNode PML3I_TMNodeL = {sRel = .Scale(.StdPar.Left.PML3I_TMNode_pos);};
-    
-    AnyRefNode PML3T_TMNodeR = {sRel = .Scale(.StdPar.Right.PML3T_TMNode_pos);};
-    AnyRefNode PML3T_TMNodeL = {sRel = .Scale(.StdPar.Left.PML3T_TMNode_pos);};
-    
-    AnyRefNode PMT12I_TMVia2NodeR = {sRel = .Scale(.StdPar.Right.PMT12I_TMVia2Node_pos);};
-    AnyRefNode PMT12I_TMVia2NodeL = {sRel = .Scale(.StdPar.Left.PMT12I_TMVia2Node_pos);};
-        
-    AnyRefNode PML1I_TMVia1NodeR = {sRel = .Scale(.StdPar.Right.PML1I_TMVia1Node_pos);};
-    AnyRefNode PML1I_TMVia1NodeL = {sRel = .Scale(.StdPar.Left.PML1I_TMVia1Node_pos);};
-    
-    AnyRefNode PML1T_TMVia2NodeR = {sRel = .Scale(.StdPar.Right.PML1T_TMVia2Node_pos);};
-    AnyRefNode PML1T_TMVia2NodeL = {sRel = .Scale(.StdPar.Left.PML1T_TMVia2Node_pos);};
-    
-    AnyRefNode PML2T_TMVia1NodeR = {sRel = .Scale(.StdPar.Right.PML2T_TMVia1Node_pos);};
-    AnyRefNode PML2T_TMVia1NodeL = {sRel = .Scale(.StdPar.Left.PML2T_TMVia1Node_pos);};
-    // End of Psoas Major Nodes
-    
-    // Quadratus Lumborum Nodes
-    AnyRefNode QLL3_CINodeR = {sRel = .Scale(.StdPar.Right.QLL3_CINode_pos);};
-    AnyRefNode QLL3_CINodeL = {sRel = .Scale(.StdPar.Left.QLL3_CINode_pos);};
-    // End of Quadratus Lumborum Nodes
-    
-    // Obliquus Externus Nodes
-    AnyRefNode OEC8_RSNodeR = {sRel = .Scale(.StdPar.Right.OEC8_RSNode_pos);};
-    AnyRefNode OEC8_RSNodeL = {sRel = .Scale(.StdPar.Left.OEC8_RSNode_pos);};
-    // End of Obliquus Externus Nodes
-    
-    // Obliquus Internus Nodes
-    AnyRefNode OICI_RS2NodeR = {sRel = .Scale(.StdPar.Right.OICI_RS2Node_pos);};
-    AnyRefNode OICI_RS2NodeL = {sRel = .Scale(.StdPar.Left.OICI_RS2Node_pos);};
-    // End of Obliquus Internus Nodes
-    
-    //AnyDrawSeg DrwSeg = {};
-    
-    AnyDrawSurf DrwSTL = {
-      FileName = ...STL.FilenameL3Seg;
-      RGB = ...ColorRef.Segments;
-      Opacity = Main.DrawSettings.BonesOpacity.L3;
-      AnyFunTransform3D &Scale =.Scale;
-    };
-    
-    AnyRefNode MidPoint={sRel=(.L2L3JntNode.sRel+.L3L4JntNode.sRel)*0.5; };     
-
-    AnyRefNode SupportNode={sRel = .Scale(.StdPar.SupportNode_pos);};
-    AnyRefNode BuckleContactNode={sRel = .ScaleAbdominal(.StdPar.BuckleContactNode_pos);};
-    
-  }; // End of L3Seg
+  AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards compatability with AMMR 2.4 MoCap Marker protocols
   
-  AnySeg L2Seg = {
-    AnyFolder &StdPar=..ModelParameters.L2;
-    
-    //initial position found as a function of pelvis pos and orientation
-    r0=.L3Seg.L2L3JntNode.sRel*.L3Seg.Axes0'+.L3Seg.r0-L2L3JntNode.sRel*Axes0'; 
-    
-    // This file includes the trunk specifc scaling function
-    // and anatomical reference system
-    AnyFunTransform3D &GeomScale = ..Scaling.GeometricalScaling.L2Seg.ScaleFunction;
-    #include "TrunkScalingAndAnatomicalFrame.any"
-    AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards compatability with AMMR 2.4 MoCap Marker protocols
-
-    AnyFunTransform3D &ScaleAbdominal =..ScalingTrunk.Lumbar.ScaleFunction;
-    
-    AnyVar MassS = ..Scaling.MassScaling.Lumbar.MassScale;
   
-    AnyVar MassStandard = ..StandardParameters.Lumbar.Mass/5;
-    Mass = MassS*MassStandard;
-    
-     Jii = {0.001,0.001,0.001};
-    
-    sCoM = Scale(StdPar.sCoM_pos);
+  AnyRefNode L4L5JntNode = {sRel = .Scale(.StdPar.L4L5JntNode_pos);};
+  AnyRefNode L3L4JntNode = {sRel = .Scale(.StdPar.L3L4JntNode_pos); };
+  
+  //These nodes are used for adding extra used by other body parts to the right 
+  //and left side of the segment
+  AnyRefNode Right = {AnyFunTransform3D&Scale=.Scale;};
+  AnyRefNode Left = {AnyFunTransform3D&Scale=.Scale;};
+  
+  // Ligament Nodes        
+  AnyRefNode LSNode = {sRel = .Scale(.StdPar.LSNode_pos);};
+  
+  AnyRefNode LINodeInferior = {sRel = .Scale(.StdPar.LINodeInferior_pos);};
+  AnyRefNode LINodeSuperior = {sRel = .Scale(.StdPar.LINodeSuperior_pos);};
+  // End of ligament Nodes
+  
+  // Multifidi Nodes
+  AnyRefNode MFdL2L4NodeR = {sRel = .Scale(.StdPar.Right.MFdL2L4Node_pos);};
+  AnyRefNode MFdL2L4NodeL = {sRel = .Scale(.StdPar.Left.MFdL2L4Node_pos);};
+  
+  AnyRefNode MFdL4S1NodeR = {sRel = .Scale(.StdPar.Right.MFdL4S1Node_pos);};
+  AnyRefNode MFdL4S1NodeL = {sRel = .Scale(.StdPar.Left.MFdL4S1Node_pos);};
+  
+  AnyRefNode MFmL1L4NodeR = {sRel = .Scale(.StdPar.Right.MFmL1L4Node_pos);};
+  AnyRefNode MFmL1L4NodeL = {sRel = .Scale(.StdPar.Left.MFmL1L4Node_pos);};
+  
+  AnyRefNode MFmL4SacrumNodeR = {sRel = .Scale(.StdPar.Right.MFmL4SacrumNode_pos);};
+  AnyRefNode MFmL4SacrumNodeL = {sRel = .Scale(.StdPar.Left.MFmL4SacrumNode_pos);};
+  
+  AnyRefNode MFtsL4SacrumNodeR = {sRel = .Scale(.StdPar.Right.MFtsL4SacrumNode_pos);};
+  AnyRefNode MFtsL4SacrumNodeL = {sRel = .Scale(.StdPar.Left.MFtsL4SacrumNode_pos);};
+  // End of Multifidi Nodes
+  
+  // Erector Spinae Nodes
+  AnyRefNode ILplL4CINodeR = {sRel = .Scale(.StdPar.Right.ILplL4CINode_pos);};
+  AnyRefNode ILplL4CINodeL = {sRel = .Scale(.StdPar.Left.ILplL4CINode_pos);};
+  
+  AnyRefNode LTplL4SIPSNodeR = {sRel = .Scale(.StdPar.Right.LTplL4SIPSNode_pos);};
+  AnyRefNode LTplL4SIPSNodeL = {sRel = .Scale(.StdPar.Left.LTplL4SIPSNode_pos);};
+  
+  AnyRefNode LTptT4L4NodeR = {sRel = .Scale(.StdPar.Right.LTptT4L4Node_pos);};
+  AnyRefNode LTptT4L4NodeL = {sRel = .Scale(.StdPar.Left.LTptT4L4Node_pos);};
+  
+  AnyRefNode ILplL1CIViaNodeR = {sRel = .Scale(.StdPar.Right.ILplL1CIViaNode_pos);};
+  AnyRefNode ILplL1CIViaNodeL = {sRel = .Scale(.StdPar.Left.ILplL1CIViaNode_pos);};
+
+  AnyRefNode ILplL2CIViaNodeR = {sRel = .Scale(.StdPar.Right.ILplL2CIViaNode_pos);};
+  AnyRefNode ILplL2CIViaNodeL = {sRel = .Scale(.StdPar.Left.ILplL2CIViaNode_pos);};
+  
+  AnyRefNode LTptT5L5Via11NodeR = {sRel = .Scale(.StdPar.Right.LTptT5L5Via11Node_pos);};
+  AnyRefNode LTptT5L5Via11NodeL = {sRel = .Scale(.StdPar.Left.LTptT5L5Via11Node_pos);};
+  
+  AnyRefNode LTptT6S1Via10NodeR = {sRel = .Scale(.StdPar.Right.LTptT6S1Via10Node_pos);};
+  AnyRefNode LTptT6S1Via10NodeL = {sRel = .Scale(.StdPar.Left.LTptT6S1Via10Node_pos);};
+  
+  AnyRefNode LTptT7S2Via9NodeR = {sRel = .Scale(.StdPar.Right.LTptT7S2Via9Node_pos);};
+  AnyRefNode LTptT7S2Via9NodeL = {sRel = .Scale(.StdPar.Left.LTptT7S2Via9Node_pos);};
+  
+  AnyRefNode LTptT8S3Via8NodeR = {sRel = .Scale(.StdPar.Right.LTptT8S3Via8Node_pos);};
+  AnyRefNode LTptT8S3Via8NodeL = {sRel = .Scale(.StdPar.Left.LTptT8S3Via8Node_pos);};
+  
+  AnyRefNode LTptT9S4Via7NodeR = {sRel = .Scale(.StdPar.Right.LTptT9S4Via7Node_pos);};
+  AnyRefNode LTptT9S4Via7NodeL = {sRel = .Scale(.StdPar.Left.LTptT9S4Via7Node_pos);};
+  
+  AnyRefNode LTptT10SacrumVia6NodeR = {sRel = .Scale(.StdPar.Right.LTptT10SacrumVia6Node_pos);};
+  AnyRefNode LTptT10SacrumVia6NodeL = {sRel = .Scale(.StdPar.Left.LTptT10SacrumVia6Node_pos);};
+  
+  AnyRefNode LTptT11SacrumVia5NodeR = {sRel = .Scale(.StdPar.Right.LTptT11SacrumVia5Node_pos);};
+  AnyRefNode LTptT11SacrumVia5NodeL = {sRel = .Scale(.StdPar.Left.LTptT11SacrumVia5Node_pos);};
+  
+  AnyRefNode LTptT12SacrumVia4NodeR = {sRel = .Scale(.StdPar.Right.LTptT12SacrumVia4Node_pos);};
+  AnyRefNode LTptT12SacrumVia4NodeL = {sRel = .Scale(.StdPar.Left.LTptT12SacrumVia4Node_pos);};
+  // End of Erector Spinae Nodes
+  
+  // Psoas Major Nodes
+  AnyRefNode PML4I_TMNodeR = {sRel = .Scale(.StdPar.Right.PML4I_TMNode_pos);};
+  AnyRefNode PML4I_TMNodeL = {sRel = .Scale(.StdPar.Left.PML4I_TMNode_pos);};
+  
+  AnyRefNode PML4T_TMNodeR = {sRel = .Scale(.StdPar.Right.PML4T_TMNode_pos);};
+  AnyRefNode PML4T_TMNodeL = {sRel = .Scale(.StdPar.Left.PML4T_TMNode_pos);};
+  
+  AnyRefNode PMT12I_TMVia3NodeR = {sRel = .Scale(.StdPar.Right.PMT12I_TMVia3Node_pos);};
+  AnyRefNode PMT12I_TMVia3NodeL = {sRel = .Scale(.StdPar.Left.PMT12I_TMVia3Node_pos);};
+
+  AnyRefNode PML1I_TMVia2NodeR = {sRel = .Scale(.StdPar.Right.PML1I_TMVia2Node_pos);};
+  AnyRefNode PML1I_TMVia2NodeL = {sRel = .Scale(.StdPar.Left.PML1I_TMVia2Node_pos);};
+  
+  AnyRefNode PML2I_TMVia1NodeR = {sRel = .Scale(.StdPar.Right.PML2I_TMVia1Node_pos);};
+  AnyRefNode PML2I_TMVia1NodeL = {sRel = .Scale(.StdPar.Left.PML2I_TMVia1Node_pos);};
+  
+  AnyRefNode PML1T_TMVia3NodeR = {sRel = .Scale(.StdPar.Right.PML1T_TMVia3Node_pos);};
+  AnyRefNode PML1T_TMVia3NodeL = {sRel = .Scale(.StdPar.Left.PML1T_TMVia3Node_pos);};
+  
+  AnyRefNode PML2T_TMVia2NodeR = {sRel = .Scale(.StdPar.Right.PML2T_TMVia2Node_pos);};
+  AnyRefNode PML2T_TMVia2NodeL = {sRel = .Scale(.StdPar.Left.PML2T_TMVia2Node_pos);};
+  
+  AnyRefNode PML3T_TMVia1NodeR = {sRel = .Scale(.StdPar.Right.PML3T_TMVia1Node_pos);};
+  AnyRefNode PML3T_TMVia1NodeL = {sRel = .Scale(.StdPar.Left.PML3T_TMVia1Node_pos);};
+  // End of Psoas Major Nodes
+  
+  // Quadratus Lumborum Nodes
+  AnyRefNode QLL4_CINodeR = {sRel = .Scale(.StdPar.Right.QLL4_CINode_pos);};
+  AnyRefNode QLL4_CINodeL = {sRel = .Scale(.StdPar.Left.QLL4_CINode_pos);};
+  // End of Quadratus Lumborum Nodes
+  
+  // Obliquus Externus Nodes
+  AnyRefNode OEC9_RSNodeR = {sRel = .Scale(.StdPar.Right.OEC9_RSNode_pos);};
+  AnyRefNode OEC9_RSNodeL = {sRel = .Scale(.StdPar.Left.OEC9_RSNode_pos);};
+  // End of Obliquus Externus Nodes
+  
+  // Obliquus Internus Nodes
+  AnyRefNode OICI_RS3NodeR = {sRel = .Scale(.StdPar.Right.OICI_RS3Node_pos);};
+  AnyRefNode OICI_RS3NodeL = {sRel = .Scale(.StdPar.Left.OICI_RS3Node_pos);};   
+  // End of Obliquus Internus Nodes
+  
+  AnyDrawSurf DrwSTL = {
+    FileName = ...STL.FilenameL4Seg;
+    RGB = ...ColorRef.Segments;
+    Opacity = Main.DrawSettings.BonesOpacity.L4;
+    AnyFunTransform3D &Scale =.Scale;
+  };
+  
+  #if BM_TRUNK_CAVITY_MODEL == _CAVITY_MODEL_VOLUME_ 
+    AnyRefNode TransversusInsNode_R={sRel=.Scale(.StdPar.Right.Transversus_Ins_pos);}; 
+    AnyRefNode TransversusInsNode_L={sRel=.Scale(.StdPar.Left.Transversus_Ins_pos);}; 
+    AnyRefNode TransversusMid={sRel=0.5*(.TransversusInsNode_R.sRel+.TransversusInsNode_L.sRel) ;};  
+  #endif
+
+  AnyRefNode MidPoint={sRel=(.L3L4JntNode.sRel+.L4L5JntNode.sRel)*0.5;};
+  AnyRefNode SupportNode={sRel = .Scale(.StdPar.SupportNode_pos);};      
+  AnyRefNode BuckleContactNode={sRel= .ScaleAbdominal(.StdPar.BuckleContactNode_pos);};
+  
+  AnyRefNode L4RContactNode = {sRel= .Scale(.StdPar.Right.ContactNode_pos);};
+  AnyRefNode L4LContactNode = {sRel= .Scale(.StdPar.Left.ContactNode_pos);};
+
+}; // End of L4Seg
+
+AnySeg L3Seg = {
+  AnyFolder &StdPar = ..ModelParameters.L3;
+  //initial position found as a function of pelvis pos and orientation
+  r0=.L4Seg.L3L4JntNode.sRel*.L4Seg.Axes0'+.L4Seg.r0-L3L4JntNode.sRel*Axes0'; 
+  
+  // This file includes the trunk specifc scaling function
+  // and anatomical reference system
+  AnyFunTransform3D &GeomScale = ..Scaling.GeometricalScaling.L3Seg.ScaleFunction;
+  #include "TrunkScalingAndAnatomicalFrame.any"
+  AnyFunTransform3D &ScaleAbdominal =..Scaling.GeometricalScaling.Lumbar.ScaleFunction;
+      
+  // Inertia properties for the segment
+  UseInertiaObjects = On;
+  segmental_inertia_matrix inertiaObject() = {
+    Mass = ...Scaling.MassScaling.Lumbar.MassScale * ...StandardParameters.Lumbar.Mass/5;
+    Jii = {0.001,0.001,0.001};
     JaboutCoMOnOff = On;
+    sCoM = .Scale(.StdPar.sCoM_pos);
+  };
 
-    AnyRefNode L2L3JntNode = {sRel = .Scale(.StdPar.L2L3JntNode_pos);};    
-    AnyRefNode L1L2JntNode = {sRel = .Scale(.StdPar.L1L2JntNode_pos); AnyDrawNodes DrwNode = {ScaleXYZ = 0.003*{1,1,1};RGB = {1,0,0};};};
-    
-    //These nodes are used for adding extra used by other body parts to the right 
-    //and left side of the segment
-    AnyRefNode Right = {AnyFunTransform3D&Scale=.Scale;};
-    AnyRefNode Left = {AnyFunTransform3D&Scale=.Scale;};
-    
-    
-    // Ligament Nodes    
-    AnyRefNode LSNode = {sRel = .Scale(.StdPar.LSNode_pos);};
-    AnyRefNode LSNode2 = {sRel = .Scale(.StdPar.LSNode2_pos);};
-    
-    AnyRefNode LINodeInferior = {sRel = .Scale(.StdPar.LINodeInferior_pos);};
-    AnyRefNode LINodeSuperior = {sRel = .Scale(.StdPar.LINodeSuperior_pos);};
-    // End of ligament Nodes
-    
-    // Multifidi Nodes
-    AnyRefNode MFdL2L4NodeR = {sRel = .Scale(.StdPar.Right.MFdL2L4Node_pos);};
-    AnyRefNode MFdL2L4NodeL = {sRel = .Scale(.StdPar.Left.MFdL2L4Node_pos);};
-                                                   
-    AnyRefNode MFmL2L5NodeR = {sRel = .Scale(.StdPar.Right.MFmL2L5Node_pos);};
-    AnyRefNode MFmL2L5NodeL = {sRel = .Scale(.StdPar.Left.MFmL2L5Node_pos);};
-    
-    AnyRefNode MFtsL2L5NodeR = {sRel = .Scale(.StdPar.Right.MFtsL2L5Node_pos);};
-    AnyRefNode MFtsL2L5NodeL = {sRel = .Scale(.StdPar.Left.MFtsL2L5Node_pos);};
-                                                    
-    AnyRefNode MFtsL2S1NodeR = {sRel = .Scale(.StdPar.Right.MFtsL2S1Node_pos);};
-    AnyRefNode MFtsL2S1NodeL = {sRel = .Scale(.StdPar.Left.MFtsL2S1Node_pos);};
-    
-    AnyRefNode MFtstL2SIPSNodeR = {sRel = .Scale(.StdPar.Right.MFtstL2SIPSNode_pos);};
-    AnyRefNode MFtstL2SIPSNodeL = {sRel = .Scale(.StdPar.Left.MFtstL2SIPSNode_pos);};
-    // End of Multifidi Nodes
-    
-    // Erector Spinae Nodes
-    AnyRefNode ILplL2CINodeR = {sRel = .Scale(.StdPar.Right.ILplL2CINode_pos);};
-    AnyRefNode ILplL2CINodeL = {sRel = .Scale(.StdPar.Left.ILplL2CINode_pos);};
-    
-    AnyRefNode LTplL2SIPSNodeR = {sRel = .Scale(.StdPar.Right.LTplL2SIPSNode_pos);};
-    AnyRefNode LTplL2SIPSNodeL = {sRel = .Scale(.StdPar.Left.LTplL2SIPSNode_pos);};
-    
-    AnyRefNode LTptT2L2NodeR = {sRel = .Scale(.StdPar.Right.LTptT2L2Node_pos);};
-    AnyRefNode LTptT2L2NodeL = {sRel = .Scale(.StdPar.Left.LTptT2L2Node_pos);};
-    
-    AnyRefNode ILplL1CIViaNodeR = {sRel = .Scale(.StdPar.Right.ILplL1CIViaNode_pos);};
-    AnyRefNode ILplL1CIViaNodeL = {sRel = .Scale(.StdPar.Left.ILplL1CIViaNode_pos);}; 
-    
-    AnyRefNode LTplL1SIPSViaNodeR = {sRel = .Scale(.StdPar.Right.LTplL1SIPSViaNode_pos);};
-    AnyRefNode LTplL1SIPSViaNodeL = {sRel = .Scale(.StdPar.Left.LTplL1SIPSViaNode_pos);};
-    
-    AnyRefNode ILptC5SIPSVia8NodeR = {sRel = .Scale(.StdPar.Right.ILptC5SIPSVia8Node_pos);};
-    AnyRefNode ILptC5SIPSVia8NodeL = {sRel = .Scale(.StdPar.Left.ILptC5SIPSVia8Node_pos);};
-                                                          
-    AnyRefNode ILptC6SIPSVia7NodeR = {sRel = .Scale(.StdPar.Right.ILptC6SIPSVia7Node_pos);};
-    AnyRefNode ILptC6SIPSVia7NodeL = {sRel = .Scale(.StdPar.Left.ILptC6SIPSVia7Node_pos);};
-    
-    AnyRefNode ILptC7CIVia6NodeR = {sRel = .Scale(.StdPar.Right.ILptC7CIVia6Node_pos);};
-    AnyRefNode ILptC7CIVia6NodeL = {sRel = .Scale(.StdPar.Left.ILptC7CIVia6Node_pos);};
+  AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards compatability with AMMR 2.4 MoCap Marker protocols
+  
+  
+  AnyRefNode L3L4JntNode = {sRel = .Scale(.StdPar.L3L4JntNode_pos);};    
+  AnyRefNode L2L3JntNode = {sRel = .Scale(.StdPar.L2L3JntNode_pos); };
+  
+  //These nodes are used for adding extra used by other body parts to the right 
+  //and left side of the segment
+  AnyRefNode Right= {AnyFunTransform3D&Scale=.Scale;
+    AnyRefNode ICSpringSupNode        = { sRel =  .Scale(..StdPar.Right.ICSpringSupNode_pos); };
+  };
+  AnyRefNode Left = {AnyFunTransform3D&Scale=.Scale;
+    AnyRefNode ICSpringSupNode        = { sRel =  .Scale(..StdPar.Left.ICSpringSupNode_pos); };
+  };
+  
+  
+  // Ligament Nodes        
+  AnyRefNode LSNode = {sRel = .Scale(.StdPar.LSNode_pos);};
+  
+  AnyRefNode LINodeInferior = {sRel = .Scale(.StdPar.LINodeInferior_pos);};
+  AnyRefNode LINodeSuperior = {sRel = .Scale(.StdPar.LINodeSuperior_pos);};
+  // End of ligament Nodes
+  
+  // Multifidi Nodes
+  AnyRefNode MFdL1L3NodeR = {sRel = .Scale(.StdPar.Right.MFdL1L3Node_pos);};
+  AnyRefNode MFdL1L3NodeL = {sRel = .Scale(.StdPar.Left.MFdL1L3Node_pos);};
+  
+  AnyRefNode MFdL3L5NodeR = {sRel = .Scale(.StdPar.Right.MFdL3L5Node_pos);};
+  AnyRefNode MFdL3L5NodeL = {sRel = .Scale(.StdPar.Left.MFdL3L5Node_pos);};
+  
+  AnyRefNode MFmL3S1NodeR = {sRel = .Scale(.StdPar.Right.MFmL3S1Node_pos);};
+  AnyRefNode MFmL3S1NodeL = {sRel = .Scale(.StdPar.Left.MFmL3S1Node_pos);};
+  
+  AnyRefNode MFtsL3LigamentNodeR = {sRel = .Scale(.StdPar.Right.MFtsL3LigamentNode_pos);};
+  AnyRefNode MFtsL3LigamentNodeL = {sRel = .Scale(.StdPar.Left.MFtsL3LigamentNode_pos);};
+  // End of Multifidi Nodes
+  
+  // Erector Spinae Nodes
+  AnyRefNode ILplL3CINodeR = {sRel = .Scale(.StdPar.Right.ILplL3CINode_pos);};
+  AnyRefNode ILplL3CINodeL = {sRel = .Scale(.StdPar.Left.ILplL3CINode_pos);};
+  
+  AnyRefNode LTplL3SIPSNodeR = {sRel = .Scale(.StdPar.Right.LTplL3SIPSNode_pos);};
+  AnyRefNode LTplL3SIPSNodeL = {sRel = .Scale(.StdPar.Left.LTplL3SIPSNode_pos);};
+  
+  AnyRefNode LTptT3L3NodeR = {sRel = .Scale(.StdPar.Right.LTptT3L3Node_pos);};
+  AnyRefNode LTptT3L3NodeL = {sRel = .Scale(.StdPar.Left.LTptT3L3Node_pos);};
+  
+  AnyRefNode ILplL1CIViaNodeR = {sRel = .Scale(.StdPar.Right.ILplL1CIViaNode_pos);};
+  AnyRefNode ILplL1CIViaNodeL = {sRel = .Scale(.StdPar.Left.ILplL1CIViaNode_pos);};
+  
+  AnyRefNode ILplL2CIViaNodeR = {sRel = .Scale(.StdPar.Right.ILplL2CIViaNode_pos);};
+  AnyRefNode ILplL2CIViaNodeL = {sRel = .Scale(.StdPar.Left.ILplL2CIViaNode_pos);};
+  
+  AnyRefNode LTplL1SIPSViaNodeR = {sRel = .Scale(.StdPar.Right.LTplL1SIPSViaNode_pos);};
+  AnyRefNode LTplL1SIPSViaNodeL = {sRel = .Scale(.StdPar.Left.LTplL1SIPSViaNode_pos);};
+  
+  AnyRefNode LTplL2SIPSViaNodeR = {sRel = .Scale(.StdPar.Right.LTplL2SIPSViaNode_pos);};
+  AnyRefNode LTplL2SIPSViaNodeL = {sRel = .Scale(.StdPar.Left.LTplL2SIPSViaNode_pos);};
+  
+  AnyRefNode ILptC5SIPSVia9NodeR = {sRel = .Scale(.StdPar.Right.ILptC5SIPSVia9Node_pos);};
+  AnyRefNode ILptC5SIPSVia9NodeL = {sRel = .Scale(.StdPar.Left.ILptC5SIPSVia9Node_pos);};
+  
+  AnyRefNode ILptC6SIPSVia8NodeR = {sRel = .Scale(.StdPar.Right.ILptC6SIPSVia8Node_pos);};
+  AnyRefNode ILptC6SIPSVia8NodeL = {sRel = .Scale(.StdPar.Left.ILptC6SIPSVia8Node_pos);};
+  
+  AnyRefNode ILptC7CIVia7NodeR = {sRel = .Scale(.StdPar.Right.ILptC7CIVia7Node_pos);};
+  AnyRefNode ILptC7CIVia7NodeL = {sRel = .Scale(.StdPar.Left.ILptC7CIVia7Node_pos);};
+  
+  AnyRefNode ILptC8CIVia6NodeR = {sRel = .Scale(.StdPar.Right.ILptC8CIVia6Node_pos);};
+  AnyRefNode ILptC8CIVia6NodeL = {sRel = .Scale(.StdPar.Left.ILptC8CIVia6Node_pos);};
+  
+  AnyRefNode ILptC9CIVia5NodeR = {sRel = .Scale(.StdPar.Right.ILptC9CIVia5Node_pos);};
+  AnyRefNode ILptC9CIVia5NodeL = {sRel = .Scale(.StdPar.Left.ILptC9CIVia5Node_pos);};
+  
+  AnyRefNode ILptC10CIVia4NodeR = {sRel = .Scale(.StdPar.Right.ILptC10CIVia4Node_pos);};
+  AnyRefNode ILptC10CIVia4NodeL = {sRel = .Scale(.StdPar.Left.ILptC10CIVia4Node_pos);};
+  
+  AnyRefNode ILptC11CIVia3NodeR = {sRel = .Scale(.StdPar.Right.ILptC11CIVia3Node_pos);};
+  AnyRefNode ILptC11CIVia3NodeL = {sRel = .Scale(.StdPar.Left.ILptC11CIVia3Node_pos);};
+  
+  AnyRefNode ILptC12CIVia3NodeR = {sRel = .Scale(.StdPar.Right.ILptC12CIVia3Node_pos);};
+  AnyRefNode ILptC12CIVia3NodeL = {sRel = .Scale(.StdPar.Left.ILptC12CIVia3Node_pos);};
+  
+  AnyRefNode LTptT4L4Via11NodeR = {sRel = .Scale(.StdPar.Right.LTptT4L4Via11Node_pos);};
+  AnyRefNode LTptT4L4Via11NodeL = {sRel = .Scale(.StdPar.Left.LTptT4L4Via11Node_pos);};
+  
+  AnyRefNode LTptT5L5Via10NodeR = {sRel = .Scale(.StdPar.Right.LTptT5L5Via10Node_pos);};
+  AnyRefNode LTptT5L5Via10NodeL = {sRel = .Scale(.StdPar.Left.LTptT5L5Via10Node_pos);};
+  
+  AnyRefNode LTptT6S1Via9NodeR = {sRel = .Scale(.StdPar.Right.LTptT6S1Via9Node_pos);};
+  AnyRefNode LTptT6S1Via9NodeL = {sRel = .Scale(.StdPar.Left.LTptT6S1Via9Node_pos);};
+  
+  AnyRefNode LTptT7S2Via8NodeR = {sRel = .Scale(.StdPar.Right.LTptT7S2Via8Node_pos);};
+  AnyRefNode LTptT7S2Via8NodeL = {sRel = .Scale(.StdPar.Left.LTptT7S2Via8Node_pos);};
+  
+  AnyRefNode LTptT8S3Via7NodeR = {sRel = .Scale(.StdPar.Right.LTptT8S3Via7Node_pos);};
+  AnyRefNode LTptT8S3Via7NodeL = {sRel = .Scale(.StdPar.Left.LTptT8S3Via7Node_pos);};
+  
+  AnyRefNode LTptT9S4Via6NodeR = {sRel = .Scale(.StdPar.Right.LTptT9S4Via6Node_pos);};
+  AnyRefNode LTptT9S4Via6NodeL = {sRel = .Scale(.StdPar.Left.LTptT9S4Via6Node_pos);};
+  
+  AnyRefNode LTptT10SacrumVia5NodeR = {sRel = .Scale(.StdPar.Right.LTptT10SacrumVia5Node_pos);};
+  AnyRefNode LTptT10SacrumVia5NodeL = {sRel = .Scale(.StdPar.Left.LTptT10SacrumVia5Node_pos);};
+  
+  AnyRefNode LTptT11SacrumVia4NodeR = {sRel = .Scale(.StdPar.Right.LTptT11SacrumVia4Node_pos);};
+  AnyRefNode LTptT11SacrumVia4NodeL = {sRel = .Scale(.StdPar.Left.LTptT11SacrumVia4Node_pos);};
+  
+  AnyRefNode LTptT12SacrumVia3NodeR = {sRel = .Scale(.StdPar.Right.LTptT12SacrumVia3Node_pos);};
+  AnyRefNode LTptT12SacrumVia3NodeL = {sRel = .Scale(.StdPar.Left.LTptT12SacrumVia3Node_pos);};
+  // End of Erector Spinae Nodes
+  
+  // Psoas Major Nodes
+  AnyRefNode PML3I_TMNodeR = {sRel = .Scale(.StdPar.Right.PML3I_TMNode_pos);};
+  AnyRefNode PML3I_TMNodeL = {sRel = .Scale(.StdPar.Left.PML3I_TMNode_pos);};
+  
+  AnyRefNode PML3T_TMNodeR = {sRel = .Scale(.StdPar.Right.PML3T_TMNode_pos);};
+  AnyRefNode PML3T_TMNodeL = {sRel = .Scale(.StdPar.Left.PML3T_TMNode_pos);};
+  
+  AnyRefNode PMT12I_TMVia2NodeR = {sRel = .Scale(.StdPar.Right.PMT12I_TMVia2Node_pos);};
+  AnyRefNode PMT12I_TMVia2NodeL = {sRel = .Scale(.StdPar.Left.PMT12I_TMVia2Node_pos);};
+      
+  AnyRefNode PML1I_TMVia1NodeR = {sRel = .Scale(.StdPar.Right.PML1I_TMVia1Node_pos);};
+  AnyRefNode PML1I_TMVia1NodeL = {sRel = .Scale(.StdPar.Left.PML1I_TMVia1Node_pos);};
+  
+  AnyRefNode PML1T_TMVia2NodeR = {sRel = .Scale(.StdPar.Right.PML1T_TMVia2Node_pos);};
+  AnyRefNode PML1T_TMVia2NodeL = {sRel = .Scale(.StdPar.Left.PML1T_TMVia2Node_pos);};
+  
+  AnyRefNode PML2T_TMVia1NodeR = {sRel = .Scale(.StdPar.Right.PML2T_TMVia1Node_pos);};
+  AnyRefNode PML2T_TMVia1NodeL = {sRel = .Scale(.StdPar.Left.PML2T_TMVia1Node_pos);};
+  // End of Psoas Major Nodes
+  
+  // Quadratus Lumborum Nodes
+  AnyRefNode QLL3_CINodeR = {sRel = .Scale(.StdPar.Right.QLL3_CINode_pos);};
+  AnyRefNode QLL3_CINodeL = {sRel = .Scale(.StdPar.Left.QLL3_CINode_pos);};
+  // End of Quadratus Lumborum Nodes
+  
+  // Obliquus Externus Nodes
+  AnyRefNode OEC8_RSNodeR = {sRel = .Scale(.StdPar.Right.OEC8_RSNode_pos);};
+  AnyRefNode OEC8_RSNodeL = {sRel = .Scale(.StdPar.Left.OEC8_RSNode_pos);};
+  // End of Obliquus Externus Nodes
+  
+  // Obliquus Internus Nodes
+  AnyRefNode OICI_RS2NodeR = {sRel = .Scale(.StdPar.Right.OICI_RS2Node_pos);};
+  AnyRefNode OICI_RS2NodeL = {sRel = .Scale(.StdPar.Left.OICI_RS2Node_pos);};
+  // End of Obliquus Internus Nodes
+  
+  //AnyDrawSeg DrwSeg = {};
+  
+  AnyDrawSurf DrwSTL = {
+    FileName = ...STL.FilenameL3Seg;
+    RGB = ...ColorRef.Segments;
+    Opacity = Main.DrawSettings.BonesOpacity.L3;
+    AnyFunTransform3D &Scale =.Scale;
+  };
+  
+  #if BM_TRUNK_CAVITY_MODEL == _CAVITY_MODEL_VOLUME_ 
+    AnyRefNode TransversusInsNode_R={sRel=.Scale(.StdPar.Right.Transversus_Ins_pos);}; 
+    AnyRefNode TransversusInsNode_L={sRel=.Scale(.StdPar.Left.Transversus_Ins_pos);}; 
+    AnyRefNode TransversusMid={sRel=0.5*(.TransversusInsNode_R.sRel+.TransversusInsNode_L.sRel) ;};  
+  #endif
+
+  AnyRefNode MidPoint={sRel=(.L2L3JntNode.sRel+.L3L4JntNode.sRel)*0.5; };     
+
+  AnyRefNode SupportNode={sRel = .Scale(.StdPar.SupportNode_pos);};
+  AnyRefNode BuckleContactNode={sRel = .ScaleAbdominal(.StdPar.BuckleContactNode_pos);};
+  
+  AnyRefNode L3RContactNode = {sRel= .Scale(.StdPar.Right.ContactNode_pos);};
+  AnyRefNode L3LContactNode = {sRel= .Scale(.StdPar.Left.ContactNode_pos);};
+}; // End of L3Seg
+
+AnySeg L2Seg = {
+  AnyFolder &StdPar=..ModelParameters.L2;
+  
+  //initial position found as a function of pelvis pos and orientation
+  r0=.L3Seg.L2L3JntNode.sRel*.L3Seg.Axes0'+.L3Seg.r0-L2L3JntNode.sRel*Axes0'; 
+  
+  // This file includes the trunk specifc scaling function
+  // and anatomical reference system
+  AnyFunTransform3D &GeomScale = ..Scaling.GeometricalScaling.L2Seg.ScaleFunction;
+  #include "TrunkScalingAndAnatomicalFrame.any"
+  AnyFunTransform3D &ScaleAbdominal =..Scaling.GeometricalScaling.Lumbar.ScaleFunction;
+  
+  // Inertia properties for the segment
+  UseInertiaObjects = On;
+  segmental_inertia_matrix inertiaObject() = {
+    Mass = ...Scaling.MassScaling.Lumbar.MassScale * ...StandardParameters.Lumbar.Mass/5;
+    Jii = {0.001,0.001,0.001};
+    JaboutCoMOnOff = On;
+    sCoM = .Scale(.StdPar.sCoM_pos);
+  };
+
+  AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards compatability with AMMR 2.4 MoCap Marker protocols
+  
+  
+  AnyRefNode L2L3JntNode = {sRel = .Scale(.StdPar.L2L3JntNode_pos);};    
+  AnyRefNode L1L2JntNode = {sRel = .Scale(.StdPar.L1L2JntNode_pos); };
+  
+  //These nodes are used for adding extra used by other body parts to the right 
+  //and left side of the segment
+  AnyRefNode Right = {AnyFunTransform3D&Scale=.Scale;
+    AnyRefNode ICSpringSupNode        = { sRel =  .Scale(..StdPar.Right.ICSpringSupNode_pos); };
+  };
+  AnyRefNode Left = {AnyFunTransform3D&Scale=.Scale;
+    AnyRefNode ICSpringSupNode        = { sRel =  .Scale(..StdPar.Left.ICSpringSupNode_pos); };
+  };
+  
+  
+  // Ligament Nodes    
+  AnyRefNode LSNode = {sRel = .Scale(.StdPar.LSNode_pos);};
+  AnyRefNode LSNode2 = {sRel = .Scale(.StdPar.LSNode2_pos);};
+  
+  AnyRefNode LINodeInferior = {sRel = .Scale(.StdPar.LINodeInferior_pos);};
+  AnyRefNode LINodeSuperior = {sRel = .Scale(.StdPar.LINodeSuperior_pos);};
+  // End of ligament Nodes
+  
+  // Multifidi Nodes
+  AnyRefNode MFdL2L4NodeR = {sRel = .Scale(.StdPar.Right.MFdL2L4Node_pos);};
+  AnyRefNode MFdL2L4NodeL = {sRel = .Scale(.StdPar.Left.MFdL2L4Node_pos);};
+                                                  
+  AnyRefNode MFmL2L5NodeR = {sRel = .Scale(.StdPar.Right.MFmL2L5Node_pos);};
+  AnyRefNode MFmL2L5NodeL = {sRel = .Scale(.StdPar.Left.MFmL2L5Node_pos);};
+  
+  AnyRefNode MFtsL2L5NodeR = {sRel = .Scale(.StdPar.Right.MFtsL2L5Node_pos);};
+  AnyRefNode MFtsL2L5NodeL = {sRel = .Scale(.StdPar.Left.MFtsL2L5Node_pos);};
+                                                  
+  AnyRefNode MFtsL2S1NodeR = {sRel = .Scale(.StdPar.Right.MFtsL2S1Node_pos);};
+  AnyRefNode MFtsL2S1NodeL = {sRel = .Scale(.StdPar.Left.MFtsL2S1Node_pos);};
+  
+  AnyRefNode MFtstL2SIPSNodeR = {sRel = .Scale(.StdPar.Right.MFtstL2SIPSNode_pos);};
+  AnyRefNode MFtstL2SIPSNodeL = {sRel = .Scale(.StdPar.Left.MFtstL2SIPSNode_pos);};
+  // End of Multifidi Nodes
+  
+  // Erector Spinae Nodes
+  AnyRefNode ILplL2CINodeR = {sRel = .Scale(.StdPar.Right.ILplL2CINode_pos);};
+  AnyRefNode ILplL2CINodeL = {sRel = .Scale(.StdPar.Left.ILplL2CINode_pos);};
+  
+  AnyRefNode LTplL2SIPSNodeR = {sRel = .Scale(.StdPar.Right.LTplL2SIPSNode_pos);};
+  AnyRefNode LTplL2SIPSNodeL = {sRel = .Scale(.StdPar.Left.LTplL2SIPSNode_pos);};
+  
+  AnyRefNode LTptT2L2NodeR = {sRel = .Scale(.StdPar.Right.LTptT2L2Node_pos);};
+  AnyRefNode LTptT2L2NodeL = {sRel = .Scale(.StdPar.Left.LTptT2L2Node_pos);};
+  
+  AnyRefNode ILplL1CIViaNodeR = {sRel = .Scale(.StdPar.Right.ILplL1CIViaNode_pos);};
+  AnyRefNode ILplL1CIViaNodeL = {sRel = .Scale(.StdPar.Left.ILplL1CIViaNode_pos);}; 
+  
+  AnyRefNode LTplL1SIPSViaNodeR = {sRel = .Scale(.StdPar.Right.LTplL1SIPSViaNode_pos);};
+  AnyRefNode LTplL1SIPSViaNodeL = {sRel = .Scale(.StdPar.Left.LTplL1SIPSViaNode_pos);};
+  
+  AnyRefNode ILptC5SIPSVia8NodeR = {sRel = .Scale(.StdPar.Right.ILptC5SIPSVia8Node_pos);};
+  AnyRefNode ILptC5SIPSVia8NodeL = {sRel = .Scale(.StdPar.Left.ILptC5SIPSVia8Node_pos);};
                                                         
-    AnyRefNode ILptC8CIVia5NodeR = {sRel = .Scale(.StdPar.Right.ILptC8CIVia5Node_pos);};
-    AnyRefNode ILptC8CIVia5NodeL = {sRel = .Scale(.StdPar.Left.ILptC8CIVia5Node_pos);};
+  AnyRefNode ILptC6SIPSVia7NodeR = {sRel = .Scale(.StdPar.Right.ILptC6SIPSVia7Node_pos);};
+  AnyRefNode ILptC6SIPSVia7NodeL = {sRel = .Scale(.StdPar.Left.ILptC6SIPSVia7Node_pos);};
+  
+  AnyRefNode ILptC7CIVia6NodeR = {sRel = .Scale(.StdPar.Right.ILptC7CIVia6Node_pos);};
+  AnyRefNode ILptC7CIVia6NodeL = {sRel = .Scale(.StdPar.Left.ILptC7CIVia6Node_pos);};
+                                                      
+  AnyRefNode ILptC8CIVia5NodeR = {sRel = .Scale(.StdPar.Right.ILptC8CIVia5Node_pos);};
+  AnyRefNode ILptC8CIVia5NodeL = {sRel = .Scale(.StdPar.Left.ILptC8CIVia5Node_pos);};
+                                                      
+  AnyRefNode ILptC9CIVia4NodeR = {sRel = .Scale(.StdPar.Right.ILptC9CIVia4Node_pos);};
+  AnyRefNode ILptC9CIVia4NodeL = {sRel = .Scale(.StdPar.Left.ILptC9CIVia4Node_pos);};
+  
+  AnyRefNode ILptC10CIVia3NodeR = {sRel = .Scale(.StdPar.Right.ILptC10CIVia3Node_pos);};
+  AnyRefNode ILptC10CIVia3NodeL = {sRel = .Scale(.StdPar.Left.ILptC10CIVia3Node_pos);};
                                                         
-    AnyRefNode ILptC9CIVia4NodeR = {sRel = .Scale(.StdPar.Right.ILptC9CIVia4Node_pos);};
-    AnyRefNode ILptC9CIVia4NodeL = {sRel = .Scale(.StdPar.Left.ILptC9CIVia4Node_pos);};
-    
-    AnyRefNode ILptC10CIVia3NodeR = {sRel = .Scale(.StdPar.Right.ILptC10CIVia3Node_pos);};
-    AnyRefNode ILptC10CIVia3NodeL = {sRel = .Scale(.StdPar.Left.ILptC10CIVia3Node_pos);};
-                                                         
-    AnyRefNode ILptC11CIVia2NodeR = {sRel = .Scale(.StdPar.Right.ILptC11CIVia2Node_pos);};
-    AnyRefNode ILptC11CIVia2NodeL = {sRel = .Scale(.StdPar.Left.ILptC11CIVia2Node_pos);};
-                                                         
-    AnyRefNode ILptC12CIVia2NodeR = {sRel = .Scale(.StdPar.Right.ILptC12CIVia2Node_pos);};
-    AnyRefNode ILptC12CIVia2NodeL = {sRel = .Scale(.StdPar.Left.ILptC12CIVia2Node_pos);};
-                                                         
-    AnyRefNode LTptT3L3Via11NodeR = {sRel = .Scale(.StdPar.Right.LTptT3L3Via11Node_pos);};
-    AnyRefNode LTptT3L3Via11NodeL = {sRel = .Scale(.StdPar.Left.LTptT3L3Via11Node_pos);};
-                                                         
-    AnyRefNode LTptT4L4Via10NodeR = {sRel = .Scale(.StdPar.Right.LTptT4L4Via10Node_pos);};
-    AnyRefNode LTptT4L4Via10NodeL = {sRel = .Scale(.StdPar.Left.LTptT4L4Via10Node_pos);};
-    
-    AnyRefNode LTptT5L5Via9NodeR = {sRel = .Scale(.StdPar.Right.LTptT5L5Via9Node_pos);};
-    AnyRefNode LTptT5L5Via9NodeL = {sRel = .Scale(.StdPar.Left.LTptT5L5Via9Node_pos);};
+  AnyRefNode ILptC11CIVia2NodeR = {sRel = .Scale(.StdPar.Right.ILptC11CIVia2Node_pos);};
+  AnyRefNode ILptC11CIVia2NodeL = {sRel = .Scale(.StdPar.Left.ILptC11CIVia2Node_pos);};
                                                         
-    AnyRefNode LTptT6S1Via8NodeR = {sRel = .Scale(.StdPar.Right.LTptT6S1Via8Node_pos);};
-    AnyRefNode LTptT6S1Via8NodeL = {sRel = .Scale(.StdPar.Left.LTptT6S1Via8Node_pos);};
+  AnyRefNode ILptC12CIVia2NodeR = {sRel = .Scale(.StdPar.Right.ILptC12CIVia2Node_pos);};
+  AnyRefNode ILptC12CIVia2NodeL = {sRel = .Scale(.StdPar.Left.ILptC12CIVia2Node_pos);};
                                                         
-    AnyRefNode LTptT7S2Via7NodeR = {sRel = .Scale(.StdPar.Right.LTptT7S2Via7Node_pos);};
-    AnyRefNode LTptT7S2Via7NodeL = {sRel = .Scale(.StdPar.Left.LTptT7S2Via7Node_pos);};
-                                                        
-    AnyRefNode LTptT8S3Via6NodeR = {sRel = .Scale(.StdPar.Right.LTptT8S3Via6Node_pos);};
-    AnyRefNode LTptT8S3Via6NodeL = {sRel = .Scale(.StdPar.Left.LTptT8S3Via6Node_pos);};
-                                                        
+  AnyRefNode LTptT3L3Via11NodeR = {sRel = .Scale(.StdPar.Right.LTptT3L3Via11Node_pos);};
+  AnyRefNode LTptT3L3Via11NodeL = {sRel = .Scale(.StdPar.Left.LTptT3L3Via11Node_pos);};
+
+  AnyRefNode LTptT4L4Via10NodeR = {sRel = .Scale(.StdPar.Right.LTptT4L4Via10Node_pos);};
+  AnyRefNode LTptT4L4Via10NodeL = {sRel = .Scale(.StdPar.Left.LTptT4L4Via10Node_pos);};
+  
+  AnyRefNode LTptT5L5Via9NodeR = {sRel = .Scale(.StdPar.Right.LTptT5L5Via9Node_pos);};
+  AnyRefNode LTptT5L5Via9NodeL = {sRel = .Scale(.StdPar.Left.LTptT5L5Via9Node_pos);};
+                                                      
+  AnyRefNode LTptT6S1Via8NodeR = {sRel = .Scale(.StdPar.Right.LTptT6S1Via8Node_pos);};
+  AnyRefNode LTptT6S1Via8NodeL = {sRel = .Scale(.StdPar.Left.LTptT6S1Via8Node_pos);};
+                                                      
+  AnyRefNode LTptT7S2Via7NodeR = {sRel = .Scale(.StdPar.Right.LTptT7S2Via7Node_pos);};
+  AnyRefNode LTptT7S2Via7NodeL = {sRel = .Scale(.StdPar.Left.LTptT7S2Via7Node_pos);};
+                                                      
+  AnyRefNode LTptT8S3Via6NodeR = {sRel = .Scale(.StdPar.Right.LTptT8S3Via6Node_pos);};
+  AnyRefNode LTptT8S3Via6NodeL = {sRel = .Scale(.StdPar.Left.LTptT8S3Via6Node_pos);};
+                                             
     AnyRefNode LTptT9S4Via5NodeR = {sRel = .Scale(.StdPar.Right.LTptT9S4Via5Node_pos);};
     AnyRefNode LTptT9S4Via5NodeL = {sRel = .Scale(.StdPar.Left.LTptT9S4Via5Node_pos);};
     
@@ -728,117 +838,163 @@ AnyFolder SegmentsLumbar = {
     AnyRefNode OICI_RS1NodeL = {sRel = .Scale(.StdPar.Left.OICI_RS1Node_pos);};  
     // End of Obliquus Internus Nodes
     
-    AnyDrawSurf DrwSTL = {
-      FileName = ...STL.FilenameL2Seg;
-      RGB = ...ColorRef.Segments;
-      Opacity = Main.DrawSettings.BonesOpacity.L2;
-      AnyFunTransform3D &Scale =.Scale;
-    };
-    
-    AnyRefNode MidPoint={sRel=(.L1L2JntNode.sRel+.L2L3JntNode.sRel)*0.5;}; 
-    AnyRefNode SupportNode={sRel = .Scale(.StdPar.SupportNode_pos);};
-    AnyRefNode BuckleContactNode={sRel = .ScaleAbdominal(.StdPar.BuckleContactNode_pos);};
+    // Diaphragm Muscles Nodes
+    AnyRefNode L2_DiaphragmNode1R = {sRel = .Scale(.StdPar.Right.DiaphragmNode1_pos); };
+    AnyRefNode L2_DiaphragmNode2R = {sRel = .Scale(.StdPar.Right.DiaphragmNode2_pos); };
+    AnyRefNode L2_DiaphragmNode1L = {sRel = .Scale(.StdPar.Left.DiaphragmNode1_pos); };
+    AnyRefNode L2_DiaphragmNode2L = {sRel = .Scale(.StdPar.Left.DiaphragmNode2_pos); };
+    //End of Diaphragm Muscles Nodes
 
-  }; // End of L2Seg
-
-  AnySeg L1Seg = {
-    
-    // Reference to generic data
-    AnyFolder &StdPar = ..ModelParameters.L1;
-
-    //initial position found as a function of pelvis pos and orientation
-    r0=.L2Seg.L1L2JntNode.sRel*.L2Seg.Axes0'+.L2Seg.r0-L1L2JntNode.sRel*Axes0';
-         
-    // This file includes the trunk specifc scaling function
-    // and anatomical reference system
-    AnyFunTransform3D &GeomScale = ..Scaling.GeometricalScaling.L1Seg.ScaleFunction;
-    #include "TrunkScalingAndAnatomicalFrame.any"
-    AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards compatability with AMMR 2.4 MoCap Marker protocols
-    
-    AnyFunTransform3D &ScaleAbdominal =..ScalingTrunk.Lumbar.ScaleFunction;   
-    
-    AnyVar MassS = ..Scaling.MassScaling.Lumbar.MassScale;
+//  AnyRefNode PMT12I_TMVia1NodeR = {sRel = .Scale(.StdPar.Right.PMT12I_TMVia1Node_pos);};
+//  AnyRefNode PMT12I_TMVia1NodeL = {sRel = .Scale(.StdPar.Left.PMT12I_TMVia1Node_pos);}; 
+//  
+//  AnyRefNode PML1T_TMVia1NodeR = {sRel = .Scale(.StdPar.Right.PML1T_TMVia1Node_pos);};
+//  AnyRefNode PML1T_TMVia1NodeL = {sRel = .Scale(.StdPar.Left.PML1T_TMVia1Node_pos);}; 
+//  // End of Psoas Major Nodes
   
-    AnyVar MassStandard = ..StandardParameters.Lumbar.Mass/5;
-    Mass = MassS*MassStandard;
+  // Quadratus Lumborum Nodes
+//  AnyRefNode QLL2_CINodeR = {sRel = .Scale(.StdPar.Right.QLL2_CINode_pos);};
+//  AnyRefNode QLL2_CINodeL = {sRel = .Scale(.StdPar.Left.QLL2_CINode_pos);}; 
+//  // End of Quadratus Lumborum Nodes
+//  
+//  // Obliquus Externus Nodes
+//  AnyRefNode OEC7_RSNodeR = {sRel = .Scale(.StdPar.Right.OEC7_RSNode_pos);};
+//  AnyRefNode OEC7_RSNodeL = {sRel = .Scale(.StdPar.Left.OEC7_RSNode_pos);};    
+//  // End of Obliquus Externus Nodes
+//  
+//  // Obliquus Internus Nodes
+//  AnyRefNode OICI_RS1NodeR = {sRel = .Scale(.StdPar.Right.OICI_RS1Node_pos);};
+//  AnyRefNode OICI_RS1NodeL = {sRel = .Scale(.StdPar.Left.OICI_RS1Node_pos);};  
+//  // End of Obliquus Internus Nodes
+//  
+//  // Diaphragm Muscles Nodes
+//  AnyRefNode L2_DiaphragmNode1R = {sRel = .Scale(.StdPar.Right.DiaphragmNode1_pos); AnyDrawNode n={ScaleXYZ={1,1,1}*0.00525;RGB={0,0,0};};};
+//  AnyRefNode L2_DiaphragmNode2R = {sRel = .Scale(.StdPar.Right.DiaphragmNode2_pos); AnyDrawNode n={ScaleXYZ={1,1,1}*0.00525;RGB={0,0,0};};};
+//  AnyRefNode L2_DiaphragmNode1L = {sRel = .Scale(.StdPar.Left.DiaphragmNode1_pos); AnyDrawNode n={ScaleXYZ={1,1,1}*0.00525;RGB={0,0,0};};};
+//  AnyRefNode L2_DiaphragmNode2L = {sRel = .Scale(.StdPar.Left.DiaphragmNode2_pos); AnyDrawNode n={ScaleXYZ={1,1,1}*0.00525;RGB={0,0,0};};};
+  //End of Diaphragm Muscles Nodes
     
-    Jii = {0.001,0.001,0.001};
-    
-    sCoM = Scale(StdPar.sCoM_pos);
-    JaboutCoMOnOff = On;
-    
-    AnyRefNode L1L2JntNode = {sRel = .Scale(.StdPar.L1L2JntNode_pos);};    
-    AnyRefNode T12L1JntNode = {sRel = .Scale(.StdPar.T12L1JntNode_pos); AnyDrawNodes DrwNode = {ScaleXYZ = 0.003*{1,1,1};RGB = {1, 0, 0};};};
-    
-    //These nodes are used for adding extra used by other body parts to the right 
-    //and left side of the segment
-    AnyRefNode Right= {AnyFunTransform3D&Scale=.Scale;};
-    AnyRefNode Left = {AnyFunTransform3D&Scale=.Scale;};
-        
-    
-    // Ligament Nodes    
-    AnyRefNode LSNode = {sRel = .Scale(.StdPar.LSNode_pos);};
-    
-    AnyRefNode LINodeInferior = {sRel = .Scale(.StdPar.LINodeInferior_pos);};
-    AnyRefNode LINodeSuperior = {sRel = .Scale(.StdPar.LINodeSuperior_pos);};
-    // End of ligament Nodes
-    
-    // Multifidi Nodes
-    AnyRefNode MFdL1L3NodeR = {sRel = .Scale(.StdPar.Right.MFdL1L3Node_pos);};
-    AnyRefNode MFdL1L3NodeL = {sRel = .Scale(.StdPar.Left.MFdL1L3Node_pos);};
-    
-    AnyRefNode MFmL1L4NodeR = {sRel = .Scale(.StdPar.Right.MFmL1L4Node_pos);};
-    AnyRefNode MFmL1L4NodeL = {sRel = .Scale(.StdPar.Left.MFmL1L4Node_pos);};
-    
-    AnyRefNode MFtsL1L5NodeR = {sRel = .Scale(.StdPar.Right.MFtsL1L5Node_pos);};
-    AnyRefNode MFtsL1L5NodeL = {sRel = .Scale(.StdPar.Left.MFtsL1L5Node_pos);};
-    
-    AnyRefNode MFtsL1S1NodeR = {sRel = .Scale(.StdPar.Right.MFtsL1S1Node_pos);};
-    AnyRefNode MFtsL1S1NodeL = {sRel = .Scale(.StdPar.Left.MFtsL1S1Node_pos);};
-    
-    AnyRefNode MFtstL1SIPSNodeR = {sRel = .Scale(.StdPar.Right.MFtstL1SIPSNode_pos);};
-    AnyRefNode MFtstL1SIPSNodeL = {sRel = .Scale(.StdPar.Left.MFtstL1SIPSNode_pos);};
-    // End of Multifidi Nodes
-    
-    // Erector Spinae Nodes
-    AnyRefNode ILplL1CINodeR = {sRel = .Scale(.StdPar.Right.ILplL1CINode_pos);};
-    AnyRefNode ILplL1CINodeL = {sRel = .Scale(.StdPar.Left.ILplL1CINode_pos);};
+  AnyDrawSurf DrwSTL = {
+    FileName = ...STL.FilenameL2Seg;
+    RGB = ...ColorRef.Segments;
+    Opacity = Main.DrawSettings.BonesOpacity.L2;
+    AnyFunTransform3D &Scale =.Scale;
+  };
+  #if BM_TRUNK_CAVITY_MODEL == _CAVITY_MODEL_VOLUME_ 
+      AnyRefNode TransversusInsNode_R={sRel=.Scale(.StdPar.Right.Transversus_Ins_pos);}; 
+      AnyRefNode TransversusInsNode_L={sRel=.Scale(.StdPar.Left.Transversus_Ins_pos);}; 
+      AnyRefNode TransversusMid={sRel=0.5*(.TransversusInsNode_R.sRel+.TransversusInsNode_L.sRel) ;};  
+  #endif
+  AnyRefNode MidPoint={sRel=(.L1L2JntNode.sRel+.L2L3JntNode.sRel)*0.5;}; 
+  AnyRefNode SupportNode={sRel = .Scale(.StdPar.SupportNode_pos);};
+  AnyRefNode BuckleContactNode={sRel = .ScaleAbdominal(.StdPar.BuckleContactNode_pos);};
 
-    AnyRefNode LTplL1SIPSNodeR = {sRel = .Scale(.StdPar.Right.LTplL1SIPSNode_pos);};
-    AnyRefNode LTplL1SIPSNodeL = {sRel = .Scale(.StdPar.Left.LTplL1SIPSNode_pos);};
+  AnyRefNode L2RContactNode = {sRel= .Scale(.StdPar.Right.ContactNode_pos);};
+  AnyRefNode L2LContactNode = {sRel= .Scale(.StdPar.Left.ContactNode_pos);};
+}; // End of L2Seg
+
+AnySeg L1Seg = {
+  
+  // Reference to generic data
+  AnyFolder &StdPar = ..ModelParameters.L1;
+
+  //initial position found as a function of pelvis pos and orientation
+  r0=.L2Seg.L1L2JntNode.sRel*.L2Seg.Axes0'+.L2Seg.r0-L1L2JntNode.sRel*Axes0';
+        
+  // This file includes the trunk specifc scaling function
+  // and anatomical reference system
+  AnyFunTransform3D &GeomScale = ..Scaling.GeometricalScaling.L1Seg.ScaleFunction;
+  #include "TrunkScalingAndAnatomicalFrame.any"   
+  AnyFunTransform3D &ScaleAbdominal =..Scaling.GeometricalScaling.Lumbar.ScaleFunction;   
+  
+  // Inertia properties for the segment
+  UseInertiaObjects = On;
+  segmental_inertia_matrix inertiaObject() = {
+    Mass = ...Scaling.MassScaling.Lumbar.MassScale * ...StandardParameters.Lumbar.Mass/5;
+    Jii = {0.001,0.001,0.001};
+    JaboutCoMOnOff = On;
+    sCoM = .Scale(.StdPar.sCoM_pos);
+  };
+
+  AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards compatability with AMMR 2.4 MoCap Marker protocols
+  
+  
+  AnyRefNode L1L2JntNode = {sRel = .Scale(.StdPar.L1L2JntNode_pos);};    
+  AnyRefNode T12L1JntNode = {sRel = .Scale(.StdPar.T12L1JntNode_pos); };
+  
+  //These nodes are used for adding extra used by other body parts to the right 
+  //and left side of the segment
+  AnyRefNode Right= {AnyFunTransform3D&Scale=.Scale;
+    AnyRefNode ICSpringSupNode        = { sRel =  .Scale(..StdPar.Right.ICSpringSupNode_pos); };
+  };
+  AnyRefNode Left = {AnyFunTransform3D&Scale=.Scale;
+    AnyRefNode ICSpringSupNode        = { sRel =  .Scale(..StdPar.Left.ICSpringSupNode_pos); };
+  };
+      
+  
+  // Ligament Nodes    
+  AnyRefNode LSNode = {sRel = .Scale(.StdPar.LSNode_pos);};
+  
+  AnyRefNode LINodeInferior = {sRel = .Scale(.StdPar.LINodeInferior_pos);};
+  AnyRefNode LINodeSuperior = {sRel = .Scale(.StdPar.LINodeSuperior_pos);};
+  // End of ligament Nodes
+  
+  // Multifidi Nodes
+  AnyRefNode MFdL1L3NodeR = {sRel = .Scale(.StdPar.Right.MFdL1L3Node_pos);};
+  AnyRefNode MFdL1L3NodeL = {sRel = .Scale(.StdPar.Left.MFdL1L3Node_pos);};
+  
+  AnyRefNode MFmL1L4NodeR = {sRel = .Scale(.StdPar.Right.MFmL1L4Node_pos);};
+  AnyRefNode MFmL1L4NodeL = {sRel = .Scale(.StdPar.Left.MFmL1L4Node_pos);};
+  
+  AnyRefNode MFtsL1L5NodeR = {sRel = .Scale(.StdPar.Right.MFtsL1L5Node_pos);};
+  AnyRefNode MFtsL1L5NodeL = {sRel = .Scale(.StdPar.Left.MFtsL1L5Node_pos);};
+  
+  AnyRefNode MFtsL1S1NodeR = {sRel = .Scale(.StdPar.Right.MFtsL1S1Node_pos);};
+  AnyRefNode MFtsL1S1NodeL = {sRel = .Scale(.StdPar.Left.MFtsL1S1Node_pos);};
+  
+  AnyRefNode MFtstL1SIPSNodeR = {sRel = .Scale(.StdPar.Right.MFtstL1SIPSNode_pos);};
+  AnyRefNode MFtstL1SIPSNodeL = {sRel = .Scale(.StdPar.Left.MFtstL1SIPSNode_pos);};
+  // End of Multifidi Nodes
+  
+  // Erector Spinae Nodes
+  AnyRefNode ILplL1CINodeR = {sRel = .Scale(.StdPar.Right.ILplL1CINode_pos);};
+  AnyRefNode ILplL1CINodeL = {sRel = .Scale(.StdPar.Left.ILplL1CINode_pos);};
+
+  AnyRefNode LTplL1SIPSNodeR = {sRel = .Scale(.StdPar.Right.LTplL1SIPSNode_pos);};
+  AnyRefNode LTplL1SIPSNodeL = {sRel = .Scale(.StdPar.Left.LTplL1SIPSNode_pos);};
 
     AnyRefNode LTptT1L1NodeR = {sRel = .Scale(.StdPar.Right.LTptT1L1Node_pos);};
-    AnyRefNode LTptT1L1NodeL = {sRel = .Scale(.StdPar.Left.LTptT1L1Node_pos);};
-    
-    AnyRefNode ILptC5SIPSVia7NodeR = {sRel = .Scale(.StdPar.Right.ILptC5SIPSVia7Node_pos);};
-    AnyRefNode ILptC5SIPSVia7NodeL = {sRel = .Scale(.StdPar.Left.ILptC5SIPSVia7Node_pos);};
-    
-    AnyRefNode ILptC6SIPSVia6NodeR = {sRel = .Scale(.StdPar.Right.ILptC6SIPSVia6Node_pos);};
-    AnyRefNode ILptC6SIPSVia6NodeL = {sRel = .Scale(.StdPar.Left.ILptC6SIPSVia6Node_pos);};
-    
-    AnyRefNode ILptC7CIVia5NodeR = {sRel = .Scale(.StdPar.Right.ILptC7CIVia5Node_pos);};
-    AnyRefNode ILptC7CIVia5NodeL = {sRel = .Scale(.StdPar.Left.ILptC7CIVia5Node_pos);};
-    
-    AnyRefNode ILptC8CIVia4NodeR = {sRel = .Scale(.StdPar.Right.ILptC8CIVia4Node_pos);};
-    AnyRefNode ILptC8CIVia4NodeL = {sRel = .Scale(.StdPar.Left.ILptC8CIVia4Node_pos);};
-    
-    AnyRefNode ILptC9CIVia3NodeR = {sRel = .Scale(.StdPar.Right.ILptC9CIVia3Node_pos);};
-    AnyRefNode ILptC9CIVia3NodeL = {sRel = .Scale(.StdPar.Left.ILptC9CIVia3Node_pos);};
-    
-    AnyRefNode ILptC10CIVia2NodeR = {sRel= .Scale(.StdPar.Right.ILptC10CIVia2Node_pos);};
-    AnyRefNode ILptC10CIVia2NodeL = {sRel= .Scale(.StdPar.Left.ILptC10CIVia2Node_pos);};
+  AnyRefNode LTptT1L1NodeL = {sRel = .Scale(.StdPar.Left.LTptT1L1Node_pos);};
+  
+  AnyRefNode ILptC5SIPSVia7NodeR = {sRel = .Scale(.StdPar.Right.ILptC5SIPSVia7Node_pos);};
+  AnyRefNode ILptC5SIPSVia7NodeL = {sRel = .Scale(.StdPar.Left.ILptC5SIPSVia7Node_pos);};
+  
+  AnyRefNode ILptC6SIPSVia6NodeR = {sRel = .Scale(.StdPar.Right.ILptC6SIPSVia6Node_pos);};
+  AnyRefNode ILptC6SIPSVia6NodeL = {sRel = .Scale(.StdPar.Left.ILptC6SIPSVia6Node_pos);};
+  
+  AnyRefNode ILptC7CIVia5NodeR = {sRel = .Scale(.StdPar.Right.ILptC7CIVia5Node_pos);};
+  AnyRefNode ILptC7CIVia5NodeL = {sRel = .Scale(.StdPar.Left.ILptC7CIVia5Node_pos);};
+  
+  AnyRefNode ILptC8CIVia4NodeR = {sRel = .Scale(.StdPar.Right.ILptC8CIVia4Node_pos);};
+  AnyRefNode ILptC8CIVia4NodeL = {sRel = .Scale(.StdPar.Left.ILptC8CIVia4Node_pos);};
+  
+  AnyRefNode ILptC9CIVia3NodeR = {sRel = .Scale(.StdPar.Right.ILptC9CIVia3Node_pos);};
+  AnyRefNode ILptC9CIVia3NodeL = {sRel = .Scale(.StdPar.Left.ILptC9CIVia3Node_pos);};
+  
+  AnyRefNode ILptC10CIVia2NodeR = {sRel= .Scale(.StdPar.Right.ILptC10CIVia2Node_pos);};
+  AnyRefNode ILptC10CIVia2NodeL = {sRel= .Scale(.StdPar.Left.ILptC10CIVia2Node_pos);};
 
-    AnyRefNode ILptC11CIVia1NodeR = {sRel= .Scale(.StdPar.Right.ILptC11CIVia1Node_pos);};
-    AnyRefNode ILptC11CIVia1NodeL = {sRel= .Scale(.StdPar.Left.ILptC11CIVia1Node_pos);};
+  AnyRefNode ILptC11CIVia1NodeR = {sRel= .Scale(.StdPar.Right.ILptC11CIVia1Node_pos);};
+  AnyRefNode ILptC11CIVia1NodeL = {sRel= .Scale(.StdPar.Left.ILptC11CIVia1Node_pos);};
 
-    AnyRefNode ILptC12CIVia1NodeR = {sRel= .Scale(.StdPar.Right.ILptC12CIVia1Node_pos);};
-    AnyRefNode ILptC12CIVia1NodeL = {sRel= .Scale(.StdPar.Left.ILptC12CIVia1Node_pos);};
+  AnyRefNode ILptC12CIVia1NodeR = {sRel= .Scale(.StdPar.Right.ILptC12CIVia1Node_pos);};
+  AnyRefNode ILptC12CIVia1NodeL = {sRel= .Scale(.StdPar.Left.ILptC12CIVia1Node_pos);};
 
-    AnyRefNode LTptT2L2Via11NodeR = {sRel= .Scale(.StdPar.Right.LTptT2L2Via11Node_pos);};
-    AnyRefNode LTptT2L2Via11NodeL = {sRel= .Scale(.StdPar.Left.LTptT2L2Via11Node_pos);};
+  AnyRefNode LTptT2L2Via11NodeR = {sRel= .Scale(.StdPar.Right.LTptT2L2Via11Node_pos);};
+  AnyRefNode LTptT2L2Via11NodeL = {sRel= .Scale(.StdPar.Left.LTptT2L2Via11Node_pos);};
 
-    AnyRefNode LTptT3L3Via10NodeR = {sRel= .Scale(.StdPar.Right.LTptT3L3Via10Node_pos);};
-    AnyRefNode LTptT3L3Via10NodeL = {sRel= .Scale(.StdPar.Left.LTptT3L3Via10Node_pos);};
+  AnyRefNode LTptT3L3Via10NodeR = {sRel= .Scale(.StdPar.Right.LTptT3L3Via10Node_pos);};
+  AnyRefNode LTptT3L3Via10NodeL = {sRel= .Scale(.StdPar.Left.LTptT3L3Via10Node_pos);};
 
     AnyRefNode LTptT4L4Via9NodeR = {sRel = .Scale(.StdPar.Right.LTptT4L4Via9Node_pos);};
     AnyRefNode LTptT4L4Via9NodeL = {sRel = .Scale(.StdPar.Left.LTptT4L4Via9Node_pos);};
@@ -881,6 +1037,15 @@ AnyFolder SegmentsLumbar = {
     AnyRefNode QLL1_CINodeL = {sRel = .Scale(.StdPar.Left.QLL1_CINode_pos);};
     // End of Quadratus Lumborum Nodes
     
+    // Diaphragm Muscles Nodes
+    AnyRefNode L1TransversProcess_DiaphragmR = {sRel = .Scale(.StdPar.Right.TransversProcessDiaphragmNode_pos); };
+    AnyRefNode L1TransversProcess_DiaphragmL = {sRel = .Scale(.StdPar.Left.TransversProcessDiaphragmNode_pos); };
+    AnyRefNode L1_DiaphragmNode1R = {sRel = .Scale(.StdPar.Right.DiaphragmNode1_pos); };
+    AnyRefNode L1_DiaphragmNode2R = {sRel = .Scale(.StdPar.Right.DiaphragmNode2_pos); };
+    AnyRefNode L1_DiaphragmNode1L = {sRel = .Scale(.StdPar.Left.DiaphragmNode1_pos); };
+    AnyRefNode L1_DiaphragmNode2L = {sRel = .Scale(.StdPar.Left.DiaphragmNode2_pos); };
+    //End of Diaphragm Muscles Nodes
+    
     AnyDrawSurf DrwSTL = {
       FileName = ...STL.FilenameL1Seg;
       RGB = ...ColorRef.Segments;
@@ -891,5 +1056,13 @@ AnyFolder SegmentsLumbar = {
     AnyRefNode MidPoint={sRel=(.L1L2JntNode.sRel+.T12L1JntNode.sRel)*0.5;}; 
     AnyRefNode SupportNode={sRel = .Scale(.StdPar.SupportNode_pos);};      
     AnyRefNode BuckleContactNode={sRel = .ScaleAbdominal(.StdPar.BuckleContactNode_pos);};
-  }; // End of L1Seg
-}; // End of SegmentsLumbar
+    
+    #if BM_TRUNK_CAVITY_MODEL == _CAVITY_MODEL_VOLUME_ 
+      AnyRefNode TransversusInsNode_R={sRel=.Scale(.StdPar.Right.Transversus_Ins_pos);}; 
+      AnyRefNode TransversusInsNode_L={sRel=.Scale(.StdPar.Left.Transversus_Ins_pos);}; 
+      AnyRefNode TransversusMid={sRel=0.5*(.TransversusInsNode_R.sRel+.TransversusInsNode_L.sRel) ;};    
+    #endif
+
+  AnyRefNode L1RContactNode = {sRel= .Scale(.StdPar.Right.ContactNode_pos);};
+  AnyRefNode L1LContactNode = {sRel= .Scale(.StdPar.Left.ContactNode_pos);};
+}; // End of L1Seg

@@ -26,166 +26,274 @@ SIPI = Spina iliaca Posterior inferior
 T = Thoracal hvirvel
 L = Lumbal hvirvel
 S = Sacral segment
-*/
-AnyFolder SegmentsThorax = { 
+*/ 
+AnySeg ThoraxSeg = {
+
+  AnyFolder &StdPar=..ModelParameters;
   
+  r0=.L1Seg.T12L1JntNode.sRel*.L1Seg.Axes0'+.L1Seg.r0-T12.T12L1JntNode.sRel*Axes0';
+  
+  // This file includes the trunk specifc scaling function
+  // and anatomical reference system
+  AnyFunTransform3D &GeomScale = ..Scaling.GeometricalScaling.ThoraxSeg.ScaleFunction;
+  #include "TrunkScalingAndAnatomicalFrame.any"
 
-  AnySeg ThoraxSeg = {
-
-    AnyFolder &StdPar=..ModelParameters;
+  // Inertia properties for the segment
+  UseInertiaObjects = On;
+  segmental_inertia_matrix inertiaObject() = {
+    Mass = ...Scaling.MassScaling.Thorax.MassScale * ...StandardParameters.Trunk.Mass;
     
-    r0=..SegmentsLumbar.L1Seg.T12L1JntNode.sRel*..SegmentsLumbar.L1Seg.Axes0'+..SegmentsLumbar.L1Seg.r0-T12L1JntNode.sRel*Axes0';
-    
-    // This file includes the trunk specifc scaling function
-    // and anatomical reference system
-    AnyFunTransform3D &GeomScale = ..Scaling.GeometricalScaling.ThoraxSeg.ScaleFunction;
-    #include "TrunkScalingAndAnatomicalFrame.any"
-    AnyVar MassS = ..Scaling.MassScaling.Thorax.MassScale;
-        
-    AnyVar MassStandard = ..StandardParameters.Trunk.Mass;
-    Mass = MassS*MassStandard;
-    
-    AnyVar UBHeight =  StdPar.Thorax.UBHeight; //0.50; //Upperbody height
-    AnyVar Radius = (Mass/(pi*UBHeight*1000))^0.5;
-    AnyVar Ixx = 0.25*Mass*Radius^2 + 1/12*Mass*UBHeight^2;
+    AnyVar Radius = (Mass / (pi * .StdPar.Thorax.UBHeight * 1000))^0.5;
+    AnyVar Ixx = 0.25 * Mass*Radius^2 + 1/12 * Mass * .StdPar.Thorax.UBHeight^2;
     AnyVar Izz = Ixx;
     AnyVar Iyy = 0.5*Mass*Radius^2;
     
-    AnyMat33 JMatRot = AnatomicalFrameTrunk.ARel*{{Ixx,0,0},{0,Iyy,0},{0,0,Izz}}*AnatomicalFrameTrunk.ARel';
+    AnyMat33 JMatRot = (
+      .AnatomicalFrameTrunk.ARel * 
+      {{Ixx,0,0}, {0,Iyy,0}, {0,0,Izz}} * 
+      .AnatomicalFrameTrunk.ARel'
+    );
+
     Jii = {JMatRot[0][0], JMatRot[1][1], JMatRot[2][2]};
     Jij = {JMatRot[1][0], JMatRot[2][1], JMatRot[2][0]};
-
     
-    sCoM = Scale(StdPar.Thorax.sCoM_pos);
+    sCoM = .Scale(.StdPar.Thorax.sCoM_pos);
     JaboutCoMOnOff = On;
-        
-    AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards compatability with AMMR 2.4 MoCap Marker protocols    
-    //Incisura jungularis right and left
-    //the nodes are used for attachment of ShoulderArm block
+  };
+ 
+  AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards compatability with AMMR 2.4 MoCap Marker protocols  AnyRefNode& ScalingNode = AnatomicalFrame;
+
+  AnyRefNode CTCVJntNode = {}; ///<placeholder for the rigid thorax
+  AnyRefNode CS          = {}; ///<placeholder for the rigid thorax
+  AnyRefNode RibNodes = {
+    AnyRefNode CTCVJntNodeR = {};    
+    AnyRefNode CTCVJntNodeL = {};    
+  };
+  
+  AnyRefNode ForceVectorNode = {sRel = .Scale(.StdPar.Thorax.ForceVectorNode_pos);};
+  
+  AnyDrawSurf DrwSurf = {
+    FileName = ...STL.FilenameThoraxSegWithoutNeck; 
+    RGB = ...ColorRef.Segments;
+    ScaleXYZ={1.0,1.0,1.0};
+    Opacity = Main.DrawSettings.BonesOpacity.Thorax;
+    AnyFunTransform3D &Scale =.Scale;
+  };
+
+  // For the rigid thorax we define nodes to represent the individual segments
+  // these nodes ensure we have separate scope for inserting nodes and naming of nodes
+  AnyRefNode Right ={
+    AnyVar Sign = 1;
+    #include "sharedSegmentalAttributes.any"
+    AnyRefNode R12 = {#include "sharedSegmentalAttributes.any"};
+    AnyRefNode R11 = {#include "sharedSegmentalAttributes.any"};
+    AnyRefNode R10 = {#include "sharedSegmentalAttributes.any"};
+    AnyRefNode R9 = {#include "sharedSegmentalAttributes.any"};
+    AnyRefNode R8 = {#include "sharedSegmentalAttributes.any"};
+    AnyRefNode R7 = {#include "sharedSegmentalAttributes.any"};
+    AnyRefNode R6 = {#include "sharedSegmentalAttributes.any"};
+    AnyRefNode R5 = {#include "sharedSegmentalAttributes.any"};
+    AnyRefNode R4 = {#include "sharedSegmentalAttributes.any"};
+    AnyRefNode R3 = {#include "sharedSegmentalAttributes.any"};
+    AnyRefNode R2 = {#include "sharedSegmentalAttributes.any"};
+    AnyRefNode R1 = {#include "sharedSegmentalAttributes.any"};
+  };
+  AnyRefNode Left ={
+    AnyVar Sign = -1;
+    #include "sharedSegmentalAttributes.any"
+    AnyRefNode R12 = {#include "sharedSegmentalAttributes.any"};
+    AnyRefNode R11 = {#include "sharedSegmentalAttributes.any"};
+    AnyRefNode R10 = {#include "sharedSegmentalAttributes.any"};
+    AnyRefNode R9 = {#include "sharedSegmentalAttributes.any"};
+    AnyRefNode R8 = {#include "sharedSegmentalAttributes.any"};
+    AnyRefNode R7 = {#include "sharedSegmentalAttributes.any"};
+    AnyRefNode R6 = {#include "sharedSegmentalAttributes.any"};
+    AnyRefNode R5 = {#include "sharedSegmentalAttributes.any"};
+    AnyRefNode R4 = {#include "sharedSegmentalAttributes.any"};
+    AnyRefNode R3 = {#include "sharedSegmentalAttributes.any"};
+    AnyRefNode R2 = {#include "sharedSegmentalAttributes.any"};
+    AnyRefNode R1 = {#include "sharedSegmentalAttributes.any"};
+  };    
+
+  AnyRefNode T12 = {
+    #include "sharedSegmentalAttributes.any"
+    AnyRefNode T11T12JntNode = {sRel = .Scale(.StdPar.T12.T11T12JntNode_pos);};    
+    AnyRefNode T12L1JntNode = {sRel = .Scale(.StdPar.T12.T12L1JntNode_pos);};
+    AnyRefNode Left = {AnyFunTransform3D& Scale = .Scale; AnyInt Sign = -1;}; 
+    AnyRefNode Right = {AnyFunTransform3D& Scale = .Scale; AnyInt Sign = 1;};
+  };
+  AnyRefNode T11 = {
+    #include "sharedSegmentalAttributes.any"
+    AnyRefNode T10T11JntNode = {sRel = .Scale(.StdPar.T11.T10T11JntNode_pos);};
+    AnyRefNode T11T12JntNode = {sRel = .Scale(.StdPar.T11.T11T12JntNode_pos);};    
+    AnyRefNode Left = {AnyFunTransform3D& Scale = .Scale; AnyInt Sign = -1;}; 
+    AnyRefNode Right = {AnyFunTransform3D& Scale = .Scale; AnyInt Sign = 1;};
+  };
+  AnyRefNode T10 = {
+    #include "sharedSegmentalAttributes.any"
+    AnyRefNode T9T10JntNode = {sRel = .Scale(.StdPar.T10.T9T10JntNode_pos);};
+    AnyRefNode T10T11JntNode = {sRel = .Scale(.StdPar.T10.T10T11JntNode_pos);};    
+    AnyRefNode Left = {AnyFunTransform3D& Scale = .Scale; AnyInt Sign = -1;}; 
+    AnyRefNode Right = {AnyFunTransform3D& Scale = .Scale; AnyInt Sign = 1;};
+  };
+  AnyRefNode T9 = {
+    #include "sharedSegmentalAttributes.any"
+    AnyRefNode T8T9JntNode = {sRel = .Scale(.StdPar.T9.T8T9JntNode_pos);};
+    AnyRefNode T9T10JntNode = {sRel = .Scale(.StdPar.T9.T9T10JntNode_pos);};    
+    AnyRefNode Left = {AnyFunTransform3D& Scale = .Scale; AnyInt Sign = -1;}; 
+    AnyRefNode Right = {AnyFunTransform3D& Scale = .Scale; AnyInt Sign = 1;};
+  };
+  AnyRefNode T8 = {
+    #include "sharedSegmentalAttributes.any"
+    AnyRefNode T7T8JntNode = {sRel = .Scale(.StdPar.T8.T7T8JntNode_pos);};
+    AnyRefNode T8T9JntNode = {sRel = .Scale(.StdPar.T8.T8T9JntNode_pos);};    
+    AnyRefNode Left = {AnyFunTransform3D& Scale = .Scale; AnyInt Sign = -1;}; 
+    AnyRefNode Right = {AnyFunTransform3D& Scale = .Scale; AnyInt Sign = 1;};
+  };
+  AnyRefNode T7 = {
+    #include "sharedSegmentalAttributes.any"
+    AnyRefNode T6T7JntNode = {sRel = .Scale(.StdPar.T7.T6T7JntNode_pos);};
+    AnyRefNode T7T8JntNode = {sRel = .Scale(.StdPar.T7.T7T8JntNode_pos);};    
+    AnyRefNode Left = {AnyFunTransform3D& Scale = .Scale; AnyInt Sign = -1;}; 
+    AnyRefNode Right = {AnyFunTransform3D& Scale = .Scale; AnyInt Sign = 1;};
+  };
+  AnyRefNode T6 = {
+    #include "sharedSegmentalAttributes.any"
+    AnyRefNode T6T7JntNode = {sRel = .Scale(.StdPar.T6.T6T7JntNode_pos);};
+    AnyRefNode T5T6JntNode = {sRel = .Scale(.StdPar.T6.T5T6JntNode_pos);};    
+    AnyRefNode Left = {AnyFunTransform3D& Scale = .Scale; AnyInt Sign = -1;}; 
+    AnyRefNode Right = {AnyFunTransform3D& Scale = .Scale; AnyInt Sign = 1;};
+  };
+  AnyRefNode T5 = {
+    #include "sharedSegmentalAttributes.any"
+    AnyRefNode T4T5JntNode = {sRel = .Scale(.StdPar.T5.T4T5JntNode_pos);};
+    AnyRefNode T5T6JntNode = {sRel = .Scale(.StdPar.T5.T5T6JntNode_pos);};    
+    AnyRefNode Left = {AnyFunTransform3D& Scale = .Scale; AnyInt Sign = -1;}; 
+    AnyRefNode Right = {AnyFunTransform3D& Scale = .Scale; AnyInt Sign = 1;};
+  };
+  AnyRefNode T4 = {
+    #include "sharedSegmentalAttributes.any"
+    AnyRefNode T3T4JntNode = {sRel = .Scale(.StdPar.T4.T3T4JntNode_pos);};
+    AnyRefNode T4T5JntNode = {sRel = .Scale(.StdPar.T4.T4T5JntNode_pos);};    
+    AnyRefNode Left = {AnyFunTransform3D& Scale = .Scale; AnyInt Sign = -1;}; 
+    AnyRefNode Right = {AnyFunTransform3D& Scale = .Scale; AnyInt Sign = 1;};
+  };
+  AnyRefNode T3 = {
+    #include "sharedSegmentalAttributes.any"
+    AnyRefNode T3T4JntNode = {sRel = .Scale(.StdPar.T3.T3T4JntNode_pos);};
+    AnyRefNode T2T3JntNode = {sRel = .Scale(.StdPar.T3.T2T3JntNode_pos);};    
+    AnyRefNode Left = {AnyFunTransform3D& Scale = .Scale; AnyInt Sign = -1;}; 
+    AnyRefNode Right = {AnyFunTransform3D& Scale = .Scale; AnyInt Sign = 1;};
+  };
+  AnyRefNode T2 = {
+    #include "sharedSegmentalAttributes.any"
+    AnyRefNode T2T3JntNode = {sRel = .Scale(.StdPar.T2.T2T3JntNode_pos);};
+    AnyRefNode T1T2JntNode = {sRel = .Scale(.StdPar.T2.T1T2JntNode_pos);};    
+    AnyRefNode Left = {AnyFunTransform3D& Scale = .Scale; AnyInt Sign = -1;}; 
+    AnyRefNode Right = {AnyFunTransform3D& Scale = .Scale; AnyInt Sign = 1;};
+  };
+  AnyRefNode T1 = {
+    #include "sharedSegmentalAttributes.any"
+    AnyRefNode T1C7JntNode = {sRel = .Scale(.StdPar.T1.T1C7JntNode_pos);};
+    AnyRefNode T1T2JntNode = {sRel = .Scale(.StdPar.T1.T1T2JntNode_pos);};    
+    AnyRefNode Left = {AnyFunTransform3D& Scale = .Scale; AnyInt Sign = -1;}; 
+    AnyRefNode Right = {AnyFunTransform3D& Scale = .Scale; AnyInt Sign = 1;};
+  };
+
+  AnyRefNode Sternum = {
+    #include "sharedSegmentalAttributes.any"
+    //Incisura jungularis 
     AnyRefNode ij = {
       AnyFloat Mirror = eye(3);
       //This is the standard value for the ij it must be used in order to scale the model
       //since nodes are inserted into this node.
-      //If the position of ij are to be adjusted it should be done by changing sRelStd 
-      AnyVec3 sRelStd = .StdPar.Thorax.ij_pos;  
-      sRel = .Scale(sRelStd);
-      // The rotation is adjusted to give same values as before the pelvic tilt adjust in AMMR 2.5.
-      ARel = .AnatomicalFrameTrunk.ARel * RotMat(6.491948543235*pi/180,z) * {{0, 0, -1}, {0, 1, 0}, {1, 0, 0}};
+      sRel = .Scale(.StdPar.Sternum.ij_pos);
+      ARel = .AnatomicalFrameTrunk.ARel * {{0, 0, -1}, {0, 1, 0}, {1, 0, 0}};
     };
-    
+  
     AnyRefNode iji = {
       AnyFloat Mirror = {{-1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
       
       //This is the standard value for the ij it must be used in order to scale the model
       //since nodes are inserted into this node.
-      //If the position of ij are to be adjusted it should be done by changing sRelS 
-      AnyVec3 sRelStd = .StdPar.Thorax.iji_pos;    
+      AnyVec3 sRelStd = .StdPar.Sternum.ij_pos;    
       sRel = .Scale(sRelStd);      
-      // The rotation is adjusted to give same values as before the pelvic tilt adjust in AMMR 2.5.
-      ARel = .AnatomicalFrameTrunk.ARel*RotMat(6.491948543235*pi/180,z) * {{0, 0, -1}, {0, 1, 0}, {1, 0, 0}};
+      ARel = .AnatomicalFrameTrunk.ARel* {{0, 0, -1}, {0, 1, 0}, {1, 0, 0}};
     };
-        
-    AnyRefNode T1C7JntNode = {sRel = .Scale(.StdPar.Thorax.T1C7JntNode_pos);};    
-    AnyRefNode T1T2JntNode = {sRel = .Scale(.StdPar.Thorax.T1T2JntNode_pos);};    
-    AnyRefNode T2T3JntNode = {sRel = .Scale(.StdPar.Thorax.T2T3JntNode_pos);};    
-    AnyRefNode T3T4JntNode = {sRel = .Scale(.StdPar.Thorax.T3T4JntNode_pos);};    
-    AnyRefNode T4T5JntNode = {sRel = .Scale(.StdPar.Thorax.T4T5JntNode_pos);};    
-    AnyRefNode T5T6JntNode = {sRel = .Scale(.StdPar.Thorax.T5T6JntNode_pos);};    
-    AnyRefNode T6T7JntNode = {sRel = .Scale(.StdPar.Thorax.T6T7JntNode_pos);};    
-    AnyRefNode T7T8JntNode = {sRel = .Scale(.StdPar.Thorax.T7T8JntNode_pos);};    
-    AnyRefNode T8T9JntNode = {sRel = .Scale(.StdPar.Thorax.T8T9JntNode_pos);};    
-    AnyRefNode T9T10JntNode = {sRel = .Scale(.StdPar.Thorax.T9T10JntNode_pos);};    
-    AnyRefNode T10T11JntNode = {sRel = .Scale(.StdPar.Thorax.T10T11JntNode_pos);};    
-    AnyRefNode T11T12JntNode = {sRel = .Scale(.StdPar.Thorax.T11T12JntNode_pos);};    
-    AnyRefNode T12L1JntNode = {sRel = .Scale(.StdPar.Thorax.T12L1JntNode_pos);};
-
-    AnyRefNode CTCVJntNode = {}; ///<placeholder for the rigid thorax
-    AnyRefNode CS          = {}; ///<placeholder for the rigid thorax
-    AnyRefNode RibNodes = {
-      AnyRefNode CTCVJntNodeR = {};    
-      AnyRefNode CTCVJntNodeL = {};    
-    };
+    AnyRefNode Right = {
+        AnyFun3D& Scale = .Scale;
+        AnyInt Sign=1;
+    }; ///< Container for all right sided nodes
+    AnyRefNode Left = {
+        AnyFun3D& Scale = .Scale;
+        AnyInt Sign=-1;
+    }; ///< Container for all left sided nodes
     
-    AnyRefNode ForceVectorNode = {sRel = .Scale(.StdPar.Thorax.ForceVectorNode_pos);};
-    
+  };
+  AnyRefNode SternalBody = {
+    #include "sharedSegmentalAttributes.any"
+    AnyRefNode Right = {
+        AnyFun3D& Scale = .Scale;
+    }; ///< Container for all right sided nodes
+    AnyRefNode Left = {
+        AnyFun3D& Scale = .Scale;
+    }; ///< Container for all left sided nodes
+  };
 
-    AnyRefNode T1C5Jnt = {sRel = .Scale(.StdPar.Thorax.T1C5Jnt_pos);};     
-    
-    AnyDrawSurf DrwSurf = {
-      FileName = ...STL.FilenameThoraxSegWithoutNeck; 
-      RGB = ...ColorRef.Segments;
-      ScaleXYZ={1.0,1.0,1.0};
-      Opacity = Main.DrawSettings.BonesOpacity.Thorax;
-      AnyFunTransform3D &Scale =.Scale;
-    };
+}; // End of ThoraxSeg
 
-    AnyRefNode Right ={
-      AnyInt Sign = 1;
-      #include "ThoraxScapulaContactRibPoints.any"
-    };
-    AnyRefNode Left ={
-      AnyInt Sign = -1;
-      #include "ThoraxScapulaContactRibPoints.any"
-    };    
+// Here we construct references to the psudo-segmental nodes inside the thorax segment
+// This is done to have the correct segment objects in the correct place in the model tree
+AnyFolder &SternumSeg = ThoraxSeg.Sternum;
+AnyFolder &SternalBodySeg = ThoraxSeg.SternalBody;
+AnyRefNode &T12Seg = ThoraxSeg.T12;
+AnyRefNode &T11Seg = ThoraxSeg.T11;
+AnyRefNode &T10Seg = ThoraxSeg.T10;
+AnyRefNode &T9Seg = ThoraxSeg.T9;
+AnyRefNode &T8Seg = ThoraxSeg.T8;
+AnyRefNode &T7Seg = ThoraxSeg.T7;
+AnyRefNode &T6Seg = ThoraxSeg.T6;
+AnyRefNode &T5Seg = ThoraxSeg.T5;
+AnyRefNode &T4Seg = ThoraxSeg.T4;
+AnyRefNode &T3Seg = ThoraxSeg.T3;
+AnyRefNode &T2Seg = ThoraxSeg.T2;
+AnyRefNode &T1Seg = ThoraxSeg.T1;
 
-  }; // End of ThoraxSeg
+AnyFolder Right = {
+  AnyRefNode &R12Seg = .ThoraxSeg.Right.R12;
+  AnyRefNode &R11Seg = .ThoraxSeg.Right.R11;
+  AnyRefNode &R10Seg = .ThoraxSeg.Right.R10;
+  AnyRefNode &R9Seg = .ThoraxSeg.Right.R9;
+  AnyRefNode &R8Seg = .ThoraxSeg.Right.R8;
+  AnyRefNode &R7Seg = .ThoraxSeg.Right.R7;
+  AnyRefNode &R6Seg = .ThoraxSeg.Right.R6;
+  AnyRefNode &R5Seg = .ThoraxSeg.Right.R5;
+  AnyRefNode &R4Seg = .ThoraxSeg.Right.R4;
+  AnyRefNode &R3Seg = .ThoraxSeg.Right.R3;
+  AnyRefNode &R2Seg = .ThoraxSeg.Right.R2;
+  AnyRefNode &R1Seg = .ThoraxSeg.Right.R1;
   
-  AnyFolder &T12Seg = ThoraxSeg;
-  AnyFolder &T11Seg = ThoraxSeg;
-  AnyFolder &T10Seg = ThoraxSeg;
-  AnyFolder &T9Seg = ThoraxSeg;
-  AnyFolder &T8Seg = ThoraxSeg;
-  AnyFolder &T7Seg = ThoraxSeg;
-  AnyFolder &T6Seg = ThoraxSeg;
-  AnyFolder &T5Seg = ThoraxSeg;
-  AnyFolder &T4Seg = ThoraxSeg;
-  AnyFolder &T3Seg = ThoraxSeg;
-  AnyFolder &T2Seg = ThoraxSeg;
-  AnyFolder &T1Seg = ThoraxSeg;
-  
-
-
-  #if BM_TRUNK_THORACIC_FUTURE == OFF
-    AnyFolder &SkullSeg = .SegmentsCervicalSpine.SkullSeg;
-  #endif
-  
+  #define _SIDE_ Right
+  AnyInt Sign = 1;
+  #include "ThoraxScapulaContactRibPoints.any"
+  #undef _SIDE_
 };
+AnyFolder Left = {
+  AnyRefNode &R12Seg = .ThoraxSeg.Left.R12;
+  AnyRefNode &R11Seg = .ThoraxSeg.Left.R11;
+  AnyRefNode &R10Seg = .ThoraxSeg.Left.R10;
+  AnyRefNode &R9Seg = .ThoraxSeg.Left.R9;
+  AnyRefNode &R8Seg = .ThoraxSeg.Left.R8;
+  AnyRefNode &R7Seg = .ThoraxSeg.Left.R7;
+  AnyRefNode &R6Seg = .ThoraxSeg.Left.R6;
+  AnyRefNode &R5Seg = .ThoraxSeg.Left.R5;
+  AnyRefNode &R4Seg = .ThoraxSeg.Left.R4;
+  AnyRefNode &R3Seg = .ThoraxSeg.Left.R3;
+  AnyRefNode &R2Seg = .ThoraxSeg.Left.R2;
+  AnyRefNode &R1Seg = .ThoraxSeg.Left.R1;
 
-SegmentsRibCage = {
-
- RibsRight = {
- 
-  AnyFolder &R12Seg = ..SegmentsThorax.ThoraxSeg;
-  AnyFolder &R11Seg = ..SegmentsThorax.ThoraxSeg;
-  AnyFolder &R10Seg = ..SegmentsThorax.ThoraxSeg;
-  AnyFolder &R9Seg = ..SegmentsThorax.ThoraxSeg;
-  AnyFolder &R8Seg = ..SegmentsThorax.ThoraxSeg;
-  AnyFolder &R7Seg = ..SegmentsThorax.ThoraxSeg;
-  AnyFolder &R6Seg = ..SegmentsThorax.ThoraxSeg;
-  AnyFolder &R5Seg = ..SegmentsThorax.ThoraxSeg;
-  AnyFolder &R4Seg = ..SegmentsThorax.ThoraxSeg;
-  AnyFolder &R3Seg = ..SegmentsThorax.ThoraxSeg;
-  AnyFolder &R2Seg = ..SegmentsThorax.ThoraxSeg;
-  AnyFolder &R1Seg = ..SegmentsThorax.ThoraxSeg;
- 
- };
-
- RibsLeft = {
- 
-  AnyFolder &R12Seg = ..SegmentsThorax.ThoraxSeg;
-  AnyFolder &R11Seg = ..SegmentsThorax.ThoraxSeg;
-  AnyFolder &R10Seg = ..SegmentsThorax.ThoraxSeg;
-  AnyFolder &R9Seg = ..SegmentsThorax.ThoraxSeg;
-  AnyFolder &R8Seg = ..SegmentsThorax.ThoraxSeg;
-  AnyFolder &R7Seg = ..SegmentsThorax.ThoraxSeg;
-  AnyFolder &R6Seg = ..SegmentsThorax.ThoraxSeg;
-  AnyFolder &R5Seg = ..SegmentsThorax.ThoraxSeg;
-  AnyFolder &R4Seg = ..SegmentsThorax.ThoraxSeg;
-  AnyFolder &R3Seg = ..SegmentsThorax.ThoraxSeg;
-  AnyFolder &R2Seg = ..SegmentsThorax.ThoraxSeg;
-  AnyFolder &R1Seg = ..SegmentsThorax.ThoraxSeg;
- 
- };
-
-
+  #define _SIDE_ Left
+  AnyInt Sign = -1;
+  #include "ThoraxScapulaContactRibPoints.any"
+  #undef _SIDE_
 };

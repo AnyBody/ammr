@@ -1,0 +1,265 @@
+// Class template for creating multiple muscles distributed along a spline function
+
+//#class_template SubjectMuscleParameter_template(NAME) {
+//  /// Descriptive name for the muscle, e.g. for plotting
+//  #var AnyString Ligament = NAME.Ligament; 
+//  
+//  /// Number of elements in the ligament
+//  #var AnyIntVar LigamentElemAmount = NAME.LigamentElemAmount;
+//
+//  /// L0 Slacklength of the ligament
+//  #var AnyFloat L0 = NAME.L0; 
+//  
+//  /// Nominal strain of the ligament
+//  #var AnyFloat eps1 = NAME.eps1; 
+//  
+//  /// Factor for determining shortening speed at optimum length
+//  #var AnyFloat F1 = NAME.F1; 
+//
+//  /// Factor for determining shortening speed at optimum length
+//  #var AnyFloat a0 = NAME.a0; 
+//  
+//  /// Factor for determining shortening speed at optimum length
+//  #var AnyFloat a1 = NAME.a1;
+//
+//  /// Stiffness coefficient for the ligament
+//  #var AnyFloat k = NAME.k; 
+//};
+
+// Class template Ligament_template
+
+//Class to construct a series of ligaments using interpolation functions between points
+
+
+
+
+#class_template Muscle_template_Simple(
+  CREATE_ELEMENTS,
+  AnyFolder &OriginSegment,
+  ORIGIN_POINTS,
+  AnyFolder &InsertionSegment,
+  INSERTION_POINTS,
+  MUSCLE_MODEL_PARAMETERS 
+){
+  AnyVec3 MuscleRGB = {0.85, 0.85, 0.85}; //< Default ligament color
+  
+ #var AnyIntVar NumberOfElements = CREATE_ELEMENTS;
+ AnyFolder& MuscleModel = MUSCLE_MODEL_PARAMETERS;
+
+ AnyFunInterpol OriginFun = { 
+   AnyInt Size = SizesOf(.ORIGIN_POINTS)[0];
+  T= linspace(0,1,Size);
+  Type=Bspline;  
+  Data = .InsertionSegment.Scale(.ORIGIN_POINTS)';
+};  
+
+ AnyFunInterpol InsertionFun = { 
+   AnyInt Size = SizesOf(.INSERTION_POINTS)[0];
+  T= linspace(0,1,Size);
+  Type=Bspline;  
+  Data = .InsertionSegment.Scale(.INSERTION_POINTS)';
+};  
+
+
+  AnyVector a = linspace(0,1,CREATE_ELEMENTS);
+ 
+
+  // Create function nodes on segments
+  OriginSegment = {
+    AnyRefNodeGroup __NAME__##_Org = {
+      NodeAmount =CREATE_ELEMENTS;
+      NodeName = "Node";
+      Node_sRels = ..OriginFun(..a);
+      CreateMotionOutput = {r=On;rDot=Off;rDDot=Off;Axes=Off;EulerPar=Off;omega=Off;omegaDot=Off;};
+      NodeDefaults.CreateMotionOutput = {r=On;rDot=Off;rDDot=Off;Axes=Off;EulerPar=Off;omega=Off;omegaDot=Off;};
+//      AnyDrawPLine intercostalis_line = {RGB = {0, 0.5, 0.5};};
+    };
+  };
+
+  InsertionSegment = {
+    AnyRefNodeGroup __NAME__##_Ins = {
+      NodeAmount = CREATE_ELEMENTS;
+      NodeName = "Node";
+      Node_sRels = ..InsertionFun(..a);
+      CreateMotionOutput = {r=On;rDot=Off;rDDot=Off;Axes=Off;EulerPar=Off;omega=Off;omegaDot=Off;};
+      NodeDefaults.CreateMotionOutput = {r=On;rDot=Off;rDDot=Off;Axes=Off;EulerPar=Off;omega=Off;omegaDot=Off;};
+//      AnyDrawPLine intercostalis_line = {RGB = {0.5, 0, 0.5};};
+    };
+  };
+  
+  // Create ligaments
+  #if CREATE_ELEMENTS >= 1 
+    AnyMuscleViaPoint elem1 = {
+      AnyRefNode &Org = .OriginSegment.__NAME__##_Org.Node0;
+      AnyRefNode &Ins = .InsertionSegment.__NAME__##_Ins.Node0;
+      AnyMuscleModel MusMdl = {F0=..MuscleModel.F0/..NumberOfElements;Lf0=..MuscleModel.F0; Vol0=..MuscleModel.Vol0/..NumberOfElements;};
+      viewForce.Visible=Off; 
+      viewMuscle = {#include "../../DrawSettings/MusDrawSettings.any"};
+    };
+  #endif
+  #if CREATE_ELEMENTS >= 2
+    AnyMuscleViaPoint elem2 = {
+      AnyRefNode &Org = .OriginSegment.__NAME__##_Org.Node1;
+      AnyRefNode &Ins = .InsertionSegment.__NAME__##_Ins.Node1;
+      AnyMuscleModel MusMdl = {F0=..MuscleModel.F0/..NumberOfElements;Lf0=..MuscleModel.F0; Vol0=..MuscleModel.Vol0/..NumberOfElements;};
+      viewForce.Visible=Off; 
+      viewMuscle = {#include "../../DrawSettings/MusDrawSettings.any"};
+    };
+  #endif
+  #if CREATE_ELEMENTS >= 3
+    AnyMuscleViaPoint elem3 = {
+       AnyRefNode &Org = .OriginSegment.__NAME__##_Org.Node2;
+      AnyRefNode &Ins = .InsertionSegment.__NAME__##_Ins.Node2;
+      AnyMuscleModel MusMdl = {F0=..MuscleModel.F0/..NumberOfElements;Lf0=..MuscleModel.F0; Vol0=..MuscleModel.Vol0/..NumberOfElements;};
+      viewForce.Visible=Off; 
+      viewMuscle = {#include "../../DrawSettings/MusDrawSettings.any"};
+    };
+  #endif
+  #if CREATE_ELEMENTS  >= 4 
+    AnyMuscleViaPoint elem4 = {
+       AnyRefNode &Org = .OriginSegment.__NAME__##_Org.Node3;
+      AnyRefNode &Ins = .InsertionSegment.__NAME__##_Ins.Node3;
+      AnyMuscleModel MusMdl = {F0=..MuscleModel.F0/..NumberOfElements;Lf0=..MuscleModel.F0; Vol0=..MuscleModel.Vol0/..NumberOfElements;};
+      viewForce.Visible=Off; 
+      viewMuscle = {#include "../../DrawSettings/MusDrawSettings.any"};
+    };
+  #endif
+  #if CREATE_ELEMENTS  >= 5
+    AnyMuscleViaPoint elem5 = {
+      AnyRefNode &Org = .OriginSegment.__NAME__##_Org.Node4;
+      AnyRefNode &Ins = .InsertionSegment.__NAME__##_Ins.Node4;
+      AnyMuscleModel MusMdl = {F0=..MuscleModel.F0/..NumberOfElements;Lf0=..MuscleModel.F0; Vol0=..MuscleModel.Vol0/..NumberOfElements;};
+      viewForce.Visible=Off; 
+      viewMuscle = {#include "../../DrawSettings/MusDrawSettings.any"};
+    };
+  #endif
+  #if CREATE_ELEMENTS  >= 6
+    AnyMuscleViaPoint elem6 = {
+      AnyRefNode &Org = .OriginSegment.__NAME__##_Org.Node5;
+      AnyRefNode &Ins = .InsertionSegment.__NAME__##_Ins.Node5;
+      AnyMuscleModel MusMdl = {F0=..MuscleModel.F0/..NumberOfElements;Lf0=..MuscleModel.F0; Vol0=..MuscleModel.Vol0/..NumberOfElements;};
+      viewForce.Visible=Off; 
+      viewMuscle = {#include "../../DrawSettings/MusDrawSettings.any"};
+    };
+  
+  #endif
+  #if CREATE_ELEMENTS  >= 7
+    AnyMuscleViaPoint elem7 = {
+      AnyRefNode &Org = .OriginSegment.__NAME__##_Org.Node6;
+      AnyRefNode &Ins = .InsertionSegment.__NAME__##_Ins.Node6;
+      AnyMuscleModel MusMdl = {F0=..MuscleModel.F0/..NumberOfElements;Lf0=..MuscleModel.F0; Vol0=..MuscleModel.Vol0/..NumberOfElements;};
+      viewForce.Visible=Off; 
+      viewMuscle = {#include "../../DrawSettings/MusDrawSettings.any"};
+    };
+  #endif
+  #if CREATE_ELEMENTS  >= 8 
+    AnyMuscleViaPoint elem8 = {
+      AnyRefNode &Org = .OriginSegment.__NAME__##_Org.Node7;
+      AnyRefNode &Ins = .InsertionSegment.__NAME__##_Ins.Node7;
+      AnyMuscleModel MusMdl = {F0=..MuscleModel.F0/..NumberOfElements;Lf0=..MuscleModel.F0; Vol0=..MuscleModel.Vol0/..NumberOfElements;};
+      viewForce.Visible=Off; 
+      viewMuscle = {#include "../../DrawSettings/MusDrawSettings.any"};
+    };
+  #endif
+  #if CREATE_ELEMENTS  >= 9 
+   AnyMuscleViaPoint elem9 = {
+      AnyRefNode &Org = .OriginSegment.__NAME__##_Org.Node8;
+      AnyRefNode &Ins = .InsertionSegment.__NAME__##_Ins.Node8;
+      AnyMuscleModel MusMdl = {F0=..MuscleModel.F0/..NumberOfElements;Lf0=..MuscleModel.F0; Vol0=..MuscleModel.Vol0/..NumberOfElements;};
+      viewForce.Visible=Off; 
+      viewMuscle = {#include "../../DrawSettings/MusDrawSettings.any"};
+    };
+  #endif
+  #if CREATE_ELEMENTS  >= 10
+   AnyMuscleViaPoint elem10 = {
+      AnyRefNode &Org = .OriginSegment.__NAME__##_Org.Node9;
+      AnyRefNode &Ins = .InsertionSegment.__NAME__##_Ins.Node9;
+      AnyMuscleModel MusMdl = {F0=..MuscleModel.F0/..NumberOfElements;Lf0=..MuscleModel.F0; Vol0=..MuscleModel.Vol0/..NumberOfElements;};
+      viewForce.Visible=Off; 
+      viewMuscle = {#include "../../DrawSettings/MusDrawSettings.any"};
+    };
+  #endif
+  #if CREATE_ELEMENTS  >= 11 
+   AnyMuscleViaPoint elem11 = {
+      AnyRefNode &Org = .OriginSegment.__NAME__##_Org.Node10;
+      AnyRefNode &Ins = .InsertionSegment.__NAME__##_Ins.Node10;
+      AnyMuscleModel MusMdl = {F0=..MuscleModel.F0/..NumberOfElements;Lf0=..MuscleModel.F0; Vol0=..MuscleModel.Vol0/..NumberOfElements;};
+      viewForce.Visible=Off; 
+      viewMuscle = {#include "../../DrawSettings/MusDrawSettings.any"};
+    };
+  #endif
+  #if CREATE_ELEMENTS  >= 12 
+   AnyMuscleViaPoint elem12 = {
+      AnyRefNode &Org = .OriginSegment.__NAME__##_Org.Node11;
+      AnyRefNode &Ins = .InsertionSegment.__NAME__##_Ins.Node11;
+      AnyMuscleModel MusMdl = {F0=..MuscleModel.F0/..NumberOfElements;Lf0=..MuscleModel.F0; Vol0=..MuscleModel.Vol0/..NumberOfElements;};
+      viewForce.Visible=Off; 
+      viewMuscle = {#include "../../DrawSettings/MusDrawSettings.any"};
+    };
+  #endif
+  #if CREATE_ELEMENTS  >= 13
+   AnyMuscleViaPoint elem13 = {
+      AnyRefNode &Org = .OriginSegment.__NAME__##_Org.Node12;
+      AnyRefNode &Ins = .InsertionSegment.__NAME__##_Ins.Node12;
+      AnyMuscleModel MusMdl = {F0=..MuscleModel.F0/..NumberOfElements;Lf0=..MuscleModel.F0; Vol0=..MuscleModel.Vol0/..NumberOfElements;};
+      viewForce.Visible=Off; 
+      viewMuscle = {#include "../../DrawSettings/MusDrawSettings.any"};
+    };
+  #endif
+  #if CREATE_ELEMENTS  >= 14 
+   AnyMuscleViaPoint elem14 = {
+      AnyRefNode &Org = .OriginSegment.__NAME__##_Org.Node13;
+      AnyRefNode &Ins = .InsertionSegment.__NAME__##_Ins.Node13;
+      AnyMuscleModel MusMdl = {F0=..MuscleModel.F0/..NumberOfElements;Lf0=..MuscleModel.F0; Vol0=..MuscleModel.Vol0/..NumberOfElements;};
+      viewForce.Visible=Off; 
+      viewMuscle = {#include "../../DrawSettings/MusDrawSettings.any"};
+    };
+  #endif
+  #if CREATE_ELEMENTS  >= 15 
+   AnyMuscleViaPoint elem15 = {
+      AnyRefNode &Org = .OriginSegment.__NAME__##_Org.Node14;
+      AnyRefNode &Ins = .InsertionSegment.__NAME__##_Ins.Node14;
+      AnyMuscleModel MusMdl = {F0=..MuscleModel.F0/..NumberOfElements;Lf0=..MuscleModel.F0; Vol0=..MuscleModel.Vol0/..NumberOfElements;};
+      viewForce.Visible=Off; 
+      viewMuscle = {#include "../../DrawSettings/MusDrawSettings.any"};
+    };
+  #endif
+  #if CREATE_ELEMENTS  >= 16 
+   AnyMuscleViaPoint elem16 = {
+      AnyRefNode &Org = .OriginSegment.__NAME__##_Org.Node15;
+      AnyRefNode &Ins = .InsertionSegment.__NAME__##_Ins.Node15;
+      AnyMuscleModel MusMdl = {F0=..MuscleModel.F0/..NumberOfElements;Lf0=..MuscleModel.F0; Vol0=..MuscleModel.Vol0/..NumberOfElements;};
+      viewForce.Visible=Off; 
+      viewMuscle = {#include "../../DrawSettings/MusDrawSettings.any"};
+    };
+  #endif
+  #if CREATE_ELEMENTS  >= 17
+   AnyMuscleViaPoint elem17 = {
+      AnyRefNode &Org = .OriginSegment.__NAME__##_Org.Node16;
+      AnyRefNode &Ins = .InsertionSegment.__NAME__##_Ins.Node16;
+      AnyMuscleModel MusMdl = {F0=..MuscleModel.F0/..NumberOfElements;Lf0=..MuscleModel.F0; Vol0=..MuscleModel.Vol0/..NumberOfElements;};
+      viewForce.Visible=Off; 
+      viewMuscle = {#include "../../DrawSettings/MusDrawSettings.any"};
+    };
+  #endif
+  #if CREATE_ELEMENTS  >= 18 
+   AnyMuscleViaPoint elem18 = {
+      AnyRefNode &Org = .OriginSegment.__NAME__##_Org.Node17;
+      AnyRefNode &Ins = .InsertionSegment.__NAME__##_Ins.Node17;
+      AnyMuscleModel MusMdl = {F0=..MuscleModel.F0/..NumberOfElements;Lf0=..MuscleModel.F0; Vol0=..MuscleModel.Vol0/..NumberOfElements;};
+      viewForce.Visible=Off; 
+      viewMuscle = {#include "../../DrawSettings/MusDrawSettings.any"};
+    };
+  #endif
+  #if CREATE_ELEMENTS  >= 19
+   AnyMuscleViaPoint elem19 = {
+      AnyRefNode &Org = .OriginSegment.__NAME__##_Org.Node18;
+      AnyRefNode &Ins = .InsertionSegment.__NAME__##_Ins.Node18;
+      AnyMuscleModel MusMdl = {F0=..MuscleModel.F0/..NumberOfElements;Lf0=..MuscleModel.F0; Vol0=..MuscleModel.Vol0/..NumberOfElements;};
+      viewForce.Visible=Off; 
+      viewMuscle = {#include "../../DrawSettings/MusDrawSettings.any"};
+    };
+  #endif
+
+};
+

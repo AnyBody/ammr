@@ -1,6 +1,6 @@
 
 # Small script for updating the wilke test files with the new reference values
-
+#%%
 from pathlib import Path
 import re
 from anypytools import AnyPyProcess, macro_commands as mc
@@ -18,6 +18,8 @@ files = [
     "test_SpinePressureStandingLiftStretchedArms.any",
 ]
 
+files = [elm.replace("Spine", "FlexibleSpine") for elm in files]
+
 macros = []
 for file in files:
     macros.append(
@@ -28,7 +30,7 @@ for file in files:
         ]
     )
 #%%
-app = AnyPyProcess(num_processes=4)
+app = AnyPyProcess(num_processes=2)
 
 results = app.start_macro(macros)
 
@@ -50,14 +52,14 @@ for file, result in zip(files, results):
 
 
 # %%
+if False:
+    for file, val in results_table.items(): 
+        text = file.read_text()
 
-for file, val in results_table.items(): 
-    text = file.read_text()
+        text = REFVALUE_RE.sub(fr"\g<1>{val};", text)
 
-    text = REFVALUE_RE.sub(fr"\g<1>{val};", text)
-
-    #print(text)
-    file.write_text(text)
+        #print(text)
+        file.write_text(text)
 
 
 # %%

@@ -1,0 +1,81 @@
+ AnyFolder OffSetCal ={
+  
+  AnyFunInterpol &Sup_spline = .Sup_spline.Fun_Resample;
+  AnyFunInterpol &Inf_spline = .Inf_spline.Fun_Resample;
+  
+  AnyFloat discretization = linspace(0,1.0,20);
+  AnyVar Pert = 0.01;
+  AnyFloat discretization_pert = linspace(Pert,1+Pert,20);
+  
+  
+  
+  
+  AnyFloat C = Sup_spline(discretization); 
+  AnyFloat B = Sup_spline(discretization_pert); 
+  AnyFloat A = Inf_spline(discretization); 
+  
+  AnyFloat a = vnorm(B-C);
+  AnyFloat b = vnorm(A-C);
+  AnyFloat c = vnorm(A-B);
+  
+  AnyFloat Angles_temp  = (180/pi)*acos((c^2-a^2-b^2)/(-2*mult(a,b)));  //angles before any corrections
+  
+  AnyFloat Zero = 90*ones(20);  
+  
+  AnyFloat Correction_Angle  =Angles_temp-Zero;  //correction needed
+  
+  AnyFloat Offsets_iso = mult(sin(Correction_Angle*pi/180),b); //offsets on INF points to obtain desired iso angle of 90 deg
+  
+  AnyFloat Offsets_Zero = zeros(20);
+  
+  AnyFloat A_corrected = Inf_spline(linspace(0,1,20)+Offsets_iso/(Inf_spline.L));   //new caluclated points on INF after correction to iso
+  
+  AnyFloat b_corrected = vnorm(C-A_corrected); //calculation ofb after point A is moved
+  
+  //using the desired angle calculate corrections needed
+  //  tan(Desired_Ext_angle)=offset/b_corrected
+  //  offset= b_corrected* tan(Desired_Ext_angle)
+  AnyFloat Offsets_Ext_Inf_temp =( mult(tan(. Desired_Ext_angle*pi/180),b_corrected)+Offsets_iso) ; //abs
+  AnyFloat Offsets_Int_Inf_temp =( mult(tan(. Desired_Int_angle*pi/180),b_corrected)+Offsets_iso) ;
+  
+  AnyFloat Offsets_Ext_Sup_temp = 0*Offsets_Ext_Inf_temp; //corrections are made only on INF points
+  AnyFloat Offsets_Int_Sup_temp = 0*Offsets_Ext_Sup_temp;//corrections are made only on INF points
+  
+  
+  
+  AnyVar L = Inf_spline.L; //length of line
+  
+  //Ext 
+  AnyFloat Ext_Inf_Lengths = Offsets_Ext_Inf_temp+linspace(0,1,20)*L; //length values with raw fix... extrapolation can happen here
+  AnyFloat Ext_Inf_Max = max(arrcat(Ext_Inf_Lengths,{L}));  //find max of lengths
+  AnyFloat Ext_Inf_Min = min(arrcat(Ext_Inf_Lengths,{0.0})); // find min o lengths
+  AnyFloat Ext_Inf_Corr_Min = -Ext_Inf_Min*linspace(1,0,20); // find the amount of extrapolation and even it out over all points
+  AnyFloat Ext_Inf_Corr_Max = -(Ext_Inf_Max-L)*linspace(0,1,20);  // find the amount of extrapolation and even it out over all points
+  AnyFloat Ext_Inf_Corr_Inf =Ext_Inf_Corr_Min+Ext_Inf_Corr_Max+Offsets_Ext_Inf_temp;  //calculate new points on inf line accouting for any extrapolations and corrections
+  AnyFloat Ext_Inf_Corr_Sup =Ext_Inf_Corr_Min+Ext_Inf_Corr_Max; //calculate new points on sup line accouting for any extrapolations not corrections these are made on inf line
+  
+  //int
+  AnyFloat Int_Inf_Lengths = Offsets_Int_Inf_temp+linspace(0,1,20)*L; //length values with raw fix... extrapolation can happen here
+  AnyFloat Int_Inf_Max = max(arrcat(Int_Inf_Lengths,{L})); 
+  AnyFloat Int_Inf_Min = min(arrcat(Int_Inf_Lengths,{0.0})); 
+  AnyFloat Int_Inf_Corr_Min = -Int_Inf_Min*linspace(1,0,20);
+  AnyFloat Int_Inf_Corr_Max = -(Int_Inf_Max-L)*linspace(0,1,20);
+  AnyFloat Int_Inf_Corr_Inf =Int_Inf_Corr_Min+Int_Inf_Corr_Max + Offsets_Int_Inf_temp;
+  AnyFloat Int_Inf_Corr_Sup =Int_Inf_Corr_Min+Int_Inf_Corr_Max;
+  
+  
+  //check did we correct to 90 deg
+ AnyFolder Check_corrected_ISO_angle_is_90 ={
+  AnyFloat a_1 = vnorm(.B-.C);
+  AnyFloat b_1 = vnorm(.A_corrected-.C);
+  AnyFloat c_1 = vnorm(.A_corrected-.B);
+  AnyFloat Angles_Check  = (180/pi)*acos((c_1^2-a_1^2-b_1^2)/(-2*mult(a_1,b_1)));  
+};
+
+  AnyFloat Offsets_Ext_Sup = Ext_Inf_Corr_Sup;
+  AnyFloat Offsets_Int_Sup = Int_Inf_Corr_Sup;
+  AnyFloat Offsets_Ext_Inf = Ext_Inf_Corr_Inf;
+  AnyFloat Offsets_Int_Inf = Int_Inf_Corr_Inf;
+  
+  
+};

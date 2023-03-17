@@ -2,27 +2,26 @@
     
     AnyFolder &StdPar=..ModelParameters.Skull;
     
-    AnyFunTransform3D &Scale =..ScalingTrunk.SkullSeg.ScaleFunction;
+    AnyFunTransform3D &Scale =..Scaling.GeometricalScaling.SkullSeg.ScaleFunction;
     
-    r0=..SegmentsCervicalSpine.C1Seg.C1C0JntNode.sRel*..SegmentsCervicalSpine.C1Seg.Axes0'+..SegmentsCervicalSpine.C1Seg.r0; 
+    r0=..Segments.C1Seg.C1C0JntNode.sRel*..Segments.C1Seg.Axes0'+..Segments.C1Seg.r0; 
     
-    AnyVar MassS = ..Scaling.MassScaling.Head.MassScale;
-    
-    AnyVar MassStandard = ..StandardParameters.HeadWithoutNeck.Mass;
-    Mass = MassS*MassStandard;
-    
-    Jii = StdPar.Jii;
-    
+    // Inertia properties for the segment
+    UseInertiaObjects = On;
+    segmental_inertia_matrix inertiaObject() = {
+      Mass = ...Scaling.MassScaling.Head.MassScale * ...StandardParameters.HeadWithoutNeck.Mass;
+      Jii = .StdPar.Jii;
+      sCoM = .Scale(.StdPar.sCoM_pos);
+      JaboutCoMOnOff = On;
+    };
+
     /// The AnatomicalFrame of skull is different from the remaining spine model since the
     ///skull has it's own coordinate system relative to the c1 - c0 joint.
     AnyRefNode AnatomicalFrame = {};
     AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards compatability with AMMR 2.4 MoCap Marker protocols
     AnyRefNode& ScalingNode = AnatomicalFrame;
     AnyFunTransform3D& GeomScale = Scale;
-    
-    sCoM = Scale(StdPar.sCoM_pos);
-    JaboutCoMOnOff = On;
-    
+        
     AnyRefNode C1C0JntNode = {sRel = .Scale(.StdPar.C1C0JntNode_pos);AnyDrawNodes DrwNode = {ScaleXYZ = {1,1,1}*0.003;RGB = {0, 1, 0};};};
     AnyRefNode NeckNode={sRel=.Scale(.StdPar.NeckNode_pos);};
     
@@ -62,6 +61,11 @@
     AnyRefNode Right ={};
     AnyRefNode Left ={};    
     
+    AnyRefNode SkullContactNode = {sRel= .Scale(.StdPar.SkullContactNode_pos);};
+    AnyRefNode ChinBonyTip ={
+      sRel = .Scale(.StdPar.ChinBonyTip_pos);
+      ARel = RotMat(-0.04,z);
+    };
   };
   
   

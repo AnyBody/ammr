@@ -3,43 +3,65 @@
 //    {'BM_SCALING': '_SCALING_NONE_'},
 //    {'BM_SCALING': '_SCALING_STANDARD_'},
 //    {'BM_SCALING': '_SCALING_UNIFORM_'},
-//    {'BM_SCALING': '_SCALING_UNIFORM_EXTMEASUREMENTS_'},
 //    {'BM_SCALING': '_SCALING_XYZ_'},
 //    {'BM_SCALING': '_SCALING_LENGTHMASS_'},
 //    {'BM_SCALING': '_SCALING_LENGTHMASSFAT_'},
-//    {'BM_SCALING': '_SCALING_LENGTHMASS_EXTMEASUREMENTS_'},
-//    {'BM_SCALING': '_SCALING_LENGTHMASSFAT_EXTMEASUREMENTS_'},
 //  ],
 //  [
 //    {'BM_LEG_TRUNK_INTERFACE': '_MORPH_NONE_'},
 //    {'BM_LEG_TRUNK_INTERFACE': '_MORPH_TRUNK_TO_LEG_'},
 //    {'BM_LEG_TRUNK_INTERFACE': '_MORPH_LEG_TO_TRUNK_'},
-//  ] 
+//  ],
+//  [
+//    {'BM_TRUNK_CAVITY_MODEL': '_CAVITY_MODEL_BUCKLE_'},
+//    {'BM_TRUNK_CAVITY_MODEL': '_CAVITY_MODEL_VOLUME_'},
+//  ],
+//  [
+//    {'BM_TRUNK_THORACIC_MODEL': '_THORACIC_MODEL_RIGID_'},
+//    {'BM_TRUNK_THORACIC_MODEL': '_THORACIC_MODEL_FLEXIBLE_'},
+//  ],
 //)
+//ignore_errors = ['BodyModel.UnallowedCombination','Model loading skipped']
 
 #include "../libdef.any"
 #include "../tools.any"
 
 #ifndef TEST_NAME
-  #define BM_SCALING _SCALING_XYZ_
-//  #define BM_LEG_TRUNK_INTERFACE _MORPH_NONE_
-//  #define BM_LEG_TRUNK_INTERFACE _MORPH_LEG_TO_TRUNK_
-  #define BM_LEG_TRUNK_INTERFACE _MORPH_TRUNK_TO_LEG_
-  #define TEST_NAME "TrunkLoadPosTest"
+  #define BM_SCALING 4
+  #define BM_LEG_TRUNK_INTERFACE 2
+  #define TEST_NAME "test_trunk_load_pos_2"
+  #define BM_TRUNK_THORACIC_MODEL 0
+  #define BM_TRUNK_CAVITY_MODEL 1
+#endif
+
+// Ensure zero posture when using flexible thorax
+#if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_
+  #define BM_MANNEQUIN_DRIVER_PELVIS_THORAX_EXTENSION OFF
+  #define BM_MANNEQUIN_DRIVER_PELVIS_THORAX_ROTATION OFF
+  #define BM_MANNEQUIN_DRIVER_PELVIS_THORAX_LATERAL_BENDING OFF
+  #define BM_TRUNK_LUMBAR_THORACIC_LINK OFF
+  #define BM_TRUNK_THORACIC_RHYTHM OFF
+#endif
+
+// Volume model requires muscles to work
+#if BM_TRUNK_CAVITY_MODEL == _CAVITY_MODEL_VOLUME_
+  #define BM_TRUNK_MUSCLES ON
+#else
+  #define BM_TRUNK_MUSCLES OFF
 #endif
 
 #define BM_ARM_RIGHT OFF
 #define BM_ARM_LEFT OFF
 #define BM_LEG_MODEL _LEG_MODEL_TLEM2_
 #define BM_LEG_MUSCLES_BOTH OFF
-#define BM_TRUNK_MUSCLES OFF
 #define BM_MANNEQUIN_DRIVER_DEFAULT ON
 
 Main = {
   #include "<ANYBODY_PATH_BODY>/HumanModel.any"
-    
+  
+  
   AnyFolder Tests = {
-    AnyFloatVar abs_tol = 1e-15;
+    AnyFloatVar abs_tol = 1e-10;
     
     /// This test is merely a test that AMS sets r to r0 upon load
     AnyInt test_seg_load_positions = expect(
@@ -99,55 +121,92 @@ Main = {
       AnyObjectPtrArray segments = set_difference(all_segments,buckle);
       
       AnyObjectPtrArray seg_r0 = ObjGetMember(segments, "r0");
-      AnyFloat seg_r0_vals = Obj2Num(seg_r0) + (0 * Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.r[0]);
+      AnyFloat seg_r0_vals = Obj2Num(seg_r0) + (0 * Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.r[0]);
       
       AnyObjectPtrArray seg_axes0 = ObjGetMember(segments, "Axes0");
-      AnyFloat seg_axes0_vals = Obj2Num(seg_axes0) + (0 * Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.r[0]);
+      AnyFloat seg_axes0_vals = Obj2Num(seg_axes0) + (0 * Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.r[0]);
       
       AnyObjectPtrArray seg_pos = ObjGetMember(segments, "r"); 
-      AnyFloat seg_pos_vals = Obj2Num(seg_pos) + (0 * Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.r[0]);
+      AnyFloat seg_pos_vals = Obj2Num(seg_pos) + (0 * Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.r[0]);
       
       AnyObjectPtrArray seg_axes = ObjGetMember(segments, "Axes"); 
-      AnyFloat seg_axes_vals = Obj2Num(seg_axes) + (0 * Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.r[0]);
+      AnyFloat seg_axes_vals = Obj2Num(seg_axes) + (0 * Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.r[0]);
       
       AnyFloat pos_diff = max(abs(seg_r0_vals - seg_pos_vals)); 
-      AnyFloat pos_diffSort = ObjSort(pos_diff, &pos_diff);
+      AnyFloat pos_diff_sorted = ObjSort(pos_diff, &pos_diff);
       AnyFloat axes_diff = ObjSort(max(abs(seg_axes0_vals - seg_axes_vals))); 
+      AnyFloat axes_diff_sorted = ObjSort(axes_diff, &axes_diff);
 
       AnyObjectPtrArray sorted_by_pos_diff = ObjSort(segments, &pos_diff);
       AnyObjectPtrArray sorted_by_axes_diff = ObjSort(segments, &axes_diff);
+      AnyString paired = transpose({strval(pos_diff_sorted), CompleteNameOf(sorted_by_pos_diff)});
     };
 
     AnyFolder NodeVars = {
       AnyObjectPtrArray all_nodes = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk", "*", "AnyRefNode");
-      AnyObjectPtrArray skull_nodes = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.SegmentsCervicalSpine.SkullSeg", "*", "AnyRefNode");
+      AnyObjectPtrArray skull_nodes = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Segments.SkullSeg", "*", "AnyRefNode");
       AnyObjectPtrArray buckle_nodes = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Buckle", "*", "AnyRefNode");      
-      AnyObjectPtrArray ij_nodes = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.SegmentsThorax.ThoraxSeg.ij", "*", "AnyRefNode");             
-      AnyObjectPtrArray iji_nodes = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.SegmentsThorax.ThoraxSeg.iji", "*", "AnyRefNode");             
+      AnyObjectPtrArray ij_nodes = ObjSearchRecursive(ObjRefResolve(&Main.HumanModel.BodyModel.Trunk.Segments.SternumSeg.ij), "*", "AnyRefNode");             
+      AnyObjectPtrArray iji_nodes = ObjSearchRecursive(ObjRefResolve(&Main.HumanModel.BodyModel.Trunk.Segments.SternumSeg.iji), "*", "AnyRefNode");             
       AnyObjectPtrArray cyl_nodes = arrcat(
-              ObjSearch("Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.*.Muscles.GlueteusMaximusWrapSurfaces.*.cyl"),
-              ObjSearch("Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.*.Muscles.*.cyl"),
-              );
+        ObjSearch("Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.*.Muscles.GlueteusMaximusWrapSurfaces.*.cyl"),
+        ObjSearch("Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.*.Muscles.*.cyl"),
+      );
       AnyObjectPtrArray HipSubNodes = arrcat(
-              ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.Right.HipJoint", "*", "AnyRefNode"),          
-              ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.Left.HipJoint", "*", "AnyRefNode"),
-              );
-            
+        ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.Right.HipJoint", "*", "AnyRefNode"),          
+        ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.Left.HipJoint", "*", "AnyRefNode"),
+      );
+      AnyObjectPtrArray rot_nodes = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Segments","*.RotNode","AnyRefNode");
+      AnyObjectPtrArray manusternal_nodes = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Segments","*.ManubriosternalJointNode.*","AnyRefNode");
+      AnyObjectPtrArray obliquus_wrap_surfs = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Segments.SternalBodySeg","*.Surf","AnySurfTorus");
+      AnyObjectPtrArray abdom_wrap_cylnodes = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Abdominal", "Translate.*", "AnyRefNode");
+      AnyObjectPtrArray abdom_wrap_translate = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Abdominal", "Translate", "AnyRefNode");
+      AnyObjectPtrArray abdom_wrap_ribcyls = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Abdominal", "*CylR*", "AnyRefNode");
+      
+      // Nodes in the diagphragm with no 
+      AnyObjectPtrArray diaphragm_no_output_nodes = arrcat(
+           ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Abdominal.Diaphragm.BaseSegSuperior.Layer_T10","*.*", "AnyRefNode"),
+           ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Abdominal.Diaphragm.BaseSegInferior.Layer_T12","*.*", "AnyRefNode"),
+           ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Abdominal.Diaphragm.CavitySeg.Layer_T12","*.*", "AnyRefNode"),
+           );
+      
       // The skull is filtered out since it has another reference system than the remaining trunk so sRel will not be equal to r
       // The buckle is removed since it is kinematically solved and thereby will move during the kinematics.
       // The ij sub nodes are removed since they are the interface nodes for the arm reference system
-      AnyObjectPtrArray nodes = set_difference(all_nodes, skull_nodes, buckle_nodes, ij_nodes, iji_nodes, cyl_nodes, HipSubNodes);
+      // The hip nodes expressed in the leg coordinates are removed
+      // The sternum RotNodes are removed since they are note part of the trunk reference system
+      // The sternal obliquus wrap surfaces are removed 
+      // The Manubriosternal Lat/Med nodes are removed as they are local to the two sternumsegs
+      AnyObjectPtrArray nodes = set_difference(
+        all_nodes,
+        arrcat(arrcat(
+        skull_nodes,
+        buckle_nodes,
+        ij_nodes,
+        iji_nodes,
+        cyl_nodes,
+        HipSubNodes,
+        rot_nodes,
+        obliquus_wrap_surfs,
+        manusternal_nodes,),
+        diaphragm_no_output_nodes,
+        abdom_wrap_cylnodes,
+        abdom_wrap_translate,
+        abdom_wrap_ribcyls
+      ));
       
       AnyObjectPtrArray node_srel = ObjGetMember(nodes, "sRel");
-      AnyFloat node_srel_vals = Obj2Num(node_srel) + (0 * Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.r[0]);
+      AnyFloat node_srel_vals = Obj2Num(node_srel) + (0 * Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.r[0]);
 
       AnyObjectPtrArray node_pos = ObjGetMember(nodes, "r");
-      AnyFloat node_pos_vals = Obj2Num(node_pos) + (0 * Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.r[0]);
-      AnyFloat _diff = node_srel_vals - node_pos_vals;
-      AnyFloat pos_diff = max(abs(_diff));
-      AnyFloat pos_diff_sorted = ObjSort(pos_diff);
+      AnyFloat node_pos_vals = Obj2Num(node_pos) + (0 * Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.r[0]);
+      
+      AnyFloat pos_diff = (max(abs(node_srel_vals - node_pos_vals)));
+      AnyFloat pos_diffSort = ObjSort(pos_diff, &pos_diff);
       AnyObjectPtrArray sorted_by_pos_diff = ObjSort(nodes, &pos_diff);
-      AnyString paired_diff = transpose({strval(pos_diff), Obj2Str(&nodes)});
+      
+      
+      AnyString paired = transpose({strval(pos_diffSort), CompleteNameOf(sorted_by_pos_diff)});
     };
   };
   
@@ -159,12 +218,65 @@ Main = {
   AnyKinStudy Study = {
     AnyFolder& BodyModel = Main.HumanModel.BodyModel;
     AnyFolder& DefaultDrivers = Main.HumanModel.DefaultMannequinDrivers;
-    
     // Correct the load time position of the Pelvis so we can drive the AnatomicalFrameTrunk to zero, without the model moving
-    Main.HumanModel.Mannequin.Posture.PelvisPosX = Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.AnatomicalFrameTrunk.sRel[0];
-    Main.HumanModel.Mannequin.Posture.PelvisPosY = Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.AnatomicalFrameTrunk.sRel[1];
-    Main.HumanModel.Mannequin.Posture.PelvisPosZ = Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.AnatomicalFrameTrunk.sRel[2];
+    Main.HumanModel.Mannequin.Posture.PelvisPosX = Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.AnatomicalFrameTrunk.sRel[0];
+    Main.HumanModel.Mannequin.Posture.PelvisPosY = Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.AnatomicalFrameTrunk.sRel[1];
+    Main.HumanModel.Mannequin.Posture.PelvisPosZ = Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.AnatomicalFrameTrunk.sRel[2];
     
+    // Set spine to zero when using the flexible thorax
+    #if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_
+    
+      Main.HumanModel.Mannequin.Posture.PelvisT12Extension = 0;
+      Main.HumanModel.Mannequin.Posture.T12T1Extension = 0;
+      
+      AnyKinEq extension_constraint = {
+        AnyKinMeasure &pelvis_t12_ext = Main.HumanModel.BodyModel.Interface.Trunk.PelvisT12Extension;
+        AnyKinMeasure &t12_t1_ext = Main.HumanModel.BodyModel.Interface.Trunk.T12T1Extension;
+        AnyKinMeasure& PelvisT12_Rot_ref = Main.HumanModel.BodyModel.Interface.Trunk.PelvisT12Rotation;      
+        AnyKinMeasure& T12T1_Rot_ref = Main.HumanModel.BodyModel.Interface.Trunk.T12T1Rotation;
+        AnyKinMeasure& PelvisT12_Latbend_ref = Main.HumanModel.BodyModel.Interface.Trunk.PelvisT12LateralBending;      
+        AnyKinMeasure& T12T1_latbend_ref = Main.HumanModel.BodyModel.Interface.Trunk.T12T1LateralBending; 
+      };
+      
+      AnyKinEqSimpleDriver spine_driver = {
+        AnyKinMeasure& T11T12_1 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T11T12.Extension;      
+        AnyKinMeasure& T10T11_2 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T10T11.Extension;      
+        AnyKinMeasure& T9T10_3 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T9T10.Extension;      
+        AnyKinMeasure& T8T9_4 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T8T9.Extension;      
+        AnyKinMeasure& T7T8_5 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T7T8.Extension;      
+        AnyKinMeasure& T6T7_6 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T6T7.Extension;      
+        AnyKinMeasure& T5T6_7 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T5T6.Extension;      
+        AnyKinMeasure& T4T5_8 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T4T5.Extension;      
+        AnyKinMeasure& T3T4_9 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T3T4.Extension;      
+        AnyKinMeasure& T2T3_10 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T2T3.Extension;      
+        AnyKinMeasure& T1T2_11 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T1T2.Extension;
+        AnyKinMeasure& T11T12_12 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T11T12.LateralBending;      
+        AnyKinMeasure& T10T11_13 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T10T11.LateralBending;      
+        AnyKinMeasure& T9T10_14 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T9T10.LateralBending;      
+        AnyKinMeasure& T8T9_15 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T8T9.LateralBending;      
+        AnyKinMeasure& T7T8_16 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T7T8.LateralBending;      
+        AnyKinMeasure& T6T7_17 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T6T7.LateralBending;      
+        AnyKinMeasure& T5T6_18 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T5T6.LateralBending;      
+        AnyKinMeasure& T4T5_19 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T4T5.LateralBending;      
+        AnyKinMeasure& T3T4_20 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T3T4.LateralBending;      
+        AnyKinMeasure& T2T3_21 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T2T3.LateralBending;      
+        AnyKinMeasure& T1T2_22 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T1T2.LateralBending;
+        AnyKinMeasure& T11T12_23 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T11T12.Rotation;      
+        AnyKinMeasure& T10T11_24 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T10T11.Rotation;      
+        AnyKinMeasure& T9T10_25 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T9T10.Rotation;      
+        AnyKinMeasure& T8T9_26 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T8T9.Rotation;      
+        AnyKinMeasure& T7T8_27 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T7T8.Rotation;      
+        AnyKinMeasure& T6T7_28 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T6T7.Rotation;      
+        AnyKinMeasure& T5T6_29 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T5T6.Rotation;      
+        AnyKinMeasure& T4T5_30 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T4T5.Rotation;      
+        AnyKinMeasure& T3T4_31 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T3T4.Rotation;      
+        AnyKinMeasure& T2T3_32 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T2T3.Rotation;      
+        AnyKinMeasure& T1T2_33 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T1T2.Rotation;
+
+        DriverPos = repmat(nDim, 0);
+        DriverVel = repmat(nDim, 0);
+      };
+    #endif
     nStep = 1;
   };
   

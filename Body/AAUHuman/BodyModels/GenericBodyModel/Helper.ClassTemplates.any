@@ -22,6 +22,12 @@
 #define REPLACE_ZEROS(x, replacement) ((x) + not(x)*(replacement))
 
 
+// Create a nDim by nDim matrix with ones on and under the diagonal and zero elsewhere
+// To get the upper triangle simply transpose the lower triangle
+#define TRI(nDim) (iffun(gteqfun(repmat(1,nDim, linspace(0,nDim-1,nDim)),repmat(1,nDim, linspace(0,nDim-1,nDim))'), 1, 0))
+
+// compute the cumulative sum of a vector
+#define CUMSUM(vector) (vector * TRI(NumElemOf(vector))')
 
 // Projection of P onto the line BA
 #define VECTOR_PROJECTION(P, A, B) (A) + ( ((P)-(A))*((B)-(A))' / ( ((B)-(A))*((B)-(A))') )*((B)-(A))
@@ -33,6 +39,13 @@
 // Remove artificial muscles' contribution to the total Pmet calculation
 // Is defined in all relevant AnyMuscles and some AnyMusclesViaPoint
 #define EXCLUDE_MUSCLE_METABOLISM AnyMetabModelSimple ZeroMetabolicMdl = {EtaCon = 2e22; EtaEcc = 2e22;}; MetabModel = &ZeroMetabolicMdl;
+
+
+
+#define MACRO_MOTION_OUTPUT_OFF CreateMotionOutput = {r=Off; rDot=Off; rDDot=Off; Axes=Off; omega=Off; omegaDot=Off;}
+#define MACRO_MOTION_OUTPUT_POS CreateMotionOutput = {r=On; rDot=Off; rDDot=Off; Axes=Off; omega=Off; omegaDot=Off;}
+
+
 
 // Extract non unique elements from an array
 // one version for pointers and one for values
@@ -257,7 +270,7 @@ E.g.:
    ORDER = "Desending",
    FORMAT="%.4f",
    STUDY_T = .MaxMuscleActivity,
-   AGGEGRATION=max,
+   AGGREGATION=max,
 ){
   #var AnyObjectPtr ValuePtrs;
   #var AnyObjectPtr NamePtrs = ValuePtrs;
@@ -267,7 +280,7 @@ E.g.:
     AnyInt SecondDim = prod(take(ValueSizes, iarr(1,NumElemOf(ValueSizes)-1) ));
 
     
-    AnyFloat Values = AGGEGRATION(reshape(Obj2Num(ValuePtrs), {FirstDim,SecondDim})) + 0*STUDY_T;
+    AnyFloat Values = AGGREGATION(reshape(Obj2Num(ValuePtrs), {FirstDim,SecondDim})) + 0*STUDY_T;
     AnyString Names = NAMEOF_FUN(NamePtrs);
 
     #if ORDER == "Desending"
@@ -279,6 +292,44 @@ E.g.:
 };
 
 
+/*
+Class template to compare to sets of object pointer arrays
+
+The output will be a list of {Name, Difference} for each object.
+
+*/
+#class_template ComparePtrArrays(
+  NAMEOF_FUN = CompleteNameOf,
+  ORDER = "Descending",
+  FORMAT = "%.12f",
+  STUDY_T = Main.Study.MaxMuscleActivity,
+  NORMALIZATION_FUNC = abs,
+  AGGREGATION_FUNC = max,
+){
+  #var AnyObjectPtrArray Array1;
+  #var AnyObjectPtrArray Array2;
+
+  AnyFloat Array1Values = Obj2Num(Array1) + (0*STUDY_T);
+  AnyFloat Array2Values = Obj2Num(Array2) + (0*STUDY_T);
+  
+  AnyInt ValueSizes = arrcat(SizesOf(Array1Values),  {1,1,1,1,1,1,1});
+  AnyInt FirstDim = ValueSizes[0];
+  AnyInt SecondDim = prod(take(ValueSizes, iarr(1,NumElemOf(ValueSizes)-1)));
+  
+  AnyFloat NormalizedDifference = reshape(
+    NORMALIZATION_FUNC(NORMALIZATION_FUNC(Array1Values) - NORMALIZATION_FUNC(Array2Values)), 
+    {FirstDim, SecondDim}
+  );
+  
+  AnyFloat AggregatedDifference = AGGREGATION_FUNC(NormalizedDifference);
+  
+  AnyFloat SortedDifference = ObjSort(AggregatedDifference);
+  
+  
+  AnyObjectPtrArray SortedNames = ObjSort(Array1, &AggregatedDifference);
+  AnyString NameValuePaired = transpose({NAMEOF_FUN(SortedNames), strval(SortedDifference)});
+  AnyObjectPtr NameOfMaxDiff = ObjRefResolve(Array1[argmax(AggregatedDifference)]);
+};
 
 
 

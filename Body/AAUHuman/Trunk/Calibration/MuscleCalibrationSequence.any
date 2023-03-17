@@ -1,0 +1,86 @@
+//This will run calibration on the spine ligaments
+AnyFolder ThoraxMuscleCalibration = {
+  AnyFolder CalibrationSettings ={
+    AnyComponentDefinition obj = {};  
+    AnyFolder& Segments =  ...BodyModel.Trunk.Segments;
+    #if BM_TRUNK_CAVITY_MODEL == _CAVITY_MODEL_BUCKLE_
+    AnyFolder& Buckle = ...BodyModel.Trunk.Buckle;
+    #endif
+    AnyFolder& Joints =  ...BodyModel.Trunk.Joints;
+    AnyFolder& Muscles =  ...BodyModel.Trunk.Muscles;
+    #if BM_LEG_MODEL & BM_LEG_LEFT
+    AnyFolder& LeftThigh = ...BodyModel.Left.Leg.Seg.Thigh;
+    AnyFolder& LeftHipJoint =  ...BodyModel.Left.Leg.Jnt.Hip;
+    #endif
+    #if BM_LEG_MODEL & BM_LEG_LEFT
+    AnyFolder& RightThigh = ...BodyModel.Right.Leg.Seg.Thigh;
+    AnyFolder& RightHipJoint =  ...BodyModel.Right.Leg.Jnt.Hip;
+    #endif
+    
+    AnyFixedRefFrame ground = {
+      AnyRefNode node = { 
+        ARel=..Segments.PelvisSeg.Axes0;
+        sRel=..Segments.PelvisSeg.r0;
+      };
+    };
+
+    AnyKinEq PelvisFix = {
+      AnyKinLinear Lin = {
+        AnyRefFrame &ground = ..ground.node;
+        AnyRefFrame &Pelvis = ..Segments.PelvisSeg;
+      };
+
+      AnyKinRotational Rot = {
+        Type = RotAxesAngles;
+        AnyRefFrame &ground = ..ground.node;
+        AnyRefFrame &Pelvis = ..Segments.PelvisSeg;
+      };
+    };
+    
+    AnyKinEqSimpleDriver  ThoraxGroundDriver = {
+      AnyKinEq &Jnt = .PelvisFix;
+      DriverPos = {0,0,0,0,0,0};
+      DriverVel = {0,0,0,0,0,0};
+      Reaction.Type = {Off,Off,Off,Off,Off,Off}; 
+    };
+    
+    
+    AnyKinEqSimpleDriver AllRelevantJoints = {
+      AnyKinMeasureOrg DOFs = {
+        AnyKinMeasure &u1 = .....BodyModel.Interface.Trunk.PelvisThoraxExtension;
+        AnyKinMeasure &u2 = .....BodyModel.Interface.Trunk.PelvisThoraxLateralBending;
+        AnyKinMeasure &u3 = .....BodyModel.Interface.Trunk.PelvisThoraxRotation;
+        AnyKinMeasure &u4 = .....BodyModel.Interface.Trunk.SkullThoraxFlexion;
+        AnyKinMeasure &u5 = .....BodyModel.Interface.Trunk.SkullThoraxLateralBending;
+        AnyKinMeasure &u6 = .....BodyModel.Interface.Trunk.SkullThoraxRotation;
+        #if BM_LEG_MODEL & BM_LEG_LEFT
+          AnyKinMeasure &u7 = .....BodyModel.Interface.Left.HipFlexion;
+          AnyKinMeasure &u8 = .....BodyModel.Interface.Left.HipAbduction;
+          AnyKinMeasure &u9 = .....BodyModel.Interface.Left.HipExternalRotation;
+        #endif
+        #if BM_LEG_MODEL & BM_LEG_RIGHT
+          AnyKinMeasure &u10 = .....BodyModel.Interface.Right.HipFlexion;
+          AnyKinMeasure &u11 = .....BodyModel.Interface.Right.HipAbduction;
+          AnyKinMeasure &u12 = .....BodyModel.Interface.Right.HipExternalRotation;
+        #endif
+      };
+      DriverPos = repmat(DOFs.nDim, 0);
+      DriverVel = repmat(DOFs.nDim, 0);
+      Reaction.Type = repmat(DOFs.nDim, On);
+    };
+  };
+
+  // The study: Operations to be performed on the model
+  AnyBodyCalibrationStudy CalibrationStudy = {
+    AnyFolder &ref=.CalibrationSettings; 
+    nStep = 1;
+    InitialConditions.SmallStepAssumptionOnOff = Off;
+    Kinematics.SmallStepAssumptionOnOff = Off;
+    Kinematics.PosAnalysisOnlyOnOff = On;
+    InitialConditions.PosAnalysisOnlyOnOff = On;
+  };
+};
+  
+CalibrationSequence ={ 
+  AnyOperation &ThoraxMusCal = .ThoraxMuscleCalibration.CalibrationStudy.TendonLengthAdjustment;
+};

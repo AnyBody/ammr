@@ -1,0 +1,323 @@
+
+
+AnyFunTransform3DLin ScaleAndProjectToLayer = {
+  PreTransforms = {&.Segref.ScaleAbdominal, &ProjectToYZero};
+  ScaleMat = eye(3);
+  Offset = {0, .JntNode.sRel[1], 0};  //< Translation to vetebra/layer level
+  
+  AnyFunTransform3DLin ProjectToYZero = {
+    ScaleMat = {{1,0,0},{0,0,0},{0,0,1}}; //< Remove Y component
+    Offset = zeros(3,1)';
+  };
+};
+
+AnyRefNode &JntNode = Segref.TransversusMid;
+
+AnySeg BaseSegPosterior={
+  sCoM = VolumePoints.Center.sRel;
+  Mass = 1e-5;
+  Jii= {0.001, 0.001, 0.001};
+  r0 = .Segref.r0;
+  Axes0 = .Segref.Axes0;
+  
+  AnyRefNode JntNode = { 
+    sRel = ..JntNode.sRel;  
+  };
+  
+  CavityPoints VolumePoints(data=..Data.AbdominalCavityPoints, scale_fun=..ScaleAndProjectToLayer) = {
+    Right.points_generator = {
+      amount = ......ModelParameters.DiscretizationPosterior;
+      start = ..data.Right.Posterior_Spline_Start; 
+      end = ..data.Right.Posterior_Spline_End;
+    };
+    Left.points_generator = {
+      amount = ......ModelParameters.DiscretizationPosterior;
+      start = ..data.Left.Posterior_Spline_Start; 
+      end = ..data.Left.Posterior_Spline_End;
+    };
+    AnyRefNode Center = { 
+      sRel = mean({
+        .Right.points_generator.points[.Right.points_generator.amount - 1], 
+        .Left.points_generator.points[.Right.points_generator.amount - 1]}');
+    };
+  };
+  
+  CavityPoints TransversusPoints(data=..Data.AbdominalCavityPoints, scale_fun=..ScaleAndProjectToLayer) = {
+    Right.points_generator = {
+      amount = 3;
+      start = ..data.Right.Posterior_Spline_Start; 
+      end = ..data.Right.Posterior_Spline_End;
+    };
+    Left.points_generator = {
+      amount = 3;
+      start = ..data.Left.Posterior_Spline_Start; 
+      end = ..data.Left.Posterior_Spline_End;
+    };
+  };
+};
+
+AnySeg BaseSegAnterior = {
+  sCoM = {0,0,0};
+  Mass = 1e-5;
+  Jii = {0.00, 0.00, 0.00};
+  r0 = .BaseSegPosterior.r0;
+  Axes0 = .BaseSegPosterior.Axes0;
+  
+  AnyRefNode Origin = {};
+  
+  CavityPoints VolumePoints(data=..Data.AbdominalCavityPoints, scale_fun=..ScaleAndProjectToLayer) = {
+    Right.points_generator = {
+      amount = ......ModelParameters.DiscretizationAnterior;
+      start = ..data.Left.Anterior_Spline_Start; 
+      end = ..data.Left.Anterior_Spline_End;
+    };
+    Left.points_generator = {
+      amount = ......ModelParameters.DiscretizationAnterior;
+      start = ..data.Left.Anterior_Spline_Start; 
+      end = ..data.Left.Anterior_Spline_End;
+    };
+    AnyRefNode Center = { 
+      sRel = mean({
+        .Right.points_generator.points[.Right.points_generator.amount - 1], 
+        .Left.points_generator.points[.Right.points_generator.amount - 1]}');
+    };
+  };
+  
+  
+  CavityPoints TransversusPoints(data=..Data.AbdominalCavityPoints, scale_fun=..ScaleAndProjectToLayer) = {
+    Right.points_generator = {
+      amount = 6;
+      start = ..data.Right.Anterior_Spline_Start; 
+      end = ..data.Right.Anterior_Spline_End;
+    };
+    Left.points_generator = {
+      amount = 6;
+      start = ..data.Left.Anterior_Spline_Start; 
+      end = ..data.Left.Anterior_Spline_End;
+    };
+    AnyRefNode Center = { 
+      sRel = mean({
+        .Right.points_generator.points[.Right.points_generator.amount - 1], 
+        .Left.points_generator.points[.Right.points_generator.amount - 1]}');
+    };
+  };
+  
+  AnyRefNode mid = {
+    AnyVec3 unscaled = 0.5 * (..Data.AbdominalCavityPoints.Right.Parametric.Fun(1.0) + ..Data.AbdominalCavityPoints.Left.Parametric.Fun(1.0));
+    sRel = ..ScaleAndProjectToLayer(unscaled);
+  };
+  AnyRefNode rectus2R ={sRel= ..ScaleAndProjectToLayer(.mid.unscaled + {0,0,0.2*0.2});}; //front right
+  AnyRefNode rectus2L ={sRel= ..ScaleAndProjectToLayer(.mid.unscaled + {0,0,-0.2*0.2});}; //front right
+  
+  AnyRefNode rectus1R ={sRel= ..ScaleAndProjectToLayer(.mid.unscaled + {0,0,0.2*0.05});}; //front right
+  AnyRefNode rectus1L ={sRel= ..ScaleAndProjectToLayer(.mid.unscaled + {0,0,-0.2*0.05});}; //front right
+  
+  AnyRefNode LayerConstraintNodes = {
+    
+    
+    
+    AnyFolder LayerPoints = {
+      PointGenerator points_right(fun=SplineFun, scale_fun=....ScaleAndProjectToLayer)={
+        start=.....Parameters.LayerMeasureSplineStart;
+            amount = .....Parameters.LayerMeasureAmount;  
+        AnyFunInterpol &SplineFun = ....Data.AbdominalCavityPoints.Right.Parametric.Fun;
+      };
+      PointGenerator points_left(fun=SplineFun, scale_fun=....ScaleAndProjectToLayer)={
+        start=.....Parameters.LayerMeasureSplineStart;
+            amount = .....Parameters.LayerMeasureAmount;  
+        AnyFunInterpol &SplineFun = ....Data.AbdominalCavityPoints.Left.Parametric.Fun;
+      };
+    };
+    
+    AnyRefNodeGroup Nodes_Below_Layer ={
+      NodeAmount = .LayerPoints.points_right.amount+.LayerPoints.points_left.amount; // number nodes in group
+      NodeName = strval(iarr(1, NodeAmount), "_node%04i");
+      
+      Node_sRels = 
+      (arrcat(.LayerPoints.points_right.points, flip(.LayerPoints.points_left.points, 0)) +
+      arrcat(...layer_below.LayerConstraintNodes.LayerPoints.points_right.points, 
+      flip(...layer_below.LayerConstraintNodes.LayerPoints.points_left.points,0) )
+      ) / 2;
+      NodeDefaults.CreateMotionOutput.r = On;
+    };
+    
+    AnyRefNodeGroup Nodes_Above_Layer ={
+      NodeAmount = .LayerPoints.points_right.amount+.LayerPoints.points_left.amount; // number nodes in group
+      NodeName = strval(iarr(1, NodeAmount), "_node%04i");
+      Node_sRels = 
+      (arrcat(.LayerPoints.points_right.points, flip(.LayerPoints.points_left.points, 0)) +
+      arrcat(...layer_above.LayerConstraintNodes.LayerPoints.points_right.points, 
+      flip(...layer_above.LayerConstraintNodes.LayerPoints.points_left.points,0) )
+      )/2;
+      NodeDefaults.CreateMotionOutput.r = On;
+    };
+    
+    
+    AnyObjectPtr Nodes_Outside_Layer_Above = ObjSearch("..layer_above.LayerConstraintNodes.Nodes_Above_Layer", "AnyRefNodeGroup");
+    AnyObjectPtr Nodes_Outside_Layer_Below = ObjSearch("..layer_below.LayerConstraintNodes.Nodes_Below_Layer", "AnyRefNodeGroup");
+    
+  };
+  
+}; 
+
+
+
+
+AnySeg CavitySegPosterior={
+  sCoM = VolumePoints.Center.sRel; //already scaled 
+  Mass = 1e-5;
+  Jii = 0 * {0.001, 0.001, 0.001};
+  r0 = .Segref.r0;
+  Axes0 = .Segref.Axes0;
+  
+  AnyRefNode JntNode ={
+    sRel = ..JntNode.sRel;
+  };
+  
+  CavityPoints VolumePoints(data=..Data.AbdominalCavityPoints, scale_fun=..ScaleAndProjectToLayer) = {
+    Right.points_generator = {
+      amount = ......ModelParameters.DiscretizationPosterior;
+      start = ..data.Right.Posterior_Spline_Start; 
+      end = ..data.Right.Posterior_Spline_End;
+    };
+    Left.points_generator = {
+      amount = ......ModelParameters.DiscretizationPosterior;
+      start = ..data.Left.Posterior_Spline_Start; 
+      end = ..data.Left.Posterior_Spline_End;
+    };
+    AnyRefNode Center = { 
+      sRel = mean({
+        .Right.points_generator.points[.Right.points_generator.amount - 1], 
+        .Left.points_generator.points[.Right.points_generator.amount - 1]}');
+    };
+  };
+  
+};
+
+AnySeg CavitySegAnterior = {
+  sCoM = {0, 0, 0};
+  Mass = 0.7;
+  Jii = {0.00, 0.00, 0.00};
+  r0 = .CavitySegPosterior.r0;
+  Axes0 = .CavitySegPosterior.Axes0;
+  
+  CavityPoints VolumePoints(data=..Data.AbdominalCavityPoints, scale_fun=..ScaleAndProjectToLayer) = {
+    Right.points_generator = {
+      amount = ......ModelParameters.DiscretizationAnterior;
+      start = ..data.Right.Anterior_Spline_Start; 
+      end = ..data.Right.Anterior_Spline_End;
+    };
+    Left.points_generator = {
+      amount = ......ModelParameters.DiscretizationAnterior;
+      start = ..data.Left.Anterior_Spline_Start; 
+      end = ..data.Left.Anterior_Spline_End;
+    };
+  };
+  
+  #include "LayerInertia.any"
+ 
+  InertiaObject = {
+    
+    AnyVec3 point_center = mean(arrcat(points_right.points, points_left.points)');
+    
+    PointGenerator points_right(fun=SplineFun, scale_fun=...ScaleAndProjectToLayer)={
+      amount = .....ModelParameters.DiscretizationAnterior;  
+      AnyFunInterpol &SplineFun = ...Data.AbdominalCavityPoints.Right.Parametric.Fun;
+    };
+    PointGenerator points_left(fun=SplineFun, scale_fun=...ScaleAndProjectToLayer)={
+      amount = .....ModelParameters.DiscretizationAnterior;  
+      AnyFunInterpol &SplineFun = ...Data.AbdominalCavityPoints.Left.Parametric.Fun;
+    };
+  };
+
+  CavityPoints MuscleWrappingPoints(data=..Data.AbdominalCavityPoints, scale_fun=..ScaleAndProjectToLayer) = {
+    Right.points_generator = {
+      amount = 12;
+      start = ..data.Right.Posterior_Spline_Start+0.2;
+      end = ..data.Right.Anterior_Spline_End;
+    };
+    Left.points_generator = {
+      amount = 12;
+      start = ..data.Left.Posterior_Spline_Start+0.2;
+      end = ..data.Left.Anterior_Spline_End;
+    };
+
+    #include "CavityWallWrapping/WrappingCyls.any"
+  };
+  
+  
+}; 
+
+AnyObjectPtrArray FullEdge_Base = arrcat(
+  BaseSegPosterior.VolumePoints.Right.NodePointers,
+  BaseSegAnterior.VolumePoints.Right.NodePointers,
+  flip(BaseSegAnterior.VolumePoints.Left.NodePointers),
+  flip(BaseSegPosterior.VolumePoints.Left.NodePointers)
+);
+
+AnyObjectPtrArray FullEdge_Cavity = arrcat(
+  CavitySegPosterior.VolumePoints.Right.NodePointers,
+  CavitySegAnterior.VolumePoints.Right.NodePointers,
+  flip(CavitySegAnterior.VolumePoints.Left.NodePointers),
+  flip(CavitySegPosterior.VolumePoints.Left.NodePointers)
+);
+
+AnyFolder Joints = {
+  
+  AnySphericalJoint Vertebrate_Layer = { 
+    AnyRefFrame &ref2 = ..BaseSegPosterior.JntNode;
+    AnyRefFrame &ref1 = ..JntNode;
+  };
+ 
+  
+  AnyPrismaticJoint BaseSeg_Posterior_Anterior_constraint = {
+    Ref = 0;
+    AnySeg &posterior = ..BaseSegPosterior;
+    AnySeg &anterior = ..BaseSegAnterior;
+    Axis = x;
+  };
+
+//  /// Degree of freedom that emulate breathing
+  AnyKinMeasureOrg  BaseSeg_Posterior_Anterior = {
+    AnyKinLinear  lin ={
+      Ref=0;
+      AnyRefFrame &ref1 = ...BaseSegPosterior;
+      AnySeg &ref2 = ...BaseSegAnterior;  
+    };
+    MeasureOrganizer = {0};
+  };
+
+  AnyPrismaticJoint BaseSegPosterior_CavitySegPosterior = {
+    Ref = 0;
+    AnyRefFrame &ref1 = ..BaseSegPosterior;
+    AnySeg &ref2 = ..CavitySegPosterior;  
+    Axis = y;  //this is the plane of the layer
+  };
+ 
+  // reaction for last BaseSeg_Post <-> CavitySeg_Post DoF is disabled
+  AnyKinEq BaseSeg_CavitySeg_constraint = {
+    AnyPrismaticJoint &ref = .BaseSegPosterior_CavitySegPosterior;
+    Reaction.Type = {Off};
+  };
+  
+  AnyPrismaticJoint CavitySeg_Posterior_Anterior = {
+    Ref = 0;
+    AnySeg &ref1 = ..CavitySegPosterior;  
+    AnySeg &ref2 = ..CavitySegAnterior;  
+    Axis = x;  //this is the plane of the layer
+  };
+  
+  AnyKinEq BaseSeg_CavitySeg_MoveTheSame = {
+    AnyKinMeasureLinComb lincomb = {
+      AnyKinMeasure &ref1 = ..BaseSeg_Posterior_Anterior;
+      AnyKinMeasure &ref2 = ..CavitySeg_Posterior_Anterior;
+      Coef = {{1, -1}};
+      OutDim = 1;
+    };
+  };
+};
+//
+//#include "LayerConstraints.any"
+//
+
+

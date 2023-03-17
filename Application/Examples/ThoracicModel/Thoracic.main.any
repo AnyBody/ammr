@@ -1,0 +1,109 @@
+#include "../libdef.any"
+#include "<ANYBODY_PATH_MODELUTILS>/Drivers/Fourier.any"
+
+
+Main = {
+ 
+  
+  // New flexible thorax is enabled with:
+  #define BM_TRUNK_THORACIC_MODEL _THORACIC_MODEL_FLEXIBLE_
+  
+  #define BM_LEG_MODEL OFF
+  
+  #define BM_ARM_LEFT ON
+  #define BM_ARM_RIGHT ON
+  
+  // Note: Model doesn't yet work without muscles
+  #define BM_TRUNK_MUSCLES ON
+
+  #define BM_TRUNK_LIGAMENTS OFF 
+  
+
+  // Remove default drivers so we can add custom fourier drivers
+  // to trunk in the this example
+  #define BM_MANNEQUIN_DRIVER_PELVIS_THORAX_EXTENSION OFF
+  #define BM_MANNEQUIN_DRIVER_PELVIS_THORAX_ROTATION OFF
+  #define BM_MANNEQUIN_DRIVER_PELVIS_THORAX_LATERAL_BENDING OFF
+  
+  // Disable neck drivers and link the degrees of freedom to the 
+  // rest of the spine. 
+  #define BM_MANNEQUIN_DRIVER_SKULL_THORAX_FLEXION OFF
+  #define BM_MANNEQUIN_DRIVER_SKULL_THORAX_LATERALBENDING OFF
+  #define BM_MANNEQUIN_DRIVER_SKULL_THORAX_ROTATION OFF
+  #define BM_TRUNK_CERVICAL_THORACIC_LINK ON
+  
+  //////////////////////////////////////////
+ 
+  // Include the human model
+  #include "<ANYBODY_PATH_BODY>/HumanModel.any"
+
+  AnyFolder Model = 
+  {
+     AnyFolder& BodyModel = Main.HumanModel.BodyModel;
+     AnyFolder& DefaultDrivers = Main.HumanModel.DefaultMannequinDrivers;
+     
+     AnyReacForce PelvisGroundReactions = {
+       AnyKinMeasure& lin = .BodyModel.Interface.Trunk.PelvisPosX.lin;
+       AnyKinMeasure& rot = .BodyModel.Interface.Trunk.PelvisRotX.rot;
+     };
+
+  };
+  
+
+
+  AnyBodyStudy Study = {
+    AnyFolder& Model = Main.Model;
+    
+    tStart = 0;
+    tEnd = 2*pi;
+    Gravity = {0, -9.81, 0.0};
+    nStep = 200;
+    
+    AnyVar PelvisThoraxFlexionDeg = Main.HumanModel.BodyModel.Interface.Trunk.PelvisThoraxExtension.Pos[0]*180/pi;
+
+    AnyFolder& BodyModel = Main.HumanModel.BodyModel;
+
+    
+    // Add a driver which drives the whole spine.
+    // The spine rhythms handles the individual DOFs, but rhytms can be disabled
+    // for full control of all DOFs.
+    SimpleFourierDriver Trunk_Extension = 
+    {
+       AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxExtension;
+       RangeOfMotion = {-40, 20}*pi/180;
+       Freq = 2/(Main.Study.tEnd-Main.Study.tStart);
+       Phase = 0*pi/180;
+    };
+    
+    SimpleFourierDriver Trunk_LateralBending = 
+    {
+       AnyKinMeasure &ref2 = .BodyModel.Interface.Trunk.PelvisThoraxLateralBending;
+       RangeOfMotion = {-50, 50} *pi/180;
+       Freq = 1/(Main.Study.tEnd-Main.Study.tStart);
+       Phase = 180 *pi/180;
+    };
+    SimpleFourierDriver Trunk_AxialRotation = 
+    {
+       AnyKinMeasure &ref3 = .BodyModel.Interface.Trunk.PelvisThoraxRotation;
+       RangeOfMotion = {-40,40} *pi/180;
+       Freq = 1/(Main.Study.tEnd-Main.Study.tStart);
+       Phase = 0 * pi/180;    
+    };
+    
+
+    // Include functions to generate a video:
+    // -> Run `Study.VideoTool.Preview` to preview the camera view.
+    // -> Run `Study.VideoTool.Create_Video` to generate video from the analysis.
+    #include "CreateVideo.any" 
+  };
+
+
+  AnyOperationSequence RunApplication = {
+    AnyOperation& ref = Main.Study.InverseDynamics;
+  };
+    
+  
+  
+
+};
+  

@@ -18,6 +18,12 @@ AnyFolder BodyModel = {
   #endif
   #define ERROR_UNALLOWED_COMBINATION (ErrorMessage) AnyMessage UnallowedCombination = { TriggerPreProcess = On; Type = MSG_ErrorFatal; Message = ErrorMessage; };
   
+  #if (BM_TRUNK_CAVITY_MODEL == _CAVITY_MODEL_VOLUME_) & (BM_TRUNK_MUSCLES != ON) & (BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_)
+    #ifndef FORBIDDEN_COMBINATION
+      ERROR_UNALLOWED_COMBINATION ("BM_TRUNK_CAVITY_MODEL can only be set to _CAVITY_MODEL_VOLUME_ when BM_TRUNK_MUSCLES is set to ON")
+      #define FORBIDDEN_COMBINATION
+    #endif
+  #endif
   
   #if (BM_LEG_RIGHT > 1) | (BM_LEG_LEFT > 1)
     #ifndef FORBIDDEN_COMBINATION
@@ -26,16 +32,6 @@ AnyFolder BodyModel = {
     #endif
   #endif  
     
-  
-  #if BM_TRUNK_CERVICAL_MUSCLES != OFF
-    #if !((BM_ARM_RIGHT & BM_ARM_MUSCLES_RIGHT) | (BM_ARM_LEFT & BM_ARM_MUSCLES_LEFT))
-    #ifdef FORBIDDEN_COMBINATION
-      #else
-      ERROR_UNALLOWED_COMBINATION ("Combination is forbidden: As some neck muscles are in the shoulder model, the neck model with muscles must be used with the neck part of the shoulder muscles to be complete.")
-      #define FORBIDDEN_COMBINATION
-      #endif
-    #endif
-  #endif
 
   #ifdef _FOOT_MODEL_GMFOOT_
   #if BM_FOOT_MODEL == _FOOT_MODEL_GMFOOT_
@@ -58,7 +54,7 @@ AnyFolder BodyModel = {
 //      #endif
 //    #endif
 //  #endif
-  
+
   
   // Include the selected body parts
   // *******************************
@@ -107,7 +103,7 @@ AnyFolder BodyModel = {
     #if BM_LEG_RIGHT == OFF
      Trunk = 
      {
-       AnyRefNode &PsoasMajorRightReference=.Trunk.SegmentsLumbar.PelvisSeg.Right;
+       AnyRefNode &PsoasMajorRightReference=.Trunk.Segments.PelvisSeg.Right;
      };
     #else
     #endif
@@ -129,7 +125,7 @@ AnyFolder BodyModel = {
     #if BM_LEG_LEFT == OFF
       Trunk = 
       {
-        AnyRefNode &PsoasMajorLeftReference=.Trunk.SegmentsLumbar.PelvisSeg.Left;
+        AnyRefNode &PsoasMajorLeftReference=.Trunk.Segments.PelvisSeg.Left;
       };
     #else
     #endif
@@ -181,21 +177,67 @@ AnyFolder BodyModel = {
   
   AnyFolder Interface = {
         AnyKinCoM CenterOfMass = {
+          // We include segments individually here since we want to avoid creating a reference to the
+          // whole BodyModel folder.
           #if  BM_ARM_RIGHT
           AnyFolder &RightArmSeg = ..Right.ShoulderArm.Seg;
+          AnyFolder &RightArmWrapSeg1 = ..Right.ShoulderArm.Mus.DeltoidWrappingPosterior.WrappingSegment;
+          AnyFolder &RightArmWrapSeg2 = ..Right.ShoulderArm.Mus.DeltoidWrappingLateral.WrappingSegment;
+          AnyFolder &RightArmWrapSeg3 = ..Right.ShoulderArm.Mus.DeltoidWrappingAnterior.WrappingSegment;
+          AnyFolder &RightArmWrapSeg4 = ..Right.ShoulderArm.Mus.LatissimusDorsiWrapping.LatissimusWrappingSeg;
+          AnyFolder &RightArmWrapSeg5 = ..Right.ShoulderArm.Mus.TricepsLHWrapping.TricepsLHWrappingSeg;
+          #if BM_ARM_MUSCLES_RIGHT
+          AnyFolder &RightArmWrapSeg6 = ..Right.ShoulderArm.Mus.Pectoralis_minor1_cyl.Cylinder.Cyl;
           #endif
+          #endif
+          
           #if  BM_ARM_LEFT
           AnyFolder &LeftArmSeg = ..Left.ShoulderArm.Seg;
+          AnyFolder &LeftArmWrapSeg1 = ..Left.ShoulderArm.Mus.DeltoidWrappingPosterior.WrappingSegment;
+          AnyFolder &LeftArmWrapSeg2 = ..Left.ShoulderArm.Mus.DeltoidWrappingLateral.WrappingSegment;
+          AnyFolder &LeftArmWrapSeg3 = ..Left.ShoulderArm.Mus.DeltoidWrappingAnterior.WrappingSegment;
+          AnyFolder &LeftArmWrapSeg4 = ..Left.ShoulderArm.Mus.LatissimusDorsiWrapping.LatissimusWrappingSeg;
+          AnyFolder &LeftArmWrapSeg5 = ..Left.ShoulderArm.Mus.TricepsLHWrapping.TricepsLHWrappingSeg;
+          #if BM_ARM_MUSCLES_LEFT
+          AnyFolder &LeftArmWrapSeg6 = ..Left.ShoulderArm.Mus.Pectoralis_minor1_cyl.Cylinder.Cyl;
           #endif
+          #endif
+          
+          #if (BM_TRUNK_CAVITY_MODEL == _CAVITY_MODEL_BUCKLE_) & BM_TRUNK_MUSCLES
+          AnyFolder& Buckle0 = ..Trunk.Buckle;
+          #endif
+          
           #if BM_LEG_RIGHT
           AnyFolder &RightLegSeg = ..Right.Leg.Seg;
-          #endif          
+          #endif
           #if BM_LEG_LEFT
           AnyFolder &LeftLegSeg = ..Left.Leg.Seg;
           #endif
-          AnyFolder &TrunkSegmentsLumbar = ..Trunk.SegmentsLumbar;
-          AnyFolder &TrunkSegmentsThorax = ..Trunk.SegmentsThorax;
-          AnyFolder &TrunkSegmentsCervicalSpine = ..Trunk.SegmentsCervicalSpine;
+          AnyFolder &TrunkSegments = ..Trunk.Segments;
+          
+          #if (BM_TRUNK_CAVITY_MODEL == _CAVITY_MODEL_VOLUME_) & BM_TRUNK_MUSCLES 
+          AnyFolder Abdominal = {
+             AnyFolder& ObliquusWrapping = ...Trunk.Abdominal.ObliquusWrapping;
+             AnyFolder& Diaphragm = ...Trunk.Abdominal.Diaphragm;
+             AnyFolder& Layer_L1 = ...Trunk.Abdominal.Layer_L1;
+             AnyFolder& Layer_L2 = ...Trunk.Abdominal.Layer_L2;
+             AnyFolder& Layer_L3 = ...Trunk.Abdominal.Layer_L3;
+             AnyFolder& Layer_L4 = ...Trunk.Abdominal.Layer_L4;
+             AnyFolder& Layer_L5 = ...Trunk.Abdominal.Layer_L5;
+             AnyFolder& Layer_Pelvic1 = ...Trunk.Abdominal.Layer_Pelvic1;
+             AnyFolder& Layer_Pelvic2 = ...Trunk.Abdominal.Layer_Pelvic2;
+             AnyFolder& Layer_Pelvic3 = ...Trunk.Abdominal.Layer_Pelvic3;
+             AnyFolder& Layer_Pelvic4 = ...Trunk.Abdominal.Layer_Pelvic4;
+             AnyFolder& Layer_Pelvic5 = ...Trunk.Abdominal.Layer_Pelvic5;
+             AnyFolder& Constraints = ...Trunk.Abdominal.Constraints;            
+          };
+          #endif
+          
+          AnyString SegNamesSearched = ObjSort(CompleteNameOf(ObjSearchRecursive( &...BodyModel, "*", "AnySeg")));
+          AnyString SegNamesCOM = ObjSort(SegNames);
+          AnyInt SegCheck = assert(eqfun(SegNamesSearched, SegNamesCOM), 
+          "Some segments are missing in the COM measure");
+          
         };  
   };
   

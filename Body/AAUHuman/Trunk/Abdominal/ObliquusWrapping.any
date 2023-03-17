@@ -1,0 +1,115 @@
+AnyFolder ObliquusWrapping ={
+  
+  AnySeg WrappingSeg ={
+    Mass=1e-5;
+    Jii ={0,0,0};
+    r0 = ....Trunk.Segments.L1Seg.r0; 
+    Axes0 =....Trunk.Segments.L1Seg.Axes0; 
+    
+    
+    AnyRefNodeGroup nodes ={
+      NodeAmount=60;
+      NodeName = strval(iarr(1, NodeAmount), "_node%04i");
+      NodeDefaults.CreateMotionOutput = {Axes=On; r=On;}; //needed for force 
+      // TODO: remove hack to force update Obj2Num
+      Node_sRels = Obj2Num(ObjGetMember(layernodes, "sRel")) + (0*.r0[0]);
+      AnyObjectPtrArray layernodes = ObjSearchRecursive("....Abdominal", "Layer_L*.BaseSegAnterior.*.*Above*.*", "AnyRefNode");
+    };
+    
+    
+    CavityPoints Layer2WrappingPoints(
+    data = ....ModelParameters.Abdominal.Layer_L2.AbdominalCavityPoints,
+    scale_fun = ....Abdominal.Layer_L2.ScaleAndProjectToLayer
+    ) = {
+      Right.points_generator = {
+        amount = 12;
+        start = ..data.Right.Posterior_Spline_Start+0.2;
+        end = ..data.Right.Anterior_Spline_End;
+      };
+      Left.points_generator = {
+        amount = 12;
+        start = ..data.Left.Posterior_Spline_Start+0.2;
+        end = ..data.Left.Anterior_Spline_End;
+      };
+      #include "CavityWallWrapping/WrappingCyls.any"
+    };    
+    
+    CavityPoints Layer3WrappingPoints(
+    data = ....ModelParameters.Abdominal.Layer_L3.AbdominalCavityPoints,
+    scale_fun = ....Abdominal.Layer_L3.ScaleAndProjectToLayer
+    ) = {
+      Right.points_generator = {
+        amount = 12;
+        start = ..data.Right.Posterior_Spline_Start+0.2;
+        end = ..data.Right.Anterior_Spline_End;
+      };
+      Left.points_generator = {
+        amount = 12;
+        start = ..data.Left.Posterior_Spline_Start+0.2;
+        end = ..data.Left.Anterior_Spline_End;
+      };
+      #include "CavityWallWrapping/WrappingCyls.any"
+    }; 
+    
+    CavityPoints Layer4WrappingPoints(
+    data = ....ModelParameters.Abdominal.Layer_L4.AbdominalCavityPoints,
+    scale_fun = ....Abdominal.Layer_L4.ScaleAndProjectToLayer
+    ) = {
+      Right.points_generator = {
+        amount = 12;
+        start = ..data.Right.Posterior_Spline_Start+0.2;
+        end = ..data.Right.Anterior_Spline_End;
+      };
+      Left.points_generator = {
+        amount = 12;
+        start = ..data.Left.Posterior_Spline_Start+0.2;
+        end = ..data.Left.Anterior_Spline_End;
+      };
+      #include "CavityWallWrapping/WrappingCyls.any"
+    }; 
+    
+    CavityPoints Layer5WrappingPoints(
+    data = ....ModelParameters.Abdominal.Layer_L5.AbdominalCavityPoints,
+    scale_fun = ....Abdominal.Layer_L5.ScaleAndProjectToLayer
+    ) = {
+      Right.points_generator = {
+        amount = 12;
+        start = ..data.Right.Posterior_Spline_Start+0.2;
+        end = ..data.Right.Anterior_Spline_End;
+      };
+      Left.points_generator = {
+        amount = 12;
+        start = ..data.Left.Posterior_Spline_Start+0.2;
+        end = ..data.Left.Anterior_Spline_End;
+      };
+      #include "CavityWallWrapping/WrappingCyls.any"
+    };   
+    
+    
+  
+  };
+    // Constraint that suspend the inertia segment inside the thoracic cavity
+    AnyKinEq constraint = {  
+      AnyMatrix skew = reshape(
+      skewmat3d(.WrappingSeg.nodes.Node_sRels), 
+      {3 * .WrappingSeg.nodes.NodeAmount,3}
+      )';
+      
+      
+      
+      
+      AnyKinMeasureLinComb measure = {
+        /// Multi-dimensional kinematic measure between wrapping segment and abdom layers
+        AnyKinLinear lin = {
+          RefFrames = {
+            ObjSelect(&...WrappingSeg.nodes, "_node*"),
+            ...WrappingSeg.nodes.layernodes
+          };
+          Ref = 0;
+        };
+        Coef = arrcat(repmat(..WrappingSeg.nodes.NodeAmount, eye(3,3))', -.skew);
+        OutDim = 6;
+      };
+    };
+  };
+  

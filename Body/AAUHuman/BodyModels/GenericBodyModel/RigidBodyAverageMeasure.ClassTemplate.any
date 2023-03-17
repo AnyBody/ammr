@@ -1,0 +1,78 @@
+/* 
+  Class template to create one multi-dimension AnyKinLinear from an array of kinematic
+  measures
+*/ 
+#class_template MeasuresToMultiDimLinear(__CLASS__ = AnyKinLinear) {
+  
+  #var AnyObjectPtrArray InputMeasures;
+
+  AnyObjectPtr _nodes = ObjGetParent(ObjSearchRecursive(InputMeasures, "*.sRel", 1));
+  AnyIntArray _ref0_idx = iarr(0, 2, NumElemOf(_nodes)-1);
+  AnyIntArray _ref1_idx = iarr(1, 2, NumElemOf(_nodes));
+  Ref = 0;
+  RefFrames = {
+    take(_nodes, _ref0_idx),
+    take(_nodes, _ref1_idx),
+  };
+};
+
+
+
+/*
+  Class template to generate a averaging kinematic measure
+
+  Arguments:
+  - ROTATIONAL -> controls whether or not to create the skewmatrix 
+  - LINEAR -> controls whether or not to compute the linear coefficients
+
+  It returnes a combination measure
+*/
+#class_template RigidBodyAverageMeasure(
+  __CLASS__ = AnyKinMeasureLinComb, 
+  LINEAR = On, 
+  ROTATIONAL = On,
+) {
+  
+  #var AnyObjectPtrArray InputMeasures; ///< Array of AnyKinMeasure to combine
+  #var AnyObjectPtr LocalReferenceFrame; ///< Ref frame to express measures relative to
+
+  /// The sign of each weight coefficient determines in what direction of the measure the
+  /// weight applies 
+  #var AnyFloat WeightCoefficients = repmat(NumElemOf(InputMeasures), 1);
+
+  /// Weight coefficient for each measure - expanded to x,y,z direction
+  AnyFloat xyz_weights = flatten({WeightCoefficients, WeightCoefficients,WeightCoefficients}');
+
+  // Here we construct a matrix of coefficients in the correct shape
+  AnyFloat identity_matrices = repmat(NumElemOf(InputMeasures), eye(3))';
+  AnyFloat linear_coefficients = identity_matrices * diag(xyz_weights);
+
+  MeasuresToMultiDimLinear lin()={ InputMeasures = .InputMeasures; };
+  
+  #if ROTATIONAL == On
+    AnyFloat measure_srels = Obj2Num(ObjGetMember(lin.RefFrames[0], "sRel")) + (0*Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.r0[0]);
+    AnyFloat local_srel = Obj2Num(ObjGetMember(ObjRefResolve(LocalReferenceFrame), "sRel")) + (0*Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.r0[0]);
+    AnyFloat srel_relative_to_local = measure_srels - reshape(repmat(SizesOf(measure_srels)[0], local_srel), SizesOf(measure_srels));
+
+    /// Skew matrix with weight coefficients added
+    ///the minus in front cancel the transpose of the skew matriw
+    AnyMatrix rotational_coefficients = -reshape(
+      skewmat3d(diag(WeightCoefficients) * srel_relative_to_local), 
+      {lin.nDim, 3}
+    )'; 
+    Coef ??= -rotational_coefficients;
+    OutDim ??= 3; 
+  #else
+    // For the case of only computing the linear part - we do not need the skewmatrix
+    Coef = linear_coefficients;
+    
+    OutDim = 3; 
+  #endif
+  
+  #if ROTATIONAL == On & LINEAR == On
+    Coef = arrcat(linear_coefficients, -rotational_coefficients);
+    OutDim = 6; 
+  #endif
+ };
+
+

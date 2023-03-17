@@ -1,0 +1,86 @@
+//This will run calibration on the spine ligaments
+AnyFolder ThoraxLigamentCalibration = {
+  AnyFolder CalibrationSettings ={
+    AnyComponentDefinition obj = {};  
+    AnyFolder Segments = {
+      AnySeg &PelvisSeg = ....BodyModel.Trunk.Segments.PelvisSeg;
+      AnySeg &SacrumSeg = ....BodyModel.Trunk.Segments.SacrumSeg;
+      AnySeg &L1Seg = ....BodyModel.Trunk.Segments.L1Seg;
+      AnySeg &L2Seg = ....BodyModel.Trunk.Segments.L2Seg;
+      AnySeg &L3Seg = ....BodyModel.Trunk.Segments.L3Seg;
+      AnySeg &L4Seg = ....BodyModel.Trunk.Segments.L4Seg;
+      AnySeg &L5Seg = ....BodyModel.Trunk.Segments.L5Seg;
+      #if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_RIGID_
+        AnySeg &Thorax = ....BodyModel.Trunk.Segments.ThoraxSeg;
+      #else
+        AnySeg &T1Seg = ....BodyModel.Trunk.Segments.T1Seg;
+        AnySeg &T2Seg = ....BodyModel.Trunk.Segments.T2Seg;
+        AnySeg &T3Seg = ....BodyModel.Trunk.Segments.T3Seg;
+        AnySeg &T4Seg = ....BodyModel.Trunk.Segments.T4Seg;
+        AnySeg &T5Seg = ....BodyModel.Trunk.Segments.T5Seg;
+        AnySeg &T6Seg = ....BodyModel.Trunk.Segments.T6Seg;
+        AnySeg &T7Seg = ....BodyModel.Trunk.Segments.T7Seg;
+        AnySeg &T8Seg = ....BodyModel.Trunk.Segments.T8Seg;
+        AnySeg &T9Seg = ....BodyModel.Trunk.Segments.T9Seg;
+        AnySeg &T10Seg = ....BodyModel.Trunk.Segments.T10Seg;
+        AnySeg &T11Seg = ....BodyModel.Trunk.Segments.T11Seg;
+        AnySeg &T12Seg = ....BodyModel.Trunk.Segments.T12Seg;
+      #endif
+    };
+    AnyFolder &SpineLigaments =  ...BodyModel.Trunk.ElasticElements.Ligaments;
+    
+    AnyFixedRefFrame ground = {
+      AnyRefNode node = { 
+        ARel=..Segments.PelvisSeg.Axes0;
+        sRel=..Segments.PelvisSeg.r0;
+      };
+    };
+
+    AnyKinEq PelvisFix = {
+      AnyKinLinear Lin = {
+        AnyRefFrame &ground = ..ground.node;
+        AnyRefFrame &Pelvis = ..Segments.PelvisSeg;
+      };
+
+      AnyKinRotational Rot = {
+        Type = RotAxesAngles;
+        AnyRefFrame &ground = ..ground.node;
+        AnyRefFrame &Pelvis = ..Segments.PelvisSeg;
+      };
+    };
+    
+    AnyKinEqSimpleDriver  ThoraxGroundDriver = {
+      AnyKinEq &Jnt = .PelvisFix;
+      DriverPos = {0,0,0,0,0,0};
+      DriverVel = {0,0,0,0,0,0};
+      Reaction.Type = {Off,Off,Off,Off,Off,Off}; 
+    };
+    
+    AnyKinEqSimpleDriver AllRelevantJoints = {
+      AnySphericalJoint &u1 = ....BodyModel.Trunk.Joints.Lumbar.SacrumPelvis;
+      AnySphericalJoint &u2 = ....BodyModel.Trunk.Joints.Lumbar.L5Sacrum;
+      AnySphericalJoint &u3 = ....BodyModel.Trunk.Joints.Lumbar.L4L5;
+      AnySphericalJoint &u4 = ....BodyModel.Trunk.Joints.Lumbar.L3L4;
+      AnySphericalJoint &u5 = ....BodyModel.Trunk.Joints.Lumbar.L2L3;
+      AnySphericalJoint &u6 = ....BodyModel.Trunk.Joints.Lumbar.L1L2;
+      AnySphericalJoint &u7 = ....BodyModel.Trunk.Joints.Lumbar.T12L1;
+      DriverPos = {0,0,0, 0,0,0, 0,0,0, 0,0,0, 0,0,0, 0,0,0, 0,0,0};
+      DriverVel = {0,0,0, 0,0,0, 0,0,0, 0,0,0, 0,0,0, 0,0,0, 0,0,0};
+      Reaction.Type = {On,On,On, On,On,On, On,On,On, On,On,On, On,On,On, On,On,On, On,On,On};
+    };
+  };
+
+  // The study: Operations to be performed on the model
+  AnyBodyCalibrationStudy CalibrationStudy = {
+    AnyFolder &ref=.CalibrationSettings; 
+    nStep = 1;
+    InitialConditions.SmallStepAssumptionOnOff = Off;
+    Kinematics.SmallStepAssumptionOnOff = Off;
+    Kinematics.PosAnalysisOnlyOnOff = On;
+    InitialConditions.PosAnalysisOnlyOnOff = On;
+  };
+};
+  
+CalibrationSequence ={ 
+  AnyOperation &ThoraxLigCal = .ThoraxLigamentCalibration.CalibrationStudy.LigamentLengthAdjustment;
+};

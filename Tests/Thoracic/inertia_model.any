@@ -1,0 +1,168 @@
+/* 
+Test model to compare inertia properties between the rigid and flexible thorax and
+buckle and volume based models
+
+We aim to test that:
+- the mass of each model is the same
+- the JMatrix is equal when summed across segments
+
+It is called from python
+
+*/ 
+
+#include "../libdef.any"
+#include "../tools.any"
+
+#ifndef TEST_NAME
+ #define TEST_NAME "test_inertia_0"
+  #define BM_TRUNK_THORACIC_MODEL _THORACIC_MODEL_FLEXIBLE_
+  #define BM_TRUNK_CAVITY_MODEL _CAVITY_MODEL_VOLUME_
+#endif
+
+// Ensure zero posture when using flexible thorax
+#if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_
+  #define BM_MANNEQUIN_DRIVER_PELVIS_THORAX_EXTENSION OFF
+  #define BM_MANNEQUIN_DRIVER_PELVIS_THORAX_ROTATION OFF
+  #define BM_MANNEQUIN_DRIVER_PELVIS_THORAX_LATERAL_BENDING OFF
+  #define BM_TRUNK_LUMBAR_THORACIC_LINK OFF
+  #define BM_TRUNK_THORACIC_RHYTHM OFF
+#endif
+
+// Volume model requires muscles to work
+#if BM_TRUNK_CAVITY_MODEL == _CAVITY_MODEL_VOLUME_
+  #define BM_TRUNK_MUSCLES ON
+#else
+  #define BM_TRUNK_MUSCLES OFF
+#endif
+
+#define BM_ARM_RIGHT ON
+#define BM_ARM_LEFT ON
+#define BM_LEG_MODEL _LEG_MODEL_TLEM2_
+#define BM_LEG_MUSCLES_BOTH ON
+#define BM_MANNEQUIN_DRIVER_DEFAULT ON
+#define BM_SCALING _SCALING_NONE_
+
+Main = {
+  #include "<ANYBODY_PATH_BODY>/HumanModel.any"
+  DrawSettings.Muscle.Visible = Off;
+  DrawSettings.InertiaSolids.Visible = On;
+  
+  AnyFolder test_variables = {
+    #if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_
+      AnyObjectPtrVar thorax_seg = &Main.HumanModel.BodyModel.Trunk.ThoracicCavity.Inertia.segment;
+    #else
+      AnyObjectPtrVar thorax_seg = &Main.HumanModel.BodyModel.Trunk.Segments.ThoraxSeg;
+    #endif
+
+    AnyFloat thorax_mass = Obj2Num(ObjGetMember(thorax_seg, "Mass")) + (0*Main.Study.t);
+    AnyFloat thorax_jmat = Obj2Num(ObjGetMember(thorax_seg, "Jmatrix")) + (0*Main.Study.t);
+
+    AnyObjectPtrArray trunk_segments = arrcat(
+      ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Segments", "L*Seg", "AnySeg"),
+      ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Segments", "C*Seg", "AnySeg"),
+      ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Segments", "SkullSeg", "AnySeg"),
+      ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Segments", "PelvisSeg", "AnySeg"),
+      ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Segments", "SacrumSeg", "AnySeg"),
+    );
+
+    AnyFloat trunk_segments_masses = Obj2Num(ObjGetMember(trunk_segments, "Mass")) + (0*Main.Study.t);
+    AnyFloat trunk_segments_jmat = Obj2Num(ObjGetMember(trunk_segments, "Jmatrix")) + (0*Main.Study.t);
+
+
+  };
+
+  AnyOperationSequence RunTest = {
+    AnyOperation& test_load_pos = Main.Operations.TestLoadPos;
+  };
+
+  AnyKinStudy Study = {
+    AnyFolder& BodyModel = Main.HumanModel.BodyModel;
+    AnyFolder& DefaultDrivers = Main.HumanModel.DefaultMannequinDrivers;
+    // Correct the load time position of the Pelvis so we can drive the AnatomicalFrameTrunk to zero, without the model moving
+    Main.HumanModel.Mannequin.Posture.PelvisPosX = Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.AnatomicalFrameTrunk.sRel[0];
+    Main.HumanModel.Mannequin.Posture.PelvisPosY = Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.AnatomicalFrameTrunk.sRel[1];
+    Main.HumanModel.Mannequin.Posture.PelvisPosZ = Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.AnatomicalFrameTrunk.sRel[2];
+    
+    // Set spine to zero when using the flexible thorax
+    #if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_
+    
+      Main.HumanModel.Mannequin.Posture.PelvisT12Extension = 0;
+      Main.HumanModel.Mannequin.Posture.T12T1Extension = 0;
+      
+      AnyKinEq extension_constraint = {
+        AnyKinMeasure &pelvis_t12_ext = Main.HumanModel.BodyModel.Interface.Trunk.PelvisT12Extension;
+        AnyKinMeasure &t12_t1_ext = Main.HumanModel.BodyModel.Interface.Trunk.T12T1Extension;
+        AnyKinMeasure& PelvisT12_Rot_ref = Main.HumanModel.BodyModel.Interface.Trunk.PelvisT12Rotation;      
+        AnyKinMeasure& T12T1_Rot_ref = Main.HumanModel.BodyModel.Interface.Trunk.T12T1Rotation;
+        AnyKinMeasure& PelvisT12_Latbend_ref = Main.HumanModel.BodyModel.Interface.Trunk.PelvisT12LateralBending;      
+        AnyKinMeasure& T12T1_latbend_ref = Main.HumanModel.BodyModel.Interface.Trunk.T12T1LateralBending; 
+      };
+      
+      AnyKinEqSimpleDriver spine_driver = {
+        AnyKinMeasure& T11T12_1 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T11T12.Extension;      
+        AnyKinMeasure& T10T11_2 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T10T11.Extension;      
+        AnyKinMeasure& T9T10_3 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T9T10.Extension;      
+        AnyKinMeasure& T8T9_4 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T8T9.Extension;      
+        AnyKinMeasure& T7T8_5 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T7T8.Extension;      
+        AnyKinMeasure& T6T7_6 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T6T7.Extension;      
+        AnyKinMeasure& T5T6_7 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T5T6.Extension;      
+        AnyKinMeasure& T4T5_8 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T4T5.Extension;      
+        AnyKinMeasure& T3T4_9 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T3T4.Extension;      
+        AnyKinMeasure& T2T3_10 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T2T3.Extension;      
+        AnyKinMeasure& T1T2_11 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T1T2.Extension;
+        AnyKinMeasure& T11T12_12 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T11T12.LateralBending;      
+        AnyKinMeasure& T10T11_13 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T10T11.LateralBending;      
+        AnyKinMeasure& T9T10_14 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T9T10.LateralBending;      
+        AnyKinMeasure& T8T9_15 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T8T9.LateralBending;      
+        AnyKinMeasure& T7T8_16 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T7T8.LateralBending;      
+        AnyKinMeasure& T6T7_17 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T6T7.LateralBending;      
+        AnyKinMeasure& T5T6_18 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T5T6.LateralBending;      
+        AnyKinMeasure& T4T5_19 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T4T5.LateralBending;      
+        AnyKinMeasure& T3T4_20 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T3T4.LateralBending;      
+        AnyKinMeasure& T2T3_21 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T2T3.LateralBending;      
+        AnyKinMeasure& T1T2_22 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T1T2.LateralBending;
+        AnyKinMeasure& T11T12_23 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T11T12.Rotation;      
+        AnyKinMeasure& T10T11_24 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T10T11.Rotation;      
+        AnyKinMeasure& T9T10_25 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T9T10.Rotation;      
+        AnyKinMeasure& T8T9_26 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T8T9.Rotation;      
+        AnyKinMeasure& T7T8_27 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T7T8.Rotation;      
+        AnyKinMeasure& T6T7_28 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T6T7.Rotation;      
+        AnyKinMeasure& T5T6_29 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T5T6.Rotation;      
+        AnyKinMeasure& T4T5_30 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T4T5.Rotation;      
+        AnyKinMeasure& T3T4_31 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T3T4.Rotation;      
+        AnyKinMeasure& T2T3_32 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T2T3.Rotation;      
+        AnyKinMeasure& T1T2_33 = Main.HumanModel.BodyModel.Interface.Trunk.IntervertebralAngles.T1T2.Rotation;
+
+        DriverPos = repmat(nDim, 0);
+        DriverVel = repmat(nDim, 0);
+      };
+    #endif
+    nStep = 1;
+  };
+  
+  
+  AnyFolder Operations = {
+    AnyOperationMacro UpdateValues = {
+      MacroStr = {"classoperation Main " + strquote("Update Values")};
+    };
+    
+    AnyOperationSetValue SetLoadTestTrigger = {
+      AnyInt dummy = 1;
+      Source = {&dummy};
+      Target = {&.TestLoadTrigger};
+    };
+    AnyOperationSetValue ResetLoadTestTrigger = {
+      AnyInt dummy = 0;
+      Source = {&dummy};
+      Target = {&.TestLoadTrigger};
+    };
+    
+    AnyOperationSequence TestLoadPos = {
+      AnyOperation& set_trigger = .SetLoadTestTrigger;
+      AnyOperation& reevaluate_test = .UpdateValues;
+      AnyOperation& reset_trigger = .ResetLoadTestTrigger;
+    };
+      
+    AnyInt TestLoadTrigger = DesignVar(0);
+  };
+};

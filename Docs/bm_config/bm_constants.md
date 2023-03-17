@@ -317,6 +317,114 @@ Constant to switch nonlinear disc spring on in the spine
 
 
 
+::::{dropdown} `_RIBCAGE_RIGID_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _RIBCAGE_RIGID_
+:value: 0
+A completely rigid model of the thoracic spine and ribcage.
+:::
+::::
+
+
+
+::::{dropdown} `_RIBCAGE_SEMI_RIGID_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _RIBCAGE_SEMI_RIGID_
+:value: 1
+A model of the ribcage where ribs are rigidly attached to relevant vertebrae, sternum follows superior ribs.
+:::
+::::
+
+
+
+::::{dropdown} `_RIBCAGE_POTENTIAL_ENERGY_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _RIBCAGE_POTENTIAL_ENERGY_
+:value: 2
+Kinematic behaviour of the ribcage is defined by minimization of potential energy in ligamentous tissues.
+:::
+::::
+
+
+
+::::{dropdown} `_RIBCAGE_USERDEFINED_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _RIBCAGE_USERDEFINED_
+:value: 3
+Kinematic behaviour of the ribcage is provided by the user.
+:::
+::::
+
+
+
+::::{dropdown} `_THORACIC_MODEL_RIGID_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _THORACIC_MODEL_RIGID_
+:value: 0
+A completely rigid model of the thoracic spine and ribcage.
+:::
+::::
+
+
+
+::::{dropdown} `_THORACIC_MODEL_FLEXIBLE_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _THORACIC_MODEL_FLEXIBLE_
+:value: 1
+A full model of the thorax and ribcage with a kinematically determinate set of drivers.
+:::
+::::
+
+
+
+::::{dropdown} `_THORACIC_MODEL_USERDEFINED_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _THORACIC_MODEL_USERDEFINED_
+:value: 2
+A full model of the thorax and ribcage where drivers/rythmns are specified by the users.
+:::
+::::
+
+
+
+::::{dropdown} `_CAVITY_MODEL_BUCKLE_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _CAVITY_MODEL_BUCKLE_
+:value: 0
+The old buckle implementation of the abdominal pressure.
+:::
+::::
+
+
+
+::::{dropdown} `_CAVITY_MODEL_VOLUME_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _CAVITY_MODEL_VOLUME_
+:value: 1
+A volume measure implementation of the pressure in the abdominal cavity and lungs.
+:::
+::::
+
+
+
 ::::{dropdown} `_RHYTHM_SOFT_`
 :animate: fade-in-slide-down
 :margin: 0 0 2 2

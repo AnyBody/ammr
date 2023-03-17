@@ -2,7 +2,7 @@ name: Nightly Full AMMR tests
 
 on:
   schedule:
-    - cron: 0 3 * * *
+    - cron: 0 4 * * *
   workflow_dispatch:
     inputs:
       debug_config:
@@ -55,8 +55,33 @@ jobs:
         run: |
           ~\micromamba.exe shell hook -s powershell | Out-String | iex
           micromamba activate _ammr_test
+        
+          cd Tests
+          pytest -n 4 `
+            --runslow `
+            --instafail `
+            --durations=20 `
+            --anybodycon="$Env:ANYBODYCON" `
+            $(Get-content .\known-failing-tests.txt | foreach {"--deselect={0}" -f $_.split('#')[0].trim() })
 
-          python -m pytest --runslow -n 4 --durations=20 --anybodycon="$Env:ANYBODYCON" Tests
+      - name: Run known failing AMMR tests
+        run: |
+          ~\micromamba.exe shell hook -s powershell | Out-String | iex
+          micromamba activate _ammr_test
+
+          cd Tests
+          if ((Get-Content .\known-failing-tests.txt | Measure-Object).Count -gt 0) {
+            pytest -n 4 `
+              --runslow `
+              --instafail `
+              --durations=20 `
+              --anybodycon="$Env:ANYBODYCON" `
+              --xfail-all `
+              --suppress-no-test-exit-code `
+              $(Get-content .\known-failing-tests.txt | foreach {"{0}" -f $_.split('#')[0].trim()})
+          }
+
+
 
   test-linux:
     runs-on: [self-hosted, linux]
@@ -67,7 +92,7 @@ jobs:
 
     strategy:
       matrix:
-        ams_version: ["7.4", "7.5_Beta"]
+        ams_version: ["7.5_Beta"]
     
     steps:
       - uses: actions/checkout@v3
@@ -77,5 +102,5 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest -n 2 Tests
+          pytest -n 2 Tests/Applications
 

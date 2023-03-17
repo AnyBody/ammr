@@ -1,0 +1,88 @@
+#include "../../libdef.any"
+
+
+// This is a model for Box Lifting from the ground
+
+Main = {
+//  #define BM_LEG_MODEL OFF
+  
+#define BM_ARM_LEFT ON
+#define BM_ARM_RIGHT ON
+#define  BM_ARM_THORAX_SCAPULA_CONTACT _MULTIPLE_POINT_CONTACT_
+#define  BM_TRUNK_CERVICAL_MUSCLES ON
+#define BM_TRUNK_MUSCLES ON
+//#define BM_TRUNK_LIGAMENTS ON
+//////////////////////////////////////////
+
+  // ----------------------------------------------------------
+  // Draw settings
+  // ----------------------------------------------------------
+  #include "DrawSettings.any"
+  // ----------------------------------------------------------
+  // Definition of the path for Mannequin.any file
+  // ----------------------------------------------------------  
+  #include "Mannequin.any"
+  // ----------------------------------------------------------
+  // Definition of the path for anthropometric data
+  // ----------------------------------------------------------   
+  #path BM_SCALING_ANTHRO_FILE "AnyManUniform.any"
+  // ----------------------------------------------------------
+  // Scaling method settings
+  // ----------------------------------------------------------    
+  #define BM_SCALING _SCALING_UNIFORM_
+  // ----------------------------------------------------------
+  // BM statements which configure the structure of human model
+  // ----------------------------------------------------------  
+  #define BM_LEG_MODEL _LEG_MODEL_TLEM2_
+  
+  #include "<ANYBODY_PATH_BODY>/HumanModel.any"
+  
+  // This folder collects the elements of the model. It is referred by the
+  // study section below as the target of the analyses.  
+  AnyFolder Model = {
+    
+    AnyFolder &BodyModel=.HumanModel.BodyModel;
+    #include "Environment.any"   
+    
+    // The Mannequin file specifies load-time positions for all the segments
+    // in the HumanModel. This is important for the model's ablity to resolve
+    // all the kinematic constraints when the model is analyzed.
+    // The mannequin file also drives those degrees of freedom of the human 
+    // model that are not governed by problem-specific drivers at run time.    
+    AnyFolder& Mannequin = .HumanModel.Mannequin;
+    
+    // The include file below, MannequinValuesFromModel, is not strictly
+    // necessary but can be helpful when developing new applications
+    // based on this application, particularly when the new application
+    // involves an environment that somehow governs the kinematics of
+    // the human body.
+    
+    // When included, MannequinValuesFromModel creates a folder named
+    // Main.HumanModel.BodyModel.MannequinValuesFromModel that contains 
+    // variables with the human model's joint angles as they are defined
+    // in the mennequin model. When the model has been loaded and the
+    // SetInitialConditions operation has been executed successfully once,
+    // you can look up 
+    // Main.HumanModel.BodyModel.MannequinValuesFromModel in the model
+    // tree and dump its values. The output is very similar to the content
+    // of the mannequin file, so the output can be saved and edited slightly
+    // and then replace the existing mannequin.any file. The new file will
+    // cause the model to have the exactly correct load-time positions.
+    // #include "MannequinValuesFromModel.any"
+    
+    AnyFolder ModelEnvironmentConnection = {
+      #include "JointsAndDrivers.any"
+    };
+  };
+    
+  AnyBodyStudy Study = {
+    AnyFolder &Model = .Model;   
+    
+    tEnd = 1.0;
+    Gravity = {0.0, -9.81, 0.0};
+    nStep = 1;
+    
+  }; // End of study
+
+}; //Main
+

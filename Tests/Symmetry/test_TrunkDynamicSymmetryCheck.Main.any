@@ -4,7 +4,7 @@
 
 
 #include "libdef.any"
-
+#include "../tools.any"
 // ----------------------------------------------------------
 // Model configuration:
 // For more info on body model configuration options please load the model and double click on: 
@@ -13,15 +13,15 @@
 
 #define BM_ARM_RIGHT OFF
 #define BM_ARM_LEFT OFF
-#define BM_LEG_RIGHT OFF
-#define BM_LEG_LEFT OFF
+#define BM_LEG_RIGHT ON
+#define BM_LEG_LEFT ON
 
 
 #define BM_SCALING _SCALING_LENGTHMASSFAT_
 
 // Use interpolation drivers to define motion
 #define DriverSelection "FreePostureMove"
-
+#define TEST_SEVERITY assert
 // actual model  
 #include "DynamicTest/FreePostureFullBodyStatic.Main.any" 
 Main = {
@@ -30,14 +30,54 @@ Main = {
   Main.HumanModel.Anthropometrics.SegmentDimensions.TrunkHeight = 0.54;
   Main.HumanModel.Anthropometrics.SegmentDimensions.PelvisWidth = 0.16;
   
+  AnyInt TestTrigger = DesignVar(0);
+ 
+  OPERATION_TEST_TRIGGER(Main.Study.InverseDynamics.PreOperation, Main.TestTrigger);
   
   Main.Study ={
+    AnyFloat kin_tol = 1e-7;
+    AnyFloat force_tol = 1e-7;
     
-    AnyInt test1= assert(ltfun(Main.Study.SymmetryCheck.Trunk.MuscleLumbar.Comparison.MaxFtDif, 1e-12),
-    "Trunk lumbar model symmetry");
-  };
-  
+    AnyInt TrunkPositions = TEST_SEVERITY( 
+      orfun( 
+        not(Main.TestTrigger),  
+        ltfun(Main.Study.SymmetryCheck.Trunk.Kinematics.pos.NormalizedDifference, kin_tol)
+      ),
+      "Trunk model positions asymmetric"
+    );
+
+    AnyInt TrunkMuscleLengths = assert(
+      orfun(
+        not(Main.TestTrigger),
+        ltfun(Main.Study.SymmetryCheck.Trunk.Muscle.lmt.NormalizedDifference, kin_tol)
+      ),
+      "Trunk muscle lengths asymmetric"
+    );
+    
+    AnyInt TrunkMuscleLengthVelocities = TEST_SEVERITY(
+      orfun(
+        not(Main.TestTrigger),
+        ltfun(Main.Study.SymmetryCheck.Trunk.Muscle.lmtDot.NormalizedDifference, kin_tol),
+      ),
+      "Trunk muscle length velocities asymmetric"
+    );
+
+    AnyInt TrunkMuscleStrengths = TEST_SEVERITY(
+      orfun(
+        not(Main.TestTrigger),
+        ltfun(Main.Study.SymmetryCheck.Trunk.Muscle.strength.NormalizedDifference, kin_tol),
+        ),
+      "Trunk muscle strength asymmetric"
+    );
+    
+    AnyInt TrunkMusForces = TEST_SEVERITY(
+      orfun(
+        not(Main.TestTrigger),
+        ltfun(Main.Study.SymmetryCheck.Trunk.Muscle.ft.NormalizedDifference, force_tol),
+        ),
+      "Trunk model muscle forces asymmetric"
+    );
+  };  
   
   AnyOperation& RunTest = Main.RunApplication;
 };
-

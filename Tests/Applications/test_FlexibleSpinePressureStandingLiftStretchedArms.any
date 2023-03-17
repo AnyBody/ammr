@@ -1,0 +1,34 @@
+//pytest_markers=["slow", pytest.mark.order("first"), pytest.mark.skip(reason="Too slow and unreliable.")]
+//ignore_errors=["'expect' failed"]
+
+#include "../libdef.any"
+
+#include "../../Application/Validation/FlexibleThorax/DiscPressure/WilkeSpinalDiscPressure/SpinePressureStandingLiftStretchedArms/SpinePressureStandingLiftStretchedArms.main.any"
+
+#include "../tools.any"
+
+Main = 
+{  
+  
+  Main.Study = 
+  {
+    AnyVar RefValue = 2159.2;
+    EXPECT_RANGE(L5Sacrum, Main.Study.L5SacrumReac, 0.95*RefValue, 1.05*RefValue, Main.TestTrigger, "L5Sacrum outside validation");
+    AnyVar todo = notice(0, "TODO: check L5SacrumReac");
+  };
+  
+  AnyInt TestTrigger = DesignVar(0);
+  
+  OPERATION_TEST_TRIGGER(Main.Study.InverseDynamics.PreOperation, Main.TestTrigger);
+  
+#ifndef CREATE_IMAGE
+  AnyOperation& RunTest = Main.RunApplication;
+#else
+  Main.wilke.Visible = Off;
+  #include "../Cameras.any"
+  AnyOperation& CameraInitPos = Main.Study.InitialConditions;
+  LoadTimeCam.CameraLookAtPoint = {0.1,0.9,0};
+  LoadTimeCam.CameraFieldOfView = DesignVar(2);
+  LoadTimeCam.CameraDirection  = {0,0,1};
+#endif
+};

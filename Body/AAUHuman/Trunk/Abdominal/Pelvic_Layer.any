@@ -1,0 +1,140 @@
+AnyFunTransform3D &Scale = BaseSegPosterior.Scale;
+
+AnyFunTransform3DLin ScaleAndProjectToLayer = {
+  PreTransforms = {&.BaseSegPosterior.Scale, &ProjectToYZero};
+  ScaleMat = eye(3);
+  Offset = {0, .LayerRef.Origin.sRel[1], 0};  //< Translation to vetebra/layer level
+  
+  AnyFunTransform3DLin ProjectToYZero = {
+    ScaleMat = {{1,0,0},{0,0,0},{0,0,1}}; //< Remove Y component
+    Offset = zeros(3,1)';
+  };
+};
+
+LayerRef = {
+  
+  AnyRefNode Origin = {
+    sRel = .Scale(..Data.Origin);
+  };
+  AnyFunTransform3D &Scale= .Scale; 
+  
+  CavityPoints VolumePoints(data=..Data.AbdominalCavityPoints, scale_fun=..ScaleAndProjectToLayer) = {
+    Right.points_generator = {
+      amount = ......ModelParameters.DiscretizationPosterior;
+      start = ..data.Right.Posterior_Spline_Start; 
+      end = ..data.Right.Posterior_Spline_End;
+    };
+    Left.points_generator = {
+      amount = ......ModelParameters.DiscretizationPosterior;
+      start = ..data.Left.Posterior_Spline_Start; 
+      end = ..data.Left.Posterior_Spline_End;
+    };
+  };
+};
+
+AnySeg BaseSegAnterior={
+  sCoM = {0.1, 0, 0};
+  Mass = 1e-5;
+  Jii = 0 * {0.001, 0.001, 0.001};
+  r0 = .BaseSegPosterior.r0;
+  Axes0 = .BaseSegPosterior.Axes0;
+  AnyRefNode Origin = {};
+  AnyRefNode JntNode = {sRel = ..LayerRef.sRel;};
+  
+  CavityPoints VolumePoints(data=..Data.AbdominalCavityPoints, scale_fun=..ScaleAndProjectToLayer) = {
+    Right.points_generator = {
+      amount = ......ModelParameters.DiscretizationAnterior;
+      start = ..data.Right.Anterior_Spline_Start; 
+      end = ..data.Right.Anterior_Spline_End;
+    };
+    Left.points_generator = {
+      amount = ......ModelParameters.DiscretizationAnterior;
+      start = ..data.Left.Anterior_Spline_Start; 
+      end = ..data.Left.Anterior_Spline_End;
+    };
+    AnyRefNode Center = { 
+      sRel = mean({
+        .Right.points_generator.points[.Right.points_generator.amount - 1], 
+        .Left.points_generator.points[.Right.points_generator.amount - 1]}');
+    };
+  };
+  
+//  AnyDrawPointCloud drw_points ={
+//    Points= arrcat(.VolumePoints.Right.Node_sRels,.VolumePoints.Left.Node_sRels);
+//    Points3D = On;
+//    RGB={1,0,0};
+//  };
+  
+  AnyRefNode LayerConstraintNodes = {
+    
+    AnyFolder LayerPoints = {
+      PointGenerator points_right(fun=SplineFun, scale_fun=....ScaleAndProjectToLayer)={
+        start=.....Parameters.LayerMeasureSplineStart;
+            amount = .....Parameters.LayerMeasureAmount;  
+        AnyFunInterpol &SplineFun = ....Data.AbdominalCavityPoints.Right.Parametric.Fun;
+      };
+      PointGenerator points_left(fun=SplineFun, scale_fun=....ScaleAndProjectToLayer)={
+     start=.....Parameters.LayerMeasureSplineStart;
+            amount = .....Parameters.LayerMeasureAmount;  
+        AnyFunInterpol &SplineFun = ....Data.AbdominalCavityPoints.Left.Parametric.Fun;
+      };
+    };
+    
+    AnyRefNodeGroup Nodes_Below_Layer ={
+      NodeAmount = .LayerPoints.points_right.amount+.LayerPoints.points_left.amount; // number nodes in group
+      NodeName = strval(iarr(1, NodeAmount), "_node%04i");
+      
+      Node_sRels = 
+      (arrcat(.LayerPoints.points_right.points, flip(.LayerPoints.points_left.points, 0)) +
+      arrcat(...layer_below.BaseSegAnterior.LayerConstraintNodes.LayerPoints.points_right.points, 
+      flip(...layer_below.BaseSegAnterior.LayerConstraintNodes.LayerPoints.points_left.points,0) )
+      ) / 2;
+      NodeDefaults.CreateMotionOutput.r = On;
+    };
+    
+    AnyRefNodeGroup Nodes_Above_Layer ={
+      NodeAmount = .LayerPoints.points_right.amount+.LayerPoints.points_left.amount; // number nodes in group
+      NodeName = strval(iarr(1, NodeAmount), "_node%04i");
+      Node_sRels = 
+      (arrcat(.LayerPoints.points_right.points, flip(.LayerPoints.points_left.points, 0)) +
+      arrcat(...layer_above.BaseSegAnterior.LayerConstraintNodes.LayerPoints.points_right.points, 
+      flip(...layer_above.BaseSegAnterior.LayerConstraintNodes.LayerPoints.points_left.points,0) )
+      )/2;
+      NodeDefaults.CreateMotionOutput.r = On;
+    };
+    
+  };
+  
+  
+};
+
+AnyObjectPtrArray FullEdge_Base = arrcat(
+LayerRef.VolumePoints.Right.NodePointers,
+BaseSegAnterior.VolumePoints.Right.NodePointers,
+flip(BaseSegAnterior.VolumePoints.Left.NodePointers),
+flip(LayerRef.VolumePoints.Left.NodePointers)
+);
+
+#ifndef PELVIC_LAYER_MOVES
+
+AnyStdJoint PelvicLayer_BaseSegAnterior = {
+  AnyRefNode &ref1 = .LayerRef;
+  AnyRefFrame &ref2 = .BaseSegAnterior.JntNode;  
+};
+
+#endif
+
+
+
+#ifdef PELVIC_LAYER_MOVES
+#include "LayerConstraintsPelvic.any"
+AnyRevoluteJoint PelvicLayer_BaseSegAnterior = {
+  AnyRefNode &ref1 = .LayerRef;
+  AnyRefFrame &ref2 = .BaseSegAnterior.JntNode;  
+  Axis=z;
+};
+
+
+
+#endif
+

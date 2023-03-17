@@ -1,0 +1,43 @@
+//pytest_markers=["slow", pytest.mark.order("first")]
+//save_study=["Main.Study"]
+//ignore_errors=["'expect' failed"]
+
+
+#include "../libdef.any"
+
+#include "../../Application/Validation/FlexibleThorax/DiscPressure/WilkeSpinalDiscPressure/SpinePressureSeatingRelaxed/SpinePressureSeatingRelaxed.main.any"
+
+#include "../tools.any"
+
+#ifndef TEST_NAME
+//#define CREATE_IMAGE
+#endif
+
+Main = 
+{  
+  
+  Main.Study = 
+  {
+    AnyVar RefValue = 305.6;
+    EXPECT_RANGE(L5Sacrum, Main.Study.L5SacrumReac, 0.95*RefValue, 1.05*RefValue, Main.TestTrigger, "L5Sacrum outside validation");
+    AnyVar todo = notice(0, "TODO: check L5SacrumReac");
+  };
+  
+  AnyInt TestTrigger = DesignVar(0);
+  
+  OPERATION_TEST_TRIGGER(Main.Study.InverseDynamics.PreOperation, Main.TestTrigger);
+  
+#ifndef CREATE_IMAGE
+  AnyOperation& RunTest = Main.RunApplication;
+#else
+  Main.wilke.Visible = Off;
+  #include "../Cameras.any"
+  AnyOperation& CameraInitPos = Main.Study.InitialConditions;
+  LoadTimeCam.CameraLookAtPoint = {0.15,-0.5,0};
+  LoadTimeCam.CameraFieldOfView = DesignVar(2);
+  LoadTimeCam.CameraDirection  = {0,0,1};
+#endif
+};
+
+
+

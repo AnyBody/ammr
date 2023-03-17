@@ -1,0 +1,74 @@
+/*
+File with joints and constraints for each rib
+*/
+
+AnySphericalJoint CostoVertebral = {
+  AnyRefFrame &vertebra = .RotationConstraint.vertebra.CV;
+  AnyRefFrame &rib = .RotationConstraint.rib.CV;
+};
+
+AnyKinEq RotationConstraint = {
+  AnyIntVar RibIndex ??= 0; ///< Define which rib we are constructing for
+  
+  RigidBodyAverageMeasure CombinationMeasure(ROTATIONAL = On, LINEAR = Off) = {
+    LocalReferenceFrame = &..CostoVertebral.rib;
+    
+    InputMeasures = {
+      &.Measures.CostoTransverseSuperior,
+      &.Measures.CostoTransverseInferior,
+      &.Measures.InterCostalSuperior,
+      &.Measures.InterCostalInferior,
+      &.Measures.CostoChondral,     
+    };
+    WeightCoefficients = arrcat(
+      repmat(2, -......ModelParameters.CostoTransverseWeight),
+      -......ModelParameters.InterCostalWeight,
+      ......ModelParameters.InterCostalWeight, // positive
+      -......ModelParameters.CostoCartilage.Kx[.RibIndex - 1]
+    );
+  };
+  Reaction.Type ??= repmat(nDim, Off);
+  CType ??= repmat(nDim, Hard);
+
+  // Measures used by the constraint
+  AnyFolder Measures = {
+    AnyKinLinear CostoTransverseSuperior = {
+      Ref = 0;
+      AnyRefNode &Vertebra = ..vertebra.CTsup;
+      AnyRefNode &Rib = ..rib.CTsup;
+    };
+    AnyKinLinear CostoTransverseInferior = {
+      Ref = 0;
+      AnyRefNode &Vertebra = ..vertebra.CTinf;
+      AnyRefNode &Rib = ..rib.CTinf;
+    };
+    AnyKinLinear InterCostalSuperior = { 
+      Ref = 0;
+      AnyRefFrame &UpperRib = ..rib_above.ICSpringInfNode;
+      AnyRefFrame &LowerRib = ..rib.ICSpringSupNode;
+      AnyFloat L = UpperRib.sRel - LowerRib.sRel;
+    };
+    AnyKinLinear InterCostalInferior = { 
+      Ref = 0;
+      AnyRefFrame &UpperRib = ..rib.ICSpringInfNode;
+      AnyRefFrame &LowerRib = ..rib_below.ICSpringSupNode;
+      AnyFloat L = UpperRib.sRel - LowerRib.sRel;
+    };
+  };
+};
+
+
+AnyRecruitedActuator CostoChondralReactionForce = {
+  AnyIntVar RibIndex ??= .RotationConstraint.RibIndex; ///< Define which rib we are constructing for
+  
+  AnyKinMeasure &PositiveDirection = .RotationConstraint.Measures.CostoChondralAligned; 
+  AnyKinMeasure &NegativeDirection = .RotationConstraint.Measures.CostoChondralAligned; 
+  
+  Type = {
+    NonNegative, NonNegative, NonNegative, 
+    NonPositive, NonPositive, NonPositive
+  };
+  
+  Strength = .....ModelParameters.CostoCartilage.ReactionForceStrength[ RibIndex -1 ];
+  SET_DEFAULT_ACTUATOR_VOLUME;
+};

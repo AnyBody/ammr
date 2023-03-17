@@ -2,7 +2,7 @@ name: AMMR tests
 
 on:
   pull_request:
-    branches: [ master, master-ammr-2.5 ]
+    branches: [ master, master-ammr-2.5, master-ammr-3.0 ]
     paths-ignore:
       - 'Docs/**'
   workflow_dispatch:
@@ -44,6 +44,26 @@ jobs:
           ~\micromamba.exe shell hook -s powershell | Out-String | iex
           micromamba activate _ammr_test
         
-          pytest -n 4 --instafail --durations=20 --anybodycon="$Env:ANYBODYCON" Tests
+          cd Tests
+          pytest -n 4 `
+            --instafail `
+            --durations=20 `
+            --anybodycon="$Env:ANYBODYCON" `
+            $(Get-content .\known-failing-tests.txt | foreach {"--deselect={0}" -f $_.split('#')[0].trim() })
 
+      - name: Run known failing AMMR tests
+        run: |
+          ~\micromamba.exe shell hook -s powershell | Out-String | iex
+          micromamba activate _ammr_test
 
+          cd Tests
+          # Check if the file .\known-failing-tests.txt is emtpty
+          if ((Get-Content .\known-failing-tests.txt | Measure-Object).Count -gt 0) {
+            pytest -n 4 `
+              --instafail `
+              --durations=20 `
+              --anybodycon="$Env:ANYBODYCON" `
+              --xfail-all `
+              --suppress-no-test-exit-code `
+              $(Get-content .\known-failing-tests.txt | foreach {"{0}" -f $_.split('#')[0].trim()})
+          }

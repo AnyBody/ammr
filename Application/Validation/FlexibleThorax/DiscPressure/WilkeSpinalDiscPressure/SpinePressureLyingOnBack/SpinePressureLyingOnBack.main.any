@@ -1,0 +1,154 @@
+#include "../../libdef.any"
+
+// This is a Wilke Spine Pressure Validation Model. To see the documentation click the link below.
+// #path HTML_DOC "<ANYBODY_PATH_BODY>/Documentation/auto_examples/Validation/plot_WilkeSpinePressure.html"
+
+Main = {
+  //  #define BM_LEG_MODEL OFF
+  
+  // Note: Model doesn't yet work with arms
+  #define BM_ARM_LEFT ON
+  #define BM_ARM_RIGHT ON
+  #define  BM_ARM_THORAX_SCAPULA_CONTACT _MULTIPLE_POINT_CONTACT_
+  #define  BM_TRUNK_CERVICAL_MUSCLES ON
+  #define BM_TRUNK_MUSCLES ON
+  
+  //#define BM_TRUNK_LIGAMENTS ON 
+  // New thorax is enabled with
+  #define BM_TRUNK_THORACIC_MODEL _THORACIC_MODEL_FLEXIBLE_
+  #define BM_LEG_TRUNK_INTERFACE _MORPH_LEG_TO_TRUNK_
+  
+//  #define THORACIC_CAVITY_PRESSURE
+  //////////////////////////////////////////
+  
+
+  /**Execute this operation to run the model in the intended operation sequence.  
+  It is also possible to run operations seperately, by manual selections in the operation tree*/
+  AnyOperationSequence RunApplication = {
+
+    /**This operation calibrates the muscles in the model if these are of the type AnyMuscleModel3E.
+    This will just be an empty operation if the model is using a muscle type that does not require calibration.*/
+    AnyOperation &CalibrationAnal = Main.HumanModel.Calibration.CalibrationSequence;  
+
+    ///This operation is the inverse dynamic analysis
+    AnyOperation &InvAnal=Main.Study.InverseDynamics;
+  };
+
+
+
+  
+  /// Driver Positions - in degrees
+  AnyFolder DrvPos = {
+    AnyVar PelvisSeatLinXPos = 0.057;      ///< Position of the pelvis on the seat
+    AnyVar SeatGlobalLinYPos = 0;         ///< Seat Height
+    AnyVar SeatGlobalZRot = 0;            ///< Forward seat inclination
+    AnyVar BackRestHeadResRotZPos = 0;    ///< Rotation of the head rest wrt the back rest
+    AnyVar GlobalLegRestRotZPos = 90;     ///< Inclination of the leg rest
+    AnyVar GlobalBackRestRotZPos = 90;    ///< Back rest inclination
+    AnyVar LegRestFootRestLinYPos = 0.16; //< Position of the footrest along the leg rest
+  }; // DrvPos
+  
+  /// Driver Velocities - angles are in degrees per second
+  AnyFolder DrvVel = {
+    AnyVar PelvisSeatLinXVel = 0;         ///< Movement of the pelvis on the seat
+    AnyVar SeatGlobalLinYVel = 0;         ///< Movement of the seat Height
+    AnyVar SeatGlobalZRotVel = 0;         ///< Movement of seat inclination
+    AnyVar GlobalBackRestRotZVel = 0;     ///< Back rest inclination velocity
+    AnyVar GlobalLegRestRotZVel = 0;      ///< Leg rest inclination velocity
+    AnyVar LegRestFootRestLinYVel = 0;    //< Movement of the footrest along the leg rest
+  }; // DrvVel
+  
+  // --------------------------------------------------------
+  // Support settings 
+  // --------------------------------------------------------
+  /// Settings for the support elements, friction coefficients and
+  /// strength of the support contact elements. If the strength 
+  /// gets too low it means that the body will start using muscle
+  /// force to avoid laying too much 
+  AnyFolder SupportSettings = {
+    
+    //Friction coefficients between the human and the chair
+    AnyVar StaticFrictionSeat = 0.5;
+    AnyVar StaticFrictionBackrest = 0.5;
+    AnyVar StaticFrictionFootrest = 0.5; 
+    AnyVar StaticFrictionArmrest = 0.2; 
+    
+    //Strenght of the support muscles between the human and the chair
+    AnyVar SeatSupportStrength=10000;
+    AnyVar BackrestSupportStrength=10000;
+    AnyVar FootrestSupportStrength=10000;
+    AnyVar ArmrestSupportStrength=10000;
+  };
+  
+  // ----------------------------------------------------------
+  // Draw settings
+  // ----------------------------------------------------------
+  #include "DrawSettings.any"
+  // ----------------------------------------------------------
+  // Definition of the path for Mannequin.any file
+  // ----------------------------------------------------------  
+  #include "Mannequin.any"
+  // ----------------------------------------------------------
+  // Definition of the path for anthropometric data
+  // ----------------------------------------------------------   
+  #path BM_SCALING_ANTHRO_FILE "AnyManUniform.any"
+  // ----------------------------------------------------------
+  // Scaling method settings
+  // ----------------------------------------------------------    
+  #define BM_SCALING _SCALING_UNIFORM_
+  // ----------------------------------------------------------
+  // BM statements which configure the structure of human model
+  // ----------------------------------------------------------  
+  #define BM_LEG_MODEL _LEG_MODEL_TLEM2_
+  
+  #include "<ANYBODY_PATH_BODY>/HumanModel.any"  
+  
+  // ------------------------------------------------------------
+  // Model
+  // ------------------------------------------------------------
+  
+  /// This folder collects all the objects in the model.
+  AnyFolder Model = {
+    AnyFolder &BodyModel=.HumanModel.BodyModel;
+    AnyFolder& Mannequin = .HumanModel.Mannequin;
+    #include "Environment.any"
+    
+    /// Objects connecting the human to the chair
+    AnyFolder ModelEnvironmentConnection = {
+      
+      #include "ConnectionSegments.any"
+      #include "JointsAndDrivers.any"
+      
+      AnyFolder &RefPM=Main.Model.EnvironmentModel;
+      #include "InitialPositionsEnvironment.any" 
+      #include "Support.any" 
+    }; // ModelEnvironmentConnection
+  }; // Model
+  
+  // --------------------------------------------------------------
+  // Study
+  // --------------------------------------------------------------
+  AnyBodyStudy Study = {
+    AnyFolder &Model = .Model;
+    tEnd = 1;
+    Gravity = {0.0001, -9.81, 0.00001};
+    nStep = 1;
+
+    #ifdef THORACIC_CAVITY_PRESSURE
+    AnyReacForce PressureThoracic ={       AnyKinVolumeCylMesh &ref1=Main.HumanModel.BodyModel.Trunk.ThoracicCavity.Volume;    };
+    #endif
+    
+    //Size of total force in the L5 Sacrum joint
+    AnyVar L5SacrumReac = (Main.Model.BodyModel.Trunk.Joints.Lumbar.L5Sacrum.Constraints.Reaction.Fout[0]^2+
+    Main.Model.BodyModel.Trunk.Joints.Lumbar.L5Sacrum.Constraints.Reaction.Fout[1]^2+
+    Main.Model.BodyModel.Trunk.Joints.Lumbar.L5Sacrum.Constraints.Reaction.Fout[2]^2)^0.5;
+    
+    //Size of total force in the L4L5 joint
+    AnyVar L4L5Reac = (Main.Model.BodyModel.Trunk.Joints.Lumbar.L4L5.Constraints.Reaction.Fout[0]^2+
+    Main.Model.BodyModel.Trunk.Joints.Lumbar.L4L5.Constraints.Reaction.Fout[1]^2+
+    Main.Model.BodyModel.Trunk.Joints.Lumbar.L4L5.Constraints.Reaction.Fout[2]^2)^0.5;
+    
+    InitialConditions.KinematicTol = 1e-3;
+    Main.Study.Kinematics.KinematicTol = 1e-3;
+  }; // Study  
+};// Main

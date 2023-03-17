@@ -1,0 +1,57 @@
+#class_template PointGenerator(
+  AnyFunInterpol &fun, 
+  AnyFunTransform3D &scale_fun
+){
+  AnyVar start ??= 0.0;
+  AnyVar end ??= 1.0;
+  AnyIntVar amount ??= 2;
+  AnyFloat param= farr(start, (end- start) / amount, amount);
+  AnyFloat points = scale_fun(fun(param));
+};
+
+
+#class_template PointsWithEdge(
+  __CLASS__= AnyRefNodeGroup,
+  AnyFolder &data,
+  AnyFunTransform3D &scale_fun
+){
+  PointGenerator points_generator(fun=SplineFun, scale_fun=.scale_fun) = {
+    AnyFunInterpol &SplineFun = ..data.__NAME__.Parametric.Fun;
+  };
+  
+  CreateMotionOutput = {r=On;rDot=Off;rDDot=Off;Axes=Off;EulerPar=Off;omega=Off;omegaDot=Off;};
+  NodeDefaults.CreateMotionOutput = {r=On;rDot=Off;rDDot=Off;Axes=Off;EulerPar=Off;omega=Off;omegaDot=Off;};
+  NodeAmount = points_generator.amount; 
+  Node_sRels = points_generator.points; 
+  NodeName = strval(iarr(1, NodeAmount), "nn%02i");
+  AnyObjectPtrArray NodePointers = ObjSelect("nn*");
+};
+
+
+#class_template CavityPoints(
+  __CLASS__= AnyRefNode,
+  AnyFolder &data,
+  AnyFunTransform3D &scale_fun
+){
+  PointsWithEdge Right(data=.data.Right, scale_fun=.scale_fun) = {};
+  PointsWithEdge Left(data=.data.Left, scale_fun=.scale_fun) = {};
+  CreateMotionOutput = {r=On;rDot=Off;rDDot=Off;Axes=Off;EulerPar=Off;omega=Off;omegaDot=Off;};
+};
+
+
+#class_template CavityNodesThoracic(
+  __CLASS__ = AnyRefNodeGroup,
+  AnyFolder &data,
+  AnyFunTransform3D &scale_fun
+){
+  PointGenerator points_generator(fun=SplineFun, scale_fun=.scale_fun) = {
+    AnyFunInterpol &SplineFun = .data.Parametric.Fun;
+  };
+
+  CreateMotionOutput = {r=On;rDot=Off;rDDot=Off;Axes=Off;EulerPar=Off;omega=Off;omegaDot=Off;};
+  NodeDefaults.CreateMotionOutput = {r=On;rDot=Off;rDDot=Off;Axes=Off;EulerPar=Off;omega=Off;omegaDot=Off;};
+  NodeAmount = points_generator.amount; 
+  Node_sRels = points_generator.points; 
+  NodeName = strval(iarr(1, NodeAmount), "nn%02i");
+  AnyObjectPtrArray NodePointers = ObjSelect("nn*");
+};

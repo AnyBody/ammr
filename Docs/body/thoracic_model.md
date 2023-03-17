@@ -1,3 +1,6 @@
+
+(thoracic-model)=
+
 # Thoracic spine model
 
 :::{admonition} **Unreleased model:** 
@@ -55,9 +58,11 @@ The detailed thoracic model can be controlled using the `BM_*` statements like t
 ```{code-block} AnyScriptDoc
 :emphasize-lines: 3
 
-  #define BM_TRUNK_THORACIC_MODEL _THORACIC_MODEL_FLEXIBLE_   //Enables the detailed thoracic model
+#define BM_TRUNK_THORACIC_MODEL _THORACIC_MODEL_RIGID_
+#define BM_TRUNK_THORACIC_MODEL _THORACIC_MODEL_FLEXIBLE_
+#define BM_TRUNK_THORACIC_MODEL _THORACIC_MODEL_USERDEFINED_
 
-  #define BM_TRUNK_CAVITY_MODEL _CAVITY_MODEL_VOLUME_  //Enables the new abdominal volume model
+#define BM_TRUNK_CAVITY_MODEL _CAVITY_MODEL_VOLUME_  //Enables the new abdominal volume model
 
 ```
 

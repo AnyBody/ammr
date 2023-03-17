@@ -5,7 +5,18 @@ import re
 from pathlib import Path
 
 from jinja2 import Template
-import toml
+
+
+def read_toml(path):
+    try:
+       import tomllib
+    except ModuleNotFoundError:
+        try: 
+            import tomli as tomllib
+        except ModuleNotFoundError:
+            import toml as tomllib
+       
+    return tomllib.loads(path.read_text())
 
 
 
@@ -14,7 +25,7 @@ tmplpath =  Path(__file__).parent.absolute()
 
 rootpath = tmplpath.parents[2]
 
-data = toml.load(rootpath / "Body/AAUHuman/bm-parameters.toml")
+data = read_toml(rootpath / "Body/AAUHuman/bm-parameters.toml")
 
 def filterp(match):
     prog = re.compile(match)
