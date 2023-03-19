@@ -23,17 +23,26 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ams_version: ["7.4", "7.5_Beta"]
+        include:
+          - ams_version: "7.4"
+            ammr_version: "master-ammr-2.4.x"
+          - ams_version: "7.5_Beta"
+            ammr_version: "master-ammr-2.4.x"
+            suppress_deprecation_messages: "On"
+          - ams_version: "7.5_Beta"
+            ammr_version: "master-ammr-2.5"
 
     env:
       # Triggers a warning at 20 deg muscles angles
       ShortestPathMaxAngle: 0.3491
       ANYBODYCON: C:\Program Files\AnyBody Technology\AnyBody.${{ matrix.ams_version }}\AnyBodyCon.exe
-      SuppressDeprecationMessages: ${{ fromJSON('{"7.4":"Off","7.5_Beta":"On"}')[matrix.ams_version] }}
+      SuppressDeprecationMessages: ${{ matrix.suppress_deprecation_messages }}
       #PYTEST_ADDOPTS: ${{contains(matrix.ams_version, 'Beta') && '--suppress-tests-failed-exit-code' || ''}}
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: ${{ matrix.ammr_version }}
 
       - name: Set debug env var
         run: echo "${{ github.event.inputs.debug_config }}" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
@@ -64,13 +73,20 @@ jobs:
     env:
       RLM_LICENSE_PASSWORD: ${{ secrets.LICENSE_PASSWORD }}
       RLM_LICENSE: ${{ secrets.LICENSE_SERVER }}
+      SuppressDeprecationMessages: ${{ fromJSON('{"7.4":"Off","7.5_Beta":"On"}')[matrix.ams_version] }}
 
     strategy:
       matrix:
-        ams_version: ["7.4", "7.5_Beta"]
+        include:
+          - ams_version: "7.4"
+            ammr_version: "master-ammr-2.4.x"
+          - ams_version: "7.5_Beta"
+            ammr_version: "master-ammr-2.5"
     
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: ${{ matrix.ammr_version }}
       
       - name: Set debug env var
         run: echo ${{ github.event.inputs.debug_config }} >> $GITHUB_ENV
