@@ -1,12 +1,7 @@
 
 AnyFolder Foot = {
-//  AnyVar MassS = ..MassScaling.Foot.MassScale;
-//  AnyVar MassStandard = ..StandardParameters.Foot.Mass;
-//  AnyVar Mass = MassS*MassStandard;
-  //////////////////////////////////////////////////////////////////////////////////////////////////
   
-  // Create pointers for reference frames representing different segments
-  
+  // Create pointers for reference frames representing different segments  
   AnyRefFrame &Calcaneus = RigidPart.Calcaneus;
   AnyRefFrame &Cuboid = RigidPart.Cuboid;
   AnyRefFrame &Navicular = RigidPart.Navicular;
@@ -32,1201 +27,265 @@ AnyFolder Foot = {
   AnyRefFrame &DistalPhalange3 = Toe3.DistalPhalange3;
   AnyRefFrame &DistalPhalange4 = Toe4.DistalPhalange4;
   AnyRefFrame &DistalPhalange5 = Toe5.DistalPhalange5;
-
-AnySeg Talus = {
   
-  r0=..Shank.AnkleJoint.sRel*..Shank.Axes0'+..Shank.r0-AnkleJoint.sRel*Axes0';
-
-  AnyFunTransform3D &Scale = ...GeoScaling.Talus.ScaleFunction;  
-    AnyFunTransform3D &GeomScale =Scale;
-UseInertiaObjects = On;
-
-//  AnyVar MassS = ...MassScaling.Foot.MassScale;
-//  AnyVar MassStandard = ...StandardParameters.Foot.Mass*0.20286341; //calculated from volume ratio
-//  Mass = MassS*MassStandard;
-//  
-//  //AnyDrawSeg Draw = {};
-//  //AnyDrawRefFrame Drw = {ScaleXYZ={1,1,1}*0.1;};
-//  //AnyDrawNodes Draw = {ScaleXYZ = 0.004*{1,1,1};};
-//  sCoM = MedMalleoli.sRel+0.5*(LatMalleoli.sRel - MedMalleoli.sRel);
-//  JaboutCoMOnOff = On;
-//  
-//  AnyVar Ixx = 2/5 * Mass * (vnorm(0.5*(LatMalleoli.sRel - MedMalleoli.sRel)))^2;
-//  AnyVar Iyy = Ixx;
-//  AnyVar Izz = Ixx;
-//  
-//  Jii={Ixx, Iyy, Izz}; 
+  AnySeg Talus = {    
+    r0 ??= ..Shank.AnkleJoint.sRel*..Shank.Axes0'+..Shank.r0-AnkleJoint.sRel*Axes0';    
+    UseInertiaObjects = On; 
+    AnyFunTransform3D &Scale = ...GeoScaling.Talus.ScaleFunction;  
+    AnyFunTransform3D &GeomScale =Scale;   
+  }; // End of Talus
   
-}; // End of Talus
-
-
-AnySeg RigidPart = {
-//  Mass = 0;
-//  Mass = Calcaneus.Mass + Cuboid.Mass + Navicular.Mass + MedialCuneiform.Mass + IntermediateCuneiform.Mass + LateralCuneiform.Mass
-//         + Metatarsal1.Mass + Metatarsal2.Mass + Metatarsal3.Mass + Metatarsal4.Mass + Metatarsal5.Mass;
-////  Jii = {0,0,0};
-  r0=.Talus.SubTalarJoint.sRel*.Talus.Axes0'+.Talus.r0-Calcaneus.SubTalarJoint.sRel*Axes0';
-//  sCoM = (
-//          Calcaneus.Mass*Calcaneus.sCoM +
-//          Cuboid.Mass*Cuboid.sCoM +
-//          Navicular.Mass*Navicular.sCoM +
-//          MedialCuneiform.Mass*MedialCuneiform.sCoM +
-//          IntermediateCuneiform.Mass*IntermediateCuneiform.sCoM +
-//          LateralCuneiform.Mass*LateralCuneiform.sCoM +
-//          Metatarsal1.Mass*Metatarsal1.sCoM +
-//          Metatarsal2.Mass*Metatarsal2.sCoM +
-//          Metatarsal3.Mass*Metatarsal3.sCoM +
-//          Metatarsal4.Mass*Metatarsal4.sCoM +
-//          Metatarsal5.Mass*Metatarsal5.sCoM 
-//          )/Mass;
-//  
-//  AnyRefNode CoM = {sRel =.sCoM;};        
-//  AnyRefNode CalcaneusCoM = {sRel =.Calcaneus.sCoM;};
-//  
-//  Jii = EqInertia.Jii;
-//  Jij = EqInertia.Jij;
-//  JaboutCoMOnOff = On;
-  UseInertiaObjects = On;
-  AnyFolder EqInertia = {
-    // Equivalent inertia is calculated using parallel axis theorem. Jii of constituent segments, expressed about their corresponding
-    // CoM are translated to the CoM of the lumped segment using the formula: JiiNew = JiiCoM + mr^2
-    // r vector is calculated as the difference between constituent segment CoM and lumped segment CoM.
-    // m is the mass of the constituent segment.
-    // JiiCoM is the Jii of the constituent segment about its own CoM
-    // JiiNew is the Jii of the constituent segment about the CoM of the lumped segment.
+  
+  AnySeg RigidPart = {    
+    r0 ??= .Talus.SubTalarJoint.sRel*.Talus.Axes0'+.Talus.r0-Calcaneus.SubTalarJoint.sRel*Axes0';    
+    UseInertiaObjects = On;
     
-    AnyFloat sRelCaCoM = .Calcaneus.sCoM-.sCoM; 
-    AnyFloat JiiCaT = .Calcaneus.Mass*{sRelCaCoM[1]^2 + sRelCaCoM[2]^2, sRelCaCoM[2]^2 + sRelCaCoM[0]^2, sRelCaCoM[0]^2 + sRelCaCoM[1]^2};
-    AnyFloat JiiCaCoM = .Calcaneus.Jii + JiiCaT;
+    AnyRefNode Calcaneus = {      
+      AnyVec3 r0 ??= ..Talus.SubTalarJoint.sRel*..Talus.Axes0'+..Talus.r0-SubTalarJoint.sRel*Axes0';
+      AnyMat33 Axes0 ??= .Axes0;      
+      AnyFunTransform3D &Scale = ....GeoScaling.Calcaneus.ScaleFunction; 
+      AnyFunTransform3D &GeomScale =Scale;      
+    }; // End of Calcaneus
     
-    AnyFloat sRelCuCoM = .Cuboid.sCoM-.sCoM;
-    AnyFloat JiiCuT = .Cuboid.Mass*{sRelCuCoM[1]^2 + sRelCuCoM[2]^2, sRelCuCoM[2]^2 + sRelCuCoM[0]^2, sRelCuCoM[0]^2 + sRelCuCoM[1]^2};
-    AnyFloat JiiCuCoM = .Cuboid.Jii + JiiCuT;
+    AnyRefNode Cuboid = {      
+      AnyVec3 r0 ??= .Calcaneus.CalcaneoCuboidJoint.sRel*.Calcaneus.Axes0'+.Calcaneus.r0-CalcaneoCuboidJoint.sRel*Axes0';
+      AnyMat33 Axes0 ??= .Axes0;      
+      AnyFunTransform3D &Scale = ....GeoScaling.Cuboid.ScaleFunction;  
+      AnyFunTransform3D &GeomScale =Scale;      
+    }; // End of cuboid
     
-    AnyFloat sRelNaCoM = .Navicular.sCoM-.sCoM;
-    AnyFloat JiiNaT = .Navicular.Mass*{sRelNaCoM[1]^2 + sRelNaCoM[2]^2, sRelNaCoM[2]^2 + sRelNaCoM[0]^2, sRelNaCoM[0]^2 + sRelNaCoM[1]^2};
-    AnyFloat JiiNaCoM = .Navicular.Jii + JiiNaT;
+    AnyRefNode Navicular = {      
+      AnyVec3 r0 ??= ..Talus.TaloNavicularJoint.sRel*..Talus.Axes0'+..Talus.r0-TaloNavicularJoint.sRel*Axes0';
+      AnyMat33 Axes0 ??= .Axes0;      
+      AnyFunTransform3D &Scale = ....GeoScaling.Navicular.ScaleFunction;  
+      AnyFunTransform3D &GeomScale =Scale;      
+    }; // End of Navicular
     
-    AnyFloat sRelMCuCoM = .MedialCuneiform.sCoM-.sCoM;
-    AnyFloat JiiMCuT = .MedialCuneiform.Mass*{sRelMCuCoM[1]^2 + sRelMCuCoM[2]^2, sRelMCuCoM[2]^2 + sRelMCuCoM[0]^2, sRelMCuCoM[0]^2 + sRelMCuCoM[1]^2};
-    AnyFloat JiiMCuCoM = .MedialCuneiform.Jii + JiiMCuT;
+    AnyRefNode MedialCuneiform = {
+      AnyVec3 r0 ??= .Navicular.MedCuneiNaviJoint.sRel*.Navicular.Axes0'+.Navicular.r0-CuneiNaviJoint.sRel*Axes0';
+      AnyMat33 Axes0 ??= .Axes0;      
+      AnyFunTransform3D &Scale = ....GeoScaling.MedialCuneiform.ScaleFunction;  
+      AnyFunTransform3D &GeomScale =Scale;      
+    }; // End of MedialCuneiform
     
-    AnyFloat sRelICuCoM = .IntermediateCuneiform.sCoM-.sCoM;
-    AnyFloat JiiICuT = .IntermediateCuneiform.Mass*{sRelICuCoM[1]^2 + sRelICuCoM[2]^2, sRelICuCoM[2]^2 + sRelICuCoM[0]^2, sRelICuCoM[0]^2 + sRelICuCoM[1]^2};
-    AnyFloat JiiICuCoM = .IntermediateCuneiform.Jii + JiiICuT;
+   AnyRefNode IntermediateCuneiform = {
+      AnyVec3 r0 ??= .Navicular.IntCuneiNaviJoint.sRel*.Navicular.Axes0'+.Navicular.r0-CuneiNaviJoint.sRel*Axes0';
+      AnyMat33 Axes0 ??= .Axes0;      
+      AnyFunTransform3D &Scale = ....GeoScaling.IntermediateCuneiform.ScaleFunction;  
+      AnyFunTransform3D &GeomScale =Scale;      
+    }; // End of IntermediateCuneiform
     
-    AnyFloat sRelLCuCoM = .LateralCuneiform.sCoM-.sCoM;
-    AnyFloat JiiLCuT = .LateralCuneiform.Mass*{sRelLCuCoM[1]^2 + sRelLCuCoM[2]^2, sRelLCuCoM[2]^2 + sRelLCuCoM[0]^2, sRelLCuCoM[0]^2 + sRelLCuCoM[1]^2};
-    AnyFloat JiiLCuCoM = .LateralCuneiform.Jii + JiiLCuT;
+    AnyRefNode LateralCuneiform = {
+      AnyVec3 r0 ??= .Navicular.LatCuneiNaviJoint.sRel*.Navicular.Axes0'+.Navicular.r0-CuneiNaviJoint.sRel*Axes0';
+      AnyMat33 Axes0 ??= .Axes0;      
+      AnyFunTransform3D &Scale = ....GeoScaling.LateralCuneiform.ScaleFunction;  
+      AnyFunTransform3D &GeomScale =Scale;      
+    }; // End of LateralCuneiform 
+    
+    
+    //************************************************
+    //Metatarsals 
+    //************************************************
+    
+    AnyRefNode Metatarsal1 = {
+      AnyVec3 r0 ??= .MedialCuneiform.TarsoMtJoint.sRel*.MedialCuneiform.Axes0'+.MedialCuneiform.r0-TarsoMtJoint.sRel*Axes0';
+      AnyMat33 Axes0 ??= .Axes0;      
+      AnyFunTransform3D &Scale = ....GeoScaling.Metatarsal1.ScaleFunction;  
+      AnyFunTransform3D &GeomScale =Scale;      
+    }; // End of Metatarsal1
+    
+    AnyRefNode Metatarsal2 = {
+      AnyVec3 r0 ??= .IntermediateCuneiform.TarsoMtJoint.sRel*.IntermediateCuneiform.Axes0'+.IntermediateCuneiform.r0-TarsoMtJoint.sRel*Axes0';
+      AnyMat33 Axes0 ??= .Axes0;      
+      AnyFunTransform3D &Scale = ....GeoScaling.Metatarsal2.ScaleFunction;  
+      AnyFunTransform3D &GeomScale =Scale;      
+    }; // End of Metatarsal2
+      
+    AnyRefNode Metatarsal3 = {
+      AnyVec3 r0 ??= .LateralCuneiform.TarsoMtJoint.sRel*.LateralCuneiform.Axes0'+.LateralCuneiform.r0-TarsoMtJoint.sRel*Axes0';
+      AnyMat33 Axes0 ??= .Axes0;      
+      AnyFunTransform3D &Scale = ....GeoScaling.Metatarsal3.ScaleFunction; 
+      AnyFunTransform3D &GeomScale =Scale;      
+    }; // End of Metatarsal3
+    
+    AnyRefNode Metatarsal4 = {
+      AnyVec3 r0 ??= .Cuboid.TarsoMt4Joint.sRel*.Cuboid.Axes0'+.Cuboid.r0-TarsoMtJoint.sRel*Axes0';
+      AnyMat33 Axes0 ??= .Axes0;      
+      AnyFunTransform3D &Scale = ....GeoScaling.Metatarsal4.ScaleFunction; 
+      AnyFunTransform3D &GeomScale =Scale;      
+    }; // End of Metatarsal4
+    
+    AnyRefNode Metatarsal5 = {      
+      AnyVec3 r0 ??= .Cuboid.TarsoMt5Joint.sRel*.Cuboid.Axes0'+.Cuboid.r0-TarsoMtJoint.sRel*Axes0';
+      AnyMat33 Axes0 ??= .Axes0;      
+      AnyFunTransform3D &Scale = ....GeoScaling.Metatarsal5.ScaleFunction;  
+      AnyFunTransform3D &GeomScale =Scale;      
+    }; // End of Metatarsal5    
+    
+    
+  }; // End of Rigid Part
+  
+  
+  
+  
+  //***********************
+  //         Toe 1
+  //***********************
+  
+  AnySeg Toe1 = {
+    r0 ??= .Metatarsal1.MtPhalJoint.sRel*.Metatarsal1.ARel'+.RigidPart.r0-ProximalPhalange1.MtPhalJoint.sRel*ProximalPhalange1.ARel';
+    UseInertiaObjects = On;
+    
+    AnyRefNode ProximalPhalange1 = {      
+      AnyVec3 r0 ??= ..Metatarsal1.MtPhalJoint.sRel*..Metatarsal1.Axes0'+..Metatarsal1.r0-MtPhalJoint.sRel*Axes0';
+      AnyMat33 Axes0 ??= .Axes0;      
+      AnyFunTransform3D &Scale = ....GeoScaling.ProximalPhalanges1.ScaleFunction;  
+      AnyFunTransform3D &GeomScale =Scale;      
+    }; // End of ProximalPhalanges1
+    
+    AnyRefNode DistalPhalange1 = {      
+      AnyVec3 r0 ??= .ProximalPhalange1.DistPhalJoint.sRel*.ProximalPhalange1.Axes0'+.ProximalPhalange1.r0-DistPhalJoint.sRel*Axes0';
+      AnyMat33 Axes0 ??= .Axes0;      
+      AnyFunTransform3D &Scale = ....GeoScaling.DistalPhalanges1.ScaleFunction;  
+      AnyFunTransform3D &GeomScale =Scale;      
+    }; // End of DistalPhalanges1    
+    
+  }; // Toe1
+  
+  
+  //***********************
+  //         Toe 2
+  //***********************
+  
+  
+  AnySeg Toe2 = {
+    r0 ??= .Metatarsal2.MtPhalJoint.sRel*.Metatarsal2.ARel'+.RigidPart.r0-ProximalPhalange2.MtPhalJoint.sRel*ProximalPhalange2.ARel';
+    UseInertiaObjects = On;
+    
+    AnyRefNode ProximalPhalange2 = {
+      AnyVec3 r0 ??= ..Metatarsal2.MtPhalJoint.sRel*..Metatarsal2.Axes0'+..Metatarsal2.r0-MtPhalJoint.sRel*Axes0';
+      AnyMat33 Axes0 ??= .Axes0;      
+      AnyFunTransform3D &Scale = ....GeoScaling.ProximalPhalanges2.ScaleFunction; 
+      AnyFunTransform3D &GeomScale =Scale;      
+    }; // End of ProximalPhalanges2
+    
+    AnyRefNode MiddlePhalange2 = {
+      AnyVec3 r0 ??= .ProximalPhalange2.ProxPhalJoint.sRel*.ProximalPhalange2.Axes0'+.ProximalPhalange2.r0-ProxPhalJoint.sRel*Axes0';
+      AnyMat33 Axes0 ??= .Axes0;      
+      AnyFunTransform3D &Scale = ....GeoScaling.MiddlePhalanges2.ScaleFunction;  
+      AnyFunTransform3D &GeomScale =Scale;      
+    }; // End of MiddlePhalanges2
+    
+    AnyRefNode DistalPhalange2 = {
+      AnyVec3 r0 ??= .MiddlePhalange2.DistPhalJoint.sRel*.MiddlePhalange2.Axes0'+.MiddlePhalange2.r0-DistPhalJoint.sRel*Axes0';
+      AnyMat33 Axes0 ??= .Axes0;      
+      AnyFunTransform3D &Scale = ....GeoScaling.DistalPhalanges2.ScaleFunction;  
+      AnyFunTransform3D &GeomScale =Scale;      
+    }; // End of DistalPhalanges2
         
-    AnyFloat sRelMt1CoM = .Metatarsal1.sCoM-.sCoM;
-    AnyFloat JMMt1T = .Metatarsal1.Mass*{{sRelMt1CoM[1]^2 + sRelMt1CoM[2]^2, -sRelMt1CoM[0]*sRelMt1CoM[1], -sRelMt1CoM[0]*sRelMt1CoM[2]},
-                                         {-sRelMt1CoM[1]*sRelMt1CoM[0], sRelMt1CoM[2]^2 + sRelMt1CoM[0]^2, -sRelMt1CoM[1]*sRelMt1CoM[2]},
-                                         {-sRelMt1CoM[2]*sRelMt1CoM[0], -sRelMt1CoM[2]*sRelMt1CoM[1], sRelMt1CoM[0]^2 + sRelMt1CoM[1]^2}};
-    AnyFloat JMMt1CoM = .Metatarsal1.JM + JMMt1T;
-    AnyFloat JiiMt1CoM = {JMMt1CoM[0][0], JMMt1CoM[1][1], JMMt1CoM[2][2]};
-    AnyFloat JijMt1CoM = {JMMt1CoM[1][0], JMMt1CoM[2][1], JMMt1CoM[2][0]};
-    
-    AnyFloat sRelMt2CoM = .Metatarsal2.sCoM-.sCoM;
-    AnyFloat JMMt2T = .Metatarsal2.Mass*{{sRelMt2CoM[1]^2 + sRelMt2CoM[2]^2, -sRelMt2CoM[0]*sRelMt2CoM[1], -sRelMt2CoM[0]*sRelMt2CoM[2]},
-                                         {-sRelMt2CoM[1]*sRelMt2CoM[0], sRelMt2CoM[2]^2 + sRelMt2CoM[0]^2, -sRelMt2CoM[1]*sRelMt2CoM[2]},
-                                         {-sRelMt2CoM[2]*sRelMt2CoM[0], -sRelMt2CoM[2]*sRelMt2CoM[1], sRelMt2CoM[0]^2 + sRelMt2CoM[1]^2}};
-    AnyFloat JMMt2CoM = .Metatarsal2.JM + JMMt2T;
-    AnyFloat JiiMt2CoM = {JMMt2CoM[0][0], JMMt2CoM[1][1], JMMt2CoM[2][2]};
-    AnyFloat JijMt2CoM = {JMMt2CoM[1][0], JMMt2CoM[2][1], JMMt2CoM[2][0]};
-
-    AnyFloat sRelMt3CoM = .Metatarsal3.sCoM-.sCoM;
-    AnyFloat JMMt3T = .Metatarsal3.Mass*{{sRelMt3CoM[1]^2 + sRelMt3CoM[2]^2, -sRelMt3CoM[0]*sRelMt3CoM[1], -sRelMt3CoM[0]*sRelMt3CoM[2]},
-                                         {-sRelMt3CoM[1]*sRelMt3CoM[0], sRelMt3CoM[2]^2 + sRelMt3CoM[0]^2, -sRelMt3CoM[1]*sRelMt3CoM[2]},
-                                         {-sRelMt3CoM[2]*sRelMt3CoM[0], -sRelMt3CoM[2]*sRelMt3CoM[1], sRelMt3CoM[0]^2 + sRelMt3CoM[1]^2}};
-    AnyFloat JMMt3CoM = .Metatarsal3.JM + JMMt3T;
-    AnyFloat JiiMt3CoM = {JMMt3CoM[0][0], JMMt3CoM[1][1], JMMt3CoM[2][2]};
-    AnyFloat JijMt3CoM = {JMMt3CoM[1][0], JMMt3CoM[2][1], JMMt3CoM[2][0]};
-
-    AnyFloat sRelMt4CoM = .Metatarsal4.sCoM-.sCoM;
-    AnyFloat JMMt4T = .Metatarsal4.Mass*{{sRelMt4CoM[1]^2 + sRelMt4CoM[2]^2, -sRelMt4CoM[0]*sRelMt4CoM[1], -sRelMt4CoM[0]*sRelMt4CoM[2]},
-                                         {-sRelMt4CoM[1]*sRelMt4CoM[0], sRelMt4CoM[2]^2 + sRelMt4CoM[0]^2, -sRelMt4CoM[1]*sRelMt4CoM[2]},
-                                         {-sRelMt4CoM[2]*sRelMt4CoM[0], -sRelMt4CoM[2]*sRelMt4CoM[1], sRelMt4CoM[0]^2 + sRelMt4CoM[1]^2}};
-    AnyFloat JMMt4CoM = .Metatarsal4.JM + JMMt4T;
-    AnyFloat JiiMt4CoM = {JMMt4CoM[0][0], JMMt4CoM[1][1], JMMt4CoM[2][2]};
-    AnyFloat JijMt4CoM = {JMMt4CoM[1][0], JMMt4CoM[2][1], JMMt4CoM[2][0]};
-
-    AnyFloat sRelMt5CoM = .Metatarsal5.sCoM-.sCoM;
-    AnyFloat JMMt5T = .Metatarsal5.Mass*{{sRelMt5CoM[1]^2 + sRelMt5CoM[2]^2, -sRelMt5CoM[0]*sRelMt5CoM[1], -sRelMt5CoM[0]*sRelMt5CoM[2]},
-                                         {-sRelMt5CoM[1]*sRelMt5CoM[0], sRelMt5CoM[2]^2 + sRelMt5CoM[0]^2, -sRelMt5CoM[1]*sRelMt5CoM[2]},
-                                         {-sRelMt5CoM[2]*sRelMt5CoM[0], -sRelMt5CoM[2]*sRelMt5CoM[1], sRelMt5CoM[0]^2 + sRelMt5CoM[1]^2}};
-    AnyFloat JMMt5CoM = .Metatarsal5.JM + JMMt5T;
-    AnyFloat JiiMt5CoM = {JMMt5CoM[0][0], JMMt5CoM[1][1], JMMt5CoM[2][2]};
-    AnyFloat JijMt5CoM = {JMMt5CoM[1][0], JMMt5CoM[2][1], JMMt5CoM[2][0]};
-
-    
-    
-    AnyFloat Jii = JiiCaCoM + JiiCuCoM + JiiNaCoM + JiiMCuCoM + JiiICuCoM + JiiLCuCoM + JiiMt1CoM + JiiMt2CoM + JiiMt3CoM + JiiMt4CoM + JiiMt5CoM;
-    AnyFloat Jij = JijMt1CoM + JijMt2CoM + JijMt3CoM + JijMt4CoM + JijMt5CoM;
-  };
-          
-  AnyRefNode Calcaneus = {
-//  sRel=..Talus.SubTalarJoint.sRel*..Talus.Axes0'+..Talus.r0-SubTalarJoint.sRel*ARel';
-  AnyVec3 r0 ??= ..Talus.SubTalarJoint.sRel*..Talus.Axes0'+..Talus.r0-SubTalarJoint.sRel*Axes0';
-  AnyMat33 Axes0 ??= .Axes0;
-  AnyFunTransform3D &Scale = ....GeoScaling.Calcaneus.ScaleFunction; 
-    AnyFunTransform3D &GeomScale =Scale;
-    
-
-  
-  AnyVar MassS = ....MassScaling.Foot.MassScale;
-  AnyVar MassStandard = ....StandardParameters.Foot.Mass*0.360683468;
-  AnyVar Mass = MassS*MassStandard;
-  
-  AnyFloat sCoM = Scale({0.01294929, 0.08385631, ....Sign*0.002736367});
-//  JaboutCoMOnOff = On;
-  
-  AnyVar Ixx = 2/5 * Mass * (vnorm(0.5*(SubTalarJoint.sRel - HeelNode.sRel)))^2;
-  AnyVar Iyy = Ixx;
-  AnyVar Izz = Ixx;
-  
-  //AnyDrawRefFrame Drw = {ScaleXYZ={1,1,1}*0.1;};
-  //AnyDrawSeg Draw = {};
-  //AnyDrawNodes Draw = {ScaleXYZ = 0.004*{1,1,1};};
-  AnyFloat Jii={Ixx, Iyy, Izz};
-    
-}; // End of Calcaneus
-
-
-
-
-
-
-
-
-AnyRefNode Cuboid = {
-//  sRel=.Calcaneus.CalcaneoCuboidJoint.sRel*.Calcaneus.ARel'+.Calcaneus.sRel-CalcaneoCuboidJoint.sRel*ARel';
-  AnyVec3 r0 ??= .Calcaneus.CalcaneoCuboidJoint.sRel*.Calcaneus.Axes0'+.Calcaneus.r0-CalcaneoCuboidJoint.sRel*Axes0';
-  AnyMat33 Axes0 ??= .Axes0;
-
-  AnyFunTransform3D &Scale = ....GeoScaling.Cuboid.ScaleFunction;  
-    AnyFunTransform3D &GeomScale =Scale;
-
-  AnyVar MassS = ....MassScaling.Foot.MassScale;
-  AnyVar MassStandard = ....StandardParameters.Foot.Mass*0.071723351;
-  AnyVar Mass = MassS*MassStandard;
-  
-  //AnyDrawRefFrame Drw = {ScaleXYZ={1,1,1}*0.1;};
-  //AnyDrawSeg Draw = {};
-  AnyFloat sCoM = 0.5*(RefDist.sRel + RefProx.sRel);
-//  JaboutCoMOnOff = On;
-  
-  AnyVar Ixx = 2/5 * Mass * (vnorm(0.5*(RefDist.sRel - RefProx.sRel)))^2;
-  AnyVar Iyy = Ixx;
-  AnyVar Izz = Ixx;
-  
-  AnyFloat Jii={Ixx, Iyy, Izz};  
-  
-}; // End of cuboid
-
-
-
-
-
-
-AnyRefNode Navicular = {
-//  sRel=..Talus.TaloNavicularJoint.sRel*..Talus.Axes0'+..Talus.r0-TaloNavicularJoint.sRel*ARel';
-  AnyVec3 r0 ??= ..Talus.TaloNavicularJoint.sRel*..Talus.Axes0'+..Talus.r0-TaloNavicularJoint.sRel*Axes0';
-  AnyMat33 Axes0 ??= .Axes0;
-
-  AnyFunTransform3D &Scale = ....GeoScaling.Navicular.ScaleFunction;  
-    AnyFunTransform3D &GeomScale =Scale;
-
-  AnyVar MassS = ....MassScaling.Foot.MassScale;
-  AnyVar MassStandard = ....StandardParameters.Foot.Mass*0.048581127;
-  AnyVar Mass = MassS*MassStandard;
-  
-  //AnyDrawRefFrame Drw = {ScaleXYZ={1,1,1}*0.1;};
-  //AnyDrawSeg Draw = {};
-  AnyFloat sCoM = 0.5*(RefDist.sRel + RefProx.sRel);
-//  JaboutCoMOnOff = On;
-  
-  AnyVar Ixx = 2/5 * Mass * (vnorm(0.7*(RefDist.sRel - RefProx.sRel)))^2; //Radius adjusted slightly because not round.
-  AnyVar Iyy = Ixx;
-  AnyVar Izz = Ixx;
-  
-  AnyFloat Jii={Ixx, Iyy, Izz};  
-  
-}; // End of Navicular
-
-
-
-
-
-
-AnyRefNode MedialCuneiform = {
-//  sRel=.Navicular.MedCuneiNaviJoint.sRel*.Navicular.ARel'+.Navicular.sRel-CuneiNaviJoint.sRel*ARel';
-  AnyVec3 r0 ??= .Navicular.MedCuneiNaviJoint.sRel*.Navicular.Axes0'+.Navicular.r0-CuneiNaviJoint.sRel*Axes0';
-  AnyMat33 Axes0 ??= .Axes0;
-
-  AnyFunTransform3D &Scale = ....GeoScaling.MedialCuneiform.ScaleFunction;  
-    AnyFunTransform3D &GeomScale =Scale;
-
-  AnyVar MassS = ....MassScaling.Foot.MassScale;
-  AnyVar MassStandard = ....StandardParameters.Foot.Mass*0.048888141;
-  AnyVar Mass = MassS*MassStandard;
-  
-  //AnyDrawRefFrame Drw = {ScaleXYZ={1,1,1}*0.1;};
-  //AnyDrawSeg Draw = {};
-  AnyFloat sCoM = 0.5*(RefDist.sRel + RefProx.sRel);
-//  JaboutCoMOnOff = On;
-  
-  AnyVar Ixx = 2/5 * Mass * (vnorm(0.5*(RefDist.sRel - RefProx.sRel)))^2;
-  AnyVar Iyy = Ixx;
-  AnyVar Izz = Ixx;
-  
-  AnyFloat Jii={Ixx, Iyy, Izz};
-    
-}; // End of MedialCuneiform
-
-
-
-
-
-
-AnyRefNode IntermediateCuneiform = {
-//  sRel=.Navicular.IntCuneiNaviJoint.sRel*.Navicular.ARel'+.Navicular.sRel-CuneiNaviJoint.sRel*ARel';
-  AnyVec3 r0 ??= .Navicular.IntCuneiNaviJoint.sRel*.Navicular.Axes0'+.Navicular.r0-CuneiNaviJoint.sRel*Axes0';
-  AnyMat33 Axes0 ??= .Axes0;
-
-  AnyFunTransform3D &Scale = ....GeoScaling.IntermediateCuneiform.ScaleFunction;  
-    AnyFunTransform3D &GeomScale =Scale;
-
-  AnyVar MassS = ....MassScaling.Foot.MassScale;
-  AnyVar MassStandard = ....StandardParameters.Foot.Mass*0.011344111;
-  AnyVar Mass = MassS*MassStandard;
-  
-  //AnyDrawRefFrame Drw = {ScaleXYZ={1,1,1}*0.1;};
-  //AnyDrawSeg Draw = {};
-  AnyFloat sCoM = 0.5*(RefDist.sRel + RefProx.sRel);
-//  JaboutCoMOnOff = On;
-  
-  AnyVar Ixx = 2/5 * Mass * (vnorm(0.5*(RefDist.sRel - RefProx.sRel)))^2;
-  AnyVar Iyy = Ixx;
-  AnyVar Izz = Ixx;
-  
-  AnyFloat Jii={Ixx, Iyy, Izz};
-  
-}; // End of IntermediateCuneiform
-
-
-
-
-
-
-AnyRefNode LateralCuneiform = {
-//  sRel=.Navicular.LatCuneiNaviJoint.sRel*.Navicular.ARel'+.Navicular.sRel-CuneiNaviJoint.sRel*ARel';
-  AnyVec3 r0 ??= .Navicular.LatCuneiNaviJoint.sRel*.Navicular.Axes0'+.Navicular.r0-CuneiNaviJoint.sRel*Axes0';
-  AnyMat33 Axes0 ??= .Axes0;
-
-  AnyFunTransform3D &Scale = ....GeoScaling.LateralCuneiform.ScaleFunction;  
-    AnyFunTransform3D &GeomScale =Scale;
-
-  AnyVar MassS = ....MassScaling.Foot.MassScale;
-  AnyVar MassStandard = ....StandardParameters.Foot.Mass*0.021885718;
-  AnyVar Mass = MassS*MassStandard;
-  
-  //AnyDrawRefFrame Drw = {ScaleXYZ={1,1,1}*0.1;};
-  //AnyDrawSeg Draw = {};
-  AnyFloat sCoM = 0.5*(RefDist.sRel + RefProx.sRel);
-//  JaboutCoMOnOff = On;
-  
-  AnyVar Ixx = 2/5 * Mass * (vnorm(0.5*(RefDist.sRel - RefProx.sRel)))^2;
-  AnyVar Iyy = Ixx;
-  AnyVar Izz = Ixx;
-  
-  AnyFloat Jii={Ixx, Iyy, Izz};
-  
-}; // End of LateralCuneiform 
-
-
-
-
-
-
-
-
-
-
-
- //************************************************
- //Metatarsal bones
- //************************************************
-
-AnyRefNode Metatarsal1 = {
-//  sRel=.MedialCuneiform.TarsoMtJoint.sRel*.MedialCuneiform.ARel'+.MedialCuneiform.sRel-TarsoMtJoint.sRel*ARel';
-  AnyVec3 r0 ??= .MedialCuneiform.TarsoMtJoint.sRel*.MedialCuneiform.Axes0'+.MedialCuneiform.r0-TarsoMtJoint.sRel*Axes0';
-  AnyMat33 Axes0 ??= .Axes0;
-  
-  AnyFunTransform3D &Scale = ....GeoScaling.Metatarsal1.ScaleFunction;  
-    AnyFunTransform3D &GeomScale =Scale;
-
-  AnyVar MassS = ....MassScaling.Foot.MassScale;
-  AnyVar MassStandard = ....StandardParameters.Foot.Mass*0.079950498;
-  AnyVar Mass = MassS*MassStandard;
-  
-  //AnyDrawRefFrame Drw = {ScaleXYZ={1,1,1}*0.1;};
-  //AnyDrawSeg Draw = {};
-  AnyFloat sCoM = 0.5*(RefDist.sRel + RefProx.sRel);
-//  JaboutCoMOnOff = On;
-  
-  AnyVar Length = vnorm(RefDist.sRel - RefProx.sRel);
-  AnyVar Radius = (Mass/(3.1416*Length*....StandardParameters.Foot.Density))^0.5;
-  
-  AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
-  AnyVar Iyy = 0.5 * Mass * Radius^2;
-  AnyVar Izz = Ixx;
-  
-  AnyMat33 JM = CenterNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode.ARel';
-  AnyFloat Jii = {JM[0][0], JM[1][1], JM[2][2]};
-  AnyFloat Jij = {JM[1][0], JM[2][1], JM[2][0]};
-  
-}; // End of Metatarsal1
-
-
-
-
-
-
-AnyRefNode Metatarsal2 = {
-//  sRel=.IntermediateCuneiform.TarsoMtJoint.sRel*.IntermediateCuneiform.ARel'+.IntermediateCuneiform.sRel-TarsoMtJoint.sRel*ARel';
-  AnyVec3 r0 ??= .IntermediateCuneiform.TarsoMtJoint.sRel*.IntermediateCuneiform.Axes0'+.IntermediateCuneiform.r0-TarsoMtJoint.sRel*Axes0';
-  AnyMat33 Axes0 ??= .Axes0;
-
-  AnyFunTransform3D &Scale = ....GeoScaling.Metatarsal2.ScaleFunction;  
-    AnyFunTransform3D &GeomScale =Scale;
-
-  
-  AnyVar MassS = ....MassScaling.Foot.MassScale;
-  AnyVar MassStandard = ....StandardParameters.Foot.Mass*0.022272746;
-  AnyVar Mass = MassS*MassStandard;
-  
-  //AnyDrawRefFrame Drw = {ScaleXYZ={1,1,1}*0.1;};
-  //AnyDrawSeg Draw = {};
-  AnyFloat sCoM = 0.5*(RefDist.sRel + RefProx.sRel);
-//  JaboutCoMOnOff = On;
-  
-  AnyVar Length = vnorm(RefDist.sRel - RefProx.sRel);
-  AnyVar Radius = (Mass/(3.1416*Length*....StandardParameters.Foot.Density))^0.5;
-  
-  AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
-  AnyVar Iyy = 0.5 * Mass * Radius^2;
-  AnyVar Izz = Ixx;
-  
-  AnyMat33 JM = CenterNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode.ARel';
-  AnyFloat Jii = {JM[0][0], JM[1][1], JM[2][2]};
-  AnyFloat Jij = {JM[1][0], JM[2][1], JM[2][0]};
-
-}; // End of Metatarsal2
-
-
-
-
-
-AnyRefNode Metatarsal3 = {
-//  sRel=.LateralCuneiform.TarsoMtJoint.sRel*.LateralCuneiform.ARel'+.LateralCuneiform.sRel-TarsoMtJoint.sRel*ARel';
-  AnyVec3 r0 ??= .LateralCuneiform.TarsoMtJoint.sRel*.LateralCuneiform.Axes0'+.LateralCuneiform.r0-TarsoMtJoint.sRel*Axes0';
-  AnyMat33 Axes0 ??= .Axes0;
-  
-  AnyFunTransform3D &Scale = ....GeoScaling.Metatarsal3.ScaleFunction; 
-    AnyFunTransform3D &GeomScale =Scale;
-  
-  AnyVar MassS = ....MassScaling.Foot.MassScale;
-  AnyVar MassStandard = ....StandardParameters.Foot.Mass*0.018827431;
-  AnyVar Mass = MassS*MassStandard;
-  
-  //AnyDrawSeg Draw = {};
-  AnyFloat sCoM = 0.5*(RefDist.sRel + RefProx.sRel);
-//  JaboutCoMOnOff = On;
-  
-  AnyVar Length = vnorm(RefDist.sRel - RefProx.sRel);
-  AnyVar Radius = (Mass/(3.1416*Length*....StandardParameters.Foot.Density))^0.5;
-  
-  AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
-  AnyVar Iyy = 0.5 * Mass * Radius^2;
-  AnyVar Izz = Ixx;
-  
-  AnyMat33 JM = CenterNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode.ARel';
-  AnyFloat Jii = {JM[0][0], JM[1][1], JM[2][2]};
-  AnyFloat Jij = {JM[1][0], JM[2][1], JM[2][0]};
-
-}; // End of Metatarsal3
-
-
-
-
-
-AnyRefNode Metatarsal4 = {
-//  sRel=.Cuboid.TarsoMt4Joint.sRel*.Cuboid.ARel'+.Cuboid.sRel-TarsoMtJoint.sRel*ARel';
-  AnyVec3 r0 ??= .Cuboid.TarsoMt4Joint.sRel*.Cuboid.Axes0'+.Cuboid.r0-TarsoMtJoint.sRel*Axes0';
-  AnyMat33 Axes0 ??= .Axes0;
-
-  AnyFunTransform3D &Scale = ....GeoScaling.Metatarsal4.ScaleFunction; 
-  AnyFunTransform3D &GeomScale =Scale;
-
-  AnyVar MassS = ....MassScaling.Foot.MassScale;
-  AnyVar MassStandard = ....StandardParameters.Foot.Mass*0.017399045;
-  AnyVar Mass = MassS*MassStandard;
-  
-  //AnyDrawSeg Draw = {};
-  AnyFloat sCoM = 0.5*(RefDist.sRel + RefProx.sRel);
-//  JaboutCoMOnOff = On;
-  
-  AnyVar Length = vnorm(RefDist.sRel - RefProx.sRel);
-  AnyVar Radius = (Mass/(3.1416*Length*....StandardParameters.Foot.Density))^0.5;
-  
-  AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
-  AnyVar Iyy = 0.5 * Mass * Radius^2;
-  AnyVar Izz = Ixx;
-  
-  AnyMat33 JM = CenterNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode.ARel';
-  AnyFloat Jii = {JM[0][0], JM[1][1], JM[2][2]};
-  AnyFloat Jij = {JM[1][0], JM[2][1], JM[2][0]};
-  
-}; // End of Metatarsal4
-
-
-
-
-
-
-AnyRefNode Metatarsal5 = {
-  
-//  sRel=.Cuboid.TarsoMt5Joint.sRel*.Cuboid.ARel'+.Cuboid.sRel-TarsoMtJoint.sRel*ARel';
-  AnyVec3 r0 ??= .Cuboid.TarsoMt5Joint.sRel*.Cuboid.Axes0'+.Cuboid.r0-TarsoMtJoint.sRel*Axes0';
-  AnyMat33 Axes0 ??= .Axes0;
-
-  
-  AnyFunTransform3D &Scale = ....GeoScaling.Metatarsal5.ScaleFunction;  
-  AnyFunTransform3D &GeomScale =Scale;
-  
-  AnyVar MassS = ....MassScaling.Foot.MassScale;
-  AnyVar MassStandard = ....StandardParameters.Foot.Mass*0.038130794;
-  AnyVar Mass = MassS*MassStandard;
-  
-  //AnyDrawSeg Draw = {};
-  AnyFloat sCoM = 0.5*(RefDist2.sRel + RefProx.sRel);
-//  JaboutCoMOnOff = On;
-  
-  AnyVar Length = vnorm(RefDist2.sRel - RefProx.sRel);
-  AnyVar Radius = (Mass/(3.1416*Length*....StandardParameters.Foot.Density))^0.5;
-  
-  AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
-  AnyVar Iyy = 0.5 * Mass * Radius^2;
-  AnyVar Izz = Ixx;
-  
-  AnyMat33 JM = CenterNode2.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode2.ARel';
-  AnyFloat Jii = {JM[0][0], JM[1][1], JM[2][2]};
-  AnyFloat Jij = {JM[1][0], JM[2][1], JM[2][0]};
-  
-}; // End of Metatarsal5
-
-
-
-  
-}; // End of Rigid Part
-
-
-//***********************
-//         Toe 1
-//***********************
-
-AnySeg Toe1 = {
-  UseInertiaObjects = On;
-//  Mass = ProximalPhalange1.Mass + DistalPhalange1.Mass;
-//  sCoM = (
-//          ProximalPhalange1.Mass*ProximalPhalange1.sCoM +
-//          DistalPhalange1.Mass*DistalPhalange1.sCoM
-//         )/Mass;
-  r0=.Metatarsal1.MtPhalJoint.sRel*.Metatarsal1.ARel'+.RigidPart.r0-ProximalPhalange1.MtPhalJoint.sRel*ProximalPhalange1.ARel';
- 
-//  AnyRefNode CoM = {sRel =.sCoM;};        
-//  AnyRefNode PPCoM = {sRel =.ProximalPhalange1.sCoM;};
-//
-//  Jii = EqInertia.Jii;
-//  Jij = EqInertia.Jij;
-//  JaboutCoMOnOff = On;
-  
-  AnyFolder EqInertia = {
-    // Equivalent inertia is calculated using parallel axis theorem. Jii of constituent segments, expressed about their corresponding
-    // CoM are translated to the CoM of the lumped segment using the formula: JiiNew = JiiCoM + mr^2
-    // r vector is calculated as the difference between constituent segment CoM and lumped segment CoM.
-    // m is the mass of the constituent segment.
-    // JiiCoM is the Jii of the constituent segment about its own CoM
-    // JiiNew is the Jii of the constituent segment about the CoM of the lumped segment.
-          
-    AnyFloat sRelPP1CoM = .ProximalPhalange1.sCoM-.sCoM;
-    AnyFloat JMPP1T = .ProximalPhalange1.Mass*{{sRelPP1CoM[1]^2 + sRelPP1CoM[2]^2, -sRelPP1CoM[0]*sRelPP1CoM[1], -sRelPP1CoM[0]*sRelPP1CoM[2]},
-                                         {-sRelPP1CoM[1]*sRelPP1CoM[0], sRelPP1CoM[2]^2 + sRelPP1CoM[0]^2, -sRelPP1CoM[1]*sRelPP1CoM[2]},
-                                         {-sRelPP1CoM[2]*sRelPP1CoM[0], -sRelPP1CoM[2]*sRelPP1CoM[1], sRelPP1CoM[0]^2 + sRelPP1CoM[1]^2}};
-    AnyFloat JMPP1CoM = .ProximalPhalange1.JM + JMPP1T;
-    AnyFloat JiiPP1CoM = {JMPP1CoM[0][0], JMPP1CoM[1][1], JMPP1CoM[2][2]};
-    AnyFloat JijPP1CoM = {JMPP1CoM[1][0], JMPP1CoM[2][1], JMPP1CoM[2][0]};
-    
-    AnyFloat sRelDP1CoM = .DistalPhalange1.sCoM-.sCoM;
-    AnyFloat JMDP1T = .DistalPhalange1.Mass*{{sRelDP1CoM[1]^2 + sRelDP1CoM[2]^2, -sRelDP1CoM[0]*sRelDP1CoM[1], -sRelDP1CoM[0]*sRelDP1CoM[2]},
-                                         {-sRelDP1CoM[1]*sRelDP1CoM[0], sRelDP1CoM[2]^2 + sRelDP1CoM[0]^2, -sRelDP1CoM[1]*sRelDP1CoM[2]},
-                                         {-sRelDP1CoM[2]*sRelDP1CoM[0], -sRelDP1CoM[2]*sRelDP1CoM[1], sRelDP1CoM[0]^2 + sRelDP1CoM[1]^2}};
-    AnyFloat JMDP1CoM = .DistalPhalange1.JM + JMDP1T;
-    AnyFloat JiiDP1CoM = {JMDP1CoM[0][0], JMDP1CoM[1][1], JMDP1CoM[2][2]};
-    AnyFloat JijDP1CoM = {JMDP1CoM[1][0], JMDP1CoM[2][1], JMDP1CoM[2][0]};
-    
-    
-    AnyFloat Jii = JiiPP1CoM + JiiDP1CoM;
-    AnyFloat Jij = JijPP1CoM + JijDP1CoM;
-  };
-  
-  AnyRefNode ProximalPhalange1 = {
-    
-    //  r0=.Metatarsal1.MtPhalJoint.sRel*.Metatarsal1.Axes0'+.Metatarsal1.r0-MtPhalJoint.sRel*Axes0';
-    AnyVec3 r0 ??= ..Metatarsal1.MtPhalJoint.sRel*..Metatarsal1.Axes0'+..Metatarsal1.r0-MtPhalJoint.sRel*Axes0';
-    AnyMat33 Axes0 ??= .Axes0;
-
-    AnyFunTransform3D &Scale = ....GeoScaling.ProximalPhalanges1.ScaleFunction;  
-    AnyFunTransform3D &GeomScale =Scale;
-
-    AnyVar MassS = ....MassScaling.Foot.MassScale;
-    AnyVar MassStandard = ....StandardParameters.Foot.Mass*0.017790222;
-    AnyVar Mass = MassS*MassStandard;
-    
-    //AnyDrawSeg Draw = {};
-    AnyFloat sCoM = 0.5*(RefDist.sRel + MtPhalJoint.sRel);
-    //  JaboutCoMOnOff = On;
-    
-    AnyVar Length = vnorm(RefDist.sRel - MtPhalJoint.sRel);
-    AnyVar Radius = (Mass/(3.1416*Length*....StandardParameters.Foot.Density))^0.5;
-    
-    AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
-    AnyVar Iyy = 0.5 * Mass * Radius^2;
-    AnyVar Izz = Ixx;
-    
-    AnyMat33 JM = CenterNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode.ARel';
-    AnyFloat Jii = {JM[0][0], JM[1][1], JM[2][2]};
-    AnyFloat Jij = {JM[1][0], JM[2][1], JM[2][0]};
-    
-  }; // End of ProximalPhalanges1
-  
-  AnyRefNode DistalPhalange1 = {
-    
-//    sRel=.ProximalPhalange1.DistPhalJoint.sRel*.ProximalPhalange1.ARel'+.ProximalPhalange1.sRel-DistPhalJoint.sRel*ARel';
-    AnyVec3 r0 ??= .ProximalPhalange1.DistPhalJoint.sRel*.ProximalPhalange1.Axes0'+.ProximalPhalange1.r0-DistPhalJoint.sRel*Axes0';
-    AnyMat33 Axes0 ??= .Axes0;
-
-    AnyFunTransform3D &Scale = ....GeoScaling.DistalPhalanges1.ScaleFunction;  
-    AnyFunTransform3D &GeomScale =Scale;
-    
-    AnyVar MassS = ....MassScaling.Foot.MassScale;
-    AnyVar MassStandard = ....StandardParameters.Foot.Mass*0.008262117;
-    AnyVar Mass = MassS*MassStandard;
-    
-    //AnyDrawSeg Draw = {};
-    AnyFloat sCoM = 0.5*(RefDist.sRel + DistPhalJoint.sRel);
-    //  JaboutCoMOnOff = On;
-    
-    AnyVar Length = vnorm(RefDist.sRel - DistPhalJoint.sRel);
-    AnyVar Radius = (Mass/(3.1416*Length*....StandardParameters.Foot.Density))^0.5;
-    
-    AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
-    AnyVar Iyy = 0.5 * Mass * Radius^2;
-    AnyVar Izz = Ixx;
-    
-    AnyMat33 JM = CenterNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode.ARel';
-    AnyFloat Jii = {JM[0][0], JM[1][1], JM[2][2]};
-    AnyFloat Jij = {JM[1][0], JM[2][1], JM[2][0]};
-    
-  }; // End of DistalPhalanges1
-  
-  
-}; // Toe1
-
-
-//***********************
-//         Toe 2
-//***********************
-
-
-AnySeg Toe2 = {
-  UseInertiaObjects = On;
-//  Mass = ProximalPhalange2.Mass + MiddlePhalange2.Mass + DistalPhalange2.Mass;
-//  sCoM = (
-//          ProximalPhalange2.Mass*ProximalPhalange2.sCoM +
-//          MiddlePhalange2.Mass*MiddlePhalange2.sCoM +
-//          DistalPhalange2.Mass*DistalPhalange2.sCoM
-//         )/Mass;
-  r0=.Metatarsal2.MtPhalJoint.sRel*.Metatarsal2.ARel'+.RigidPart.r0-ProximalPhalange2.MtPhalJoint.sRel*ProximalPhalange2.ARel';
-//  AnyRefNode CoM = {sRel =.sCoM;}; 
-//  Jii = EqInertia.Jii;
-//  Jij = EqInertia.Jij;
-//  JaboutCoMOnOff = On;
-  
-  AnyFolder EqInertia = {
-    // Equivalent inertia is calculated using parallel axis theorem. Jii of constituent segments, expressed about their corresponding
-    // CoM are translated to the CoM of the lumped segment using the formula: JiiNew = JiiCoM + mr^2
-    // r vector is calculated as the difference between constituent segment CoM and lumped segment CoM.
-    // m is the mass of the constituent segment.
-    // JiiCoM is the Jii of the constituent segment about its own CoM
-    // JiiNew is the Jii of the constituent segment about the CoM of the lumped segment.
-          
-    AnyFloat sRelPP2CoM = .ProximalPhalange2.sCoM-.sCoM;
-    AnyFloat JMPP2T = .ProximalPhalange2.Mass*{{sRelPP2CoM[1]^2 + sRelPP2CoM[2]^2, -sRelPP2CoM[0]*sRelPP2CoM[1], -sRelPP2CoM[0]*sRelPP2CoM[2]},
-                                         {-sRelPP2CoM[1]*sRelPP2CoM[0], sRelPP2CoM[2]^2 + sRelPP2CoM[0]^2, -sRelPP2CoM[1]*sRelPP2CoM[2]},
-                                         {-sRelPP2CoM[2]*sRelPP2CoM[0], -sRelPP2CoM[2]*sRelPP2CoM[1], sRelPP2CoM[0]^2 + sRelPP2CoM[1]^2}};
-    AnyFloat JMPP2CoM = .ProximalPhalange2.JM + JMPP2T;
-    AnyFloat JiiPP2CoM = {JMPP2CoM[0][0], JMPP2CoM[1][1], JMPP2CoM[2][2]};
-    AnyFloat JijPP2CoM = {JMPP2CoM[1][0], JMPP2CoM[2][1], JMPP2CoM[2][0]};
-    
-    AnyFloat sRelMP2CoM = .MiddlePhalange2.sCoM-.sCoM;
-    AnyFloat JMMP2T = .MiddlePhalange2.Mass*{{sRelMP2CoM[1]^2 + sRelMP2CoM[2]^2, -sRelMP2CoM[0]*sRelMP2CoM[1], -sRelMP2CoM[0]*sRelMP2CoM[2]},
-                                         {-sRelMP2CoM[1]*sRelMP2CoM[0], sRelMP2CoM[2]^2 + sRelMP2CoM[0]^2, -sRelMP2CoM[1]*sRelMP2CoM[2]},
-                                         {-sRelMP2CoM[2]*sRelMP2CoM[0], -sRelMP2CoM[2]*sRelMP2CoM[1], sRelMP2CoM[0]^2 + sRelMP2CoM[1]^2}};
-    AnyFloat JMMP2CoM = .MiddlePhalange2.JM + JMMP2T;
-    AnyFloat JiiMP2CoM = {JMMP2CoM[0][0], JMMP2CoM[1][1], JMMP2CoM[2][2]};
-    AnyFloat JijMP2CoM = {JMMP2CoM[1][0], JMMP2CoM[2][1], JMMP2CoM[2][0]};
-
-    AnyFloat sRelDP2CoM = .DistalPhalange2.sCoM-.sCoM;
-    AnyFloat JMDP2T = .DistalPhalange2.Mass*{{sRelDP2CoM[1]^2 + sRelDP2CoM[2]^2, -sRelDP2CoM[0]*sRelDP2CoM[1], -sRelDP2CoM[0]*sRelDP2CoM[2]},
-                                         {-sRelDP2CoM[1]*sRelDP2CoM[0], sRelDP2CoM[2]^2 + sRelDP2CoM[0]^2, -sRelDP2CoM[1]*sRelDP2CoM[2]},
-                                         {-sRelDP2CoM[2]*sRelDP2CoM[0], -sRelDP2CoM[2]*sRelDP2CoM[1], sRelDP2CoM[0]^2 + sRelDP2CoM[1]^2}};
-    AnyFloat JMDP2CoM = .DistalPhalange2.JM + JMDP2T;
-    AnyFloat JiiDP2CoM = {JMDP2CoM[0][0], JMDP2CoM[1][1], JMDP2CoM[2][2]};
-    AnyFloat JijDP2CoM = {JMDP2CoM[1][0], JMDP2CoM[2][1], JMDP2CoM[2][0]};
-    
-    
-    AnyFloat Jii = JiiPP2CoM + JiiMP2CoM + JiiDP2CoM;
-    AnyFloat Jij = JijPP2CoM + JijMP2CoM + JijDP2CoM;
-  };
-
-  AnyRefNode ProximalPhalange2 = {
-    //  sRel=.Metatarsal2.MtPhalJoint.sRel*.Metatarsal2.Axes0'+.Metatarsal2.r0-MtPhalJoint.sRel*Axes0';
-    AnyVec3 r0 ??= ..Metatarsal2.MtPhalJoint.sRel*..Metatarsal2.Axes0'+..Metatarsal2.r0-MtPhalJoint.sRel*Axes0';
-    AnyMat33 Axes0 ??= .Axes0;
-
-    AnyFunTransform3D &Scale = ....GeoScaling.ProximalPhalanges2.ScaleFunction; 
-    AnyFunTransform3D &GeomScale =Scale;
-    
-    AnyVar MassS = ....MassScaling.Foot.MassScale;
-    AnyVar MassStandard = ....StandardParameters.Foot.Mass*0.007562741;
-    AnyVar Mass = MassS*MassStandard;
-    
-    //AnyDrawSeg Draw = {};
-    AnyFloat sCoM = 0.5*(RefDist.sRel + MtPhalJoint.sRel);
-    //  JaboutCoMOnOff = On;
-    
-    AnyVar Length = vnorm(RefDist.sRel - MtPhalJoint.sRel);
-    AnyVar Radius = (Mass/(3.1416*Length*....StandardParameters.Foot.Density))^0.5;
-    
-    AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
-    AnyVar Iyy = 0.5 * Mass * Radius^2;
-    AnyVar Izz = Ixx;
-    
-    AnyMat33 JM = CenterNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode.ARel';
-    AnyFloat Jii = {JM[0][0], JM[1][1], JM[2][2]};
-    AnyFloat Jij = {JM[1][0], JM[2][1], JM[2][0]};
-        
-  }; // End of ProximalPhalanges2
-  
-  AnyRefNode MiddlePhalange2 = {
-//    sRel=.ProximalPhalange2.ProxPhalJoint.sRel*.ProximalPhalange2.ARel'+.ProximalPhalange2.sRel-ProxPhalJoint.sRel*ARel';
-    AnyVec3 r0 ??= .ProximalPhalange2.ProxPhalJoint.sRel*.ProximalPhalange2.Axes0'+.ProximalPhalange2.r0-ProxPhalJoint.sRel*Axes0';
-    AnyMat33 Axes0 ??= .Axes0;
-
-    AnyFunTransform3D &Scale = ....GeoScaling.MiddlePhalanges2.ScaleFunction;  
-    AnyFunTransform3D &GeomScale =Scale;
-
-    AnyVar MassS = ....MassScaling.Foot.MassScale;
-    AnyVar MassStandard = ....StandardParameters.Foot.Mass*0.001591376;
-    AnyVar Mass = MassS*MassStandard;
-    
-    //AnyDrawSeg Draw = {};
-    AnyFloat sCoM = 0.5*(RefDist.sRel + ProxPhalJoint.sRel);
-    //  JaboutCoMOnOff = On;
-    
-    AnyVar Length = vnorm(RefDist.sRel - ProxPhalJoint.sRel);
-    AnyVar Radius = (Mass/(3.1416*Length*....StandardParameters.Foot.Density))^0.5;
-    
-    AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
-    AnyVar Iyy = 0.5 * Mass * Radius^2;
-    AnyVar Izz = Ixx;
-    
-    AnyMat33 JM = CenterNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode.ARel';
-    AnyFloat Jii = {JM[0][0], JM[1][1], JM[2][2]};
-    AnyFloat Jij = {JM[1][0], JM[2][1], JM[2][0]};
-            
-  }; // End of MiddlePhalanges2
+  };// end Toe2
+  
   
-  AnyRefNode DistalPhalange2 = {
-//    sRel=.MiddlePhalange2.DistPhalJoint.sRel*.MiddlePhalange2.ARel'+.MiddlePhalange2.sRel-DistPhalJoint.sRel*ARel';
-    AnyVec3 r0 ??= .MiddlePhalange2.DistPhalJoint.sRel*.MiddlePhalange2.Axes0'+.MiddlePhalange2.r0-DistPhalJoint.sRel*Axes0';
-    AnyMat33 Axes0 ??= .Axes0;
-    
-    AnyFunTransform3D &Scale = ....GeoScaling.DistalPhalanges2.ScaleFunction;  
-    AnyFunTransform3D &GeomScale =Scale;
-    
-    AnyVar MassS = ....MassScaling.Foot.MassScale;
-    AnyVar MassStandard = ....StandardParameters.Foot.Mass*0.000724269;
-    AnyVar Mass = MassS*MassStandard;
-    
-    //AnyDrawSeg Draw = {};
-    AnyFloat sCoM = 0.5*(RefDist.sRel + DistPhalJoint.sRel);
-    //  JaboutCoMOnOff = On;
-    
-    AnyVar Length = vnorm(RefDist.sRel - DistPhalJoint.sRel);
-    AnyVar Radius = (Mass/(3.1416*Length*....StandardParameters.Foot.Density))^0.5;
-    
-    AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
-    AnyVar Iyy = 0.5 * Mass * Radius^2;
-    AnyVar Izz = Ixx;
-    
-    AnyMat33 JM = CenterNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode.ARel';
-    AnyFloat Jii = {JM[0][0], JM[1][1], JM[2][2]};
-    AnyFloat Jij = {JM[1][0], JM[2][1], JM[2][0]};
-    
-  }; // End of DistalPhalanges2
-  
-  
-};// end Toe2
-
-
-//***********************
-//         Toe 3
-//***********************
-
-
-AnySeg Toe3 = {
-  UseInertiaObjects = On;
-//  Mass = ProximalPhalange3.Mass + MiddlePhalange3.Mass + DistalPhalange3.Mass;
-//  sCoM = (
-//          ProximalPhalange3.Mass*ProximalPhalange3.sCoM +
-//          MiddlePhalange3.Mass*MiddlePhalange3.sCoM +
-//          DistalPhalange3.Mass*DistalPhalange3.sCoM
-//         )/Mass;
-  r0=.Metatarsal3.MtPhalJoint.sRel*.Metatarsal3.ARel'+.RigidPart.r0-ProximalPhalange3.MtPhalJoint.sRel*ProximalPhalange3.ARel';
-//  AnyRefNode CoM = {sRel =.sCoM;}; 
-//  Jii = EqInertia.Jii;
-//  Jij = EqInertia.Jij;
-//  JaboutCoMOnOff = On;
+  //***********************
+  //         Toe 3
+  //***********************
   
-  AnyFolder EqInertia = {
-    // Equivalent inertia is calculated using parallel axis theorem. Jii of constituent segments, expressed about their corresponding
-    // CoM are translated to the CoM of the lumped segment using the formula: JiiNew = JiiCoM + mr^2
-    // r vector is calculated as the difference between constituent segment CoM and lumped segment CoM.
-    // m is the mass of the constituent segment.
-    // JiiCoM is the Jii of the constituent segment about its own CoM
-    // JiiNew is the Jii of the constituent segment about the CoM of the lumped segment.
-          
-    AnyFloat sRelPP3CoM = .ProximalPhalange3.sCoM-.sCoM;
-    AnyFloat JMPP3T = .ProximalPhalange3.Mass*{{sRelPP3CoM[1]^2 + sRelPP3CoM[2]^2, -sRelPP3CoM[0]*sRelPP3CoM[1], -sRelPP3CoM[0]*sRelPP3CoM[2]},
-                                         {-sRelPP3CoM[1]*sRelPP3CoM[0], sRelPP3CoM[2]^2 + sRelPP3CoM[0]^2, -sRelPP3CoM[1]*sRelPP3CoM[2]},
-                                         {-sRelPP3CoM[2]*sRelPP3CoM[0], -sRelPP3CoM[2]*sRelPP3CoM[1], sRelPP3CoM[0]^2 + sRelPP3CoM[1]^2}};
-    AnyFloat JMPP3CoM = .ProximalPhalange3.JM + JMPP3T;
-    AnyFloat JiiPP3CoM = {JMPP3CoM[0][0], JMPP3CoM[1][1], JMPP3CoM[2][2]};
-    AnyFloat JijPP3CoM = {JMPP3CoM[1][0], JMPP3CoM[2][1], JMPP3CoM[2][0]};
-    
-    AnyFloat sRelMP3CoM = .MiddlePhalange3.sCoM-.sCoM;
-    AnyFloat JMMP3T = .MiddlePhalange3.Mass*{{sRelMP3CoM[1]^2 + sRelMP3CoM[2]^2, -sRelMP3CoM[0]*sRelMP3CoM[1], -sRelMP3CoM[0]*sRelMP3CoM[2]},
-                                         {-sRelMP3CoM[1]*sRelMP3CoM[0], sRelMP3CoM[2]^2 + sRelMP3CoM[0]^2, -sRelMP3CoM[1]*sRelMP3CoM[2]},
-                                         {-sRelMP3CoM[2]*sRelMP3CoM[0], -sRelMP3CoM[2]*sRelMP3CoM[1], sRelMP3CoM[0]^2 + sRelMP3CoM[1]^2}};
-    AnyFloat JMMP3CoM = .MiddlePhalange3.JM + JMMP3T;
-    AnyFloat JiiMP3CoM = {JMMP3CoM[0][0], JMMP3CoM[1][1], JMMP3CoM[2][2]};
-    AnyFloat JijMP3CoM = {JMMP3CoM[1][0], JMMP3CoM[2][1], JMMP3CoM[2][0]};
-
-    AnyFloat sRelDP3CoM = .DistalPhalange3.sCoM-.sCoM;
-    AnyFloat JMDP3T = .DistalPhalange3.Mass*{{sRelDP3CoM[1]^2 + sRelDP3CoM[2]^2, -sRelDP3CoM[0]*sRelDP3CoM[1], -sRelDP3CoM[0]*sRelDP3CoM[2]},
-                                         {-sRelDP3CoM[1]*sRelDP3CoM[0], sRelDP3CoM[2]^2 + sRelDP3CoM[0]^2, -sRelDP3CoM[1]*sRelDP3CoM[2]},
-                                         {-sRelDP3CoM[2]*sRelDP3CoM[0], -sRelDP3CoM[2]*sRelDP3CoM[1], sRelDP3CoM[0]^2 + sRelDP3CoM[1]^2}};
-    AnyFloat JMDP3CoM = .DistalPhalange3.JM + JMDP3T;
-    AnyFloat JiiDP3CoM = {JMDP3CoM[0][0], JMDP3CoM[1][1], JMDP3CoM[2][2]};
-    AnyFloat JijDP3CoM = {JMDP3CoM[1][0], JMDP3CoM[2][1], JMDP3CoM[2][0]};
-    
-    
-    AnyFloat Jii = JiiPP3CoM + JiiMP3CoM + JiiDP3CoM;
-    AnyFloat Jij = JijPP3CoM + JijMP3CoM + JijDP3CoM;
-  };
-
-  
-  AnyRefNode ProximalPhalange3 = {
-    //  r0=.Metatarsal3.MtPhalJoint.sRel*.Metatarsal3.Axes0'+.Metatarsal3.r0-MtPhalJoint.sRel*Axes0';
-    AnyVec3 r0 ??= ..Metatarsal3.MtPhalJoint.sRel*..Metatarsal3.Axes0'+..Metatarsal3.r0-MtPhalJoint.sRel*Axes0';
-    AnyMat33 Axes0 ??= .Axes0;
-
-    AnyFunTransform3D &Scale = ....GeoScaling.ProximalPhalanges3.ScaleFunction;  
-    AnyFunTransform3D &GeomScale =Scale;
-    
-    AnyVar MassS = ....MassScaling.Foot.MassScale;
-    AnyVar MassStandard = ....StandardParameters.Foot.Mass*0.006408771;
-    AnyVar Mass = MassS*MassStandard;
-    
-    //AnyDrawSeg Draw = {};
-    AnyFloat sCoM = 0.5*(RefDist.sRel + MtPhalJoint.sRel);
-    //  JaboutCoMOnOff = On;
-    
-    AnyVar Length = vnorm(RefDist.sRel - MtPhalJoint.sRel);
-    AnyVar Radius = (Mass/(3.1416*Length*....StandardParameters.Foot.Density))^0.5;
-    
-    AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
-    AnyVar Iyy = 0.5 * Mass * Radius^2;
-    AnyVar Izz = Ixx;
-    
-    AnyMat33 JM = CenterNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode.ARel';
-    AnyFloat Jii = {JM[0][0], JM[1][1], JM[2][2]};
-    AnyFloat Jij = {JM[1][0], JM[2][1], JM[2][0]};
-        
-  }; // End of ProximalPhalanges3
   
-  AnyRefNode MiddlePhalange3 = {
-//    sRel=.ProximalPhalange3.ProxPhalJoint.sRel*.ProximalPhalange3.ARel'+.ProximalPhalange3.sRel-ProxPhalJoint.sRel*ARel';
-    AnyVec3 r0 ??= .ProximalPhalange3.ProxPhalJoint.sRel*.ProximalPhalange3.Axes0'+.ProximalPhalange3.r0-ProxPhalJoint.sRel*Axes0';
-    AnyMat33 Axes0 ??= .Axes0;
-
-    AnyFunTransform3D &Scale = ....GeoScaling.MiddlePhalanges3.ScaleFunction;  
-    AnyFunTransform3D &GeomScale =Scale;
-    
-    AnyVar MassS = ....MassScaling.Foot.MassScale;
-    AnyVar MassStandard = ....StandardParameters.Foot.Mass*0.001243466;
-    AnyVar Mass = MassS*MassStandard;
+  AnySeg Toe3 = {
+    r0 ??= .Metatarsal3.MtPhalJoint.sRel*.Metatarsal3.ARel'+.RigidPart.r0-ProximalPhalange3.MtPhalJoint.sRel*ProximalPhalange3.ARel';
+    UseInertiaObjects = On;
     
-    //AnyDrawSeg Draw = {};
-    AnyFloat sCoM = 0.5*(RefDist.sRel + ProxPhalJoint.sRel);
-    //  JaboutCoMOnOff = On;
+    AnyRefNode ProximalPhalange3 = {
+      AnyVec3 r0 ??= ..Metatarsal3.MtPhalJoint.sRel*..Metatarsal3.Axes0'+..Metatarsal3.r0-MtPhalJoint.sRel*Axes0';
+      AnyMat33 Axes0 ??= .Axes0;      
+      AnyFunTransform3D &Scale = ....GeoScaling.ProximalPhalanges3.ScaleFunction;  
+      AnyFunTransform3D &GeomScale =Scale;      
+    }; // End of ProximalPhalanges3
     
-    AnyVar Length = vnorm(RefDist.sRel - ProxPhalJoint.sRel);
-    AnyVar Radius = (Mass/(3.1416*Length*....StandardParameters.Foot.Density))^0.5;
+    AnyRefNode MiddlePhalange3 = {
+      AnyVec3 r0 ??= .ProximalPhalange3.ProxPhalJoint.sRel*.ProximalPhalange3.Axes0'+.ProximalPhalange3.r0-ProxPhalJoint.sRel*Axes0';
+      AnyMat33 Axes0 ??= .Axes0;      
+      AnyFunTransform3D &Scale = ....GeoScaling.MiddlePhalanges3.ScaleFunction;  
+      AnyFunTransform3D &GeomScale =Scale;      
+    }; // End of MiddlePhalanges3
     
-    AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
-    AnyVar Iyy = 0.5 * Mass * Radius^2;
-    AnyVar Izz = Ixx;
+    AnyRefNode DistalPhalange3 = {
+      AnyVec3 r0 ??= .MiddlePhalange3.DistPhalJoint.sRel*.MiddlePhalange3.Axes0'+.MiddlePhalange3.r0-DistPhalJoint.sRel*Axes0';
+      AnyMat33 Axes0 ??= .Axes0;      
+      AnyFunTransform3D &Scale = ....GeoScaling.DistalPhalanges3.ScaleFunction;  
+      AnyFunTransform3D &GeomScale =Scale;      
+    }; // End of DistalPhalanges3    
     
-    AnyMat33 JM = CenterNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode.ARel';
-    AnyFloat Jii = {JM[0][0], JM[1][1], JM[2][2]};
-    AnyFloat Jij = {JM[1][0], JM[2][1], JM[2][0]};
-    
-  }; // End of MiddlePhalanges3
+  } ; // End of Toe3
   
-  AnyRefNode DistalPhalange3 = {
-//    sRel=.MiddlePhalange3.DistPhalJoint.sRel*.MiddlePhalange3.ARel'+.MiddlePhalange3.sRel-DistPhalJoint.sRel*ARel';
-    AnyVec3 r0 ??= .MiddlePhalange3.DistPhalJoint.sRel*.MiddlePhalange3.Axes0'+.MiddlePhalange3.r0-DistPhalJoint.sRel*Axes0';
-    AnyMat33 Axes0 ??= .Axes0;
-
-    AnyFunTransform3D &Scale = ....GeoScaling.DistalPhalanges3.ScaleFunction;  
-    AnyFunTransform3D &GeomScale =Scale;
-    
-    AnyVar MassS = ....MassScaling.Foot.MassScale;
-    AnyVar MassStandard = ....StandardParameters.Foot.Mass*0.000608694;
-    AnyVar Mass = MassS*MassStandard;
-    
-    //AnyDrawSeg Draw = {};
-    AnyFloat sCoM = 0.5*(RefDist.sRel + DistPhalJoint.sRel);
-    //  JaboutCoMOnOff = On;
-    
-    AnyVar Length = vnorm(RefDist.sRel - DistPhalJoint.sRel);
-    AnyVar Radius = (Mass/(3.1416*Length*....StandardParameters.Foot.Density))^0.5;
-    
-    AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
-    AnyVar Iyy = 0.5 * Mass * Radius^2;
-    AnyVar Izz = Ixx;
-    
-    AnyMat33 JM = CenterNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode.ARel';
-    AnyFloat Jii = {JM[0][0], JM[1][1], JM[2][2]};
-    AnyFloat Jij = {JM[1][0], JM[2][1], JM[2][0]};
-        
-  }; // End of DistalPhalanges3
   
+  //***********************
+  //         Toe 4
+  //***********************
   
-} ; // End of Toe3
-
-
-//***********************
-//         Toe 4
-//***********************
-
-AnySeg Toe4 = {
-  UseInertiaObjects = On;
-//  Mass = ProximalPhalange4.Mass + MiddlePhalange4.Mass + DistalPhalange4.Mass;
-//  sCoM = (
-//          ProximalPhalange4.Mass*ProximalPhalange4.sCoM +
-//          MiddlePhalange4.Mass*MiddlePhalange4.sCoM +
-//          DistalPhalange4.Mass*DistalPhalange4.sCoM
-//         )/Mass;
-  r0=.Metatarsal4.MtPhalJoint.sRel*.Metatarsal4.ARel'+.RigidPart.r0-ProximalPhalange4.MtPhalJoint.sRel*ProximalPhalange4.ARel';
-//  AnyRefNode CoM = {sRel =.sCoM;}; 
-//  Jii = EqInertia.Jii;
-//  Jij = EqInertia.Jij;
-//  JaboutCoMOnOff = On;
   
-  AnyFolder EqInertia = {
-    // Equivalent inertia is calculated using parallel axis theorem. Jii of constituent segments, expressed about their corresponding
-    // CoM are translated to the CoM of the lumped segment using the formula: JiiNew = JiiCoM + mr^2
-    // r vector is calculated as the difference between constituent segment CoM and lumped segment CoM.
-    // m is the mass of the constituent segment.
-    // JiiCoM is the Jii of the constituent segment about its own CoM
-    // JiiNew is the Jii of the constituent segment about the CoM of the lumped segment.
-          
-    AnyFloat sRelPP4CoM = .ProximalPhalange4.sCoM-.sCoM;
-    AnyFloat JMPP4T = .ProximalPhalange4.Mass*{{sRelPP4CoM[1]^2 + sRelPP4CoM[2]^2, -sRelPP4CoM[0]*sRelPP4CoM[1], -sRelPP4CoM[0]*sRelPP4CoM[2]},
-                                         {-sRelPP4CoM[1]*sRelPP4CoM[0], sRelPP4CoM[2]^2 + sRelPP4CoM[0]^2, -sRelPP4CoM[1]*sRelPP4CoM[2]},
-                                         {-sRelPP4CoM[2]*sRelPP4CoM[0], -sRelPP4CoM[2]*sRelPP4CoM[1], sRelPP4CoM[0]^2 + sRelPP4CoM[1]^2}};
-    AnyFloat JMPP4CoM = .ProximalPhalange4.JM + JMPP4T;
-    AnyFloat JiiPP4CoM = {JMPP4CoM[0][0], JMPP4CoM[1][1], JMPP4CoM[2][2]};
-    AnyFloat JijPP4CoM = {JMPP4CoM[1][0], JMPP4CoM[2][1], JMPP4CoM[2][0]};
-    
-    AnyFloat sRelMP4CoM = .MiddlePhalange4.sCoM-.sCoM;
-    AnyFloat JMMP4T = .MiddlePhalange4.Mass*{{sRelMP4CoM[1]^2 + sRelMP4CoM[2]^2, -sRelMP4CoM[0]*sRelMP4CoM[1], -sRelMP4CoM[0]*sRelMP4CoM[2]},
-                                         {-sRelMP4CoM[1]*sRelMP4CoM[0], sRelMP4CoM[2]^2 + sRelMP4CoM[0]^2, -sRelMP4CoM[1]*sRelMP4CoM[2]},
-                                         {-sRelMP4CoM[2]*sRelMP4CoM[0], -sRelMP4CoM[2]*sRelMP4CoM[1], sRelMP4CoM[0]^2 + sRelMP4CoM[1]^2}};
-    AnyFloat JMMP4CoM = .MiddlePhalange4.JM + JMMP4T;
-    AnyFloat JiiMP4CoM = {JMMP4CoM[0][0], JMMP4CoM[1][1], JMMP4CoM[2][2]};
-    AnyFloat JijMP4CoM = {JMMP4CoM[1][0], JMMP4CoM[2][1], JMMP4CoM[2][0]};
-
-    AnyFloat sRelDP4CoM = .DistalPhalange4.sCoM-.sCoM;
-    AnyFloat JMDP4T = .DistalPhalange4.Mass*{{sRelDP4CoM[1]^2 + sRelDP4CoM[2]^2, -sRelDP4CoM[0]*sRelDP4CoM[1], -sRelDP4CoM[0]*sRelDP4CoM[2]},
-                                         {-sRelDP4CoM[1]*sRelDP4CoM[0], sRelDP4CoM[2]^2 + sRelDP4CoM[0]^2, -sRelDP4CoM[1]*sRelDP4CoM[2]},
-                                         {-sRelDP4CoM[2]*sRelDP4CoM[0], -sRelDP4CoM[2]*sRelDP4CoM[1], sRelDP4CoM[0]^2 + sRelDP4CoM[1]^2}};
-    AnyFloat JMDP4CoM = .DistalPhalange4.JM + JMDP4T;
-    AnyFloat JiiDP4CoM = {JMDP4CoM[0][0], JMDP4CoM[1][1], JMDP4CoM[2][2]};
-    AnyFloat JijDP4CoM = {JMDP4CoM[1][0], JMDP4CoM[2][1], JMDP4CoM[2][0]};
-    
-    
-    AnyFloat Jii = JiiPP4CoM + JiiMP4CoM + JiiDP4CoM;
-    AnyFloat Jij = JijPP4CoM + JijMP4CoM + JijDP4CoM;
-  };
-
-  AnyRefNode ProximalPhalange4 = {
-    //  r0=.Metatarsal4.MtPhalJoint.sRel*.Metatarsal4.Axes0'+.Metatarsal4.r0-MtPhalJoint.sRel*Axes0';
-    AnyVec3 r0 ??= ..Metatarsal4.MtPhalJoint.sRel*..Metatarsal4.Axes0'+..Metatarsal4.r0-MtPhalJoint.sRel*Axes0';
-    AnyMat33 Axes0 ??= .Axes0;
-
-    AnyFunTransform3D &Scale = ....GeoScaling.ProximalPhalanges4.ScaleFunction;
-    AnyFunTransform3D &GeomScale =Scale;
+  AnySeg Toe4 = {
+    r0 ??= .Metatarsal4.MtPhalJoint.sRel*.Metatarsal4.ARel'+.RigidPart.r0-ProximalPhalange4.MtPhalJoint.sRel*ProximalPhalange4.ARel';
+    UseInertiaObjects = On;
     
-    AnyVar MassS = ....MassScaling.Foot.MassScale;
-    AnyVar MassStandard = ....StandardParameters.Foot.Mass*0.00596366;
-    AnyVar Mass = MassS*MassStandard;
+    AnyRefNode ProximalPhalange4 = {
+      AnyVec3 r0 ??= ..Metatarsal4.MtPhalJoint.sRel*..Metatarsal4.Axes0'+..Metatarsal4.r0-MtPhalJoint.sRel*Axes0';
+      AnyMat33 Axes0 ??= .Axes0;      
+      AnyFunTransform3D &Scale = ....GeoScaling.ProximalPhalanges4.ScaleFunction;
+      AnyFunTransform3D &GeomScale =Scale;      
+    }; // End of ProximalPhalanges4
     
-    //AnyDrawSeg Draw = {};
-    AnyFloat sCoM = 0.5*(RefDist.sRel + MtPhalJoint.sRel);
-    //  JaboutCoMOnOff = On;
+    AnyRefNode MiddlePhalange4 = {
+      AnyVec3 r0 ??= .ProximalPhalange4.ProxPhalJoint.sRel*.ProximalPhalange4.Axes0'+.ProximalPhalange4.r0-ProxPhalJoint.sRel*Axes0';
+      AnyMat33 Axes0 ??= .Axes0;      
+      AnyFunTransform3D &Scale = ....GeoScaling.MiddlePhalanges4.ScaleFunction; 
+      AnyFunTransform3D &GeomScale =Scale;      
+    }; // End of MiddlePhalanges4
     
-    AnyVar Length = vnorm(RefDist.sRel - MtPhalJoint.sRel);
-    AnyVar Radius = (Mass/(3.1416*Length*....StandardParameters.Foot.Density))^0.5;
+    AnyRefNode DistalPhalange4 = {
+      AnyVec3 r0 ??= .MiddlePhalange4.DistPhalJoint.sRel*.MiddlePhalange4.Axes0'+.MiddlePhalange4.r0-DistPhalJoint.sRel*Axes0';
+      AnyMat33 Axes0 ??= .Axes0;      
+      AnyFunTransform3D &Scale = ....GeoScaling.DistalPhalanges4.ScaleFunction;  
+      AnyFunTransform3D &GeomScale =Scale;      
+    }; // End of DistalPhalanges4
     
-    AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
-    AnyVar Iyy = 0.5 * Mass * Radius^2;
-    AnyVar Izz = Ixx;
-    
-    AnyMat33 JM = CenterNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode.ARel';
-    AnyFloat Jii = {JM[0][0], JM[1][1], JM[2][2]};
-    AnyFloat Jij = {JM[1][0], JM[2][1], JM[2][0]};
-    
-  }; // End of ProximalPhalanges4
+  }; // End of Toe 4
   
-  AnyRefNode MiddlePhalange4 = {
-//    sRel =.ProximalPhalange4.ProxPhalJoint.sRel*.ProximalPhalange4.ARel'+.ProximalPhalange4.sRel-ProxPhalJoint.sRel*ARel';
-    AnyVec3 r0 ??= .ProximalPhalange4.ProxPhalJoint.sRel*.ProximalPhalange4.Axes0'+.ProximalPhalange4.r0-ProxPhalJoint.sRel*Axes0';
-    AnyMat33 Axes0 ??= .Axes0;
-
-    AnyFunTransform3D &Scale = ....GeoScaling.MiddlePhalanges4.ScaleFunction; 
-    AnyFunTransform3D &GeomScale =Scale;
-    
-    AnyVar MassS = ....MassScaling.Foot.MassScale;
-    AnyVar MassStandard = ....StandardParameters.Foot.Mass*0.001188346;
-    AnyVar Mass = MassS*MassStandard;
-    
-    //AnyDrawSeg Draw = {};
-    AnyFloat sCoM = 0.5*(RefDist.sRel + ProxPhalJoint.sRel);
-    //  JaboutCoMOnOff = On;
-    
-    AnyVar Length = vnorm(RefDist.sRel - ProxPhalJoint.sRel);
-    AnyVar Radius = (Mass/(3.1416*Length*....StandardParameters.Foot.Density))^0.5;
-    
-    AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
-    AnyVar Iyy = 0.5 * Mass * Radius^2;
-    AnyVar Izz = Ixx;
-    
-    AnyMat33 JM = CenterNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode.ARel';
-    AnyFloat Jii = {JM[0][0], JM[1][1], JM[2][2]};
-    AnyFloat Jij = {JM[1][0], JM[2][1], JM[2][0]};
-    
-  }; // End of MiddlePhalanges4
   
-  AnyRefNode DistalPhalange4 = {
-//    sRel=.MiddlePhalange4.DistPhalJoint.sRel*.MiddlePhalange4.ARel'+.MiddlePhalange4.sRel-DistPhalJoint.sRel*ARel';
-    AnyVec3 r0 ??= .MiddlePhalange4.DistPhalJoint.sRel*.MiddlePhalange4.Axes0'+.MiddlePhalange4.r0-DistPhalJoint.sRel*Axes0';
-    AnyMat33 Axes0 ??= .Axes0;
-    
-    AnyFunTransform3D &Scale = ....GeoScaling.DistalPhalanges4.ScaleFunction;  
-    AnyFunTransform3D &GeomScale =Scale;
-    
-    AnyVar MassS = ....MassScaling.Foot.MassScale;
-    AnyVar MassStandard = ....StandardParameters.Foot.Mass*0.000541127;
-    AnyVar Mass = MassS*MassStandard;
-    
-    //AnyDrawSeg Draw = {};
-    AnyFloat sCoM = 0.5*(RefDist.sRel + DistPhalJoint.sRel);
-    //  JaboutCoMOnOff = On;
-    
-    AnyVar Length = vnorm(RefDist.sRel - DistPhalJoint.sRel);
-    AnyVar Radius = (Mass/(3.1416*Length*....StandardParameters.Foot.Density))^0.5;
-    
-    AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
-    AnyVar Iyy = 0.5 * Mass * Radius^2;
-    AnyVar Izz = Ixx;
-    
-    AnyMat33 JM = CenterNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode.ARel';
-    AnyFloat Jii = {JM[0][0], JM[1][1], JM[2][2]};
-    AnyFloat Jij = {JM[1][0], JM[2][1], JM[2][0]};
-        
-  }; // End of DistalPhalanges4
+  //***********************
+  //         Toe 5
+  //***********************
   
-}; // End of Toe 4
-
-
-//***********************
-//         Toe 5
-//***********************
-
-AnySeg Toe5 = {
-//  Mass = ProximalPhalange5.Mass + MiddlePhalange5.Mass + DistalPhalange5.Mass;
-//  sCoM = (
-//          ProximalPhalange5.Mass*ProximalPhalange5.sCoM +
-//          MiddlePhalange5.Mass*MiddlePhalange5.sCoM +
-//          DistalPhalange5.Mass*DistalPhalange5.sCoM
-//         )/Mass;
-  r0=.Metatarsal5.MtPhalJoint.sRel*.Metatarsal5.ARel'+.RigidPart.r0-ProximalPhalange5.MtPhalJoint.sRel*ProximalPhalange5.ARel';
-//  AnyRefNode CoM = {sRel =.sCoM;}; 
-//  Jii = EqInertia.Jii;
-//  Jij = EqInertia.Jij;
-//  JaboutCoMOnOff = On;
-  UseInertiaObjects = On;
-  AnyFolder EqInertia = {
-    // Equivalent inertia is calculated using parallel axis theorem. Jii of constituent segments, expressed about their corresponding
-    // CoM are translated to the CoM of the lumped segment using the formula: JiiNew = JiiCoM + mr^2
-    // r vector is calculated as the difference between constituent segment CoM and lumped segment CoM.
-    // m is the mass of the constituent segment.
-    // JiiCoM is the Jii of the constituent segment about its own CoM
-    // JiiNew is the Jii of the constituent segment about the CoM of the lumped segment.
-          
-    AnyFloat sRelPP5CoM = .ProximalPhalange5.sCoM-.sCoM;
-    AnyFloat JMPP5T = .ProximalPhalange5.Mass*{{sRelPP5CoM[1]^2 + sRelPP5CoM[2]^2, -sRelPP5CoM[0]*sRelPP5CoM[1], -sRelPP5CoM[0]*sRelPP5CoM[2]},
-                                         {-sRelPP5CoM[1]*sRelPP5CoM[0], sRelPP5CoM[2]^2 + sRelPP5CoM[0]^2, -sRelPP5CoM[1]*sRelPP5CoM[2]},
-                                         {-sRelPP5CoM[2]*sRelPP5CoM[0], -sRelPP5CoM[2]*sRelPP5CoM[1], sRelPP5CoM[0]^2 + sRelPP5CoM[1]^2}};
-    AnyFloat JMPP5CoM = .ProximalPhalange5.JM + JMPP5T;
-    AnyFloat JiiPP5CoM = {JMPP5CoM[0][0], JMPP5CoM[1][1], JMPP5CoM[2][2]};
-    AnyFloat JijPP5CoM = {JMPP5CoM[1][0], JMPP5CoM[2][1], JMPP5CoM[2][0]};
-    
-    AnyFloat sRelMP5CoM = .MiddlePhalange5.sCoM-.sCoM;
-    AnyFloat JMMP5T = .MiddlePhalange5.Mass*{{sRelMP5CoM[1]^2 + sRelMP5CoM[2]^2, -sRelMP5CoM[0]*sRelMP5CoM[1], -sRelMP5CoM[0]*sRelMP5CoM[2]},
-                                         {-sRelMP5CoM[1]*sRelMP5CoM[0], sRelMP5CoM[2]^2 + sRelMP5CoM[0]^2, -sRelMP5CoM[1]*sRelMP5CoM[2]},
-                                         {-sRelMP5CoM[2]*sRelMP5CoM[0], -sRelMP5CoM[2]*sRelMP5CoM[1], sRelMP5CoM[0]^2 + sRelMP5CoM[1]^2}};
-    AnyFloat JMMP5CoM = .MiddlePhalange5.JM + JMMP5T;
-    AnyFloat JiiMP5CoM = {JMMP5CoM[0][0], JMMP5CoM[1][1], JMMP5CoM[2][2]};
-    AnyFloat JijMP5CoM = {JMMP5CoM[1][0], JMMP5CoM[2][1], JMMP5CoM[2][0]};
-
-    AnyFloat sRelDP5CoM = .DistalPhalange5.sCoM-.sCoM;
-    AnyFloat JMDP5T = .DistalPhalange5.Mass*{{sRelDP5CoM[1]^2 + sRelDP5CoM[2]^2, -sRelDP5CoM[0]*sRelDP5CoM[1], -sRelDP5CoM[0]*sRelDP5CoM[2]},
-                                         {-sRelDP5CoM[1]*sRelDP5CoM[0], sRelDP5CoM[2]^2 + sRelDP5CoM[0]^2, -sRelDP5CoM[1]*sRelDP5CoM[2]},
-                                         {-sRelDP5CoM[2]*sRelDP5CoM[0], -sRelDP5CoM[2]*sRelDP5CoM[1], sRelDP5CoM[0]^2 + sRelDP5CoM[1]^2}};
-    AnyFloat JMDP5CoM = .DistalPhalange5.JM + JMDP5T;
-    AnyFloat JiiDP5CoM = {JMDP5CoM[0][0], JMDP5CoM[1][1], JMDP5CoM[2][2]};
-    AnyFloat JijDP5CoM = {JMDP5CoM[1][0], JMDP5CoM[2][1], JMDP5CoM[2][0]};
-    
-    
-    AnyFloat Jii = JiiPP5CoM + JiiMP5CoM + JiiDP5CoM;
-    AnyFloat Jij = JijPP5CoM + JijMP5CoM + JijDP5CoM;
-  };
-
-  AnyRefNode ProximalPhalange5 = {
-    //  r0=.Metatarsal5.MtPhalJoint.sRel*.Metatarsal5.Axes0'+.Metatarsal5.r0-MtPhalJoint.sRel*Axes0';
-    AnyVec3 r0 ??= ..Metatarsal5.MtPhalJoint.sRel*..Metatarsal5.Axes0'+..Metatarsal5.r0-MtPhalJoint.sRel*Axes0';
-    AnyMat33 Axes0 ??= .Axes0;
-
-    AnyFunTransform3D &Scale = ....GeoScaling.ProximalPhalanges5.ScaleFunction;  
-    AnyFunTransform3D &GeomScale =Scale;
-    
-    AnyVar MassS = ....MassScaling.Foot.MassScale;
-    AnyVar MassStandard = ....StandardParameters.Foot.Mass*0.00440014;
-    AnyVar Mass = MassS*MassStandard;
-    
-    //AnyDrawSeg Draw = {};
-    AnyFloat sCoM = 0.5*(RefDist.sRel + MtPhalJoint.sRel);
-    //  JaboutCoMOnOff = On;
-    
-    AnyVar Length = vnorm(RefDist.sRel - MtPhalJoint.sRel);
-    AnyVar Radius = (Mass/(3.1416*Length*....StandardParameters.Foot.Density))^0.5;
-    
-    AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
-    AnyVar Iyy = 0.5 * Mass * Radius^2;
-    AnyVar Izz = Ixx;
-    
-    AnyMat33 JM = CenterNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode.ARel';
-    AnyFloat Jii = {JM[0][0], JM[1][1], JM[2][2]};
-    AnyFloat Jij = {JM[1][0], JM[2][1], JM[2][0]};
-    
-  }; // End of ProximalPhalanges5
   
-  AnyRefNode MiddlePhalange5 = {
-//    sRel=.ProximalPhalange5.ProxPhalJoint.sRel*.ProximalPhalange5.ARel'+.ProximalPhalange5.sRel-ProxPhalJoint.sRel*ARel';
-    AnyVec3 r0 ??= .ProximalPhalange5.ProxPhalJoint.sRel*.ProximalPhalange5.Axes0'+.ProximalPhalange5.r0-ProxPhalJoint.sRel*Axes0';
-    AnyMat33 Axes0 ??= .Axes0;
-
-    AnyFunTransform3D &Scale = ....GeoScaling.MiddlePhalanges5.ScaleFunction;  
-    AnyFunTransform3D &GeomScale =Scale;
+  AnySeg Toe5 = {
+    r0 ??= .Metatarsal5.MtPhalJoint.sRel*.Metatarsal5.ARel'+.RigidPart.r0-ProximalPhalange5.MtPhalJoint.sRel*ProximalPhalange5.ARel';
+    UseInertiaObjects = On;
     
-    AnyVar MassS = ....MassScaling.Foot.MassScale;
-    AnyVar MassStandard = ....StandardParameters.Foot.Mass*0.000644255;
-    AnyVar Mass = MassS*MassStandard;
+    AnyRefNode ProximalPhalange5 = {
+      AnyVec3 r0 ??= ..Metatarsal5.MtPhalJoint.sRel*..Metatarsal5.Axes0'+..Metatarsal5.r0-MtPhalJoint.sRel*Axes0';
+      AnyMat33 Axes0 ??= .Axes0;      
+      AnyFunTransform3D &Scale = ....GeoScaling.ProximalPhalanges5.ScaleFunction;  
+      AnyFunTransform3D &GeomScale =Scale;      
+    }; // End of ProximalPhalanges5
     
-    //AnyDrawSeg Draw = {};
-    AnyFloat sCoM = 0.5*(RefDist.sRel + ProxPhalJoint.sRel);
-    //  JaboutCoMOnOff = On;
+    AnyRefNode MiddlePhalange5 = {
+      AnyVec3 r0 ??= .ProximalPhalange5.ProxPhalJoint.sRel*.ProximalPhalange5.Axes0'+.ProximalPhalange5.r0-ProxPhalJoint.sRel*Axes0';
+      AnyMat33 Axes0 ??= .Axes0;      
+      AnyFunTransform3D &Scale = ....GeoScaling.MiddlePhalanges5.ScaleFunction;  
+      AnyFunTransform3D &GeomScale =Scale;      
+    }; // End of MiddlePhalanges5
     
-    AnyVar Length = vnorm(RefDist.sRel - ProxPhalJoint.sRel);
-    AnyVar Radius = (Mass/(3.1416*Length*....StandardParameters.Foot.Density))^0.5;
     
-    AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
-    AnyVar Iyy = 0.5 * Mass * Radius^2;
-    AnyVar Izz = Ixx;
+    AnyRefNode DistalPhalange5 = {
+      AnyVec3 r0 ??= .MiddlePhalange5.DistPhalJoint.sRel*.MiddlePhalange5.Axes0'+.MiddlePhalange5.r0-DistPhalJoint.sRel*Axes0';
+      AnyMat33 Axes0 ??= .Axes0;      
+      AnyFunTransform3D &Scale = ....GeoScaling.DistalPhalanges5.ScaleFunction;  
+      AnyFunTransform3D &GeomScale =Scale;      
+    }; // End of DistalPhalanges5
     
-    AnyMat33 JM = CenterNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode.ARel';
-    AnyFloat Jii = {JM[0][0], JM[1][1], JM[2][2]};
-    AnyFloat Jij = {JM[1][0], JM[2][1], JM[2][0]};
-    
-  }; // End of MiddlePhalanges5
+  }; // End of Toe5
   
   
-  AnyRefNode DistalPhalange5 = {
-//    sRel=.MiddlePhalange5.DistPhalJoint.sRel*.MiddlePhalange5.ARel'+.MiddlePhalange5.sRel-DistPhalJoint.sRel*ARel';
-    AnyVec3 r0 ??= .MiddlePhalange5.DistPhalJoint.sRel*.MiddlePhalange5.Axes0'+.MiddlePhalange5.r0-DistPhalJoint.sRel*Axes0';
-    AnyMat33 Axes0 ??= .Axes0;
-
-    AnyFunTransform3D &Scale = ....GeoScaling.DistalPhalanges5.ScaleFunction;  
-    AnyFunTransform3D &GeomScale =Scale;
-    
-    AnyVar MassS = ....MassScaling.Foot.MassScale;
-    AnyVar MassStandard = ....StandardParameters.Foot.Mass*0.000520976;
-    AnyVar Mass = MassS*MassStandard;
-    
-    //AnyDrawSeg Draw = {};
-    AnyFloat sCoM = 0.5*(RefDist.sRel + DistPhalJoint.sRel);
-    //  JaboutCoMOnOff = On;
-    
-    AnyVar Length = vnorm(RefDist.sRel - DistPhalJoint.sRel);
-    AnyVar Radius = (Mass/(3.1416*Length*....StandardParameters.Foot.Density))^0.5;
-    
-    AnyVar Ixx = 1/12 * Mass * (3*Radius^2 + Length^2);
-    AnyVar Iyy = 0.5 * Mass * Radius^2;
-    AnyVar Izz = Ixx;
-    
-    AnyMat33 JM = CenterNode.ARel*{{Iyy,0,0},{0,Ixx,0},{0,0,Izz}}*CenterNode.ARel';
-    AnyFloat Jii = {JM[0][0], JM[1][1], JM[2][2]};
-    AnyFloat Jij = {JM[1][0], JM[2][1], JM[2][0]};
-    
-  }; // End of DistalPhalanges5
   
-}; // End of Toe5
-
 }; // Foot
+
