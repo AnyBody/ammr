@@ -9,6 +9,8 @@
 **Changed:**
 
 **Fixed:**
+* Fix an issue with the load time position (start guess) of the wrist joint segment. This fix greatly improves the kinematic robustness of all models which have arms. 
+  The wrist joint segment is small intermediate segment between the radius bone and the hand which greates the 'unversal-joint' mechanism of the wrist.  
 * The `LoadParameters` operation was missing in the `LoadAndReplay` operation in 
   MoCap examples. This has been fixed.
 
