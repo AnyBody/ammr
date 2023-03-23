@@ -13,8 +13,8 @@
   The wrist joint segment is small intermediate segment between the radius bone and the hand which greates the 'unversal-joint' mechanism of the wrist.  
 * The `LoadParameters` operation was missing in the `LoadAndReplay` operation in 
   MoCap examples. This has been fixed.
-* Fixed incorrect overloading of the oblique muscles. This was cause by a regression in AMMR 2.4 which added a more anatomical 
-  correct implementation of the oblique muscles. Even a very tiny force imbalance would cause the major overloading oblique muscle.
+* Fixed incorrect overloading of the oblique muscles. This was caused by a regression in AMMR 2.4 which added a more anatomically 
+  correct implementation of the oblique muscles. Even a very tiny force imbalance would cause major overloading of the oblique muscles.
   A weak residual force was added to the Y rotation of the buckle, which eliminates the problem.
 
 (ammr-2.4-changelog)=
