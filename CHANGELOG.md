@@ -9,14 +9,19 @@
 **Changed:**
 
 **Fixed:**
-* Fix an issue with the load time position (start guess) of the wrist joint segment. This fix greatly improves the kinematic robustness of all models which have arms. 
-  The wrist joint segment is small intermediate segment between the radius bone and the hand which greates the 'unversal-joint' mechanism of the wrist.  
-* Further fixes to the robustness of the pectoralis wrapping segment. The intial load time positions were optimized to ensure the model kinematics can more easily solve. 
-* The `LoadParameters` operation was missing in the `LoadAndReplay` operation in 
-  MoCap examples. This has been fixed.
-* Fixed incorrect overloading of the oblique muscles. This was caused by a regression in AMMR 2.4 which added a more anatomically 
-  correct implementation of the oblique muscles. Even a very tiny force imbalance would cause major overloading of the oblique muscles.
-  A weak residual force was added to the Y rotation of the buckle, which eliminates the problem.
+Thank you for sharing these entries with me. Here are some revised versions:
+
+* Fixed an issue with wrist joint segment's load time position (start guess). This greatly improves kinematic robustness of all models with arms as it creates a 'universal-joint' mechanism for wrist movement.
+
+* Further fixes made to pectoralis wrapping segment's robustness by optimizing initial load time positions to ensure model kinematics can more easily solve.
+
+* Fixed missing `LoadParameters` operation in `LoadAndReplay` operation in MoCap examples.
+
+* Fixed a problem with oblique muscles introduced in AMMR 2.4. Some load cases could cause overloading of the oblique muscles as the tried to misuse them to balance tiny imbalance in the buckle segment. A weak residual force was added to Y rotation of buckle to eliminate this problem.
+
+* Corrected wrong order of nonlinear intervertebral disc stiffness polynomial coefficients (affects only those who used polynomial disc stiffness).
+
+* Corrected small asymmetry in function for nonlinear intervertebral disc stiffness in coronal plane (affects only those who used polynomial disc stiffness).
 
 (ammr-2.4-changelog)=
 ## AMMR 2.4.3 (2023-01-27)
