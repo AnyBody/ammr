@@ -1,41 +1,40 @@
 AnyFolder Cylinder = {
   
-  //scaling factor to adjust size of the wrapping cylinder based on the boney landmarks
-  AnyFloat ScaleFactor = (
-    vnorm(...Seg.Humerus.Data.I_subscapularis_1_pos - ...Seg.Humerus.Data.I_subscapularis_5_pos) /
-    vnorm(...Seg.Humerus.I_subscapularis_1.sRel - ...Seg.Humerus.I_subscapularis_5.sRel)
-  );  
+  AnyFloat ScaleFactor ??= 1;
+  AnyFloat LengthScale ??= 1;
   
-  AnySeg Cyl = {
+  AnySeg Segment = {
     Mass=1e-5;
-    Jii = {0, 0, 0};
-    r0 = ..InitialPos;    
-    Axes0 = ..InitialAxes * ..InitialRot;
+    Jii ??= {0, 0, 0};
+    r0 ??= {0,0,0};    
+    Axes0 ??= eye(3);
         
     AnyRefNode node1 = {
-       sRel = {0, 0, -0.13} * ..ScaleFactor;
-
-      AnySurfCylinder CylSurf = {
-        Length = ....LengthScale * vnorm( ..node2.sRel-..node1.sRel );
+       sRel = {0, 0, 0.0} * ..ScaleFactor;
+       
+       //AnyDrawRefFrame drw = {RGB={1,0,0};};
+       
+      AnySurfCylinder Surf = {
+        Length = ...LengthScale * vnorm( ..node2.sRel-..node1.sRel ) + 0.07;
         Radius = 0.014 * ...ScaleFactor;
       };
     };
     AnyRefNode node2 = { 
-      sRel = {0, 0, 0.07} * ..ScaleFactor; 
+      sRel = {0, 0, 0.13} * ..ScaleFactor; 
     };
   };
 
   AnyUniversalJoint ThoraxAttachement = {
-    AnyRefFrame &ref1 = ..StartNode;
-    AnyRefFrame &ref2 = .Cyl.node1;
+    AnyRefFrame &ref1 = .StartNode;
+    AnyRefFrame &ref2 = .Segment.node1;
     Axis1 = x;
     Axis2 = y;
   };
 
   AnyKinEqSimpleDriver DirectionDriver = {
     AnyKinLinear Lin = {
-      AnyRefFrame &ref1 = ..Cyl;
-      AnyRefFrame &ref2 = ...EndNode;
+      AnyRefFrame &ref1 = ..Segment.node2;
+      AnyRefFrame &ref2 = ..EndNode;
       Ref = 0;
     };
     DriverPos = {0,0};
