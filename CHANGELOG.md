@@ -14,6 +14,9 @@
 * Further fixes to the robustness of the pectoralis wrapping segment. The intial load time positions were optimized to ensure the model kinematics can more easily solve. 
 * The `LoadParameters` operation was missing in the `LoadAndReplay` operation in 
   MoCap examples. This has been fixed.
+* Fixed incorrect overloading of the oblique muscles. This was caused by a regression in AMMR 2.4 which added a more anatomically 
+  correct implementation of the oblique muscles. Even a very tiny force imbalance would cause major overloading of the oblique muscles.
+  A weak residual force was added to the Y rotation of the buckle, which eliminates the problem.
 
 (ammr-2.4-changelog)=
 ## AMMR 2.4.3 (2023-01-27)
