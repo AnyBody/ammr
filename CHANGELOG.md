@@ -128,6 +128,27 @@ to account for pelvis segment morphing into leg pelvis coordinate system using
 * Renamed the folders holding muscle models from `MusPar` to `MuscleModels` for better clarity.
    
 
+## AMMR 2.4.4
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.7764841.svg)](https://doi.org/10.5281/zenodo.7764841)
+
+
+**Fixed:**
+Thank you for sharing these entries with me. Here are some revised versions:
+
+* Fixed an issue with wrist joint segment's load time position (start guess). This greatly improves kinematic robustness of all models with arms as it creates a 'universal-joint' mechanism for wrist movement.
+
+* Further fixes made to pectoralis wrapping segment's robustness by optimizing initial load time positions to ensure model kinematics can more easily solve.
+
+* Fixed missing `LoadParameters` operation in `LoadAndReplay` operation in MoCap examples.
+
+* Fixed a problem with oblique muscles introduced in AMMR 2.4. Some load cases could cause overloading of the oblique muscles as the tried to misuse them to balance tiny imbalance in the buckle segment. A weak residual force was added to Y rotation of buckle to eliminate this problem.
+
+* Corrected wrong order of nonlinear intervertebral disc stiffness polynomial coefficients (affects only those who used polynomial disc stiffness).
+
+* Corrected small asymmetry in function for nonlinear intervertebral disc stiffness in coronal plane (affects only those who used polynomial disc stiffness).
+
+
+
 
 (ammr-2.4-changelog)=
 ## AMMR 2.4.3 (2023-01-27)
