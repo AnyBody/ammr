@@ -23,13 +23,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ams_version: ["7.5_Beta"]
+        include:
+          - ams_version: "7.5_Beta"
 
     env:
       # Triggers a warning at 20 deg muscles angles
       ShortestPathMaxAngle: 0.3491
       ANYBODYCON: C:\Program Files\AnyBody Technology\AnyBody.${{ matrix.ams_version }}\AnyBodyCon.exe
-      SuppressDeprecationMessages: ${{ fromJSON('{"7.4":"Off","7.5_Beta":"On"}')[matrix.ams_version] }}
+      SuppressDeprecationMessages: ${{ matrix.suppress_deprecation_messages }}
       #PYTEST_ADDOPTS: ${{contains(matrix.ams_version, 'Beta') && '--suppress-tests-failed-exit-code' || ''}}
 
     steps:
@@ -81,26 +82,4 @@ jobs:
               $(Get-content .\known-failing-tests.txt | foreach {"{0}" -f $_.split('#')[0].trim()})
           }
 
-
-
-  test-linux:
-    runs-on: [self-hosted, linux]
-    container: ghcr.io/anybody/anybodycon-linux:${{ matrix.ams_version }}
-    env:
-      RLM_LICENSE_PASSWORD: ${{ secrets.LICENSE_PASSWORD }}
-      RLM_LICENSE: ${{ secrets.LICENSE_SERVER }}
-
-    strategy:
-      matrix:
-        ams_version: ["7.5_Beta"]
-    
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Set debug env var
-        run: echo ${{ github.event.inputs.debug_config }} >> $GITHUB_ENV
-
-      - name: Run tests
-        run: |
-          pytest -n 2 Tests/Applications
 
