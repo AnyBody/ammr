@@ -49,6 +49,13 @@ Github repository is given on request.
 
 Please [submit an issue here](https://github.com/AnyBody/ammr-doc/issues), to request access. 
 
+
+## Repository structure
+
+![Visualization of the codebase](./diagram.svg)
+
+
+
 <!---
 A [public mirror](https://gihub.com/anybody/ammr) exists on GitHub in which the
 [main development
