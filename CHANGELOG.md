@@ -202,6 +202,17 @@ to account for pelvis segment morphing into leg pelvis coordinate system using
 ## AMMR 2.4.4
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.7764841.svg)](https://doi.org/10.5281/zenodo.7764841)
 
+This version of AMMR adds a number fixes and tweaks to the body models which
+improves robustness of various kinematic and recruitment solvers. 
+
+**Added:**
+
+* Kinematic joint angle limits in MoCap models were added to prevent the
+  kinematic solver finding postures which physiologically improsible. E.g. like
+  bending the elbow backwards. The limits are active for the elbow and wrist
+  joint where marker tracking solver would occasional find a local minima with
+  unphysiological posture. 
+
 
 **Fixed:**
 Thank you for sharing these entries with me. Here are some revised versions:
