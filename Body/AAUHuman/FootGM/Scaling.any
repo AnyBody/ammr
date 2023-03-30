@@ -1,0 +1,111 @@
+/// Morhping GM foot to TLEM foot
+AnyFolder InterfaceMorphingDef = {
+  /// Manually picked points on unscaled foot
+  AnyMatrix IM_PickedPoints_GMFoot_Unscaled = {
+    {-0.01961456, 0.0858648, -0.007123132}, 
+    {0.02075712, 0.1087559, -0.006255695}, 
+    {0.0342384, 0.05814035, -0.02207076}, 
+    {0.02573188, 0.0293713, -0.02425312}, 
+    {0.05192875, 0.02385391, -0.002496652}, 
+    {-0.005725655, 0.0278952, 0.03647349}, 
+    {0.008851912, -0.07466774, -0.01443108}, 
+    {-0.007507085, -0.07433279, -0.01176224}, 
+    {0.0004892429, -0.1238552, 0.001978389}, 
+    {-0.01497396, -0.04175921, 0.05853032}, 
+    {0.03469826, -0.009105483, 0.01519154}, 
+    {0.004084765, -0.01045513, -0.006703559}
+  };
+  /// Manually picked points on unscaled foot
+  AnyMatrix IM_PickedPoints_TLEMFoot_Unscaled = {
+    {-0.02252427, -0.03790143, -0.008338326}, 
+    {-0.03461374, -0.002309684, -0.009032215}, 
+    {0.009918688, 0.002448009, -0.02865508}, 
+    {0.0307748, -0.00828098, -0.03138046}, 
+    {0.04263911, 0.01830755, -0.01265807}, 
+    {0.03993737, -0.02786064, 0.02709521}, 
+    {0.1383494, -0.0259056, -0.02061057}, 
+    {0.1372951, -0.04079262, -0.01777501}, 
+    {0.1869549, -0.04883619, -0.002536982}, 
+    {0.1139123, -0.04244486, 0.0392754}, 
+    {0.07316664, 0.006129127, -0.00285548}, 
+    {0.07007261, -0.02680092, -0.01598569}
+  };
+  
+  /// Affine transformation of GM foot to Tlem foot
+  AnyFunTransform3DLin2 IM_Foot_GM_To_TLEM_Affine = {
+    Points0 = .IM_PickedPoints_GMFoot_Unscaled;
+    Points1 = .IM_PickedPoints_TLEMFoot_Unscaled;
+    Mode = VTK_LANDMARK_AFFINE;
+  };
+  /// RBF Transform of GM foot to Tlem foot using affine
+  /// transformation as pretransform
+  AnyFunTransform3DRBF IM_FootAffine_GM_To_TLEM_RBF = {
+    Points0 = .IM_PickedPoints_GMFoot_Unscaled;
+    Points1 = .IM_PickedPoints_TLEMFoot_Unscaled;
+    PreTransforms = {&.IM_Foot_GM_To_TLEM_Affine};
+    
+    RBFDef.Type = RBF_ThinPlate;
+    BoundingBoxOnOff = On;
+    BoundingBox.ScaleXYZ = {1,1,1}*2;
+    BoundingBox.DivisionFactorXYZ = {1, 1, 1}*2;
+    BoundingBox.Type = BB_PrincipalAxes;
+  };
+  /// Reverse rigid body transformation from TLEM to GM foot
+  AnyFunTransform3DLin2 IM_Foot_TLEM_To_GM_RigidBody = {
+    Points0 = .IM_PickedPoints_TLEMFoot_Unscaled;
+    Points1 = .IM_PickedPoints_GMFoot_Unscaled;
+    Mode = VTK_LANDMARK_RIGIDBODY;
+  };
+  /// Interface morphing of GM foot to Tlem foot including reverse transformation
+  AnyFunTransform3DLin IM_Foot_GM_To_TLEM = {
+    PreTransforms = {&.IM_FootAffine_GM_To_TLEM_RBF, &.IM_Foot_TLEM_To_GM_RigidBody};
+    ScaleMat = {{1,0,0},{0,1,0},{0,0,1}};
+    Offset = {0,0,0};
+  };
+
+};// Interface Morphing
+
+/// Scale function consisting of interface morphing and anthropometric scaling
+AnyFunTransform3D Scale = {
+  PreTransforms = {&.InterfaceMorphingDef.IM_Foot_GM_To_TLEM,
+                   &...GeoScaling.Foot.ScaleFunction};
+};
+
+AnyFolder &ModelParameters = ..ModelParameters;
+ModelParameters.Foot = {
+  
+  AnyMatrix IM_PickedPoints_GMFoot_Unscaled = {
+    {-0.01961456, 0.0858648, -0.007123132}, 
+    {0.02075712, 0.1087559, -0.006255695}, 
+    {0.0342384, 0.05814035, -0.02207076}, 
+    {0.02573188, 0.0293713, -0.02425312}, 
+    {0.05192875, 0.02385391, -0.002496652}, 
+    {-0.005725655, 0.0278952, 0.03647349}, 
+    {0.008851912, -0.07466774, -0.01443108}, 
+    {-0.007507085, -0.07433279, -0.01176224}, 
+    {0.0004892429, -0.1238552, 0.001978389}, 
+    {-0.01497396, -0.04175921, 0.05853032}, 
+    {0.03469826, -0.009105483, 0.01519154}, 
+    {0.004084765, -0.01045513, -0.006703559}
+  };
+  
+  AnyMatrix IM_PickedPoints_TLEMFoot_Unscaled = {
+    {-0.02252427, -0.03790143, -0.008338326}, 
+    {-0.03461374, -0.002309684, -0.009032215}, 
+    {0.009918688, 0.002448009, -0.02865508}, 
+    {0.0307748, -0.00828098, -0.03138046}, 
+    {0.04263911, 0.01830755, -0.01265807}, 
+    {0.03993737, -0.02786064, 0.02709521}, 
+    {0.1383494, -0.0259056, -0.02061057}, 
+    {0.1372951, -0.04079262, -0.01777501}, 
+    {0.1869549, -0.04883619, -0.002536982}, 
+    {0.1139123, -0.04244486, 0.0392754}, 
+    {0.07316664, 0.006129127, -0.00285548}, 
+    {0.07007261, -0.02680092, -0.01598569}
+  };
+  
+};
+
+
+
+
