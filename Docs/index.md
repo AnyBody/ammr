@@ -20,19 +20,19 @@ System][anybody modeling system].
 The AnyBody Model Repository is a *unique* open collection of human body parts.
 :::
 
-The AnyBody Managed Model Repository consists of two parts:
+The AMMR consists of two parts:
 
-- {ref}`Body Models <the-body-model>`: The human body models which can be
-  customized and scaled to build a specific musculoskeletal model;
-- {ref}`Application examples <examples-index>`: in which the body models are
-  utilized in specific applications (from common daily activities,
-  like pushing the acceleration or brake pedals of a car, to workplace
-  specific scenarios).
+- {ref}`Body Models <the-body-model>`: The human body models which can be 
+  customized and scaled to build a specific musculoskeletal model.
+- {ref}`Application examples <examples-index>`: in which the body models are 
+  utilized in specific applications (from common daily activities, like pushing
+  the acceleration or brake pedals of a car, to workplace specific scenarios).
 
 The models are developed in research projects at academic institutions or by
 AnyBody Technology in collaboration with academic institutions. The models are
-maintained by AnyBody Technology who ensure that various body part models can
-be used together as full body, scalable musculoskeletal model.
+maintained by AnyBody Technology who ensure that various body part models can be
+used together as a full body, scalable musculoskeletal model.
+
 
 ```{rubric} First time you're using AMMR?
 ```

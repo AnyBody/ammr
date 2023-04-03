@@ -17,9 +17,10 @@ improves robustness of various kinematic and recruitment solvers.
   joint where marker tracking solver would occasional find a local minima with
   unphysiological posture. 
 
+* Tables with body model configuration parameter in the AMMR documentation now contains 
+  links showing their options. See for example the page on {doc}`Leg model parameter </bm_config/leg>`.   
 
 **Fixed:**
-Thank you for sharing these entries with me. Here are some revised versions:
 
 * Fixed an issue with wrist joint segment's load time position (start guess). This greatly improves kinematic robustness of all models with arms as it creates a 'universal-joint' mechanism for wrist movement.
 
