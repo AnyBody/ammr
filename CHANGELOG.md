@@ -73,6 +73,10 @@ to account for pelvis segment morphing into leg pelvis coordinate system using
   relative to which markers are placed on segment using `PlaceMarkerAt` argument
   in the class template. Previously this defaulted to the `AnatomicalFrame` of the segment.
 
+* Organization of segmental scaling functions was reworked and now configured slightly simpler. This modification 
+  is expected not to affect users working with default and non-default scaling laws and patient-specific morphing. 
+  Additionally, all spinal segments share a scaling reference frame. 
+
 * Added new `AnatomicalFrameTrunk` reference frame to pelvis segment consistent
   with anatomical frames in rest of the trunk model. All joint angles relative to
   the pelvis segment now use this frame. This aligns the neutral position of the model with
