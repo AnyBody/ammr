@@ -70,7 +70,7 @@ System][anybody modeling system]. The AnyBody Managed Model Repository consists 
 The human body models which can be 
 customized and scaled to build a specific musculoskeletal model.
 +++
-{ref}`Learn more » <the-body-model>`
+{ref}`Learn more � <the-body-model>`
 :::
 
 :::{grid-item-card} {material-regular}`fitness_center;2em` Example gallery
@@ -79,7 +79,7 @@ customized and scaled to build a specific musculoskeletal model.
 
 Lots of applicaiton examples showing how the body models are used.
 +++
-{ref}`Learn more » <example-gallery>`
+{ref}`Learn more � <example-gallery>`
 :::
 
 :::{grid-item-card} {material-regular}`settings;2em` Model Configuration
@@ -88,7 +88,7 @@ Lots of applicaiton examples showing how the body models are used.
 
 Information on how to configure the body models, and enable or disable various body parts.
 +++
-{ref}`Learn more » <bm-config>`
+{ref}`Learn more � <bm-config>`
 :::
 
 ::::
@@ -97,8 +97,8 @@ Information on how to configure the body models, and enable or disable various b
 
 The models are developed in research projects at academic institutions or by
 AnyBody Technology in collaboration with academic institutions. The models are
-maintained by AnyBody Technology who ensure that various body part models can
-be used together as full body, scalable musculoskeletal model.
+maintained by AnyBody Technology who ensure that various body part models can be
+used together as a full body, scalable musculoskeletal model.
 
 
 ```{admonition} **First time user?**
@@ -153,7 +153,7 @@ anymocap/index
 
 
 ```{toctree}
-:caption: ━━━━━━━━
+:caption: ????????
 :includehidden: true
 :hidden: true
 :maxdepth: 2
