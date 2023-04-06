@@ -73,6 +73,10 @@ to account for pelvis segment morphing into leg pelvis coordinate system using
   relative to which markers are placed on segment using `PlaceMarkerAt` argument
   in the class template. Previously this defaulted to the `AnatomicalFrame` of the segment.
 
+* Organization of segmental scaling functions was reworked and now configured slightly simpler. This modification 
+  is expected not to affect users working with default and non-default scaling laws and patient-specific morphing. 
+  Additionally, all spinal segments share a scaling reference frame. 
+
 * Added new `AnatomicalFrameTrunk` reference frame to pelvis segment consistent
   with anatomical frames in rest of the trunk model. All joint angles relative to
   the pelvis segment now use this frame. This aligns the neutral position of the model with
@@ -136,15 +140,11 @@ improves robustness of various kinematic and recruitment solvers.
 
 **Added:**
 
-* Kinematic joint angle limits in MoCap models were added to prevent the
-  kinematic solver finding postures which physiologically improsible. E.g. like
-  bending the elbow backwards. The limits are active for the elbow and wrist
-  joint where marker tracking solver would occasional find a local minima with
-  unphysiological posture. 
+* Added kinematic joint angle limits in MoCap models for elbow and wrist joints to prevent the kinematic solver from finding postures that are physiologically impossible, such as bending the elbow backwards. These limits are active where marker tracking solver would occasionally find a local minima with unphysiological posture.
 
+* Tables with body model configuration parameter in the AMMR documentation now contain links showing their options. For example, see the page on {doc}`Leg model parameter </bm_config/leg>`.
 
 **Fixed:**
-Thank you for sharing these entries with me. Here are some revised versions:
 
 * Fixed an issue with wrist joint segment's load time position (start guess). This greatly improves kinematic robustness of all models with arms as it creates a 'universal-joint' mechanism for wrist movement.
 
@@ -152,13 +152,11 @@ Thank you for sharing these entries with me. Here are some revised versions:
 
 * Fixed missing `LoadParameters` operation in `LoadAndReplay` operation in MoCap examples.
 
-* Fixed a problem with oblique muscles introduced in AMMR 2.4. Some load cases could cause overloading of the oblique muscles as the tried to misuse them to balance tiny imbalance in the buckle segment. A weak residual force was added to Y rotation of buckle to eliminate this problem.
+* Fixed a problem with oblique muscles introduced in AMMR 2.4. A weak residual force was added to Y rotation of buckle to eliminate this problem.
 
 * Corrected wrong order of nonlinear intervertebral disc stiffness polynomial coefficients (affects only those who used polynomial disc stiffness).
 
 * Corrected small asymmetry in function for nonlinear intervertebral disc stiffness in coronal plane (affects only those who used polynomial disc stiffness).
-
-
 
 
 (ammr-2.4-changelog)=
