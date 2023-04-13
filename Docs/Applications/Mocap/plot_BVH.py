@@ -3,7 +3,7 @@ r"""
 Inertial MoCap example
 ===============================
 
-Example of a MoCap model using data from an inertial motional caputure suit.
+Example of a MoCap model using data from an inertial motion capture suit.
 The model uses a BVH file with data from an Xsens suit. The ground reaction
 forces are predicted using the GRF prediction algorithm.
 
@@ -25,7 +25,7 @@ Musculoskeletal model moved similar to marker based MoCap models.
    old examples. 
 
 AnyBody automatically calculates the virtual markers positions, and the model is scaled directly from
-the size of the BVH stick figure. Hence the model contains no *Parameter identification* step to find
+the size of the BVH stick figure. Hence the model contains no *Parameter identification* step to find the parameters.
 The remaining parts of the model are equivalent to other :ref:`MoCap model <anymocap>`  based on C3D files. 
 
 Updating old (ammr < 2.2.3) BVH based models

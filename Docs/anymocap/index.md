@@ -4,7 +4,7 @@
 
 The AnyMoCap model is an effort to create a simple and unified framework for
 doing any kind of MoCap analysis with the [AnyBody Modeling
-System](http://anybodytech.com).
+System](https://anybodytech.com).
 
 :::{figure-md} 
 :align: center

@@ -6,7 +6,7 @@
 This mandible model is based on CT scans of a ”normal” face of a
 30-year-old male. It contains 24 hill-type muscles and 4 DoF. It was
 developed by Dr. Mark de Zee at Aarhus University, Denmark and
-[published](http://www.anybodytech.com/downloads/publications/?fwd=publications#zee2007)
+[published](https://pubmed.ncbi.nlm.nih.gov/16930608/)
 and presented at several scientific meetings. [^cite_dezee2007]
 
 :::{seealso}

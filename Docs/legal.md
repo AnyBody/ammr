@@ -93,11 +93,11 @@ AnyBody Modeling System:
 
 > The AnyBody Modeling System (Version {{ AMS_VERSION }}) ({{ CURRENT_YEAR }}). \[Computer
 > software\]. Aalborg, Denmark: AnyBody Technology. Available from
-> <http://www.anybodytech.com>
+> <https://www.anybodytech.com>
 
 When referring to specific models from the AnyBody Managed Model
 Repository use:
 
 > The AnyBody Managed Model Repository (Version {{ AMMR_VERSION }}) ({{ CURRENT_YEAR }}). \[Computer
 > software\]. Aalborg, Denmark: AnyBody Technology. Available from
-> [http://www.anybodytech.com](http://www.anybodytech.com)
+> [https://www.anybodytech.com](https://www.anybodytech.com)

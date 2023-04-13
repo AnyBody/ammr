@@ -1,0 +1,165 @@
+#include "../libdef.any"
+/* ----------------------------------------------------------------------------------
+  This is an example of a passive trunk exoskeleton concept. 
+  
+  The model is structured to include the BVH_BoxLift model from the AMMR and then apply
+  the code for the exoskeleton concept. This was done to avoid duplicating the box lift
+  model in the AMMR. If you want to apply the exo concept to your own model, you just 
+  need to copy the code in the ExoConcept section to your own model.
+
+---------------------------------------------------------------------------------- */
+
+// ***************************** AnyMoCap ************************************
+// This section points to the BVH_BoxLift Model in the AMMR and allows you to
+// select the subject and trial folders.
+
+// Path to the BVH_BoxLift model in the AMMR. The path to the mocap models in AMMR 
+// generally follows the structure: <MocapModel>/<Subjects>/<S#>/<S#_T#>/Main.any
+// where # is a number. 
+// Please define here the path to the mocap model.
+#path ANYMOCAP_BVH_BOXLIFT "<ANYBODY_PATH_AMMR>/Application/MocapExamples/BVH_BoxLift/Subjects/"
+// Select Subject folder
+#define MOCAP_NAME_SUBJECTDIR "S01"
+// Select Trial folder suffix. 
+#define MOCAP_NAME_TRIALDIR "_T05"
+
+#define MOCAP_NAME_MAINFILEDIR MOCAP_NAME_SUBJECTDIR + MOCAP_NAME_TRIALDIR
+#path BVH_BOXLIFT_MAINFILEDIR "<ANYMOCAP_BVH_BOXLIFT>" + MOCAP_NAME_SUBJECTDIR +"/" +MOCAP_NAME_MAINFILEDIR 
+#include "<BVH_BOXLIFT_MAINFILEDIR>/Main.any"
+
+// ***************************** AnyMoCap ************************************
+// ***************************************************************************
+
+
+// **************************** ExoConcept ***********************************
+/*
+  In this example of a passive trunk exoskeleton concept, an assistive torque
+  is applied at the PelvisThoraxExtension measure in the Interface folder of 
+  the Body Model. The spring stiffness can be set in the ExoskeletonParameters
+  folder in Main.ModelSetup.
+
+  This simple example illustrates how the effects of an exoskeleton can be 
+  investigated by applying the assistive torque directly at the human body with
+  a few lines. Feel free to change the Stiffness value.  
+*/
+Main = {
+  ModelSetup ={
+    /// Various EnvironmentParameters for setting up the model
+    AnyFolder ExoskeletonParameters = {
+      AnyFloat Stiffness = 150;
+    };
+  };
+  
+  EnvironmentModel = {
+    /// Assistive torque applied as a passive spring at the pelvis-thorax extension
+    AnyForce ThoraxExtTorque = {
+      AnyKinMeasure &ThP = Main.HumanModel.BodyModel.Interface.Trunk.PelvisThoraxExtension;
+      F = -{ThP.Pos[0]*Main.ModelSetup.ExoskeletonParameters.Stiffness};//      
+    };    
+  };
+  
+////////////////////////////////////////////////////////////////////////////////////////////
+// The following lines of code are used to only visualize the drawing of the exoskeleton. //
+// The drawing is implemented through AnySurfCylinder at the hips and through AnyKinPLine //
+// that draws the line using several via points defined on the human model.               //
+////////////////////////////////////////////////////////////////////////////////////////////
+  Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg = {
+    
+    Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.Right.HipJoint = {
+      AnyRefNode CylAnchor = {
+        sRel = {0,0,0.11};
+        AnySurfCylinder Cyl = {
+          Radius = 0.05;
+          Length = 0.02;
+          AnyDrawParamSurf srf={RGB={1,0,0};};
+        };
+//        AnyDrawRefFrame Draw = {ScaleXYZ={1,1,1}*0.1;RGB={1,0,0};};
+      };
+    };
+    Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.Left.HipJoint = {
+      AnyRefNode CylAnchor = {
+        sRel = {0,0, -0.11};
+        AnySurfCylinder Cyl = {
+          Radius = 0.05;
+          Length = 0.02;
+          AnyDrawParamSurf srf={RGB={1,0,0};};
+        };
+      };
+    };
+    
+    Main.HumanModel.BodyModel.Trunk.SegmentsThorax.ThoraxSeg.iji.O_pectoralis_major_thoracic_part_1 = {
+      AnyRefNode ExoAnchor = {
+        sRel={0.0, 0.0, -0.03};
+//        AnyDrawRefFrame Draw = {ScaleXYZ={1,1,1}*0.1;RGB={1,0,0};};
+      };
+    };
+    Main.HumanModel.BodyModel.Trunk.SegmentsThorax.ThoraxSeg.ij.O_pectoralis_major_thoracic_part_1 = {
+      AnyRefNode ExoAnchor = {
+        sRel={0.0, 0.0, -0.03};
+//        AnyDrawRefFrame Draw = {ScaleXYZ={1,1,1}*0.1;RGB={1,0,0};};
+      };
+    };
+    
+    Main.HumanModel.BodyModel.Left.Leg.Seg.Thigh.VastusIntermedius6Node = {
+      AnyRefNode ExoAnchor = {
+        sRel={0.0, 0.03, -0.05};
+//        AnyDrawRefFrame Draw = {ScaleXYZ={1,1,1}*0.1;RGB={1,0,0};};
+      };
+      AnyRefNode Wrap1 = {
+        sRel={0.07, 0.03, 0.0};
+//        AnyDrawRefFrame Draw = {ScaleXYZ={1,1,1}*0.1;RGB={1,0,0};};
+      };
+      
+      AnyRefNode Wrap2 = {
+        sRel={0.07, 0.03, 0.06};
+//        AnyDrawRefFrame Draw = {ScaleXYZ={1,1,1}*0.1;RGB={1,0,0};};
+      };
+      
+      AnyRefNode Wrap3 = {
+        sRel={0.0, 0.03, 0.11};
+//        AnyDrawRefFrame Draw = {ScaleXYZ={1,1,1}*0.1;RGB={1,0,0};};
+      };
+    };
+    
+    Main.HumanModel.BodyModel.Right.Leg.Seg.Thigh.VastusIntermedius6Node = {
+      AnyRefNode ExoAnchor = {
+        sRel={0.0, 0.03, 0.05};
+//        AnyDrawRefFrame Draw = {ScaleXYZ={1,1,1}*0.1;RGB={1,0,0};};
+      };
+      
+      AnyRefNode Wrap1 = {
+        sRel={0.07, 0.03, 0.0};
+//        AnyDrawRefFrame Draw = {ScaleXYZ={1,1,1}*0.1;RGB={1,0,0};};
+      };
+      
+      AnyRefNode Wrap2 = {
+        sRel={0.07, 0.03, -0.06};
+//        AnyDrawRefFrame Draw = {ScaleXYZ={1,1,1}*0.1;RGB={1,0,0};};
+      };
+      
+      AnyRefNode Wrap3 = {
+        sRel={0.0, 0.03, -0.11};
+//        AnyDrawRefFrame Draw = {ScaleXYZ={1,1,1}*0.1;RGB={1,0,0};};
+      };
+    };
+    
+    AnyKinPLine drawExoPLine = {
+      AnyRefFrame &w3 = Main.HumanModel.BodyModel.Left.Leg.Seg.Thigh.VastusIntermedius6Node.Wrap3;
+      AnyRefFrame &w2 = Main.HumanModel.BodyModel.Left.Leg.Seg.Thigh.VastusIntermedius6Node.Wrap2;
+      AnyRefFrame &w1 = Main.HumanModel.BodyModel.Left.Leg.Seg.Thigh.VastusIntermedius6Node.Wrap1;
+      AnyRefFrame &rf = Main.HumanModel.BodyModel.Left.Leg.Seg.Thigh.VastusIntermedius6Node.ExoAnchor;
+      AnyRefFrame &rf0 = Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.Left.HipJoint.CylAnchor;
+      AnyRefFrame &rf1 = Main.HumanModel.BodyModel.Trunk.SegmentsThorax.ThoraxSeg.iji.O_pectoralis_major_thoracic_part_1.ExoAnchor;
+      AnyRefFrame &rf2 = Main.HumanModel.BodyModel.Trunk.SegmentsThorax.ThoraxSeg.ij.O_pectoralis_major_thoracic_part_1.ExoAnchor;
+      AnyRefFrame &rf3 = Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.Right.HipJoint.CylAnchor;
+      AnyRefFrame &rf4 = Main.HumanModel.BodyModel.Right.Leg.Seg.Thigh.VastusIntermedius6Node.ExoAnchor;
+      AnyRefFrame &w1l = Main.HumanModel.BodyModel.Right.Leg.Seg.Thigh.VastusIntermedius6Node.Wrap1;
+      AnyRefFrame &w2l = Main.HumanModel.BodyModel.Right.Leg.Seg.Thigh.VastusIntermedius6Node.Wrap2;
+      AnyRefFrame &w3l = Main.HumanModel.BodyModel.Right.Leg.Seg.Thigh.VastusIntermedius6Node.Wrap3;
+      AnyDrawPLine draw = {Thickness = 0.02;RGB={1,0,0};};
+    };
+    
+  };
+};
+// **************************** ExoConcept ***********************************
+// ***************************************************************************

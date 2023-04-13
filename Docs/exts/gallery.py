@@ -8,7 +8,7 @@ def plot(image_name, dpi=200, size=None):
     # px,py,  = image.shape # depending of your matplotlib.rc you may have to use py,px instead
     px, py = image[:, :, 0].shape  # if image has a (x,y,z) shape
     if size is None:
-        size = (py / np.float(dpi), px / np.float(dpi))  # note the np.float()
+        size = (py / float(dpi), px / float(dpi))  # note the np.float()
 
     fig = plt.figure(figsize=size, dpi=dpi)
     ax = fig.add_axes([0, 0, 1, 1])

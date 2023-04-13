@@ -57,8 +57,8 @@ for more information on BM parameters.
 More details can be found online:
 
 1. Dendorfer and Toerholm 2008: Report containing moment arm validation for [ESA:
-   report](http://www.anybodytech.com/fileadmin/downloads/Final_Report.pdf)
+   report](https://paperpile.com/app/p/28bfe52d-29e1-0c5f-bdfb-68a0597117ff)
 2. Horsman 2007: Klein Horsman, M. D., Koopman, H. F. J. M., van der Helm, F. C. T.,
    Prosé, L. P., and Veeger, H. E. J., 2007, “Morphological Muscle and Joint Parameters for
    Musculoskeletal Modelling of the Lower Extremity,” Clin. Biomech. , 22(2), pp. 239–247.
-   [link](http://linkinghub.elsevier.com/retrieve/pii/S0268003306001896)
+   [link](https://linkinghub.elsevier.com/retrieve/pii/S0268003306001896)

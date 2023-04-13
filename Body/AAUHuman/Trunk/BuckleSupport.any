@@ -1,18 +1,17 @@
 AnyFolder BuckleSupport={
   AnyVar Strength =500;
-  AnyVar Strength1 =500;
-  AnyVar Strength2 =500;
-  AnyVar Friction =0*1;    
+  AnyVar StrengthPull =20; 
   
   AnyFolder Disc1 ={
     AnyRefNode &StartNode=..Disc1.Disc.DiscSeg.node0;//SupportNode ;
     AnyRefFrame &EndNode=..Slider1.Seg;
+     AnyVar ScaleFactor =0;
     //The terms push and pull are determined wrt. the coordinate system of the StartNode!
     //StrenghtOfReactionsLin = {XPush,XPull,YPush,YPull,ZPush,ZPull}
-    AnyVar ScaleFactor =0;
-    AnyVector StrengthOfReactionsLin = {.Strength,0,0,0,0,0}; //List of strengths for the linear muscles
+    AnyVector StrengthOfReactionsLin = {.Strength,.StrengthPull,0,0,0,0}; //List of strengths for the linear muscles
     AnyFolder &DrawRef=Main.DrawSettings;
-    #include "<ANYBODY_PATH_MODELUTILS>/Reactions/XPush.any"   
+    #include "<ANYBODY_PATH_MODELUTILS>/Reactions/XPush.any"          
+    #include "<ANYBODY_PATH_MODELUTILS>/Reactions/XPull.any"          
   };
   
   AnyFolder Disc2 ={
@@ -21,9 +20,10 @@ AnyFolder BuckleSupport={
     AnyVar ScaleFactor =0;
     //The terms push and pull are determined wrt. the coordinate system of the StartNode!
     //StrenghtOfReactionsLin = {XPush,XPull,YPush,YPull,ZPush,ZPull}
-    AnyVector StrengthOfReactionsLin = {.Strength,0,0,0,0,0}; //List of strengths for the linear muscles
+    AnyVector StrengthOfReactionsLin = {.Strength,.StrengthPull,0,0,0,0}; //List of strengths for the linear muscles
     AnyFolder &DrawRef=Main.DrawSettings;
     #include "<ANYBODY_PATH_MODELUTILS>/Reactions/XPush.any"          
+    #include "<ANYBODY_PATH_MODELUTILS>/Reactions/XPull.any"          
   };
   
   AnyFolder Disc3 ={
@@ -32,34 +32,64 @@ AnyFolder BuckleSupport={
     AnyVar ScaleFactor =0;
     //The terms push and pull are determined wrt. the coordinate system of the StartNode!
     //StrenghtOfReactionsLin = {XPush,XPull,YPush,YPull,ZPush,ZPull}
-    AnyVector StrengthOfReactionsLin = {.Strength,0,0,0,0,0}; //List of strengths for the linear muscles
+    AnyVector StrengthOfReactionsLin = {.Strength,.StrengthPull,0,0,0,0}; //List of strengths for the linear muscles
     AnyFolder &DrawRef=Main.DrawSettings;
-    #include "<ANYBODY_PATH_MODELUTILS>/Reactions/XPush.any"   
+    #include "<ANYBODY_PATH_MODELUTILS>/Reactions/XPush.any"          
+    #include "<ANYBODY_PATH_MODELUTILS>/Reactions/XPull.any"          
     
   };
   
   AnyFolder Disc4 ={
     AnyRefNode &StartNode=..Disc4.Disc.DiscSeg.node0;//SupportNode ;
     AnyRefFrame &EndNode=..Slider4.Seg;  
-    AnyVar ScaleFactor =0;
+     AnyVar ScaleFactor =0;
     //The terms push and pull are determined wrt. the coordinate system of the StartNode!
     //StrenghtOfReactionsLin = {XPush,XPull,YPush,YPull,ZPush,ZPull}
-    AnyVector StrengthOfReactionsLin = {.Strength,0,0,0,0,0}; //List of strengths for the linear muscles
+    AnyVector StrengthOfReactionsLin = {.Strength,.StrengthPull,0,0,0,0}; //List of strengths for the linear muscles
     AnyFolder &DrawRef=Main.DrawSettings;
-    #include "<ANYBODY_PATH_MODELUTILS>/Reactions/XPush.any"   
+    #include "<ANYBODY_PATH_MODELUTILS>/Reactions/XPush.any"          
+    #include "<ANYBODY_PATH_MODELUTILS>/Reactions/XPull.any"          
   };
   
   AnyFolder Disc5 ={
     AnyRefNode &StartNode=..Disc5.Disc.DiscSeg.node0;//SupportNode ;
     AnyRefFrame &EndNode=..Slider5.Seg;
-    AnyVar ScaleFactor =0;
+   AnyVar ScaleFactor =0;
     //The terms push and pull are determined wrt. the coordinate system of the StartNode!
     //StrenghtOfReactionsLin = {XPush,XPull,YPush,YPull,ZPush,ZPull}
-    AnyVector StrengthOfReactionsLin = {.Strength,0,0,0,0,0}; //List of strengths for the linear muscles
+    AnyVector StrengthOfReactionsLin = {.Strength,.StrengthPull,0,0,0,0}; //List of strengths for the linear muscles
     AnyFolder &DrawRef=Main.DrawSettings;
-    #include "<ANYBODY_PATH_MODELUTILS>/Reactions/XPush.any"   
+    #include "<ANYBODY_PATH_MODELUTILS>/Reactions/XPush.any"          
+    #include "<ANYBODY_PATH_MODELUTILS>/Reactions/XPull.any"          
   };
-   
+  
+  
+  // Weak residual on the Y rotation of the buckle. This ensures stability
+  // and prevents oblique muscles from beeing recruited if this DOF can not be balanced.
+  AnyGeneralMuscle RotationSupportYPos =
+  {
+    AnyKinMeasureOrg Measure = {
+      AnyKinRotational rot = {
+        AnyRefFrame& buckle = ....Segments.BuckleSeg;
+        AnyRefFrame& pelvis = .....SegmentsLumbar.PelvisSeg;
+        Type = RotAxesAngles;
+      };
+      MeasureOrganizer = {1};
+
+    };
+    AnyMuscleModel MusMdl = {F0=1;};
+    ForceDirection =1;
+    EXCLUDE_MUSCLE_METABOLISM
+  };
+  AnyGeneralMuscle RotationSupportYNeg =
+  {
+    AnyKinMeasureOrg& Measure = .RotationSupportYPos.Measure;
+    AnyMuscleModel& MusMdl = .RotationSupportYPos.MusMdl;
+    ForceDirection =-1;
+    EXCLUDE_MUSCLE_METABOLISM
+  };
+
+
 };
 
 
