@@ -38,7 +38,18 @@ AnyFunTransform3D &ScaleFunction = Main.MyScalingLaws.PelvisScaleFunction;      
 
 AnyFolder Scaling = {
   
-  AnyFolder& Scaling = .ScalingDefault;
+  
+  AnyMessage DeprecatedCustomScaling = 
+  {
+     TriggerConst = On;
+     Type = MSG_Warning;
+     Message = strformat("\n---------------------------------------------------------------------------------------------------------------\n"
+     +"        Custom scaling using the '#define CUSTOM_SCALING_xxxx' statements is deprecated, - but still works.    \n"
+     +"        See the AnyBody Tutorial on custom scaling, on how to update your code. \n"
+     +"---------------------------------------------------------------------------------------------------------------");
+  };    
+  
+  AnyFolder& Scaling = .ScalingLaw;
   
   AnyFolder &StandardParameters = Scaling.StandardParameters;
   AnyFolder &MassScaling = Scaling.MassScaling;
@@ -417,13 +428,13 @@ AnyFolder Scaling = {
     
     AnyFolder PelvisSeg = {
       #ifndef CUSTOM_SCALING_PelvisSeg
-      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.PelvisSeg.ScaleFunction;
+      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.Pelvis.ScaleFunction;
       #else
       #if BM_LEG_TRUNK_INTERFACE == _MORPH_LEG_TO_TRUNK_
       AnyFunTransform3DIdentity TSeg2ScaleFrame = {
         PreTransforms = {
           &....BodyModel.Trunk.Segments.PelvisSeg.InterfaceMorphingDef.IM_Leg_To_Trunk_Unscaled,            
-          &....BodyModel.Trunk.Segments.PelvisSeg.Scale_Leg_Pelvis.ScaleAfterInterfaceMorphingDef.Scale.T0
+          &....BodyModel.Trunk.Segments.PelvisSeg.AnatomicalFrame.Scale_Leg_Pelvis.ScaleAfterInterfaceMorphingDef.Scale.T0
         };
       };
       
@@ -431,7 +442,8 @@ AnyFolder Scaling = {
       {
         TriggerPreProcess = On;
         Type = MSG_Warning;
-        Message = "Pelvis morphing: the source geometry corresponds to the TLEM1.2, \nto switch back to TLEM2.1 please use another interface morphing option (_MORPH_NONE_ or _MORPH_TRUNK_TO_LEG_)";
+        Message = "Pelvis morphing: the source geometry corresponds to the TLEM1.2, \nto "+
+        "switch back to TLEM2.1 please use another interface morphing option (_MORPH_NONE_ or _MORPH_TRUNK_TO_LEG_)";
       };           
       #else
       //options: BM_LEG_TRUNK_INTERFACE == _MORPH_NONE_ && BM_LEG_TRUNK_INTERFACE == _MORPH_TRUNK_TO_LEG_
@@ -457,7 +469,7 @@ AnyFolder Scaling = {
       AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.Thorax.ScaleFunction;
       #else
       /// The rigid body transform from segmental to scaling reference frame
-      AnyFunTransform3DIdentity TSeg2ScaleFrame = {};
+      AnyFunTransform3DIdentity& TSeg2ScaleFrame = .PelvisSeg.TSeg2ScaleFrame;
       AnyMessage scaling_message_Trunk = 
       {
         TriggerPreProcess = On;
@@ -472,7 +484,7 @@ AnyFolder Scaling = {
       AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.Head.ScaleFunction;
       #else
       /// The rigid body transform from segmental to scaling reference frame
-      AnyFunTransform3DIdentity TSeg2ScaleFrame = {};
+      AnyFunTransform3DIdentity& TSeg2ScaleFrame = .PelvisSeg.TSeg2ScaleFrame;
       
       AnyMessage scaling_message_Head = 
       {
@@ -486,10 +498,10 @@ AnyFolder Scaling = {
     
     AnyFolder SkullSeg = {
       #ifndef CUSTOM_SCALING_SkullSeg
-      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.SkullSeg.ScaleFunction;
+      AnyFunTransform3D &ScaleFunction = .Head.ScaleFunction;
       #else
       /// The rigid body transform from segmental to scaling reference frame
-      AnyFunTransform3DIdentity TSeg2ScaleFrame = {};
+      AnyFunTransform3DIdentity& TSeg2ScaleFrame = .PelvisSeg.TSeg2ScaleFrame;
       
       AnyMessage scaling_message_SkullSeg = 
       {
@@ -501,10 +513,10 @@ AnyFolder Scaling = {
     };
     AnyFolder ThoraxSeg = {
       #ifndef CUSTOM_SCALING_ThoraxSeg
-      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.ThoraxSeg.ScaleFunction;
+      AnyFunTransform3D &ScaleFunction = .Thorax.ScaleFunction;
       #else
       /// The rigid body transform from segmental to scaling reference frame
-      AnyFunTransform3DIdentity TSeg2ScaleFrame = {};
+      AnyFunTransform3DIdentity& TSeg2ScaleFrame = .PelvisSeg.TSeg2ScaleFrame;
       
       AnyMessage scaling_message_ThoraxSeg = 
       {
@@ -517,10 +529,10 @@ AnyFolder Scaling = {
     
     AnyFolder C1Seg = {
       #ifndef CUSTOM_SCALING_C1Seg
-      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.C1Seg.ScaleFunction;
+      AnyFunTransform3D &ScaleFunction = .Cervical.ScaleFunction;
       #else
       /// The rigid body transform from segmental to scaling reference frame
-      AnyFunTransform3DIdentity TSeg2ScaleFrame = {};
+      AnyFunTransform3DIdentity& TSeg2ScaleFrame = .PelvisSeg.TSeg2ScaleFrame;
       
       AnyMessage scaling_message_C1Seg = 
       {
@@ -533,10 +545,10 @@ AnyFolder Scaling = {
     
     AnyFolder C2Seg = {
       #ifndef CUSTOM_SCALING_C2Seg
-      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.C2Seg.ScaleFunction;
+      AnyFunTransform3D &ScaleFunction = .Cervical.ScaleFunction;
       #else
       /// The rigid body transform from segmental to scaling reference frame
-      AnyFunTransform3DIdentity TSeg2ScaleFrame = {};
+      AnyFunTransform3DIdentity& TSeg2ScaleFrame = .PelvisSeg.TSeg2ScaleFrame;
       
       AnyMessage scaling_message_C2Seg = 
       {
@@ -549,10 +561,10 @@ AnyFolder Scaling = {
     
     AnyFolder C3Seg = {
       #ifndef CUSTOM_SCALING_C3Seg
-      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.C3Seg.ScaleFunction;
+      AnyFunTransform3D &ScaleFunction = .Cervical.ScaleFunction;
       #else
       /// The rigid body transform from segmental to scaling reference frame
-      AnyFunTransform3DIdentity TSeg2ScaleFrame = {};
+      AnyFunTransform3DIdentity& TSeg2ScaleFrame = .PelvisSeg.TSeg2ScaleFrame;
       
       AnyMessage scaling_message_C3Seg = 
       {
@@ -565,10 +577,10 @@ AnyFolder Scaling = {
     
     AnyFolder C4Seg = {
       #ifndef CUSTOM_SCALING_C4Seg
-      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.C4Seg.ScaleFunction;
+      AnyFunTransform3D &ScaleFunction = .Cervical.ScaleFunction;
       #else
       /// The rigid body transform from segmental to scaling reference frame
-      AnyFunTransform3DIdentity TSeg2ScaleFrame = {};
+      AnyFunTransform3DIdentity& TSeg2ScaleFrame = .PelvisSeg.TSeg2ScaleFrame;
       
       AnyMessage scaling_message_C4Seg = 
       {
@@ -581,10 +593,10 @@ AnyFolder Scaling = {
     
     AnyFolder C5Seg = {
       #ifndef CUSTOM_SCALING_C5Seg
-      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.C5Seg.ScaleFunction;
+      AnyFunTransform3D &ScaleFunction = .Cervical.ScaleFunction;
       #else
       /// The rigid body transform from segmental to scaling reference frame
-      AnyFunTransform3DIdentity TSeg2ScaleFrame = {};
+      AnyFunTransform3DIdentity& TSeg2ScaleFrame = .PelvisSeg.TSeg2ScaleFrame;
       
       AnyMessage scaling_message_C5Seg = 
       {
@@ -596,10 +608,10 @@ AnyFolder Scaling = {
     };
     AnyFolder C6Seg = {
       #ifndef CUSTOM_SCALING_C6Seg    
-      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.C6Seg.ScaleFunction;
+      AnyFunTransform3D &ScaleFunction = .Cervical.ScaleFunction;
       #else
       /// The rigid body transform from segmental to scaling reference frame
-      AnyFunTransform3DIdentity TSeg2ScaleFrame = {};
+      AnyFunTransform3DIdentity& TSeg2ScaleFrame = .PelvisSeg.TSeg2ScaleFrame;
       
       AnyMessage scaling_message_C6Seg = 
       {
@@ -611,10 +623,10 @@ AnyFolder Scaling = {
     };
     AnyFolder C7Seg = {
       #ifndef CUSTOM_SCALING_C7Seg    
-      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.C7Seg.ScaleFunction;
+      AnyFunTransform3D &ScaleFunction = .Cervical.ScaleFunction;
       #else
       /// The rigid body transform from segmental to scaling reference frame
-      AnyFunTransform3DIdentity TSeg2ScaleFrame = {};
+      AnyFunTransform3DIdentity& TSeg2ScaleFrame = .PelvisSeg.TSeg2ScaleFrame;
       AnyMessage scaling_message_C7Seg = 
       {
         TriggerPreProcess = On;
@@ -628,7 +640,7 @@ AnyFolder Scaling = {
       AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.Cervical.ScaleFunction;
       #else
       /// The rigid body transform from segmental to scaling reference frame
-      AnyFunTransform3DIdentity TSeg2ScaleFrame = {};
+      AnyFunTransform3DIdentity& TSeg2ScaleFrame = .PelvisSeg.TSeg2ScaleFrame;
       AnyMessage scaling_message_Cervical = 
       {
         TriggerPreProcess = On;
@@ -640,10 +652,10 @@ AnyFolder Scaling = {
     
     AnyFolder L1Seg = {
       #ifndef CUSTOM_SCALING_L1Seg
-      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.L1Seg.ScaleFunction;
+      AnyFunTransform3D &ScaleFunction = .Lumbar.ScaleFunction;
       #else
       /// The rigid body transform from segmental to scaling reference frame
-      AnyFunTransform3DIdentity TSeg2ScaleFrame = {};
+      AnyFunTransform3DIdentity& TSeg2ScaleFrame = .PelvisSeg.TSeg2ScaleFrame;
       AnyMessage scaling_message_L1Seg = 
       {
         TriggerPreProcess = On;
@@ -655,10 +667,10 @@ AnyFolder Scaling = {
     
     AnyFolder L2Seg = {
       #ifndef CUSTOM_SCALING_L2Seg
-      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.L2Seg.ScaleFunction;
+      AnyFunTransform3D &ScaleFunction = .Lumbar.ScaleFunction;
       #else
       /// The rigid body transform from segmental to scaling reference frame
-      AnyFunTransform3DIdentity TSeg2ScaleFrame = {};
+      AnyFunTransform3DIdentity& TSeg2ScaleFrame = .PelvisSeg.TSeg2ScaleFrame;
       AnyMessage scaling_message_L2Seg = 
       {
         TriggerPreProcess = On;
@@ -670,10 +682,10 @@ AnyFolder Scaling = {
     
     AnyFolder L3Seg = {
       #ifndef CUSTOM_SCALING_L3Seg
-      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.L3Seg.ScaleFunction;
+      AnyFunTransform3D &ScaleFunction = .Lumbar.ScaleFunction;
       #else
       /// The rigid body transform from segmental to scaling reference frame
-      AnyFunTransform3DIdentity TSeg2ScaleFrame = {};
+      AnyFunTransform3DIdentity& TSeg2ScaleFrame = .PelvisSeg.TSeg2ScaleFrame;
       AnyMessage scaling_message_L3Seg = 
       {
         TriggerPreProcess = On;
@@ -684,10 +696,10 @@ AnyFolder Scaling = {
     };
     AnyFolder L4Seg = {
       #ifndef CUSTOM_SCALING_L4Seg
-      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.L4Seg.ScaleFunction;
+      AnyFunTransform3D &ScaleFunction = .Lumbar.ScaleFunction;
       #else
       /// The rigid body transform from segmental to scaling reference frame
-      AnyFunTransform3DIdentity TSeg2ScaleFrame = {};
+      AnyFunTransform3DIdentity& TSeg2ScaleFrame = .PelvisSeg.TSeg2ScaleFrame;
       AnyMessage scaling_message_L4Seg = 
       {
         TriggerPreProcess = On;
@@ -698,10 +710,10 @@ AnyFolder Scaling = {
     };
     AnyFolder L5Seg = {
       #ifndef CUSTOM_SCALING_L5Seg
-      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.L5Seg.ScaleFunction;
+      AnyFunTransform3D &ScaleFunction = .Lumbar.ScaleFunction;
       #else
       /// The rigid body transform from segmental to scaling reference frame
-      AnyFunTransform3DIdentity TSeg2ScaleFrame = {};
+      AnyFunTransform3DIdentity& TSeg2ScaleFrame = .PelvisSeg.TSeg2ScaleFrame;
       AnyMessage scaling_message_L5Seg = 
       {
         TriggerPreProcess = On;
@@ -712,10 +724,10 @@ AnyFolder Scaling = {
     };
     AnyFolder SacrumSeg = {
       #ifndef CUSTOM_SCALING_SacrumSeg    
-      AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.SacrumSeg.ScaleFunction;
+      AnyFunTransform3D &ScaleFunction = .PelvisSeg.ScaleFunction;
       #else
       /// The rigid body transform from segmental to scaling reference frame
-      AnyFunTransform3DIdentity TSeg2ScaleFrame = {};
+      AnyFunTransform3DIdentity& TSeg2ScaleFrame = .PelvisSeg.TSeg2ScaleFrame;
       AnyMessage scaling_message_SacrumSeg = 
       {
         TriggerPreProcess = On;
@@ -730,7 +742,7 @@ AnyFolder Scaling = {
       AnyFunTransform3D &ScaleFunction = ..Scaling.GeometricalScaling.Lumbar.ScaleFunction;
       #else
       /// The rigid body transform from segmental to scaling reference frame
-      AnyFunTransform3DIdentity TSeg2ScaleFrame = {};
+      AnyFunTransform3DIdentity& TSeg2ScaleFrame = .PelvisSeg.TSeg2ScaleFrame;
       AnyMessage scaling_message_Lumbar = 
       {
         TriggerPreProcess = On;
