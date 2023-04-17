@@ -1,0 +1,84 @@
+Main.ModelSetup.LabSpecificData = {
+
+  
+ #if INCLUDE_UPPERBODY == ON
+ #path BODY_MODEL_CONFIG_FILE "BodyModelConfigFullBody.any"
+ #else
+ #path BODY_MODEL_CONFIG_FILE "BodyModelConfig.any"
+ #endif
+ 
+ #if BM_TRUNK_THORACIC_MODEL != _THORACIC_MODEL_FLEXIBLE_
+ #path MOCAP_MARKER_PROTOCOL_FILE "MarkerProtocol.any"
+ #else
+ #path MOCAP_MARKER_PROTOCOL_FILE "MarkerProtocol_FlexibleThorax.any"
+ #endif
+ 
+ #path MOCAP_EXTRA_DRIVERS_FILE "ExtraDrivers.any"
+ 
+ #path MOCAP_C3DSETTINGS "C3DSettings.any"
+ 
+ #ifdef USE_GRF_PREDICTION
+  // This switch ensure that the AnyMoCap sets the appropriate settings 
+  // for the GRF prediction (e.g. residuals, solvers etc.)
+  #define MOCAP_USE_GRF_PREDICTION ON
+  // Include the GRF prediction force plates.
+  #path MOCAP_FORCE_PLATE_FILE "ForcePlates_GRFPrediction.any"
+  
+  // GRF prediction models run with more numerical stability using a second order 
+  // criterion. This is due to the big difference in strength of recruited actuators
+  // (artificial muscles) which is used as contract element under the feet 
+  // (high strength) and human-ground residuals (low strength)
+  Main.Studies.InverseDynamicStudy.InverseDynamics.Criterion.Power = 2;
+  
+ #else
+  // Use normal force plates
+  #path MOCAP_FORCE_PLATE_FILE "ForcePlates.any"
+ #endif
+ 
+ Gravity = 9.81*{0,0,-1};
+  
+ 
+  // This adds different segment length as design variables to 
+  // to the parameter identification study (Main.Studies.ParameterIdentification)
+  // This allows the segment length to be optimized in based on the markers/motion
+  OptimizeAnthropometricsOnOff OptimizeAntropometricsOnOff (
+    PELVIS_WIDTH = ON , 
+    HEAD_HEIGHT = OFF, 
+    TRUNK_HEIGHT= ON, 
+    RIGHT_THIGH_LENGTH= ON, 
+    LEFT_THIGH_LENGTH = ON,
+    RIGHT_SHANK_LENGTH= ON, 
+    LEFT_SHANK_LENGTH = ON,
+    RIGHT_FOOT_LENGTH= ON, 
+    LEFT_FOOT_LENGTH = ON,
+//    RIGHT_UPPERARM_LENGTH= INCLUDE_UPPERBODY, 
+//    LEFT_UPPERARM_LENGTH = INCLUDE_UPPERBODY,
+//    RIGHT_LOWERARM_LENGTH= INCLUDE_UPPERBODY, 
+//    LEFT_LOWERARM_LENGTH = INCLUDE_UPPERBODY,
+//    RIGHT_HAND_LENGTH= OFF, 
+//    LEFT_HAND_LENGTH = OFF,
+    LEFT_RIGHT_SYMMETRY = ON
+  ) ={};
+  
+  
+//  AnyFolder OptimizeAntropometrics = 
+//  {
+//   CreateDesVar PelvisWidth( ENABLE = ON,
+//     NAME = PelvisWidth,
+//     PARAMETER = Main.HumanModel.Anthropometrics.SegmentDimensions.PelvisWidth
+//   ) = {};
+//
+//  };
+
+  // Include functions to generate a video:
+  // -> Run `Study.VideoTool.Preview` to preview the camera view.
+  // -> Run `Study.VideoTool.Create_Video` to generate video from the analysis.
+  #include "CreateVideo.any"
+ 
+ 
+ 
+ 
+ 
+ 
+
+};
