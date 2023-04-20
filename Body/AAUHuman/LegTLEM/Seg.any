@@ -763,7 +763,15 @@ AnySeg Shank =
   #if JOINT_TYPE_KNEE != _JOINT_TYPE_USERDEFINED_
   AnyRefNode KneeJoint =
   {
-    #if JOINT_TYPE_KNEE == _JOINT_TYPE_BONY_LANDMARK_
+
+    #if INCLUDE_KNEE_TIBIA_INT_ROT_OFFSET == ON
+    /// Variable that allows for changing the knee internal/external rotation in the model.
+    AnyVar IntRotation = DesignVar(-0.4);
+   
+    AnyVar AxisRot2= .Sign *IntRotation;
+    #endif    
+  
+      #if JOINT_TYPE_KNEE == _JOINT_TYPE_BONY_LANDMARK_
        AnyVec3 sRelUnscaled = 0.5*(.StdPar.LateralFemuralCondyleInNeutralConf + .StdPar.MedialFemuralCondyleInNeutralConf);
        AnyMat33 ARelUnscaled =  RotMat({0,0,0.0},
                                        .Sign*(.StdPar.LateralFemuralCondyleInNeutralConf - .StdPar.MedialFemuralCondyleInNeutralConf),
@@ -776,10 +784,12 @@ AnySeg Shank =
                      -1*.AnatomicalFrame.ARel'[1])*RotMat(pi,z)*RotMat(-pi/2,y);
     #endif
     #if JOINT_TYPE_KNEE == _JOINT_TYPE_DEFAULT_
+       
+       #if INCLUDE_KNEE_TIBIA_INT_ROT_OFFSET == ON
        AnyVec3 sRelUnscaled = .StdPar.KneeJoint;
        AnyMat33 ARelUnscaled =  RotMat({0,0,0.0},
                                        .Sign*(LateralControlPoint - MedialControlPoint),
-                                       -1*.AnatomicalFrame.ARelUnscaled'[1])*RotMat(pi,z)*RotMat(-pi/2,y);
+                                       -1*.AnatomicalFrame.ARelUnscaled'[1])*RotMat(pi,z)*RotMat(-pi/2,y)* RotMat(AxisRot2,y);                                     
        /// Control point for the knee joint. Found by projecting the EpicondylusFemoris bony landmarks onto the
        /// knee axis from the cadaver data set. Thus, scaling the control points will also scale the Knee joint axis
        AnyVec3 LateralControlPoint = .StdPar.KneeJoint + (.StdPar.LateralFemuralCondyleInNeutralConf - .StdPar.KneeJoint)*.StdPar.KneeJointAxis'*.StdPar.KneeJointAxis;
@@ -788,14 +798,30 @@ AnySeg Shank =
        AnyVec3 MedialControlPoint = .StdPar.KneeJoint + (.StdPar.MedialFemuralCondyleInNeutralConf - .StdPar.KneeJoint)*.StdPar.KneeJointAxis'*.StdPar.KneeJointAxis;
        sRel = .Scale(.StdPar.KneeJoint);
        /// Knee Joint orientation is calculated based on the direction between the two control points.
+       ARel = RotMat({0,0,0.0}, .Sign*(.Scale(LateralControlPoint)-.Scale(MedialControlPoint)), -1*.AnatomicalFrame.ARel'[1])*RotMat(pi,z)*RotMat(-pi/2,y)* RotMat(AxisRot2,y);                                       
+                                       
+       #else
+       AnyVec3 sRelUnscaled = .StdPar.KneeJoint;
+       AnyMat33 ARelUnscaled =  RotMat({0,0,0.0},
+                                       .Sign*(LateralControlPoint - MedialControlPoint),
+                                       -1*.AnatomicalFrame.ARelUnscaled'[1])*RotMat(pi,z)*RotMat(-pi/2,y);                                       
+       /// Control point for the knee joint. Found by projecting the EpicondylusFemoris bony landmarks onto the
+       /// knee axis from the cadaver data set. Thus, scaling the control points will also scale the Knee joint axis
+       AnyVec3 LateralControlPoint = .StdPar.KneeJoint + (.StdPar.LateralFemuralCondyleInNeutralConf - .StdPar.KneeJoint)*.StdPar.KneeJointAxis'*.StdPar.KneeJointAxis;
+       /// Control point for the knee joint. Found by projecting the EpicondylusFemoris bony landmarks onto the
+       /// knee axis from the cadaver data set. Thus, scaling the control points will also scale the Knee joint axis
+       AnyVec3 MedialControlPoint = .StdPar.KneeJoint + (.StdPar.MedialFemuralCondyleInNeutralConf - .StdPar.KneeJoint)*.StdPar.KneeJointAxis'*.StdPar.KneeJointAxis;
+       sRel = .Scale(.StdPar.KneeJoint);
+       /// Knee Joint orientation is calculated based on the direction between the two control points.     
        ARel = RotMat({0,0,0.0}, .Sign*(.Scale(LateralControlPoint)-.Scale(MedialControlPoint)), -1*.AnatomicalFrame.ARel'[1])*RotMat(pi,z)*RotMat(-pi/2,y);
+       #endif
     #endif
 
     #include "../DrawSettings/JointAxesDistal.any"
   
   };
   #endif
-
+  
   #if BM_FOOT_MODEL != _FOOT_MODEL_NONE_
   AnyRefNode AchillesWrapping1 = {
     AnyVar ShankLengthScale = vnorm(.AnkleJoint.sRel-.KneeJoint.sRel)
