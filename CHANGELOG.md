@@ -49,6 +49,15 @@ to account for pelvis segment morphing into leg pelvis coordinate system using
 
 ### Changed:
 
+* Wrapping surfaces have been added to the achilles tendon around the ankle in
+  the TLEM 2.0 leg model. This ensures a even ratio of moment arms between
+  the soleus and gastrocnemius muscles. Hence, gastroc is recruited less in
+  especially downhill walking, solving the models tendency to overpredict the
+  knee contact forces at toe off. This is the first of a number of improvements
+  to the leg model by Dr. Enrico De Pieri who is working on a
+  publication on improvements and validation of the TLEM 2 leg model. 
+
+
 * Adjustments to pelvic tilt have changed position of MoCap markers on the pelvis
   segment. This mostly affect markers with hardcoded positions.
   Particularly PSIS markers furthest posterior from the origin between ASIS. When migrating
