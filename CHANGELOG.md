@@ -3,6 +3,23 @@
 % To minimize the risk of merge conflicts insert the your changes at a
 % random empty or make a new entry a random place in the bullet lists.
 
+## AMMR Beta
+
+**Fixed:**
+* The kinematic start guess for left patalla joint has been adjusted to improve
+  robustness of the kinematic solver. This does not changed the result of
+  models. 
+
+**Changed:**
+* The InverseDynamics analysis in MoCap models now use the first step of Marker
+  tracking as a start guess (initial conditions)  
+  for the kinematic solver. This improves robustness in certain cases. 
+
+**Added:**
+* Add an option to override the default kinematic joint limits in the MoCap
+  framework.
+
+
 ## AMMR 2.4.4
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.7764841.svg)](https://doi.org/10.5281/zenodo.7764841)
 
