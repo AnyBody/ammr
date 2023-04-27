@@ -140,6 +140,22 @@ to account for pelvis segment morphing into leg pelvis coordinate system using
   
 * Renamed the folders holding muscle models from `MusPar` to `MuscleModels` for better clarity.
    
+## AMMR 2.4.5-beta
+
+**Fixed:**
+* The kinematic start guess for left patalla joint has been adjusted to improve
+  robustness of the kinematic solver. This does not changed the result of
+  models. 
+
+**Changed:**
+* The InverseDynamics analysis in MoCap models now use the first step of Marker
+  tracking as a start guess (initial conditions)  
+  for the kinematic solver. This improves robustness in certain cases. 
+
+**Added:**
+* Add an option to override the default kinematic joint limits in the MoCap
+  framework
+
 
 ## AMMR 2.4.4
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.7764841.svg)](https://doi.org/10.5281/zenodo.7764841)
