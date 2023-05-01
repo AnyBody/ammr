@@ -16,6 +16,7 @@
 // BODY_MODEL_FOLDER = Main.HumanModel.BodyModel,
 // PlaceMarkerAt = AnatomicalFrame,
 // DRAW_SCALE = 1,
+// SKIP_MARKER_EXIST_CHECK = 0, // This must be disabled if creating markers before the C3D file have been defined
 
 
 
@@ -34,7 +35,8 @@
                                     USE_BVH_INPUT = 0,
                                     BVH_OBJECT = Main.ModelSetup.BVHFileData,
                                     MarkerPlacementBVH = REQUIRED_FOR_BVH_INPUT,
-                                    DRAW_SCALE = 1
+                                    DRAW_SCALE = 1,
+                                    SKIP_MARKER_EXIST_CHECK = 0
                                     ){
                                       
                                      
@@ -66,19 +68,22 @@
 
 
 #if  USE_BVH_INPUT == 0
-
+#if SKIP_MARKER_EXIST_CHECK == 0
 AnyMessage TestMarkerExist ={
 #if MarkerName == _NOT_DEFINED_
-  TriggerPreProcess = not(sum(eqfun(Main.ModelSetup.C3DFileData.PointLabels, #__NAME__)));
   AnyString MarkerLabel = #__NAME__;
   #else
-  TriggerPreProcess = not(sum(eqfun(Main.ModelSetup.C3DFileData.PointLabels, #MarkerName)));
   AnyString MarkerLabel = #MarkerName;
-#endif
+#endif 
+  // Note: if you get a ERROR: " 'PointLabels'  :  Identifier cannot be resolved "
+  //       This is because you create a marker earlier than the C3D file objects
+  //       is created. For example by creating the marker directly in the "TrialSpecificData.any" file
+  //       In that case set the class-template argument 'SKIP_MARKER_EXIST_CHECK=1', as a workaround.
+  TriggerPreProcess = not(sum(eqfun(Main.ModelSetup.C3DFileData.PointLabels, MarkerLabel)));
   Type=MSG_Error;
   Message = "Marker: " + strquote(MarkerLabel) + " does not exist in the c3d file";
-};     
-
+};
+#endif
 #endif
                                       
                                       
