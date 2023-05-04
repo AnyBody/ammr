@@ -1,0 +1,1 @@
+FROM ghcr.io/anybody/anybodycon-devcontainer:latest
