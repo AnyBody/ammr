@@ -6,6 +6,13 @@ on:
     paths-ignore:
       - 'Docs/**'
   workflow_dispatch:
+    inputs:
+      run-slow-tests:
+        type: boolean
+        description: 'Set to true to run the full tests (takes a long time)'
+        required: false
+        default: false
+
 
 concurrency: 
   group: ci-${{ github.ref }}
@@ -40,10 +47,18 @@ jobs:
           micromamba create --allow-downgrade -y -n _ammr_test -f Tests\test-environment.yml
 
       - name: Run fast AMMR tests
+        if: github.event.inputs.run-slow-tests == 'false'
         run: |
           ~\micromamba.exe shell hook -s powershell | Out-String | iex
           micromamba activate _ammr_test
         
           pytest -n 4 --instafail --durations=20 --anybodycon="$Env:ANYBODYCON" Tests
 
-
+      - name: Run slow AMMR tests
+        if: github.event.inputs.run-slow-tests == 'true'
+        run: |
+          ~\micromamba.exe shell hook -s powershell | Out-String | iex
+          micromamba activate _ammr_test
+        
+          pytest -n 4 --instafail --durations=20 --anybodycon="$Env:ANYBODYCON" --runslow Tests
+  
