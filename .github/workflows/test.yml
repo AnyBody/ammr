@@ -12,7 +12,7 @@ on:
         description: 'Set to true to run the full tests (takes a long time)'
         required: false
         default: false
-      use-special-anybodycon:
+      custom-anybodycon:
           description: 'Set to true to run the full tests (takes a long time)'
           required: false
           default: 'AnyBody.7.5-CI-master.AnyBody.7.5.x/AnyBodyCon.exe'
@@ -42,25 +42,27 @@ jobs:
       #   with:
       #     connection-string: ${{ secrets.AZURE_CONN_STR }}
       #     container: anybodycon
-      #     name: ${{ github.event.inputs.use-special-anybodycon }}
+      #     name: ${{ inputs.custom-anybodycon }}
       #     path: ${{ runner.temp }}
 
 
-      - name: create folder
-        run: mkdir -p ${{ runner.temp }}/AnyBody.7.5-CI-master.AnyBody.7.5.x
+      - name: Create temp location for AnyBodyCon
+        if: ${{ inputs.custom-anybodycon }}
+        run: mkdir -p ${{ runner.temp }}/(split-path ${{ inputs.custom-anybodycon }} -Parent)
         
       - name: Get special AnyBodyCon version
+        if: ${{ inputs.custom-anybodycon }}
         uses: armanrahman22/azblob-download-action@main
         with:
           connection-string: ${{ secrets.AZURE_CONN_STR }}
           container-name: "anybodycon"
-          blob-name: ${{ github.event.inputs.use-special-anybodycon }}
+          blob-name: ${{ inputs.custom-anybodycon }}
           download-path: ${{ runner.temp }}
         
       - name: Overwrite AnyBodyCon
-        if: ${{ github.event.inputs.use-special-anybodycon }}
+        if: ${{ inputs.custom-anybodycon }}
         run: | 
-          echo "ANYBODYCON=$PWD\${{ github.event.inputs.use-special-anybodycon }}" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+          echo "ANYBODYCON=${{ runner.temp }}\${{ inputs.custom-anybodycon }}" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
     
       - name: Install conda
         run: | 
