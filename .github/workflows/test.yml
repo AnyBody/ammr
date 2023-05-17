@@ -12,11 +12,18 @@ on:
         description: 'Run full tests (--runslow)'
         required: false
         default: false
-      custom-anybodycon:
-          description: 'Use AnyBody version from AMS build system (e.g filename on the I:/ drive)'
+      use-custom-anybodycon:
+          type: boolean
+          description: 'Use a custom version of AnyBody from AMS build system.'
+          default: false
+      custom-anybodycon-name:
+          description: 'Name of the custom AnyBody version to use. (E.g. path on the I:\ drive)'
           required: false
           default: 'AnyBody.7.5-CI-master.AnyBody.7.5.x/AnyBodyCon.exe'
-  
+      custom-pytest-arg:
+          description: 'Specify which test to run. E.g. `Tests/test_example.any`. Default is entire test suite.'
+          required: false
+          default: ''
 
 concurrency: 
   group: ci-${{ github.ref }}
@@ -38,10 +45,10 @@ jobs:
       - uses: actions/checkout@v3
         
       - name: Download custom AnyBodyCon
-        if: ${{ inputs.custom-anybodycon }}
+        if: inputs.use-custom-anybodycon
         uses: ./.github/actions/custom-anybodycon
         with:
-          custom-anybodycon: ${{ inputs.custom-anybodycon }}
+          custom-anybodycon: ${{ inputs.custom-anybodycon-name }}
           connection-string:  ${{ secrets.AZURE_CONN_STR }}
 
       - name: Install micro mamba
@@ -57,5 +64,5 @@ jobs:
         
           pytest -n 4 --instafail --durations=20 --anybodycon="$Env:ANYBODYCON" `
            ${{ github.event.inputs.run-slow-tests == 'true' && '--runslow' || '' }} `
-           Tests
+           ${{ github.event.inputs.custom-pytest-arg  || 'Tests' }}
   
