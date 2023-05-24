@@ -84,7 +84,14 @@ to account for pelvis segment morphing into leg pelvis coordinate system using
 
 * Organization of segmental scaling functions was reworked and now configured slightly simpler. This modification 
   is expected not to affect users working with default and non-default scaling laws and patient-specific morphing. 
-  Additionally, all spinal segments share a scaling reference frame. 
+  Additionally, all spinal segments share a scaling reference frame.
+
+* We updated how the class `AnySurfCylinderFit` is used in the {ref}`Knee
+  Simulator example <example_kneesimulator>`. The deprecated way of using the
+  `AnySurfCylinderFit` have been changed. Since `AnySurfCylinderFit` is now a
+  sub class of `AnyRefNode` it should no longer be nested inside inside an other parent
+  reference frame to provide the pos `sRel` and orientation `ARel`. This fixes a
+  number of deprecated warnings which would have triggered with AMS 7.5. 
 
 * Added new `AnatomicalFrameTrunk` reference frame to pelvis segment consistent
   with anatomical frames in rest of the trunk model. All joint angles relative to
@@ -475,7 +482,7 @@ The `HumeroUlnarJoint` is the elbow flexion extension, and together `HumeroRadia
 
 **Changed:**
 
-- The settings of the {ref}`Knee Simulator example <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_KneeSimulator.py>` has been
+- The settings of the {ref}`Knee Simulator example <example_kneesimulator>` has been
   tweaked to make it run faster.
 
 ## AMMR 2.3.2 (2021-01-21)
@@ -929,7 +936,7 @@ requested body height.
   {ref}`Shoulder-Arm Documentation <DeltoidWrapping>` for more information.
 
 - Added new example model of a Knee Simulator using a knee implant model and force-dependent kinematics (FDK).
-  See the {ref}`Knee Simulator example <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_KneeSimulator.py>`
+  See the {ref}`Knee Simulator example <example_kneesimulator>`
   for more information.
 
 - New model plugin (BodyModel Configurator) which provides a graphical user interface
