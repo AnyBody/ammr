@@ -1,0 +1,94 @@
+AnyFolder LegCal2 ={
+  AnyComponentDefinition obj = {};  
+  
+  AnyFolder &Pelvis = ...BodyModel.Trunk.SegmentsLumbar.PelvisSeg;
+  AnyFolder &Sacrum = ...BodyModel.Trunk.SegmentsLumbar.SacrumSeg;
+  
+  AnyFolder &LegSegSide = .SideHumanFolderRef.Leg.Seg;
+  
+  AnyFolder &LegJointsSide = .SideHumanFolderRef.Leg.Jnt;
+  AnyFolder &SacrumPelvisJnt = ...BodyModel.Trunk.JointsLumbar.SacrumPelvisJnt;
+  
+  
+  AnyFixedRefFrame ground = {
+    AnyRefNode node = {
+      ARel=..Pelvis.Axes0;
+      sRel=..Pelvis.r0;
+    };
+  };
+  
+AnyKinEq PelvisFix = {
+    AnyKinLinear Lin = {
+      AnyRefFrame &ground = ..ground.node;
+      AnyRefFrame &Pelvis = .....BodyModel.Trunk.SegmentsLumbar.PelvisSeg;
+    };
+    AnyKinRotational Rot = {
+      Type = RotAxesAngles;
+      AnyRefFrame &ground = ..ground.node;
+      AnyRefFrame &Pelvis = .....BodyModel.Trunk.SegmentsLumbar.PelvisSeg;
+    };
+  };
+  
+  
+  AnyKinEqSimpleDriver PelvisSacrumFix = {
+    AnyKinMeasure& Jnt = .SacrumPelvisJnt;
+    DriverPos = {0,0,0};
+    DriverVel = {0,0,0};
+    Reaction.Type = {Off,Off,Off};
+  };
+  
+  AnyKinEqSimpleDriver Hip = {
+    AnyKinRotational &Spherical = ..SideInterfaceFolderRef.HipFlexion.HipMeasure;
+    DriverPos = {50,0,0}*pi/180; // Flexion - Abduction - external rotation 
+    DriverVel = {0,0,0}*pi/180;
+    Reaction.Type = {Off,Off,Off};
+  };
+  
+  AnyKinEqSimpleDriver Knee = {
+    AnyKinMeasure& Hinge = ..SideInterfaceFolderRef.KneeFlexion;
+    DriverPos = {  0*pi/180};
+    DriverVel = {0*pi/180};
+    Reaction.Type = {Off};
+  };
+
+  #if BM_FOOT_MODEL == _FOOT_MODEL_DEFAULT_
+  AnyKinEqSimpleDriver Ankle = {
+    AnyKinMeasure& Hinge = ..SideInterfaceFolderRef.AnklePlantarFlexion;
+    DriverPos = {-15*pi/180}; //15 degrees dorsal flexion
+    DriverVel = {0*pi/180};
+    Reaction.Type = {Off};
+  };
+  
+  AnyKinEqSimpleDriver SubTalar = {
+    AnyKinMeasure& Hinge = ..SideInterfaceFolderRef.SubTalarEversion;
+    DriverPos = {0*pi/180};
+    DriverVel = {0*pi/180};
+    Reaction.Type = {Off};
+  };
+  #endif
+  
+  AnyString MusPrefix = CompleteNameOf(&.SideHumanFolderRef.Leg.Mus);
+  
+  AnyObjectPtrArray TibialisPosteriorMuscles = ObjSearch(MusPrefix+".TibialisPosterior*", "AnyMuscle");
+  AnyObjectPtrArray GastrocnemiusMuscles = ObjSearch(MusPrefix+".Gastrocnemius*", "AnyMuscle");
+  AnyObjectPtrArray FlexorMuscles = ObjSearch(MusPrefix+".Flexor*", "AnyMuscle");
+  AnyObjectPtrArray PlantarisMuscles = ObjSearch(MusPrefix+".Plantaris*", "AnyMuscle");
+  AnyObjectPtrArray GluteusMaximusMuscles = ObjSearch(MusPrefix+".GluteusMaximus*", "AnyMuscle");
+};
+
+// The study: Operations to be performed on the model
+AnyBodyCalibrationStudy LegCalibrationStudy2 = {
+  AnyFolder &ref=.LegCal2;
+  nStep = 1;
+  MuscleArr = arrcat(
+                ref.TibialisPosteriorMuscles,
+                ref.GastrocnemiusMuscles,
+                ref.FlexorMuscles,
+                ref.PlantarisMuscles,
+                ref.GluteusMaximusMuscles
+             );
+  InitialConditions.SmallStepAssumptionOnOff = Off;
+  Kinematics.SmallStepAssumptionOnOff = Off;
+  Kinematics.PosAnalysisOnlyOnOff = On;
+  InitialConditions.PosAnalysisOnlyOnOff = On;
+};

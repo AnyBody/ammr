@@ -1,0 +1,104 @@
+/*
+/***************** Leg.root.any *******************************
+This file is the root file of the LegTLEM model using the constant strength muscle model 
+
+Please find a description of the model in the seg.any file.
+*/
+
+  AnyDoc DocLink = {
+    DocumentationLink = AMMR_PATH_DOC +
+    #if BM_LEG_MODEL == _LEG_MODEL_TLEM2_
+     "/body/leg_tlem2_model.html";
+    #else
+     "/body/leg_tlem_model.html";
+    #endif
+  };
+
+
+// Collection of the joints into JntDOF which are used by the applications.
+  AnyKinMeasureOrg JntDOF = {
+    // This is where the DOF of the leg are assembled into one single measure, this measure has the following DOF:
+  // 0 Ankle flexion/extension
+  // 1 Ankle abduction adduction  
+  // 2 Knee flextion/extension
+    // 3 Hip adduction/abduction 
+    // 4 Hip rotation externa/internal
+    // 5 Hip flexion/extension 
+    #if BM_FOOT_MODEL == _FOOT_MODEL_DEFAULT_
+    AnyRevoluteJoint &Ankle = .Jnt.Ankle;
+    AnyRevoluteJoint &SubTalar = .Jnt.SubTalar;
+    #endif
+    #if BM_JOINT_TYPE_KNEE_RIGHT != _JOINT_TYPE_USERDEFINED_
+    AnyRevoluteJoint &Knee = .Jnt.Knee;
+    #endif
+    AnySphericalJoint &Hip = .Jnt.Hip;
+  
+  }; 
+  
+  // Definition of the leg segments
+  AnyFolder Seg = {
+    #include "Seg.any"
+  };
+  
+  // Definition of the joints
+  AnyFolder Jnt = {
+    #include "Jnt.any"
+  };
+  
+  // Definition of the muscles
+  #if ((_LEFT_RIGHT_ == "Right") & !BM_LEG_MUSCLES_RIGHT) | ((_LEFT_RIGHT_ == "Left") & !BM_LEG_MUSCLES_LEFT)
+    #include "JointMuscles.any"
+  #else
+    AnyFolder Mus = {
+      #include "Mus.any" 
+    };  
+    
+    /// Definition of the muscle parameters of the simple muscle model
+    AnyFolder MuscleModels = {      
+      #if ((_LEFT_RIGHT_ == "Right") & (BM_LEG_MUSCLES_RIGHT == _MUSCLES_SIMPLE_)) | ((_LEFT_RIGHT_ == "Left") & (BM_LEG_MUSCLES_LEFT == _MUSCLES_SIMPLE_)) 
+         #if BM_LEG_MORPHOLOGY == 1
+            #include "MusMdlSimple_1.any" 
+         #endif
+         #if BM_LEG_MORPHOLOGY == 2
+            #include "MusMdlSimple_2.any" 
+         #endif
+      #endif
+      
+      #if ((_LEFT_RIGHT_ == "Right") & (BM_LEG_MUSCLES_RIGHT == _MUSCLES_3E_HILL_)) | ((_LEFT_RIGHT_ == "Left") & (BM_LEG_MUSCLES_LEFT == _MUSCLES_3E_HILL_)) 
+         #if BM_LEG_MORPHOLOGY == 1
+            #include "MusMdl3E_1.any" 
+         #endif
+         #if BM_LEG_MORPHOLOGY == 2
+            #include "MusMdl3E_2.any" 
+         #endif
+      #endif
+    };    
+  #endif
+  
+ 
+  ///Summation of masses in the leg
+  AnyFolder MassSummation=
+  {
+    AnyVar Mass =  
+    .Seg.Thigh.Mass+.Seg.Shank.Mass+
+    #if BM_FOOT_MODEL == _FOOT_MODEL_DEFAULT_
+    .Seg.Foot.Mass+.Seg.Talus.Mass+
+    #endif
+    .Seg.Patella.Mass;  
+  };
+  
+  #ifdef DONT_USE_INITIAL_POSITION_FROM_MANNEQUIN
+  #else
+    #include "InitialPositions.any"
+  #endif
+
+  InterfaceFolder =
+  {
+    #include "Interface.any"
+  };
+  
+  MannequinValuesFolder ={
+    #include "MannequinValuesFromModel.any"
+  };
+  
+  
