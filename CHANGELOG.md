@@ -153,16 +153,16 @@ to account for pelvis segment morphing into leg pelvis coordinate system using
   - The anatomical frames of the foot and the talus are now defined using bony landmarks on the foot and the lateral 
     and medial malleoli. The vertical axis is defined using three coplanar points that can be considered parallel to 
     the ground. In the new implementation, these are the lowermost points on heel, metatarsal 5, and medial 
-    sesmoid on metatarsal 1. This will update the neutral position of the foot.
+    sesamoid on metatarsal 1. This will update the neutral position of the foot.
   - The malleoli coordinates in the foot coordinate system have been fixed to match the malleoli on the shank in the 
     neutral position.
   - The talus coordinate system is updated to be coincident with the foot coordinate system in the neutral position.
     The ankle and subtalar joint axis parameters have been changed to be expressed in the updated coordinate system. However,
     they are consistent with the previous definition. The update of the talus coordinate system allows reusing some of
-    the parameters from the foot model and simplifies the code. For backwards compatability, a new reference node, 
+    the parameters from the foot model and simplifies the code. For backwards compatibility, a new reference node, 
     `TalusCompatibilityFrameAMMR24`, is created in the talus segment. This reference node has the same position and
     orientation as the previous coordinate system of talus. 
-  - The model tree has been updated. The talus segment is moved inside the foot segment. For backwards compatbility, a 
+  - The model tree has been updated. The talus segment is moved inside the foot segment. For backwards compatibility, a 
     pointer to the talus segment still exists outside the foot segment.
    
 ## AMMR 2.4.5-beta
