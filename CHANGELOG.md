@@ -163,7 +163,11 @@ to account for pelvis segment morphing into leg pelvis coordinate system using
 **Changed:**
 * The InverseDynamics analysis in MoCap models now use the first step of Marker
   tracking as a start guess (initial conditions)  
-  for the kinematic solver. This improves robustness in certain cases. 
+  for the kinematic solver. This improves robustness in certain cases.
+* The marker protocol in the {ref}`"ADL gait (MoCap model)" <sphx_glr_auto_examples_MoCap_plot_ADL_Gait.py>` 
+  was updated/tweaked to improve the robustness of the model. Some special exception where added to trials
+  where we discovered that some markers where swapped by accident in the original open access dataset.
+  
 
 **Added:**
 * Add an option to override the default kinematic joint limits in the MoCap

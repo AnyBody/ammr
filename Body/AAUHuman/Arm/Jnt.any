@@ -4,16 +4,6 @@
 #if BM_ARM_THORAX_SCAPULA_CONTACT == _MULTIPLE_POINT_CONTACT_
 
 
-AnyFolder ThoraxScapulaMultiPointContactSettings = {
-  AnyVar Base ??= 1;
-  // This is an insanely large number, but the fomula behind 
-  // applies log(Exponent)
-  #if (ANYBODY_V1 > 7)|(ANYBODY_V1 == 7 & ANYBODY_V2 >= 3)
-  AnyVar Exponent ??= 2.718281^(200);
-  #else
-  AnyVar Exponent ??= 4^120;
-  #endif
-};
 #endif
 
 
@@ -182,17 +172,16 @@ AnyRevoluteJoint WristJointDeviation = {
 
 #if BM_ARM_THORAX_SCAPULA_CONTACT == _MULTIPLE_POINT_CONTACT_
 
-
-AnyKinPointSurface ScapulaAIThoraxMeasure = {
-  Base = .ThoraxScapulaMultiPointContactSettings.Base;
-  Exponent=.ThoraxScapulaMultiPointContactSettings.Exponent;
-  #include "ThoraxScapulaContactPoints.any"
-  
-  //RefFrames = ObjSearch("..Trunk.SegmentsThorax.ThoraxSeg.Right.RibNodes.*","AnyRefFrame"); 
-  AnyFolder &surf3 =..Seg.Scapula.Ellipsoid_ai.ellipsoid;
- 
-  NormedMeasureOnOff = On;
-
+AnyKinMeasureExpComb ScapulaAIThoraxMeasure = {
+  // A large negative number for the exponential combination measures causes
+  // the measure to put emphasis on the "penetration" of the points,
+  // while "ignoring" points far from the surface.
+  a ??= -200;
+  AnyKinPointSurface point_surface_measure = 
+  {
+    #include "ThoraxScapulaContactPoints.any"
+    AnyFolder &surf3 =...Seg.Scapula.Ellipsoid_ai.ellipsoid;
+  };
   
 };
 
@@ -212,12 +201,14 @@ AnyKinEqSimpleDriver ScapulaAIThoraxNodeDriver = {
 
 #if BM_ARM_THORAX_SCAPULA_CONTACT == _ELLIPSOID_CONTACT_
 
+
+
+
 AnyKinEqSimpleDriver ScapulaAIThoraxNodeDriver = {
   
   AnyKinPointSurface Measure1 = {
     AnyRefFrame &r1 = ...Seg.Scapula.ScapulaSlidingAI;
     AnySurface &s1 = ...ShoulderRef.ScapulaEllipsoidOrigin.Elipse;
-    NormedMeasureOnOff = Off;
   };
   
   DriverPos = {0};
@@ -274,17 +265,15 @@ AnyMuscleViaPoint TrapezoidLigamentReaction = {
 
 #if BM_ARM_THORAX_SCAPULA_CONTACT == _MULTIPLE_POINT_CONTACT_
 
-
-AnyKinPointSurface ScapulaTSThoraxMeasure = 
+AnyKinMeasureExpComb ScapulaTSThoraxMeasure = 
 {
-  Base =.ThoraxScapulaMultiPointContactSettings.Base;
-  Exponent=.ThoraxScapulaMultiPointContactSettings.Exponent;
- 
-  #include "ThoraxScapulaContactPoints.any"
-    
-  AnyFolder &surf3 =..Seg.Scapula.Ellipsoid_ts.ellipsoid;
-  NormedMeasureOnOff = On;
- 
+  a ??= .ScapulaAIThoraxMeasure.a;
+  AnyKinPointSurface point_surface_measure = 
+  {
+    #include "ThoraxScapulaContactPoints.any"
+    AnyFolder &surf3 =...Seg.Scapula.Ellipsoid_ts.ellipsoid;
+  };
+  
 };
 
 
@@ -382,7 +371,6 @@ scapula ={
 AnyKinPointSurface  ScapulaTSThoraxMeasure = {
     AnyRefFrame &r1 = ..Seg.Scapula.ScapulaSlidingTS;
     AnySurface &s1 = ..ShoulderRef.ScapulaEllipsoidOrigin.Elipse;
-    NormedMeasureOnOff = Off;
   };
 
 #endif
