@@ -42,7 +42,7 @@ if len(glob.glob("C3DFiles/**/*.c3d")) < 3:
     warnings.warn(
         "Dataset not present. Please see "
         "Schreiber & Moissenet (2019) https://doi.org/10.1038/s41597-019-0124-4 "
-        "and download the data from https://ndownloader.figshare.com/articles/7734767/versions/8 "
+        "and download the data from https://figshare.com/articles/dataset/A_multimodal_dataset_of_human_gait_at_different_walking_speeds/7734767/8 "
     )
 
 # Create folder for storing batch processing logfiles
@@ -50,7 +50,10 @@ if len(glob.glob("C3DFiles/**/*.c3d")) < 3:
 os.makedirs("BatchProcessingLogs", exist_ok=True)
 
 #%% Process all standing reference trials
-macro = [mc.Load("Main.any"), mc.OperationRun("Main.RunParameterIdentification")]
+macro = [
+    mc.Load("Main.any"),
+    mc.OperationRun("Main.RunParameterIdentification"),
+]
 
 app = AnyPyProcess(num_processes=3)
 app.start_macro(
