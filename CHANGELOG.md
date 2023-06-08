@@ -173,9 +173,11 @@ to account for pelvis segment morphing into leg pelvis coordinate system using
 * Add an option to override the default kinematic joint limits in the MoCap
   framework
 
-
-## AMMR 2.4.4
+(ammr-2.4-changelog)=
+## AMMR 2.4.4 (2023-04-03)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.7764841.svg)](https://doi.org/10.5281/zenodo.7764841)
+[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.4.4-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-4-4-8907_x64/)
+
 
 This version of AMMR adds a number fixes and tweaks to the body models which
 improves robustness of various kinematic and recruitment solvers. 
@@ -201,7 +203,6 @@ improves robustness of various kinematic and recruitment solvers.
 * Corrected small asymmetry in function for nonlinear intervertebral disc stiffness in coronal plane (affects only those who used polynomial disc stiffness).
 
 
-(ammr-2.4-changelog)=
 ## AMMR 2.4.3 (2023-01-27)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.7572879.svg)](https://doi.org/10.5281/zenodo.7572879)  [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.4.3-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-4-3-8899_x64/)
 
