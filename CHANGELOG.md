@@ -137,6 +137,12 @@ to account for pelvis segment morphing into leg pelvis coordinate system using
   same, this method yields same result as before.
   
 * Renamed the folders holding muscle models from `MusPar` to `MuscleModels` for better clarity.
+
+* The implementation of the Tweente Lower Extremity Model (TLEM) has been split
+  into two seperates folders `LegTLEM/` and `LegTLEM1/`. All references to TLEM
+  1 code have been removed in the code implementing the TLEM 2 model. 
+
+* The TLEM 1 model now triggers a deprecation warning suggesting to use TLEM 2.
    
 ## AMMR 2.4.5-beta
 
@@ -148,7 +154,11 @@ to account for pelvis segment morphing into leg pelvis coordinate system using
 **Changed:**
 * The InverseDynamics analysis in MoCap models now use the first step of Marker
   tracking as a start guess (initial conditions)  
-  for the kinematic solver. This improves robustness in certain cases. 
+  for the kinematic solver. This improves robustness in certain cases.
+* The marker protocol in the {ref}`"ADL gait (MoCap model)" <sphx_glr_auto_examples_MoCap_plot_ADL_Gait.py>` 
+  was updated/tweaked to improve the robustness of the model. Some special exception where added to trials
+  where we discovered that some markers where swapped by accident in the original open access dataset.
+  
 
 **Added:**
 * Add an option to override the default kinematic joint limits in the MoCap
