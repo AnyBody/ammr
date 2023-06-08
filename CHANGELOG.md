@@ -146,6 +146,12 @@ to account for pelvis segment morphing into leg pelvis coordinate system using
   same, this method yields same result as before.
   
 * Renamed the folders holding muscle models from `MusPar` to `MuscleModels` for better clarity.
+
+* The implementation of the Tweente Lower Extremity Model (TLEM) has been split
+  into two seperates folders `LegTLEM/` and `LegTLEM1/`. All references to TLEM
+  1 code have been removed in the code implementing the TLEM 2 model. 
+
+* The TLEM 1 model now triggers a deprecation warning suggesting to use TLEM 2.
    
 ## AMMR 2.4.5-beta
 
