@@ -77,11 +77,11 @@ Switch off a leg
 
 
 
-::::{dropdown} `_LEG_MODEL_TLEM1_`
+::::{dropdown} `_LEG_MODEL_TLEM_`
 :animate: fade-in-slide-down
 :margin: 0 0 2 2
 
-:::{ammr:bm_constant} _LEG_MODEL_TLEM1_
+:::{ammr:bm_constant} _LEG_MODEL_TLEM_
 :value: 1
 Switch to use leg model: "TLEM 1"
 :::
@@ -95,6 +95,7 @@ Switch to use leg model: "TLEM 1"
 
 :::{ammr:bm_constant} _LEG_MODEL_TLEM1_
 :value: 1
+:deprecated:
 Switch to use leg model: "TLEM 1"
 :::
 ::::
