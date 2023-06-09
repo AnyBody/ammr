@@ -56,6 +56,16 @@ The AnyBody Model Repository (AMMR), is an unique open library of
 musculoskeletal models and examples ready to be used with the [AnyBody Modeling
 System][anybody modeling system]. The AnyBody Managed Model Repository consists of two parts:
 
+
+```{admonition} **First time user?**
+:class: hint dropdown margin
+
+If you are a new user check the [AnyBody Tutorials](https://anyscript.org/tutorials/) and the getting started video on AnyBody.
+
+The following {doc}`Getting Started section </getting_started>` on the AMMR provides insight into how AMMR is structured, how to
+install it and how to use it.
+```
+
 <span class="material-symbols-outlined">
 </span>
 
@@ -70,7 +80,7 @@ System][anybody modeling system]. The AnyBody Managed Model Repository consists 
 The human body models which can be 
 customized and scaled to build a specific musculoskeletal model.
 +++
-{ref}`Learn more » <the-body-model>`
+{ref}`Learn more Â» <the-body-model>`
 :::
 
 :::{grid-item-card} {material-regular}`fitness_center;2em` Example gallery
@@ -79,7 +89,7 @@ customized and scaled to build a specific musculoskeletal model.
 
 Lots of applicaiton examples showing how the body models are used.
 +++
-{ref}`Learn more » <example-gallery>`
+{ref}`Learn more Â» <example-gallery>`
 :::
 
 :::{grid-item-card} {material-regular}`settings;2em` Model Configuration
@@ -88,10 +98,12 @@ Lots of applicaiton examples showing how the body models are used.
 
 Information on how to configure the body models, and enable or disable various body parts.
 +++
-{ref}`Learn more » <bm-config>`
+{ref}`Learn more Â» <bm-config>`
 :::
 
 ::::
+
+
 
 
 
@@ -101,14 +113,6 @@ maintained by AnyBody Technology who ensure that various body part models can be
 used together as a full body, scalable musculoskeletal model.
 
 
-```{admonition} **First time user?**
-:class: hint dropdown
-
-If you are a new user check the [AnyBody Tutorials](https://anyscript.org/tutorials/) and the getting started video on AnyBody.
-
-The following {doc}`Getting Started section </getting_started>` on the AMMR provides insight into how AMMR is structured, how to
-install it and how to use it.
-```
 
 [anybody modeling system]: https://www.anybodytech.com/software/anybodymodelingsystem/
 
@@ -153,14 +157,15 @@ anymocap/index
 
 
 ```{toctree}
-:caption: ????????
+:caption: About
 :includehidden: true
 :hidden: true
 :maxdepth: 2
 :titlesonly: true
 
 
-
-About the model repository <about>
+changelog
+Contribute or cite <about>
+legal
 
 ```
