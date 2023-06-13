@@ -7,7 +7,7 @@ You can find this model in a public [repository on GitHub](https://github.com/An
 :::
 
 AnyBody Technology developed in corporation with Glasgow Caledonian
-University and University of Maastricht inside the [AFootprint EU project](https://www.afootprint.eu/)
+University and University of Maastricht inside the [AFootprint EU project](https://web.archive.org/web/20190502001603/https://www.afootprint.eu/)
 a detailed multisegmental foot model, which is fully dynamic and
 contains 26 segments representing all the foot bones, muscles,
 ligaments, and joints connecting them.
