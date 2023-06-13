@@ -57,7 +57,7 @@ More details on the cervical spine can be found online at:
 - Thesis: Data on which the cervical spine model, described by [Marike van der
   Horst](http://alexandria.tue.nl/extra2/200211336.pdf)
 - Webcast: [A detailed rigid-body cervical spine model based on inverse
-  dynamics](https://www.anybodytech.com/a-detailed-rigid-body-cervical-spine-model-based-on-inverse-dynamics/)
+  dynamics](https://www.anybodytech.com/em_publication/a-detailed-rigid-body-cervical-spine-model-based-on-inverse-dynamics/)
 
 ## References
 

@@ -113,128 +113,7 @@ AnyFolder STL =
 };
 
 #if BM_FOOT_MODEL == _FOOT_MODEL_DEFAULT_
-AnySeg Talus =
-{
-  AnyFolder &StdPar = ..ModelParameters.Talus;
-
-  JaboutCoMOnOff = On;
-  AnyVar  MassS=..MassScaling.Talus.MassScale;
-
-  r0=.Shank.AnkleJoint.sRel*.Shank.Axes0'+.Shank.r0-AnkleJoint.sRel*Axes0';
-
-  AnyFloat pUnscaled = {StdPar.LateralMalleolus, StdPar.MedialMalleolus};
-  AnyFloat dAxisFixed = { (StdPar.MedialTibialEpicondyle + StdPar.LateralTibialEpicondyle)*0.5 - StdPar.SubTalarJoint, (StdPar.MedialTibialEpicondyle - StdPar.LateralTibialEpicondyle ) };
-  AnyFunTransform3D& GeomScale = ..GeoScaling.Talus.ScaleFunction;
-  AnyVar Sign = ..Sign;
-  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(p, SIGN) 0.5*(p[0]+p[1])
-  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2(p, d, SIGN) RotMat(0.5*(p[0]+p[1]), 0.5*(p[0]+p[1]) + d[0], 0.5*(p[0]+p[1]) + d[1] ) * RotMat(-0.5*pi,z) * RotMat(0.5*pi,y) * RotMat(0.5*(SIGN-1)*pi,y)
-  #include "..\Scaling\SegScaleFunWrtAnatomicalFrame.any"
-
-  AnyRefNode AnatomicalFrame =
-  {
-    AnyFloat pScaled = .Scale(.pUnscaled);
-    sRel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(pScaled, .Sign);
-    ARel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2(pScaled, .dAxisFixed, .Sign);
-    AnyVec3 sRelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(.pUnscaled, .Sign); ///< Generic unscaled position of talus ScalingNode
-    AnyMat33 ARelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2(.pUnscaled, .dAxisFixed, .Sign);///< Generic unscaled rotation of talus ScalingNode
-  };
-  
-  /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
-  AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;
-  
-  AnyRefNode& ScalingNode = AnatomicalFrame ;
-  #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_s
-  #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2
-
-  sCoM = Scale(StdPar.sCoM);
-  Mass = MassS*StdPar.MassStandard;
-  Jii = StdPar.Jii;
-  Jij = StdPar.Jij;
-
-  AnyRefNode MedialMalleolus =
-  {
-    sRel = .Scale(.StdPar.MedialMalleolus );
-    #include "../DrawSettings/BML.any"
-  };
-
-  #if JOINT_TYPE_SUBTALAR != _JOINT_TYPE_USERDEFINED_
-  AnyRefNode SubTalarJoint =
-  {
-    sRel = .Scale(.StdPar.SubTalarJoint);
-    ARel = RotMat({0.0,0,0}, .StdPar.SubTalarJointAxis, .AnatomicalFrame.ARel'[1])*RotMat(pi/2,y);
-
-    #include "../DrawSettings/JointAxesProximal.any"
-
-    #if DRAWAXES
-    AnyDrawLine SJaxis2 =
-    {
-      Visible = On;
-      p0 = ..StdPar.SubTalarJoint + {..StdPar.SubTalarJointAxis[2],..StdPar.SubTalarJointAxis[1],..StdPar.SubTalarJointAxis[0]}*0.2;
-      p1 = ..StdPar.SubTalarJoint - {..StdPar.SubTalarJointAxis[2],..StdPar.SubTalarJointAxis[1],..StdPar.SubTalarJointAxis[0]}*0.2;      //Offset = {0, 0, 0};
-      Line = {
-      Thickness = 0.001;
-      RGB = {0, 0, 0};
-      };
-    };
-    #endif
-  };
-  #endif
-  
-  #if JOINT_TYPE_ANKLE != _JOINT_TYPE_USERDEFINED_
-  AnyRefNode AnkleJoint =
-  {
-    #if JOINT_TYPE_ANKLE == _JOINT_TYPE_BONY_LANDMARK_
-       AnyVec3 sRelUnscaled =  0.5*(.StdPar.LateralAnkleAxisMarker+.StdPar.MedialAnkleAxisMarker);
-       AnyMat33 ARelUnscaled = RotMat({0.0,0,0},
-                                      ...Sign*(.StdPar.LateralAnkleAxisMarker - .StdPar.MedialAnkleAxisMarker ),
-                                      .AnatomicalFrame.ARelUnscaled'[1])*RotMat(pi/2,y);
-       /// Ankle joint is defined from the two malleolus bony landmarks
-       sRel = 0.5*(.Scale(.StdPar.LateralAnkleAxisMarker)+.Scale(.StdPar.MedialAnkleAxisMarker));
-       /// Ankle joint axis is defined from the two malleolus bony landmarks
-       ARel = RotMat({0.0,0,0}, ...Sign*(.Scale(.StdPar.LateralAnkleAxisMarker) - .Scale(.StdPar.MedialAnkleAxisMarker) ), .AnatomicalFrame.ARel'[1]  )*RotMat(pi/2,y);
-    #endif
-    #if JOINT_TYPE_ANKLE == _JOINT_TYPE_DEFAULT_
-       AnyVec3 sRelUnscaled = .StdPar.AnkleJoint;
-       AnyMat33 ARelUnscaled = RotMat({0.0,0,0}, .StdPar.AnkleJointAxis, .AnatomicalFrame.ARelUnscaled'[1])*RotMat(pi/2,y);
-       /// Control point for the Ankle joint. Found by projecting the malleolus bony landmarks onto the
-       /// ankle axis from the cadaver data set. Thus, scaling that moves the control points will also scale the ankle joint axis
-       AnyVec3 LateralControlPoint = .Scale(.StdPar.AnkleJoint + (.StdPar.LateralMalleolus - .StdPar.AnkleJoint)*.StdPar.AnkleJointAxis'*.StdPar.AnkleJointAxis);
-       /// Control point for the Ankle joint. Found by projecting the malleolus bony landmarks onto the
-       /// ankle axis from the cadaver data set. Thus, scaling that moves the control points will also scale the ankle joint axis
-       AnyVec3 MedialControlPoint = .Scale(.StdPar.AnkleJoint + (.StdPar.MedialMalleolus - .StdPar.AnkleJoint)*.StdPar.AnkleJointAxis'*.StdPar.AnkleJointAxis );
-       /// Ankle Joint defined directly from the cadaver dataset.
-       sRel = .Scale(.StdPar.AnkleJoint);
-       /// Ankle Joint orientation is calculated based on the direction between the two control points.
-       ARel = RotMat(0.0*{0,0,0}, .Sign*(LateralControlPoint-MedialControlPoint ),  .AnatomicalFrame.ARel'[1] )*RotMat(pi/2,y);
-    #endif
-
-    #include "../DrawSettings/JointAxesDistal.any"
-
-    #if DRAWAXES
-    AnyDrawLine SJaxis2 =
-    {
-      Visible = On;
-      p0 = ..StdPar.TalocruralsRel + {..StdPar.AnkleJointAxis[2],..StdPar.AnkleJointAxis[1],..StdPar.AnkleJointAxis[0]}*0.2;
-      p1 = ..StdPar.TalocruralsRel - {..StdPar.AnkleJointAxis[2],..StdPar.AnkleJointAxis[1],..StdPar.AnkleJointAxis[0]}*0.2;      //Offset = {0, 0, 0};
-      Line = {Thickness = 0.001; RGB = {0, 0, 0};};
-    };
-    #endif
-  };
-  #endif
-  
-  #include "../DrawSettings/Nodes.any"
-  #include "../DrawSettings/SegmentAxes.any"
-
-  AnyDrawSurf DrwSurf =
-  {
-    FileName = ..STL.FilenameTalus;
-    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
-    RGB = ...ColorRef.Segments;
-    AnyFunTransform3D &Scale =.Scale;
-    Opacity = ...BonesOpacity.Talus;
-  };
-}; // end of Talus segment
-
+AnySeg &Talus = Foot.Talus;
 
 AnySeg Foot =
 {
@@ -243,13 +122,19 @@ AnySeg Foot =
   JaboutCoMOnOff = On;
 
   r0=.Talus.SubTalarJoint.sRel*.Talus.Axes0'+.Talus.r0-SubTalarJoint.sRel*Axes0';
-
-  AnyFloat pUnscaled = {StdPar.LateralMalleolus, StdPar.MedialMalleolus};
-  AnyFloat dAxisFixed = { (StdPar.MedialTibialEpicondyle + StdPar.LateralTibialEpicondyle)*0.5 - StdPar.SubTalarJoint, (StdPar.MedialTibialEpicondyle - StdPar.LateralTibialEpicondyle ) };
+  
+  /// pUnscaled = {LateralMalleolus, MedialMalleolus, Metatarsal2} //bony landmarks to define orgin and long axis of the foot
+  AnyFloat pUnscaled = {StdPar.LateralMalleolus, StdPar.MedialMalleolus, StdPar.Metatarsal2PlantarNode};
+  /// d={Heel, Metatarsal5, Metatarsal1} // three coplanar points to define the horizontal plane parallel to the ground. These can be on the bones, skin, shoe, etc. and 
+  /// determine the proximal-distal axis of the foot and ankle plantarflexion zero value
+  AnyFloat dAxisFixed = {StdPar.HeelPlantarNode, StdPar.Metatarsal5PlantarNode, StdPar.Metatarsal1PlantarNode};
   AnyFunTransform3D& GeomScale = ..GeoScaling.Foot.ScaleFunction;
   AnyVar Sign = ..Sign;
+  // p={LateralMalleolus, MedialMalleolus, Metatarsal2} //bony landmarks to define orgin and long axis of the foot
+  // d={Heel, Metatarsal5, Metatarsal1} // three coplanar points to define the horizontal plane parallel to the ground. These can be on the bones, skin, shoe, etc. and 
+  //                                    // determine the proximal-distal axis of the foot and ankle plantarflexion zero value
   #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(p, SIGN) 0.5*(p[0]+p[1])
-  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2(p, d, SIGN) RotMat(0.5*(p[0]+p[1]), 0.5*(p[0]+p[1]) + d[0], 0.5*(p[0]+p[1]) + d[1] ) * RotMat(-0.5*pi,z) * RotMat(0.5*pi,y) * RotMat(0.5*(SIGN-1)*pi,y)
+  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2(p, d, SIGN) RotMat(0.5*(p[0]+p[1]),0.5*(p[0]+p[1]) + cross(d[1]-d[0],d[2]-d[0])*SIGN, p[2]) * RotMat(-0.5*pi,z) * RotMat(1*pi,y)
   #include "..\Scaling\SegScaleFunWrtAnatomicalFrame.any"
 
   AnyRefNode AnatomicalFrame =
@@ -260,6 +145,141 @@ AnySeg Foot =
     AnyVec3 sRelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(.pUnscaled, .Sign);///< Generic unscaled position of foot ScalingNode
     AnyMat33 ARelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2(.pUnscaled, .dAxisFixed, .Sign);///< Generic unscaled rotation of foot ScalingNode
   };
+  
+  AnySeg Talus =
+  {
+    AnyFolder &StdPar = ...ModelParameters.Talus;
+    
+    JaboutCoMOnOff = On;
+    AnyVar  MassS=...MassScaling.Talus.MassScale;
+    
+    r0=..Shank.AnkleJoint.sRel*..Shank.Axes0'+..Shank.r0-AnkleJoint.sRel*Axes0';
+    
+    /// pUnscaled = pUnscaled from foot = {LateralMalleolus, MedialMalleolus, Metatarsal2} //bony landmarks to define orgin and long axis of the foot
+    AnyFloat pUnscaled = .pUnscaled;
+    /// dAxisFixed = dAxisFixed from foot = {Heel, Metatarsal5, Metatarsal1} // three coplanar points to define the horizontal plane parallel to the ground. These can be on the bones, skin, shoe, etc. and 
+    /// determine the proximal-distal axis of the foot and ankle plantarflexion zero value
+    AnyFloat dAxisFixed = .dAxisFixed;
+    AnyFunTransform3D& GeomScale = ...GeoScaling.Talus.ScaleFunction;
+    AnyVar Sign = ...Sign;
+    #include "..\Scaling\SegScaleFunWrtAnatomicalFrame.any"
+    
+    AnyRefNode AnatomicalFrame =
+    {
+      AnyFloat pScaled = .Scale(.pUnscaled);
+      sRel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(pScaled, .Sign);
+      ARel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2(pScaled, .dAxisFixed, .Sign);
+      AnyVec3 sRelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(.pUnscaled, .Sign); ///< Generic unscaled position of talus ScalingNode
+      AnyMat33 ARelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2(.pUnscaled, .dAxisFixed, .Sign);///< Generic unscaled rotation of talus ScalingNode
+    };
+    
+    /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
+    AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;
+    
+    AnyRefNode& ScalingNode = AnatomicalFrame ;
+    
+    /// For backwards compatability with AMMR 2.4 talus coordinate system
+    AnyRefNode TalusCompatibilityFrameAMMR24 = {
+      sRel = .Scale({0.006451731, 0.02442938, -0.005543055});
+      ARel = {{0.9999733, -0.001715394, 0.007107884}, 
+              {0.001810773, 0.9999081, -0.01343407}, 
+              {-0.007084187, 0.01344658, 0.9998845}};
+    };
+    
+    sCoM = Scale(StdPar.sCoM);
+    Mass = MassS*StdPar.MassStandard;
+    Jii = StdPar.Jii;
+    Jij = StdPar.Jij;
+    
+    AnyRefNode MedialMalleolus =
+    {
+      sRel = .Scale(.StdPar.MedialMalleolus );
+      #include "../DrawSettings/BML.any"
+    };
+    
+    AnyRefNode LateralMalleolus =
+    {
+      sRel = .Scale(.StdPar.LateralMalleolus );
+      #include "../DrawSettings/BML.any"
+    };
+    
+    #if JOINT_TYPE_SUBTALAR != _JOINT_TYPE_USERDEFINED_
+    AnyRefNode SubTalarJoint =
+    {
+      sRel = .Scale(.StdPar.SubTalarJoint);
+      ARel = RotMat({0.0,0,0}, .StdPar.SubTalarJointAxis, .AnatomicalFrame.ARel'[1])*RotMat(pi/2,y);
+      
+      #include "../DrawSettings/JointAxesProximal.any"
+      
+      #if DRAWAXES
+      AnyDrawLine SJaxis2 =
+      {
+        Visible = On;
+        p0 = ..StdPar.SubTalarJoint + {..StdPar.SubTalarJointAxis[2],..StdPar.SubTalarJointAxis[1],..StdPar.SubTalarJointAxis[0]}*0.2;
+        p1 = ..StdPar.SubTalarJoint - {..StdPar.SubTalarJointAxis[2],..StdPar.SubTalarJointAxis[1],..StdPar.SubTalarJointAxis[0]}*0.2;      //Offset = {0, 0, 0};
+        Line = {
+          Thickness = 0.001;
+          RGB = {0, 0, 0};
+        };
+      };
+      #endif
+    };
+    #endif
+    
+    #if JOINT_TYPE_ANKLE != _JOINT_TYPE_USERDEFINED_
+    AnyRefNode AnkleJoint =
+    {
+      #if JOINT_TYPE_ANKLE == _JOINT_TYPE_BONY_LANDMARK_
+      AnyVec3 sRelUnscaled =  0.5*(.StdPar.LateralMalleolus+.StdPar.MedialMalleolus);
+      AnyMat33 ARelUnscaled = RotMat({0.0,0,0},
+                                      ....Sign*(.StdPar.LateralMalleolus - .StdPar.MedialMalleolus ),
+                                      .AnatomicalFrame.ARelUnscaled'[1])*RotMat(pi/2,y);
+      /// Ankle joint is defined from the two malleolus bony landmarks
+      sRel = 0.5*(.Scale(.StdPar.LateralMalleolus)+.Scale(.StdPar.MedialMalleolus));
+      /// Ankle joint axis is defined from the two malleolus bony landmarks
+      ARel = RotMat({0.0,0,0}, ....Sign*(.Scale(.StdPar.LateralMalleolus) - .Scale(.StdPar.MedialMalleolus) ), .AnatomicalFrame.ARel'[1]  )*RotMat(pi/2,y);
+      #endif
+      #if JOINT_TYPE_ANKLE == _JOINT_TYPE_DEFAULT_
+      AnyVec3 sRelUnscaled = .StdPar.AnkleJoint;
+      AnyMat33 ARelUnscaled = RotMat({0.0,0,0}, .StdPar.AnkleJointAxis, .AnatomicalFrame.ARelUnscaled'[1])*RotMat(pi/2,y);
+      /// Control point for the Ankle joint. Found by projecting the malleolus bony landmarks onto the
+      /// ankle axis from the cadaver data set. Thus, scaling that moves the control points will also scale the ankle joint axis
+      AnyVec3 LateralControlPoint = .Scale(.StdPar.AnkleJoint + (.StdPar.LateralMalleolus - .StdPar.AnkleJoint)*.StdPar.AnkleJointAxis'*.StdPar.AnkleJointAxis);
+      /// Control point for the Ankle joint. Found by projecting the malleolus bony landmarks onto the
+      /// ankle axis from the cadaver data set. Thus, scaling that moves the control points will also scale the ankle joint axis
+      AnyVec3 MedialControlPoint = .Scale(.StdPar.AnkleJoint + (.StdPar.MedialMalleolus - .StdPar.AnkleJoint)*.StdPar.AnkleJointAxis'*.StdPar.AnkleJointAxis );
+      /// Ankle Joint defined directly from the cadaver dataset.
+      sRel = .Scale(.StdPar.AnkleJoint);
+      /// Ankle Joint orientation is calculated based on the direction between the two control points.
+      ARel = RotMat(0.0*{0,0,0}, .Sign*(LateralControlPoint-MedialControlPoint ),  .AnatomicalFrame.ARel'[1] )*RotMat(pi/2,y);
+      #endif
+      
+      #include "../DrawSettings/JointAxesDistal.any"
+      
+      #if DRAWAXES
+      AnyDrawLine SJaxis2 =
+      {
+        Visible = On;
+        p0 = ..StdPar.TalocruralsRel + {..StdPar.AnkleJointAxis[2],..StdPar.AnkleJointAxis[1],..StdPar.AnkleJointAxis[0]}*0.2;
+        p1 = ..StdPar.TalocruralsRel - {..StdPar.AnkleJointAxis[2],..StdPar.AnkleJointAxis[1],..StdPar.AnkleJointAxis[0]}*0.2;      //Offset = {0, 0, 0};
+        Line = {Thickness = 0.001; RGB = {0, 0, 0};};
+      };
+      #endif
+    };
+    #endif
+    
+    #include "../DrawSettings/Nodes.any"
+    #include "../DrawSettings/SegmentAxes.any"
+    
+    AnyDrawSurf DrwSurf =
+    {
+      FileName = ...STL.FilenameTalus;
+      ScaleXYZ = {1.0, 1.0, ....Sign*1.0};
+      RGB = ....ColorRef.Segments;
+      AnyFunTransform3D &Scale =.Scale;
+      Opacity = ....BonesOpacity.Talus;
+    };
+  }; // end of Talus segment
   
   /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
   AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;
@@ -297,7 +317,7 @@ AnySeg Foot =
     #if JOINT_TYPE_ANKLE == _JOINT_TYPE_BONY_LANDMARK_
       sRel = (.MedialMalleolus.sRel + .LateralMalleolus.sRel)*0.5;
     #else
-      sRel = 0.5*(.Scale(.StdPar.MedialAnkleAxisMarkerInNeutralConf) + .Scale(.StdPar.LateralAnkleAxisMarkerInNeutralConf));
+      sRel = .Scale(.StdPar.AnkleJointInNeutralConf);
     #endif
 
     ARel = .AnatomicalFrame.ARel;
@@ -319,6 +339,22 @@ AnySeg Foot =
   {
     sRel =0.5* (.MedialMalleolus.sRel+.LateralMalleolus.sRel);
     #include "../DrawSettings/BML.any"
+  };
+  AnyRefNode HeelPlantar = 
+  {
+    sRel = .Scale(.StdPar.HeelPlantarNode);
+  };
+  AnyRefNode Metatarsal5Plantar = 
+  {
+    sRel = .Scale(.StdPar.Metatarsal5PlantarNode);
+  };
+  AnyRefNode Metatarsal2Plantar = 
+  {
+    sRel = .Scale(.StdPar.Metatarsal2PlantarNode);
+  };
+  AnyRefNode Metatarsal1Plantar = 
+  {
+    sRel = .Scale(.StdPar.Metatarsal1PlantarNode);
   };
 
   AnyRefNode GroundJoint =
@@ -397,29 +433,6 @@ AnySeg Foot =
   {
     sRel =.Scale( .StdPar.MetatarsalJoint5Node );
   };
-
-  AnyRefNode MedialMalleolus2 =
-  {
-    sRel = .Scale(.StdPar.MedialMalleolus);
-  };
-
-  AnyRefNode LateralMalleolus2 =
-  {
-    sRel = .Scale(.StdPar.LateralMalleolus);
-  };
-
-  AnyRefNode MedialTibialEpicondyle =
-  {
-    sRel = .Scale(.StdPar.MedialTibialEpicondyle);
-  };
-
-  AnyRefNode LateralTibialEpicondyle =
-  {
-    sRel = .Scale(.StdPar.LateralTibialEpicondyle);
-  };
-
-  // Bony landmarks transformed into foot coordinatesystem in the neutral configuration of the model.
-  AnyRefNode MalleousLateralNode = {sRel = .Scale( ..Shank.StdPar.LateralMalleolus);};
 
   //Insertion points on Phalanges:
   AnyRefNode ExtensorDigitorumLongus1Node = {sRel = .Scale( .StdPar.ExtensorDigitorumLongus1Node );};

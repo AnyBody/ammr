@@ -120,7 +120,7 @@ The model is structured as outlined below:
 The model also contains a batch processing Python script for running all models. The script 
 `batchprocess.py` is located in the top-level folder. 
 
-To use the scirpt install the [Anaconda Python Distribution](https://www.anaconda.com/products/distribution#Downloads). 
+To use the scirpt install the [Anaconda Python Distribution](https://www.anaconda.com/download). 
 
 The script uses the [AnyPyTools](https://github.com/AnyBody-Research-Group/AnyPyTools) library for working with the
 AnyBody Model System ( [Lund 2019](https://doi.org/10.21105/joss.01108) ). The library can be installed with:

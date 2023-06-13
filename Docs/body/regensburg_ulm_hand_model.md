@@ -127,4 +127,4 @@ If you need to cite the model use the following references:
 [^cite_mesl21]: Melzner, M., Engelhardt, L., Simon, U., & Dendorfer, S. (2021). Electromyography Based Validation of a Musculoskeletal Hand Model. Journal of Biomechanical Engineering. ([link](https://doi.org/10.1115/1.4052115))
 
 [^cite_webcast20]: Engelhardt, L., Melzner M., (2020) A new musculoskeletal AnyBodyTM detailed hand model, AnyBody Technology Webcast.
-    ([link](https://www.anybodytech.com/a-new-musculoskeletal-anybody-detailed-hand-model))
+    ([link](https://www.anybodytech.com/em_publication/a-new-musculoskeletal-anybody-detailed-hand-model))
