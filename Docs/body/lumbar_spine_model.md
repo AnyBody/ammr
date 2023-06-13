@@ -78,11 +78,11 @@ More details on the lumbar spine model can be found online:
 
 - Presentation about the [Abdominal pressure
   Presentation](https://www.anybodytech.com/wp-content/uploads/publication_files/AbdominalPressureModel.pdf)
-- Webcast: [A lumbar spine model with facets joints and a dynamic stabilization device](https://www.anybodytech.com/a-lumbar-spine-model-with-facets-joints-and-a-dynamic-stabilization-device/)
-- Webcast: [Implementation of facet joints in a lumbar spine model](https://www.anybodytech.com/implementation-of-facet-joints-in-a-lumbar-spine-model/)
+- Webcast: [A lumbar spine model with facets joints and a dynamic stabilization device](https://www.anybodytech.com/download/a-lumbar-spine-model-with-facets-joints-and-a-dynamic-stabilization-device)
+- Webcast: [Implementation of facet joints in a lumbar spine model](https://www.anybodytech.com/download/implementation-of-facet-joints-in-a-lumbar-spine-model/)
 - Webcast [A detailed rigid-body cervical spine model based on inverse
-  dynamics](https://www.anybodytech.com/a-detailed-rigid-body-cervical-spine-model-based-on-inverse-dynamics/)
-- Webcast [A generic detailed rigid-body lumbar spine model](https://www.anybodytech.com/a-generic-detailed-rigid-body-lumbar-spine-model/)
+  dynamics](https://www.anybodytech.com/em_publication/a-detailed-rigid-body-cervical-spine-model-based-on-inverse-dynamics/)
+- Webcast [A generic detailed rigid-body lumbar spine model](https://www.anybodytech.com/em_publication/a-generic-detailed-rigid-body-lumbar-spine-model)
 - PowerPoint presentation [Spine Rhythm Presentation (PDF with videos click to activate
   them)](https://www.anybodytech.com/wp-content/uploads/publication_files/Spinerhythm.pdf)
 

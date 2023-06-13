@@ -146,7 +146,7 @@ Wrist joint                                               Two successive revolut
 
 More details on the ShoulderArm model can be found online:
 
-- Webcast: [Validation of the AnyBody version of the Dutch Shoulder Model by the in-vivo measurement of GH contact forces by Bergmann et al.](https://www.anybodytech.com/validation-of-the-anybody-version-of-the-dutch-shoulder-model-by-the-in-vivo-measurement-of-gh-contact-forces-by-bergmann-et-al/)
+- Webcast: [Validation of the AnyBody version of the Dutch Shoulder Model by the in-vivo measurement of GH contact forces by Bergmann et al.](https://www.anybodytech.com/download/validation-of-the-anybody-version-of-the-dutch-shoulder-model-by-the-in-vivo-measurement-of-gh-contact-forces-by-bergmann-et-al/)
 
 ## Anatomy References
 
