@@ -49,12 +49,12 @@ to account for pelvis segment morphing into leg pelvis coordinate system using
 
 ### Changed:
 
-* Wrapping surfaces have been added to the achilles tendon around the ankle in
-  the TLEM 2.0 leg model. This ensures a even ratio of moment arms between
-  the soleus and gastrocnemius muscles. Hence, gastroc is recruited less in
-  especially during downhill walking and stair descent, solving the models tendency 
+* Wrapping surfaces have been added to the Achilles tendon around the ankle in
+  the TLEM 2 leg model (now designated [TLEM 2.2](#TLEM2-v2.2)). This ensures an even ratio of moment arms between
+  the soleus and gastrocnemius muscles. Hence, gastrocnemius is recruited less, 
+  especially during downhill walking and stair descent, solving the tendency of the model 
   to overpredict the knee contact forces at toe off. 
-  This is the first of a number of improvements to the leg model by Dr. Enrico De Pieri 
+  This is the first of a number of improvements to the leg model by Dr. Enrico De Pieri, 
   who is working on a publication on improvements and validation of the TLEM 2 leg model. 
 
 
@@ -153,9 +153,8 @@ to account for pelvis segment morphing into leg pelvis coordinate system using
 
 * The TLEM 1 model now triggers a deprecation warning suggesting to use TLEM 2.
 
-* TLEM 2 model is updated to TLEM 2.2. The foot and talus models in TLEM 2.2 have several updates in 
-  preparation for the release of advanced multi-segment foot models in the future (see {doc}`TLEM 2 page </body/leg_tlem2_model>` for
-  more details):
+* The foot and talus models in TLEM 2 leg model (now designated [TLEM 2.2](#TLEM2-v2.2)) have several updates in 
+  preparation for the release of advanced multi-segment foot models in the future:
   - The coordinate system of talus is updated to be coincident with foot coordinate system. A new reference
     node, `TalusCompatibilityFrameAMMR24`, is created in the talus segment to be consistent with the previous
     coordinate system for backwards compatibility.

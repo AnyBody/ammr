@@ -90,6 +90,13 @@ More details on the TLEM2 model can be found online:
 (TLEM2-v2.2)=
 
 TLEM v2.2 (Released in AMMR 2.5.0)
+: Wrapping surfaces have been added to the Achilles tendon around the ankle in
+  the TLEM 2 leg model (now designated TLEM 2.2). This ensures an even ratio of moment arms between
+  the soleus and gastrocnemius muscles. Hence, gastrocnemius is recruited less, 
+  especially during downhill walking and stair descent, solving the tendency of the model 
+  to overpredict the knee contact forces at toe off. 
+  This is the first of a number of improvements to the leg model by Dr. Enrico De Pieri, 
+  who is working on a publication on improvements and validation of the TLEM 2 leg model.
 : The foot and talus models have several updates in preparation for the 
   release of advanced multi-segment foot models in the future:  
   - The talus coordinate system is updated to be coincident with the foot 
