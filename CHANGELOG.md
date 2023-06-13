@@ -152,6 +152,26 @@ to account for pelvis segment morphing into leg pelvis coordinate system using
   1 code have been removed in the code implementing the TLEM 2 model. 
 
 * The TLEM 1 model now triggers a deprecation warning suggesting to use TLEM 2.
+
+* TLEM 2 model is updated to TLEM 2.2. The foot and talus models in TLEM 2.2 have several updates in 
+  preparation for the release of advanced multi-segment foot models in the future (see {doc}`TLEM 2 page </body/leg_tlem2_model>` for
+  more details):
+  - The coordinate system of talus is updated to be coincident with foot coordinate system. A new reference
+    node, `TalusCompatibilityFrameAMMR24`, is created in the talus segment to be consistent with the previous
+    coordinate system for backwards compatibility.
+  - Subtalar and ankle joint parameters for the talus have been updated to be expressed in the new coordinate system.
+    The implementation of the joints is still consistent with the previous implementation.    
+  - The anatomical frames of the foot and talus are updated and defined using bony landmarks on the foot. This updates
+    the neutral position of the foot and talus. This will also update the ankle plantarflexion and subtalar joint angles.
+    :::{warning}
+    Ankle and Subtalar joint angle measures are updated. Please run `MarkerTracking` again for
+    mocap models if using TLEM 2.2.
+    :::
+  - The malleoli coordinates in the foot coordinate system have been fixed to match the malleoli on the shank in the 
+    neutral position.
+  - The model tree has been updated. The talus segment is moved inside the foot segment. For backwards compatibility, a 
+    pointer to the talus segment still exists outside the foot segment.
+
    
 ## AMMR 2.4.5-beta
 

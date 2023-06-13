@@ -8,7 +8,7 @@
 :::
 
 The *AnyBody Model Repository* (AMMR) comes bundled with the
-[AnyBody Modelling System]. But it must be installed/unpacked manually after you installed AnyBody.
+[AnyBody Modeling System]. But it must be installed/unpacked manually after you installed AnyBody.
 You can install the AMMR from the *AnyBody Assistent* dialog which is presented when AnyBody starts.
 
 
