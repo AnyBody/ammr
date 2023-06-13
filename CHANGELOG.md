@@ -77,7 +77,7 @@ to account for pelvis segment morphing into leg pelvis coordinate system using
       pointer to the talus segment still exists outside the foot segment.
 
 * The implementation of the TLEM model has been split
-  into two seperates folders `LegTLEM/` and `LegTLEM1/`. All references to TLEM
+  into two separates folders `LegTLEM/` and `LegTLEM1/`. All references to TLEM
   1 code have been removed in the code implementing the TLEM 2 model. 
 
 * The TLEM 1 model now triggers a deprecation warning suggesting to use TLEM 2.
@@ -93,7 +93,7 @@ to account for pelvis segment morphing into leg pelvis coordinate system using
   remains same but users can now create scaling functions that account for
   offsets between regions with different scaling.
 
-* Glenoid reaction forces are now expressed in coordinate system of glenoid cup
+* Glenoid reaction forces are now expressed in the coordinate system of glenoid cup
   instead of general scapula coordinate system. Variables
   `GlenoHumeral_DistractionForce`, `GlenoHumeral_InferoSuperiorForce`, 
   `GlenoHumeral_AnteroPosteriorForce`represent three directions given by the glenoid
