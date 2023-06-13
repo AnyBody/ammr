@@ -48,10 +48,11 @@ it easier to implement Force Dependent Kinematics on joint movements ({doc}`see
 tutorial <tutorials:ForceDependentKinematics/index>`)
 
 The model was refined during the [Life Long Joints
-project](https://lifelongjoints.eu/) where its anatomical fidelity and joint
+project](https://web.archive.org/web/20230323035759/https://lifelongjoints.eu/) where its anatomical fidelity and joint
 force prediction accuracy were improved by De Pieri et al. [^cite_dlgr17], 
 mainly, by implementing better a wrapping surfaces for the muscles ([TLEM
 v2.1](#TLEM2-v2.1)). 
+
 
 ::::{figure} _static/Wrapping_TLEM2.png
 :width: 80%
@@ -78,8 +79,8 @@ segment foot models.
 
 More details on the TLEM2 model can be found online:
 
-- Webcast: [TLEMsafe: Personalization of musculoskeletal models and prediction of functional outcome](https://www.anybodytech.com/tlemsafe-personalization-of-musculoskeletal-models-and-prediction-of-functional-outcome/)
-- Webcast: [TLEMsafe: An integrated system to improve predictability of functional recovery of patients requiring musculoskeletal surgery](https://www.anybodytech.com/tlemsafe-an-integrated-system-to-improve-predictability-of-functional-recovery-of-patients-requiring-musculoskeletal-surgery/)
+- Webcast: [TLEMsafe: Personalization of musculoskeletal models and prediction of functional outcome](https://www.anybodytech.com/download/tlemsafe-personalization-of-musculoskeletal-models-and-prediction-of-functional-outcome/)
+- Webcast: [TLEMsafe: An integrated system to improve predictability of functional recovery of patients requiring musculoskeletal surgery](https://www.anybodytech.com/download/tlemsafe-an-integrated-system-to-improve-predictability-of-functional-recovery-of-patients-requiring-musculoskeletal-surgery/)
 
 
 

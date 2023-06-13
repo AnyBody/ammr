@@ -114,7 +114,7 @@ More information can be found online:
 
   [Presentation
   (2Mb)](https://www.anybodytech.com/the-new-glasgow-maastricht-anybody-foot-model/?wpdmdl=3101&ind=0),
-  [YouTube](https://www.anybodytech.com/the-new-glasgow-maastricht-anybody-foot-model/)
+  [YouTube](https://www.anybodytech.com/download/the-new-glasgow-maastricht-anybody-foot-model/)
 
   This webcast presents a detailed AnyBody musculoskeletal foot model
   which includes all bones and joints of a real foot. Developed in
