@@ -36,35 +36,35 @@ full list of configuration parameters.
 ## Background
 
 The model is based on published anatomical data produced from a cadaver study in
-the [TLEMsafe EU project](https://tlemsafe.eu/). The first implmentation of
+the [TLEMsafe EU project](https://tlemsafe.eu/). The first implementation of
 the musculoskeletal model was created by Vincenzo Carbone and René Fluit from
 the University of Twente [^cite_cfpk15].
 
 The key feature of TLEM 2 compared to older TLEM 1 model is a consistent
-dataset, where both muscle attachement and bone surface scans are from the same
+dataset, where both muscle attachment and bone surface scans are from the same
 subject. This makes TLEM2 the more anatomically consistent model. Bone contact
 at joints such as the knee thus consists of naturally congruent surfaces, making
 it easier to implement Force Dependent Kinematics on joint movements ({doc}`see
-tutorial <tutorials:ForceDependentKinematics/index>`
+tutorial <tutorials:ForceDependentKinematics/index>`)
 
 The model was refined during the [Life Long Joints
 project](https://lifelongjoints.eu/) where its anatomical fidelity and joint
-force prediction accuracy were improved by De Pieri et al. [^cite_dlgr17]. 
-Mainly by implementing better a wrapping surfaces for the muscles. 
+force prediction accuracy were improved by De Pieri et al. [^cite_dlgr17], 
+mainly, by implementing better a wrapping surfaces for the muscles. 
 
 ::::{figure} _static/Wrapping_TLEM2.png
 :width: 80%
 
-New wrapping surfaces for (clockwise) Gluteus maximus, Ilio-Psoas, Gluteus
-medius & minimus, Hamstrings & Gastrocnemius. All figures are
+New wrapping surfaces for (clockwise) Gluteus Maximus, Ilio-Psoas, Gluteus
+Medius & Minimus, Hamstrings & Gastrocnemius. All figures are
 from the publication by De Pieri et al. [^cite_dlgr17]
 
 ::::
 
 
-Resently, the model have been updated again (Now designated [version
-2.2](#TLEM2-v2.2)) with muscle wrapping for the achiles tendon, as well as
-updates to the implemenation of the ankle complex in preparation for a new multi
+Recently, the model has been updated again (Now designated [version
+2.2](#TLEM2-v2.2)) with muscle wrapping for the Achilles tendon, as well as
+updates to the implementation of the ankle complex in preparation for new multi
 segment foot models. 
 
 
@@ -134,7 +134,7 @@ TLEM v2.1
 
 ## Citing and references
 
-If you need to cite the model use the following references [^cite_dlgr17], [^cite_cfpk15]. Other usefull papers using or related to the TLEM2 model are: [^cite_ca16] and [^cite_ckkv16]. 
+If you need to cite the model use the following references [^cite_dlgr17], [^cite_cfpk15]. Other useful papers using or related to the TLEM2 model are: [^cite_ca16] and [^cite_ckkv16]. 
 
 
 [^cite_dlgr17]: De Pieri,E., Lund,ME., Gopalakrishnan, A, Rasmussen, KP., Lunn, DE., Ferguson, SJ.
