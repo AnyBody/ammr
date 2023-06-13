@@ -25,7 +25,6 @@
 * Updated scaling functions (`Scale`) for segments in trunk model (lumbar, thoracic and cervical) 
 to account for pelvis segment morphing into leg pelvis coordinate system using
  `BM_LEG_TRUNK_INTERFACE` setting.
-* Added missing `LoadParameters` operation to `LoadAndReplay` operation in MoCap examples.
 
 
 ### Added:
