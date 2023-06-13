@@ -50,7 +50,8 @@ tutorial <tutorials:ForceDependentKinematics/index>`)
 The model was refined during the [Life Long Joints
 project](https://lifelongjoints.eu/) where its anatomical fidelity and joint
 force prediction accuracy were improved by De Pieri et al. [^cite_dlgr17], 
-mainly, by implementing better a wrapping surfaces for the muscles. 
+mainly, by implementing better a wrapping surfaces for the muscles ([TLEM
+v2.1](#TLEM2-v2.1)). 
 
 ::::{figure} _static/Wrapping_TLEM2.png
 :width: 80%
@@ -62,8 +63,8 @@ from the publication by De Pieri et al. [^cite_dlgr17]
 ::::
 
 
-Recently, the model has been updated again (Now designated [version
-2.2](#TLEM2-v2.2)) with muscle wrapping for the Achilles tendon, as well as
+Subsequently, the model has been updated again (currently [TLEM
+v2.2](#TLEM2-v2.2)) with muscle wrapping for the Achilles tendon, as well as
 updates to the implementation of the ankle complex in preparation for new multi
 segment foot models. 
 
@@ -88,10 +89,8 @@ More details on the TLEM2 model can be found online:
 
 (TLEM2-v2.2)=
 
-TLEM v2.2
-: :::{versionadded} 2.5.0
-  :::
-  The foot and talus models have several updates in preparation for the 
+TLEM v2.2 (Released in AMMR 2.5.0)
+: The foot and talus models have several updates in preparation for the 
   release of advanced multi-segment foot models in the future:  
   - The talus coordinate system is updated to be coincident with the foot 
     coordinate system in the neutral position. This facilitates scaling
@@ -125,10 +124,8 @@ TLEM v2.2
 
 (TLEM2-v2.1)=
 
-TLEM v2.1
-: :::{versionadded} 2.0.0
-  :::
-  Wrapping surfaces for several muscles were updated. These changes were engineered to
+TLEM v2.1 (Released in AMMR 2.0.0)
+: Wrapping surfaces for several muscles were updated. These changes were engineered to
   result in realistic muscle coordination and hip contact forces as documented
   in the publication by De Pieri et al. [^cite_dlgr17]
 
