@@ -113,128 +113,7 @@ AnyFolder STL =
 };
 
 #if BM_FOOT_MODEL == _FOOT_MODEL_DEFAULT_
-AnySeg Talus =
-{
-  AnyFolder &StdPar = ..ModelParameters.Talus;
-
-  JaboutCoMOnOff = On;
-  AnyVar  MassS=..MassScaling.Talus.MassScale;
-
-  r0=.Shank.AnkleJoint.sRel*.Shank.Axes0'+.Shank.r0-AnkleJoint.sRel*Axes0';
-
-  AnyFloat pUnscaled = {StdPar.LateralMalleolus, StdPar.MedialMalleolus};
-  AnyFloat dAxisFixed = { (StdPar.MedialTibialEpicondyle + StdPar.LateralTibialEpicondyle)*0.5 - StdPar.SubTalarJoint, (StdPar.MedialTibialEpicondyle - StdPar.LateralTibialEpicondyle ) };
-  AnyFunTransform3D& GeomScale = ..GeoScaling.Talus.ScaleFunction;
-  AnyVar Sign = ..Sign;
-  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(p, SIGN) 0.5*(p[0]+p[1])
-  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2(p, d, SIGN) RotMat(0.5*(p[0]+p[1]), 0.5*(p[0]+p[1]) + d[0], 0.5*(p[0]+p[1]) + d[1] ) * RotMat(-0.5*pi,z) * RotMat(0.5*pi,y) * RotMat(0.5*(SIGN-1)*pi,y)
-  #include "..\Scaling\SegScaleFunWrtAnatomicalFrame.any"
-
-  AnyRefNode AnatomicalFrame =
-  {
-    AnyFloat pScaled = .Scale(.pUnscaled);
-    sRel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(pScaled, .Sign);
-    ARel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2(pScaled, .dAxisFixed, .Sign);
-    AnyVec3 sRelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(.pUnscaled, .Sign); ///< Generic unscaled position of talus ScalingNode
-    AnyMat33 ARelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2(.pUnscaled, .dAxisFixed, .Sign);///< Generic unscaled rotation of talus ScalingNode
-  };
-  
-  /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
-  AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;
-  
-  AnyRefNode& ScalingNode = AnatomicalFrame ;
-  #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_s
-  #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2
-
-  sCoM = Scale(StdPar.sCoM);
-  Mass = MassS*StdPar.MassStandard;
-  Jii = StdPar.Jii;
-  Jij = StdPar.Jij;
-
-  AnyRefNode MedialMalleolus =
-  {
-    sRel = .Scale(.StdPar.MedialMalleolus );
-    #include "../DrawSettings/BML.any"
-  };
-
-  #if JOINT_TYPE_SUBTALAR != _JOINT_TYPE_USERDEFINED_
-  AnyRefNode SubTalarJoint =
-  {
-    sRel = .Scale(.StdPar.SubTalarJoint);
-    ARel = RotMat({0.0,0,0}, .StdPar.SubTalarJointAxis, .AnatomicalFrame.ARel'[1])*RotMat(pi/2,y);
-
-    #include "../DrawSettings/JointAxesProximal.any"
-
-    #if DRAWAXES
-    AnyDrawLine SJaxis2 =
-    {
-      Visible = On;
-      p0 = ..StdPar.SubTalarJoint + {..StdPar.SubTalarJointAxis[2],..StdPar.SubTalarJointAxis[1],..StdPar.SubTalarJointAxis[0]}*0.2;
-      p1 = ..StdPar.SubTalarJoint - {..StdPar.SubTalarJointAxis[2],..StdPar.SubTalarJointAxis[1],..StdPar.SubTalarJointAxis[0]}*0.2;      //Offset = {0, 0, 0};
-      Line = {
-      Thickness = 0.001;
-      RGB = {0, 0, 0};
-      };
-    };
-    #endif
-  };
-  #endif
-  
-  #if JOINT_TYPE_ANKLE != _JOINT_TYPE_USERDEFINED_
-  AnyRefNode AnkleJoint =
-  {
-    #if JOINT_TYPE_ANKLE == _JOINT_TYPE_BONY_LANDMARK_
-       AnyVec3 sRelUnscaled =  0.5*(.StdPar.LateralAnkleAxisMarker+.StdPar.MedialAnkleAxisMarker);
-       AnyMat33 ARelUnscaled = RotMat({0.0,0,0},
-                                      ...Sign*(.StdPar.LateralAnkleAxisMarker - .StdPar.MedialAnkleAxisMarker ),
-                                      .AnatomicalFrame.ARelUnscaled'[1])*RotMat(pi/2,y);
-       /// Ankle joint is defined from the two malleolus bony landmarks
-       sRel = 0.5*(.Scale(.StdPar.LateralAnkleAxisMarker)+.Scale(.StdPar.MedialAnkleAxisMarker));
-       /// Ankle joint axis is defined from the two malleolus bony landmarks
-       ARel = RotMat({0.0,0,0}, ...Sign*(.Scale(.StdPar.LateralAnkleAxisMarker) - .Scale(.StdPar.MedialAnkleAxisMarker) ), .AnatomicalFrame.ARel'[1]  )*RotMat(pi/2,y);
-    #endif
-    #if JOINT_TYPE_ANKLE == _JOINT_TYPE_DEFAULT_
-       AnyVec3 sRelUnscaled = .StdPar.AnkleJoint;
-       AnyMat33 ARelUnscaled = RotMat({0.0,0,0}, .StdPar.AnkleJointAxis, .AnatomicalFrame.ARelUnscaled'[1])*RotMat(pi/2,y);
-       /// Control point for the Ankle joint. Found by projecting the malleolus bony landmarks onto the
-       /// ankle axis from the cadaver data set. Thus, scaling that moves the control points will also scale the ankle joint axis
-       AnyVec3 LateralControlPoint = .Scale(.StdPar.AnkleJoint + (.StdPar.LateralMalleolus - .StdPar.AnkleJoint)*.StdPar.AnkleJointAxis'*.StdPar.AnkleJointAxis);
-       /// Control point for the Ankle joint. Found by projecting the malleolus bony landmarks onto the
-       /// ankle axis from the cadaver data set. Thus, scaling that moves the control points will also scale the ankle joint axis
-       AnyVec3 MedialControlPoint = .Scale(.StdPar.AnkleJoint + (.StdPar.MedialMalleolus - .StdPar.AnkleJoint)*.StdPar.AnkleJointAxis'*.StdPar.AnkleJointAxis );
-       /// Ankle Joint defined directly from the cadaver dataset.
-       sRel = .Scale(.StdPar.AnkleJoint);
-       /// Ankle Joint orientation is calculated based on the direction between the two control points.
-       ARel = RotMat(0.0*{0,0,0}, .Sign*(LateralControlPoint-MedialControlPoint ),  .AnatomicalFrame.ARel'[1] )*RotMat(pi/2,y);
-    #endif
-
-    #include "../DrawSettings/JointAxesDistal.any"
-
-    #if DRAWAXES
-    AnyDrawLine SJaxis2 =
-    {
-      Visible = On;
-      p0 = ..StdPar.TalocruralsRel + {..StdPar.AnkleJointAxis[2],..StdPar.AnkleJointAxis[1],..StdPar.AnkleJointAxis[0]}*0.2;
-      p1 = ..StdPar.TalocruralsRel - {..StdPar.AnkleJointAxis[2],..StdPar.AnkleJointAxis[1],..StdPar.AnkleJointAxis[0]}*0.2;      //Offset = {0, 0, 0};
-      Line = {Thickness = 0.001; RGB = {0, 0, 0};};
-    };
-    #endif
-  };
-  #endif
-  
-  #include "../DrawSettings/Nodes.any"
-  #include "../DrawSettings/SegmentAxes.any"
-
-  AnyDrawSurf DrwSurf =
-  {
-    FileName = ..STL.FilenameTalus;
-    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
-    RGB = ...ColorRef.Segments;
-    AnyFunTransform3D &Scale =.Scale;
-    Opacity = ...BonesOpacity.Talus;
-  };
-}; // end of Talus segment
-
+AnySeg &Talus = Foot.Talus;
 
 AnySeg Foot =
 {
@@ -243,13 +122,19 @@ AnySeg Foot =
   JaboutCoMOnOff = On;
 
   r0=.Talus.SubTalarJoint.sRel*.Talus.Axes0'+.Talus.r0-SubTalarJoint.sRel*Axes0';
-
-  AnyFloat pUnscaled = {StdPar.LateralMalleolus, StdPar.MedialMalleolus};
-  AnyFloat dAxisFixed = { (StdPar.MedialTibialEpicondyle + StdPar.LateralTibialEpicondyle)*0.5 - StdPar.SubTalarJoint, (StdPar.MedialTibialEpicondyle - StdPar.LateralTibialEpicondyle ) };
+  
+  /// pUnscaled = {LateralMalleolus, MedialMalleolus, Metatarsal2} //bony landmarks to define orgin and long axis of the foot
+  AnyFloat pUnscaled = {StdPar.LateralMalleolus, StdPar.MedialMalleolus, StdPar.Metatarsal2PlantarNode};
+  /// d={Heel, Metatarsal5, Metatarsal1} // three coplanar points to define the horizontal plane parallel to the ground. These can be on the bones, skin, shoe, etc. and 
+  /// determine the proximal-distal axis of the foot and ankle plantarflexion zero value
+  AnyFloat dAxisFixed = {StdPar.HeelPlantarNode, StdPar.Metatarsal5PlantarNode, StdPar.Metatarsal1PlantarNode};
   AnyFunTransform3D& GeomScale = ..GeoScaling.Foot.ScaleFunction;
   AnyVar Sign = ..Sign;
+  // p={LateralMalleolus, MedialMalleolus, Metatarsal2} //bony landmarks to define orgin and long axis of the foot
+  // d={Heel, Metatarsal5, Metatarsal1} // three coplanar points to define the horizontal plane parallel to the ground. These can be on the bones, skin, shoe, etc. and 
+  //                                    // determine the proximal-distal axis of the foot and ankle plantarflexion zero value
   #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(p, SIGN) 0.5*(p[0]+p[1])
-  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2(p, d, SIGN) RotMat(0.5*(p[0]+p[1]), 0.5*(p[0]+p[1]) + d[0], 0.5*(p[0]+p[1]) + d[1] ) * RotMat(-0.5*pi,z) * RotMat(0.5*pi,y) * RotMat(0.5*(SIGN-1)*pi,y)
+  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2(p, d, SIGN) RotMat(0.5*(p[0]+p[1]),0.5*(p[0]+p[1]) + cross(d[1]-d[0],d[2]-d[0])*SIGN, p[2]) * RotMat(-0.5*pi,z) * RotMat(1*pi,y)
   #include "..\Scaling\SegScaleFunWrtAnatomicalFrame.any"
 
   AnyRefNode AnatomicalFrame =
@@ -260,6 +145,141 @@ AnySeg Foot =
     AnyVec3 sRelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(.pUnscaled, .Sign);///< Generic unscaled position of foot ScalingNode
     AnyMat33 ARelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2(.pUnscaled, .dAxisFixed, .Sign);///< Generic unscaled rotation of foot ScalingNode
   };
+  
+  AnySeg Talus =
+  {
+    AnyFolder &StdPar = ...ModelParameters.Talus;
+    
+    JaboutCoMOnOff = On;
+    AnyVar  MassS=...MassScaling.Talus.MassScale;
+    
+    r0=..Shank.AnkleJoint.sRel*..Shank.Axes0'+..Shank.r0-AnkleJoint.sRel*Axes0';
+    
+    /// pUnscaled = pUnscaled from foot = {LateralMalleolus, MedialMalleolus, Metatarsal2} //bony landmarks to define orgin and long axis of the foot
+    AnyFloat pUnscaled = .pUnscaled;
+    /// dAxisFixed = dAxisFixed from foot = {Heel, Metatarsal5, Metatarsal1} // three coplanar points to define the horizontal plane parallel to the ground. These can be on the bones, skin, shoe, etc. and 
+    /// determine the proximal-distal axis of the foot and ankle plantarflexion zero value
+    AnyFloat dAxisFixed = .dAxisFixed;
+    AnyFunTransform3D& GeomScale = ...GeoScaling.Talus.ScaleFunction;
+    AnyVar Sign = ...Sign;
+    #include "..\Scaling\SegScaleFunWrtAnatomicalFrame.any"
+    
+    AnyRefNode AnatomicalFrame =
+    {
+      AnyFloat pScaled = .Scale(.pUnscaled);
+      sRel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(pScaled, .Sign);
+      ARel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2(pScaled, .dAxisFixed, .Sign);
+      AnyVec3 sRelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(.pUnscaled, .Sign); ///< Generic unscaled position of talus ScalingNode
+      AnyMat33 ARelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2(.pUnscaled, .dAxisFixed, .Sign);///< Generic unscaled rotation of talus ScalingNode
+    };
+    
+    /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
+    AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;
+    
+    AnyRefNode& ScalingNode = AnatomicalFrame ;
+    
+    /// For backwards compatability with AMMR 2.4 talus coordinate system
+    AnyRefNode TalusCompatibilityFrameAMMR24 = {
+      sRel = .Scale({0.006451731, 0.02442938, -0.005543055});
+      ARel = {{0.9999733, -0.001715394, 0.007107884}, 
+              {0.001810773, 0.9999081, -0.01343407}, 
+              {-0.007084187, 0.01344658, 0.9998845}};
+    };
+    
+    sCoM = Scale(StdPar.sCoM);
+    Mass = MassS*StdPar.MassStandard;
+    Jii = StdPar.Jii;
+    Jij = StdPar.Jij;
+    
+    AnyRefNode MedialMalleolus =
+    {
+      sRel = .Scale(.StdPar.MedialMalleolus );
+      #include "../DrawSettings/BML.any"
+    };
+    
+    AnyRefNode LateralMalleolus =
+    {
+      sRel = .Scale(.StdPar.LateralMalleolus );
+      #include "../DrawSettings/BML.any"
+    };
+    
+    #if JOINT_TYPE_SUBTALAR != _JOINT_TYPE_USERDEFINED_
+    AnyRefNode SubTalarJoint =
+    {
+      sRel = .Scale(.StdPar.SubTalarJoint);
+      ARel = RotMat({0.0,0,0}, .StdPar.SubTalarJointAxis, .AnatomicalFrame.ARel'[1])*RotMat(pi/2,y);
+      
+      #include "../DrawSettings/JointAxesProximal.any"
+      
+      #if DRAWAXES
+      AnyDrawLine SJaxis2 =
+      {
+        Visible = On;
+        p0 = ..StdPar.SubTalarJoint + {..StdPar.SubTalarJointAxis[2],..StdPar.SubTalarJointAxis[1],..StdPar.SubTalarJointAxis[0]}*0.2;
+        p1 = ..StdPar.SubTalarJoint - {..StdPar.SubTalarJointAxis[2],..StdPar.SubTalarJointAxis[1],..StdPar.SubTalarJointAxis[0]}*0.2;      //Offset = {0, 0, 0};
+        Line = {
+          Thickness = 0.001;
+          RGB = {0, 0, 0};
+        };
+      };
+      #endif
+    };
+    #endif
+    
+    #if JOINT_TYPE_ANKLE != _JOINT_TYPE_USERDEFINED_
+    AnyRefNode AnkleJoint =
+    {
+      #if JOINT_TYPE_ANKLE == _JOINT_TYPE_BONY_LANDMARK_
+      AnyVec3 sRelUnscaled =  0.5*(.StdPar.LateralMalleolus+.StdPar.MedialMalleolus);
+      AnyMat33 ARelUnscaled = RotMat({0.0,0,0},
+                                      ....Sign*(.StdPar.LateralMalleolus - .StdPar.MedialMalleolus ),
+                                      .AnatomicalFrame.ARelUnscaled'[1])*RotMat(pi/2,y);
+      /// Ankle joint is defined from the two malleolus bony landmarks
+      sRel = 0.5*(.Scale(.StdPar.LateralMalleolus)+.Scale(.StdPar.MedialMalleolus));
+      /// Ankle joint axis is defined from the two malleolus bony landmarks
+      ARel = RotMat({0.0,0,0}, ....Sign*(.Scale(.StdPar.LateralMalleolus) - .Scale(.StdPar.MedialMalleolus) ), .AnatomicalFrame.ARel'[1]  )*RotMat(pi/2,y);
+      #endif
+      #if JOINT_TYPE_ANKLE == _JOINT_TYPE_DEFAULT_
+      AnyVec3 sRelUnscaled = .StdPar.AnkleJoint;
+      AnyMat33 ARelUnscaled = RotMat({0.0,0,0}, .StdPar.AnkleJointAxis, .AnatomicalFrame.ARelUnscaled'[1])*RotMat(pi/2,y);
+      /// Control point for the Ankle joint. Found by projecting the malleolus bony landmarks onto the
+      /// ankle axis from the cadaver data set. Thus, scaling that moves the control points will also scale the ankle joint axis
+      AnyVec3 LateralControlPoint = .Scale(.StdPar.AnkleJoint + (.StdPar.LateralMalleolus - .StdPar.AnkleJoint)*.StdPar.AnkleJointAxis'*.StdPar.AnkleJointAxis);
+      /// Control point for the Ankle joint. Found by projecting the malleolus bony landmarks onto the
+      /// ankle axis from the cadaver data set. Thus, scaling that moves the control points will also scale the ankle joint axis
+      AnyVec3 MedialControlPoint = .Scale(.StdPar.AnkleJoint + (.StdPar.MedialMalleolus - .StdPar.AnkleJoint)*.StdPar.AnkleJointAxis'*.StdPar.AnkleJointAxis );
+      /// Ankle Joint defined directly from the cadaver dataset.
+      sRel = .Scale(.StdPar.AnkleJoint);
+      /// Ankle Joint orientation is calculated based on the direction between the two control points.
+      ARel = RotMat(0.0*{0,0,0}, .Sign*(LateralControlPoint-MedialControlPoint ),  .AnatomicalFrame.ARel'[1] )*RotMat(pi/2,y);
+      #endif
+      
+      #include "../DrawSettings/JointAxesDistal.any"
+      
+      #if DRAWAXES
+      AnyDrawLine SJaxis2 =
+      {
+        Visible = On;
+        p0 = ..StdPar.TalocruralsRel + {..StdPar.AnkleJointAxis[2],..StdPar.AnkleJointAxis[1],..StdPar.AnkleJointAxis[0]}*0.2;
+        p1 = ..StdPar.TalocruralsRel - {..StdPar.AnkleJointAxis[2],..StdPar.AnkleJointAxis[1],..StdPar.AnkleJointAxis[0]}*0.2;      //Offset = {0, 0, 0};
+        Line = {Thickness = 0.001; RGB = {0, 0, 0};};
+      };
+      #endif
+    };
+    #endif
+    
+    #include "../DrawSettings/Nodes.any"
+    #include "../DrawSettings/SegmentAxes.any"
+    
+    AnyDrawSurf DrwSurf =
+    {
+      FileName = ...STL.FilenameTalus;
+      ScaleXYZ = {1.0, 1.0, ....Sign*1.0};
+      RGB = ....ColorRef.Segments;
+      AnyFunTransform3D &Scale =.Scale;
+      Opacity = ....BonesOpacity.Talus;
+    };
+  }; // end of Talus segment
   
   /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
   AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;
@@ -297,7 +317,7 @@ AnySeg Foot =
     #if JOINT_TYPE_ANKLE == _JOINT_TYPE_BONY_LANDMARK_
       sRel = (.MedialMalleolus.sRel + .LateralMalleolus.sRel)*0.5;
     #else
-      sRel = 0.5*(.Scale(.StdPar.MedialAnkleAxisMarkerInNeutralConf) + .Scale(.StdPar.LateralAnkleAxisMarkerInNeutralConf));
+      sRel = .Scale(.StdPar.AnkleJointInNeutralConf);
     #endif
 
     ARel = .AnatomicalFrame.ARel;
@@ -320,35 +340,34 @@ AnySeg Foot =
     sRel =0.5* (.MedialMalleolus.sRel+.LateralMalleolus.sRel);
     #include "../DrawSettings/BML.any"
   };
-
-#if BM_LEG_MORPHOLOGY == 1
-  // These nodes are used by different applications and have to be estimated for the BM_LEG_MORPHOLOGY == 2
-  AnyRefNode GroundJoint =
+  AnyRefNode HeelPlantar = 
   {
-    sRel = .Scale(.StdPar.GroundJoint);// Estimation, between Heel and Toetip
-    ARel = .ScalingNode.ARel;
+    sRel = .Scale(.StdPar.HeelPlantarNode);
   };
-#else
+  AnyRefNode Metatarsal5Plantar = 
+  {
+    sRel = .Scale(.StdPar.Metatarsal5PlantarNode);
+  };
+  AnyRefNode Metatarsal2Plantar = 
+  {
+    sRel = .Scale(.StdPar.Metatarsal2PlantarNode);
+  };
+  AnyRefNode Metatarsal1Plantar = 
+  {
+    sRel = .Scale(.StdPar.Metatarsal1PlantarNode);
+  };
+
   AnyRefNode GroundJoint =
   {
     sRel = 0.55*.HeelContactNodeLow.sRel + 0.45*.BigToeNode.sRel;
     ARel = .ScalingNode.ARel;
   };
-#endif
 
-#if BM_LEG_MORPHOLOGY == 2
   AnyRefNode HeelContactNodeLow =
   {
     sRel = .Scale(.StdPar.HeelContactNode1Node);
     ARel = .AnatomicalFrame.ARel;
   };
-#else
-  AnyRefNode HeelContactNodeLow =
-  {
-    sRel = .Scale(.StdPar.HeelContactNodeLow);
-    ARel = .AnatomicalFrame.ARel;
-  };
-#endif
 
   AnyRefNode ToeJoint =
   {
@@ -415,34 +434,10 @@ AnySeg Foot =
     sRel =.Scale( .StdPar.MetatarsalJoint5Node );
   };
 
-  AnyRefNode MedialMalleolus2 =
-  {
-    sRel = .Scale(.StdPar.MedialMalleolus);
-  };
-
-  AnyRefNode LateralMalleolus2 =
-  {
-    sRel = .Scale(.StdPar.LateralMalleolus);
-  };
-
-  AnyRefNode MedialTibialEpicondyle =
-  {
-    sRel = .Scale(.StdPar.MedialTibialEpicondyle);
-  };
-
-  AnyRefNode LateralTibialEpicondyle =
-  {
-    sRel = .Scale(.StdPar.LateralTibialEpicondyle);
-  };
-
-  // Bony landmarks transformed into foot coordinatesystem in the neutral configuration of the model.
-  AnyRefNode MalleousLateralNode = {sRel = .Scale( ..Shank.StdPar.LateralMalleolus);};
-
   //Insertion points on Phalanges:
   AnyRefNode ExtensorDigitorumLongus1Node = {sRel = .Scale( .StdPar.ExtensorDigitorumLongus1Node );};
   AnyRefNode ExtensorDigitorumLongus2Node = {sRel = .Scale( .StdPar.ExtensorDigitorumLongus2Node );};
   AnyRefNode ExtensorDigitorumLongus3Node = {sRel = .Scale( .StdPar.ExtensorDigitorumLongus3Node );};
-#if BM_LEG_MORPHOLOGY == 2
   AnyRefNode ExtensorDigitorumLongus4Node = {sRel = .Scale( .StdPar.ExtensorDigitorumLongus4Node );};
   AnyRefNode ExtensorDigitorumLongusViaNode1 = {sRel = .Scale( .StdPar.ExtensorDigitorumViaNode1 );};
   AnyRefNode ExtensorDigitorumLongusViaNode2 = {sRel = .Scale( .StdPar.ExtensorDigitorumViaNode2 );};
@@ -450,60 +445,28 @@ AnySeg Foot =
   AnyRefNode ExtensorDigitorumLongusViaNode4 = {sRel = .Scale( .StdPar.ExtensorDigitorumViaNode4 );};
   //AnyRefNode ExtensorDigitorumLongusViaNode5 = {sRel = .Scale( .StdPar.ExtensorDigitorumLongusViaNode5 );};
   AnyRefNode ExtensorDigitorumSplitPoint1Node = {sRel = .Scale( .StdPar.ExtensorDigitorumSplitPoint1Node);};
-#endif
 
-#if BM_LEG_MORPHOLOGY == 1
-  AnyRefNode ExtensorHallucisLongus1Node = {sRel = .Scale( .StdPar.ExtensorHallucisLongus1Node );};
-  AnyRefNode ExtensorHallucisLongus2Node = {sRel = .Scale( .StdPar.ExtensorHallucisLongus2Node );};
-  AnyRefNode ExtensorHallucisLongus3Node = {sRel = .Scale( .StdPar.ExtensorHallucisLongus3Node );};
-  AnyRefNode ExtensorHallucisLongusViaNode7 = {sRel = .Scale( .StdPar.ExtensorHallucisLongusViaNode7 );};
-  AnyRefNode ExtensorHallucisLongusViaNode8 = {sRel = .Scale( .StdPar.ExtensorHallucisLongusViaNode8 );};
-  //  AnyRefNode ExtensorHallucisLongusViaNode9 = {sRel = .Scale( .StdPar.ExtensorHallucisLongusViaNode9 );};
-  //  AnyRefNode ExtensorHallucisLongusViaNode10 = {sRel = .Scale( .StdPar.ExtensorHallucisLongusViaNode10 );};
-  //  AnyRefNode ExtensorHallucisLongusViaNode11 = {sRel = .Scale( .StdPar.ExtensorHallucisLongusViaNode11 );};
-  //  AnyRefNode ExtensorHallucisLongusViaNode12 = {sRel = .Scale( .StdPar.ExtensorHallucisLongusViaNode12 );};
-  //  AnyRefNode ExtensorHallucisLongusViaNode13 = {sRel = .Scale( .StdPar.ExtensorHallucisLongusViaNode13 );};
-#endif
-#if BM_LEG_MORPHOLOGY == 2
   AnyRefNode ExtensorHallucisLongus1Node = {sRel = .Scale( .StdPar.ExtensorHallucisLongus1Node );};
   AnyRefNode ExtensorHallucisLongus2Node = {sRel = .Scale( .StdPar.ExtensorHallucisLongus1Node );};
   AnyRefNode ExtensorHallucisLongus3Node = {sRel = .Scale( .StdPar.ExtensorHallucisLongus1Node );};
   AnyRefNode ExtensorHallucisLongusViaNode4 = {sRel = .Scale( .StdPar.ExtensorHallucisLongusViaNode4 );};
   //AnyRefNode ExtensorHallucisLongusViaNode5 = {sRel = .Scale( .StdPar.ExtensorHallucisLongusViaNode5 );};
-#endif
 
   AnyRefNode FlexorDigitorumLongus1Node = {sRel = .Scale( .StdPar.FlexorDigitorumLongus1Node );};
   AnyRefNode FlexorDigitorumLongus2Node = {sRel = .Scale( .StdPar.FlexorDigitorumLongus2Node );};
   AnyRefNode FlexorDigitorumLongus3Node = {sRel = .Scale( .StdPar.FlexorDigitorumLongus3Node );};
-#if BM_LEG_MORPHOLOGY == 2
   AnyRefNode FlexorDigitorumLongus4Node = {sRel = .Scale( .StdPar.FlexorDigitorumLongus4Node );};
-#endif
-#if BM_LEG_MORPHOLOGY == 1
-  AnyRefNode FlexorDigitorumLongusViaNode7 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode7 );};
-  AnyRefNode FlexorDigitorumLongusViaNode8 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode8 );};
-#endif
-#if BM_LEG_MORPHOLOGY == 2
   AnyRefNode FlexorDigitorumLongusViaNode7 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode1 );};
   AnyRefNode FlexorDigitorumLongusViaNode8 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode2 );};
   //  AnyRefNode FlexorDigitorumLongusViaNode9 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode9 );};
   //  AnyRefNode FlexorDigitorumLongusViaNode10 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode10);};
   //  AnyRefNode FlexorDigitorumLongusViaNode11 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode11);};
   //  AnyRefNode FlexorDigitorumLongusViaNode12 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode12);};
-#endif
 
-#if BM_LEG_MORPHOLOGY == 1
-  AnyRefNode FlexorHallucisLongus1Node = {sRel = .Scale( .StdPar.FlexorHallucisLongus1Node );};
-  AnyRefNode FlexorHallucisLongus2Node = {sRel = .Scale( .StdPar.FlexorHallucisLongus2Node );};
-  AnyRefNode FlexorHallucisLongus3Node = {sRel = .Scale( .StdPar.FlexorHallucisLongus3Node );};
-  AnyRefNode FlexorHallucisLongusViaNode7 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode7 );};
-  AnyRefNode FlexorHallucisLongusViaNode8 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode8 );};
-#endif
-#if BM_LEG_MORPHOLOGY == 2
   AnyRefNode FlexorHallucisLongus1Node = {sRel = .Scale( .StdPar.FlexorHallucisLongus1Node );};
   AnyRefNode FlexorHallucisLongus2Node = {sRel = .Scale( .StdPar.FlexorHallucisLongus1Node );};
   AnyRefNode FlexorHallucisLongus3Node = {sRel = .Scale( .StdPar.FlexorHallucisLongus1Node );};
   AnyRefNode FlexorHallucisLongusViaNode7 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode1 );};
-#endif
 
   //Insertion points on Hindfoot:
   AnyRefNode TendonCalcaneousNode = {sRel = .Scale( .StdPar.TendonCalcaneousNode );};
@@ -520,65 +483,38 @@ AnySeg Foot =
   AnyRefNode SoleusLateralis2Node = {sRel = .Scale( .StdPar.SoleusLateralis2Node );};
   AnyRefNode SoleusLateralis3Node =  {sRel = .Scale( .StdPar.SoleusLateralis3Node );};
 
-  //Insertion points on Midfoot:
-#if BM_LEG_MORPHOLOGY == 1
-  AnyRefNode PeroneusBrevis1Node = {sRel = .Scale( .StdPar.PeroneusBrevis1Node );};
-  AnyRefNode PeroneusBrevis2Node = {sRel = .Scale( .StdPar.PeroneusBrevis2Node );};
-  AnyRefNode PeroneusBrevis3Node = {sRel = .Scale( .StdPar.PeroneusBrevis3Node );};
-  AnyRefNode PeroneusBrevisViaNode4 = {sRel = .Scale( .StdPar.PeroneusBrevisViaNode4 );};
-#endif
-#if BM_LEG_MORPHOLOGY == 2
+  AnyRefNode TendonCalcaneousSuperiorNode = {sRel = .Scale( .StdPar.TendonCalcaneousSuperiorNode );};
+  AnyRefNode GastrocnemiusLateralis1SuperiorNode = {sRel = .Scale( .StdPar.GastrocnemiusLateralis1SuperiorNode );};
+  AnyRefNode GastrocnemiusMedialis1SuperiorNode =  {sRel = .Scale( .StdPar.GastrocnemiusMedialis1SuperiorNode );};
+  AnyRefNode Plantaris1SuperiorNode = {sRel = .Scale( .StdPar.Plantaris1SuperiorNode );};
+
+  AnyRefNode SoleusMedialis1SuperiorNode = {sRel = .Scale( .StdPar.SoleusMedialis1SuperiorNode );};
+  AnyRefNode SoleusMedialis2SuperiorNode = {sRel = .Scale( .StdPar.SoleusMedialis2SuperiorNode );};
+  AnyRefNode SoleusMedialis3SuperiorNode =  {sRel = .Scale( .StdPar.SoleusMedialis3SuperiorNode );};
+  AnyRefNode SoleusLateralis1SuperiorNode = {sRel = .Scale( .StdPar.SoleusLateralis1SuperiorNode );};
+  AnyRefNode SoleusLateralis2SuperiorNode = {sRel = .Scale( .StdPar.SoleusLateralis2SuperiorNode );};
+  AnyRefNode SoleusLateralis3SuperiorNode =  {sRel = .Scale( .StdPar.SoleusLateralis3SuperiorNode );};  
+
+//Insertion points on Midfoot:
   AnyRefNode PeroneusBrevis1Node = {sRel = .Scale( .StdPar.PeroneusBrevisDistal1Node  );};
   AnyRefNode PeroneusBrevis2Node = {sRel = .Scale( .StdPar.PeroneusBrevisProximal1Node);};
   // AnyRefNode PeroneusBrevis3Node = {sRel = .Scale( .StdPar.PeroneusBrevis1Node );};
   AnyRefNode PeroneusBrevisSplitPoint1Node = {sRel = .Scale( .StdPar.PeroneusBrevisSplitPoint1Node);};
   AnyRefNode PeroneusBrevisViaNode4 = {sRel = .Scale( .StdPar.PeroneusBrevisViaNode4 );};
-#endif
 
 
-#if BM_LEG_MORPHOLOGY == 1
-  AnyRefNode PeroneusLongus1Node = {sRel = .Scale( .StdPar.PeroneusLongus1Node );};
-  AnyRefNode PeroneusLongus2Node = {sRel = .Scale( .StdPar.PeroneusLongus2Node );};
-  AnyRefNode PeroneusLongus3Node = {sRel = .Scale( .StdPar.PeroneusLongus3Node );};
-  AnyRefNode PeroneusTertius1Node = {sRel = .Scale( .StdPar.PeroneusTertius1Node );};
-  AnyRefNode PeroneusTertius2Node = {sRel = .Scale( .StdPar.PeroneusTertius2Node );};
-  AnyRefNode PeroneusTertius3Node = {sRel = .Scale( .StdPar.PeroneusTertius3Node );};
-  AnyRefNode PeroneusLongusViaNode4 = {sRel = .Scale( .StdPar.PeroneusLongusViaNode4 );};
-#endif
-#if BM_LEG_MORPHOLOGY == 2
   AnyRefNode PeroneusLongus1Node = {sRel = .Scale( .StdPar.PeroneusLongus1Node );};
   AnyRefNode PeroneusLongus2Node = {sRel = .Scale( .StdPar.PeroneusLongus1Node );};
   AnyRefNode PeroneusLongus3Node = {sRel = .Scale( .StdPar.PeroneusLongus1Node );};
   AnyRefNode PeroneusLongusViaNode5 = {sRel = .Scale( .StdPar.PeroneusLongusViaNode1 );};
   AnyRefNode PeroneusLongusViaNode6 = {sRel = .Scale( .StdPar.PeroneusLongusViaNode2 );};
   AnyRefNode PeroneusLongusViaNode7 = {sRel = .Scale( .StdPar.PeroneusLongusViaNode3 );};
-#endif
 
-#if BM_LEG_MORPHOLOGY == 1
-  AnyRefNode TibialisAnterior1Node = {sRel = .Scale( .StdPar.TibialisAnterior1Node );};
-  AnyRefNode TibialisAnterior2Node = {sRel = .Scale( .StdPar.TibialisAnterior2Node );};
-  AnyRefNode TibialisAnterior3Node = {sRel = .Scale( .StdPar.TibialisAnterior3Node );};
-  AnyRefNode TibialisAnteriorViaNode2 = {sRel = .Scale( .StdPar.TibialisAnteriorViaNode2 );};
-#endif
-#if BM_LEG_MORPHOLOGY == 2
   AnyRefNode TibialisAnterior1Node = {sRel = .Scale( .StdPar.TibialisAnteriorDistal1Node  );};
   AnyRefNode TibialisAnterior2Node = {sRel = .Scale( .StdPar.TibialisAnteriorProximal1Node );};
   //  AnyRefNode TibialisAnterior3Node = {sRel = .Scale( .StdPar.TibialisAnterior1Node );};
   AnyRefNode TibialisAnteriorViaNode3 = {sRel = .Scale( .StdPar.TibialisAnteriorViaNode1 );};
-#endif
 
-#if BM_LEG_MORPHOLOGY == 1
-  AnyRefNode TibialisPosteriorMedialis1Node = {sRel = .Scale( .StdPar.TibialisPosteriorMedialis1Node );};
-  AnyRefNode TibialisPosteriorMedialis2Node = {sRel = .Scale( .StdPar.TibialisPosteriorMedialis2Node );};
-  AnyRefNode TibialisPosteriorMedialis3Node = {sRel = .Scale( .StdPar.TibialisPosteriorMedialis3Node );};
-  AnyRefNode TibialisPosteriorLateralis1Node = {sRel = .Scale( .StdPar.TibialisPosteriorLateralis1Node );};
-  AnyRefNode TibialisPosteriorLateralis2Node = {sRel = .Scale( .StdPar.TibialisPosteriorLateralis2Node );};
-  AnyRefNode TibialisPosteriorLateralis3Node = {sRel = .Scale( .StdPar.TibialisPosteriorLateralis3Node );};
-  AnyRefNode TibialisPosteriorLateralisViaNode10 = {sRel = .Scale( .StdPar.TibialisPosteriorLateralisViaNode10 );};
-  AnyRefNode TibialisPosteriorMedialisViaNode10 = {sRel = .Scale( .StdPar.TibialisPosteriorMedialisViaNode10 );};
-  AnyRefNode TibialisPosteriorMedialisViaNode11 = {sRel = .Scale( .StdPar.TibialisPosteriorMedialisViaNode11 );};
-#endif
-#if BM_LEG_MORPHOLOGY == 2
   AnyRefNode TibialisPosteriorMedialis1Node = {sRel = .Scale( .StdPar.TibialisPosterior1Node );};
   AnyRefNode TibialisPosteriorMedialis2Node = {sRel = .Scale( .StdPar.TibialisPosterior1Node );};
   AnyRefNode TibialisPosteriorMedialis3Node = {sRel = .Scale( .StdPar.TibialisPosterior1Node );};
@@ -588,15 +524,12 @@ AnySeg Foot =
   AnyRefNode TibialisPosteriorViaNode5 = {sRel = .Scale( .StdPar.TibialisPosteriorViaNode1 );};
   AnyRefNode TibialisPosteriorViaNode6 = {sRel = .Scale( .StdPar.TibialisPosteriorViaNode2 );};
   AnyRefNode TibialisPosteriorViaNode7 = {sRel = .Scale( .StdPar.TibialisPosteriorViaNode3 );};
-#endif
 
-#if BM_LEG_MORPHOLOGY == 2
   AnyRefNode HeelContact  = {sRel = .Scale( .StdPar.HeelContactNode1Node );};
   AnyRefNode Metatarsal1Contact  = {sRel = .Scale( .StdPar.Metatarsal1ContactNode );};
   AnyRefNode Metatarsal2Contact  = {sRel = .Scale( .StdPar.Metatarsal2ContactNode);};
   AnyRefNode Metatarsal5Contact  = {sRel = .Scale( .StdPar.Metatarsal5ContactNode );};
   //  AnyRefNode MetatarsalJoint  = {sRel = .Scale( .StdPar.MetatarsalJoint );};
-#endif
 
   #include "../DrawSettings/Nodes.any"
   #include "../DrawSettings/SegmentAxes.any"
@@ -781,6 +714,27 @@ AnySeg Shank =
   
   };
   #endif
+
+  #if BM_FOOT_MODEL != _FOOT_MODEL_NONE_
+  AnyRefNode AchillesWrapping1 = {
+    AnyVar ShankLengthScale = vnorm(.AnkleJoint.sRel-.KneeJoint.sRel)
+                            /vnorm(.StdPar.AnkleJoint-.StdPar.KneeJoint);
+    sRel = .Scale({-0.0336, 0.0987, 0});
+    AnySurfCylinder Cyl = {
+       Length = 0.2;
+       sRel = {-Radius,0,-0.5*Length};
+       Radius = .ShankLengthScale*0.105;
+       };
+  };
+  AnyRefNode AchillesWrapping2 = {
+    sRel = .Scale({-0.032, 0.0437, 0.000});
+    AnySurfCylinder Cyl = {
+       Length = 0.2;
+       sRel = {Radius,0,-0.5*Length};
+       Radius = ..AchillesWrapping1.ShankLengthScale*0.07;
+       };
+  };
+  #endif
   
   //BonyLandMarks
   AnyRefNode MedialTibialEpicondyle =
@@ -838,12 +792,7 @@ AnySeg Shank =
   #endif
   
   //Origin points on the Tibia:
-#if BM_LEG_MORPHOLOGY == 1
-  AnyRefNode GastrocnemiusLateralis1ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusLateralis1ViaNode );};
-  AnyRefNode GastrocnemiusMedialis1ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusMedialis1ViaNode );};
-#endif
 
-#if BM_LEG_MORPHOLOGY == 2
   AnyRefNode GastrocnemiusLateralis7ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusLateralis7ViaNode );};
   AnyRefNode GastrocnemiusLateralis8ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusLateralis8ViaNode );};
   AnyRefNode GastrocnemiusLateralis9ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusLateralis9ViaNode );};
@@ -855,7 +804,6 @@ AnySeg Shank =
   AnyRefNode GastrocnemiusMedialis7ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusMedialis7ViaNode );};
   AnyRefNode GastrocnemiusMedialis8ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusMedialis8ViaNode );};
   AnyRefNode GastrocnemiusMedialis9ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusMedialis9ViaNode );};
-#endif
 
 
   //////
@@ -865,9 +813,7 @@ AnySeg Shank =
   AnyRefNode ExtensorDigitorumLongus1Node = {sRel = .Scale( .StdPar.ExtensorDigitorumLongus1Node );};
   AnyRefNode ExtensorDigitorumLongus2Node = {sRel = .Scale( .StdPar.ExtensorDigitorumLongus2Node );};
   AnyRefNode ExtensorDigitorumLongus3Node = {sRel = .Scale( .StdPar.ExtensorDigitorumLongus3Node );};
-#if BM_LEG_MORPHOLOGY == 2
   AnyRefNode ExtensorDigitorumLongus4Node = {sRel = .Scale( .StdPar.ExtensorDigitorumLongus4Node );};
-#endif
   AnyRefNode ExtensorDigitorumLongusViaNode1 = {sRel = .Scale( .StdPar.ExtensorDigitorumLongusViaNode1 );};
   AnyRefNode ExtensorDigitorumLongusViaNode2 = {sRel = .Scale( .StdPar.ExtensorDigitorumLongusViaNode2 );};
   AnyRefNode ExtensorDigitorumLongusViaNode3 = {sRel = .Scale( .StdPar.ExtensorDigitorumLongusViaNode3 );};
@@ -877,69 +823,34 @@ AnySeg Shank =
   AnyRefNode ExtensorHallucisLongus2Node = {sRel = .Scale( .StdPar.ExtensorHallucisLongus2Node );};
   AnyRefNode ExtensorHallucisLongus3Node = {sRel = .Scale( .StdPar.ExtensorHallucisLongus3Node );};
 
-#if BM_LEG_MORPHOLOGY == 1
-  AnyRefNode ExtensorHallucisLongusViaNode1 = {sRel = .Scale( .StdPar.ExtensorHallucisLongusViaNode1 );};
-  AnyRefNode ExtensorHallucisLongusViaNode2 = {sRel = .Scale( .StdPar.ExtensorHallucisLongusViaNode2 );};
-  //AnyRefNode ExtensorHallucisLongusViaNode3 = {sRel = .Scale( .StdPar.ExtensorHallucisLongusViaNode3 );};
-  //AnyRefNode ExtensorHallucisLongusViaNode4 = {sRel = .Scale( .StdPar.ExtensorHallucisLongusViaNode4 );};
-  //AnyRefNode ExtensorHallucisLongusViaNode5 = {sRel = .Scale( .StdPar.ExtensorHallucisLongusViaNode5 );};
-  AnyRefNode ExtensorHallucisLongusViaNode6 = {sRel = .Scale( .StdPar.ExtensorHallucisLongusViaNode6 );};
-#endif
-#if BM_LEG_MORPHOLOGY == 2
   AnyRefNode ExtensorHallucisLongusViaNode1 = {sRel = .Scale( .StdPar.ExtensorHallucisLongusViaNode1 );};
   AnyRefNode ExtensorHallucisLongusViaNode2 = {sRel = .Scale( .StdPar.ExtensorHallucisLongusViaNode2 );};
   AnyRefNode ExtensorHallucisLongusViaNode3 = {sRel = .Scale( .StdPar.ExtensorHallucisLongusViaNode3 );};
-#endif
 
   AnyRefNode FlexorDigitorumLongus1Node = {sRel = .Scale( .StdPar.FlexorDigitorumLongus1Node );};
   AnyRefNode FlexorDigitorumLongus2Node = {sRel = .Scale( .StdPar.FlexorDigitorumLongus2Node );};
   AnyRefNode FlexorDigitorumLongus3Node = {sRel = .Scale( .StdPar.FlexorDigitorumLongus3Node );};
-#if BM_LEG_MORPHOLOGY == 2
   AnyRefNode FlexorDigitorumLongus4Node = {sRel = .Scale( .StdPar.FlexorDigitorumLongus4Node );};
-#endif
 
-  #if BM_LEG_MORPHOLOGY == 1
-  AnyRefNode FlexorDigitorumLongusViaNode1 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode1 );};
-  AnyRefNode FlexorDigitorumLongusViaNode2 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode2 );};
-  // AnyRefNode FlexorDigitorumLongusViaNode3 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode3 );};
-  //AnyRefNode FlexorDigitorumLongusViaNode4 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode4 );};
-  AnyRefNode FlexorDigitorumLongusViaNode5 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode5 );};
-  AnyRefNode FlexorDigitorumLongusViaNode6 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode6 );};
-  AnyRefNode FlexorDigitorumLongusViaNode7 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode7 );};
-  AnyRefNode FlexorDigitorumLongusViaNode8 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode8 );};
-#endif
-#if BM_LEG_MORPHOLOGY == 2
   AnyRefNode FlexorDigitorumLongusViaNode1 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode1 );};
   AnyRefNode FlexorDigitorumLongusViaNode2 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode2 );};
   AnyRefNode FlexorDigitorumLongusViaNode3 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode3 );};
   AnyRefNode FlexorDigitorumLongusViaNode4 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode4 );};
   AnyRefNode FlexorDigitorumLongusViaNode5 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode5 );};
   AnyRefNode FlexorDigitorumLongusViaNode6 = {sRel = .Scale( .StdPar.FlexorDigitorumLongusViaNode6 );};
-#endif
 
   AnyRefNode FlexorHallucisLongus1Node = {sRel = .Scale( .StdPar.FlexorHallucisLongus1Node );};
   AnyRefNode FlexorHallucisLongus2Node = {sRel = .Scale( .StdPar.FlexorHallucisLongus2Node );};
   AnyRefNode FlexorHallucisLongus3Node = {sRel = .Scale( .StdPar.FlexorHallucisLongus3Node );};
 
-#if BM_LEG_MORPHOLOGY == 1
-  AnyRefNode FlexorHallucisLongusViaNode1 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode1 );};
-  AnyRefNode FlexorHallucisLongusViaNode3 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode3 );};
-  AnyRefNode FlexorHallucisLongusViaNode4 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode4 );};
-  AnyRefNode FlexorHallucisLongusViaNode5 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode5 );};
-  AnyRefNode FlexorHallucisLongusViaNode6 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode6 );};
-  AnyRefNode FlexorHallucisLongusViaNode7 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode7 );};
-  //AnyRefNode FlexorHallucisLongusViaNode8 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode8 );};
-#endif
 
 
-#if BM_LEG_MORPHOLOGY == 2
   AnyRefNode FlexorHallucisLongusViaNode1 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode1 );};
   AnyRefNode FlexorHallucisLongusViaNode2 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode2 );};
   AnyRefNode FlexorHallucisLongusViaNode3 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode3 );};
   AnyRefNode FlexorHallucisLongusViaNode4 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode4 );};
   AnyRefNode FlexorHallucisLongusViaNode5 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode5 );};
   AnyRefNode FlexorHallucisLongusViaNode6 = {sRel = .Scale( .StdPar.FlexorHallucisLongusViaNode6 );};
-#endif
 
   AnyRefNode PeroneusBrevis1Node = {sRel = .Scale( .StdPar.PeroneusBrevis1Node );};
   AnyRefNode PeroneusBrevis2Node = {sRel = .Scale( .StdPar.PeroneusBrevis2Node );};
@@ -957,14 +868,6 @@ AnySeg Shank =
   AnyRefNode PeroneusLongusViaNode4 = {sRel = .Scale( .StdPar.PeroneusLongusViaNode4 );};
 
 
-#if BM_LEG_MORPHOLOGY == 1
-  AnyRefNode PeroneusTertius1Node = {sRel = .Scale( .StdPar.PeroneusTertius1Node );};
-  AnyRefNode PeroneusTertius2Node = {sRel = .Scale( .StdPar.PeroneusTertius2Node );};
-  AnyRefNode PeroneusTertius3Node = {sRel = .Scale( .StdPar.PeroneusTertius3Node );};
-  AnyRefNode PeroneusTertiusViaNode1 = {sRel = .Scale( .StdPar.PeroneusTertiusViaNode1 );};
-  AnyRefNode PeroneusTertiusViaNode2 = {sRel = .Scale( .StdPar.PeroneusTertiusViaNode2 );};
-  AnyRefNode PeroneusTertiusViaNode3 = {sRel = .Scale( .StdPar.PeroneusTertiusViaNode3 );};
-#endif
 
   AnyRefNode SoleusMedialis1Node = {sRel = .Scale( .StdPar.SoleusMedialis1Node );};
   AnyRefNode SoleusMedialis2Node = {sRel = .Scale( .StdPar.SoleusMedialis2Node );};
@@ -983,45 +886,18 @@ AnySeg Shank =
   AnyRefNode TibialisPosteriorMedialis3Node = {sRel = .Scale( .StdPar.TibialisPosteriorMedialis3Node );};
 
 
-#if BM_LEG_MORPHOLOGY == 1
-  AnyRefNode TibialisPosteriorMedialisViaNode1 = {sRel = .Scale( .StdPar.TibialisPosteriorMedialisViaNode1 );};
-  AnyRefNode TibialisPosteriorMedialisViaNode2 = {sRel = .Scale( .StdPar.TibialisPosteriorMedialisViaNode2 );};
-  AnyRefNode TibialisPosteriorMedialisViaNode3 = {sRel = .Scale( .StdPar.TibialisPosteriorMedialisViaNode3 );};
-  AnyRefNode TibialisPosteriorMedialisViaNode4 = {sRel = .Scale( .StdPar.TibialisPosteriorMedialisViaNode4 );};
-  AnyRefNode TibialisPosteriorMedialisViaNode5 = {sRel = .Scale( .StdPar.TibialisPosteriorMedialisViaNode5 );};
-  AnyRefNode TibialisPosteriorMedialisViaNode6 = {sRel = .Scale( .StdPar.TibialisPosteriorMedialisViaNode6 );};
-  AnyRefNode TibialisPosteriorMedialisViaNode7 = {sRel = .Scale( .StdPar.TibialisPosteriorMedialisViaNode7 );};
-  AnyRefNode TibialisPosteriorMedialisViaNode8 = {sRel = .Scale( .StdPar.TibialisPosteriorMedialisViaNode8 );};
-  AnyRefNode TibialisPosteriorMedialisViaNode9 = {sRel = .Scale( .StdPar.TibialisPosteriorMedialisViaNode9 );};
-  AnyRefNode TibialisPosteriorMedialisViaNode10 = {sRel = .Scale( .StdPar.TibialisPosteriorMedialisViaNode10 );};
-  AnyRefNode TibialisPosteriorMedialisViaNode11 = {sRel = .Scale( .StdPar.TibialisPosteriorMedialisViaNode11 );};
-#endif
 
   AnyRefNode TibialisPosteriorLateralis1Node = {sRel = .Scale( .StdPar.TibialisPosteriorLateralis1Node );};
   AnyRefNode TibialisPosteriorLateralis2Node = {sRel = .Scale( .StdPar.TibialisPosteriorLateralis2Node );};
   AnyRefNode TibialisPosteriorLateralis3Node = {sRel = .Scale( .StdPar.TibialisPosteriorLateralis3Node );};
 
 
-#if BM_LEG_MORPHOLOGY == 1
-  AnyRefNode TibialisPosteriorLateralisViaNode1 = {sRel = .Scale( .StdPar.TibialisPosteriorLateralisViaNode1 );};
-  AnyRefNode TibialisPosteriorLateralisViaNode2 = {sRel = .Scale( .StdPar.TibialisPosteriorLateralisViaNode2 );};
-  AnyRefNode TibialisPosteriorLateralisViaNode3 = {sRel = .Scale( .StdPar.TibialisPosteriorLateralisViaNode3 );};
-  AnyRefNode TibialisPosteriorLateralisViaNode4 = {sRel = .Scale( .StdPar.TibialisPosteriorLateralisViaNode4 );};
-  AnyRefNode TibialisPosteriorLateralisViaNode5 = {sRel = .Scale( .StdPar.TibialisPosteriorLateralisViaNode5 );};
-  AnyRefNode TibialisPosteriorLateralisViaNode6 = {sRel = .Scale( .StdPar.TibialisPosteriorLateralisViaNode6 );};
-  AnyRefNode TibialisPosteriorLateralisViaNode7 = {sRel = .Scale( .StdPar.TibialisPosteriorLateralisViaNode7 );};
-  AnyRefNode TibialisPosteriorLateralisViaNode8 = {sRel = .Scale( .StdPar.TibialisPosteriorLateralisViaNode8 );};
-  AnyRefNode TibialisPosteriorLateralisViaNode9 = {sRel = .Scale( .StdPar.TibialisPosteriorLateralisViaNode9 );};
-  AnyRefNode TibialisPosteriorLateralisViaNode10 = {sRel = .Scale( .StdPar.TibialisPosteriorLateralisViaNode10 );};
-#endif
 
 
-#if BM_LEG_MORPHOLOGY == 2
   AnyRefNode TibialisPosteriorViaNode1 = {sRel = .Scale( .StdPar.TibialisPosteriorViaNode1 );};
   AnyRefNode TibialisPosteriorViaNode2 = {sRel = .Scale( .StdPar.TibialisPosteriorViaNode2 );};
   AnyRefNode TibialisPosteriorViaNode3 = {sRel = .Scale( .StdPar.TibialisPosteriorViaNode3 );};
   AnyRefNode TibialisPosteriorViaNode4 = {sRel = .Scale( .StdPar.TibialisPosteriorViaNode4 );};
-#endif
   //Insertion points on the Tibia (all these muscles, exept for the Biceps Femoris Caput Breve, originate from the Pelvis):
 
   //  AnyRefNode AdductorMagnusDistal1Node = {sRel = .Scale( .StdPar.AdductorMagnusDistal1Node );};
@@ -1030,76 +906,38 @@ AnySeg Shank =
   //
 
 
-#if BM_LEG_MORPHOLOGY == 1
-  AnyRefNode BicepsFemorisCaputLongum1Node = {sRel = .Scale( .StdPar.BicepsFemorisCaputLongum1Node );};
-  AnyRefNode BicepsFemorisCaputBreve1Node = {sRel = .Scale( .StdPar.BicepsFemorisCaputBreve1Node );};
-  AnyRefNode BicepsFemorisCaputBreve2Node = {sRel = .Scale( .StdPar.BicepsFemorisCaputBreve2Node );};
-  AnyRefNode BicepsFemorisCaputBreve3Node = {sRel = .Scale( .StdPar.BicepsFemorisCaputBreve3Node );};
-#endif
 
 
-  #if BM_LEG_MORPHOLOGY == 2
   AnyRefNode BicepsFemorisCaputLongum1Node = {sRel = .Scale( .StdPar.BicepsFemoris1Node );};
   AnyRefNode BicepsFemorisCaputBreve1Node = {sRel = .Scale( .StdPar.BicepsFemoris1Node );};
   AnyRefNode BicepsFemorisCaputBreve2Node = {sRel = .Scale( .StdPar.BicepsFemoris1Node );};
   AnyRefNode BicepsFemorisCaputBreve3Node = {sRel = .Scale( .StdPar.BicepsFemoris1Node );};
-#endif
 
 
-#if BM_LEG_MORPHOLOGY == 1
-  AnyRefNode Gracilis1Node = {sRel = .Scale( .StdPar.Gracilis1Node );};
-  AnyRefNode Gracilis2Node = {sRel = .Scale( .StdPar.Gracilis2Node );};
-  AnyRefNode GracilisViaNode1 = {sRel = .Scale( .StdPar.GracilisViaNode1 );};
-  AnyRefNode GracilisViaNode2 = {sRel = .Scale( .StdPar.GracilisViaNode2 );};
-  //AnyRefNode GracilisViaNode3 = {sRel = .Scale( .StdPar.GracilisViaNode3 );};
-  //AnyRefNode GracilisViaNode4 = {sRel = .Scale( .StdPar.GracilisViaNode4 );};
-  //AnyRefNode GracilisViaNode5 = {sRel = .Scale( .StdPar.GracilisViaNode5 );};
-  AnyRefNode GracilisViaNode6 = {sRel = .Scale( .StdPar.GracilisViaNode6 );};
-  AnyRefNode GracilisViaNode7 = {sRel = .Scale( .StdPar.GracilisViaNode7 );};
-  AnyRefNode GracilisViaNode8 = {sRel = .Scale( .StdPar.GracilisViaNode8 );};
-#endif
-#if BM_LEG_MORPHOLOGY == 2
   AnyRefNode Gracilis1Node = {sRel = .Scale( .StdPar.Gracilis1Node );};
   AnyRefNode Gracilis2Node = {sRel = .Scale( .StdPar.Gracilis1Node );};
   AnyRefNode GracilisViaNode1 = {sRel = .Scale( .StdPar.GracilisViaNode1 );};
   AnyRefNode GracilisViaNode2 = {sRel = .Scale( .StdPar.GracilisViaNode2 );};
   AnyRefNode GracilisViaNode3 = {sRel = .Scale( .StdPar.GracilisViaNode3 );};
-#endif
 
 
-#if BM_LEG_MORPHOLOGY == 1
-  AnyRefNode SartoriusProximal1Node = {sRel = .Scale( .StdPar.SartoriusProximal1Node );};
-  AnyRefNode SartoriusDistal1Node = {sRel = .Scale( .StdPar.SartoriusDistal1Node );};
-#endif
 
 
-#if BM_LEG_MORPHOLOGY == 2
   AnyRefNode Sartorius1Node = {sRel = .Scale( .StdPar.Sartorius1Node );};
   AnyRefNode SartoriusVia1Node = {sRel = .Scale( .StdPar.SartoriusVia1Node );};
   AnyRefNode SartoriusVia2Node = {sRel = .Scale( .StdPar.SartoriusVia2Node );};
   AnyRefNode SartoriusVia3Node = {sRel = .Scale( .StdPar.SartoriusVia3Node );};
-#endif
 
   AnyRefNode Semimembranosus1Node = {sRel = .Scale( .StdPar.Semimembranosus1Node );};
 
 
-#if BM_LEG_MORPHOLOGY == 2
   AnyRefNode Semimembranosus2Node = {sRel = .Scale( .StdPar.Semimembranosus2Node );};
   AnyRefNode Semimembranosus3Node = {sRel = .Scale( .StdPar.Semimembranosus3Node );};
-#endif
 
   AnyRefNode Semitendinosus1Node = {sRel = .Scale( .StdPar.Semitendinosus1Node );};
   AnyRefNode SemitendinosusViaNode1 = {sRel = .Scale( .StdPar.SemitendinosusViaNode1 );};
 
 
-#if BM_LEG_MORPHOLOGY == 1
-  AnyRefNode SemitendinosusViaNode2 = {sRel = .Scale( .StdPar.SemitendinosusViaNode2 );};
-  AnyRefNode SemitendinosusViaNode3 = {sRel = .Scale( .StdPar.SemitendinosusViaNode3 );};
-  AnyRefNode SemitendinosusViaNode4 = {sRel = .Scale( .StdPar.SemitendinosusViaNode4 );};
-  AnyRefNode SemitendinosusViaNode5 = {sRel = .Scale( .StdPar.SemitendinosusViaNode5 );};
-  AnyRefNode SemitendinosusViaNode6 = {sRel = .Scale( .StdPar.SemitendinosusViaNode6 );};
-  AnyRefNode SemitendinosusViaNode7 = {sRel = .Scale( .StdPar.SemitendinosusViaNode7 );};
-#endif
 
   //Original nodes are placed to high on tibia this can not be correct
   //  AnyRefNode TensorFasciaeLatae1Node = {sRel = .Scale( .StdPar.TensorFasciaeLatae1Node );};
@@ -1107,28 +945,18 @@ AnySeg Shank =
 
   //New positions are based on bone
 
-#if BM_LEG_MORPHOLOGY == 1
-  AnyRefNode TensorFasciaeLatae1Node = {sRel = .Scale( .StdPar.TensorFasciaeLatae1Node );};
-  AnyRefNode TensorFasciaeLatae2Node = {sRel = .Scale( .StdPar.TensorFasciaeLatae2Node );};
-#endif
 
 
-#if BM_LEG_MORPHOLOGY == 2
   AnyRefNode TensorFasciaeLatae1Node = {sRel = .Scale( .StdPar.TensorFasciaeLatae1Node );};
   AnyRefNode TensorFasciaeLatae2Node = {sRel = .Scale( .StdPar.TensorFasciaeLatae1Node );};
-  #endif
 
   AnyRefNode Popliteus1Node = {sRel = .Scale( .StdPar.Popliteus1Node );};
   AnyRefNode Popliteus2Node = {sRel = .Scale( .StdPar.Popliteus2Node );};
-#if BM_LEG_MORPHOLOGY == 2
   AnyRefNode Popliteus3Node = {sRel = .Scale( .StdPar.Popliteus3Node );};
-#endif
 
   AnyRefNode PopliteusViaNode1 = {sRel = .Scale( .StdPar.PopliteusViaNode1 );};
   
-#if BM_LEG_MORPHOLOGY == 2  
   AnyRefNode PopliteusViaNode2 = {sRel = .Scale( .StdPar.PopliteusViaNode2 );};
-#endif  
 
   AnyDrawSurf DrwSurfTibia =
   {
@@ -1262,7 +1090,6 @@ AnySeg Thigh =
 
 
 
-#if BM_LEG_MORPHOLOGY == 2
   AnyRefNode IliacusWrapSurf =
   {
     AnyMatrix p = .Scale(.StdPar.IliacusWrapLandmarks);
@@ -1302,7 +1129,6 @@ AnySeg Thigh =
       CapRatio2 = 3;
     };
   };
-#endif
 
    #if JOINT_TYPE_KNEE != _JOINT_TYPE_USERDEFINED_
    AnyRefNode KneeJoint =
@@ -1422,31 +1248,25 @@ AnySeg Thigh =
 
   AnyRefNode GastrocnemiusLateralis1Node = {sRel = .Scale( .StdPar.GastrocnemiusLateralis1Node );};
 
-#if BM_LEG_MORPHOLOGY == 2
   AnyRefNode GastrocnemiusLateralis1ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusLateralisVia1Node );};
   AnyRefNode GastrocnemiusLateralis2ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusLateralisVia2Node );};
   AnyRefNode GastrocnemiusLateralis3ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusLateralisVia3Node );};
   AnyRefNode GastrocnemiusLateralis4ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusLateralisVia4Node );};
   AnyRefNode GastrocnemiusLateralis5ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusLateralisVia5Node );};
   AnyRefNode GastrocnemiusLateralis6ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusLateralisVia6Node );};
-#endif
 
   AnyRefNode GastrocnemiusMedialis1Node = {sRel = .Scale( .StdPar.GastrocnemiusMedialis1Node );};
 
-#if BM_LEG_MORPHOLOGY == 2
   AnyRefNode GastrocnemiusMedialis1ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusMedialisVia1Node );};
   AnyRefNode GastrocnemiusMedialis2ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusMedialisVia2Node );};
   AnyRefNode GastrocnemiusMedialis3ViaNode = {sRel = .Scale( .StdPar.GastrocnemiusMedialisVia3Node );};
-#endif
 
 
   AnyRefNode Plantaris1Node = {sRel = .Scale( .StdPar.Plantaris1Node );};
 
   AnyRefNode Popliteus1Node = {sRel = .Scale( .StdPar.Popliteus1Node );};
   AnyRefNode Popliteus2Node = {sRel = .Scale( .StdPar.Popliteus2Node );};
-#if BM_LEG_MORPHOLOGY == 2
   AnyRefNode Popliteus3Node = {sRel = .Scale( .StdPar.Popliteus3Node );};
-#endif
 
   AnyRefNode VastusIntermedius1Node = {sRel = .Scale( .StdPar.VastusIntermedius1Node );};
   AnyRefNode VastusIntermedius2Node = {sRel = .Scale( .StdPar.VastusIntermedius2Node );};
@@ -1477,10 +1297,6 @@ AnySeg Thigh =
   AnyRefNode VastusMedialisSuperior4Node = {sRel = .Scale( .StdPar.VastusMedialisSuperior4Node );};
 
 
-#if BM_LEG_MORPHOLOGY == 1
-  AnyRefNode VastusMedialisSuperior5Node = {sRel = .Scale( .StdPar.VastusMedialisSuperior5Node );};
-  AnyRefNode VastusMedialisSuperior6Node = {sRel = .Scale( .StdPar.VastusMedialisSuperior6Node );};
-#endif
 
   AnyRefNode AdductorBrevisProximal1Node = {sRel = .Scale( .StdPar.AdductorBrevisProximal1Node );};
   AnyRefNode AdductorBrevisProximal2Node = {sRel = .Scale( .StdPar.AdductorBrevisProximal2Node );};
@@ -1509,18 +1325,11 @@ AnySeg Thigh =
   AnyRefNode AdductorMagnusProximal4Node = {sRel = .Scale( .StdPar.AdductorMagnusProximal4Node );};
 
 
-#if BM_LEG_MORPHOLOGY == 1
-  AnyRefNode AdductorMagnusDistal1Node = {sRel = .Scale( .StdPar.AdductorMagnusDistal1Node );};
-  AnyRefNode AdductorMagnusDistal2Node = {sRel = .Scale( .StdPar.AdductorMagnusDistal2Node );};
-  AnyRefNode AdductorMagnusDistal3Node = {sRel = .Scale( .StdPar.AdductorMagnusDistal3Node );};
-#endif
 
 
-#if BM_LEG_MORPHOLOGY == 2
   AnyRefNode AdductorMagnusDistal1Node = {sRel = .Scale( .StdPar.AdductorMagnusDistal1Node );};
   AnyRefNode AdductorMagnusDistal2Node = {sRel = .Scale( .StdPar.AdductorMagnusDistal1Node );};
   AnyRefNode AdductorMagnusDistal3Node = {sRel = .Scale( .StdPar.AdductorMagnusDistal1Node );};
-#endif
 
   AnyRefNode GemellusInferior1Node = {sRel = .Scale( .StdPar.GemellusInferior1Node );};
 
@@ -1561,46 +1370,18 @@ AnySeg Thigh =
 
   AnyRefNode GluteusMinimusPosterior1Node = {sRel = .Scale( .StdPar.GluteusMinimusPosterior1Node );};
   
-  #if BM_LEG_MORPHOLOGY == 2
   AnyRefNode GluteusMinimusAnterior1Via = {sRel = .Scale( .StdPar.GluteusMinimusAnterior1Via );};
   AnyRefNode GluteusMinimusMid1Via = {sRel = .Scale( .StdPar.GluteusMinimusMid1Via );};
   AnyRefNode GluteusMinimusPosterior1Via = {sRel = .Scale( .StdPar.GluteusMinimusPosterior1Via );};
-  #endif
-  
 
-#if BM_LEG_MORPHOLOGY == 1
-  AnyRefNode IliacusLateralis1Node = {sRel = .Scale( .StdPar.IliacusLateralis1Node );};
-  AnyRefNode IliacusLateralis2Node = {sRel = .Scale( .StdPar.IliacusLateralis2Node );};
-  AnyRefNode IliacusLateralis3Node = {sRel = .Scale( .StdPar.IliacusLateralis3Node );};
 
-  AnyRefNode IliacusMid1Node = {sRel = .Scale( .StdPar.IliacusMid1Node );};
-  AnyRefNode IliacusMid2Node = {sRel = .Scale( .StdPar.IliacusMid2Node );};
-  AnyRefNode IliacusMid3Node = {sRel = .Scale( .StdPar.IliacusMid3Node );};
 
-  AnyRefNode IliacusMedialis1Node = {sRel = .Scale( .StdPar.IliacusMedialis1Node );};
-  AnyRefNode IliacusMedialis2Node = {sRel = .Scale( .StdPar.IliacusMedialis2Node );};
-  AnyRefNode IliacusMedialis3Node = {sRel = .Scale( .StdPar.IliacusMedialis3Node );};
 
-  AnyRefNode ObturatorExternusInferior1Node = {sRel = .Scale( .StdPar.ObturatorExternusInferior1Node );};
-  AnyRefNode ObturatorExternusInferior2Node = {sRel = .Scale( .StdPar.ObturatorExternusInferior2Node );};
-
-  AnyRefNode ObturatorExternusSuperior1Node = {sRel = .Scale( .StdPar.ObturatorExternusSuperior1Node );};
-  AnyRefNode ObturatorExternusSuperior2Node = {sRel = .Scale( .StdPar.ObturatorExternusSuperior2Node );};
-  AnyRefNode ObturatorExternusSuperior3Node = {sRel = .Scale( .StdPar.ObturatorExternusSuperior3Node );};
-  AnyRefNode ObturatorExternusSuperiorViaNode1 = {sRel = .Scale( .StdPar.ObturatorExternusSuperiorViaNode1 );};
-#endif
-
-#if BM_LEG_MORPHOLOGY == 2
   AnyRefNode ObturatorExternus1Node = {sRel = .Scale( .StdPar.ObturatorExternus1Node );};
   AnyRefNode ObturatorExternusVia1Node = {sRel = .Scale( .StdPar.ObturatorExternusVia1Node );};
-#endif
 
   AnyRefNode ObturatorInternus1Node = {sRel = .Scale( .StdPar.ObturatorInternus1Node );};
 
-#if BM_LEG_MORPHOLOGY == 1
-  AnyRefNode ObturatorInternus2Node = {sRel = .Scale( .StdPar.ObturatorInternus2Node );};
-  AnyRefNode ObturatorInternus3Node = {sRel = .Scale( .StdPar.ObturatorInternus3Node );};
-#endif
 
   AnyRefNode Pectineus1Node = {sRel = .Scale( .StdPar.Pectineus1Node );};
   AnyRefNode Pectineus2Node = {sRel = .Scale( .StdPar.Pectineus2Node );};
@@ -1609,69 +1390,30 @@ AnySeg Thigh =
 
   AnyRefNode Piriformis1Node = {sRel = .Scale( .StdPar.Piriformis1Node );};
 
-#if BM_LEG_MORPHOLOGY == 1
-  AnyRefNode PsoasMinor1Node = {sRel = .Scale( .StdPar.PsoasMinor1Node );};
-  AnyRefNode PsoasMajor1Node = {sRel = .Scale( .StdPar.PsoasMajor1Node );};
-  AnyRefNode PsoasMajor2Node = {sRel = .Scale( .StdPar.PsoasMajor2Node );};
-  AnyRefNode PsoasMajor3Node = {sRel = .Scale( .StdPar.PsoasMajor3Node );};
-#endif
 
-#if BM_LEG_MORPHOLOGY == 2
   AnyRefNode Iliopsoas1Node = {sRel = .Scale( .StdPar.Iliopsoas1Node );};
   AnyRefNode Iliopsoas2Node = {sRel = .Scale( .StdPar.Iliopsoas2Node );};
   AnyRefNode Iliopsoas3Node = {sRel = .Scale( .StdPar.Iliopsoas3Node );};
-#endif
 
   AnyRefNode QuadratusFemoris1Node	= {sRel = .Scale( .StdPar.QuadratusFemoris1Node );};
   AnyRefNode QuadratusFemoris2Node	= {sRel = .Scale( .StdPar.QuadratusFemoris2Node );};
   AnyRefNode QuadratusFemoris3Node	= {sRel = .Scale( .StdPar.QuadratusFemoris3Node );};
   AnyRefNode QuadratusFemoris4Node	= {sRel = .Scale( .StdPar.QuadratusFemoris4Node );};
 
-#if BM_LEG_MORPHOLOGY == 1
-  AnyRefNode SartoriusProximalViaNode1 = {sRel = .Scale( .StdPar.SartoriusProximalViaNode1 );};
-  AnyRefNode SartoriusProximalViaNode2 = {sRel = .Scale( .StdPar.SartoriusProximalViaNode2 );};
-  AnyRefNode SartoriusProximalViaNode3 = {sRel = .Scale( .StdPar.SartoriusProximalViaNode3 );};
-  AnyRefNode SartoriusProximalViaNode4 = {sRel = .Scale( .StdPar.SartoriusProximalViaNode4 );};
-  AnyRefNode SartoriusProximalViaNode5 = {sRel = .Scale( .StdPar.SartoriusProximalViaNode5 );};
-  AnyRefNode SartoriusProximalViaNode6 = {sRel = .Scale( .StdPar.SartoriusProximalViaNode6 );};
-  AnyRefNode SartoriusProximalViaNode7 = {sRel = .Scale( .StdPar.SartoriusProximalViaNode7 );};
-  AnyRefNode SartoriusProximalViaNode8 = {sRel = .Scale( .StdPar.SartoriusProximalViaNode8 );};
-  AnyRefNode SartoriusProximalViaNode9 = {sRel = .Scale( .StdPar.SartoriusProximalViaNode9 );};
-  AnyRefNode SartoriusProximalViaNode10 = {sRel = .Scale( .StdPar.SartoriusProximalViaNode10 );};
-  AnyRefNode SartoriusProximalViaNode11 = {sRel = .Scale( .StdPar.SartoriusProximalViaNode11 );};
-  AnyRefNode SartoriusProximalViaNode12 = {sRel = .Scale( .StdPar.SartoriusProximalViaNode12 );};
-  AnyRefNode SartoriusProximalViaNode13 = {sRel = .Scale( .StdPar.SartoriusProximalViaNode13 );};
 
-  AnyRefNode SartoriusDistalViaNode1 = {sRel = .Scale( .StdPar.SartoriusDistalViaNode1 );};
-#endif
 
-#if BM_LEG_MORPHOLOGY == 2
   AnyRefNode SartoriusVia1Node = {sRel = .Scale( .StdPar.SartoriusVia1Node );};
   AnyRefNode SartoriusVia2Node = {sRel = .Scale( .StdPar.SartoriusVia2Node );};
   AnyRefNode SartoriusVia3Node = {sRel = .Scale( .StdPar.SartoriusVia3Node );};
   AnyRefNode SartoriusVia4Node = {sRel = .Scale( .StdPar.SartoriusVia4Node );};
   AnyRefNode SartoriusVia5Node = {sRel = .Scale( .StdPar.SartoriusVia5Node );};
   AnyRefNode SartoriusVia6Node = {sRel = .Scale( .StdPar.SartoriusVia6Node );};
-#endif
 
 
-#if BM_LEG_MORPHOLOGY == 2
     AnyRefNode &IliopsoasIns = Iliopsoas1Node;
-#endif
 
-#if BM_LEG_MORPHOLOGY == 2
     AnyRefNode TensorFasciaeLatae1ViaNode = {sRel = .Scale( .StdPar.TensorFasciaeLatae1ViaNode);};
     AnyRefNode TensorFasciaeLatae2ViaNode = {sRel = .Scale( .StdPar.TensorFasciaeLatae2ViaNode);};
-#endif
-#if BM_LEG_MORPHOLOGY == 1
-  AnyRefNode &IliopsoasIns = IliacusMid1Node;
-  AnyRefNode IlioFemAntIns  = {sRel = .Scale( .StdPar.IlioFemAntIns );};
-  AnyRefNode IlioFemAntIns2  = {sRel = .Scale( .StdPar.IlioFemAntIns2 );};
-  AnyRefNode IlioFemLatIns  = {sRel = .Scale( .StdPar.IlioFemLatIns );};
-  AnyRefNode IlioFemLatIns2 = {sRel = .Scale( .StdPar.IlioFemLatIns2 );};
-  AnyRefNode PuboFemIns  = {sRel = .Scale( .StdPar.PuboFemIns );};
-  AnyRefNode IschioFemIns  = {sRel = .Scale( .StdPar.IschioFemIns );};
-#endif
 
   AnyRefNode GastroWrapSurf =
   {
@@ -1684,7 +1426,6 @@ AnySeg Thigh =
     #include "<ANYBODY_PATH_MODELUTILS>/WrappingSurfaces/WrappingCylinder5PointFit.any"
   };
 
-#if BM_LEG_MORPHOLOGY == 2
    
   AnyRefNode HamstringWrapSurf =
   {
@@ -1697,7 +1438,6 @@ AnySeg Thigh =
   
     #include "<ANYBODY_PATH_MODELUTILS>/WrappingSurfaces/WrappingCylinder5PointFit.any"
   };
-#endif
 
   AnyDrawSurf Drw3 =
   {
@@ -1792,7 +1532,7 @@ AnySeg Patella =
     sRel = .Scale(.StdPar.PatellaFemurJoint);
     // / PatellaFemurJoint Joint orientation is calculated based on the direction between the two control points.
     ARel = RotMat({0.0,0,0}, .Sign*(PFLateralControlPoint-PFMedialControlPoint), 
-            .Sign*(0.5*(.RectusFemoris1Node.sRel+.RectusFemoris2Node.sRel) - .Origin_patella_tendon.sRel))*RotMat(pi/2,y);
+            (0.5*(.RectusFemoris1Node.sRel+.RectusFemoris2Node.sRel) - .Origin_patella_tendon.sRel))*RotMat(pi/2,y);
   };
   #endif
   
@@ -1825,55 +1565,29 @@ AnySeg Patella =
   AnyRefNode RectusFemoris2Node = {sRel = .Scale( .StdPar.RectusFemoris2Node );};
 
 
-#if BM_LEG_MORPHOLOGY == 1
-  AnyRefNode VastusIntermedius1Node = {sRel = .Scale( .StdPar.VastusIntermedius1Node );};
-  AnyRefNode VastusIntermedius2Node = {sRel = .Scale( .StdPar.VastusIntermedius2Node );};
-  AnyRefNode VastusIntermedius3Node = {sRel = .Scale( .StdPar.VastusIntermedius3Node );};
-  AnyRefNode VastusIntermedius4Node = {sRel = .Scale( .StdPar.VastusIntermedius4Node );};
-  AnyRefNode VastusIntermedius5Node = {sRel = .Scale( .StdPar.VastusIntermedius5Node );};
-  AnyRefNode VastusIntermedius6Node = {sRel = .Scale( .StdPar.VastusIntermedius6Node );};
-  #endif
 
-#if BM_LEG_MORPHOLOGY == 2
   AnyRefNode VastusIntermedius1Node = {sRel = .Scale( .StdPar.RectusFemoris1Node );};
   AnyRefNode VastusIntermedius2Node = {sRel = .Scale( .StdPar.RectusFemoris2Node);};
   AnyRefNode VastusIntermedius3Node = {sRel = .Scale( .StdPar.RectusFemoris1Node );};
   AnyRefNode VastusIntermedius4Node = {sRel = .Scale( .StdPar.RectusFemoris2Node );};
   AnyRefNode VastusIntermedius5Node = {sRel = .Scale( .StdPar.RectusFemoris1Node );};
   AnyRefNode VastusIntermedius6Node = {sRel = .Scale( .StdPar.RectusFemoris2Node );};
-#endif
 
 
-#if BM_LEG_MORPHOLOGY == 1
-  AnyRefNode VastusLateralisInferior1Node = {sRel = .Scale( .StdPar.VastusLateralisInferior1Node );};
-  AnyRefNode VastusLateralisInferior2Node = {sRel = .Scale( .StdPar.VastusLateralisInferior2Node );};
-  AnyRefNode VastusLateralisInferior3Node = {sRel = .Scale( .StdPar.VastusLateralisInferior3Node );};
-  AnyRefNode VastusLateralisInferior4Node = {sRel = .Scale( .StdPar.VastusLateralisInferior4Node );};
-  AnyRefNode VastusLateralisInferior5Node = {sRel = .Scale( .StdPar.VastusLateralisInferior5Node );};
-  AnyRefNode VastusLateralisInferior6Node = {sRel = .Scale( .StdPar.VastusLateralisInferior6Node );};
-#endif
 
 
-#if BM_LEG_MORPHOLOGY == 2
   AnyRefNode VastusLateralisInferior1Node = {sRel = .Scale( .StdPar.VastusLateralisInferior1Node );};
   AnyRefNode VastusLateralisInferior2Node = {sRel = .Scale( .StdPar.VastusLateralisInferior1Node );};
   AnyRefNode VastusLateralisInferior3Node = {sRel = .Scale( .StdPar.VastusLateralisInferior2Node );};
   AnyRefNode VastusLateralisInferior4Node = {sRel = .Scale( .StdPar.VastusLateralisInferior2Node );};
   AnyRefNode VastusLateralisInferior5Node = {sRel = .Scale( .StdPar.VastusLateralisInferior3Node );};
   AnyRefNode VastusLateralisInferior6Node = {sRel = .Scale( .StdPar.VastusLateralisInferior3Node );};
-#endif
 
 
-#if BM_LEG_MORPHOLOGY == 1
-  AnyRefNode VastusLateralisSuperior1Node = {sRel = .Scale( .StdPar.VastusLateralisSuperior1Node );};
-  AnyRefNode VastusLateralisSuperior2Node = {sRel = .Scale( .StdPar.VastusLateralisSuperior2Node );};
-#endif
 
 
-#if BM_LEG_MORPHOLOGY == 2
   AnyRefNode VastusLateralisSuperior1Node = {sRel = .Scale( .StdPar.VastusLateralisSuperior1Node );};
   AnyRefNode VastusLateralisSuperior2Node = {sRel = .Scale( .StdPar.VastusLateralisSuperior1Node );};
-#endif
 
   AnyRefNode VastusMedialisInferior1Node = {sRel = .Scale( .StdPar.VastusMedialisInferior1Node );};
   AnyRefNode VastusMedialisInferior2Node = {sRel = .Scale( .StdPar.VastusMedialisInferior1Node );};
@@ -1882,22 +1596,12 @@ AnySeg Patella =
 
 
 
-#if BM_LEG_MORPHOLOGY == 1
-  AnyRefNode VastusMedialisSuperior1Node = {sRel = .Scale( .StdPar.VastusMedialisSuperior1Node );};
-  AnyRefNode VastusMedialisSuperior2Node = {sRel = .Scale( .StdPar.VastusMedialisSuperior2Node );};
-  AnyRefNode VastusMedialisSuperior3Node = {sRel = .Scale( .StdPar.VastusMedialisSuperior3Node );};
-  AnyRefNode VastusMedialisSuperior4Node = {sRel = .Scale( .StdPar.VastusMedialisSuperior4Node );};
-  AnyRefNode VastusMedialisSuperior5Node = {sRel = .Scale( .StdPar.VastusMedialisSuperior5Node );};
-  AnyRefNode VastusMedialisSuperior6Node = {sRel = .Scale( .StdPar.VastusMedialisSuperior6Node );};
-#endif
 
 
-#if BM_LEG_MORPHOLOGY == 2
   AnyRefNode VastusMedialisSuperior1Node = {sRel = .Scale( .StdPar.VastusMedialisSuperior1Node );};
   AnyRefNode VastusMedialisSuperior2Node = {sRel = .Scale( .StdPar.VastusMedialisSuperior1Node );};
   AnyRefNode VastusMedialisSuperior3Node = {sRel = .Scale( .StdPar.VastusMedialisSuperior1Node );};
   AnyRefNode VastusMedialisSuperior4Node = {sRel = .Scale( .StdPar.VastusMedialisSuperior1Node );};
-#endif
 
 };// end of Patella
 
@@ -1923,14 +1627,12 @@ SacrumSeg =
       /// Folder with cadaver parameters for pelvis in the LegTLEM model
       AnyFolder &StdPar = ....ModelParameters.Pelvis;
       AnyFunTransform3D &Scale = ...PelvisSeg.AnatomicalFrame.Scale_Leg_Pelvis;   
-      #if BM_LEG_MORPHOLOGY >= 2
       AnyRefNode GluteusMaximusInferior1Node = {sRel = .Scale( .StdPar.GluteusMaximusInferior1Node );};
       AnyRefNode GluteusMaximusInferior2Node = {sRel = .Scale( .StdPar.GluteusMaximusInferior2Node );};
       AnyRefNode GluteusMaximusInferior3Node = {sRel = .Scale( .StdPar.GluteusMaximusInferior3Node );};
       AnyRefNode GluteusMaximusInferior4Node = {sRel = .Scale( .StdPar.GluteusMaximusInferior4Node );};
       AnyRefNode GluteusMaximusInferior5Node = {sRel = .Scale( .StdPar.GluteusMaximusInferior5Node );};
       AnyRefNode GluteusMaximusInferior6Node = {sRel = .Scale( .StdPar.GluteusMaximusInferior6Node );};
-      #endif
     };
   };// Sacrum.Left/Right
   
@@ -1970,21 +1672,8 @@ PelvisSeg =
 
       AnyFunTransform3D &Scale = ..AnatomicalFrame.Scale_Leg_Pelvis;
 
-#if BM_LEG_MORPHOLOGY == 1
-      AnyRefNode IliacusWrapSurf =
-      {
-        AnyFloat p = .Scale(.StdPar.IliacusWrapLandmarks);  //dn(20120614): moved scaling out of WrappingCylinder5PointFit.any
-        AnyFloat lengthscalefactor = 1.8;//1.4;
-        AnyFloat radiusscalefactor = 1;
 
-        AnyInt Sign = ..Sign;
-        AnyMat33 transform = RotMat(-pi * (Sign + 1) / 2, y);
-        AnyVar Z_rotation =0;
-        #include "<ANYBODY_PATH_MODELUTILS>/WrappingSurfaces/WrappingCylinder5PointFit.any"
-      };
-#endif
 
-#if BM_LEG_MORPHOLOGY == 2
 
       #include "GluteusMaximumsWrappingSurfaces.any"
 
@@ -2063,11 +1752,8 @@ PelvisSeg =
 
 
       
-#endif
 
-      #if BM_LEG_MORPHOLOGY == 2
       AnyRefNode IschialTuberosityWrapNode = {sRel = .Scale( .StdPar.IschialTuberosityWrapNode);};
-      #endif
       // Origin points on the Pelvis
 
       AnyRefNode ASIS = {sRel = .Scale( .StdPar.AsisIpsilateral); /*AnyDrawNode Node = {ScaleXYZ = {0.005, 0.005, 0.005};};*/};
@@ -2150,43 +1836,28 @@ PelvisSeg =
       AnyRefNode IliacusLateralis2Node = {sRel = .Scale( .StdPar.IliacusLateralis2Node ); };
 
 
-#if BM_LEG_MORPHOLOGY == 1
-      AnyRefNode IliacusLateralis3Node = {sRel = .Scale( .StdPar.IliacusLateralis3Node );};
-#endif
 
       AnyRefNode IliacusLateralisViaNode1 = {sRel = .Scale( .StdPar.IliacusLateralisViaNode1 );};
-#if BM_LEG_MORPHOLOGY == 2
       AnyRefNode IliacusLateralisViaNode2 = {sRel = 0.5*.Scale(.StdPar.IliacusLateralisViaNode1) + 0.5*.Scale(.StdPar.IliacusMidViaNode1);};
-#endif
       
       AnyRefNode IliacusMid1Node = {sRel = .Scale( .StdPar.IliacusMid1Node );};
       AnyRefNode IliacusMid2Node = {sRel = .Scale( .StdPar.IliacusMid2Node );};
 
 
-#if BM_LEG_MORPHOLOGY == 1
-      AnyRefNode IliacusMid3Node = {sRel = .Scale( .StdPar.IliacusMid3Node );};
-#endif
 
       AnyRefNode IliacusMidViaNode1 = {sRel = .Scale( .StdPar.IliacusMidViaNode1 );};
 
-#if BM_LEG_MORPHOLOGY == 2
       AnyRefNode IliacusMidViaNode2 = {sRel = (2/3)*.Scale(.StdPar.IliacusMidViaNode1 ) + (1/3)* .Scale(.StdPar.IliacusMedialisViaNode1); };
-#endif
 
 
       AnyRefNode IliacusMedialis1Node = {sRel =.Scale( .StdPar.IliacusMedialis1Node ); };
       AnyRefNode IliacusMedialis2Node = {sRel = .Scale( .StdPar.IliacusMedialis2Node );};
 
 
-#if BM_LEG_MORPHOLOGY == 1
-      AnyRefNode IliacusMedialis3Node = {sRel = .Scale( .StdPar.IliacusMedialis3Node );};
-#endif
 
 
       AnyRefNode IliacusMedialisViaNode1 = {sRel = .Scale( .StdPar.IliacusMedialisViaNode1 );};
-#if BM_LEG_MORPHOLOGY == 2
       AnyRefNode IliacusMedialisViaNode2 = {sRel = (1/3)*.Scale(.StdPar.IliacusMidViaNode1 ) + (2/3)* .Scale(.StdPar.IliacusMedialisViaNode1); };
-#endif
       
       
       
@@ -2198,32 +1869,22 @@ PelvisSeg =
       AnyRefNode ObturatorExternusSuperior3Node = {sRel = .Scale( .StdPar.ObturatorExternusSuperior3Node );};
 
 
-#if BM_LEG_MORPHOLOGY == 1
-      AnyRefNode ObturatorExternusSuperiorViaNode1 = {sRel = .Scale( .StdPar.ObturatorExternusSuperiorViaNode1 );};
-#endif
 
       AnyRefNode ObturatorInternus1Node = {sRel = .Scale( .StdPar.ObturatorInternus1Node );};
       AnyRefNode ObturatorInternus2Node = {sRel = .Scale( .StdPar.ObturatorInternus2Node );};
       AnyRefNode ObturatorInternus3Node = {sRel = .Scale( .StdPar.ObturatorInternus3Node );};
 
-#if BM_LEG_MORPHOLOGY == 1
-      AnyRefNode ObturatorInternusViaNode1 = {sRel = .Scale( .StdPar.ObturatorInternusViaNode1 );};
-#endif
 
 
-#if BM_LEG_MORPHOLOGY == 2
       AnyRefNode ObturatorInternus4Node = {sRel = .Scale( .StdPar.ObturatorInternus4Node );};
       AnyRefNode ObturatorInternus5Node = {sRel = .Scale( .StdPar.ObturatorInternus5Node );};
       AnyRefNode ObturatorInternus6Node = {sRel = .Scale( .StdPar.ObturatorInternus6Node );};
 
       AnyRefNode ObturatorInternusViaNode1 = {sRel = .Scale( .StdPar.ObturatorInternusVia1Node );};
 
-#endif
 
       AnyRefNode Pectineus1Node = {sRel = .Scale( .StdPar.Pectineus1Node );};
-#if BM_LEG_MORPHOLOGY == 2
       AnyRefNode Pectineus1ViaNode = {sRel = .Scale( .StdPar.Pectineus1ViaNode );};
-#endif
       AnyRefNode Pectineus2Node = {sRel = .Scale( .StdPar.Pectineus2Node );};
       AnyRefNode Pectineus3Node = {sRel = .Scale( .StdPar.Pectineus3Node );};
       AnyRefNode Pectineus4Node = {sRel = .Scale( .StdPar.Pectineus4Node );};
@@ -2231,18 +1892,7 @@ PelvisSeg =
       AnyRefNode Piriformis1Node = {sRel = .Scale( .StdPar.Piriformis1Node );};
 
 
-#if BM_LEG_MORPHOLOGY == 1
-      AnyRefNode PsoasMinor1Node = {sRel = .Scale( .StdPar.PsoasMinor1Node );};
-      AnyRefNode PsoasMinorViaNode1 = {sRel = .Scale( .StdPar.PsoasMinorViaNode1 );};
-      // The PsoasMinor does not have a viapoint according to the Klein Horsman dataset. However, since it uses the
-      // Psoas Major insertion point (see comments in Thigh segment) it needs this via point in order to wrap around
-      // the cylinder in the right direction.
 
-      AnyRefNode PsoasMajor1Node = {sRel = .Scale( .StdPar.PsoasMajor1Node );};
-      AnyRefNode PsoasMajor2Node = {sRel = .Scale( .StdPar.PsoasMajor2Node );};
-      AnyRefNode PsoasMajor3Node = {sRel = .Scale( .StdPar.PsoasMajor3Node );};
-      AnyRefNode PsoasMajorViaNode1 = {sRel = .Scale( .StdPar.PsoasMajorViaNode1 );};
-#endif
 
 
       AnyRefNode QuadratusFemoris1Node	= {sRel = .Scale( .StdPar.QuadratusFemoris1Node );};
@@ -2255,23 +1905,15 @@ PelvisSeg =
       AnyRefNode RectusFemoris2Node = {sRel = .Scale( .StdPar.RectusFemoris2Node );};
 
 
-#if BM_LEG_MORPHOLOGY == 1
-      AnyRefNode SartoriusProximal1Node = {sRel = .Scale( .StdPar.SartoriusProximal1Node );};
-      AnyRefNode SartoriusDistal1Node = {sRel = .Scale( .StdPar.SartoriusDistal1Node );};
-#endif
 
 
-#if BM_LEG_MORPHOLOGY == 2
       AnyRefNode Sartorius1Node = {sRel = .Scale( .StdPar.Sartorius1Node );};
-#endif
 
       AnyRefNode Semimembranosus1Node = {sRel = .Scale( .StdPar.Semimembranosus1Node );};
 
 
-#if BM_LEG_MORPHOLOGY == 2
       AnyRefNode Semimembranosus2Node = {sRel = .Scale( .StdPar.Semimembranosus2Node );};
       AnyRefNode Semimembranosus3Node = {sRel = .Scale( .StdPar.Semimembranosus3Node );};
-#endif
 
       AnyRefNode Semitendinosus1Node = {sRel = .Scale( .StdPar.Semitendinosus1Node );};
 
@@ -2279,13 +1921,6 @@ PelvisSeg =
       AnyRefNode TensorFasciaeLatae2Node = {sRel = .Scale( .StdPar.TensorFasciaeLatae2Node );};
 
 
-#if BM_LEG_MORPHOLOGY == 1
-      //Ligament origin nodes from Klein-Horseman
-      AnyRefNode IlioFemAntOrig = {sRel = .Scale( .StdPar.IlioFemAntOrig );};
-      AnyRefNode IlioFemLatOrig = {sRel = .Scale( .StdPar.IlioFemLatOrig );};
-      AnyRefNode PuboFemOrig = {sRel = .Scale( .StdPar.PuboFemOrig );}; //updated coordinates
-      AnyRefNode IschioFemOrig = {sRel = .Scale( .StdPar.IschioFemOrig );};
-#endif
 
 
 

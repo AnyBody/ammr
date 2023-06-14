@@ -95,6 +95,7 @@ Switch to use leg model: "TLEM 1"
 
 :::{ammr:bm_constant} _LEG_MODEL_TLEM1_
 :value: 1
+:deprecated:
 Switch to use leg model: "TLEM 1"
 :::
 ::::

@@ -3,8 +3,8 @@
 //Spine Vol23(20), 1998, pp2167-2173
 //
 //See also:
-//S. Dendorfer; J. Rasmussen; S. Tørholm and B. Robie, The Effect of Spinal Disc Herniation on Multifidus Muscles, 56th Annual Orthopaedic Research Society Meeting, New Orleans, USA, 2010
-//B. Robie, J. Rasmussen; S. Tørholm and S. Dendorfer, Herniation Induces 55% Increase in Load of Key Stabilizing Muscle - Impact on Herniation Treatment Devices?, Spine Arthoplasty Society meeting, New Orleans, USA, 2010
+//S. Dendorfer; J. Rasmussen; S. Toerholm and B. Robie, The Effect of Spinal Disc Herniation on Multifidus Muscles, 56th Annual Orthopaedic Research Society Meeting, New Orleans, USA, 2010
+//B. Robie, J. Rasmussen; S. Toerholm and S. Dendorfer, Herniation Induces 55% Increase in Load of Key Stabilizing Muscle - Impact on Herniation Treatment Devices?, Spine Arthoplasty Society meeting, New Orleans, USA, 2010
 //SD
 
 
@@ -44,6 +44,8 @@
      AnyFunPolynomial &Extfun = Flexfun;
      AnyFunPolynomial &ARfun = Flexfun;
      AnyFunPolynomial &LBfun = Flexfun;    
+     AnyFunPolynomial &LBfun_R = Flexfun;    
+     AnyFunPolynomial &LBfun_L = Flexfun;    
     #endif
     
     #if BM_TRUNK_DISC_STIFNESS == _DISC_STIFFNESS_LINEAR_
@@ -58,8 +60,10 @@
        PolyCoef=-1*{{0, .ratio*.AxialRot+.ligAxialRot}};
      };
      AnyFunPolynomial LBfun = {
-       PolyCoef=-1*{{0, .ratio*.Latbend+.ligLatbend}};
+       PolyCoef=-1*{{0, .ratio*.Latbend+.ligLatbend}}; //linear behavior, 0-centered, symmetric with opposite sign for R/L
      };
+     AnyFunPolynomial &LBfun_R = LBfun;    
+     AnyFunPolynomial &LBfun_L = LBfun;    
 
     #endif
     
@@ -69,19 +73,24 @@
       //  #Lateral bending  -0.0087x2 - 0.6989x
       //  #Axial rotation   -0.0061x3 - 1.0191x   
       
+      
+      // Flexion-extension curve is not symmetric
       AnyFunPolynomial Flexfun = {
-        PolyCoef={{-0.002, 0.0141,-0.4726 + .ligFlex,0}};    
+        PolyCoef={{0,-0.4726 + .ligFlex, 0.0141, -0.002,0}};    
       };
 
       AnyFunPolynomial Extfun = {
-        PolyCoef={{-0.002, 0.0141,-0.4726 + .ligExt,0}};    
+        PolyCoef={{0,-0.4726 + .ligFlex, 0.0141, -0.002,0}};    
       };
       
       AnyFunPolynomial ARfun = {
-        PolyCoef={{-0.0061,0,-1.0191+ .ligAxialRot,0}};
+        PolyCoef={{0, -1.0191+ .ligAxialRot,0,-0.0061}}; // symmetric for R/L ax.rotations
       };
-      AnyFunPolynomial LBfun = {
-        PolyCoef={{0, -0.0087, -0.6989+ .ligLatbend,0}};
+      AnyFunPolynomial LBfun_R = {
+        PolyCoef={{0, -0.6989+ .ligLatbend, -0.0087,0}};
+      };
+      AnyFunPolynomial LBfun_L = {
+        PolyCoef={{0, -0.6989+ .ligLatbend, 0.0087,0}};
       };
     #endif
     
@@ -91,7 +100,12 @@
     AnyForce L5SacrumDiscMoment = {         
       // find out where it is flexion or extension
       AnyFloat A = iffun(gtfun(rot.Pos[0],0), 0, 1);
-      F = { (A*.Flexfun(Angle[0])[0]+(1-A)*.Extfun(Angle[0]))[0], .ARfun(Angle[1])[0], .LBfun(Angle[2])[0]};
+      AnyFloat B = iffun(gtfun(rot.Pos[1],0), 0, 1);
+      F = { 
+        (A*.Flexfun(Angle[0])[0] + (1-A)*.Extfun(Angle[0])[0]), 
+           .ARfun(  Angle[1])[0], 
+        (B*.LBfun_L(Angle[2])[0] + (1-B)*.LBfun_R(Angle[2])[0])
+      };
       AnyFloat Angle = rot.Pos*180/pi;  // Z,Y,X (FlexExt,AxRot,LatBend)
       AnyKinRotational rot = {
         AnyRefNode &rf0 = ...SegmentsLumbar.SacrumSeg.SacrumL5JntNode;
@@ -104,7 +118,12 @@
     AnyForce L4L5DiscMoment = {         
       // find out where it is flexion or extension
       AnyFloat A = iffun(gtfun(rot.Pos[0],0), 0, 1);
-      F = { (A*.Flexfun(Angle[0])[0]+(1-A)*.Extfun(Angle[0]))[0], .ARfun(Angle[1])[0], .LBfun(Angle[2])[0]};
+      AnyFloat B = iffun(gtfun(rot.Pos[1],0), 0, 1);
+      F = { 
+        (A*.Flexfun(Angle[0])[0] + (1-A)*.Extfun(Angle[0])[0]), 
+           .ARfun(  Angle[1])[0], 
+        (B*.LBfun_L(Angle[2])[0] + (1-B)*.LBfun_R(Angle[2])[0])
+      };
       AnyFloat Angle = rot.Pos*180/pi;  // Z,Y,X (FlexExt,AxRot,LatBend)
       AnyKinRotational rot = {
         AnyRefNode &rf0 = ...SegmentsLumbar.L5Seg.L4L5JntNode;
@@ -117,7 +136,12 @@
     AnyForce L3L4DiscMoment = {         
       // find out where it is flexion or extension
       AnyFloat A = iffun(gtfun(rot.Pos[0],0), 0, 1);
-      F = { (A*.Flexfun(Angle[0])[0]+(1-A)*.Extfun(Angle[0]))[0], .ARfun(Angle[1])[0], .LBfun(Angle[2])[0]};
+      AnyFloat B = iffun(gtfun(rot.Pos[1],0), 0, 1);
+      F = { 
+        (A*.Flexfun(Angle[0])[0] + (1-A)*.Extfun(Angle[0])[0]), 
+           .ARfun(  Angle[1])[0], 
+        (B*.LBfun_L(Angle[2])[0] + (1-B)*.LBfun_R(Angle[2])[0])
+      };
       AnyFloat Angle = rot.Pos*180/pi;  // Z,Y,X (FlexExt,AxRot,LatBend)
       AnyKinRotational rot = {
         AnyRefNode &rf0 = ...SegmentsLumbar.L4Seg.L3L4JntNode;
@@ -131,7 +155,12 @@
     AnyForce L2L3DiscMoment = {         
       // find out where it is flexion or extension
       AnyFloat A = iffun(gtfun(rot.Pos[0],0), 0, 1);
-      F = { (A*.Flexfun(Angle[0])[0]+(1-A)*.Extfun(Angle[0]))[0], .ARfun(Angle[1])[0], .LBfun(Angle[2])[0]};
+      AnyFloat B = iffun(gtfun(rot.Pos[1],0), 0, 1);
+      F = { 
+        (A*.Flexfun(Angle[0])[0] + (1-A)*.Extfun(Angle[0])[0]), 
+           .ARfun(  Angle[1])[0], 
+        (B*.LBfun_L(Angle[2])[0] + (1-B)*.LBfun_R(Angle[2])[0])
+      };
       AnyFloat Angle = rot.Pos*180/pi;  // Z,Y,X (FlexExt,AxRot,LatBend)
       AnyKinRotational rot = {
         AnyRefNode &rf0 = ...SegmentsLumbar.L3Seg.L2L3JntNode;
@@ -144,7 +173,12 @@
     AnyForce L1L2DiscMoment = {         
       // find out where it is flexion or extension
       AnyFloat A = iffun(gtfun(rot.Pos[0],0), 0, 1);
-      F = { (A*.Flexfun(Angle[0])[0]+(1-A)*.Extfun(Angle[0]))[0], .ARfun(Angle[1])[0], .LBfun(Angle[2])[0]};
+      AnyFloat B = iffun(gtfun(rot.Pos[1],0), 0, 1);
+      F = { 
+        (A*.Flexfun(Angle[0])[0] + (1-A)*.Extfun(Angle[0])[0]), 
+           .ARfun(  Angle[1])[0], 
+        (B*.LBfun_L(Angle[2])[0] + (1-B)*.LBfun_R(Angle[2])[0])
+      };
       AnyFloat Angle = rot.Pos*180/pi;  // Z,Y,X (FlexExt,AxRot,LatBend)
       AnyKinRotational rot = {
         AnyRefNode &rf0 = ...SegmentsLumbar.L2Seg.L1L2JntNode;
@@ -157,7 +191,12 @@
     AnyForce T12L1DiscMoment = {         
       // find out where it is flexion or extension
       AnyFloat A = iffun(gtfun(rot.Pos[0],0), 0, 1);
-      F = { (A*.Flexfun(Angle[0])[0]+(1-A)*.Extfun(Angle[0]))[0], .ARfun(Angle[1])[0], .LBfun(Angle[2])[0]};
+      AnyFloat B = iffun(gtfun(rot.Pos[1],0), 0, 1);
+      F = { 
+        (A*.Flexfun(Angle[0])[0] + (1-A)*.Extfun(Angle[0])[0]), 
+           .ARfun(  Angle[1])[0], 
+        (B*.LBfun_L(Angle[2])[0] + (1-B)*.LBfun_R(Angle[2])[0])
+      };
       AnyFloat Angle = rot.Pos*180/pi;  // Z,Y,X (FlexExt,AxRot,LatBend)
       AnyKinRotational rot = {
         AnyRefNode &rf0 = ...SegmentsLumbar.L1Seg.T12L1JntNode;

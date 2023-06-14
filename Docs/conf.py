@@ -290,12 +290,14 @@ html_title = "%s v%s Documentation" % (project, release)
 
 html_theme_options = {
   # 'single_page': True,
-   "extra_navbar": "",
-   "logo_only": True,
+#    "extra_navbar": "",
+#    "logo_only": True,
    "home_page_in_toc": False,
    "show_navbar_depth": 1,
    "use_download_button": False,
    #"default_mode": "dark",
+   "pygment_light_style": "AnyScript",
+   "pygment_dark_style": "stata-dark"
 }
 
 
@@ -431,11 +433,16 @@ linkcheck_ignore = [
     "https://doi.org/10.1115/1.4037100", # asme.org prevents the linkcheck 
     "https://doi.org/10.1115/1.4052115", # asme.org prevents the linkcheck 
     "https://dx.doi.org/10.1115/1.4001678", # asme.org prevents the linkcheck 
-    "https://dx.doi.org/10.1115/1.4029258", # asme.org prevents the linkcheck 
+    "https://dx.doi.org/10.1115/1.4029258", # asme.org prevents the linkcheck
+    "https://doi.org/10.1080/10255842.2020.1851367", # tandfonline.com prevents the linkcheck
+    "https://dx.doi.org/10.1002/jor.20255", # wiley.com prevents the linkcheck
+    "https://doi.org/10.1016/j.clinbiomech.2006.10.003", # clinbiomech.com prevents the linkcheck
     ]
 
 linkcheck_allowed_redirects = {
-   "https://doi.org.*":  ".*"
+   "https://doi.org.*":  ".*",
+   "https://dx.doi.org.*":  ".*",
+   "https://www.anybodytech.com/download/anybodysetup.*": ".*",
 }
 
 

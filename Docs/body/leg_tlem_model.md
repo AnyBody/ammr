@@ -2,6 +2,12 @@
 
 # Twente Lower Extremity Model v.1.2
 
+
+:::{deprecated} 2.5.0
+TLEM 1 has been deprecated.
+:::
+
+
 The AnyBody implementation of a the Twente lower extremity model (TLEM) consists
 of **159 muscles**, and **6 joint degrees**.
 

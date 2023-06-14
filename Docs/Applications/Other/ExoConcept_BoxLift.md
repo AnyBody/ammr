@@ -23,7 +23,7 @@ Exoskeleton concept model.
 :::
 
 This example shows how to study different exoskeleton concepts on an activity. The model is
-based on the [webcast](https://www.anybodytech.com/simulation-driven-conceptual-design-of-exoskeletons/)
+based on the [webcast](https://www.anybodytech.com/download/simulation-driven-conceptual-design-of-exoskeletons/)
 presented by Prof. John Rasmussen from Aalborg University on March 28, 2022.
 
 The model points to the existing {ref}`BVH Box Lift model <example_bvh_boxlift>` in the AMMR and implements

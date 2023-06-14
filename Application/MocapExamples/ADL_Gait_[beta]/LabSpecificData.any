@@ -27,19 +27,41 @@ Main.ModelSetup.LabSpecificData = {
  #include "Outputs_extended.any"
  #endif
  
- // The low-pass filter cut-off frequencies are relatively low here. This is 
- // to compensate for the noise in the recording. 
- // A low cut-off frequency is possible since this is a slow excersize. 
- // For other activities use higher values and check that the filter 
- // does not alter the actual signal. (Suitable values for normal gait are 5/10).
- LowPassFilterSettings.MarkerFilterCutOffFrequency = 10;
- LowPassFilterSettings.ForceFilterCutOffFrequency = 12;
+ 
+ // Better start-guess/posture for gait trials
+   Main.HumanModel.Mannequin.Posture = {
+    Right.ElbowFlexion = 30;
+    Left.ElbowFlexion = 30;
+  };
+
+  Main.Studies.ParameterIdentification.KinematicStudyForParameterIdentification= {
+    Kinematics.KinematicTol = 1e-4;
+  };
+  Main.ModelSetup.TrialSpecificData.ParameterOptimizationConvergenceTol = 1e-2;
+  
+ 
+ 
  
  // Disable the upper bound for muscle recruitment. This improves the stability of the model by 
  // preventing the solver from changing if the some muscles becomes over loaded. 
  Main.Studies.InverseDynamicStudy.InverseDynamics.Criterion.UpperBoundOnOff = Off;
  
  Gravity = -9.81*{0,0,1};
+ 
+ 
+ #ifdef REFERENCE_TRIAL
+ // Set narrow kinematic limits when running parameter optimization
+ // improves robustness
+ Main.ModelSetup.MocapExtraDrivers.DefaultJointLimits = 
+ {
+   LimitElbowFlexionRight.ROM = {3, 120};
+   LimitElbowFlexionLeft.ROM = {3, 120};
+   WristFlexionRight.ROM = {-70,20};
+   WristFlexionLeft.ROM = {-70,20};
+   WristAbductionRight.ROM = {-30, 30};
+   WristAbductionLeft.ROM = {-30, 30};
+ };
+ #endif
  
  
    // This adds different segment length as design variables to 
@@ -64,13 +86,23 @@ Main.ModelSetup.LabSpecificData = {
     LEFT_LOWERARM_LENGTH = ON,
     RIGHT_HAND_LENGTH= ON, 
     LEFT_HAND_LENGTH = ON,
-    RIGHT_HAND_BREADTH= ON, 
-    LEFT_HAND_BREADTH = ON,
+    RIGHT_HAND_BREADTH= OFF, 
+    LEFT_HAND_BREADTH = OFF,
     RIGHT_TIBIAL_TORSION = ON,
     LEFT_TIBIAL_TORSION = ON,
     LEFT_RIGHT_SYMMETRY = ON
 ) ={};
-  
+
+  Main.HumanModel.Anthropometrics.SegmentScaleFactors = {
+     // Some antropometrics are not optimized from markers but set 
+     // to match the total BodyScale height parameter
+     Thorax.DepthScale = BodyScale;
+     Neck.LengthScale = Thorax.LengthScale;
+     Head.LengthScale = Thorax.LengthScale;
+     Head.DepthScale = Head.LengthScale;
+     Head.WidthScale = Head.LengthScale;
+     
+  };
 
  #else
   OptimizeAnthropometricsOnOff OptimizeAntropometricsOnOff ={}; 
@@ -94,7 +126,7 @@ Main.ModelSetup.LabSpecificData = {
     "------------------------------------------------------------------------------------------------------\n"+
     "The 'Rehazenter-adult-walking-dataset' must be downloaded manually. It is available under \n"+
     "a Creative Commons license from fig-share: \n"+
-    "https://ndownloader.figshare.com/files/22164558 \n"+
+    "https://figshare.com/articles/dataset/A_multimodal_dataset_of_human_gait_at_different_walking_speeds/7734767/8 \n"+
     "   \n"+
     "Download the data and extract the files into the 'c3dfiles/' subfolder. So the layout becomes\n"+
     "  C3DFiles\\ \n"+
