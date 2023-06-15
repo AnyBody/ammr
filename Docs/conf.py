@@ -248,14 +248,13 @@ if tags.has("draft") and not release.endswith("beta"):
     release = release + "-beta"
 
 
-suppress_warnings = ["ref.citation"]
+# suppress_warnings = ["ref.citation"]
 
 
 # -- Options for HTML output ----------------------------------------------
 
 
-def setup(app):
-    app.add_stylesheet("theme_override.css")
+
 
 
 # html_sidebars = {
@@ -455,4 +454,5 @@ linkcheck_allowed_redirects = {
 
 
 def setup(app):
+    app.add_stylesheet("theme_override.css")
     app.add_css_file("custom.css")
