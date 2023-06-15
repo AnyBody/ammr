@@ -457,5 +457,5 @@ linkcheck_allowed_redirects = {
 
 
 def setup(app):
-    app.add_stylesheet("theme_override.css")
+    app.add_css_file("theme_override.css")
     app.add_css_file("custom.css")
