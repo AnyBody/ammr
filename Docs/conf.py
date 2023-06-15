@@ -215,8 +215,16 @@ if tags.has("draft"):
     myst_html_meta["robots"] = "noindex"
 
 
-
-
+# Monkeypatch sphinx.domains.changeset.versionslabels dictionary
+# highlight AMMR
+# from sphinx.domains.changeset import versionlabels
+from sphinx.locale import _
+from sphinx.domains.changeset import versionlabels
+versionlabels.update({
+    "versionadded": _('New in AMMR %s'),
+    "versionchanged": _('Changed in AMMR %s'),
+    "deprecated": _('Deprecated since AMMR %s'),
+})
 
 
 # General information about the project.
