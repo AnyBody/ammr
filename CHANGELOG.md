@@ -29,6 +29,8 @@ achieve same marker position and joint angle output.
 * Updated scaling functions (`Scale`) for segments in trunk model (lumbar,
   thoracic and cervical) to account for pelvis segment morphing into leg pelvis
   coordinate system using `BM_LEG_TRUNK_INTERFACE` setting.
+* Fixed a bug in the `AnatomicalFrame` of TLEM 2.2 foot and talus that caused the
+  ARel to be constructed from unscaled landmarks.
 
 
 ### Added:

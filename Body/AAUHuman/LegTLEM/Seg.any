@@ -123,27 +123,25 @@ AnySeg Foot =
 
   r0=.Talus.SubTalarJoint.sRel*.Talus.Axes0'+.Talus.r0-SubTalarJoint.sRel*Axes0';
   
-  /// pUnscaled = {LateralMalleolus, MedialMalleolus, Metatarsal2} //bony landmarks to define orgin and long axis of the foot
-  AnyFloat pUnscaled = {StdPar.LateralMalleolus, StdPar.MedialMalleolus, StdPar.Metatarsal2PlantarNode};
-  /// d={Heel, Metatarsal5, Metatarsal1} // three coplanar points to define the horizontal plane parallel to the ground. These can be on the bones, skin, shoe, etc. and 
-  /// determine the proximal-distal axis of the foot and ankle plantarflexion zero value
-  AnyFloat dAxisFixed = {StdPar.HeelPlantarNode, StdPar.Metatarsal5PlantarNode, StdPar.Metatarsal1PlantarNode};
+  /// pUnscaled = {LateralMalleolus, MedialMalleolus, Metatarsal2} //bony landmarks to define orgin and long axis of the foot and three coplanar points to define the
+  /// horizontal plane parallel to the ground. These can be on the bones, skin, shoe, etc. and determine the proximal-distal axis of the foot and ankle plantarflexion zero value
+  AnyFloat pUnscaled = {StdPar.LateralMalleolus, StdPar.MedialMalleolus, StdPar.Metatarsal2PlantarNode,StdPar.HeelPlantarNode, StdPar.Metatarsal5PlantarNode, StdPar.Metatarsal1PlantarNode};
   AnyFunTransform3D& GeomScale = ..GeoScaling.Foot.ScaleFunction;
   AnyVar Sign = ..Sign;
-  // p={LateralMalleolus, MedialMalleolus, Metatarsal2} //bony landmarks to define orgin and long axis of the foot
-  // d={Heel, Metatarsal5, Metatarsal1} // three coplanar points to define the horizontal plane parallel to the ground. These can be on the bones, skin, shoe, etc. and 
-  //                                    // determine the proximal-distal axis of the foot and ankle plantarflexion zero value
+  // p={LateralMalleolus, MedialMalleolus, Metatarsal2, Heel, Metatarsal5, Metatarsal1} //bony landmarks to define orgin and long axis of the foot
+  // and three coplanar points to define the horizontal plane parallel to the ground. These can be on the bones, skin, shoe, etc. and 
+  // determine the proximal-distal axis of the foot and ankle plantarflexion zero value
   #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(p, SIGN) 0.5*(p[0]+p[1])
-  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2(p, d, SIGN) RotMat(0.5*(p[0]+p[1]),0.5*(p[0]+p[1]) + cross(d[1]-d[0],d[2]-d[0])*SIGN, p[2]) * RotMat(-0.5*pi,z) * RotMat(1*pi,y)
+  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(p, SIGN) RotMat(0.5*(p[0]+p[1]),0.5*(p[0]+p[1]) + cross(p[4]-p[3],p[5]-p[3])*SIGN, p[2]) * RotMat(-0.5*pi,z) * RotMat(1*pi,y)
   #include "..\Scaling\SegScaleFunWrtAnatomicalFrame.any"
 
   AnyRefNode AnatomicalFrame =
   {
     AnyFloat pScaled = .Scale(.pUnscaled);
     sRel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(pScaled, .Sign);
-    ARel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2(pScaled, .dAxisFixed, .Sign);
+    ARel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(pScaled, .Sign);
     AnyVec3 sRelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(.pUnscaled, .Sign);///< Generic unscaled position of foot ScalingNode
-    AnyMat33 ARelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2(.pUnscaled, .dAxisFixed, .Sign);///< Generic unscaled rotation of foot ScalingNode
+    AnyMat33 ARelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(.pUnscaled, .Sign);///< Generic unscaled rotation of foot ScalingNode
   };
   
   AnySeg Talus =
@@ -155,11 +153,10 @@ AnySeg Foot =
     
     r0=..Shank.AnkleJoint.sRel*..Shank.Axes0'+..Shank.r0-AnkleJoint.sRel*Axes0';
     
-    /// pUnscaled = pUnscaled from foot = {LateralMalleolus, MedialMalleolus, Metatarsal2} //bony landmarks to define orgin and long axis of the foot
-    AnyFloat pUnscaled = .pUnscaled;
-    /// dAxisFixed = dAxisFixed from foot = {Heel, Metatarsal5, Metatarsal1} // three coplanar points to define the horizontal plane parallel to the ground. These can be on the bones, skin, shoe, etc. and 
+    /// pUnscaled = pUnscaled from foot = {LateralMalleolus, MedialMalleolus, Metatarsal2, Heel, Metatarsal5, Metatarsal1} //bony landmarks to define orgin and long axis of the foot
+    /// and three coplanar points to define the horizontal plane parallel to the ground. These can be on the bones, skin, shoe, etc. and 
     /// determine the proximal-distal axis of the foot and ankle plantarflexion zero value
-    AnyFloat dAxisFixed = .dAxisFixed;
+    AnyFloat pUnscaled = .pUnscaled;
     AnyFunTransform3D& GeomScale = ...GeoScaling.Talus.ScaleFunction;
     AnyVar Sign = ...Sign;
     #include "..\Scaling\SegScaleFunWrtAnatomicalFrame.any"
@@ -168,9 +165,9 @@ AnySeg Foot =
     {
       AnyFloat pScaled = .Scale(.pUnscaled);
       sRel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(pScaled, .Sign);
-      ARel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2(pScaled, .dAxisFixed, .Sign);
+      ARel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(pScaled, .Sign);
       AnyVec3 sRelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(.pUnscaled, .Sign); ///< Generic unscaled position of talus ScalingNode
-      AnyMat33 ARelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2(.pUnscaled, .dAxisFixed, .Sign);///< Generic unscaled rotation of talus ScalingNode
+      AnyMat33 ARelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(.pUnscaled, .Sign);///< Generic unscaled rotation of talus ScalingNode
     };
     
     /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
@@ -286,7 +283,7 @@ AnySeg Foot =
 
   AnyRefNode& ScalingNode=AnatomicalFrame;
   #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_s
-  #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_A2
+  #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_A
 
   AnyVar LengthStandard = vnorm(StdPar.SubTalarJoint-StdPar.ToeJoint,2);
   AnyVar MassS = ..MassScaling.Foot.MassScale;
