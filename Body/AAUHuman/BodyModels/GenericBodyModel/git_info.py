@@ -19,14 +19,21 @@ def git_info(context, fpath: str) -> Tuple[str, str]:
     gitfolder = Path(fpath)
     if not gitfolder.is_absolute():
         gitfolder = Path(context.call_location_file).parent.joinpath(gitfolder)
-    
-    head_file = gitfolder /"HEAD"
-    orig_file = gitfolder / "ORIG_HEAD"
 
-    if not head_file.is_file() or not orig_file.is_file():
-        raise FileNotFoundError(f"Git folder not found: {gitfolder}")
-    
-    ref = head_file.read_text(encoding="utf-8").strip()
-    hash = orig_file.read_text(encoding="utf-8").strip()
-    return ref, hash
+    head_file = gitfolder / "HEAD"
+    orig_head_file = gitfolder / "ORIG_HEAD"
+    fetch_head_file = gitfolder / "FETCH_HEAD"
 
+    if orig_head_file.is_file():
+        hashref = orig_head_file.read_text(encoding="utf-8").strip()
+    elif fetch_head_file.is_file():
+        hashref = fetch_head_file.read_text(encoding="utf-8").strip().split("\t")[0]
+    else:
+        hashref = "unknown"
+
+    if head_file.is_file():
+        ref = head_file.read_text(encoding="utf-8").strip()
+    else:
+        ref = "unknown"
+
+    return ref, hashref
