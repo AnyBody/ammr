@@ -37,7 +37,7 @@ ERROR(SCR.PRS9) :   some-file.any(##)  :   'Scale_Leg_Pelvis'  :  Unresolved obj
 ```
 
 The functions `Scale_Leg_Pelvis` and `Scale_Trunk_Pelvis` on the pelvis segment have been moved inside the `AnatomicalFrame` folder. 
-So update code to `AnatomicalFrame.Scale_Leg_Pelvis`.
+Update your code to `AnatomicalFrame.Scale_Leg_Pelvis`.
 
 
 #### Unresolved `MusPar` folder
