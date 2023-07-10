@@ -15,9 +15,8 @@ This documents shows some of the most common errors which may be encountered whe
 
 #### Pelvic markers
 
-Changes to the pelvic tilt means that markers on the pelvis located directly in
-the pelvis Anatomcial frame will have moved slightly. This i most noticable for
-markers on the posterior part of the pelvis (i.e. PSIS markers). The Y component
+Changes to the pelvic tilt means that pelvic markers located relative to the pelvis Anatomical frame will have moved slightly. This is most noticeable for
+markers on the posterior part of the pelvis, like the PSIS markers. The Y component
 may need to be adjusted to achieve same marker position and joint angle output. 
 
 If markers are placed relative to bony landmarks (using the `PlaceMarkerAt=`
