@@ -5,7 +5,7 @@
 
 Advanced models or applications which modify the body models may need updates in order to work with the newest version of AnyBody and AMMR.  
 
-This documents shows some error which may occur and how to fix them.
+This documents shows some of the most common errors which may be encountered when migrating models and how to fix them.
 
 ## Migratin from AMMR 2.4 to 2.5
 
