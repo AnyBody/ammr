@@ -36,35 +36,37 @@ full list of configuration parameters.
 ## Background
 
 The model is based on published anatomical data produced from a cadaver study in
-the [TLEMsafe EU project](https://tlemsafe.eu/). The first implmentation of
+the [TLEMsafe EU project](https://tlemsafe.eu/). The first implementation of
 the musculoskeletal model was created by Vincenzo Carbone and René Fluit from
 the University of Twente [^cite_cfpk15].
 
 The key feature of TLEM 2 compared to older TLEM 1 model is a consistent
-dataset, where both muscle attachement and bone surface scans are from the same
+dataset, where both muscle attachment and bone surface scans are from the same
 subject. This makes TLEM2 the more anatomically consistent model. Bone contact
 at joints such as the knee thus consists of naturally congruent surfaces, making
 it easier to implement Force Dependent Kinematics on joint movements ({doc}`see
-tutorial <tutorials:ForceDependentKinematics/index>`
+tutorial <tutorials:ForceDependentKinematics/index>`)
 
 The model was refined during the [Life Long Joints
 project](https://web.archive.org/web/20230323035759/https://lifelongjoints.eu/) where its anatomical fidelity and joint
-force prediction accuracy were improved by De Pieri et al. [^cite_dlgr17]. 
-Mainly by implementing better a wrapping surfaces for the muscles. 
+force prediction accuracy were improved by De Pieri et al. [^cite_dlgr17], 
+mainly, by implementing better a wrapping surfaces for the muscles ([TLEM
+v2.1](#TLEM2-v2.1)). 
+
 
 ::::{figure} _static/Wrapping_TLEM2.png
 :width: 80%
 
-New wrapping surfaces for (clockwise) Gluteus maximus, Ilio-Psoas, Gluteus
-medius & minimus, Hamstrings & Gastrocnemius. All figures are
+New wrapping surfaces for (clockwise) Gluteus Maximus, Ilio-Psoas, Gluteus
+Medius & Minimus, Hamstrings & Gastrocnemius. All figures are
 from the publication by De Pieri et al. [^cite_dlgr17]
 
 ::::
 
 
-Resently, the model have been updated again (Now designated [version
-2.2](#TLEM2-v2.2)) with muscle wrapping for the achiles tendon, as well as
-updates to the implemenation of the ankle complex in preparation for a new multi
+Subsequently, the model has been updated again (currently [TLEM
+v2.2](#TLEM2-v2.2)) with muscle wrapping for the Achilles tendon, as well as
+updates to the implementation of the ankle complex in preparation for new multi
 segment foot models. 
 
 
@@ -88,10 +90,15 @@ More details on the TLEM2 model can be found online:
 
 (TLEM2-v2.2)=
 
-TLEM v2.2
-: :::{versionadded} 2.5.0
-  :::
-  The foot and talus models have several updates in preparation for the 
+TLEM v2.2 (Released in AMMR 2.5.0)
+: Wrapping surfaces have been added to the Achilles tendon around the ankle in
+  the TLEM 2 leg model (now designated TLEM 2.2). This ensures an even ratio of moment arms between
+  the soleus and gastrocnemius muscles. Hence, gastrocnemius is recruited less, 
+  especially during downhill walking and stair descent, solving the tendency of the model 
+  to overpredict the knee contact forces at toe off. 
+  This is the first of a number of improvements to the leg model by Dr. Enrico De Pieri, 
+  who is working on a publication on improvements and validation of the TLEM 2 leg model.
+: The foot and talus models have several updates in preparation for the 
   release of advanced multi-segment foot models in the future:  
   - The talus coordinate system is updated to be coincident with the foot 
     coordinate system in the neutral position. This facilitates scaling
@@ -125,16 +132,14 @@ TLEM v2.2
 
 (TLEM2-v2.1)=
 
-TLEM v2.1
-: :::{versionadded} 2.0.0
-  :::
-  Wrapping surfaces for several muscles were updated. These changes were engineered to
+TLEM v2.1 (Released in AMMR 2.0.0)
+: Wrapping surfaces for several muscles were updated. These changes were engineered to
   result in realistic muscle coordination and hip contact forces as documented
   in the publication by De Pieri et al. [^cite_dlgr17]
 
 ## Citing and references
 
-If you need to cite the model use the following references [^cite_dlgr17], [^cite_cfpk15]. Other usefull papers using or related to the TLEM2 model are: [^cite_ca16] and [^cite_ckkv16]. 
+If you need to cite the model use the following references [^cite_dlgr17], [^cite_cfpk15]. Other useful papers using or related to the TLEM2 model are: [^cite_ca16] and [^cite_ckkv16]. 
 
 
 [^cite_dlgr17]: De Pieri,E., Lund,ME., Gopalakrishnan, A, Rasmussen, KP., Lunn, DE., Ferguson, SJ.
