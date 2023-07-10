@@ -3,7 +3,7 @@
 
 ## Introduction
 
-Advanced models or models modifying the body models may need to be changed in order to work with the newest version of AnyBody. 
+Advanced models or applications which modify the body models may need updates in order to work with the newest version of AnyBody and AMMR.  
 
 This documents shows some error which may occur and how to fix them.
 
