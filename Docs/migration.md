@@ -25,8 +25,7 @@ argument) this problem will not occur.
 #### Foot markers
 
 Changes to the antomical frame of the foot and talus segment may cause markers
-to have moved slightly. The Y component may need to be adjusted to achieve same
-frame can casuse marker position and joint angle output.
+to have moved slightly. The Y component may need to be adjusted to achieve the same marker position and joint angle output.
 
 
 ### Load time errors
