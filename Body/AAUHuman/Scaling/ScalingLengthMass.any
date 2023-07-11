@@ -301,7 +301,8 @@ John Rasmussen & Mark de Zee, 2004.11.23
       AnyVar ms = ..MassScaling.Pelvis.MassScale;
       AnyVar ls = LengthScale;
       AnyFunTransform3DLin ScaleFunction = {
-        ScaleMat = {{(.ms/.ls)^0.5, 0, 0},{0, (.ms/.ls)^0.5, 0},{0, 0, .ls}};
+        ScaleMat = diag({(.ms/.ls)^0.5, (.ms/.ls)^0.5, .ls});
+        AnyMat33 ScaleMatInverse = diag({1/((.ms/.ls)^0.5), 1/((.ms/.ls)^0.5), 1/.ls});
         Offset = {0, 0, 0};
       };
     };
@@ -310,9 +311,17 @@ John Rasmussen & Mark de Zee, 2004.11.23
       AnyVar LengthScale = (...Anthropometrics.SegmentDimensions.TrunkHeight / ..StandardParameters.Trunk.Height);
       AnyVar ms = ..MassScaling.Thorax.MassScale;
       AnyVar ls = LengthScale;
+      
+      AnyFloat OriginUnscaled ??= warn(
+        0, "To ensure continuity in the scaling law the thorax origin must be specified"
+      );
+
       AnyFunTransform3DLin ScaleFunction = {
-        ScaleMat = {{(.ms/.ls)^0.5, 0, 0},{0, .ls, 0},{0, 0, (.ms/.ls)^0.5}};
-        Offset = {0,0,0};
+        ScaleMat = diag({(.ms/.ls)^0.5, .ls, (.ms/.ls)^0.5});
+        AnyMat33 ScaleMatInverse = diag({1/((.ms/.ls)^0.5), 1/.ls, 1/((.ms/.ls)^0.5)});
+        Offset = (
+          ..Lumbar.ScaleFunction(.OriginUnscaled) - (.OriginUnscaled * ScaleMat')
+        ) * ScaleMatInverse;
       };
     };
     
@@ -321,42 +330,30 @@ John Rasmussen & Mark de Zee, 2004.11.23
       AnyVar ms = ..MassScaling.Head.MassScale;
       AnyVar ls = LengthScale;
       AnyFunTransform3DLin ScaleFunction = {
-        ScaleMat = {{(.ms/.ls)^0.5, 0, 0},{0, .ls, 0},{0, 0, (.ms/.ls)^0.5}};
+        ScaleMat = diag({(.ms/.ls)^0.5, .ls, (.ms/.ls)^0.5});
+        AnyMat33 ScaleMatInverse = diag({1/((.ms/.ls)^0.5), 1/.ls, 1/((.ms/.ls)^0.5)});
         Offset = {0,0,0};
       };
     };
     
-    AnyFolder Cervical = {
-      AnyFunTransform3DLin &ScaleFunction = .Head.ScaleFunction;
-    };
-    
-    AnyFolder &PelvisSeg = Pelvis;    
-    AnyFolder &SkullSeg = Head;
-    AnyFolder &ThoraxSeg = Thorax;
-    AnyFolder &RibCage = Thorax;
-    
-    AnyFolder &C1Seg = Cervical;
-    AnyFolder &C2Seg = Cervical;
-    AnyFolder &C3Seg = Cervical;
-    AnyFolder &C4Seg = Cervical;
-    AnyFolder &C5Seg = Cervical;
-    AnyFolder &C6Seg = Cervical;
-    AnyFolder &C7Seg = Cervical;
-    
-    AnyFolder &L1Seg = Lumbar;
-    AnyFolder &L2Seg = Lumbar;
-    AnyFolder &L3Seg = Lumbar;
-    AnyFolder &L4Seg = Lumbar;
-    AnyFolder &L5Seg = Lumbar;
-    AnyFolder &SacrumSeg = PelvisSeg;
+    AnyFolder &Cervical = Thorax;
     
     AnyFolder Lumbar = {
       AnyVar LengthScale = (...Anthropometrics.SegmentDimensions.TrunkHeight / ..StandardParameters.Trunk.Height);
       AnyVar ms = ..MassScaling.Lumbar.MassScale;
       AnyVar ls = LengthScale;
+
+      AnyFloat OriginUnscaled ??= warn(
+        0, "To ensure continuity in the scaling law the lumbar origin must be specified"
+      );
+
       AnyFunTransform3DLin ScaleFunction = {
-        ScaleMat = {{(.ms/.ls)^0.5, 0, 0},{0, .ls, 0},{0, 0, (.ms/.ls)^0.5}};
-        Offset = {0,0,0};
+        ScaleMat = diag({(.ms/.ls)^0.5, .ls, (.ms/.ls)^0.5});
+        AnyMat33 ScaleMatInverse = diag({1/((.ms/.ls)^0.5), 1/.ls, 1/((.ms/.ls)^0.5)});
+
+        Offset = (
+          ..Pelvis.ScaleFunction(.OriginUnscaled) - (.OriginUnscaled * ScaleMat')
+        ) * ScaleMatInverse;
       };
     };
     

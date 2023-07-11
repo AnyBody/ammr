@@ -1,0 +1,156 @@
+//This is the calibration1 file, it will calibrate all muscle in the leg in
+//a neutral position (all joint angles in the drivers are zero)
+//The subsequent calibrations 2 and 3 will overwrite some of the values
+//obtained in this study
+
+AnyFolder LegCalKnee =
+{  
+  AnyComponentDefinition obj = {};  
+  AnyFolder &Pelvis = ...BodyModel.Trunk.SegmentsLumbar.PelvisSeg;
+  AnyFolder &Sacrum = ...BodyModel.Trunk.SegmentsLumbar.SacrumSeg;
+  
+  // Segments needed for the Psoas Major muscles
+  AnyFolder &SegmentsLumbar = ...BodyModel.Trunk.SegmentsLumbar;
+  AnyFolder &Thorax = ...BodyModel.Trunk.SegmentsThorax.ThoraxSeg;
+  
+  AnyFolder &LegSegSide = .SideHumanFolderRef.Leg.Seg;
+  
+  AnyFolder &LegJointsSide = .SideHumanFolderRef.Leg.Jnt;
+  AnyFolder &TrunkJoints = ...BodyModel.Trunk.JointsLumbar;
+  
+  AnyFolder &MusCalSide =  .SideHumanFolderRef.Leg.Mus;
+  
+  // Knee position variables // Kneeflexion ??????????????????????????????????????????
+  AnyFloat Flexed      = { 155} * pi/180;
+  AnyFloat Extended    = {  -3} * pi/180;
+  
+  AnyFloat KneePositions = flatten({
+      Flexed,
+      Extended
+  }');
+  
+  
+  AnyFixedRefFrame ground = 
+  {
+    AnyRefNode node = 
+    {
+      ARel=..Pelvis.Axes0;
+      sRel=..Pelvis.r0;
+    };
+  };
+
+  AnyKinEq ThoraxFix = 
+  {
+    AnyKinMeasure& PelvisThoraxExtension = ....BodyModel.Interface.Trunk.PelvisThoraxExtension;
+    AnyKinMeasure& PelvisThoraxLateralBending = ....BodyModel.Interface.Trunk.PelvisThoraxLateralBending;
+    AnyKinMeasure& PelvisThoraxRotation = ....BodyModel.Interface.Trunk.PelvisThoraxRotation;
+  };
+  
+  AnyKinEq PelvisFix = 
+  {
+    AnyKinLinear Lin = 
+    {
+      AnyRefFrame &ground = ..ground.node;
+      AnyRefFrame &Pelvis = .....BodyModel.Trunk.SegmentsLumbar.PelvisSeg;
+    };
+    AnyKinRotational Rot = 
+    {
+      Type = RotAxesAngles;
+      AnyRefFrame &ground = ..ground.node;
+      AnyRefFrame &Pelvis = .....BodyModel.Trunk.SegmentsLumbar.PelvisSeg;
+    };
+  };
+  
+  AnyKinEqInterPolDriver Hip = 
+  {
+    AnyKinRotational &Spherical = ..SideInterfaceFolderRef.HipFlexion.HipMeasure;
+    Type = PiecewiseLinear;
+    T =      {0.0, 1.0};
+    Data = {{0,  0},
+            {0,  0},
+            {0,  0}}*pi/180;
+    Reaction.Type = {Off, Off, Off};
+  };
+  
+  AnyKinEqInterPolDriver Knee = 
+  {
+    AnyKinMeasure& Hinge = ..SideInterfaceFolderRef.KneeFlexion;
+    Type = PiecewiseLinear;
+    T = linspace(0,1,SizesOf(Data)[1]);
+    Data = {.KneePositions}; // ? degrees knee flexion
+    Reaction.Type = {Off};
+  };
+  
+  #if BM_FOOT_MODEL == _FOOT_MODEL_DEFAULT_
+  AnyKinEqInterPolDriver Ankle = 
+  {
+    AnyKinMeasure& Hinge = ..SideInterfaceFolderRef.AnklePlantarFlexion;
+    Type = PiecewiseLinear;
+    T =      {0.0, 1.0};
+    Data = {{0,0}}*pi/180;
+    Reaction.Type = {Off};
+  };
+  
+  AnyKinEqInterPolDriver SubTalar = 
+  {
+    AnyKinMeasure& Hinge = ..SideInterfaceFolderRef.SubTalarEversion;
+    Type = PiecewiseLinear;
+    T =      {0.0, 1.0};
+    Data = {{0,0}}*pi/180;
+    Reaction.Type = {Off};
+  };
+  #endif
+  
+  AnyString MusPrefix = CompleteNameOf(&.SideHumanFolderRef.Leg.Mus);
+  
+  AnyObjectPtrArray VastusMedialisMuscles = ObjSearch(MusPrefix+".VastusMedialis*", "AnyMuscle");
+  AnyFloat  VastusMedialisRmin = repmat(NumElemOf(VastusMedialisMuscles), ..RMin);
+  AnyFloat  VastusMedialisRmax = repmat(NumElemOf(VastusMedialisMuscles), ..RMax);
+  
+  AnyObjectPtrArray VastusLateralisMuscles = ObjSearch(MusPrefix+".VastusLateralis*", "AnyMuscle");
+  AnyFloat  VastusLateralisRmin = repmat(NumElemOf(VastusLateralisMuscles), ..RMin);
+  AnyFloat  VastusLateralisRmax = repmat(NumElemOf(VastusLateralisMuscles), ..RMax);
+  
+  AnyObjectPtrArray VastusIntermediusMuscles = ObjSearch(MusPrefix+".VastusIntermedius*", "AnyMuscle");
+  AnyFloat  VastusIntermediusRmin = repmat(NumElemOf(VastusIntermediusMuscles), ..RMin);
+  AnyFloat  VastusIntermediusRmax = repmat(NumElemOf(VastusIntermediusMuscles), ..RMax);
+  
+  AnyObjectPtrArray PopliteusMuscles = ObjSearch(MusPrefix+".Popliteus*", "AnyMuscle");
+  AnyFloat  PopliteusRmin = repmat(NumElemOf(PopliteusMuscles), ..RMin);
+  AnyFloat  PopliteusRmax = repmat(NumElemOf(PopliteusMuscles), ..RMax);
+  
+};
+
+// The study: Operations to be performed on the model
+AnyBodyCalibrationStudy LegCalibrationStudyKnee = {
+  AnyFolder &ref=.LegCalKnee; 
+  nStep = 2;
+  FiberAndTendonLengthAdjustment.CalibrateTendonAtMaxForceOnOff = On;
+  Kinematics.SmallStepAssumptionOnOff = Off;
+  InitialConditions.SmallStepAssumptionOnOff = Off;
+  Kinematics.PosAnalysisOnlyOnOff = On;
+  InitialConditions.PosAnalysisOnlyOnOff = On;
+  
+  MuscleArr = arrcat(
+      ref.VastusMedialisMuscles,
+      ref.VastusLateralisMuscles,
+      ref.VastusIntermediusMuscles,
+      ref.PopliteusMuscles
+  );
+  RminMuscleFiber = arrcat(
+      ref.VastusMedialisRmin,
+      ref.VastusLateralisRmin,
+      ref.VastusIntermediusRmin,
+      ref.PopliteusRmin
+  );
+  RmaxMuscleFiber = arrcat(
+      ref.VastusMedialisRmax,
+      ref.VastusLateralisRmax,
+      ref.VastusIntermediusRmax,
+      ref.PopliteusRmax
+  );
+ 
+                   
+  
+};
+

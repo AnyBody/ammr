@@ -3,10 +3,13 @@
 # AnyBody Managed Model Repository 
 > An open library of musculoskeletal models
 
-
 The AnyBody Model Repository (AMMR), is an open library of musculoskeletal
 models and examples ready to be used with the [AnyBody Modeling
 System](https://www.anybodytech.com/software/ams/).
+
+> **Note**
+> AnyBody version 7.5 is needed to the use run these models. 
+> Please see the [beta program](https://forum.anyscript.org/t/become-a-beta-tester/5056/6). 
 
 <p align="center">
   <img src = "https://github.com/AnyBody/ammr/blob/master/Docs/_static/ammr_bodyparts.png" width=350>
@@ -23,9 +26,9 @@ The AnyBody Managed Model Repository consists of two parts:
   workplace-specific scenarios).
 
 The models are developed in research projects at academic institutions or by
-[AnyBody Technology](https://anybodytech.com) in collaboration with academic
+[AnyBody Technology](https://www.anybodytech.com) in collaboration with academic
 institutions. The models are maintained by [AnyBody
-Technology](https://anybodytech.com) who ensure that various body part models
+Technology](https://www.anybodytech.com) who ensure that various body part models
 can be used together as a full body, scalable musculoskeletal model.
 
 
@@ -42,26 +45,13 @@ information on getting started using the AMMR.
 
 ## Contributing
 
-Development takes place in a closed [repository on
-Github](https://github.com/anybody/ammr) to protect academic contributors
-who also often need to publish their models before release. Access to the closed
-Github repository is given on request. 
+All contributions are welcome and much appreciated. If you stumble on a problem
+or happend to find a bug please report it on the [AnyScript
+forum](https://forum.anyscript.org).
 
-Please [submit an issue here](https://github.com/AnyBody/ammr-doc/issues), to request access. 
-
-
-## Repository structure
-
-![Visualization of the codebase](./diagram.svg)
-
-
-
-<!---
-A [public mirror](https://gihub.com/anybody/ammr) exists on GitHub in which the
-[main development
-branch](https://github.com/AnyBody-Research-Group/AMMR/commits/master) is
-available. Pull request are very welcome on GitHub.
---->
+If you have fix or an improvement to the models consider sharing it with other
+users by contributing it back to the AMMR. That would be very much appreciated.
+Simply fork this repository and make a pull request on GitHub. 
 
 ## License
 

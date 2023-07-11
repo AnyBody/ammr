@@ -1,0 +1,41 @@
+#include "../libdef.any"
+
+/* doc 
+This model shows how to use the `EvaluateMaxLoad` class-template to estimate 
+the maximum loading where `MaxMuscleActivity` reaches 1.
+
+The `EvaluateMaxLoad` needs to have a argument with the study, as well as pointer 
+to the variable which controls the loading. The variable can be anything, as long as
+it controls some external force or moment on the model. 
+
+In this example we use the `EvaluateMaxLoad` class-template to evalate the maximum 
+torque the model can provide at every timestep in the study. 
+
+:::{Note}
+The tool asumes a linear relationship betweeen the external load and the
+maximum muscle activity. This is almost always the case, but it is woth considering if 
+this assumption holds. 
+See [this blog post](https://anyscript.org/tools/estimating-maximum-model-strength/) for more details.
+:::
+
+doc */
+
+#include "<ANYBODY_PATH_MODELUTILS>/Validation/EvaluateMaxExternalLoad.any"
+
+#include "../../Examples/WheelTurn\WheelTurn.Main.any"
+
+Main = 
+{ 
+  // Max loading can only be calculate if the criterion of muscles are set to min max strict. 
+  // I.e. maximum muscle cooporation. 
+  Main.Study.InverseDynamics.Criterion.Type = MR_MinMaxStrict;
+
+  EvaluateMaxLoad MaxLoading(STUDY = Main.Study) = 
+  {
+     // In this case we are pointing torque value of the hand wheel. 
+     // But loading can be any parameter/value which affects the muscle 
+     // recruitment. 
+     LoadPtr = &Main.WheelParameters.M;
+  };
+
+};

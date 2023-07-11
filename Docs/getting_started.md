@@ -1,14 +1,17 @@
-# Getting Started with AMMR
+# Getting Started
 
 ## AMMR Intallation
 
-The *AnyBody Model Repository* (AMMR) comes bundled with the
-[AnyBody Modelling System]. But it must be installed/unpacked manually after you installed AnyBody.
-You can install the AMMR from the *AnyBody Assistent* dialog which is presented when AnyBody starts.
-
 :::{seealso}
+:class: margin
 {doc}`Detailed guide on how to install the AMMR <ammr_installation>`:
 :::
+
+The *AnyBody Model Repository* (AMMR) comes bundled with the
+[AnyBody Modeling System]. But it must be installed/unpacked manually after you installed AnyBody.
+You can install the AMMR from the *AnyBody Assistent* dialog which is presented when AnyBody starts.
+
+
 
 ```{toctree}
 :hidden: true
@@ -81,6 +84,11 @@ which AMMR to use should be at the very beginning of your `.any` file:
 
 ### Configuring the Human Model
 
+:::{seealso}
+:class: margin
+{doc}`The documentation on BM configuration </bm_config/index>`
+:::
+
 ```AnyScriptDoc
 Main =
 {
@@ -94,9 +102,6 @@ The Human Body Model is configured through a number of `#define` and `#path`
 statements. These statements are all prefixed with `BM_` inside AnyScript,
 and they can also be referred to as "bm-statements".
 
-:::{seealso}
-{doc}`The documentation on BM configuration </bm_config/index>`
-:::
 
 ### Including the Human Model
 
@@ -134,6 +139,12 @@ AnyBodyStudy Study =
 };
 ```
 
+:::{seealso}
+:class: margin
+{doc}`The full tutorial on how to create a HumanModel from scratch </creating_model_from_scratch>`
+:::
+
+
 The `AnyBodyStudy` is where you configure and define your simulation. It
 specificies start and end times of the simulation, and number of steps. It also
 configures which solvers are used.
@@ -141,9 +152,6 @@ configures which solvers are used.
 Only the model elements which are referenced from within the Study, will be included in
 the simulation. In this case everything in `Main.Model` folder is part of the simulation.
 
-:::{seealso}
-{doc}`The full tutorial on how to create a HumanModel from scratch </creating_model_from_scratch>`
-:::
 
 [anybody modelling system]: https://www.anybodytech.com/software/anybodymodelingsystem/ 
 [anyscript]: https://anyscript.org/tutorials/A_Getting_started_anyscript/index.html

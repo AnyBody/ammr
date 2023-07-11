@@ -2,6 +2,10 @@
 #define EXCLUDE_MUSCLE_METABOLISM AnyMetabModelSimple ZeroMetabolicMdl = {EtaCon = 2e22; EtaEcc = 2e22;}; MetabModel = &ZeroMetabolicMdl;
 #endif
 
+#ifndef SET_DEFAULT_ACTUATOR_VOLUME
+#define SET_DEFAULT_ACTUATOR_VOLUME Volume = 1e-6
+#endif
+
   AnyKinRotational Rot={
      AnyRefFrame &ref1=..StartNode;
      AnyRefFrame &ref2=..EndNode;
@@ -13,21 +17,19 @@
     MeasureOrganizer=.Axis;
   };
 
-  AnyMuscleModel MuscleModel={
-    F0=.Strength;     
-  };
+
   
-  AnyGeneralMuscle ArtificialSupportMuscle={
-    AnyMuscleModel &ref1=.MuscleModel;
+  AnyRecruitedActuator ArtificialSupportMuscle={
+    Strength = .Strength;
     AnyKinMeasure& ref2=.RotMeasureOrg;
-    ForceDirection=.DirectionOfForce;
-    EXCLUDE_MUSCLE_METABOLISM
+    Type = iffun(eqfun(.DirectionOfForce,1), NonNegative, NonPositive);
+    SET_DEFAULT_ACTUATOR_VOLUME;
      
   };
 
   AnyDrawVector DrawVector = {
     AnyRefFrame &ref = .Rot.ref2;
-    Vec = ..DrawRef.DrawSettingsSupport.Rot.ScaleFactor*.Direction*.ArtificialSupportMuscle.Ft*.Rot.ref1.Axes';
+    Vec = ..DrawRef.DrawSettingsSupport.Rot.ScaleFactor*.Direction*.ArtificialSupportMuscle.Fout[0]*.Rot.ref1.Axes';
   
    PointAway = Off;
   DrawCoord = Off;
@@ -41,7 +43,7 @@
   //Make another arrow to symbolize the moment vector
   AnyDrawVector DrawVector2 = {
     AnyRefFrame &ref = .Rot.ref2;
-    Vec = ..DrawRef.DrawSettingsSupport.Rot.ScaleFactor*(.Direction+2*..DrawRef.DrawSettingsSupport.Rot.HeadLength*.Direction)*.ArtificialSupportMuscle.Ft*.Rot.ref1.Axes';
+    Vec = ..DrawRef.DrawSettingsSupport.Rot.ScaleFactor*(.Direction+2*..DrawRef.DrawSettingsSupport.Rot.HeadLength*.Direction)*.ArtificialSupportMuscle.Fout[0]*.Rot.ref1.Axes';
    PointAway = Off;
   DrawCoord = Off;
   

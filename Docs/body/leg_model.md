@@ -27,7 +27,7 @@ by Delp and Maganaris
 ```{rubric} References:
 ```
 
-- 19. Delp, Parameters for the lower limb, <http://isbweb.org/data/delp/>
+- 19. Delp, Parameters for the lower limb, <https://isbweb.org/data/delp/>
 - Maganaris, C. N. In vivo measurement-based estimations of the moment
   arm in the human tibialis anterior muscle-tendon unit. Journal of
   Biomechanics, Vol. 33, pp. 375-379, 2000

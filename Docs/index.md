@@ -1,32 +1,111 @@
-# Welcome to the AMMR documentation!
+---
+sd_hide_title: true
+---
 
-The AnyBody Model Repository (AMMR), is an open library of
+# AMMR documentation!
+
+::::::{div} landing-title
+:style: "padding: 0.1rem 0.5rem 0.6rem 0; background-image: linear-gradient(315deg, #9e3f49 0%, #953337 74%); clip-path: polygon(0px 0px, 100% 0%, 100% 100%, 0% calc(100% - 1.5rem)); -webkit-clip-path: polygon(0px 0px, 100% 0%, 100% 100%, 0% calc(100% - 1.5rem));"
+
+::::{grid}
+:reverse:
+:gutter: 2 3 3 3
+:margin: 4 4 1 2
+
+:::{grid-item}
+:columns: 12 4 4 4
+
+```{image} ./_static/ammr_bodyparts2.png
+:width: 180px
+:class: sd-m-auto sd-animate-grow50-rot20
+```
+:::
+
+:::{grid-item}
+:columns: 12 8 8 8
+:child-align: justify
+:class: sd-text-white sd-fs-3
+
+The AnyBody Managed Model Repository
+
+```{button-link} ./changelog.html#linkcheck_ignore
+:outline:
+:color: white
+:class: sd-px-4 sd-fs-5
+
+{material-outlined}`timeline;1.5em` New in AMMR {{AMMR_VERSION}}
+:::
+::::
+
+::::::
+
+Open body models
+: All models are open and editable with the AnyScript model language
+
+Configurable Human model
+: Configure and combine different body models into a full body model
+
+Lots of Application examples
+: Gallery of example models provide a good starting point for modeling
+
+Community effort
+: Models are combined effort of many research groups over two decades
+
+
+The AnyBody Model Repository (AMMR), is an unique open library of
 musculoskeletal models and examples ready to be used with the [AnyBody Modeling
-System][anybody modeling system].
+System][anybody modeling system]. The AnyBody Managed Model Repository consists of two parts:
 
-```{rst-class} float-right
+
+```{admonition} **First time user?**
+:class: hint dropdown margin
+
+If you are a new user check the [AnyBody Tutorials](https://anyscript.org/tutorials/) and the getting started video on AnyBody.
+
+The following {doc}`Getting Started section </getting_started>` on the AMMR provides insight into how AMMR is structured, how to
+install it and how to use it.
 ```
 
-:::{seealso}
-{{ WHAT_IS_NEW }}
+<span class="material-symbols-outlined">
+</span>
+
+::::{grid} 1 3 2 3
+:margin: 2 2 0 0
+:gutter: 2
+
+:::{grid-item-card} {material-regular}`settings_accessibility;2em` Body Models
+:link: the-body-model
+:link-type: ref
+
+The human body models which can be 
+customized and scaled to build a specific musculoskeletal model.
++++
+{ref}`Learn more » <the-body-model>`
 :::
 
-:::{figure-md} 
-:align: center
-:width: 70 %
+:::{grid-item-card} {material-regular}`fitness_center;2em` Example gallery
+:link: example-gallery
+:link-type: ref
 
-![The AnyBody Model Repository](_static/ammr_bodyparts.png)
-
-The AnyBody Model Repository is a *unique* open collection of human body parts.
+Lots of applicaiton examples showing how the body models are used.
++++
+{ref}`Learn more » <example-gallery>`
 :::
 
-The AMMR consists of two parts:
+:::{grid-item-card} {material-regular}`settings;2em` Model Configuration
+:link: bm-config
+:link-type: ref
 
-- {ref}`Body Models <the-body-model>`: The human body models which can be 
-  customized and scaled to build a specific musculoskeletal model.
-- {ref}`Application examples <examples-index>`: in which the body models are 
-  utilized in specific applications (from common daily activities, like pushing
-  the acceleration or brake pedals of a car, to workplace specific scenarios).
+Information on how to configure the body models, and enable or disable various body parts.
++++
+{ref}`Learn more » <bm-config>`
+:::
+
+::::
+
+
+
+
 
 The models are developed in research projects at academic institutions or by
 AnyBody Technology in collaboration with academic institutions. The models are
@@ -34,19 +113,59 @@ maintained by AnyBody Technology who ensure that various body part models can be
 used together as a full body, scalable musculoskeletal model.
 
 
-```{rubric} First time you're using AMMR?
-```
-
-If you are a new user check the [AnyBody Tutorials](https://anyscript.org/tutorials) and the getting started video on AnyBody.
-
-The following {doc}`Getting Started section </getting_started>` on the AMMR provides insight into how AMMR is structured, how to
-install it and how to use it.
-
-```{rst-class} without-title
-```
-
-:::{seealso}
-**Continue:** {doc}`Get Started using the AMMR </getting_started>`
-:::
 
 [anybody modeling system]: https://www.anybodytech.com/software/anybodymodelingsystem/
+
+
+
+```{toctree}
+:caption: Examples and applications
+:includehidden: true
+:hidden:
+
+getting_started
+Gallery of examples <Applications/index>
+migration
+```
+
+
+```{toctree}
+:caption: Body Models
+:includehidden: true
+:hidden:
+
+Overview <body/models>
+bm_config/index
+
+```
+
+
+
+
+```{toctree}
+:caption: Guides
+:includehidden: true
+:hidden:
+:maxdepth: 2
+:titlesonly:
+
+creating_model_from_scratch
+Scaling/intro
+anymocap/index
+
+```
+
+
+```{toctree}
+:caption: About
+:includehidden: true
+:hidden: true
+:maxdepth: 2
+:titlesonly: true
+
+
+changelog
+Contribute or cite <about>
+legal
+
+```

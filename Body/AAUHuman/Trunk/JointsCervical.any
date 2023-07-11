@@ -47,61 +47,52 @@ AnyFolder JointsCervicalSpine = {
   
 
   AnyKinRotational SkullThoraxRotMeasure = {
-    AnyRefFrame &Thorax = ..SegmentsThorax.T1Seg.AnatomicalFrame;  
+    AnyRefFrame &Thorax = ..SegmentsThorax.T1Seg.AnatomicalFrameTrunk;  
     AnyRefFrame &Skull = ..SegmentsCervicalSpine.SkullSeg.AnatomicalFrame; 
     Type = RotVector;
   };
   
   
   // CervicalRhythm
-  
   AnyFolder Flexion = {
     
-    AnyKinMeasureOrg Measure  = {
-      AnyKinMeasure& ref1 = ..C3C2Jnt;
-      AnyKinMeasure& ref2 = ..C4C3Jnt;
-      AnyKinMeasure& ref3 = ..C5C4Jnt;
-      AnyKinMeasure& ref4 = ..C6C5Jnt;
-      AnyKinMeasure& ref5 = ..C7C6Jnt;
-      AnyKinMeasure& ref6 = ..T1C7Jnt;
-      MeasureOrganizer = iarr(0, 3, 17)+2;
-    };   
-    
     #if BM_TRUNK_CERVICAL_RHYTHM != OFF
-    AnyKinEqSimpleDriver RhythmDriver = {
-      
-      AnyKinMeasureLinComb Measure = {
-        
-        AnyKinMeasure& u0 = ..SkullThoraxFlexion;
-        AnyKinMeasure& u1 = ...C1C0Jnt;  // z direction
-        AnyKinMeasure& u2 = ..Measure;
+    RhytmDriverLinear rhythmC2C7( _REDEFINE_VARIABLES=On) = 
+    {
+       AnyVector RhythmCoefficients ??= {1,1,1,1,1,1};
+       Measures.Input  = {
+         AnyKinMeasure& ref1 = ....C3C2Jnt;
+         AnyKinMeasure& ref2 = ....C4C3Jnt;
+         AnyKinMeasure& ref3 = ....C5C4Jnt;
+         AnyKinMeasure& ref4 = ....C6C5Jnt;
+         AnyKinMeasure& ref5 = ....C7C6Jnt;
+         AnyKinMeasure& ref6 = ....T1C7Jnt;
+         MeasureOrganizer = iarr(0, 3, 17)+2;
+      };   
+       
+       #if BM_TRUNK_CERVICAL_RHYTHM == _RHYTHM_SOFT_
+       CType = repmat(nDim, Soft);
+       #endif
+       
+     };
+     
+     RhytmDriverLinear rhythmC1C0SkullThoraxFlexion( _REDEFINE_VARIABLES=On) = 
+     {
+       // The -1 is because C1C0Jnt has extension as positive opposite signs for output.
+       AnyVector RhythmCoefficients ??= {122/40,-1};
+       
+       Measures.Input  = {
+         AnyKinMeasure& ref = ...SkullThoraxFlexion;
+         AnyKinMeasure& u1 = ....C1C0Jnt;  // z direction
+         MeasureOrganizer = {0, 1};
+       };   
+       
+       #if BM_TRUNK_CERVICAL_RHYTHM == _RHYTHM_SOFT_
+       CType = repmat(nDim, Soft);
+       #endif
+    };  
+    #endif
 
-        OutDim = 6;
-        Const = {0, 0, 0, 0, 0, 0};
-        Coef = {
-          {40/122, 1, 0, 0, 0, 0, 0, 0},
-          {0, 0, 1, -1, 0, 0,  0,  0},
-          {0, 0, 0, 1, -1, 0,  0,  0},
-          {0, 0, 0, 0, 1, -1,  0,  0},
-          {0, 0, 0, 0, 0,  1, -1,  0},
-          {0, 0, 0, 0, 0,  0,  1, -1}};
-      }; // Measure      
-      
-    #if BM_TRUNK_CERVICAL_RHYTHM == _RHYTHM_SOFT_
-      // Use a template to create the weight function, so
-      // the weight values can be overridden by the user. 
-      Template_AnyFunConst Weights (NUMBER_OF_ELEMENTS=..nDim) = {};
-      
-        CType= repmat(nDim,Soft); 
-        WeightFun ={&Weights.Fun};
-    #endif
-      
-      DriverPos = repmat(nDim, 0);
-      DriverVel = repmat(nDim, 0);
-      Reaction.Type = repmat(nDim, Off);
-      
-    }; // CervicalFlexionRhythmDrv
-    #endif
         
   AnyKinMeasureLinComb SkullThoraxFlexion  = {
     AnyKinMeasureOrg select ={
@@ -114,51 +105,29 @@ AnyFolder JointsCervicalSpine = {
   };
 
     
-  };//Flexion
-  
+  };
   
   AnyFolder LateralBending = {
-    
-    AnyKinMeasureOrg Measure  = {
-      AnyKinMeasure& ref1 = ..C3C2Jnt;
-      AnyKinMeasure& ref2 = ..C4C3Jnt;
-      AnyKinMeasure& ref3 = ..C5C4Jnt;
-      AnyKinMeasure& ref4 = ..C6C5Jnt;
-      AnyKinMeasure& ref5 = ..C7C6Jnt;
-      AnyKinMeasure& ref6 = ..T1C7Jnt;
-      MeasureOrganizer = iarr(0, 3, 17)+0;
-    };  
-    
-    
+       
     #if BM_TRUNK_CERVICAL_RHYTHM != OFF
-    AnyKinEqSimpleDriver RhythmDriver = {
-      
-      AnyKinMeasureLinComb Measure = {        
-        AnyKinMeasure& u = ..Measure;
-
-        OutDim = 5;
-        Const = {0, 0, 0, 0, 0};
-        Coef = {
-          {1, -1, 0, 0,  0,  0},
-          {0, 1, -1, 0,  0,  0},
-          {0, 0, 1, -1,  0,  0},
-          {0, 0, 0,  1, -1,  0},
-          {0, 0, 0,  0,  1, -1}};
-        
-      }; // Measure
-     #if BM_TRUNK_CERVICAL_RHYTHM == _RHYTHM_SOFT_
-      // Use a template to create the weight function, so
-      // the weight values can be overridden by the user. 
-      Template_AnyFunConst Weights (NUMBER_OF_ELEMENTS=..nDim) = {};
-      CType= repmat(nDim,Soft);
-      WeightFun ={&Weights.Fun};
-     #endif
-
-      DriverPos = repmat(nDim, 0);
-      DriverVel = repmat(nDim, 0);
-      Reaction.Type = repmat(nDim, Off);
-      
-    }; // CervicalLateralBendingRhythmDrv
+    RhytmDriverLinear rhythmC2C7(_REDEFINE_VARIABLES=On) = 
+    {
+       AnyVector RhythmCoefficients ??= {1,1,1,1,1,1};
+       Measures.Input  = {
+         AnyKinMeasure& ref1 = ....C3C2Jnt;
+         AnyKinMeasure& ref2 = ....C4C3Jnt;
+         AnyKinMeasure& ref3 = ....C5C4Jnt;
+         AnyKinMeasure& ref4 = ....C6C5Jnt;
+         AnyKinMeasure& ref5 = ....C7C6Jnt;
+         AnyKinMeasure& ref6 = ....T1C7Jnt;
+         MeasureOrganizer = iarr(0, 3, 17)+0;
+      };   
+       
+       #if BM_TRUNK_CERVICAL_RHYTHM == _RHYTHM_SOFT_
+       CType = repmat(nDim, Soft);
+       #endif
+       
+     };
     #endif
     
     AnyKinMeasureOrg SkullThoraxLateralBending  = {
@@ -170,49 +139,41 @@ AnyFolder JointsCervicalSpine = {
   
   AnyFolder Rotation = {
     
-    AnyKinMeasureOrg Measure  = {
-      AnyKinMeasure& ref1 = ..C3C2Jnt;
-      AnyKinMeasure& ref2 = ..C4C3Jnt;
-      AnyKinMeasure& ref3 = ..C5C4Jnt;
-      AnyKinMeasure& ref4 = ..C6C5Jnt;
-      AnyKinMeasure& ref5 = ..C7C6Jnt;
-      AnyKinMeasure& ref6 = ..T1C7Jnt;
-      MeasureOrganizer = iarr(0, 3, 17)+1;
-    };  
     
     #if BM_TRUNK_CERVICAL_RHYTHM != OFF
-    AnyKinEqSimpleDriver RhythmDriver = {
-      
-      AnyKinMeasureLinComb Measure = {
-        
-        AnyKinMeasure& u0 = ..SkullThoraxRotation;
-        AnyKinMeasure& u1 = ...C2C1Jnt;  // y direction
-        AnyKinMeasure& u2 = ..Measure;
-        OutDim = 6;
-        Const = {0, 0, 0, 0, 0, 0};
-        Coef = {
-          {77/132, -1, 0, 0, 0, 0, 0, 0},
-          {0, 0, 1, -1, 0, 0,  0,  0},
-          {0, 0, 0, 1, -1, 0,  0,  0},
-          {0, 0, 0, 0, 1, -1,  0,  0},
-          {0, 0, 0, 0, 0,  1, -1,  0},
-          {0, 0, 0, 0, 0,  0,  1, -1}};        
-      }; // Measure
+    RhytmDriverLinear rhythmC2C7(_REDEFINE_VARIABLES=On) = 
+    {
+       AnyVector RhythmCoefficients ??= {1,1,1,1,1,1};
+       Measures.Input  = {
+         AnyKinMeasure& ref1 = ....C3C2Jnt;
+         AnyKinMeasure& ref2 = ....C4C3Jnt;
+         AnyKinMeasure& ref3 = ....C5C4Jnt;
+         AnyKinMeasure& ref4 = ....C6C5Jnt;
+         AnyKinMeasure& ref5 = ....C7C6Jnt;
+         AnyKinMeasure& ref6 = ....T1C7Jnt;
+         MeasureOrganizer = iarr(0, 3, 17)+1;
+      };   
+       #if BM_TRUNK_CERVICAL_RHYTHM == _RHYTHM_SOFT_
+       CType = repmat(nDim, Soft);
+       #endif
+     };
+     
+     RhytmDriverLinear rhythmC2C1SkullThoraxRotation( _REDEFINE_VARIABLES=On) = 
+     {
+       AnyVector RhythmCoefficients ??= {132/77, 1};
+       
+       Measures.Input  = {
+         AnyKinMeasure& ref = ...SkullThoraxRotation;
+         AnyKinMeasure& u1 = ....C2C1Jnt;  // y direction
+         MeasureOrganizer = {0, 1};
+       };   
+       
+       #if BM_TRUNK_CERVICAL_RHYTHM == _RHYTHM_SOFT_
+       CType = repmat(nDim, Soft);
+       #endif
+    };  
+    
 
-      
-    #if BM_TRUNK_CERVICAL_RHYTHM == _RHYTHM_SOFT_
-      // Use a template to create the weight function, so
-      // the weight values can be overridden by the user. 
-      Template_AnyFunConst Weights (NUMBER_OF_ELEMENTS=..nDim) = {};
-      CType= repmat(nDim,Soft);
-      WeightFun ={&Weights.Fun};
-     #endif
-
-      DriverPos = repmat(nDim, 0);
-      DriverVel = repmat(nDim, 0);
-      Reaction.Type = repmat(nDim, Off);
-      
-    }; // CervicalRotationRhythmDrv
     #endif
     
     AnyKinMeasureOrg SkullThoraxRotation  = {
