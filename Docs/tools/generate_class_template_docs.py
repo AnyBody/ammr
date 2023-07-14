@@ -3,12 +3,15 @@ This script searches for class templates in the source code and generates
 documentation for them.
 """
 import re
+import os
 import warnings
 from pathlib import Path
 from collections import defaultdict
 import textwrap
 from typing import Any
 from pydantic import BaseModel, ValidationError
+
+from tqdm import tqdm
 
 import frontmatter
 import jinja2
@@ -46,7 +49,6 @@ RE_FILE_DOCS = re.compile(
 )
 
 
-
 class ClassTemplateInfo(BaseModel):
     classname: str
     classtype: str = ""
@@ -57,19 +59,18 @@ class ClassTemplateInfo(BaseModel):
 class FileInfo(BaseModel):
     group: str
     topic: str
-    description: str = ""
+    descr: str = ""
     include_str: str = ""
     class_templates: list[ClassTemplateInfo] = []
 
 
-
-
-def parse_file_docs(file_content: str, include_str:str) -> FileInfo:
+def parse_file_docs(file: str | os.PathLike, include_str: str) -> FileInfo:
     """
     Finds the documentation string of the file.
     """
-    stopidx=file_content.find("*/")
-    match = RE_FILE_DOCS.match(file_content[:stopidx+10])
+    file_content = Path(file).read_text(encoding="utf-8")
+    stopidx = file_content.find("*/")
+    match = RE_FILE_DOCS.match(file_content[: stopidx + 10])
     if not match:
         docs = ""
     else:
@@ -100,11 +101,7 @@ def parse_class_template_arguments(arg_string: str) -> tuple[str, list[dict]]:
     return classtype, args
 
 
-
-
-def find_class_templates(
-    file_content: str
-) -> list[ClassTemplateInfo]:
+def find_class_templates(file: str | os.PathLike) -> list[ClassTemplateInfo]:
     """
     Finds all class templates in the given file content and returns a list of
     dictionaries with the following keys:
@@ -114,11 +111,14 @@ def find_class_templates(
     - docs: The documentation string of the class template.
     """
     template_list = []
-    for match in RE_CLASSTMPL_WITH_DOCS.finditer(file_content):
+    file = Path(file).resolve()
+    for match in RE_CLASSTMPL_WITH_DOCS.finditer(file.read_text(encoding="utf-8")):
         groupd = match.groupdict()
         docstring = groupd["docs"]
         docstring = RE_MATCH_LEADING_SLASHES.sub("", docstring)
         docstring = textwrap.dedent(docstring).strip()
+        docstring = docstring.replace("__self__", str(file))
+        docstring = docstring.replace("__REMOVED__", "")
         classtype, args = parse_class_template_arguments(groupd["arguments"])
         template_list.append(
             ClassTemplateInfo(
@@ -142,17 +142,17 @@ def run(ams_path_def, base_path):
     fileloader = jinja2.FileSystemLoader(searchpath=Path(__file__).parent)
     env = jinja2.Environment(loader=fileloader)
     template = env.get_template("class-template.md.jinja")
+    files = list(base_path.glob("**/*.any"))
 
-    for file in base_path.glob("**/*.any"):
-        content = file.read_text()
+    for file in tqdm(files, desc="Looking for class templates"):
         include_str = f"<{ams_path_def}>\\{file.relative_to(base_path)}"
-        class_templates = find_class_templates(content)
+        class_templates = find_class_templates(file)
         if not class_templates:
             continue
         try:
-            filedata = parse_file_docs(content, include_str)
+            filedata = parse_file_docs(file, include_str)
         except ValidationError:
-            warnings.warn(f"File {file.name} has invalid documentation meta data")
+            # warnings.warn(f"File {file.name} has invalid documentation meta data")
             continue
         filedata.class_templates = class_templates
         # find the compent of the file path relative to search_path
@@ -163,8 +163,9 @@ def run(ams_path_def, base_path):
         outfile.write_text(
             template.render(
                 filename=file.stem,
-                group=f"{filedata.group}.{filedata.topic}",
-                filedocstring=filedata.description or "",
+                group=filedata.group,
+                topic=filedata.topic,
+                filedocstring=filedata.descr or "",
                 class_templates=class_templates,
                 include_str=filedata.include_str,
             )
@@ -174,9 +175,7 @@ def run(ams_path_def, base_path):
     for group, topics in classt_info.items():
         group_file = TOOLS_DIR / f"{group}-toc.md"
         group_template = env.get_template("group-toc.md.jinja")
-        group_file.write_text(
-            group_template.render(group=group, topics=topics)
-        )
+        group_file.write_text(group_template.render(group=group, topics=topics))
 
 
 def run_all():
