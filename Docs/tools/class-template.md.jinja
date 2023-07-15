@@ -9,28 +9,91 @@
 ::: 
 
 {% for classt in class_templates %}
-{%- set classname = classt['classname'] %}
+{%- set classname = classt['name'] %}
 
 ({{group}}.{{topic}}.{{filename}}.{{classname}})=
-{%- set expected_arguments = classt.args | selectattr("value", "eq", "") | list %}
-{%- set optional_arguments = classt.args | selectattr("value", "ne", "") | list %}
-{%- set all_arguments = expected_arguments + optional_arguments  %}
+{%- set documented_args = classt.args | selectattr("docs", "ne", "") | list %}
+{%- set undocumented_args = classt.args | selectattr("docs", "eq", "") | list %}
+{%- set expected_undocumented_args = undocumented_args | selectattr("value", "eq", "") | list %}
+{%- set args_in_documentation = (documented_args + expected_undocumented_args) %}
+{% set required_members = classt.members | selectattr("value", "eq", "") | list %}
+{% set optional_members = classt.members | selectattr("value", "ne", "") | list %}
 
 ## {{ classname }}
 
-:class template type: `{{classt.classtype}}`{l=AnyScript}
+:class type: `{{classt.type}}`{l=AnyScript}
 
 ```{code-block} AnyScriptDoc
 {{classname}} <ObjectName>
-{%- if all_arguments | length  -%}
+{%- if args_in_documentation | length  -%}
 (
-  {%- for arg in all_arguments %}
+  {%- for arg in args_in_documentation %}
   {{ arg.name }}={{arg.value or "<required>"}},
 {%- endfor %}
-){% endif %} = {};
+){% endif %} = {
+{%- for member in required_members %}
+{{member.name}} = <Required>; {{ "\n" if loop.last}}
+{%- endfor -%}
+};
 ```
 
+{% if args_in_documentation | length  -%}
+**Arguments**
+{% for arg in args_in_documentation %}
+:{{arg.name}}: 
+  {{arg.docs}} {%if arg.value %} (Default: {{arg.value}}) {%else%} (Required) {%endif%}
+{% endfor %}
+{% endif %}
+
+
+{%- if expected_members | length  %}
+::::::{dropdown} **Required initialization members**
+  
+:::::{grid} 1
+{% for member in expected_members %}
+::::{grid-item}
+:::{dropdown} `{{member.name}} = <Required>;`{l=AnyScript}
+
+{%if member.type != ""%}:class type: `{{member.type}}`{l=AnyScript}{%endif%}
+
+{{member.docs}}
+:::
+::::
+{% endfor %}
+:::::
+::::::
+{% endif %}
+
+{%- if optional_members | length  %}
+::::::{dropdown} **Optional initialization members**
+:color: info
+  
+:::::{grid} 1
+{% for member in optional_members %}
+::::{grid-item}
+:::{dropdown} `{{member.name}} = {{member.value}};`{l=AnyScript}
+:margin: 0
+:color: white
+
+{%if member.type != ""%}:class type: `{{member.type}}`{l=AnyScript}{%endif%}
+
+{{member.docs}}
+:::
+::::
+{% endfor %}
+:::::
+::::::
+{% endif %}
+
+### Documentaton
+
 {{ classt['docs'].strip() }}
+
+
+
+
+
+
 
 {% endfor %}
 
