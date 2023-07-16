@@ -1,5 +1,5 @@
 ({{group}}.{{topic}}.{{filename}}.any)=
-# {{filename}}
+# {{topic}}.{{filename}}
 
 {{filedocstring}}
 
@@ -16,12 +16,14 @@
 {%- set undocumented_args = classt.args | selectattr("docs", "eq", "") | list %}
 {%- set expected_undocumented_args = undocumented_args | selectattr("value", "eq", "") | list %}
 {%- set args_in_documentation = (documented_args + expected_undocumented_args) %}
+{% set expected_members = classt.expected_members %}
 {% set required_members = classt.members | selectattr("value", "eq", "") | list %}
 {% set optional_members = classt.members | selectattr("value", "ne", "") | list %}
 
-## {{ classname }}
 
-:class type: `{{classt.type}}`{l=AnyScript}
+## #{{classname}}
+
+{{ classt['docs'].splitlines() | first  }}
 
 ```{code-block} AnyScriptDoc
 {{classname}} <ObjectName>
@@ -37,36 +39,67 @@
 };
 ```
 
-{% if args_in_documentation | length  -%}
-**Arguments**
+
+:::{rubric} Arguments
+:::
+
+:\_\_CLASS\_\_: `{{classt.type}}`{l=AnyScript}
 {% for arg in args_in_documentation %}
 :{{arg.name}}: 
   {{arg.docs}} {%if arg.value %} (Default: {{arg.value}}) {%else%} (Required) {%endif%}
 {% endfor %}
-{% endif %}
-
 
 {%- if expected_members | length  %}
-::::::{dropdown} **Required initialization members**
+
+:::{rubric} Expected members
+:::
   
 :::::{grid} 1
 {% for member in expected_members %}
-::::{grid-item}
-:::{dropdown} `{{member.name}} = <Required>;`{l=AnyScript}
+::::{grid-item-card} 
+```{code-block} AnyScriptDoc
+{% if member.group %}{{member.group}} = { {{"\n  "}}{%endif%}
+{{- member.name}} {{member.name}} = {{member.value}}
+{% if member.group %}};{%endif%}
+```
+
+
+{{member.docs}}
+
+::::
+{% endfor %}
+:::::
+
+{% endif %}
+
+
+
+{%- if required_members | length  %}
+
+:::{rubric} Required initialization members
+:::
+  
+:::::{grid} 1
+{% for member in required_members %}
+::::{grid-item-card} 
+```{code-block} AnyScriptDoc
+{{member.name}} = <Required>;`{l=AnyScript}
+```
 
 {%if member.type != ""%}:class type: `{{member.type}}`{l=AnyScript}{%endif%}
 
 {{member.docs}}
-:::
 ::::
 {% endfor %}
 :::::
-::::::
+
 {% endif %}
 
 {%- if optional_members | length  %}
-::::::{dropdown} **Optional initialization members**
-:color: info
+
+:::{rubric} Optional initialization members
+:::
+
   
 :::::{grid} 1
 {% for member in optional_members %}
@@ -82,10 +115,11 @@
 ::::
 {% endfor %}
 :::::
-::::::
 {% endif %}
 
-### Documentaton
+
+:::{rubric} Documentaton
+:::
 
 {{ classt['docs'].strip() }}
 

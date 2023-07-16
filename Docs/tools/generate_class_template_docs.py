@@ -51,6 +51,7 @@ RE_FILE_DOCS = re.compile(
 
 class MemberInfo(BaseModel):
     """ Information about a documented class member."""
+    group: str = ""
     name: str
     type: str = ""
     value: str = ""
@@ -70,6 +71,7 @@ class ClassTemplateInfo(BaseModel):
     args: list[ArgInfo] = []
     docs: str = ""
     members: list[MemberInfo] = []
+    expected_members: list[MemberInfo] = []
 
 
 class FileInfo(BaseModel):
@@ -141,6 +143,39 @@ def parse_arg_docs(filecontent:str, classname:str, argname:str) -> str:
     docs = textwrap.dedent(docs).strip()
     return docs
 
+def parse_expected_member_docs(filecontent:str, classname:str) -> list[MemberInfo]:
+    """ Parses the documentation string of a class template argument.
+        Looks for a comment block starting with 
+        //{classname}#{argname}
+        // <Some doc string>
+        //
+        and returns the doc string.
+    """
+    re_docs = re.compile(
+        rf"""
+        ^\s*//\s*{classname}\.(?P<group>[\w\.]+)\s*?\n #Match start of member
+        (?P<docs>\s*//.*?)   #Match documentation string
+        ^\s*?(//)?\s*?   # match start line
+        (?P<type>\w+)\s+?
+        (?P<name>\w+)
+        \s*?=\s*
+        (?P<value>.*?;.*?)\n
+        """, re.MULTILINE |  re.DOTALL |  re.VERBOSE
+    )
+    expected_members = []
+    for match in re_docs.finditer(filecontent):
+        docs = match.groupdict()["docs"]
+        docs = RE_MATCH_2_SLASHES.sub("", docs)
+        docs = textwrap.dedent(docs).strip()
+        expected_members.append(MemberInfo(
+            group=match.groupdict()["group"],
+            type=match.groupdict()["type"],
+            name=match.groupdict()["name"],
+            value=match.groupdict()["value"],
+            docs=docs,
+        ))
+    return expected_members
+
 def parse_class_members(filecontent:str, classname:str) -> list[MemberInfo]:
     """ Parses the file for documented members of a class template.
         Looks for members with documentation stirngs looking like this:  
@@ -202,6 +237,7 @@ def find_class_templates(file: str | os.PathLike) -> list[ClassTemplateInfo]:
         for arg in class_args:
             arg.docs = parse_arg_docs(filecontent,class_name, arg.name)
         class_members = parse_class_members(filecontent, class_name)
+        expected_members = parse_expected_member_docs(filecontent, class_name)
         
         template_list.append(
             ClassTemplateInfo(
@@ -210,6 +246,7 @@ def find_class_templates(file: str | os.PathLike) -> list[ClassTemplateInfo]:
                 type=classtype,
                 args=class_args,
                 members=class_members,
+                expected_members=expected_members,
             )
         )
     return template_list
