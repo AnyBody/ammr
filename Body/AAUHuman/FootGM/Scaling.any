@@ -4,10 +4,10 @@ AnyFolder InterfaceMorphingDef = {
   AnyMatrix MirroringMat ={ {1,0,0},{0,1,0},{0,0,...Sign} };
   /// Manually picked points on unscaled foot
   AnyMatrix IM_PickedPoints_GMFoot_Unscaled = {
-{-0.01923199, 0.08287545, -0.005511518}, 
-{-0.01524367, -0.03055783, 0.04927201}, 
-{-0.007463424, -0.06155794, 0.01020253}, 
-{-0.01293344, -0.05830658, -0.01899186}, 
+{-0.01923199, 0.08287545, -0.005511518}, //Heel
+{-0.01524367, -0.03055783, 0.04927201}, //MT5
+{-0.007463424, -0.06155794, 0.01020253}, //MT2
+{-0.01293344, -0.05830658, -0.01899186}, //MT1
 {-0.007135777, 0.08833511, 0.02071268}, 
 {0.02138242, 0.1071969, -0.008062809}, 
 {0.02375501, 0.02864095, -0.0233577}, 
@@ -106,6 +106,12 @@ AnyFolder InterfaceMorphingDef = {
     Points1 = .IM_PickedPoints_TLEMFoot_Unscaled;
     Mode = VTK_LANDMARK_AFFINE;
   };
+  /// Rigid transformation of GM foot to Tlem foot
+  AnyFunTransform3DLin2 IM_Foot_GM_To_TLEM_Rigidbody = {
+    Points0 = .IM_PickedPoints_GMFoot_Unscaled;
+    Points1 = .IM_PickedPoints_TLEMFoot_Unscaled;
+    Mode = VTK_LANDMARK_RIGIDBODY;
+  };
   /// RBF Transform of GM foot to Tlem foot using affine
   /// transformation as pretransform
   AnyFunTransform3DRBF IM_FootAffine_GM_To_TLEM_RBF = {
@@ -119,12 +125,12 @@ AnyFolder InterfaceMorphingDef = {
     BoundingBox.DivisionFactorXYZ = {1, 1, 1}*2;
     BoundingBox.Type = BB_PrincipalAxes;
   };
-//  /// Reverse rigid body transformation from TLEM to GM foot
-//  AnyFunTransform3DLin2 IM_Foot_TLEM_To_GM_RigidBody = {
-//    Points0 = .IM_PickedPoints_TLEMFoot_Unscaled;
-//    Points1 = .IM_PickedPoints_GMFoot_Unscaled;
-//    Mode = VTK_LANDMARK_RIGIDBODY;
-//  };
+  /// Reverse rigid body transformation from TLEM to GM foot
+  AnyFunTransform3DLin2 IM_Foot_TLEM_To_GM_RigidBody = {
+    Points0 = .IM_PickedPoints_TLEMFoot_Unscaled;
+    Points1 = .IM_PickedPoints_GMFoot_Unscaled;
+    Mode = VTK_LANDMARK_RIGIDBODY;
+  };
   /// Interface morphing of GM foot to Tlem foot including reverse transformation
   AnyFunTransform3DLin IM_Foot_GM_To_TLEM = {
     PreTransforms = {&.IM_FootAffine_GM_To_TLEM_RBF};//, &.IM_Foot_TLEM_To_GM_RigidBody};
@@ -136,31 +142,48 @@ AnyFolder InterfaceMorphingDef = {
 
 AnyFunTransform3D& GeomScale = ..GeoScaling.Foot.ScaleFunction;
 
-#if BM_SCALING == _SCALING_NONE_
-InterfaceMorphingDef = {
-  /// Rigid transformation of GM foot to Tlem foot
-  AnyFunTransform3DLin2 IM_Foot_GM_To_TLEM_Rigidbody = {
-    Points0 = .IM_PickedPoints_GMFoot_Unscaled;
-    Points1 = .IM_PickedPoints_TLEMFoot_Unscaled;
-    Mode = VTK_LANDMARK_RIGIDBODY;
-  };
-};
-AnyFunTransform3D Scale = {
-  PreTransforms = {&.InterfaceMorphingDef.IM_Foot_GM_To_TLEM_Rigidbody};
-};
-#else
+//#if BM_SCALING == _SCALING_NONE_
+//InterfaceMorphingDef = {
+//};
+//AnyFunTransform3D Scale = {
+//  PreTransforms = {&.InterfaceMorphingDef.IM_Foot_GM_To_TLEM_Rigidbody};
+//};
+//#else
 /// Scale function consisting of interface morphing and anthropometric scaling
 AnyFunTransform3D Scale = {
-  PreTransforms = {&.InterfaceMorphingDef.IM_Foot_GM_To_TLEM,
-                   &.GeomScale};
+  AnyFolder ScaleAfterInterfaceMorphingDef = {
+    #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(p, SIGN) 0.5*(p[0]+p[1])
+    #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(p, SIGN) RotMat(0.5*(p[0]+p[1]),0.5*(p[0]+p[1]) + cross(p[4]-p[3],p[5]-p[3])*SIGN, p[2]) * RotMat(-0.5*pi,z) * RotMat(1*pi,y)
+
+    AnyFloat pUnscaled = ..InterfaceMorphingDef.IM_Foot_GM_To_TLEM(..pUnscaled);
+    AnyFunTransform3D& GeomScale = ....GeoScaling.Foot.ScaleFunction;
+    AnyVar Sign = ..Sign;
+    
+    #include "..\Scaling\SegScaleFunWrtAnatomicalFrame.any"
+    #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_s
+    #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_A
+    
+  };
+  
+  AnyFunTransform3DLin &T0 = ScaleAfterInterfaceMorphingDef.Scale.T0;
+  
+  PreTransforms = {
+    #if BM_SCALING == _SCALING_NONE_
+    &.InterfaceMorphingDef.IM_Foot_GM_To_TLEM_Rigidbody,
+    #else
+    &.InterfaceMorphingDef.IM_Foot_GM_To_TLEM,
+    #endif
+    &ScaleAfterInterfaceMorphingDef.Scale
+  };
+                 
 };
-#endif
+//#endif
 
 Scale = {
-  AnyFunTransform3DLin &T0 = .Scale;
+//  AnyFunTransform3DLin &T0 = .Scale;
 };
 
-AnyFolder &ModelParameters = ..ModelParameters;
+//AnyFolder &ModelParameters = ..ModelParameters;
 //ModelParameters.Foot = {
 //  
 //  AnyMatrix IM_PickedPoints_GMFoot_Unscaled = {
