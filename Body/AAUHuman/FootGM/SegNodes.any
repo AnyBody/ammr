@@ -1,33 +1,5 @@
 Shank = {
-  
-  AnyRefNode AnkleJoint =
-  {
-    AnyVec3 sRelUnscaled = .StdPar.AnkleJoint+{-0.01, 0.005, 0.002}*.AnatomicalFrame.ARelUnscaled';
-    AnyMat33 ARelUnscaled = RotMat({0.0,0,0}, .StdPar.AnkleJointAxis, .AnatomicalFrame.ARelUnscaled'[1])*RotMat(pi/2,y);
-    /// Control point for the Ankle joint. Found by projecting the malleolus bony landmarks onto the
-    /// ankle axis from the cadaver data set. Thus, scaling that moves the control points will also scale the ankle joint axis
-    AnyVec3 LateralControlPoint = .Scale(.StdPar.AnkleJoint + (.StdPar.LateralMalleolus - .StdPar.AnkleJoint)*.StdPar.AnkleJointAxis'*.StdPar.AnkleJointAxis);
-    /// Control point for the Ankle joint. Found by projecting the malleolus bony landmarks onto the
-    /// ankle axis from the cadaver data set. Thus, scaling that moves the control points will also scale the ankle joint axis
-    AnyVec3 MedialControlPoint = .Scale(.StdPar.AnkleJoint + (.StdPar.MedialMalleolus - .StdPar.AnkleJoint)*.StdPar.AnkleJointAxis'*.StdPar.AnkleJointAxis );
-    /// Ankle Joint defined directly from the cadaver dataset.
-    sRel = .Scale(sRelUnscaled);
-    /// Ankle Joint orientation is calculated based on the direction between the two control points.
-    ARel = RotMat(0.0*{0,0,0}, .Sign*(LateralControlPoint-MedialControlPoint ),  .AnatomicalFrame.ARel'[1] )*RotMat(pi/2,y);
     
-    #include "<ANYBODY_PATH_BODY>/DrawSettings/JointAxesDistal.any"
-    
-    #if DRAWAXES
-    AnyDrawLine SJaxis2 =
-    {
-      Visible = On;
-      p0 = ..StdPar.TalocruralsRel + {..StdPar.AnkleJointAxis[2],..StdPar.AnkleJointAxis[1],..StdPar.AnkleJointAxis[0]}*0.2;
-      p1 = ..StdPar.TalocruralsRel - {..StdPar.AnkleJointAxis[2],..StdPar.AnkleJointAxis[1],..StdPar.AnkleJointAxis[0]}*0.2;      //Offset = {0, 0, 0};
-      Line = {Thickness = 0.001; RGB = {0, 0, 0};};
-    };
-    #endif
-  };
-  
   AnyRefNode LigTibioTalarPosterior = {
     sRel = .Scale({0.005, 0.006, ...Sign*-0.025});
     //AnyDrawRefFrame drw={ScaleXYZ={0.01,0.01,0.01};RGB={0,0,0};};
@@ -64,16 +36,42 @@ Shank = {
 }; // end Shank
 
 Foot = {
-  //These pointers and values are only used for compatibility with references in the LegTD files using the stiff foot originaly.
+  
+  //These pointers and values are only used for compatibility with references in the LegTD files using the stiff foot originally.
   //It forwards the references to the coresponding element of the detailed foot.
+  AnyRefFrame &AnatomicalFrame = Talus.AnatomicalFrame;
   AnyRefFrame &SubTalarJoint = Calcaneus.SubTalarJoint;  
   AnyRefFrame &HeelNode = Calcaneus.HeelNode;  
   AnyRefFrame &ToeMedialContactNode = Metatarsal1.ToeMedialContactNode;  
   AnyRefFrame &ToeLateralContactNode = Metatarsal5.ToeLateralContactNode;  
+  AnyFolder &StdPar = ..ModelParameters.FootGM;
+  AnyVar Sign = ..Sign;
+  AnyFloat pUnscaled = {StdPar.LateralMalleolus, StdPar.MedialMalleolus, StdPar.Metatarsal2PlantarNode,StdPar.HeelPlantarNode, StdPar.Metatarsal5PlantarNode, StdPar.Metatarsal1PlantarNode};
+  // p={LateralMalleolus, MedialMalleolus, Metatarsal2, Heel, Metatarsal5, Metatarsal1} //bony landmarks to define orgin and long axis of the foot
+  // and three coplanar points to define the horizontal plane parallel to the ground. These can be on the bones, skin, shoe, etc. and
+  // determine the proximal-distal axis of the foot and ankle plantarflexion zero value
+
   
   Talus = {
     
-    AnyRefNode AnatomicalFrame = {};
+    AnyVar Sign = .Sign;
+    AnyFolder &StdPar =.StdPar;
+    
+    AnyFloat pUnscaled = .pUnscaled;
+    #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(p, SIGN) 0.5*(p[0]+p[1])
+    #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(p, SIGN) RotMat(0.5*(p[0]+p[1]),0.5*(p[0]+p[1]) + cross(p[4]-p[3],p[5]-p[3])*SIGN, p[2]) * RotMat(-0.5*pi,z) * RotMat(1*pi,y)
+
+    AnyRefNode AnatomicalFrame =
+    {
+      AnyFloat pScaled = .Scale(.pUnscaled);
+      sRel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(pScaled, .Sign);
+      ARel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(pScaled, .Sign);
+      AnyVec3 sRelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(.pUnscaled, .Sign);///< Generic unscaled position of foot ScalingNode
+      AnyMat33 ARelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(.pUnscaled, .Sign);///< Generic unscaled rotation of foot ScalingNode
+    };
+    #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_s
+    #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_A
+    
     AnyRefNode& ScalingNode=AnatomicalFrame ;
     /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
     AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;
@@ -93,39 +91,18 @@ Foot = {
       sRel = .Scale({0.0449248, 0.07027722, ....Sign*0.02751965});
       //    AnyDrawRefFrame drw={ScaleXYZ=2*{0.005,0.005,0.005};RGB={1,0,0};};
     };      
-    //  AnyRefNode SubTalarJointReactionNode1= { 
-    //    sRel= .Scale({0.04, 0.05, ....Sign*0.01});
-    //    ARel = .SubTalarJoint.ARel;
-    //    AnyDrawRefFrame drw={ScaleXYZ=0.02*{1,1,1};};
-    //  }; 
-    //  AnyRefNode SubTalarJointReactionNode2= { 
-    //    sRel= .Scale({0.04, 0.06, ....Sign*-0.01});
-    //    ARel = .SubTalarJoint.ARel;
-    //    AnyDrawRefFrame drw={ScaleXYZ=0.02*{1,1,1};};
-    //  };     
-    AnyRefNode AnkleJoint={
-      //sRel = .MedMalleoli.sRel+0.5*(.LatMalleoli.sRel-.MedMalleoli.sRel) + {0.0071, -0.0021, ....Sign*0.001};
-      sRel = .Scale({0.05072315, 0.06269352, ....Sign*0.003089067});
-      AnyMat33 ARelStandard = RotMat(.MedMalleoli.sRel,.LatMalleoli.sRel,{1.0,0.0,-....Sign*0.1})*RotMat(....Sign*pi/2,y);
-      //    AnyMat33 ARelStandard = {{-0.04812958, 0.9836665, -....Sign*0.1734469}, {-0.984744, -0.01765817, ....Sign*0.173111}, {....Sign*0.1672207, ....Sign*0.1791326, 0.9695095}};
-      
-      //correction of the axis used when morphing, specialy needed for severe flat foot.
-      AnyVar ARelCorrectionAngle = (..Metatarsal1.MTHeadMedialNode.sRel[0]-..Metatarsal5.MTHeadLateralNode.sRel[0])/(..Metatarsal5.MTHeadLateralNode.sRel[2]-..Metatarsal1.MTHeadMedialNode.sRel[2])*0.6;
-      AnyVar ARelCorrectionAngleCond = iffun(gtfun(ARelCorrectionAngle,0.15),ARelCorrectionAngle,0.0);
-      ARel = ARelStandard * RotMat(ARelCorrectionAngleCond,x)*RotMat(pi/2,z);
-      
-      //    AnyDrawRefFrame drw={ScaleXYZ=10*{0.005,0.005,0.005};RGB={1,0,0};};
-    };        
-    AnyRefNode SubTalarJoint= 
+    AnyRefNode MedialMalleolus_TLEM = 
     {
-      sRel = ..Calcaneus.SubTalarJoint.sRel;
-      ARel = ..Calcaneus.SubTalarJoint.ARel;
-    };   
-    
-    //***********************
-    //Muscles nodes
-    //***********************
-    
+      sRel = .Scale(.StdPar.MedialMalleolus);
+      //    AnyDrawRefFrame drw={ScaleXYZ=2*{0.005,0.005,0.005};RGB={1,0,0};};
+    };    
+    AnyRefNode LateralMalleolus_TLEM = 
+    {
+      sRel = .Scale(.StdPar.LateralMalleolus);
+      //    AnyDrawRefFrame drw={ScaleXYZ=2*{0.005,0.005,0.005};RGB={1,0,0};};
+    };     //  AnyRefNode SubTalarJointReactionNode1= { 
+
+    //****************
     //Ligaments nodes
     //****************
     AnyRefNode LigTibioTalarPosterior = {
@@ -149,7 +126,10 @@ Foot = {
   
   Calcaneus = {
     
-    AnyRefNode AnatomicalFrame = {};
+    AnyVar Sign = .Sign;
+    AnyFolder &StdPar = .StdPar;
+    
+    AnyRefNode &AnatomicalFrame = .AnatomicalFrame;
     AnyRefNode& ScalingNode=AnatomicalFrame ;
     /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
     AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;
@@ -160,13 +140,6 @@ Foot = {
       sRel = ..Cuboid.CalcaneoCuboidJoint.sRel;
       ARel = ..Cuboid.CalcaneoCuboidJoint.ARel;// *RotMat(7*pi/180,z); // modified
     };    
-    AnyRefNode SubTalarJoint= 
-    {
-      //    AnyDrawRefFrame drw={ScaleXYZ=10*{0.01,0.01,0.01};RGB={1,0,0};};
-      sRel = .Scale({0.03704882, 0.05320177, ....Sign*-0.000740961});
-      //    ARel = RotMat((....Sign*25*pi/180),x)*RotMat(-58*pi/180,z)*RotMat(....Sign*-pi/2,y);
-      ARel = RotMat(sRel, .SubTalarJointAxisRef.sRel, ..Talus.AnkleJoint.sRel)*RotMat(....Sign*pi/2,y);
-    };        
     AnyRefNode SubTalarJointAxisRef = 
     {
       sRel = .Scale({-0.012, 0.105, ....Sign*0.015});
@@ -405,7 +378,10 @@ Foot = {
     
   Cuboid = {
     
-    AnyRefNode AnatomicalFrame = {};
+    AnyVar Sign = .Sign;
+    AnyFolder &StdPar = .StdPar;
+    
+    AnyRefNode &AnatomicalFrame = .AnatomicalFrame;
     AnyRefNode& ScalingNode=AnatomicalFrame ;
     /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
     AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;
@@ -515,7 +491,10 @@ Foot = {
     
   Navicular = {
     
-    AnyRefNode AnatomicalFrame = {};
+    AnyVar Sign = .Sign;
+    AnyFolder &StdPar = .StdPar;
+    
+    AnyRefNode &AnatomicalFrame = .AnatomicalFrame;
     AnyRefNode& ScalingNode=AnatomicalFrame ;
     /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
     AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;   
@@ -627,7 +606,10 @@ Foot = {
   
   MedialCuneiform = {
     
-    AnyRefNode AnatomicalFrame = {};
+    AnyVar Sign = .Sign;
+    AnyFolder &StdPar = .StdPar;
+    
+    AnyRefNode &AnatomicalFrame = .AnatomicalFrame;
     AnyRefNode& ScalingNode=AnatomicalFrame ;
     /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
     AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;    
@@ -704,7 +686,10 @@ Foot = {
   
   IntermediateCuneiform = {
     
-    AnyRefNode AnatomicalFrame = {};
+    AnyVar Sign = .Sign;
+    AnyFolder &StdPar = .StdPar;
+    
+    AnyRefNode &AnatomicalFrame = .AnatomicalFrame;
     AnyRefNode& ScalingNode=AnatomicalFrame ;
     /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
     AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;
@@ -757,7 +742,10 @@ Foot = {
   
   LateralCuneiform = {
     
-    AnyRefNode AnatomicalFrame = {};
+    AnyVar Sign = .Sign;
+    AnyFolder &StdPar = .StdPar;
+    
+    AnyRefNode &AnatomicalFrame = .AnatomicalFrame;
     AnyRefNode& ScalingNode=AnatomicalFrame ;
     /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
     AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;
@@ -817,9 +805,13 @@ Foot = {
   //************************************************
   
   Metatarsal1 = {
+    
     AnyFolder &FootType = ...FootType;
     
-    AnyRefNode AnatomicalFrame = {};
+    AnyVar Sign = .Sign;
+    AnyFolder &StdPar = .StdPar;
+    
+    AnyRefNode &AnatomicalFrame = .AnatomicalFrame;
     AnyRefNode& ScalingNode=AnatomicalFrame ;
     /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
     AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;
@@ -928,7 +920,10 @@ Foot = {
     
   Metatarsal2 = {
     
-    AnyRefNode AnatomicalFrame = {};
+    AnyVar Sign = .Sign;
+    AnyFolder &StdPar = .StdPar;
+    
+    AnyRefNode &AnatomicalFrame = .AnatomicalFrame;
     AnyRefNode& ScalingNode=AnatomicalFrame ;
     /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
     AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;
@@ -1030,7 +1025,10 @@ Foot = {
   
   Metatarsal3 = {
     
-    AnyRefNode AnatomicalFrame = {};
+    AnyVar Sign = .Sign;
+    AnyFolder &StdPar = .StdPar;
+    
+    AnyRefNode &AnatomicalFrame = .AnatomicalFrame;
     AnyRefNode& ScalingNode=AnatomicalFrame ;
     /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
     AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;   
@@ -1132,7 +1130,10 @@ Foot = {
   
   Metatarsal4 = {
     
-    AnyRefNode AnatomicalFrame = {};
+    AnyVar Sign = .Sign;
+    AnyFolder &StdPar = .StdPar;
+    
+    AnyRefNode &AnatomicalFrame = .AnatomicalFrame;
     AnyRefNode& ScalingNode=AnatomicalFrame ;
     /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
     AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;
@@ -1234,7 +1235,10 @@ Foot = {
     
   Metatarsal5 = {
     
-    AnyRefNode AnatomicalFrame = {};
+    AnyVar Sign = .Sign;
+    AnyFolder &StdPar = .StdPar;
+    
+    AnyRefNode &AnatomicalFrame = .AnatomicalFrame;
     AnyRefNode& ScalingNode=AnatomicalFrame ;
     /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
     AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;
@@ -1392,7 +1396,10 @@ Foot = {
     
     AnyFolder &FootType = ...FootType;
     
-    AnyRefNode AnatomicalFrame = {};
+    AnyVar Sign = .Sign;
+    AnyFolder &StdPar = .StdPar;
+    
+    AnyRefNode &AnatomicalFrame = .AnatomicalFrame;
     AnyRefNode& ScalingNode=AnatomicalFrame ;
     /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
     AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;
@@ -1455,7 +1462,10 @@ Foot = {
     
   ProximalPhalange2 = {
     
-    AnyRefNode AnatomicalFrame = {};
+    AnyVar Sign = .Sign;
+    AnyFolder &StdPar = .StdPar;
+    
+    AnyRefNode &AnatomicalFrame = .AnatomicalFrame;
     AnyRefNode& ScalingNode=AnatomicalFrame ;
     /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
     AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;
@@ -1518,7 +1528,10 @@ Foot = {
     
   ProximalPhalange3 = {
     
-    AnyRefNode AnatomicalFrame = {};
+    AnyVar Sign = .Sign;
+    AnyFolder &StdPar = .StdPar;
+    
+    AnyRefNode &AnatomicalFrame = .AnatomicalFrame;
     AnyRefNode& ScalingNode=AnatomicalFrame ;
     /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
     AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;
@@ -1581,7 +1594,10 @@ Foot = {
   
   ProximalPhalange4 = {
     
-    AnyRefNode AnatomicalFrame = {};
+    AnyVar Sign = .Sign;
+    AnyFolder &StdPar = .StdPar;
+    
+    AnyRefNode &AnatomicalFrame = .AnatomicalFrame;
     AnyRefNode& ScalingNode=AnatomicalFrame ;
     /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
     AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;
@@ -1644,7 +1660,10 @@ Foot = {
     
   ProximalPhalange5 = {
     
-    AnyRefNode AnatomicalFrame = {};
+    AnyVar Sign = .Sign;
+    AnyFolder &StdPar = .StdPar;
+    
+    AnyRefNode &AnatomicalFrame = .AnatomicalFrame;
     AnyRefNode& ScalingNode=AnatomicalFrame ;
     /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
     AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;
@@ -1712,7 +1731,10 @@ Foot = {
   
   MiddlePhalange2 = {
     
-    AnyRefNode AnatomicalFrame = {};
+    AnyVar Sign = .Sign;
+    AnyFolder &StdPar = .StdPar;
+    
+    AnyRefNode &AnatomicalFrame = .AnatomicalFrame;
     AnyRefNode& ScalingNode=AnatomicalFrame ;
     /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
     AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;
@@ -1770,7 +1792,10 @@ Foot = {
     
   MiddlePhalange3 = {
     
-    AnyRefNode AnatomicalFrame = {};
+    AnyVar Sign = .Sign;
+    AnyFolder &StdPar = .StdPar;
+    
+    AnyRefNode &AnatomicalFrame = .AnatomicalFrame;
     AnyRefNode& ScalingNode=AnatomicalFrame ;
     /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
     AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;
@@ -1828,7 +1853,10 @@ Foot = {
     
   MiddlePhalange4 = {
     
-    AnyRefNode AnatomicalFrame = {};
+    AnyVar Sign = .Sign;
+    AnyFolder &StdPar = .StdPar;
+    
+    AnyRefNode &AnatomicalFrame = .AnatomicalFrame;
     AnyRefNode& ScalingNode=AnatomicalFrame ;
     /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
     AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;
@@ -1886,7 +1914,10 @@ Foot = {
     
   MiddlePhalange5 = {
     
-    AnyRefNode AnatomicalFrame = {};
+    AnyVar Sign = .Sign;
+    AnyFolder &StdPar = .StdPar;
+    
+    AnyRefNode &AnatomicalFrame = .AnatomicalFrame;
     AnyRefNode& ScalingNode=AnatomicalFrame ;
     /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
     AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;
@@ -1951,7 +1982,10 @@ Foot = {
     
     AnyFolder &FootType = ...FootType;
     
-    AnyRefNode AnatomicalFrame = {};
+    AnyVar Sign = .Sign;
+    AnyFolder &StdPar = .StdPar;
+    
+    AnyRefNode &AnatomicalFrame = .AnatomicalFrame;
     AnyRefNode& ScalingNode=AnatomicalFrame ;
     /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
     AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;
@@ -2022,7 +2056,10 @@ Foot = {
   
   DistalPhalange2 = {
     
-    AnyRefNode AnatomicalFrame = {};
+    AnyVar Sign = .Sign;
+    AnyFolder &StdPar = .StdPar;
+    
+    AnyRefNode &AnatomicalFrame = .AnatomicalFrame;
     AnyRefNode& ScalingNode=AnatomicalFrame ;
     /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
     AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;
@@ -2079,7 +2116,10 @@ Foot = {
   
   DistalPhalange3 = {
     
-    AnyRefNode AnatomicalFrame = {};
+    AnyVar Sign = .Sign;
+    AnyFolder &StdPar = .StdPar;
+    
+    AnyRefNode &AnatomicalFrame = .AnatomicalFrame;
     AnyRefNode& ScalingNode=AnatomicalFrame ;
     /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
     AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;
@@ -2126,7 +2166,10 @@ Foot = {
     
   DistalPhalange4 = {
     
-    AnyRefNode AnatomicalFrame = {};
+    AnyVar Sign = .Sign;
+    AnyFolder &StdPar = .StdPar;
+    
+    AnyRefNode &AnatomicalFrame = .AnatomicalFrame;
     AnyRefNode& ScalingNode=AnatomicalFrame ;
     /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
     AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;
@@ -2173,7 +2216,10 @@ Foot = {
   
   DistalPhalange5 = {
     
-    AnyRefNode AnatomicalFrame = {};
+    AnyVar Sign = .Sign;
+    AnyFolder &StdPar = .StdPar;
+    
+    AnyRefNode &AnatomicalFrame = .AnatomicalFrame;
     AnyRefNode& ScalingNode=AnatomicalFrame ;
     /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
     AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;
