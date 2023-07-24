@@ -191,6 +191,11 @@ achieve same marker position and joint angle output.
   `VideoLookAtCamera.any` to have the same name as the class template it
   contains. 
 
+**Removed:**
+- The template `DEFAULT_PARAMETER_FOLDER` has been removed. It is no longer needed 
+  since the same functionality is now provided by the `??=` operator. 
+
+
 ## AMMR 2.4.5-beta
 
 **Fixed:**
