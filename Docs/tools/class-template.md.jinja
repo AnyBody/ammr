@@ -1,5 +1,5 @@
-({{group}}.{{topic}}.{{filename}}.any)=
-# {{topic}}.{{filename}}
+({{ (group+"."+topic+"."+filename) | replace(" ","-") }}.any)=
+# {{filename}}
 
 {{filedocstring}}
 
@@ -11,19 +11,22 @@
 {% for classt in class_templates %}
 {%- set classname = classt['name'] %}
 
-({{group}}.{{topic}}.{{filename}}.{{classname}})=
+({{ (group+"."+topic+"."+filename) | replace(" ","-")  }}.{{classname}})=
 {%- set documented_args = classt.args | selectattr("docs", "ne", "") | list %}
 {%- set undocumented_args = classt.args | selectattr("docs", "eq", "") | list %}
 {%- set expected_undocumented_args = undocumented_args | selectattr("value", "eq", "") | list %}
 {%- set args_in_documentation = (documented_args + expected_undocumented_args) %}
-{% set expected_members = classt.expected_members %}
-{% set required_members = classt.members | selectattr("value", "eq", "") | list %}
-{% set optional_members = classt.members | selectattr("value", "ne", "") | list %}
-
+{%- set expected_members = classt.expected_members %}
+{%- set required_members = classt.members | selectattr("value", "eq", "") | list %}
+{%- set optional_members = classt.members | selectattr("value", "ne", "") | list %}
 
 ## #{{classname}}
 
-{{ classt['docs'].splitlines() | first  }}
+{{ classt['docs'].strip() }}
+
+
+:::{rubric} Full call signature
+:::
 
 ```{code-block} AnyScriptDoc
 {{classname}} <ObjectName>
@@ -33,8 +36,13 @@
   {{ arg.name }}={{arg.value or "<required>"}},
 {%- endfor %}
 ){% endif %} = {
+{%- for member in expected_members %}
+  {% if member.group %}{{member.group}} = { {{"\n    "}}{%endif%}
+{{- member.type}} {{member.name}} = {{member.value}}
+{% if member.group %}  };{{"\n"}}{%endif%}
+{%- endfor -%}
 {%- for member in required_members %}
-{{member.name}} = <Required>; {{ "\n" if loop.last}}
+  {{member.name}} = <Required>; {{ "\n" if loop.last}}
 {%- endfor -%}
 };
 ```
@@ -83,7 +91,7 @@
 {% for member in required_members %}
 ::::{grid-item-card} 
 ```{code-block} AnyScriptDoc
-{{member.name}} = <Required>;`{l=AnyScript}
+{{member.name}} = §<Required>§;
 ```
 
 {%if member.type != ""%}:class type: `{{member.type}}`{l=AnyScript}{%endif%}
@@ -117,11 +125,6 @@
 :::::
 {% endif %}
 
-
-:::{rubric} Documentaton
-:::
-
-{{ classt['docs'].strip() }}
 
 
 

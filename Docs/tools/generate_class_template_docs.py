@@ -133,7 +133,7 @@ def parse_arg_docs(filecontent:str, classname:str, argname:str) -> str:
         rf"""
         ^\s*//\s*{classname}\s*\#\s*{argname}\s*?\n #Match start of argument
         (?P<docs>\s*//.*?)   #Match documentation string
-        ^\s*?(//)?\s*?\n     # Match an empty line
+        ^\s*?(//|//\s*?{classname}\s*\#\w+?)?\s*?\n     # Match an empty line
         """, re.MULTILINE |  re.DOTALL |  re.VERBOSE
     )
     if not (match:= re_arg_docs.search(filecontent)):
@@ -209,7 +209,7 @@ def parse_class_members(filecontent:str, classname:str) -> list[MemberInfo]:
         members.append(MemberInfo(
             name=member_name,
             type=member_type,
-            value=member_value,
+            value=member_value or "",
             docs=member_docstring,
         ))
     return members
@@ -289,7 +289,7 @@ def run(ams_path_def, base_path):
                 filedocstring=filedata.descr or "",
                 class_templates=class_templates,
                 include_str=filedata.include_str,
-            )
+            ), encoding="utf-8"
         )
 
     # Write group toc files

@@ -140,13 +140,13 @@ bm_config/index
 
 
 ```{toctree}
-:caption: Tools anc class templates
+:caption: Tools
 :includehidden: true
-:maxdepth: 1
+:maxdepth: 0
 :hidden:
 :glob:
 
-tools/*-toc
+tools/class-templates
 ```
 
 
