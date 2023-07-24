@@ -157,7 +157,7 @@ def parse_expected_member_docs(filecontent:str, classname:str) -> list[MemberInf
         (?P<docs>\s*//.*?)   #Match documentation string
         ^\s*?(//)?\s*?   # match start line
         (?P<type>\w+)\s+?
-        (?P<name>\w+)
+        (?P<name>[^=\s]+)
         \s*?=\s*
         (?P<value>.*?;.*?)\n
         """, re.MULTILINE |  re.DOTALL |  re.VERBOSE

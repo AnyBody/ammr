@@ -1,103 +1,110 @@
 #ifndef _ANYMOCAP_FORCE_PLATE_AUTO_DETECTION_ANY_
 #define _ANYMOCAP_FORCE_PLATE_AUTO_DETECTION_ANY_
+/*
+---
+group: MoCap
+topic: Force plates
+descr: Create Force plates based on data in C3D file.
+---
+
+See below for more details
+
+*/
 
 #include "ForcePlateTypes.any"
 
 
-/* Class template: ForcePlateAutoDetection 
-
-  Class template to create a force plates from measured data (in c3d files) which
-  automatically detects which foot comes in contact with the plate.
-  
-  The class can also be used for other limbs. 
-  
-  Tip: If you have a model with only one leg, or want to ensure that only one leg
-  contacts the plate then set LIMB1 and LIMB2 to the same segment
- 
-
-   Class arguments:
-   ----------
-    PLATE_NO: int
-      The plate number in the C3D file (1..N)
-    FORCEPLATE_TYPE int:
-       The type of force plate.
-    VerticalDirection: string, optional
-      The vertical direction of the force plate used in the contact detection. 
-      Possible values are "X", "Y", "Z","Automatic". (Defaults to "Automatic")
-    HeightTolerance: float, optional
-      The height tolerance for contact detection. (Defaults to 0.07 m)
-    VelThreshold: float, optional
-      The velocity tolerance for contact detection. (Defaults to 2.2 m/s)
-    ALLOW_MULTI_LIMB_CONTACT: bool, optional
-       Switch to specify if two feet can be in contact wit the plate simultaneously.
-       If set to OFF only the leg with lowest velocity will be assumed in contact. 
-       Set this to OFF to prevent false contact detection in the swing phase from 
-       the collateral leg. (Defaults to ON)
-    LIMB1: objname, optional
-      Location of the limb 1 (defaults to: Main.HumanModel.BodyModel.Right.Leg.Seg.Foot)
-    LIMB2: objname, optional
-      Location of the limb 2 (defaults to: Main.HumanModel.BodyModel.Left.Leg.Seg.Foot)
-    DRAW_RAW_FORCES: bool,  optional
-        Switch if the specify if the raw force in the forceplate should  be visualized. (Defaults to ON)
-    C3D_OBJECT: objname, optional
-      Location of the c3d file object in the model three (defaults to: Main.ModelSetup.C3DFileData,
-    CONTACT_NODE1: objname, optional
-       The node on LIMB1/2 used for contact detection. Change this if you are connecting 
-       to something different than the feet. (Defaults to: HeelContactNodeLow)
-    CONTACT_NODE2: objname, optional
-       The node on LIMB1/2 used for contact detection. Change this if you are connecting 
-       to something different than the feet. (Defaults to: ToeLateralContactNode)
-    CREATE_KIN_GRF: bool, optional
-        Create a kinematic represenation of the ground reaction force vector. This is experimental 
-        but could be used to include the GRF vector in the parameter optimization. (Defaults to OFF)
-    KIN_GRF_LIMB1_FUN: objname, optional
-        Switch to customize the kinematic GRF vector represenation. Experimental. (Defautls to GlobalCopFun)
-        KIN_GRF_LIMB2_FUN: objname, optional
-        Switch to customize the kinematic GRF vector represenation. Experimental. (Defautls to GlobalCopFun)
-        
-   
-  Optional initialization:
-  ------------------------
-  GroundVelocity = {0, 0, 0}; //< Sets the velocity of the ground. Useful if subject walks on treadmills
-
-  SurfaceOffset = {0,0,0};    // Offset of the plate surface. Usefull if stairs or other equiment is placed
-                              // is placed on the force plate. 
-  
-   
-  Example: 
-  --------
-  ForcePlateAutoDetection <Object_name>(
-    PLATE_NO=<1..N>,
-    FORCEPLATE_TYPE = 1,
-    HeightTolerance = 0.07,
-    VelThreshold = 2.2,
-    ALLOW_MULTI_LIMB_CONTACT = OFF
-  )=
-  {
-      SurfaceOffset = {0, 0.1, 0}
-  };  
-  
-   
-*/
-
+/// Class template to create a force plates from measured data (in c3d files).
+/// 
+/// The class automatically links the force to the foot closest and stationary 
+/// on the force plate. 
+/// 
+/// The class can also be used for other limbs. 
+/// 
+/// :::{tip} If you have a model with only one leg, or want to ensure that only one leg
+/// contacts the plate then set LIMB1 and LIMB2 to the same segment
+/// :::
+///
+/// :::{rubric} Example
+/// :::
+/// 
+/// ```{code-block} AnyScriptDoc
+/// ForcePlateAutoDetection Plate1(
+///   PLATE_NO=1,
+///   LIMB1 = Main.HumanModel.BodyModel.Right.Leg.Seg.Foot,
+///   LIMB2 = Main.HumanModel.BodyModel.Left.Leg.Seg.Foot,
+///   HeightTolerance = 0.07,
+///   VelThreshold = 2.2,
+///   FORCEPLATE_TYPE = 4,
+///   ALLOW_MULTI_LIMB_CONTACT = OFF
+/// ) = 
+/// {
+///   SurfaceOffset = {0, 0.1, 0};
+/// };
+///```
+///
 #class_template ForcePlateAutoDetection (
     PLATE_NO,
-    C3D_OBJECT = Main.ModelSetup.C3DFileData,
+    FORCEPLATE_TYPE,
     LIMB1 = Main.HumanModel.BodyModel.Right.Leg.Seg.Foot,
     LIMB2 = Main.HumanModel.BodyModel.Left.Leg.Seg.Foot,
     VerticalDirection = "Automatic",
     HeightTolerance = 0.07,
     VelThreshold = 2.2, 
     ALLOW_MULTI_LIMB_CONTACT = 1,
-    FORCEPLATE_TYPE,
     CONTACT_NODE1 = HeelContactNodeLow,
     CONTACT_NODE2 = ToeLateralContactNode,
     CREATE_KIN_GRF = 0,
     KIN_GRF_LIMB1_FUN = GlobalCopFun,
     KIN_GRF_LIMB2_FUN = GlobalCopFun,
     DRAW_RAW_FORCES = 1
+    C3D_OBJECT = Main.ModelSetup.C3DFileData,
     )
 {
+
+  // Argument
+  // -----------------
+  // ForcePlateAutoDetection#PLATE_NO
+  //   The plate number in the C3D file (1..N)
+  // ForcePlateAutoDetection#FORCEPLATE_TYPE
+  //   The type of force plate (from the C3D spec.) (1..4)
+  // ForcePlateAutoDetection#LIMB1
+  //   Location of the limb 1 (defaults to: Main.HumanModel.BodyModel.Right.Leg.Seg.Foot)
+  // ForcePlateAutoDetection#LIMB2
+  //   Location of the limb 2 (defaults to: Main.HumanModel.BodyModel.Left.Leg.Seg.Foot)
+  // ForcePlateAutoDetection#VerticalDirection
+  //   The vertical direction of the force plate. 
+  //   Possible values are "X", "Y", "Z", "Automatic".
+  //   The default is "Automatic" which will use the direction of the force plate
+  //   normal vector.
+  // ForcePlateAutoDetection#HeightTolerance
+  //   The height tolerance for contact detection with the foot. (Defaults to 0.07 m).
+  // ForcePlateAutoDetection#VelThreshold
+  //   The velocity threshold for contact detection with the foot. (Defaults to 2.2 m/s).
+  // ForcePlateAutoDetection#ALLOW_MULTI_LIMB_CONTACT
+  //  Switch to specify if both LIMB1 and LIMB2 can be in contact with the plate simultaneously.
+  //  If set to OFF only the limb with lowest velocity will be assumed in contact. 
+  //  Set this to OFF to prevent false contact detection in the swing phase from 
+  //  the collateral limb. (Defaults to ON) 
+  // ForcePlateAutoDetection#CONTACT_NODE1
+  //   The node on LIMB1/2 used for contact detection. Change this if you are connecting
+  //   to something different than the feet. (Defaults to: HeelContactNodeLow)
+  // ForcePlateAutoDetection#CONTACT_NODE2
+  //   The node on LIMB1/2 used for contact detection. Change this if you are connecting
+  //   to something different than the feet. (Defaults to: ToeLateralContactNode)
+  // ForcePlateAutoDetection#CREATE_KIN_GRF
+  //   Create a kinematic represenation of the ground reaction force vector. This is experimental 
+  //   but could be used to include the GRF vector in the parameter optimization. (Defaults to OFF)
+  // ForcePlateAutoDetection#KIN_GRF_LIMB1_FUN
+  //   Switch to customize the kinematic GRF vector representation. Experimental. (Defautls to GlobalCopFun)
+  // ForcePlateAutoDetection#KIN_GRF_LIMB2_FUN
+  //   Switch to customize the kinematic GRF vector representation. Experimental. (Defautls to GlobalCopFun)
+  // ForcePlateAutoDetection#DRAW_RAW_FORCES
+  //   Switch to draw the raw forces from the C3D file. (Defaults to ON)
+  // ForcePlateAutoDetection#C3D_OBJECT
+  //   The c3d object in the model tree
+
+
   AnyComponentDefinition obj = {};  
   AnyFolder ForcePlateInfo = 
   {
@@ -172,9 +179,15 @@
   
   #var AnySwitch Switch_DrawForceVectorFromCOP = On;
   
-  /// Specifies the velocity of the ground frame. I.e. if the subject is walking on a treadmill. 
+  /// ForcePlateAutoDetection 
+  /// Specifies the velocity of the ground frame.
+  /// Modify the value if the subject is for example walking on a threadmill 
   #var AnyVec3 GroundVelocity = {0, 0, 0};
 
+  /// ForcePlateAutoDetection 
+  /// Offset of the plate surface. Usefull if stairs or other equiment
+  /// is placed on the force plate and center of pressure should be 
+  /// calculated and visualized on this offset surface.
   #var AnyVec3 SurfaceOffset = {0,0,0};
   
   #var AnyVec3 SurfaceCorner_c01 = Corners.Origin + Corners.c01.sRel * Corners.Axes' + SurfaceOffset;
