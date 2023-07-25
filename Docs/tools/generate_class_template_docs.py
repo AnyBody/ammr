@@ -30,7 +30,7 @@ RE_CLASSTMPL_WITH_DOCS = re.compile(
     (?P<docs>(^///[^\n]*?\n)+)                   # Pre documentation part
     ^\#class_template[\s\n]+  #
     (?P<name>[\w]+)             # Class name
-    [\s\n]?\(                   # Opening parenthesis
+    [\s\n]*?\(                   # Opening parenthesis
     (?P<arguments>.*?)          # Class arguments
     \)                          # Closing parenthesis
     """,
