@@ -49,23 +49,28 @@ RE_FILE_DOCS = re.compile(
     re.VERBOSE | re.MULTILINE | re.DOTALL,
 )
 
+
 class MemberInfo(BaseModel):
-    """ Information about a documented class member."""
+    """Information about a documented class member."""
+
     group: str = ""
     name: str
     type: str = ""
     value: str = ""
     docs: str = ""
 
+
 class ArgInfo(BaseModel):
-    """ Information about a class template argument."""
+    """Information about a class template argument."""
+
     name: str
     value: str = ""
     docs: str = ""
 
 
 class ClassTemplateInfo(BaseModel):
-    """ Information about a class template."""
+    """Information about a class template."""
+
     name: str
     type: str = ""
     args: list[ArgInfo] = []
@@ -75,7 +80,8 @@ class ClassTemplateInfo(BaseModel):
 
 
 class FileInfo(BaseModel):
-    """" Information about a file."""
+    """ " Information about a file."""
+
     group: str
     topic: str
     descr: str = ""
@@ -97,12 +103,14 @@ def parse_file_docs(file: str | os.PathLike, include_str: str) -> FileInfo:
     meta, _ = frontmatter.parse(docs)
     return FileInfo(include_str=include_str, **meta)
 
+
 def parse_class_type(args: list[ArgInfo]) -> str:
-    """ Returns the class type of the class template."""
+    """Returns the class type of the class template."""
     for arg in args:
         if arg.name == "__CLASS__":
             return arg.value
     return "AnyFolder"
+
 
 def parse_class_args(arg_string: str) -> list[ArgInfo]:
     """
@@ -115,41 +123,46 @@ def parse_class_args(arg_string: str) -> list[ArgInfo]:
         if not arg_str:
             continue
         argname, _, value = arg_str.partition("=")
-        args.append(ArgInfo(
-            name=argname.strip(),
-            value=value.strip(),
-        ))
+        args.append(
+            ArgInfo(
+                name=argname.strip(),
+                value=value.strip(),
+            )
+        )
     return args
 
-def parse_arg_docs(filecontent:str, classname:str, argname:str) -> str:
-    """ Parses the documentation string of a class template argument.
-        Looks for a comment block starting with 
-        //{classname}#{argname}
-        // <Some doc string>
-        //
-        and returns the doc string.
+
+def parse_arg_docs(filecontent: str, classname: str, argname: str) -> str:
+    """Parses the documentation string of a class template argument.
+    Looks for a comment block starting with
+    //{classname}#{argname}
+    // <Some doc string>
+    //
+    and returns the doc string.
     """
     re_arg_docs = re.compile(
         rf"""
         ^\s*//\s*{classname}\s*\#\s*{argname}\s*?\n #Match start of argument
         (?P<docs>\s*//.*?)   #Match documentation string
         ^\s*?(//|//\s*?{classname}\s*\#\w+?)?\s*?\n     # Match an empty line
-        """, re.MULTILINE |  re.DOTALL |  re.VERBOSE
+        """,
+        re.MULTILINE | re.DOTALL | re.VERBOSE,
     )
-    if not (match:= re_arg_docs.search(filecontent)):
+    if not (match := re_arg_docs.search(filecontent)):
         return ""
     docs = match.groupdict()["docs"]
     docs = RE_MATCH_2_SLASHES.sub("", docs)
     docs = textwrap.dedent(docs).strip()
     return docs
 
-def parse_expected_member_docs(filecontent:str, classname:str) -> list[MemberInfo]:
-    """ Parses the documentation string of a class template argument.
-        Looks for a comment block starting with 
-        //{classname}#{argname}
-        // <Some doc string>
-        //
-        and returns the doc string.
+
+def parse_expected_member_docs(filecontent: str, classname: str) -> list[MemberInfo]:
+    """Parses the documentation string of a class template argument.
+    Looks for a comment block starting with
+    //{classname}#{argname}
+    // <Some doc string>
+    //
+    and returns the doc string.
     """
     re_docs = re.compile(
         rf"""
@@ -160,30 +173,34 @@ def parse_expected_member_docs(filecontent:str, classname:str) -> list[MemberInf
         (?P<name>[^=\s]+)
         \s*?=\s*
         (?P<value>.*?;.*?)\n
-        """, re.MULTILINE |  re.DOTALL |  re.VERBOSE
+        """,
+        re.MULTILINE | re.DOTALL | re.VERBOSE,
     )
     expected_members = []
     for match in re_docs.finditer(filecontent):
         docs = match.groupdict()["docs"]
         docs = RE_MATCH_2_SLASHES.sub("", docs)
         docs = textwrap.dedent(docs).strip()
-        expected_members.append(MemberInfo(
-            group=match.groupdict()["group"],
-            type=match.groupdict()["type"],
-            name=match.groupdict()["name"],
-            value=match.groupdict()["value"],
-            docs=docs,
-        ))
+        expected_members.append(
+            MemberInfo(
+                group=match.groupdict()["group"],
+                type=match.groupdict()["type"],
+                name=match.groupdict()["name"],
+                value=match.groupdict()["value"],
+                docs=docs,
+            )
+        )
     return expected_members
 
-def parse_class_members(filecontent:str, classname:str) -> list[MemberInfo]:
-    """ Parses the file for documented members of a class template.
-        Looks for members with documentation stirngs looking like this:  
-        ```
-        /// <docs>
-        #var [type] <name> [= <value>];
-        ```
-        and return list of MemberInfo objects.
+
+def parse_class_members(filecontent: str, classname: str) -> list[MemberInfo]:
+    """Parses the file for documented members of a class template.
+    Looks for members with documentation stirngs looking like this:
+    ```
+    /// <docs>
+    #var [type] <name> [= <value>];
+    ```
+    and return list of MemberInfo objects.
     """
     re_member_docs = re.compile(
         rf"""
@@ -193,26 +210,30 @@ def parse_class_members(filecontent:str, classname:str) -> list[MemberInfo]:
         (?P<type>\w+)?\s*       #Match member type
         (?P<name>\w+)\s*          #Match member name
         (=\s*(?P<value>.*?))?\s*;    #Match member value
-        """, re.MULTILINE |  re.DOTALL |  re.VERBOSE
+        """,
+        re.MULTILINE | re.DOTALL | re.VERBOSE,
     )
     members = []
     for match in re_member_docs.finditer(filecontent):
         groupd = match.groupdict()
-        member_name = groupd["name"] 
+        member_name = groupd["name"]
         if groupd["group"]:
-            member_name = groupd["group"] + "." + member_name 
+            member_name = groupd["group"] + "." + member_name
         member_type = groupd["type"]
         member_value = groupd["value"]
         member_docstring = groupd["docs"]
         member_docstring = RE_MATCH_3_SLASHES.sub("", member_docstring)
         member_docstring = textwrap.dedent(member_docstring).strip()
-        members.append(MemberInfo(
-            name=member_name,
-            type=member_type,
-            value=member_value or "",
-            docs=member_docstring,
-        ))
+        members.append(
+            MemberInfo(
+                name=member_name,
+                type=member_type,
+                value=member_value or "",
+                docs=member_docstring,
+            )
+        )
     return members
+
 
 def find_class_templates(file: str | os.PathLike) -> list[ClassTemplateInfo]:
     """
@@ -228,17 +249,17 @@ def find_class_templates(file: str | os.PathLike) -> list[ClassTemplateInfo]:
     filecontent = file.read_text(encoding="utf-8")
     for match in RE_CLASSTMPL_WITH_DOCS.finditer(filecontent):
         groupd = match.groupdict()
-        class_name=groupd["name"]
+        class_name = groupd["name"]
         class_docstring = groupd["docs"]
         class_docstring = RE_MATCH_3_SLASHES.sub("", class_docstring)
         class_docstring = textwrap.dedent(class_docstring).strip()
         class_args = parse_class_args(groupd["arguments"])
         classtype = parse_class_type(class_args)
         for arg in class_args:
-            arg.docs = parse_arg_docs(filecontent,class_name, arg.name)
+            arg.docs = parse_arg_docs(filecontent, class_name, arg.name)
         class_members = parse_class_members(filecontent, class_name)
         expected_members = parse_expected_member_docs(filecontent, class_name)
-        
+
         template_list.append(
             ClassTemplateInfo(
                 name=class_name,
@@ -289,7 +310,8 @@ def run(ams_path_def, base_path):
                 filedocstring=filedata.descr or "",
                 class_templates=class_templates,
                 include_str=filedata.include_str,
-            ), encoding="utf-8"
+            ),
+            encoding="utf-8",
         )
 
     # Write group toc files
