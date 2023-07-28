@@ -4,7 +4,7 @@ gallery_image: "/Applications/images/BenchPress.jpg"
 ---
 
 (sphx_glr_auto_examples_Sports_plot_BenchPress.py)=
-
+(example_benchpress)=
 # Bench Press
 
 ````{sidebar} **Example**
