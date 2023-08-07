@@ -27,7 +27,7 @@ CLASST_DIR = TOOLS_DIR.joinpath("class-templates")
 # the first end parenthesis ")" is found.
 RE_CLASSTMPL_WITH_DOCS = re.compile(
     r"""
-    (?P<docs>(^///[^\n]*?\n)+)                   # Pre documentation part
+    (?P<docs>(^//[^\n]*?\n)+)                   # Pre documentation part
     ^\#class_template[\s\n]+  #
     (?P<name>[\w]+)             # Class name
     [\s\n]*?\(                   # Opening parenthesis
@@ -37,6 +37,7 @@ RE_CLASSTMPL_WITH_DOCS = re.compile(
     re.VERBOSE | re.MULTILINE | re.DOTALL,
 )
 RE_MATCH_3_SLASHES = re.compile(r"^\s*///", re.MULTILINE)
+RE_MATCH_LEADING_SLASHES = re.compile(r"^\s*[/]{2,3}", re.MULTILINE)
 RE_MATCH_2_SLASHES = re.compile(r"^\s*//", re.MULTILINE)
 
 RE_FILE_DOCS = re.compile(
@@ -204,8 +205,8 @@ def parse_class_members(filecontent: str, classname: str) -> list[MemberInfo]:
     """
     re_member_docs = re.compile(
         rf"""
-        ^\s*///\s*{classname}(\.(?P<group>.+?))?\s*\n # Match keyword for member docs
-        (?P<docs>(^\s*///.*?\n)+)   #Match member docs
+        ^\s*[/]{2,3}\s*{classname}(\.(?P<group>.+?))?\s*\n # Match keyword for member docs
+        (?P<docs>(^\s*[/]{2,3}.*?\n)+)   #Match member docs
         ^\s*\#var\s+              #Match start of member declaration
         (?P<type>\w+)?\s*       #Match member type
         (?P<name>\w+)\s*          #Match member name
@@ -222,7 +223,7 @@ def parse_class_members(filecontent: str, classname: str) -> list[MemberInfo]:
         member_type = groupd["type"]
         member_value = groupd["value"]
         member_docstring = groupd["docs"]
-        member_docstring = RE_MATCH_3_SLASHES.sub("", member_docstring)
+        member_docstring = RE_MATCH_LEADING_SLASHES.sub("", member_docstring)
         member_docstring = textwrap.dedent(member_docstring).strip()
         members.append(
             MemberInfo(
@@ -251,7 +252,7 @@ def find_class_templates(file: str | os.PathLike) -> list[ClassTemplateInfo]:
         groupd = match.groupdict()
         class_name = groupd["name"]
         class_docstring = groupd["docs"]
-        class_docstring = RE_MATCH_3_SLASHES.sub("", class_docstring)
+        class_docstring = RE_MATCH_LEADING_SLASHES.sub("", class_docstring)
         class_docstring = textwrap.dedent(class_docstring).strip()
         class_args = parse_class_args(groupd["arguments"])
         classtype = parse_class_type(class_args)
