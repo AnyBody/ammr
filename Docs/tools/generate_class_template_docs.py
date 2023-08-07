@@ -37,7 +37,7 @@ RE_CLASSTMPL_WITH_DOCS = re.compile(
     re.VERBOSE | re.MULTILINE | re.DOTALL,
 )
 RE_MATCH_3_SLASHES = re.compile(r"^\s*///", re.MULTILINE)
-RE_MATCH_LEADING_SLASHES = re.compile(r"^\s*[/]{2,3}", re.MULTILINE)
+RE_MATCH_LEADING_SLASHES = re.compile(r"^\s*///?", re.MULTILINE)
 RE_MATCH_2_SLASHES = re.compile(r"^\s*//", re.MULTILINE)
 
 RE_FILE_DOCS = re.compile(
@@ -196,17 +196,18 @@ def parse_expected_member_docs(filecontent: str, classname: str) -> list[MemberI
 
 def parse_class_members(filecontent: str, classname: str) -> list[MemberInfo]:
     """Parses the file for documented members of a class template.
-    Looks for members with documentation stirngs looking like this:
+    Looks for members with documentation strings looking like this:
     ```
-    /// <docs>
+    // <classname>[.<subfolder>]
+    // <docs>
     #var [type] <name> [= <value>];
     ```
     and return list of MemberInfo objects.
     """
     re_member_docs = re.compile(
         rf"""
-        ^\s*[/]{2,3}\s*{classname}(\.(?P<group>.+?))?\s*\n # Match keyword for member docs
-        (?P<docs>(^\s*[/]{2,3}.*?\n)+)   #Match member docs
+        ^\s*///?\s*{classname}(\.(?P<group>.+?))?\s*\n # Match keyword for member docs
+        (?P<docs>(^\s*///?.*?\n)+)   #Match member docs
         ^\s*\#var\s+              #Match start of member declaration
         (?P<type>\w+)?\s*       #Match member type
         (?P<name>\w+)\s*          #Match member name
