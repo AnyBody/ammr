@@ -56,6 +56,9 @@ achieve same marker position and joint angle output.
 
 ### Changed:
 
+* The Pelvis ground driver in [Bench Press example](example_benchpress) has 
+  been updated to use the AnatomicalFrameTrunk to account for the pelvis tilt.
+  The Pelvis-Thorax Extension value has been also been updated slightly.
 * The Twente Lower Extremity Model (TLEM) 2 leg model has several updates and is
   now designated as [TLEM 2.2](#TLEM2-v2.2).
 
