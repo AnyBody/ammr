@@ -1,0 +1,151 @@
+{% set file_target = (group+"."+topic+"."+filename) | replace(" ","-") %}
+
+({{ file_target }}.any)=
+# {{filename}}
+
+{{filedocstring}}
+
+:::{code-block} AnyScriptDoc
+:caption: Include this file this file to use
+#include "{{include_str}}"`
+::: 
+
+{% for classt in class_templates %}
+{%- set classname = classt['name'] %}
+
+({{ file_target }}.{{classname}})=
+{%- set documented_args = classt.args | selectattr("docs", "ne", "") | list %}
+{%- set undocumented_args = classt.args | selectattr("docs", "eq", "") | list %}
+{%- set expected_undocumented_args = undocumented_args | selectattr("value", "eq", "") | list %}
+{%- set args_in_documentation = (documented_args + expected_undocumented_args) %}
+{%- set expected_members = classt.expected_members %}
+{%- set required_members = classt.members | selectattr("value", "eq", "") | list %}
+{%- set optional_members = classt.members | selectattr("value", "ne", "") | list %}
+
+
+```{raw} html
+<!--  
+```
+% If you get a build error here, most likely your class template documentation is invalid
+[Validate docs section](#{{ file_target }}.{{classname}}.DocsValidationTarget)
+
+```{raw} html
+-->
+```
+
+## #{{classname}}
+
+{{ classt['docs'].strip() }}
+
+
+({{ file_target }}.{{classname}}.DocsValidationTarget )=
+
+:::{rubric} Full signature
+:::
+
+```{code-block} AnyScriptDoc
+{{classname}} <ObjectName>
+{%- if args_in_documentation | length  -%}
+(
+  {%- for arg in args_in_documentation %}
+  {{ arg.name }}={{arg.value or "<required>"}},
+{%- endfor %}
+){% endif %} = {
+{%- for member in expected_members %}
+  {% if member.group %}{{member.group}} = { {{"\n    "}}{%endif%}
+{{- member.type}} {{member.name}} = {{member.value}}
+{% if member.group %}  };{{"\n"}}{%endif%}
+{%- endfor -%}
+{%- for member in required_members %}
+  {{member.name}} = <Required>; {{ "\n" if loop.last}}
+{%- endfor -%}
+};
+```
+
+
+:::{rubric} Arguments
+:::
+
+:\_\_CLASS\_\_: `{{classt.type}}`{l=AnyScriptDoc}
+{% for arg in args_in_documentation %}
+:{{arg.name}}: 
+  {{arg.docs}} {%if arg.value %} (Default: {{arg.value}}) {%else%} (Required) {%endif%}
+{% endfor %}
+
+{%- if expected_members | length  %}
+
+:::{rubric} Expected members
+:::
+  
+:::::{grid} 1
+{% for member in expected_members %}
+::::{grid-item-card} 
+```{code-block} AnyScriptDoc
+{% if member.group %}{{member.group}} = { {{"\n  "}}{%endif%}
+{{- member.type}} {{member.name}} = {{member.value}}
+{% if member.group %}};{%endif%}
+```
+
+
+{{member.docs}}
+
+::::
+{% endfor %}
+:::::
+
+{% endif %}
+
+
+
+{%- if required_members | length  %}
+
+:::{rubric} Required initialization members
+:::
+  
+:::::{grid} 1
+{% for member in required_members %}
+::::{grid-item-card} 
+```{code-block} AnyScriptDoc
+{{member.name}} = §<Required>§;
+```
+
+{%if member.type != ""%}:class type: `{{member.type}}`{l=AnyScriptDoc}{%endif%}
+
+{{member.docs}}
+::::
+{% endfor %}
+:::::
+
+{% endif %}
+
+{%- if optional_members | length  %}
+
+:::{rubric} Optional initialization members
+:::
+
+  
+:::::{grid} 1
+{% for member in optional_members %}
+::::{grid-item}
+:::{dropdown} `{{member.name}} = {{member.value}};`{l=AnyScriptDoc}
+:margin: 0
+:color: white
+
+{%if member.type != ""%}:class type: `{{member.type}}`{l=AnyScriptDoc}{%endif%}
+
+{{member.docs}}
+:::
+::::
+{% endfor %}
+:::::
+{% endif %}
+
+
+
+
+
+
+
+
+{% endfor %}
+
