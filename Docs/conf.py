@@ -34,6 +34,7 @@ from datetime import datetime
 
 
 sys.path.insert(0, os.path.abspath("exts"))
+sys.path.insert(0, os.path.abspath("tools"))
 
 try:
     import pygments_anyscript
@@ -96,6 +97,7 @@ myst_enable_extensions = [
     "amsmath",
     "html_image",
     "substitution",
+    "attrs_inline",
 ]
 
 
@@ -436,6 +438,11 @@ for folder, section in gallery.items():
     if content != previous_content:
         with open(gallery_txt, "w", encoding="utf8") as fh:
             fh.write(content)
+
+
+import generate_class_template_docs
+generate_class_template_docs.run_all()
+
 
 
 linkcheck_ignore = [

@@ -136,9 +136,18 @@ migration
 
 Overview <body/models>
 bm_config/index
-
 ```
 
+
+```{toctree}
+:caption: Tools
+:includehidden: true
+:maxdepth: 0
+:hidden:
+:glob:
+
+tools/class-templates
+```
 
 
 
@@ -169,3 +178,4 @@ Contribute or cite <about>
 legal
 
 ```
+

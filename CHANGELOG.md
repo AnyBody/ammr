@@ -183,6 +183,14 @@ achieve same marker position and joint angle output.
   
 * Renamed the folders holding muscle models from `MusPar` to `MuscleModels` for
   better clarity.
+* The `CameraClassTemplate.any` include file in model utilities have been renamed to
+  `VideoLookAtCamera.any` to have the same name as the class template it
+  contains. 
+
+**Removed:**
+- The template `DEFAULT_PARAMETER_FOLDER` has been removed. It is no longer needed 
+  since the same functionality is now provided by the `??=` operator. 
+
 
 ## AMMR 2.4.5-beta
 
@@ -688,6 +696,7 @@ requested body height.
   `AnyCameraLookAt.RenderUserInterfaceViewState` in AnyBody version 7.3.2. The
   old behavior can be restored by setting
   `Camera.RenderUserInterfaceViewState=Off;` in the class template.
+  
  
 ## AMMR 2.3.1 (2020-09-30)
 
