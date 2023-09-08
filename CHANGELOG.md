@@ -139,7 +139,7 @@ achieve same marker position and joint angle output.
   to the pelvis segment now use this frame. This aligns the neutral position of
   the model with the neutral position of the trunk dataset and results in more
   pelvic tilt in the neutral position, better reflecting reported values in
-  literature. Existing `PelvisSeg.AnatomicalFrame` defined by ASIS/PSIS bony
+  literature. Existing `PelvisSeg.AnatomicalFrame` defined by the ASIS and pubic bony
   landmarks remains unchanged.
 
 * Updated trend validation in ["Wilke Spine Pressure validation
