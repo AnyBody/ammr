@@ -2,7 +2,7 @@
 
 The ShoulderArm model contains data from two different persons. Most of this data
 comes from the Dutch Shoulder Group and their
-[shoulder model available online](http://homepage.tudelft.nl/g6u61/repository/shoulder/overview.htm)
+[shoulder model available online](https://web.archive.org/web/20150707202425/http://homepage.tudelft.nl/g6u61/repository/shoulder/overview.htm)
 
 
 :::{versionadded} 2.2
