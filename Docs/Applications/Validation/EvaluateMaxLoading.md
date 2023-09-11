@@ -7,7 +7,7 @@ gallery_image: "/Applications/Validation/EvaluateMaxLoadPlot.png"
 # Evaluate max external loading
 
 ````{sidebar} **Example**
-<img src="/Applications/images/WheelTurn.jpg" width="70%" align="center">
+<img src="/Applications/images/WheelTurn.webp" width="70%" align="center">
 ````
 
 

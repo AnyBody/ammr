@@ -1,6 +1,6 @@
 ---
 gallery_title: "BVH driven box lift"
-gallery_image: "/Applications/images/BVH_BoxLift.jpg"
+gallery_image: "/Applications/images/BVH_BoxLift.webp"
 ---
 
 (sphx_glr_auto_examples_Mocap_plot_BVH_BoxLift.py)=
@@ -9,7 +9,7 @@ gallery_image: "/Applications/images/BVH_BoxLift.jpg"
 
 
 ````{sidebar} **Example**
-<img src="/Applications/images/BVH_BoxLift.jpg" width="70%" align="center">
+<img src="/Applications/images/BVH_BoxLift.webp" width="70%" align="center">
 ````
 
 

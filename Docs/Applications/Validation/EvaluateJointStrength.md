@@ -1,6 +1,6 @@
 ---
 gallery_title: "Evaluate joint strength"
-gallery_image: "/Applications/images/EvaluateJointStrength.jpg"
+gallery_image: "/Applications/images/EvaluateJointStrength.webp"
 ---
 
 (sphx_glr_auto_examples_Validation_plot_EvaluateJointStrength.py)=
@@ -8,7 +8,7 @@ gallery_image: "/Applications/images/EvaluateJointStrength.jpg"
 # Evaluate joint strength
 
 ````{sidebar} **Example**
-<img src="/Applications/images/EvaluateJointStrength.jpg" width="70%" align="center">
+<img src="/Applications/images/EvaluateJointStrength.webp" width="70%" align="center">
 ````
 
 

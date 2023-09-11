@@ -1,6 +1,6 @@
 ---
 gallery_title: "Facet Joint Model"
-gallery_image: "/Applications/images/FacetJointModel.jpg"
+gallery_image: "/Applications/images/FacetJointModel.webp"
 ---
 
 (sphx_glr_auto_examples_Orthopedics_and_rehab_plot_FacetJointModel.py)=
@@ -9,7 +9,7 @@ gallery_image: "/Applications/images/FacetJointModel.jpg"
 
 
 ````{sidebar} **Example**
-<img src="/Applications/images/FacetJointModel.jpg" width="70%" align="center">
+<img src="/Applications/images/FacetJointModel.webp" width="70%" align="center">
 ````
 
 A spine model with facet joints.
