@@ -1,6 +1,6 @@
 ---
 gallery_title: "Simpel Knee force estimation"
-gallery_image: "/Applications/images/KneeForceExample.jpg"
+gallery_image: "/Applications/images/KneeForceExample.webp"
 ---
 
 (sphx_glr_auto_examples_Orthopedics_and_rehab_plot_KneeForcesExample.py)=
@@ -9,7 +9,7 @@ gallery_image: "/Applications/images/KneeForceExample.jpg"
 
 
 ````{sidebar} **Example**
-<img src="/Applications/images/KneeForceExample.jpg" width="70%" align="center">
+<img src="/Applications/images/KneeForceExample.webp" width="70%" align="center">
 ````
 
 Example of calculating the medial/lateral knee force from the total force and moment.

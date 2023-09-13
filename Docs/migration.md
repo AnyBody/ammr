@@ -5,9 +5,15 @@
 
 Advanced models or applications which modify the body models may need updates in order to work with the newest version of AnyBody and AMMR.  
 
-This documents shows some of the most common errors which may be encountered when migrating models and how to fix them.
+This document shows some of the most common errors which may be encountered when migrating models and how to fix them.
 
 ## Migratin from AMMR 2.4 to 2.5
+
+:::{warning} The updated trunk model in AMMR 2.5 changes the posture which considered the neutral position. This changes was done in preparation for new full detailed thoracic model in AMMR 3.0. The changes invloves minor pelvic tilt, and a change to the neutral orientation of the throacic segment. 
+
+This change affects many different applications. Epecially models which trunk joint angles are driven directly and models where the pelvis segmental reference frame is positioned directly (i.e. has a driver directly on the pelvis referna driver directly on pelvis). 
+
+:::
 
 ### Model changes
 

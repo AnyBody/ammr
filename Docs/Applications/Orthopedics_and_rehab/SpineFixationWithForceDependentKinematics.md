@@ -1,6 +1,6 @@
 ---
 gallery_title: "Spine Fixation Model"
-gallery_image: "/Applications/images/SpineFixationWithForceDependentKinematics.jpg"
+gallery_image: "/Applications/images/SpineFixationWithForceDependentKinematics.webp"
 ---
 
 (sphx_glr_auto_examples_Orthopedics_and_rehab_plot_SpineFixationWithForceDependentKinematics.py)=
@@ -9,7 +9,7 @@ gallery_image: "/Applications/images/SpineFixationWithForceDependentKinematics.j
 
 
 ````{sidebar} **Example**
-<img src="/Applications/images/SpineFixationWithForceDependentKinematics.jpg" width="70%" align="center">
+<img src="/Applications/images/SpineFixationWithForceDependentKinematics.webp" width="70%" align="center">
 ````
 
 This application is an example of how to use the new force-dependent

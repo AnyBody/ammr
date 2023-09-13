@@ -1,6 +1,6 @@
 ---
 gallery_title: "Seated Human"
-gallery_image: "/Applications/images/SeatedHuman.jpg"
+gallery_image: "/Applications/images/SeatedHuman.webp"
 ---
 
 (sphx-glr-auto-examples-adls-and-ergonomics-plot-seatedhuman-py)=
@@ -9,7 +9,7 @@ gallery_image: "/Applications/images/SeatedHuman.jpg"
 
 
 ````{sidebar} **Example**
-<img src="/Applications/images/SeatedHuman.jpg" width="70%" align="center">
+<img src="/Applications/images/SeatedHuman.webp" width="70%" align="center">
 
 ````
 

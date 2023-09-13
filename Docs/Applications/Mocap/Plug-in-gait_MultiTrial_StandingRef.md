@@ -1,6 +1,6 @@
 ---
 gallery_title: "Multi trial MoCap model"
-gallery_image: "/Applications/images/Plug-in-gait_Squat_Flywheel.jpg"
+gallery_image: "/Applications/images/Plug-in-gait_Squat_Flywheel.webp"
 ---
 
 (sphx_glr_auto_examples_Mocap_plot_Plug-in-gait_MultiTrial_StandingRef.py)=
@@ -10,7 +10,7 @@ gallery_image: "/Applications/images/Plug-in-gait_Squat_Flywheel.jpg"
 
 
 ````{sidebar} **Example**
-<img src="/Applications/images/Plug-in-gait_Squat_Flywheel.jpg" width="70%" align="center">
+<img src="/Applications/images/Plug-in-gait_Squat_Flywheel.webp" width="70%" align="center">
 ````
 
 Example of a MoCap model structured for analyzing data from multiple subjects

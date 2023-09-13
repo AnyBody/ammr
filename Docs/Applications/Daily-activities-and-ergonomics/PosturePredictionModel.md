@@ -1,6 +1,6 @@
 ---
 gallery_title: "Posture Prediction Model"
-gallery_image: "/Applications/images/StandingPosturePredictionModel.jpg"
+gallery_image: "/Applications/images/StandingPosturePredictionModel.webp"
 ---
 
 
@@ -10,7 +10,7 @@ gallery_image: "/Applications/images/StandingPosturePredictionModel.jpg"
 
 
 ````{sidebar} **Example**
-<img src="/Applications/images/StandingPosturePredictionModel.jpg" width="70%" align="center">
+<img src="/Applications/images/StandingPosturePredictionModel.webp" width="70%" align="center">
 
 ````
 
