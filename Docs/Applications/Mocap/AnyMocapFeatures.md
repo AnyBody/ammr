@@ -1,6 +1,6 @@
 ---
 gallery_title: "AnyMoCap Features"
-gallery_image: "/Applications/images/force_plate_offset.jpg"
+gallery_image: "/Applications/images/force_plate_offset.webp"
 ---
 
 (sphx_glr_auto_examples_MoCap_plot_AnyMoCapFeatures.py)=
@@ -8,7 +8,7 @@ gallery_image: "/Applications/images/force_plate_offset.jpg"
 # AnyMoCap Features
 
 ````{sidebar} **Example**
-<img src="/Applications/images/force_plate_offset.jpg" width="70%" align="center">
+<img src="/Applications/images/force_plate_offset.webp" width="70%" align="center">
 ````
 
 A collection of small models that show-off special features of the

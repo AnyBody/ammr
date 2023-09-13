@@ -1,6 +1,6 @@
 ---
 gallery_title: "Bench Press"
-gallery_image: "/Applications/images/BenchPress.jpg"
+gallery_image: "/Applications/images/BenchPress.webp"
 ---
 
 (sphx_glr_auto_examples_Sports_plot_BenchPress.py)=
@@ -8,7 +8,7 @@ gallery_image: "/Applications/images/BenchPress.jpg"
 # Bench Press
 
 ````{sidebar} **Example**
-<img src="/Applications/images/BenchPress.jpg" width="70%" align="center">
+<img src="/Applications/images/BenchPress.webp" width="70%" align="center">
 ````
 
 

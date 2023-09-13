@@ -1,6 +1,6 @@
 ---
 gallery_title: "Trunk exoskeleton model"
-gallery_image: "/Applications/images/ExoskeletonConceptTrunk_BoxLift.jpg"
+gallery_image: "/Applications/images/ExoConceptTrunk_BoxLift.webp"
 ---
 
 (sphx_glr_auto_examples_Other_plot_ExoConceptTrunk_BoxLift.py)=
@@ -9,7 +9,7 @@ gallery_image: "/Applications/images/ExoskeletonConceptTrunk_BoxLift.jpg"
 
 
 ````{sidebar} **Example**
-<img src="/Applications/images/ExoskeletonConceptTrunk_BoxLift.jpg" width="70%" align="center">
+<img src="/Applications/images/ExoConceptTrunk_BoxLift.webp" width="70%" align="center">
 ````
 
 Trunk exoskeleton concept model.

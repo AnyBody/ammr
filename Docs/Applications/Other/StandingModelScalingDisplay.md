@@ -1,6 +1,6 @@
 ---
 gallery_title: "Standing Model Scaling Display"
-gallery_image: "/Applications/images/StandingModelScalingDisplay.jpg"
+gallery_image: "/Applications/images/StandingModelScalingDisplay.webp"
 ---
 
 (sphx_glr_auto_examples_Other_plot_StandingModelScalingDisplay.py)=
@@ -9,7 +9,7 @@ gallery_image: "/Applications/images/StandingModelScalingDisplay.jpg"
 
 
 ````{sidebar} **Example**
-<img src="/Applications/images/StandingModelScalingDisplay.jpg" width="70%" align="center">
+<img src="/Applications/images/StandingModelScalingDisplay.webp" width="70%" align="center">
 ````
 
 This application shows all the scaling laws available.

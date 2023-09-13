@@ -1,6 +1,6 @@
 ---
 gallery_title: "Simple Lower extremity model"
-gallery_image: "/Applications/images/LowerExtremity-Plug-in-gait.jpg"
+gallery_image: "/Applications/images/LowerExtremity-Plug-in-gait.webp"
 ---
 
 (sphx_glr_auto_examples_Mocap_plot_Plug-in-gait_Simple_LowerExtremity)=
@@ -9,7 +9,7 @@ gallery_image: "/Applications/images/LowerExtremity-Plug-in-gait.jpg"
 
 
 ````{sidebar} **Example**
-<img src="/Applications/images/LowerExtremity-Plug-in-gait.jpg" width="70%" align="center">
+<img src="/Applications/images/LowerExtremity-Plug-in-gait.webp" width="70%" align="center">
 ````
 
 Example of lower body MoCap model using the Plug-in-Gait marker protocol,

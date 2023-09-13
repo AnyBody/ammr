@@ -1,6 +1,6 @@
 ---
 gallery_title: "Airline passenger"
-gallery_image: "/Applications/images/AirlinePassenger.jpg"
+gallery_image: "/Applications/images/AirlinePassenger.webp"
 ---
 
 (sphx-glr-auto-examples-adls-and-ergonomics-plot-airlinepassenger-py)=
@@ -8,7 +8,7 @@ gallery_image: "/Applications/images/AirlinePassenger.jpg"
 # Airline passenger
 
 ````{sidebar} **Example**
-<img src="/Applications/images/AirlinePassenger.jpg" align="center" width="70%" align="center">
+<img src="/Applications/images/AirlinePassenger.webp" align="center" width="70%" align="center">
 
 ````
 The airline passenger example. This is a model of a coach class airline passenger seat

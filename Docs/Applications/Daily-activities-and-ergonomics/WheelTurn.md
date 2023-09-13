@@ -1,6 +1,6 @@
 ---
 gallery_title: "Hand crank model"
-gallery_image: "/Applications/images/WheelTurn.jpg"
+gallery_image: "/Applications/images/WheelTurn.webp"
 ---
 
 (sphx_glr_auto_examples_ADLs_and_ergonomics_plot_WheelTurn.py)=
@@ -8,7 +8,7 @@ gallery_image: "/Applications/images/WheelTurn.jpg"
 # Hand crank model
 
 ````{sidebar} **Example**
-<img src="/Applications/images/WheelTurn.jpg" width="70%" align="center">
+<img src="/Applications/images/WheelTurn.webp" width="70%" align="center">
 ````
 
 This is a model of a person turning a horizontal wheel by means of a handle.
