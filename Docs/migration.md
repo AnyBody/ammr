@@ -123,7 +123,7 @@ AnySurfCylinderFit Outer =
 ```
 
 In fact, the original would no longer give the correct result given the new properties of `AnySurfCylinderFit` as reference frame.
-So AnyBody detects the old usage pattern and reverts to a 'compatability' mode. 
+So AnyBody detects the old usage pattern and reverts to a 'Compatibility' mode. 
 
 
 
