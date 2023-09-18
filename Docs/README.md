@@ -43,16 +43,22 @@ System](https://www.anybodytech.com/software/anybodymodelingsystem/), or availab
 Please see the [AMMR documentation](https://anyscript.org/ammr-doc/beta) for more
 information on getting started using the AMMR.
 
+
+## Licensing
+Access to and use of "AnyBody Managed Model Repository" on GitHub is covered by our End User License Agreement (EULA). 
+Please see the ["License certificate"](../LICENSE) file include with this repository for more information. 
+
+If you don' agree to the terms of the EULA (which may be updated from time to time) you are not allowed to use the AMMR.
+
+
 ## Contributing
 
-All contributions are welcome and much appreciated. If you stumble on a problem
-or happend to find a bug please report it on the [AnyScript
+All contributions are welcome and greatly appreciated. 
+
+If you find a bug or have comments to the code please report it on the [AnyScript
 forum](https://forum.anyscript.org).
 
-If you have fix or an improvement to the models consider sharing it with other
-users by contributing it back to the AMMR. That would be very much appreciated.
-Simply fork this repository and make a pull request on GitHub. 
+If you have a fix or an improvement to the models we are happy to accept it. Code contributions and fixes are submitted through [pull requests]() on GitHub.
 
-## License
-
-See [LICENSE.txt](../LICENSE.txt)
+Simply fork this repository, editor your fork and [start a pull
+request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request) 
