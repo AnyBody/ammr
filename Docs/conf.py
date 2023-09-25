@@ -454,6 +454,7 @@ linkcheck_ignore = [
     "https://doi.org/10.1080/10255842.2020.1851367",  # tandfonline.com prevents the linkcheck
     "https://dx.doi.org/10.1002/jor.20255",  # wiley.com prevents the linkcheck
     "https://doi.org/10.1016/j.clinbiomech.2006.10.003",  # clinbiomech.com prevents the linkcheck
+    "https://github.com/anybody/ammr",  # AMMR is not yet public
 ]
 
 linkcheck_allowed_redirects = {
