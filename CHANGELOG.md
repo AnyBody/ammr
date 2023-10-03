@@ -31,6 +31,8 @@ achieve same marker position and joint angle output.
   coordinate system using `BM_LEG_TRUNK_INTERFACE` setting.
 * Fixed a bug in the `AnatomicalFrame` of TLEM 2.2 foot and talus that caused the
   ARel to be constructed from unscaled landmarks.
+* Fixed small inaccuracy in the mass scaling of the shank. It did not account for the
+  mass of the patella segment which uses the same scaling coefficient as the shank.
 
 
 ### Added:
