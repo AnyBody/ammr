@@ -8,7 +8,7 @@ models and examples ready to be used with the [AnyBody Modeling
 System](https://www.anybodytech.com/software/ams/).
 
 > **Note**
-> AnyBody version 7.5 is needed to the use run these models. 
+> AnyBody version 7.5 is needed to run models in the GitHub. 
 > Please see the [beta program](https://forum.anyscript.org/t/become-a-beta-tester/5056/6). 
 
 <p align="center">
