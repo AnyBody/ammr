@@ -16,6 +16,10 @@ achieve same marker position and joint angle output.
 
 
 ### Fixed:
+* Fixed a couple of bugs in the {ref}`Seated Human model <example_seatedhuman>`:  
+  - Reactions for subtalar joint driver are switched off.
+  - GHDriverLeft was using velocity value from GHExternalRotation instead of GHAbduction.
+    This is now fixed.
 * The `Main.ModelSetup.CreateVideo` operation was missing in some of the MoCap
   examples. This has been fixed. If you have this problem update the
   `CreateVideo.any` file in your application. 
