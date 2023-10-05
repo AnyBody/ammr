@@ -4,7 +4,7 @@ gallery_image: "/Applications/images/SeatedHuman.webp"
 ---
 
 (sphx-glr-auto-examples-adls-and-ergonomics-plot-seatedhuman-py)=
-
+(example_seatedhuman)=
 # Seated Human
 
 
