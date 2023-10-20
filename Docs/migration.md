@@ -1,42 +1,55 @@
-# Migrating models to AMMR 2.5
+# Update models to AMMR 2.5
 
+Models created earlier versions of AnyBody may need to be updated to work with
+AnyBody 7.5 and the new model repository (AMMR 2.5).
 
-## Introduction
+This document outlines important changes which may break
+older models or change results.
 
-Advanced models or applications which modify the body models may need updates in order to work with the newest version of AnyBody and AMMR.  
+:::{tip} 
 
-This document shows some of the most common errors which may be encountered when migrating models and how to fix them.
-
-## Migratin from AMMR 2.4 to 2.5
-
-:::{warning} The updated trunk model in AMMR 2.5 changes the posture which considered the neutral position. This changes was done in preparation for new full detailed thoracic model in AMMR 3.0. The changes invloves minor pelvic tilt, and a change to the neutral orientation of the throacic segment. 
-
-This change affects many different applications. Epecially models which trunk joint angles are driven directly and models where the pelvis segmental reference frame is positioned directly (i.e. has a driver directly on the pelvis referna driver directly on pelvis). 
+See the last part of this document for a list of concrete errors and deprecation
+warnings and how to fix them. 
 
 :::
 
-### Model changes
+## Model changes
+
+### Trunk and pelvis neutral posture
+
+The trunk model in AMMR 2.5 changes which posture is considered
+neutral. This was done in preparation for a new [detailed thoracic
+model](#thoracic-model) which will be available in [AMMR
+3.0](https://github.com/anybody/ammr). Pelvic tilt for the model has been updated as well as the the neutral orientation of the thoracic segment.
+
+::: {warning}
+These postural changes will affect older applications. Especially, in models
+where trunk joint angles are driven directly and in models where a driver is applied directly on the pelvis segmental reference frame.
+:::
 
 ### MoCap models
 
 #### Pelvic markers
 
-Changes to the pelvic tilt means that pelvic markers located relative to the pelvis Anatomical frame will have moved slightly. This is most noticeable for
-markers on the posterior part of the pelvis, like the PSIS markers. The Y component
-may need to be adjusted to achieve same marker position and joint angle output. 
+Changes to the pelvic tilt means that pelvic markers located relative to the
+pelvis Anatomical frame will appear to have moved slightly. This is most
+noticeable for markers on the posterior part of the pelvis, like the PSIS
+markers. The Y component of the marker position may need to be adjusted to achieve same marker position and joint angle output. 
 
 If markers are placed relative to bony landmarks (using the `PlaceMarkerAt=`
-argument) this problem will not occur.
+argument) this problem will often not occur.
 
 #### Foot markers
 
-Changes to the antomical frame of the foot and talus segment may cause markers
-to have moved slightly. The Y component may need to be adjusted to achieve the same marker position and joint angle output.
+Changes to the anatomical frame of the foot and talus segment may cause markers
+to have moved slightly. The Y component may need to be adjusted to achieve the
+same marker position and joint angle output.
 
 
-### Load time errors
+## Load time errors
 
-#### Unresolved `Scale_Leg_Pelvis`
+:::{dropdown} `Scale_Leg_Pelvis  :  Unresolved object`
+
 
 ```
 ERROR(SCR.PRS9) :   some-file.any(##)  :   'Scale_Leg_Pelvis'  :  Unresolved object
@@ -45,8 +58,10 @@ ERROR(SCR.PRS9) :   some-file.any(##)  :   'Scale_Leg_Pelvis'  :  Unresolved obj
 The functions `Scale_Leg_Pelvis` and `Scale_Trunk_Pelvis` on the pelvis segment have been moved inside the `AnatomicalFrame` folder. 
 Update your code to `AnatomicalFrame.Scale_Leg_Pelvis`.
 
+:::
 
-#### Unresolved `MusPar` folder
+
+:::{dropdown} `MusPar  :  Unresolved object`
 
 
 ```
@@ -55,34 +70,66 @@ ERROR(SCR.PRS9) :   some-file.any(##)  :   'MusPar'  :  Unresolved object
 
 The `MusPar` folder have been renamed to `MuscleModels`. 
 
-#### Unresolved `PCSAfactor` variable
+:::
 
-> ERROR(SCR.PRS9) :   xxx.any(##)  :   'PCSAfactor'  :  Unresolved object
+
+
+:::{dropdown} `PCSAfactor  :  Unresolved object`
+
+```
+ERROR(SCR.PRS9) :   xxx.any(##)  :   'PCSAfactor'  :  Unresolved object
+```
 
 This could be cause by the fact that the `MuscleParameters.Muscles.PCSAfactor` is  now located at `MuscleModels.DefaultMusPar.PCSAfactor`
 
-#### `StringMesh`  :  Error in expression
+:::
 
-> ERROR(SCR.EXP0) :   Ligaments.any(18)  :     Defined at :   Class_CreateLigament.any(47)  :   StringMesh  :  Error in expression. Please refer to the following error messages for details ...
-> ERROR(SCR.EXP1) :   Ligaments.any(18)  :     Defined at :   Class_CreateLigament.any(47)  :   Operator '='  :  Illegal operation for given argument types  :  'AnyInt[Undefined]' '=' 'AnyFloatVar'
+
+:::{dropdown} `StringMesh  :  Error in expression`
+
+```
+ERROR(SCR.EXP0) :   Ligaments.any(18)  :     Defined at :   Class_CreateLigament.any(47)  :   StringMesh  :  Error in expression. Please refer to the following error messages for details ...
+ERROR(SCR.EXP1) :   Ligaments.any(18)  :     Defined at :   Class_CreateLigament.any(47)  :   Operator '='  :  Illegal operation for given argument types  :  'AnyInt[Undefined]' '=' 'AnyFloatVar'
+```
 
 The `StringMesh` variable have changed type from `AnyVar` to `AnyInt`. So if `StringMesh` is assigned from an other variable, make sure that it has the type `AnyInt`.
 
+:::
 
-### Deprecation warnings
+## Deprecation warnings
 
-#### Deprecated AnyMuscle class names
+Below is a set of possible errors you may encounter if old models are used with AMMR 2.5. 
+
+
+:::{dropdown} `AnyViaPointMuscle  :  Deprecated class`
 
 ```
-WARNING(SYS3) :  ... :  Deprecated class  :  Class 'AnyViaPointMuscle' was renamed to 'AnyMuscleViaPoint'
-WARNING(SYS3) :   ...  :  AnyShortestPathMuscle  :  Deprecated class  :  Class 'AnyShortestPathMuscle' was renamed to 'AnyMuscleShortestPath'
+WARNING(SYS3) :  ... :  AnyViaPointMuscle : Deprecated class  :  Class 'AnyViaPointMuscle' was renamed to 'AnyMuscleViaPoint'
 ```
-Some class names for `AnyMuscle` have been deprecaed. Just rename them. 
+Some class names for `AnyMuscle` have been deprecated. Just rename them. 
 
 *  `AnyViaPointMuscle` --> `AnyMuscleViaPoint`
 *  `AnyShortestPathMuscle` --> `AnyMuscleShortestPath`
 
-#### Deprecated use of AnySurf*Fit classes
+:::
+
+
+:::{dropdown} `AnyShortestPathMuscle  :  Deprecated class`
+
+```
+WARNING(SYS3) :   ...  :  AnyShortestPathMuscle  :  Deprecated class  :  Class 'AnyShortestPathMuscle' was renamed to 'AnyMuscleShortestPath'
+```
+Some class names for `AnyMuscle` have been deprecated. Just rename them. 
+
+*  `AnyViaPointMuscle` --> `AnyMuscleViaPoint`
+*  `AnyShortestPathMuscle` --> `AnyMuscleShortestPath`
+
+:::
+
+
+
+:::{dropdown} `Deprecated use of AnySurf*Fit classes`
+
 
 ```
 ERROR(OBJ.MCH.SURF4) :   Custom_Seg_Shank.any(114)  :   Surf  :  Deprecated use of AnySurf*Fit classes identified. Compatibility mode entered. 
@@ -90,7 +137,7 @@ ERROR(OBJ.MCH.SURF4) :   Custom_Seg_Shank.any(114)  :   Surf  :  Deprecated use 
 > 2) Read the long error description to see how to maintain backwards compatibility of your model. 
 ```
 
-The class `AnySurfCylinderFit` now inherits directly from `AnyRefNode` and can create a reference frame directly. 
+The class `AnySurfCylinderFit` now inherits directly from `AnyRefNode` and creates a reference frame directly. 
 So they should no longer be nested inside existing reference frames to calculate the position and orientation.
 
 Imagine the following code:
@@ -110,7 +157,7 @@ AnyRefNode Outer =
 };
 
 ```
-The `Outer` class gets the positon and orientation from the inner `AnySurfCylinderFit` class.
+The `Outer` class gets the position and orientation from the inner `AnySurfCylinderFit` class.
 This should be changed to: 
 
 ```AnyScriptDoc
@@ -123,8 +170,7 @@ AnySurfCylinderFit Outer =
 ```
 
 In fact, the original would no longer give the correct result given the new properties of `AnySurfCylinderFit` as reference frame.
-So AnyBody detects the old usage pattern and reverts to a 'compatability' mode. 
+So AnyBody detects the old usage pattern and reverts to a 'Compatibility' mode. 
 
-
-
+:::
 

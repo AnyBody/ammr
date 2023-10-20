@@ -1,3 +1,5 @@
+(thoracic-model)=
+
 # Thoracic spine model
 
 :::{admonition} **Unreleased model:** 
