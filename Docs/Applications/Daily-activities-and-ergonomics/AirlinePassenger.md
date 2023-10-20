@@ -1,0 +1,49 @@
+---
+gallery_title: "Airline passenger"
+gallery_image: "/Applications/images/AirlinePassenger.webp"
+---
+
+(sphx-glr-auto-examples-adls-and-ergonomics-plot-airlinepassenger-py)=
+
+# Airline passenger
+
+````{sidebar} **Example**
+<img src="/Applications/images/AirlinePassenger.webp" align="center" width="70%" align="center">
+
+````
+The airline passenger example. This is a model of a coach class airline passenger seat
+characterized by the following:
+
+- No arm rests (you always lose the battle for the armrest  to the person next to you)
+- Horizontal seat pan
+- Limited ability to incline the backrest due to the lack of clearance to the person behind
+
+```{admonition} **Main file location in AMMR:**
+:class: seealso
+{menuselection}`Application --> Examples --> AirlinePassenger -->
+AirlinePassenger.main.any`
+```
+
+
+The model assesses the comfort of the passenger in terms of
+the following:
+
+- Muscle effort computed as the percentage of maximum
+  voluntary contraction to maintain the given posture.
+- The total shear force between the seat pan and the
+  buttocks of the passenger. Shear forces are known to
+  cause particular discomfort in static loading situations,
+  typically as when the passenger tries to sleep.
+
+The posture of the passenger is controlled by the backrest
+angle. The bacrest offers pressure support for the back
+of the human model but no tension support. This means that
+forward leaning postures are realized by inclining the
+seat forward and the body is not getting any support from
+the backrest in this situation.
+
+The inverse dynamic analysis of the model inclines the
+backrest backwards from an initial 10 degree forward
+inclination to a 30 degree backward inclination, which
+is on the very upper limit of coach class passenger seats.
+

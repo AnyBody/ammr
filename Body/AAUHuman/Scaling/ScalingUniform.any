@@ -19,7 +19,7 @@
       AnyFolder Hand      = { AnyVar MassScale = ....Anthropometrics.SegmentMasses.Right.Hand / ...StandardParameters.Hand.Mass; };    
       AnyFolder Foot      = { AnyVar MassScale = ....Anthropometrics.SegmentMasses.Right.Foot  / ...StandardParameters.Right.Foot.Mass; };
       AnyFolder Talus     = { AnyVar MassScale = ....Anthropometrics.SegmentMasses.Right.Talus / ...StandardParameters.Right.Talus.Mass; };  
-      AnyFolder Shank     = { AnyVar MassScale = ....Anthropometrics.SegmentMasses.Right.Shank / ...StandardParameters.Right.Shank.Mass; };
+      AnyFolder Shank     = { AnyVar MassScale = (....Anthropometrics.SegmentMasses.Right.Shank) / (...StandardParameters.Right.Shank.Mass+...StandardParameters.Right.Patella.Mass); };
       AnyFolder Thigh     = { AnyVar MassScale = ....Anthropometrics.SegmentMasses.Right.Thigh / ...StandardParameters.Right.Thigh.Mass; };  
     };
     AnyFolder Left = 
@@ -32,7 +32,7 @@
       AnyFolder Hand      = { AnyVar MassScale = ....Anthropometrics.SegmentMasses.Left.Hand / ...StandardParameters.Hand.Mass; };    
       AnyFolder Foot      = { AnyVar MassScale = ....Anthropometrics.SegmentMasses.Left.Foot  / ...StandardParameters.Left.Foot.Mass; };
       AnyFolder Talus     = { AnyVar MassScale = ....Anthropometrics.SegmentMasses.Left.Talus / ...StandardParameters.Left.Talus.Mass; };  
-      AnyFolder Shank     = { AnyVar MassScale = ....Anthropometrics.SegmentMasses.Left.Shank / ...StandardParameters.Left.Shank.Mass; };
+      AnyFolder Shank     = { AnyVar MassScale = (....Anthropometrics.SegmentMasses.Left.Shank) / (...StandardParameters.Right.Shank.Mass+...StandardParameters.Left.Patella.Mass); };
       AnyFolder Thigh     = { AnyVar MassScale = ....Anthropometrics.SegmentMasses.Left.Thigh / ...StandardParameters.Left.Thigh.Mass; };  
     };
   };
@@ -265,60 +265,42 @@
     AnyFolder Pelvis = {
       AnyVar GeomScale = (...Anthropometrics.SegmentDimensions.PelvisWidth / ..StandardParameters.Pelvis.Width);
       AnyFunTransform3DLin ScaleFunction = {
-        ScaleMat ={{.GeomScale,0,0},{0,.GeomScale,0},{0,0,.GeomScale}};
+        ScaleMat = diag({.GeomScale, .GeomScale, .GeomScale});
+        AnyMatrix ScaleMatInverse = diag({1/.GeomScale, 1/.GeomScale, 1/.GeomScale});
         Offset = {0,0,0};
       };
     };
-    
     AnyFolder Thorax = {
       AnyVar GeomScale = (...Anthropometrics.SegmentDimensions.TrunkHeight / ..StandardParameters.Trunk.Height);
+
+      AnyFloat OriginUnscaled ??= warn(
+        0, "To ensure continuity in the scaling law the thorax origin must be specified"
+      );
+
       AnyFunTransform3DLin ScaleFunction = {
-        ScaleMat ={{.GeomScale,0,0},{0,.GeomScale,0},{0,0,.GeomScale}};
-        Offset = {0,0,0};
+        ScaleMat = diag({.GeomScale, .GeomScale, .GeomScale});
+        AnyMatrix ScaleMatInverse = diag({1/.GeomScale, 1/.GeomScale, 1/.GeomScale});
+        Offset = (
+          ..Pelvis.ScaleFunction(.OriginUnscaled) - (.OriginUnscaled * ScaleMat')
+        ) * ScaleMatInverse;
       };
     };
     
     AnyFolder Head = {
       AnyVar GeomScale = (...Anthropometrics.SegmentDimensions.HeadHeight / ..StandardParameters.Head.Height);
-      AnyFunTransform3DLin ScaleFunction = {
-        ScaleMat ={{.GeomScale,0,0},{0,.GeomScale,0},{0,0,.GeomScale}};
-        Offset = {0,0,0};
-      };
-    };
-    
-    
-    AnyFolder Cervical = {
-      AnyFunTransform3DLin &ScaleFunction = .Head.ScaleFunction;
-    };
-    
-    AnyFolder Lumbar = {
-      AnyVar GeomScale = (...Anthropometrics.SegmentDimensions.TrunkHeight / ..StandardParameters.Trunk.Height);
-      AnyFunTransform3DLin ScaleFunction = {
-        ScaleMat ={{.GeomScale,0,0},{0,.GeomScale,0},{0,0,.GeomScale}};
-        Offset = {0,0,0};
-      };
-    };
 
-    AnyFolder &PelvisSeg = Pelvis;    
-    AnyFolder &SkullSeg = Head;
-    AnyFolder &ThoraxSeg = Thorax;
-    AnyFolder &RibCage = Thorax;
+      AnyFunTransform3DLin ScaleFunction = {
+        ScaleMat = diag({.GeomScale, .GeomScale, .GeomScale});
+        AnyMatrix ScaleMatInverse = diag({1/.GeomScale, 1/.GeomScale, 1/.GeomScale});
+        Offset = {0,0,0};
+      };
+    };
     
-    AnyFolder &C1Seg = Cervical;
-    AnyFolder &C2Seg = Cervical;
-    AnyFolder &C3Seg = Cervical;
-    AnyFolder &C4Seg = Cervical;
-    AnyFolder &C5Seg = Cervical;
-    AnyFolder &C6Seg = Cervical;
-    AnyFolder &C7Seg = Cervical;
     
-    AnyFolder &L1Seg = Lumbar;
-    AnyFolder &L2Seg = Lumbar;
-    AnyFolder &L3Seg = Lumbar;
-    AnyFolder &L4Seg = Lumbar;
-    AnyFolder &L5Seg = Lumbar;
-    AnyFolder &SacrumSeg = PelvisSeg;
-        
+    // uniform scaling is the same for cervical, thoracic and lumbar regions
+    AnyFolder &Cervical = Thorax;    
+    AnyFolder &Lumbar = Thorax;  
+
   };
   
 

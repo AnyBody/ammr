@@ -39,17 +39,23 @@ AnyFolder SegmentsLumbar = {
 
     AnyFolder &StdPar=..ModelParameters.Sacrum;    
     
-    AnyFunTransform3D &Scale = .PelvisSeg.Scale;
-
     //initial position found as a function of pelvis pos and orientation
-    r0=.PelvisSeg.PelvisSacrumJntNode.sRel*.PelvisSeg.Axes0'+.PelvisSeg.r0-SacrumPelvisJntNode.sRel*Axes0'; 
-    
-   
+    r0=.PelvisSeg.PelvisSacrumJntNode.sRel*.PelvisSeg.Axes0'+.PelvisSeg.r0-SacrumPelvisJntNode.sRel*Axes0';    
     Axes0=.PelvisSeg.Axes0;
-    Mass = 0; // Pelvis contains the mass of Sacrum
+    Mass = 1e-5; // Pelvis contains the mass of Sacrum
     Jii = {0.001,0.001,0.001};
     
-    AnyRefNode ScalingNode = {};
+    AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards Compatibility with AMMR 2.4 MoCap Marker protocols
+    
+    // Sacrum is part of the pelvis so they scales together
+    AnyFunTransform3D &GeomScale = ..Scaling.GeometricalScaling.PelvisSeg.ScaleFunction;
+    AnyRefNode& ScalingNode = AnatomicalFrameTrunk;
+    AnyRefNode AnatomicalFrameTrunk = {
+      sRel = ..PelvisSeg.AnatomicalFrameTrunk.sRel;
+      ARel = ..PelvisSeg.AnatomicalFrameTrunk.ARel;
+    };
+    AnyFunTransform3D& Scale = .PelvisSeg.Scale;
+
     
     // Joint nodes
     AnyRefNode SacrumL5JntNode = {sRel = .Scale(.StdPar.SacrumL5JntNode_pos);};    
@@ -72,7 +78,7 @@ AnyFolder SegmentsLumbar = {
    
    
    // -------- Drawing object section (pelvis&sacrum)-------- 
-   #if (BM_LEG_MODEL != _LEG_MODEL_TLEM_ & BM_LEG_MODEL != _LEG_MODEL_TLEM2_) | (BM_PELVIS_DISPLAY == _PELVIS_DISPLAY_LEGANDTRUNKPELVIS_)
+   #if (BM_LEG_MODEL != _LEG_MODEL_TLEM1_ & BM_LEG_MODEL != _LEG_MODEL_TLEM2_) | (BM_PELVIS_DISPLAY == _PELVIS_DISPLAY_LEGANDTRUNKPELVIS_)
    SacrumSeg = {
      #if (BM_PELVIS_DISPLAY == _PELVIS_DISPLAY_LEGANDTRUNKPELVIS_)
      DrwSacrumForTrunk.Opacity = Main.DrawSettings.BonesOpacity.Sacrum*0.5;
@@ -99,7 +105,12 @@ AnyFolder SegmentsLumbar = {
     //initial position found as a function of pelvis pos and orientation
     r0=.SacrumSeg.SacrumL5JntNode.sRel*.SacrumSeg.Axes0'+.SacrumSeg.r0-L5SacrumJntNode.sRel*Axes0'; 
     
-    AnyFunTransform3D &Scale =..Scaling.GeometricalScaling.L5Seg.ScaleFunction;
+    // This file includes the trunk specifc scaling function
+    // and anatomical reference system
+    AnyFunTransform3D &GeomScale = ..Scaling.GeometricalScaling.L5Seg.ScaleFunction;
+    #include "TrunkScalingAndAnatomicalFrame.any"
+
+    AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards Compatibility with AMMR 2.4 MoCap Marker protocols
     AnyFunTransform3D &ScaleAbdominal =..Scaling.GeometricalScaling.Lumbar.ScaleFunction;
     AnyVar MassS = ..Scaling.MassScaling.Lumbar.MassScale;
   
@@ -110,8 +121,6 @@ AnyFolder SegmentsLumbar = {
     
     sCoM = Scale(StdPar.sCoM_pos);
     JaboutCoMOnOff = On;
-    
-    AnyRefNode ScalingNode = {};
     
     AnyRefNode L5SacrumJntNode = {sRel = .Scale(.StdPar.L5SacrumJntNode_pos);};        
     AnyRefNode L4L5JntNode = {sRel = .Scale(.StdPar.L4L5JntNode_pos); AnyDrawNodes DrwNode = {ScaleXYZ = 0.003*{1,1,1};RGB = {1,0,0};};};
@@ -234,11 +243,15 @@ AnyFolder SegmentsLumbar = {
   
     AnyFolder &StdPar=..ModelParameters.L4;    
 	
-	//initial position found as a function of pelvis pos and orientation
+	  //initial position found as a function of pelvis pos and orientation
     r0=.L5Seg.L4L5JntNode.sRel*.L5Seg.Axes0'+.L5Seg.r0-L4L5JntNode.sRel*Axes0'; 
     
-    
-    AnyFunTransform3D &Scale =..ScalingTrunk.L4Seg.ScaleFunction;
+    // This file includes the trunk specifc scaling function
+    // and anatomical reference system
+    AnyFunTransform3D &GeomScale = ..Scaling.GeometricalScaling.L4Seg.ScaleFunction;
+    #include "TrunkScalingAndAnatomicalFrame.any"
+
+    AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards Compatibility with AMMR 2.4 MoCap Marker protocols
     AnyFunTransform3D &ScaleAbdominal =..ScalingTrunk.Lumbar.ScaleFunction;
     
     AnyVar MassS = ..Scaling.MassScaling.Lumbar.MassScale;
@@ -250,8 +263,6 @@ AnyFolder SegmentsLumbar = {
     
     sCoM = Scale(StdPar.sCoM_pos);
     JaboutCoMOnOff = On;
-    
-    AnyRefNode ScalingNode = {};
     
     AnyRefNode L4L5JntNode = {sRel = .Scale(.StdPar.L4L5JntNode_pos);};
     AnyRefNode L3L4JntNode = {sRel = .Scale(.StdPar.L3L4JntNode_pos); AnyDrawNodes DrwNode = {ScaleXYZ = 0.003*{1,1,1};RGB = {1, 0, 0};};};
@@ -386,7 +397,12 @@ AnyFolder SegmentsLumbar = {
     //initial position found as a function of pelvis pos and orientation
     r0=.L4Seg.L3L4JntNode.sRel*.L4Seg.Axes0'+.L4Seg.r0-L3L4JntNode.sRel*Axes0'; 
     
-    AnyFunTransform3D &Scale =..ScalingTrunk.L3Seg.ScaleFunction;
+    // This file includes the trunk specifc scaling function
+    // and anatomical reference system
+    AnyFunTransform3D &GeomScale = ..Scaling.GeometricalScaling.L3Seg.ScaleFunction;
+    #include "TrunkScalingAndAnatomicalFrame.any"
+
+    AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards Compatibility with AMMR 2.4 MoCap Marker protocols
     AnyFunTransform3D &ScaleAbdominal =..ScalingTrunk.Lumbar.ScaleFunction;
         
     AnyVar MassS = ..Scaling.MassScaling.Lumbar.MassScale;
@@ -398,9 +414,7 @@ AnyFolder SegmentsLumbar = {
     
     sCoM = Scale(StdPar.sCoM_pos);
     JaboutCoMOnOff = On;
-    
-    AnyRefNode ScalingNode = {};
-    
+
     AnyRefNode L3L4JntNode = {sRel = .Scale(.StdPar.L3L4JntNode_pos);};    
     AnyRefNode L2L3JntNode = {sRel = .Scale(.StdPar.L2L3JntNode_pos); AnyDrawNodes DrwNode = {ScaleXYZ = 0.003*{1,1,1};RGB = {1,0,0};};};
     
@@ -562,7 +576,12 @@ AnyFolder SegmentsLumbar = {
     //initial position found as a function of pelvis pos and orientation
     r0=.L3Seg.L2L3JntNode.sRel*.L3Seg.Axes0'+.L3Seg.r0-L2L3JntNode.sRel*Axes0'; 
     
-    AnyFunTransform3D &Scale =..ScalingTrunk.L2Seg.ScaleFunction;
+    // This file includes the trunk specifc scaling function
+    // and anatomical reference system
+    AnyFunTransform3D &GeomScale = ..Scaling.GeometricalScaling.L2Seg.ScaleFunction;
+    #include "TrunkScalingAndAnatomicalFrame.any"
+    AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards Compatibility with AMMR 2.4 MoCap Marker protocols
+
     AnyFunTransform3D &ScaleAbdominal =..ScalingTrunk.Lumbar.ScaleFunction;
     
     AnyVar MassS = ..Scaling.MassScaling.Lumbar.MassScale;
@@ -574,9 +593,7 @@ AnyFolder SegmentsLumbar = {
     
     sCoM = Scale(StdPar.sCoM_pos);
     JaboutCoMOnOff = On;
-    
-    AnyRefNode ScalingNode = {};
-    
+
     AnyRefNode L2L3JntNode = {sRel = .Scale(.StdPar.L2L3JntNode_pos);};    
     AnyRefNode L1L2JntNode = {sRel = .Scale(.StdPar.L1L2JntNode_pos); AnyDrawNodes DrwNode = {ScaleXYZ = 0.003*{1,1,1};RGB = {1,0,0};};};
     
@@ -732,7 +749,12 @@ AnyFolder SegmentsLumbar = {
     //initial position found as a function of pelvis pos and orientation
     r0=.L2Seg.L1L2JntNode.sRel*.L2Seg.Axes0'+.L2Seg.r0-L1L2JntNode.sRel*Axes0';
          
-    AnyFunTransform3D &Scale =..ScalingTrunk.L1Seg.ScaleFunction;   
+    // This file includes the trunk specifc scaling function
+    // and anatomical reference system
+    AnyFunTransform3D &GeomScale = ..Scaling.GeometricalScaling.L1Seg.ScaleFunction;
+    #include "TrunkScalingAndAnatomicalFrame.any"
+    AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards Compatibility with AMMR 2.4 MoCap Marker protocols
+    
     AnyFunTransform3D &ScaleAbdominal =..ScalingTrunk.Lumbar.ScaleFunction;   
     
     AnyVar MassS = ..Scaling.MassScaling.Lumbar.MassScale;
@@ -744,8 +766,6 @@ AnyFolder SegmentsLumbar = {
     
     sCoM = Scale(StdPar.sCoM_pos);
     JaboutCoMOnOff = On;
-    
-    AnyRefNode ScalingNode = {};
     
     AnyRefNode L1L2JntNode = {sRel = .Scale(.StdPar.L1L2JntNode_pos);};    
     AnyRefNode T12L1JntNode = {sRel = .Scale(.StdPar.T12L1JntNode_pos); AnyDrawNodes DrwNode = {ScaleXYZ = 0.003*{1,1,1};RGB = {1, 0, 0};};};

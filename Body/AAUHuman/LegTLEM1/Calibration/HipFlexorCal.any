@@ -1,0 +1,110 @@
+AnyFolder HipFlexorCal ={
+  AnyComponentDefinition obj = {};  
+
+  AnyFolder &Pelvis = ...HumanFolderRef.Trunk.SegmentsLumbar.PelvisSeg;
+  AnyFolder &Sacrum = ...HumanFolderRef.Trunk.SegmentsLumbar.SacrumSeg;
+  
+  // Segments needed for the Psoas Major muscles
+  AnyFolder& SegmentsLumbar = ...HumanFolderRef.Trunk.SegmentsLumbar;
+  AnyFolder &Thorax = ...HumanFolderRef.Trunk.SegmentsThorax.ThoraxSeg;
+  
+  
+  AnyFolder &LegSegSide = .SideHumanFolderRef.Leg.Seg;
+  AnyFolder &LegJointsSide = .SideHumanFolderRef.Leg.Jnt;
+  AnyFolder &TrunkJoints = ...HumanFolderRef.Trunk.JointsLumbar;
+  
+  
+  AnyFixedRefFrame ground = {
+    AnyRefNode node = {
+      ARel=..Pelvis.Axes0;
+      sRel=..Pelvis.r0;
+    };
+  };
+  
+  AnyKinEq ThoraxFix = {
+    AnyKinMeasure& PelvisThoraxExtension = ....HumanFolderRef.Interface.Trunk.PelvisThoraxExtension;
+    AnyKinMeasure& PelvisThoraxLateralBending = ....HumanFolderRef.Interface.Trunk.PelvisThoraxLateralBending;
+    AnyKinMeasure& PelvisThoraxRotation = ....HumanFolderRef.Interface.Trunk.PelvisThoraxRotation;
+  };
+  
+  AnyKinEq PelvisFix = {
+    AnyKinLinear Lin = {
+      AnyRefFrame &ground = ..ground.node;
+      AnyRefFrame &Pelvis = .....HumanFolderRef.Trunk.SegmentsLumbar.PelvisSeg;
+    };
+    AnyKinRotational Rot = {
+      Type = RotAxesAngles;
+      AnyRefFrame &ground = ..ground.node;
+      AnyRefFrame &Pelvis = .....HumanFolderRef.Trunk.SegmentsLumbar.PelvisSeg;
+    };
+  };
+
+  
+  AnyKinEqInterPolDriver Hip = {
+    AnyKinRotational &Spherical = ..SideInterfaceFolderRef.HipFlexion.HipMeasure;
+    Type = PiecewiseLinear;
+    T =      {0.0, 1.0 };
+    Data = { {130,  -20},
+             {-25,  40},
+             {0,  -6}
+    }*pi/180; // Flexion - Abduction - internal rotation 
+    
+    Reaction.Type = {Off, Off, Off};
+  };
+  
+  AnyKinEqInterPolDriver Knee = {
+    AnyKinMeasure& Hinge = ..SideInterfaceFolderRef.KneeFlexion;
+    Type = PiecewiseLinear;
+    T =      {0.0, 1.0 };
+    Data = {{140, 90}}*pi/180; // ? degrees knee flexion
+    Reaction.Type = {Off};
+  };
+  
+  
+  AnyKinEqInterPolDriver Ankle = {
+    AnyKinMeasure& Hinge = ..SideInterfaceFolderRef.AnklePlantarFlexion;
+    Type = PiecewiseLinear;
+    T =      {0.0, 1.0 };
+    Data = {{0,-10}}*pi/180;
+    Reaction.Type = {Off};
+  };
+  
+  AnyKinEqInterPolDriver SubTalar = {
+    AnyKinMeasure& Hinge = ..SideInterfaceFolderRef.SubTalarEversion;
+    Type = PiecewiseLinear;
+    T =      {0.0, 1.0 };
+    Data = {{0,0}}*pi/180;
+    Reaction.Type = {Off};
+  };
+  
+  AnyString MusPrefix = CompleteNameOf(&.SideHumanFolderRef.Leg.Mus);
+  
+  AnyObjectPtrArray IliacusMuscles = ObjSearch(MusPrefix+".Iliacus*", "AnyMuscle");
+  AnyFloat  IliacusRmin = repmat(NumElemOf(IliacusMuscles), 0.5);
+  AnyFloat  IliacusRmax = repmat(NumElemOf(IliacusMuscles), 1.2);
+  
+  // Psoas muscles are created in the trunk folder, and search function is not returning pointers  
+  AnyObjectPtrArray PsoasMajorMuscles = ObjSearch(CompleteNameOf(&.SidePsoasRef)+".PM*", "AnyMuscle");
+  AnyFloat  PsoasMajorRmin = repmat(NumElemOf(PsoasMajorMuscles), 0.5);
+  AnyFloat  PsoasMajorRmax = repmat(NumElemOf(PsoasMajorMuscles), 1.2);
+};
+
+// The study: Operations to be performed on the model
+AnyBodyCalibrationStudy LegCalibrationStudyHipFlexor = {
+  AnyFolder &ref=.HipFlexorCal; 
+  nStep = 2;
+  MuscleArr = arrcat(
+      ref.IliacusMuscles,
+      ref.PsoasMajorMuscles
+  );
+  RminMuscleFiber = arrcat(
+      ref.IliacusRmin,
+      ref.PsoasMajorRmin
+  );
+  RmaxMuscleFiber = arrcat(
+      ref.IliacusRmax,
+      ref.PsoasMajorRmax
+                   );
+  InitialConditions.SolverType = KinSolOverDeterminate;
+};
+

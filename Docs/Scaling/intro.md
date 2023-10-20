@@ -2,6 +2,21 @@
 
 # Introduction to Scaling
 
+:::{sidebar} Scaling Tutorials
+
+The three tutorials covers the different scaling 
+methods shown in the table below:
+
+```{toctree}
+:maxdepth: 1
+
+lesson1
+lesson2
+lesson3
+
+```
+:::
+
 Musculoskeletal models must be scalable to sizes of different
 individuals to be useful for product design. Scaling pertains not only to the overall geometry,
 but also muscle insertion points, muscle parameters, wrapping
@@ -17,11 +32,10 @@ choose the actual law.
 
 Currently there are nine pre-defined scaling laws available in AnyBody
 
-```{rubric} Scaling
-```
+
 
 ```{eval-rst}
-.. list-table:: Scaling laws
+.. list-table::
    :widths: 3 7
    :header-rows: 1
 
@@ -62,35 +76,14 @@ scaling is done automatically in most cases. We will come back to it
 when needed. Users who need a more comprehensive introduction can view
 this recorded previous webcast titled [“Anthropometrical Scaling of
 Musculoskeletal
-Models”](https://www.anybodytech.com/anthropometrical-scaling-of-musculoskeletal-models/).
+Models”](https://www.anybodytech.com/download/anthropometrical-scaling-of-musculoskeletal-models).
 
-```{rubric} Tutorial
-```
 
-The first five scaling methods are covered in {doc}`Lesson 1 <lesson1>`. They are often
-referred to as Joint to joint scaling methods. {doc}`Lesson 2 <lesson2>` covers the
-next three which are based on external body measurement. And Lesson 3 covers
-the ScalingXYZ scaling law, since the usage logic slightly differs from
-the rest of the laws.
 
-With the AnyBody Modeling System you already have a repository of models
-available, for details please see the AnyBody Assistant available from
-the menu. As a starting point for this tutorial please find the model
-{ref}`StandingModelScalingDisplay <sphx_glr_auto_examples_Other_plot_StandingModelScalingDisplay.py>`.
 
-```{toctree}
-:maxdepth: 1
-
-lesson1
-lesson2
-lesson3
-```
-
-```{rst-class} without-title
-```
-
-:::{seealso}
-**Next lesson:** Now head for {doc}`lesson1`.
+:::{admonition} **Next lesson:**
+:class: seealso
+Now head for {doc}`lesson1`.
 :::
 
 % ..  image:: _static/intro/image1.jpeg

@@ -4,389 +4,896 @@
 # All BodyModel constants
 
 
+
+::::{dropdown} `ON`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
 :::{ammr:bm_constant} ON
 :value: 1
+Switch ON
 :::
+::::
+
+
+
+::::{dropdown} `OFF`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} OFF
 :value: 0
+Switch OFF
 :::
+::::
+
+
+
+::::{dropdown} `_MUSCLES_NONE_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _MUSCLES_NONE_
 :value: 0
 Constant to switch off muscles
 :::
+::::
+
+
+
+::::{dropdown} `_MUSCLES_SIMPLE_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _MUSCLES_SIMPLE_
 :value: 1
 Constant to use simple muscles
 :::
+::::
+
+
+
+::::{dropdown} `_MUSCLES_3E_HILL_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _MUSCLES_3E_HILL_
 :value: 2
 Constant to use 3 element Hill-type muscle
 :::
+::::
+
+
+
+::::{dropdown} `_LEG_MODEL_OFF_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _LEG_MODEL_OFF_
 :value: 0
 Switch off a leg
 :::
+::::
+
+
+
+::::{dropdown} `_LEG_MODEL_TLEM_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _LEG_MODEL_TLEM_
 :value: 1
 Switch to use leg model: "TLEM 1"
 :::
+::::
+
+
+
+::::{dropdown} `_LEG_MODEL_TLEM1_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _LEG_MODEL_TLEM1_
 :value: 1
+:deprecated:
 Switch to use leg model: "TLEM 1"
 :::
+::::
+
+
+
+::::{dropdown} `_LEG_MODEL_TLEM2_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _LEG_MODEL_TLEM2_
 :value: 2
 Switch to use leg model: "TLEM 2"
 :::
+::::
+
+
+
+::::{dropdown} `_LEG_MODEL_LEG_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _LEG_MODEL_LEG_
 :value: 3
 Switch to use leg model: "Leg"
 :::
+::::
+
+
+
+::::{dropdown} `_FOOT_MODEL_DEFAULT_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _FOOT_MODEL_DEFAULT_
 :value: 0
 Switch for using the default foot model
 :::
+::::
+
+
+
+::::{dropdown} `_FOOT_MODEL_NONE_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _FOOT_MODEL_NONE_
 :value: 1
 Switch for using the GM foot model"
 :::
+::::
+
+
+
+::::{dropdown} `_ELLIPSOID_CONTACT_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _ELLIPSOID_CONTACT_
 :value: 1
 Switch for using ellipsoid contact between scapula and thorax
 :::
+::::
+
+
+
+::::{dropdown} `_MULTIPLE_POINT_CONTACT_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _MULTIPLE_POINT_CONTACT_
 :value: 0
 Switch for using multiple point contact between scapula and thorax"
 :::
+::::
+
+
+
+::::{dropdown} `_DELTOID_WRAPPING_RAKE_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _DELTOID_WRAPPING_RAKE_
 :value: 0
 Switch for using pre AMMR 2.2. rake implementation for deltoid wrapping
 :::
+::::
+
+
+
+::::{dropdown} `_DELTOID_WRAPPING_CYLINDERS_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _DELTOID_WRAPPING_CYLINDERS_
 :value: 1
 Switch for using mulitple cylinder in the deltroid wrapping
 :::
+::::
+
+
+
+::::{dropdown} `_DELTOID_WRAPPING_ELIPSOIDS_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _DELTOID_WRAPPING_ELIPSOIDS_
 :value: 2
 Switch for using multiple elipsoids in the deltoid wrapping"
 :::
+::::
+
+
+
+::::{dropdown} `_MORPH_NONE_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _MORPH_NONE_
 :value: 0
 Constant for no-morphing between the upper and lower bodies.
 :::
+::::
+
+
+
+::::{dropdown} `_MORPH_TRUNK_TO_LEG_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _MORPH_TRUNK_TO_LEG_
 :value: 1
 Constant for the trunk-to-leg morphing
 :::
+::::
+
+
+
+::::{dropdown} `_MORPH_LEG_TO_TRUNK_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _MORPH_LEG_TO_TRUNK_
 :value: 2
 Constant for the leg-to-trunk morhping
 :::
+::::
+
+
+
+::::{dropdown} `_PELVIS_DISPLAY_NONE_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _PELVIS_DISPLAY_NONE_
 :value: 0
 Constant to switch off pelvis visualization
 :::
+::::
+
+
+
+::::{dropdown} `_PELVIS_DISPLAY_LEGPELVIS_ONLY_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _PELVIS_DISPLAY_LEGPELVIS_ONLY_
 :value: 1
 Constant to display leg-dependent pevlis only
 :::
+::::
+
+
+
+::::{dropdown} `_PELVIS_DISPLAY_LEGANDTRUNKPELVIS_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _PELVIS_DISPLAY_LEGANDTRUNKPELVIS_
 :value: 2
 Constant to display both trunk and leg pelvises
 :::
+::::
+
+
+
+::::{dropdown} `_DISC_STIFFNESS_NONE_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _DISC_STIFFNESS_NONE_
 :value: 0
 Constant to switch off disc spring in the spine
 :::
+::::
+
+
+
+::::{dropdown} `_DISC_STIFFNESS_LINEAR_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _DISC_STIFFNESS_LINEAR_
 :value: 1
 Constant to switch linear disc spring on in the spine
 :::
+::::
+
+
+
+::::{dropdown} `_DISC_STIFFNESS_NONLINEAR_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _DISC_STIFFNESS_NONLINEAR_
 :value: 2
 Constant to switch nonlinear disc spring on in the spine
 :::
+::::
+
+
+
+::::{dropdown} `_RHYTHM_SOFT_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _RHYTHM_SOFT_
 :value: 2
 Constant to switch kinematic rhythms as soft contraints
 :::
+::::
+
+
+
+::::{dropdown} `_SCALING_NONE_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _SCALING_NONE_
 :value: 0
 A scaling law to use body part datasets as is without any scaling.
 :::
+::::
+
+
+
+::::{dropdown} `_SCALING_STANDARD_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _SCALING_STANDARD_
 :value: 1
 A default scaling law that corresponds to the 50th percentile European male.
 :::
+::::
+
+
+
+::::{dropdown} `_SCALING_UNIFORM_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _SCALING_UNIFORM_
 :value: 2
 Uniform anthropometric scaling law to be used by the entire model.
 :::
+::::
+
+
+
+::::{dropdown} `_SCALING_LENGTHMASS_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _SCALING_LENGTHMASS_
 :value: 3
 Length/mass anthropometric scaling law to be used by the entire model.
 :::
+::::
+
+
+
+::::{dropdown} `_SCALING_LENGTHMASSFAT_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _SCALING_LENGTHMASSFAT_
 :value: 4
 Length/mass/fat anthropometric scaling law to be used by the entire model.
 :::
+::::
+
+
+
+::::{dropdown} `_SCALING_UNIFORM_EXTMEASUREMENTS_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _SCALING_UNIFORM_EXTMEASUREMENTS_
 :value: 5
 Uniform anthropometric scaling law  with external measurements to be used by the entire model.
 :::
+::::
+
+
+
+::::{dropdown} `_SCALING_LENGTHMASS_EXTMEASUREMENTS_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _SCALING_LENGTHMASS_EXTMEASUREMENTS_
 :value: 6
 Length/mass anthropometric with external measurements scaling law to be used by the entire model.
 :::
+::::
+
+
+
+::::{dropdown} `_SCALING_LENGTHMASSFAT_EXTMEASUREMENTS_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _SCALING_LENGTHMASSFAT_EXTMEASUREMENTS_
 :value: 7
 Length/mass/fat anthropometric with external measurements scaling law to be used by the entire model.
 :::
+::::
+
+
+
+::::{dropdown} `_SCALING_LENGTHMASSFAT_MULTIDOFS_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _SCALING_LENGTHMASSFAT_MULTIDOFS_
 :value: 8
 :deprecated:
 Length/mass/fat anthropometric with for multiple degree of freedom.
 :::
+::::
+
+
+
+::::{dropdown} `_SCALING_XYZ_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _SCALING_XYZ_
 :value: 9
 Scaling using xyz factors for all Segments.
 :::
+::::
+
+
+
+::::{dropdown} `_SCALING_CUSTOM_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _SCALING_CUSTOM_
 :value: 10
 :deprecated:
 Custom anthropometric scaling law for the entire model
 :::
+::::
+
+
+
+::::{dropdown} `_SCALING_USERDEFINED_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _SCALING_USERDEFINED_
 :value: 10
 Don't use a builtin scaling law. A user-defined law must be specified with ``BM_SCALING_FILE``.
 :::
+::::
+
+
+
+::::{dropdown} `_JOINT_TYPE_USERDEFINED_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _JOINT_TYPE_USERDEFINED_
 :value: 0
 User-defined joint. This will exclude the joint and which nodes.
 :::
+::::
+
+
+
+::::{dropdown} `_JOINT_TYPE_DEFAULT_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _JOINT_TYPE_DEFAULT_
 :value: 1
 Default joint definition.
 :::
+::::
+
+
+
+::::{dropdown} `_JOINT_TYPE_BONY_LANDMARK_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _JOINT_TYPE_BONY_LANDMARK_
 :value: 2
 Joint definition based on bony landmarks. This will create a joint which resembles what is often used in traditional gait analysis. (E.g. revolute knee joint along the femoral condyles).
 :::
+::::
+
+
+
+::::{dropdown} `_CALIBRATION_TYPE_1PAR_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _CALIBRATION_TYPE_1PAR_
 :value: 1
 Constant to use 1 parameter muscle tendon calibration
 :::
+::::
+
+
+
+::::{dropdown} `_CALIBRATION_TYPE_2PAR_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _CALIBRATION_TYPE_2PAR_
 :value: 2
 Constant to use 2 parameter muscle tendon calibration
 :::
+::::
+
+
+
+::::{dropdown} `_CALIBRATION_TYPE_CUSTOM_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} _CALIBRATION_TYPE_CUSTOM_
 :value: 0
 Use custom calibration. I.e. diables calibration so the user can add their own code.
 :::
+::::
+
+
+
+::::{dropdown} `CONST_MUSCLES_NONE`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} CONST_MUSCLES_NONE
 :value: 0
 :deprecated:
 Constant to switch off muscles
 :::
+::::
+
+
+
+::::{dropdown} `CONST_MUSCLES_SIMPLE`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} CONST_MUSCLES_SIMPLE
 :value: 1
 :deprecated:
 Constant to use simple muscles
 :::
+::::
+
+
+
+::::{dropdown} `CONST_MUSCLES_3E_HILL`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} CONST_MUSCLES_3E_HILL
 :value: 2
 :deprecated:
 Constant to use 3 element Hill-type muscle
 :::
+::::
+
+
+
+::::{dropdown} `CONST_HAND_SIMPLE`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} CONST_HAND_SIMPLE
 :value: 0
 :deprecated:
 Constant to use simplified hand model
 :::
+::::
+
+
+
+::::{dropdown} `CONST_HAND_DETAILED`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} CONST_HAND_DETAILED
 :value: 1
 :deprecated:
 Constant to use detailed hand model
 :::
+::::
+
+
+
+::::{dropdown} `CONST_LEG_MODEL_OFF`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} CONST_LEG_MODEL_OFF
 :value: 0
 :deprecated:
 Switch off a leg
 :::
+::::
+
+
+
+::::{dropdown} `CONST_LEG_MODEL_TLEM`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} CONST_LEG_MODEL_TLEM
 :value: 1
 :deprecated:
 Switch to use leg model: "TLEM 1"
 :::
+::::
+
+
+
+::::{dropdown} `CONST_LEG_MODEL_TLEM2`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} CONST_LEG_MODEL_TLEM2
 :value: 2
 :deprecated:
 Switch to use leg model: "TLEM 2"
 :::
+::::
+
+
+
+::::{dropdown} `CONST_LEG_MODEL_Leg`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} CONST_LEG_MODEL_Leg
 :value: 3
 :deprecated:
 Switch to use leg model: "Leg"
 :::
+::::
+
+
+
+::::{dropdown} `CONST_MORPH_NONE`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} CONST_MORPH_NONE
 :value: 0
 :deprecated:
 Constant for no-morphing between the upper and lower bodies.
 :::
+::::
+
+
+
+::::{dropdown} `CONST_MORPH_TRUNK_TO_LEG`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} CONST_MORPH_TRUNK_TO_LEG
 :value: 1
 :deprecated:
 Constant for the trunk-to-leg morphing
 :::
+::::
+
+
+
+::::{dropdown} `CONST_MORPH_LEG_TO_TRUNK`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} CONST_MORPH_LEG_TO_TRUNK
 :value: 2
 :deprecated:
 Constant for the leg-to-trunk morhping
 :::
+::::
+
+
+
+::::{dropdown} `CONST_PELVIS_DISPLAY_NONE`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} CONST_PELVIS_DISPLAY_NONE
 :value: 0
 :deprecated:
 Constant to switch off pelvis visualization
 :::
+::::
+
+
+
+::::{dropdown} `CONST_PELVIS_DISPLAY_LEGPELVIS_ONLY`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} CONST_PELVIS_DISPLAY_LEGPELVIS_ONLY
 :value: 1
 :deprecated:
 Constant to display leg-dependent pevlis only
 :::
+::::
+
+
+
+::::{dropdown} `CONST_PELVIS_DISPLAY_LEGANDTRUNKPELVIS`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} CONST_PELVIS_DISPLAY_LEGANDTRUNKPELVIS
 :value: 2
 :deprecated:
 Constant to display both trunk and leg pelvises
 :::
+::::
+
+
+
+::::{dropdown} `CONST_DISC_STIFFNESS_NONE`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} CONST_DISC_STIFFNESS_NONE
 :value: 0
 :deprecated:
 Constant to switch off disc spring in the spine
 :::
+::::
+
+
+
+::::{dropdown} `CONST_DISC_STIFFNESS_LINEAR`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} CONST_DISC_STIFFNESS_LINEAR
 :value: 1
 :deprecated:
 Constant to switch linear disc spring on in the spine
 :::
+::::
+
+
+
+::::{dropdown} `CONST_DISC_STIFFNESS_NONLINEAR `
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} CONST_DISC_STIFFNESS_NONLINEAR 
 :value: 2
 :deprecated:
 Constant to switch nonlinear disc spring on in the spine
 :::
+::::
+
+
+
+::::{dropdown} `CONST_SCALING_STANDARD`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} CONST_SCALING_STANDARD
 :value: 1
 :deprecated:
 Standard scaling law to be used by the entire model.
 :::
+::::
+
+
+
+::::{dropdown} `CONST_SCALING_UNIFORM`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} CONST_SCALING_UNIFORM
 :value: 2
 :deprecated:
 Uniform anthropometric scaling law to be used by the entire model.
 :::
+::::
+
+
+
+::::{dropdown} `CONST_SCALING_LENGTHMASS`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} CONST_SCALING_LENGTHMASS
 :value: 3
 :deprecated:
 Length/mass anthropometric scaling law to be used by the entire model.
 :::
+::::
+
+
+
+::::{dropdown} `CONST_SCALING_LENGTHMASSFAT`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} CONST_SCALING_LENGTHMASSFAT
 :value: 4
 :deprecated:
 Length/mass/fat anthropometric scaling law to be used by the entire model.
 :::
+::::
+
+
+
+::::{dropdown} `CONST_SCALING_UNIFORM_EXTMEASUREMENTS`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} CONST_SCALING_UNIFORM_EXTMEASUREMENTS
 :value: 5
 :deprecated:
 Uniform anthropometric scaling law  with external measurements to be used by the entire model.
 :::
+::::
+
+
+
+::::{dropdown} `CONST_SCALING_LENGTHMASS_EXTMEASUREMENTS`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} CONST_SCALING_LENGTHMASS_EXTMEASUREMENTS
 :value: 6
 :deprecated:
 Length/mass anthropometric with external measurements scaling law to be used by the entire model.
 :::
+::::
+
+
+
+::::{dropdown} `CONST_SCALING_LENGTHMASSFAT_EXTMEASUREMENTS`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} CONST_SCALING_LENGTHMASSFAT_EXTMEASUREMENTS
 :value: 7
 :deprecated:
 Length/mass/fat anthropometric with external measurements scaling law to be used by the entire model.
 :::
+::::
+
+
+
+::::{dropdown} `CONST_SCALING_LENGTHMASSFAT_MULTIDOFS`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} CONST_SCALING_LENGTHMASSFAT_MULTIDOFS
 :value: 8
 :deprecated:
 Length/mass/fat anthropometric with for multiple degree of freedom.
 :::
+::::
+
+
+
+::::{dropdown} `CONST_SCALING_CUSTOM`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
 
 :::{ammr:bm_constant} CONST_SCALING_CUSTOM
 :value: 10
 :deprecated:
 Custom anthropometric scaling law for the entire model
 :::
+::::
+

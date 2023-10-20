@@ -3,10 +3,13 @@
 # AnyBody Managed Model Repository 
 > An open library of musculoskeletal models
 
-
 The AnyBody Model Repository (AMMR), is an open library of musculoskeletal
 models and examples ready to be used with the [AnyBody Modeling
 System](https://www.anybodytech.com/software/ams/).
+
+> **Note**
+> AnyBody version 7.5 is needed to run models. 
+> Please see the [beta program](https://forum.anyscript.org/t/become-a-beta-tester/5056/6). 
 
 <p align="center">
   <img src = "https://github.com/AnyBody/ammr/blob/master/Docs/_static/ammr_bodyparts.png" width=350>
@@ -23,9 +26,9 @@ The AnyBody Managed Model Repository consists of two parts:
   workplace-specific scenarios).
 
 The models are developed in research projects at academic institutions or by
-[AnyBody Technology](https://anybodytech.com) in collaboration with academic
+[AnyBody Technology](https://www.anybodytech.com) in collaboration with academic
 institutions. The models are maintained by [AnyBody
-Technology](https://anybodytech.com) who ensure that various body part models
+Technology](https://www.anybodytech.com) who ensure that various body part models
 can be used together as a full body, scalable musculoskeletal model.
 
 
@@ -40,29 +43,22 @@ System](https://www.anybodytech.com/software/anybodymodelingsystem/), or availab
 Please see the [AMMR documentation](https://anyscript.org/ammr-doc/beta) for more
 information on getting started using the AMMR.
 
+
+## Licensing
+Access to and use of "AnyBody Managed Model Repository" on GitHub is covered by our End User License Agreement (EULA). 
+Please see the ["License certificate"](../LICENSE) file include with this repository for more information. 
+
+If you don' agree to the terms of the EULA (which may be updated from time to time) you are not allowed to use the AMMR.
+
+
 ## Contributing
 
-Development takes place in a closed [repository on
-Github](https://github.com/anybody/ammr) to protect academic contributors
-who also often need to publish their models before release. Access to the closed
-Github repository is given on request. 
+All contributions are welcome and greatly appreciated. 
 
-Please [submit an issue here](https://github.com/AnyBody/ammr-doc/issues), to request access. 
+If you find a bug or have comments to the code please report it on the [AnyScript
+forum](https://forum.anyscript.org).
 
+If you have a fix or an improvement to the models we are happy to accept it. Code contributions and fixes are submitted through [pull requests]() on GitHub.
 
-## Repository structure
-
-![Visualization of the codebase](./diagram.svg)
-
-
-
-<!---
-A [public mirror](https://gihub.com/anybody/ammr) exists on GitHub in which the
-[main development
-branch](https://github.com/AnyBody-Research-Group/AMMR/commits/master) is
-available. Pull request are very welcome on GitHub.
---->
-
-## License
-
-See [LICENSE.txt](../LICENSE.txt)
+Simply fork this repository, editor your fork and [start a pull
+request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request) 

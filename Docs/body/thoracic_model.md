@@ -1,10 +1,10 @@
+(thoracic-model)=
+
 # Thoracic spine model
 
-```{rst-class} without-title
-```
-
-:::{caution}
-**Unreleased model:** The model is under development and not yet included in the managed model repository.
+:::{admonition} **Unreleased model:** 
+:class: caution
+The model is under development and not yet included in the managed model repository.
 The model is used in various research projects and access to the model can be given on request. Please
 [contact us](mailto:sales@anybodytech.com) if you are interested in this work.
 :::

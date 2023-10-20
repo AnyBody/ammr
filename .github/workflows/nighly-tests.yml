@@ -3,12 +3,7 @@ name: Nightly Full AMMR tests
 on:
   schedule:
     - cron: 0 3 * * *
-  workflow_dispatch:
-    inputs:
-      debug_config:
-        description: 'A debug environment varibles which is set when running tests.'
-        required: false
-        default: ""
+  workflow_dispatch: {}
 
 
 concurrency: 
@@ -18,7 +13,7 @@ concurrency:
 
 jobs:
   test:
-    runs-on: [self-hosted, AnyBody]
+    runs-on: [self-hosted, Windows, AnyBody]
 
     strategy:
       fail-fast: false
@@ -30,36 +25,25 @@ jobs:
             ammr_version: "master-ammr-2.4.x"
             suppress_deprecation_messages: "On"
           - ams_version: "7.5_Beta"
-            ammr_version: "master-ammr-2.5"
+            ammr_version: "master"
 
     env:
       # Triggers a warning at 20 deg muscles angles
       ShortestPathMaxAngle: 0.3491
       ANYBODYCON: C:\Program Files\AnyBody Technology\AnyBody.${{ matrix.ams_version }}\AnyBodyCon.exe
-      SuppressDeprecationMessages: ${{ matrix.suppress_deprecation_messages }}
-      #PYTEST_ADDOPTS: ${{contains(matrix.ams_version, 'Beta') && '--suppress-tests-failed-exit-code' || ''}}
+      ANYBODY_SUPPRESS_DEPRECATION_MESSAGES: ${{ matrix.suppress_deprecation_messages }}
 
     steps:
       - uses: actions/checkout@v3
         with:
           ref: ${{ matrix.ammr_version }}
 
-      - name: Set debug env var
-        run: echo "${{ github.event.inputs.debug_config }}" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
-
-      - name: Install conda
-        run: | 
-          Invoke-Webrequest -URI https://anybodycloudci.blob.core.windows.net/micromamba/micromamba-0.25.1-0.tar.bz2 -OutFile ~\micromamba.tar.bz2
-          (Get-FileHash ~\micromamba.tar.bz2).hash -eq "ED3B12B747F05A630198D3A8A8F7120BDE22AE9033CB62AF95D6F3DF57FE9B0C"
-          $env:Path = "C:\PROGRA~1\Git\usr\bin;" + $env:Path
-          tar -xvjf ~/micromamba.tar.bz2 --strip-components 2 -C ~ Library/bin/micromamba.exe
-          echo "MAMBA_ROOT_PREFIX=$HOME\micromamba" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
-
-      - name: Create conda environment
-        run: | 
-          ~\micromamba.exe shell hook -s powershell | Out-String | iex
-          micromamba create --allow-downgrade -y -n _ammr_test -f Tests\test-environment.yml
-
+      - name: Install micro mamba
+        uses: ./.github/actions/setup-micromamba
+        with:
+          environment-file: Tests/test-environment.yml
+          environment-name: _ammr_test
+        
       - name: Run full AMMR tests
         run: |
           ~\micromamba.exe shell hook -s powershell | Out-String | iex
@@ -68,12 +52,10 @@ jobs:
           python -m pytest --runslow -n 4 --durations=20 --anybodycon="$Env:ANYBODYCON" Tests
 
   test-linux:
-    runs-on: [self-hosted, linux]
-    container: ghcr.io/anybody/anybodycon-linux:${{ matrix.ams_version }}
+    runs-on: [self-hosted-linux]
+    container: ghcr.io/anybody/anybodycon-github-actions:${{ matrix.ams_version }}
     env:
-      RLM_LICENSE_PASSWORD: ${{ secrets.LICENSE_PASSWORD }}
-      RLM_LICENSE: ${{ secrets.LICENSE_SERVER }}
-      SuppressDeprecationMessages: ${{ fromJSON('{"7.4":"Off","7.5_Beta":"On"}')[matrix.ams_version] }}
+      ANYBODY_SUPPRESS_DEPRECATION_MESSAGES: ${{ fromJSON('{"7.4":"Off","7.5_Beta":"On"}')[matrix.ams_version] }}
 
     strategy:
       matrix:
@@ -81,7 +63,7 @@ jobs:
           - ams_version: "7.4"
             ammr_version: "master-ammr-2.4.x"
           - ams_version: "7.5_Beta"
-            ammr_version: "master-ammr-2.5"
+            ammr_version: "master"
     
     steps:
       - uses: actions/checkout@v3
@@ -92,6 +74,8 @@ jobs:
         run: echo ${{ github.event.inputs.debug_config }} >> $GITHUB_ENV
 
       - name: Run tests
-        run: |
-          pytest -n 2 Tests
-
+        run: pytest -n 2 Tests
+        env:
+          RLM_LICENSE_PASSWORD: ${{ secrets.LICENSE_PASSWORD }}
+          RLM_LICENSE: ${{ secrets.LICENSE_SERVER }}
+      
