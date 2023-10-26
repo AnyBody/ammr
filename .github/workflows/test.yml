@@ -31,7 +31,11 @@ concurrency:
 
 jobs:
   test:
-    
+    strategy:
+      fail-fast: false
+      matrix:
+        test_group: [1, 2, 3, 4, 5]
+
     env:
       # Triggers a warning at 20 deg
       ShortestPathMaxAngle: 0.3491 
@@ -61,8 +65,9 @@ jobs:
         run: |
           ~\micromamba.exe shell hook -s powershell | Out-String | iex
           micromamba activate _ammr_test
-        
-          pytest -n 4 --instafail --durations=20 --anybodycon="$Env:ANYBODYCON" `
+          
+          cd Tests
+          pytest -n auto --dist worksteal --splits 5 --group ${{ matrix.test_group }} --splitting-algorithm=least_duration --durations=10 --anybodycon="$Env:ANYBODYCON" `
            ${{ github.event.inputs.run-slow-tests == 'true' && '--runslow' || '' }} `
-           ${{ github.event.inputs.custom-pytest-arg  || 'Tests' }}
+           ${{ github.event.inputs.custom-pytest-arg  || '' }}
   
