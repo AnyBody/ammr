@@ -7,9 +7,9 @@ The AnyBody Model Repository (AMMR), is an open library of musculoskeletal
 models and examples ready to be used with the [AnyBody Modeling
 System](https://www.anybodytech.com/software/ams/).
 
-> **Note**
-> An AnyBody license with active maintenance is required to use the models from GitHub. 
-> Please see the [beta program](https://forum.anyscript.org/t/become-a-beta-tester/5056/6). 
+> [!IMPORTANT]
+An AnyBody license with active maintenance is required to use the models from GitHub. 
+Please see the [beta program](https://forum.anyscript.org/t/become-a-beta-tester/5056/6). 
 
 <p align="center">
   <img src = "https://github.com/AnyBody/ammr/blob/master/Docs/_static/ammr_bodyparts.png" width=350>
