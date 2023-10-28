@@ -21,9 +21,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test_group: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         ams_version: ["7.5_Beta"]
         ammr_version: ["master-ammr-2.4.x", "master"]
+        test_group: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
     env:
       # Triggers a warning at 20 deg muscles angles
@@ -52,7 +52,12 @@ jobs:
           environment-file: Tests/test-environment.yml
           init-shell: powershell
           cache-environment: true
-          
+      
+      - name: Add pytest-splits for ammr 2.4
+        if: ${{ matrix.ammr_version == 'master-ammr-2.4.x' }}
+        run: |
+          micromamba install -c conda-forge pytest-split
+
       - name: Run full AMMR tests
         env:
           RLM_LICENSE_PASSWORD: ${{ secrets.LICENSE_PASSWORD }}
@@ -74,8 +79,8 @@ jobs:
 
     strategy:
       matrix:
-        test_group: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         ams_version: ["7.4", "7.5_Beta"]
+        test_group: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
     steps:
       - uses: actions/checkout@v3
@@ -84,6 +89,10 @@ jobs:
       
       - name: Set debug env var
         run: echo ${{ github.event.inputs.debug_config }} >> $GITHUB_ENV
+
+      - name: Ensure pytest-split is installed
+        run: |
+          micromamba install -n base -c conda-forge pytest-split
 
       - name: Run tests
         env:
