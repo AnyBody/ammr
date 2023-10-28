@@ -34,40 +34,50 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test_group: [1, 2, 3, 4, 5]
+        test_group: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
 
     env:
       # Triggers a warning at 20 deg
       ShortestPathMaxAngle: 0.3491 
-      ANYBODYCON: C:\Program Files\AnyBody Technology\AnyBody.7.5_Beta\AnyBodyCon.exe
 
-    runs-on: [self-hosted, Windows, AnyBody]
-
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: windows-latest
     
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         
-      - name: Download custom AnyBodyCon
+      - uses: anybody/setup-anybody@main
+        name: Install AnyBody
+        with:
+          anybody-version: "7.5.0"
+          anybody-version-suffix: "Beta"
+          anybody-version-build: "7"
+          python-environment: "minimal"
+
+      - name: Path AnyBody with custom version
         if: inputs.use-custom-anybodycon
         uses: ./.github/actions/custom-anybodycon
         with:
           custom-anybodycon: ${{ inputs.custom-anybodycon-name }}
           connection-string:  ${{ secrets.AZURE_CONN_STR }}
-
-      - name: Install micro mamba
-        uses: ./.github/actions/setup-micromamba
+          overwrite: true
+            
+      - name: Install pytest
+        uses: mamba-org/setup-micromamba@v1
         with:
           environment-file: Tests/test-environment.yml
-          environment-name: _ammr_test
+          init-shell: powershell
+          cache-environment: true
+  
 
-      - name: Run AMMR tests (${{ github.event.inputs.run-slow-tests == 'true' && 'slow' || 'fast' }} tests)
+      - name: Run AMMR tests
         run: |
-          ~\micromamba.exe shell hook -s powershell | Out-String | iex
-          micromamba activate _ammr_test
-          
           cd Tests
-          pytest -n auto --dist worksteal --splits 5 --group ${{ matrix.test_group }} --splitting-algorithm=least_duration --durations=10 --anybodycon="$Env:ANYBODYCON" `
-           ${{ github.event.inputs.run-slow-tests == 'true' && '--runslow' || '' }} `
-           ${{ github.event.inputs.custom-pytest-arg  || '' }}
+          pytest -n auto --dist worksteal `
+             --splits 20 --group ${{ matrix.test_group }} --splitting-algorithm=least_duration `
+             --durations=10 `
+             --runslow
+             ${{ github.event.inputs.custom-pytest-arg  || '' }}
+        env:
+          RLM_LICENSE: ${{ secrets.LICENSE_SERVER }}
+          RLM_LICENSE_PASSWORD: ${{ secrets.LICENSE_PASSWORD }}
   
