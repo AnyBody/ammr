@@ -26,19 +26,15 @@ jobs:
         test_group: [1, 2, 3, 4, 5]
 
     env:
-      # Triggers a warning at 20 deg muscles angles
+      # Triggers a warning at 20 deg muscles discretization angles
+      # I.e. wrapping on very small sharp corners
       ShortestPathMaxAngle: 0.3491
-
+      ANYBODY_SUPPRESS_DEPRECATION_MESSAGES: ${{ fromJSON('{"master-ammr-2.4.x":"On","master":"Off"}')[matrix.ammr_version] }}
+  
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ matrix.ammr_version }}
-
-      - name: Suppress deprecation warnings on older ammr
-        if: ${{ matrix.ammr_version == 'master-ammr-2.4.x' }}
-        run: |
-          write-host "ANYBODY_SUPPRESS_DEPRECATION_MESSAGES=On" | `
-            Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - uses: anybody/setup-anybody@main
         name: Install AnyBody
@@ -53,11 +49,6 @@ jobs:
           init-shell: powershell
           cache-environment: true
       
-      - name: Add pytest-splits for ammr 2.4
-        if: ${{ matrix.ammr_version == 'master-ammr-2.4.x' }}
-        run: |
-          micromamba install -c conda-forge pytest-split
-
       - name: Run full AMMR tests
         env:
           RLM_LICENSE_PASSWORD: ${{ secrets.LICENSE_PASSWORD }}
