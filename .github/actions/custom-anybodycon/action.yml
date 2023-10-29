@@ -11,6 +11,10 @@ inputs:
   connection-string:
     description: 'The connection string to the Azure Blob storage'
     required: true
+  overwrite:
+    description: 'Overwrite the AnyBodyCon version in the GitHub runner'
+    required: false
+    default: false
     
 runs:
   using: "composite"
@@ -29,13 +33,20 @@ runs:
         blob-name: ${{ inputs.custom-anybodycon }}
         download-path: ${{ runner.temp }}
       
-    - name: Overwrite AnyBodyCon
-      if: ${{ inputs.custom-anybodycon }}
+    - name: Update AnyBodyCon environment variable
+      if: ${{ ! inputs.overwrite }}
       shell: powershell
       run: |
         cp ${{ runner.temp }}\${{ inputs.custom-anybodycon }} "$(split-path $Env:ANYBODYCON -Parent)/AnyBodyConCustom.any"
         echo "ANYBODYCON=$(split-path $Env:ANYBODYCON -Parent)\AnyBodyConCustom.any" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
 
+    - name: Overwrite existing AnyBodyCon version
+      if: ${{ inputs.overwrite }}
+      shell: powershell
+      run: |
+        $anybodycon = (Get-ItemProperty -Path "Registry::HKEY_CLASSES_ROOT\AnyBody.AnyScript\shell\open\command" -Name "(default)")."(default)"
+        $anybodycon = $anybodycon.split('"')[2]
+        cp ${{ runner.temp }}\${{ inputs.custom-anybodycon }} "$anybodycon"
 
 
 
