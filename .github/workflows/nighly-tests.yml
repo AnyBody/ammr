@@ -3,8 +3,6 @@ name: Nightly Full AMMR tests
 on:
   schedule:
     - cron: 0 3 * * *
-      
-      
   workflow_dispatch: {}
 
 
@@ -14,71 +12,80 @@ concurrency:
 
 
 jobs:
-  test:
+  test-windows:
     if: github.repository_owner == 'anybody'
-    runs-on: [self-hosted, Windows, AnyBody]
+    runs-on: windows-latest
 
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - ams_version: "7.4"
-            ammr_version: "master-ammr-2.4.x"
-          - ams_version: "7.5_Beta"
-            ammr_version: "master-ammr-2.4.x"
-            suppress_deprecation_messages: "On"
-          - ams_version: "7.5_Beta"
-            ammr_version: "master"
+        ams_version: ["7.5_Beta"]
+        ammr_version: ["master-ammr-2.4.x", "master"]
+        test_group: [1, 2, 3, 4, 5]
 
     env:
-      # Triggers a warning at 20 deg muscles angles
+      # Triggers a warning at 20 deg muscles discretization angles
+      # I.e. wrapping on very small sharp corners
       ShortestPathMaxAngle: 0.3491
-      ANYBODYCON: C:\Program Files\AnyBody Technology\AnyBody.${{ matrix.ams_version }}\AnyBodyCon.exe
-      ANYBODY_SUPPRESS_DEPRECATION_MESSAGES: ${{ matrix.suppress_deprecation_messages }}
-
+      ANYBODY_SUPPRESS_DEPRECATION_MESSAGES: ${{ fromJSON('{"master-ammr-2.4.x":"On","master":"Off"}')[matrix.ammr_version] }}
+  
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ matrix.ammr_version }}
 
-      - name: Install micro mamba
-        uses: ./.github/actions/setup-micromamba
+      - uses: anybody/setup-anybody@main
+        name: Install AnyBody
+        with:
+          anybody-version: "7.5.0"
+          anybody-version-suffix: "Beta"
+
+      - name: Install pytest
+        uses: mamba-org/setup-micromamba@v1
         with:
           environment-file: Tests/test-environment.yml
-          environment-name: _ammr_test
-        
+          init-shell: powershell
+          cache-environment: true
+      
       - name: Run full AMMR tests
+        env:
+          RLM_LICENSE_PASSWORD: ${{ secrets.LICENSE_PASSWORD }}
+          RLM_LICENSE: ${{ secrets.LICENSE_SERVER }}
         run: |
-          ~\micromamba.exe shell hook -s powershell | Out-String | iex
-          micromamba activate _ammr_test
+            cd Tests
+            pytest -n auto --dist worksteal `
+              --splits 5 --group ${{ matrix.test_group }} --splitting-algorithm=least_duration `
+              --durations=20 `
+              --runslow
 
-          python -m pytest --runslow -n 4 --durations=20 --anybodycon="$Env:ANYBODYCON" Tests
-
+              
   test-linux:
-    runs-on: [self-hosted-linux]
+    if: github.repository_owner == 'anybody'
+    runs-on: ubuntu-latest
     container: ghcr.io/anybody/anybodycon-github-actions:${{ matrix.ams_version }}
     env:
       ANYBODY_SUPPRESS_DEPRECATION_MESSAGES: ${{ fromJSON('{"7.4":"Off","7.5_Beta":"On"}')[matrix.ams_version] }}
 
     strategy:
       matrix:
-        include:
-          - ams_version: "7.4"
-            ammr_version: "master-ammr-2.4.x"
-          - ams_version: "7.5_Beta"
-            ammr_version: "master"
-    
+        ams_version: ["7.4", "7.5_Beta"]
+        test_group: [1, 2, 3, 4, 5]
+
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
-          ref: ${{ matrix.ammr_version }}
+          ref: ${{ fromJSON('{"7.4":"master-ammr-2.4.x","7.5_Beta":"master"}')[matrix.ams_version] }}
       
-      - name: Set debug env var
+      - name: Set debug env vars
         run: echo ${{ github.event.inputs.debug_config }} >> $GITHUB_ENV
 
       - name: Run tests
-        run: pytest -n 2 Tests
         env:
           RLM_LICENSE_PASSWORD: ${{ secrets.LICENSE_PASSWORD }}
           RLM_LICENSE: ${{ secrets.LICENSE_SERVER }}
+        run: |
+            cd Tests
+            pytest -n auto \
+              --splits 5 --group ${{ matrix.test_group }} --splitting-algorithm=least_duration \
+              --runslow
       
