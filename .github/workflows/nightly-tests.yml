@@ -56,7 +56,16 @@ jobs:
             pytest -n auto --dist worksteal `
               --splits 5 --group ${{ matrix.test_group }} --splitting-algorithm=least_duration `
               --durations=20 `
+              --store-durations --clean-durations `
               --runslow
+      
+      - name: Upload partial durations
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-durations-${{ matrix.test_group }}
+          path: | 
+            Tests\.test_durations
+          retention-days: 1
 
               
   test-linux:
@@ -89,3 +98,44 @@ jobs:
               --splits 5 --group ${{ matrix.test_group }} --splitting-algorithm=least_duration \
               --runslow
       
+
+  combine-and-upload-timings:
+    runs-on: ubuntu-latest
+    needs: [test-windows, test-linux]
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Combine test-durations
+        run: |
+          import json, pathlib
+          data = {}
+          for file in pathlib.Path.cwd().glob(test-durations*/*):
+              data.update(json.loads(file.read_text()))
+          data = {k: v for k, v in sorted(data.items(), key=lambda x: x[1], reverse=True)}
+          
+          test_durations = pathlib.Path('Tests/.test_durations')
+          if True or set(data) != set(json.loads(test_durations.read_text())):
+              test_durations.write_text(json.dumps(data, indent=2))
+        shell: python
+
+      - name: Create updated durations PR
+        uses: peter-evans/create-pull-request@v5
+        with:
+          push-to-fork: anybody-bot/ammr
+          token: ${{ secrets.DURATIONS_TOKEN }}
+          branch: update-durations
+          delete-branch: true
+          commit-message: Update test durations
+          author: AnyBody Bot <149305714+anybody-bot@users.noreply.github.com>
+          committer: AnyBody Bot <149305714+anybody-bot@users.noreply.github.com>
+          title: 🤖 Update test durations
+          body: |
+            Aggregate recent test durations for each test and update the durations file.
+
+            [nightly-tests.yml]: ${{ github.server_url }}/${{ github.repository }}/blob/main/.github/workflows/nightly-tests.yml
+
+            This PR was created automatically by the [`nightly-tests.yml`][nightly-tests.yml] workflow.
