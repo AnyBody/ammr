@@ -1,6 +1,6 @@
 ---
 gallery_title: "Simple Full body model"
-gallery_image: "/Applications/images/Plug-in-gait_Main.jpg"
+gallery_image: "/Applications/images/Plug-in-gait_simple_fullbody.webp"
 ---
 
 (sphx_glr_auto_examples_Mocap_plot_Plug-in-gait_Simple_FullBody.py)=
@@ -9,7 +9,7 @@ gallery_image: "/Applications/images/Plug-in-gait_Main.jpg"
 
 
 ````{sidebar} **Example**
-<img src="/Applications/images/Plug-in-gait_Main.jpg" width="70%" align="center">
+<img src="/Applications/images/Plug-in-gait_simple_fullbody.webp" width="70%" align="center">
 ````
 
 

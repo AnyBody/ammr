@@ -1,6 +1,6 @@
 ---
 gallery_title: "Inertial MoCap (Xsens)"
-gallery_image: "/Applications/images/BVH.jpg"
+gallery_image: "/Applications/images/BVH.webp"
 ---
 
 (sphx_glr_auto_examples_Mocap_plot_BVH.py)=
@@ -8,7 +8,7 @@ gallery_image: "/Applications/images/BVH.jpg"
 # Inertial MoCap example
 
 ````{sidebar} **Example**
-<img src="/Applications/images/BVH.jpg" width="70%" align="center">
+<img src="/Applications/images/BVH.webp" width="70%" align="center">
 ````
 
 Example of a MoCap model using data from an inertial motion capture suit.

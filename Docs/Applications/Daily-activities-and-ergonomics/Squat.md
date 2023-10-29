@@ -1,6 +1,6 @@
 ---
 gallery_title: "Squat"
-gallery_image: "/Applications/images/Squat.jpg"
+gallery_image: "/Applications/images/Squat.webp"
 ---
 
 (sphx_glr_auto_examples_ADLs_and_ergonomics_plot_Squat.py)=
@@ -8,7 +8,7 @@ gallery_image: "/Applications/images/Squat.jpg"
 # Squat
 
 ````{sidebar} **Example**
-<img src="/Applications/images/Squat.jpg" width="70%" align="center">
+<img src="/Applications/images/Squat.webp" width="70%" align="center">
 
 ````
 

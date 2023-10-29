@@ -1,6 +1,6 @@
 ---
 gallery_title: "Standing Model"
-gallery_image: "/Applications/images/StandingModel.jpg"
+gallery_image: "/Applications/images/StandingModel.webp"
 ---
 
 (sphx_glr_auto_examples_ADLs_and_ergonomics_plot_StandingModel.py)=
@@ -8,7 +8,7 @@ gallery_image: "/Applications/images/StandingModel.jpg"
 # Standing Model
 
 ````{sidebar} **Example**
-<img src="/Applications/images/StandingModel.jpg" width="70%" align="center">
+<img src="/Applications/images/StandingModel.webp" width="70%" align="center">
 ````
 
 A full-body model that which uses a center of mass drivers to keep balance and Ground Reaction Force prediction for contact with the ground.

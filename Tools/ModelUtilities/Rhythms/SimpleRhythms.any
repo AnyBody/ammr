@@ -1,7 +1,13 @@
 #ifndef MODELUTILS_RHYTHMS_SIMPLERHYTHMS_ANY
 #define MODELUTILS_RHYTHMS_SIMPLERHYTHMS_ANY
 /*
-Collection of simple rhythm drivers
+---
+group: Rhythms
+topic: Linear
+descr: |
+  Collection of class templates for linear and bilinear rhythm drivers. 
+  These are for example used to create the spine rhythms in the AMMR.
+---
 
 To use these drivers import the file:
 #include "<ANYBODY_PATH_MODELUTILS>/Rhythms/SimpleRhythms.any"
@@ -11,14 +17,48 @@ See the individual classes for more information.
 */
 
 
-/// Creates a linear rhythm between the DOFs of measure
-/// 
-///
-#class_template RhytmDriverLinear(__CLASS__=AnyKinMotion, RELATIVE_TO_DOF=-1,  _REDEFINE_VARIABLES=Off){
+// Creates a linear rhythm between the degrees of freedom (DOF) of a kinematic measure. The rhythm is defined by 
+// a `RhythmCoefficients` vector which defines the relative movement of the DOFs.
+//
+// In the example below the rhythm constrains two DOFs of the arm to move in a 1:4 ratio.
+//
+// :::{rubric} Example
+// :::
+//
+// :::{code-block} AnyScriptDoc
+// RhythmDriverLinear Rhythm = {
+//    RhythmCoefficients = {0.2, 0.8};
+//    Measures.Input = {
+//        AnyJoint& ref1 = Main.HumanModel.BodyModel.Interface.Arm.Right.ShoulderElevation;
+//        AnyJoint& ref2 = Main.HumanModel.BodyModel.Interface.Arm.Right.GHElevation;
+//    };
+//:::
+//
+#class_template RhythmDriverLinear(__CLASS__=AnyKinMotion, RELATIVE_TO_DOF=1,  _REDEFINE_VARIABLES=Off){
+ 
+  // Arguments:
+  // ----------------------
+  //RhythmDriverLinear#RELATIVE_TO_DOF
+  // Specifies which kinematic input measure is used in the implementation of the rhythm. 
+  // By default (RELATIVE_TO_DOF=1) the first measure is used as the reference for the rest. 
+  // I.e. all other measures are linked to some ratio of the first measure in the underlying 
+  // matrix defining the rhythm. 
+  // It is also possible to set this value to -1, in which case the rhythm is implemented
+  // implicitly, i.e. all kinematic measures are linked together as in a chain. Note, that 
+  // implicit implementation prevents the any of the RhythmCoefficients to be zero.
 
+
+   // _REDREFINE_VARIABLES is a 'internal' flag used in the AMMR to allow
+   // the `RhythmCoefficients` to be declared when the class is used.
+   // Hence allowing the final user to still overwrite `RhythmCoefficients`
+   // in the application examples. 
    #if _REDEFINE_VARIABLES != On
-   // The class declares expected RhythmCoefficients variables
+
+   /// RhythmDriverLinear
+   /// The Coefficient which defines the relative weights of the 
+   /// kinematic measures in the Rhythm. The default value is a vector of ones.
    #var AnyVector RhythmCoefficients = ones(1,Measures.Input.nDim)[0];
+
    #endif
    
    
@@ -31,6 +71,10 @@ See the individual classes for more information.
    {
       AnyKinMeasureOrg Input = 
       {
+        //RhythmDriverLinear.Measures.Input
+        // A number of AnyKinMeasures that are used to define the rhythm
+        // AnyKinMeaure MyMeasure = <...>; (1..Inf)
+
         #var MeasureOrganizer = #default;
       };
    };
@@ -78,13 +122,14 @@ See the individual classes for more information.
  
  };
  
- 
 
+// Include wrapper template to call _RhythmDriverFunInterpol multiple times
+#include "<AMMR_TOOLS>/Lib/classtools/MultipleSubTemplates.any"
 
-#class_template RhytmDriverFunInterpol(IDX=0, ARG1=0.2, ARG2=0, ARG3=0, ARG4=0,
+// This helper class template used by the `RhythmDriverBiLinear` class 
+// to implement the interpolation function used in the rhythm.
+#class_template _RhythmDriverFunInterpol(IDX=0, ARG1=0.2, ARG2=0, ARG3=0, ARG4=0,
   __CLASS__= AnyFunInterpol) {
-    
-    
         
     AnyVector x_arr = linspace(ARG1/2, max({20*ARG1/2, 2*pi}), 100);
     Type=Bspline;
@@ -94,23 +139,58 @@ See the individual classes for more information.
           {0.0}, 
           .CoefficientsPos[IDX]* x_arr
         )};
- //   
-//   Type = Bspline;
-//   T = arrcat(flip(-1*...abs1), {0.0}, ...abs1);
-//   Data = {arrcat( ...RhythmWeightsNegative[IDX]*flip(-1*...abs1), {0.0}, ...RhythmWeights[IDX]*...abs1) };
 
 };
 
-/// Creates a two way rhythm between the DOFs
-#class_template RhytmDriverTwoWayLinear(__CLASS__=AnyKinEq, NDIM, RELATIVE_TO_DOF=-1, _REDEFINE_VARIABLES=Off){
-     
-   #if _REDEFINE_VARIABLES != On
+// Creates a bi-linear rhythm between a number of input kinematic measures where the
+// RhythmCoefficients can be different between the positive and negative values of
+// the input measures. The rhythm is similar to simple `RhythmDriverLinear` template 
+// but is defined by two sets of RhythmCoefficients. 
+// 
+// * `RhythmCoefficients`: for positive values of the input measures
+// * `RhythmCoefficientsNegative`: for negative values of the input measures
+// * `TransitionInterval`: The interval over which the transition between the two
+//   sets of RhythmCoefficients is performed.
+// 
+// The RhythmCoefficients are defined as a vector of coefficients for each
+// kinematic measure. The relative ratio between the coefficients defines the
+// rhythm. If the coefficients sum to 1, then the coefficients can be interpreted
+// as the relative fraction of the kinematic measures in the rhythm.
+#class_template RhythmDriverBiLinear(__CLASS__=AnyKinEq, NDIM, RELATIVE_TO_DOF=1, _REDEFINE_VARIABLES=Off){
+
+//RhythmDriverBiLinear#RELATIVE_TO_DOF
+// Specifies which kinematic input measure is used in the implementation of the rhythm. 
+// By default (RELATIVE_TO_DOF=1) the first measure is used as the reference for the rest. 
+// I.e. all other measures are linked to some ratio of the first measure in the underlying 
+// matrix defining the rhythm. 
+// It is also possible to set this value to -1, in which case the rhythm is implemented
+// implicitly, i.e. all kinematic measures are linked together as in a chain. Note, that 
+// implicit implementation prevents the any of the RhythmCoefficients to be zero.
+//
+//RhythmDriverBiLinear#NDIM
+// The number of kinematic measures used in the implementation of the rhythm. Due to 
+// the implementation it of this class template it is necessary to specify this value
+// explicitly.
+
+
+
+#if _REDEFINE_VARIABLES != On
+  
+   // RhythmDriverBiLinear
+   /// The coefficient which defines the relative weights of the 
+   /// kinematic measures in the Rhythm for positive inputs.
    #var AnyVector RhythmCoefficients;
-   #var AnyVector RhythmCoefficientsNegative = RhythmCoefficients;
+
+   // RhythmDriverBiLinear
+   /// The coefficient which defines the relative weights of the 
+   /// kinematic measures in the Rhythm for negative inputs.
+   #var AnyVector RhythmCoefficientsNegative;
    
-      
+   // RhythmDriverBiLinear
+   /// The interval over which the transition between the two
+   /// sets of RhythmCoefficients is performed.
    #var AnyVar TransitionInterval=0.1;
-   #endif   
+#endif   
    
    
    
@@ -161,6 +241,11 @@ See the individual classes for more information.
    AnyFolder Measures = {
       AnyKinMeasureOrg Input = 
       {
+        //RhythmDriverBiLinear.Measures.Input
+        // A number of AnyKinMeasures that are used to define the rhythm
+        // AnyKinMeasure MyMeasure = <...>; (1..Inf)
+
+
          #var MeasureOrganizer = #default;
       };
             
@@ -176,7 +261,7 @@ See the individual classes for more information.
         #if RELATIVE_TO_DOF != -1
         MultipleSubTemplates ParamFuns(
            NUM=NDIM-1,
-           CLASS_TEMPLATE = "RhytmDriverFunInterpol",
+           CLASS_TEMPLATE = "_RhythmDriverFunInterpol",
            NAME_PREFIX=Fun,
            ARG1 = ....TransitionInterval
          ) = {
@@ -188,7 +273,7 @@ See the individual classes for more information.
          #if RELATIVE_TO_DOF == -1
          MultipleSubTemplates ParamFuns(
             NUM=NDIM,
-            CLASS_TEMPLATE="RhytmDriverFunInterpol",
+            CLASS_TEMPLATE="_RhythmDriverFunInterpol",
             NAME_PREFIX=Fun,
             ARG1 = ....TransitionInterval
           ) = {

@@ -1,6 +1,6 @@
 ---
 gallery_title: "The Aalborg Mandible model"
-gallery_image: "/Applications/images/AalborgMandibleValidation.jpg"
+gallery_image: "/Applications/images/AalborgMandibleValidation.webp"
 ---
 
 (sphx_glr_auto_examples_Validation_plot_AalborgMandible.py)=
@@ -8,7 +8,7 @@ gallery_image: "/Applications/images/AalborgMandibleValidation.jpg"
 # The Aalborg Mandible model
 
 ````{sidebar} **Example**
-<img src="/Applications/images/AalborgMandibleValidation.jpg" width="70%" align="center">
+<img src="/Applications/images/AalborgMandibleValidation.webp" width="70%" align="center">
 ````
 
 

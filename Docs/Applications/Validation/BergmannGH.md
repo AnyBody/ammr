@@ -1,6 +1,6 @@
 ---
 gallery_title: "Bergmann GH"
-gallery_image: "/Applications/images/BergmannGH.jpg"
+gallery_image: "/Applications/images/BergmannGH.webp"
 ---
 
 (sphx_glr_auto_examples_Validation_plot_BergmannGH.py)=
@@ -8,7 +8,7 @@ gallery_image: "/Applications/images/BergmannGH.jpg"
 # Bergmann GH
 
 ````{sidebar} **Example**
-<img src="/Applications/images/BergmannGH.jpg" width="70%" align="center">
+<img src="/Applications/images/BergmannGH.webp" width="70%" align="center">
 ````
 
 

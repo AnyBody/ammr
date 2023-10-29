@@ -34,6 +34,7 @@ from datetime import datetime
 
 
 sys.path.insert(0, os.path.abspath("exts"))
+sys.path.insert(0, os.path.abspath("tools"))
 
 try:
     import pygments_anyscript
@@ -96,6 +97,7 @@ myst_enable_extensions = [
     "amsmath",
     "html_image",
     "substitution",
+    "attrs_inline",
 ]
 
 
@@ -443,6 +445,11 @@ for folder, section in gallery.items():
 # exec(class_template_gen.read_text())
 
 
+import generate_class_template_docs
+generate_class_template_docs.run_all()
+
+
+
 linkcheck_ignore = [
     r".*linkcheck_ignore",
     "https://doi.org/10.1115/1.4037100",  # asme.org prevents the linkcheck
@@ -452,6 +459,7 @@ linkcheck_ignore = [
     "https://doi.org/10.1080/10255842.2020.1851367",  # tandfonline.com prevents the linkcheck
     "https://dx.doi.org/10.1002/jor.20255",  # wiley.com prevents the linkcheck
     "https://doi.org/10.1016/j.clinbiomech.2006.10.003",  # clinbiomech.com prevents the linkcheck
+    "https://github.com/anybody/ammr",  # AMMR is not yet public
 ]
 
 linkcheck_allowed_redirects = {

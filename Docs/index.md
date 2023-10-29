@@ -136,17 +136,17 @@ migration
 
 Overview <body/models>
 bm_config/index
-Tools <tools/overview>
 ```
 
 
 ```{toctree}
 :caption: Tools
 :includehidden: true
-:maxdepth: 1
+:maxdepth: 0
 :hidden:
+:glob:
 
-class templates <tools/overview>
+tools/class-templates
 ```
 
 

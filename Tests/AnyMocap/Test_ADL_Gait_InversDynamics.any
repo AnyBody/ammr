@@ -1,0 +1,64 @@
+//import pytest
+//ignore_errors = [
+//  "'Set Value' operation on", "'GHRot'  :  Close to singular position",
+//  "Model contains redundant constraint",
+//]
+//fatal_warnings = True
+//pytest_markers=["slow"]
+//save_study=[
+//  "Main.Studies.InverseDynamicStudy",
+//]
+
+
+
+#include "../libdef.any"
+
+#path MOCAP_PATH_MAINFILEDIR "<ANYMOCAP_EXAMPLES>/ADL_Gait_[beta]/Subjects/2014001/2014001_C1_01"
+#path MOCAP_PATH_MAINFILE "<MOCAP_PATH_MAINFILEDIR>/Main.any"
+#define MOCAP_NAME_MAINFILEDIR "2014001_C1_01"
+
+//#define CREATE_IMAGE 1
+
+// Run test with fewer timesteps
+#define N_STEP 40
+
+
+#path TEMP_PATH "<ANYMOCAP_EXAMPLES>/ADL_Gait_[beta]/Output/"
+
+
+
+
+
+#include "<MOCAP_PATH_MAINFILE>"
+
+Main = 
+{  
+  
+  AnyOperationSequence  TestRunApplication = 
+  {
+    AnyOperation& LoadParameters =  Main.RunAnalysis.LoadParameters;
+    AnyOperation& InverseDynamics = Main.RunAnalysis.InverseDynamics; 
+  };
+
+  #ifndef CREATE_IMAGE
+    AnyOperation& RunTest = Main.TestRunApplication;
+  #else
+    #define _MODEL_UP_DIRECTION z
+    #include "../Cameras.any"
+    AnyOperationSequence CameraInitPos = 
+    {
+      AnyOperation& ref1 = Main.RunAnalysis.LoadParameters;
+      AnyOperation& ref2 = Main.RunAnalysis.MarkerTracking;
+      AnyOperationSetValue setTime =  {
+        AnyFloat t_custom  = 1.2;
+        Source = {&t_custom};
+        Target = {&Main.Studies.InverseDynamicStudy.tStart};
+      };
+      
+      AnyOperation& ref3 = Main.Studies.InverseDynamicStudy.InitialConditions;
+    };
+    LoadTimeCam.CameraLookAtPoint = {-0.6,0.6,1.0};
+    LoadTimeCam.CameraFieldOfView = DesignVar(2.0);
+    LoadTimeCam.CameraDirection  = {-1,0.5,0.3};
+  #endif    
+};

@@ -7,7 +7,7 @@
 
 :::{Warning} Care must be taken when porting existing MoCap models to the 
 new AMMR. Changes to the pelvic tilt, and changes to the foot anatomical
-frame can casuse MoCap markers on Pelvis and feet to have moved slightly.
+frame can cause MoCap markers on Pelvis and feet to have moved slightly.
 
 If migrating models from AMMR 2.4, be sure to check markers on
 pelvis and the foot segments.  The Y component may need to be adjusted to 
@@ -16,6 +16,10 @@ achieve same marker position and joint angle output.
 
 
 ### Fixed:
+* Fixed a couple of bugs in the {ref}`Seated Human model <example_seatedhuman>`:  
+  - Reactions for subtalar joint driver are switched off.
+  - GHDriverLeft was using velocity value from GHExternalRotation instead of GHAbduction.
+    This is now fixed.
 * The `Main.ModelSetup.CreateVideo` operation was missing in some of the MoCap
   examples. This has been fixed. If you have this problem update the
   `CreateVideo.any` file in your application. 
@@ -31,6 +35,8 @@ achieve same marker position and joint angle output.
   coordinate system using `BM_LEG_TRUNK_INTERFACE` setting.
 * Fixed a bug in the `AnatomicalFrame` of TLEM 2.2 foot and talus that caused the
   ARel to be constructed from unscaled landmarks.
+* Fixed small inaccuracy in the mass scaling of the shank. It did not account for the
+  mass of the patella segment which uses the same scaling coefficient as the shank.
 
 
 ### Added:
@@ -56,14 +62,25 @@ achieve same marker position and joint angle output.
 
 ### Changed:
 
+* Adjustments to pelvic tilt have changed position of MoCap markers on the
+  pelvis segment. This mostly affect markers with hardcoded positions.
+  Particularly PSIS markers furthest posterior from the origin between ASIS.
+  When migrating from AMMR 2.4 models without adjusting marker positions, PSIS
+  markers may move 2 cm lower.
+
+  - Most [non-MoCap model examples](#example-gallery)
+    has been updated to account for the new pelvic tilt value. Either by using the 
+    `AnatomicalFrameTrunk` reference frame  in the pelvic driver or by adjusting the 
+    Pelvis-Thorax Extension slightly.
+
 * The Twente Lower Extremity Model (TLEM) 2 leg model has several updates and is
   now designated as [TLEM 2.2](#TLEM2-v2.2).
 
   - Wrapping surfaces have been added to the Achilles tendon around the ankle in
-    the TLEM 2.2 leg model. This ensures an even ratio of moment arms between
+    the TLEM 2.2 leg model. Giving a more even ratio of moment arms between
     the soleus and gastrocnemius muscles. Hence, gastrocnemius is recruited
     less, especially during downhill walking and stair descent, solving the
-    tendency of the model to overpredict the knee contact forces at toe off.
+    tendency of the model to over-predict the knee contact forces at toe off.
     This is the first of a number of improvements to the leg model by Dr. Enrico
     De Pieri, who is working on a publication on improvements and validation of
     the TLEM 2 leg model. 
@@ -88,21 +105,16 @@ achieve same marker position and joint angle output.
       foot segment. For backwards compatibility, a pointer to the talus segment
       still exists outside the foot segment.
 
-* The implementation of the TLEM model has been split into two separates folders
-  `LegTLEM/` and `LegTLEM1/`. All references to TLEM 1 code have been removed in
-  the code implementing the TLEM 2 model. 
+  - The implementation of the TLEM model has been split into two separates folders
+    `LegTLEM/` and `LegTLEM1/`. All references to TLEM 1 code have been removed in
+    the code implementing the TLEM 2 model. 
 
-* The TLEM 1 model now triggers a deprecation warning suggesting to use TLEM 2.
+  - The TLEM 1 model now triggers a deprecation warning suggesting to use TLEM 2.
    
-* Adjustments to pelvic tilt have changed position of MoCap markers on the
-  pelvis segment. This mostly affect markers with hardcoded positions.
-  Particularly PSIS markers furthest posterior from the origin between ASIS.
-  When migrating from AMMR 2.4 models without adjusting marker positions, PSIS
-  markers may move 2 cm lower.
 
 * Scaling laws defined by `BM_SCALING` setting have been updated to calculate
   offsets between different scaling regions and apply them at load time. Scaling
-  remains same but users can now create scaling functions that account for
+  remains the same but users can now create scaling functions that account for
   offsets between regions with different scaling.
 
 * Glenoid reaction forces are now expressed in the coordinate system of glenoid
@@ -136,7 +148,7 @@ achieve same marker position and joint angle output.
   to the pelvis segment now use this frame. This aligns the neutral position of
   the model with the neutral position of the trunk dataset and results in more
   pelvic tilt in the neutral position, better reflecting reported values in
-  literature. Existing `PelvisSeg.AnatomicalFrame` defined by ASIS/PSIS bony
+  literature. Existing `PelvisSeg.AnatomicalFrame` defined by the ASIS and pubic bony
   landmarks remains unchanged.
 
 * Updated trend validation in ["Wilke Spine Pressure validation
@@ -190,6 +202,11 @@ achieve same marker position and joint angle output.
 * The `CameraClassTemplate.any` include file in model utilities have been renamed to
   `VideoLookAtCamera.any` to have the same name as the class template it
   contains. 
+
+**Removed:**
+- The template `DEFAULT_PARAMETER_FOLDER` has been removed. It is no longer needed 
+  since the same functionality is now provided by the `??=` operator. 
+
 
 ## AMMR 2.4.5-beta
 
