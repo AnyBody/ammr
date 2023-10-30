@@ -4,11 +4,18 @@ The Model Repository is the product of collaboration between AnyBody Technology,
 and many academic institutions and research projects.
 
 If you are interested in beta models/repositories you can get access to the
-development version of the AMMR. Development takes place in a semi-closed
-repository. The repository is closed to protect academic contributors who also
-often need to publish their models before release.
+development version of the AMMR on GitHub. Development happens on GitHub
+where you can follow the development and contribute to the models. All 
+contributions are welcome and greatly appreciated.
 
-However, access is given on request. Please \[submit an issue here\](<https://github.com/AnyBody/ammr-doc/issues>), to request access.
+If you find a bug or have comments to the code please report it on the 
+[AnyScript forum](https://forum.anyscript.org).
+
+If you have a fix or an improvement to the models we are happy to accept it. Code contributions and 
+fixes are submitted through [pull requests]() on GitHub. 
+
+Simply fork the repository on GitHub, edit your fork and [start a pull
+request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request) 
 
 You can also view other freely available models and resources hosted on [GitHub](https://github.com/anybody).
 
