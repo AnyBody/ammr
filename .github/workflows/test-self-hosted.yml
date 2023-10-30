@@ -1,0 +1,69 @@
+name: AMMR tests (self hosted)
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      use-custom-anybodycon:
+          type: boolean
+          description: 'Use a custom version of AnyBody from AMS build system.'
+          default: false
+      custom-anybodycon-name:
+          description: 'Name of the custom AnyBody version to use. (E.g. path on the I:\ drive)'
+          required: false
+          default: 'AnyBody.7.5-CI-master.AnyBody.7.5.x/AnyBodyCon.exe'
+      custom-pytest-arg:
+          description: 'Specify which test to run. E.g. `Tests/test_example.any`. Default is entire test suite.'
+          required: false
+          default: ''
+
+concurrency: 
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    if: github.event.pull_request.head.repo.full_name == 'anybody/ammr-internal'
+
+    strategy:
+      fail-fast: false
+      matrix:
+        test_group: [1, 2, 3, 4, 5]
+
+    env:
+      # Triggers a warning at 20 deg
+      ShortestPathMaxAngle: 0.3491
+      ANYBODYCON: C:\Program Files\AnyBody Technology\AnyBody.7.5_Beta\AnyBodyCon.exe
+ 
+
+    runs-on: [self-hosted, Windows, AnyBody]
+    
+    steps:
+      - uses: actions/checkout@v4
+        
+      - name: Patch with custom version
+        if: inputs.use-custom-anybodycon
+        uses: ./.github/actions/custom-anybodycon
+        with:
+          custom-anybodycon: ${{ inputs.custom-anybodycon-name }}
+          connection-string:  ${{ secrets.AZURE_CONN_STR }}
+
+
+      - name: Install micro mamba
+        uses: ./.github/actions/setup-micromamba
+        with:
+          environment-file: Tests/test-environment.yml
+          environment-name: _ammr_test  
+
+      - name: Run AMMR tests
+        run: |
+          ~\micromamba.exe shell hook -s powershell | Out-String | iex
+          micromamba activate _ammr_test
+          
+          cd Tests
+          pytest -n auto --dist worksteal `
+            --splits 5 --group ${{ matrix.test_group }} --splitting-algorithm=least_duration `
+            --durations=10 `
+            --anybodycon="$Env:ANYBODYCON" `
+            --runslow `
+          ${{ github.event.inputs.custom-pytest-arg  || '' }}
