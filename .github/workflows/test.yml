@@ -1,17 +1,11 @@
 name: AMMR tests
 
+
 on:
-  pull_request:
-    branches: [ master, master-ammr-2.5 ]
-    paths-ignore:
-      - 'Docs/**'
+  pull_request_target:
+
   workflow_dispatch:
     inputs:
-      run-slow-tests:
-        type: boolean
-        description: 'Run full tests (--runslow)'
-        required: false
-        default: false
       use-custom-anybodycon:
           type: boolean
           description: 'Use a custom version of AnyBody from AMS build system.'
@@ -31,6 +25,7 @@ concurrency:
 
 jobs:
   test:
+    if: contains(github.event.pull_request.labels.*.name, 'safe to test') || github.event.pull_request.head.repo.full_name == 'anybody/ammr'
     strategy:
       fail-fast: false
       matrix:
@@ -43,8 +38,11 @@ jobs:
     runs-on: windows-latest
     
     steps:
+
       - uses: actions/checkout@v4
-        
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
       - uses: anybody/setup-anybody@main
         name: Install AnyBody
         with:
@@ -78,4 +76,3 @@ jobs:
         env:
           RLM_LICENSE: ${{ secrets.LICENSE_SERVER }}
           RLM_LICENSE_PASSWORD: ${{ secrets.LICENSE_PASSWORD }}
-  
