@@ -439,6 +439,11 @@ for folder, section in gallery.items():
         with open(gallery_txt, "w", encoding="utf8") as fh:
             fh.write(content)
 
+# Run the python file "tools/generate_class_template_docs.py"
+# to generate the class template documentation
+# class_template_gen =Path("tools/generate_class_template_docs.py")
+# exec(class_template_gen.read_text())
+
 
 import generate_class_template_docs
 generate_class_template_docs.run_all()
