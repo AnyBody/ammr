@@ -1,7 +1,7 @@
 # Changelog
 
-% To minimize the risk of merge conflicts insert the your changes at a
-% random empty or make a new entry a random place in the bullet lists.
+% A nice version of the CHANGELOG is avaible here:
+%    https://anyscript.org/ammr-doc/beta/changelog.html
 
 ## AMMR beta
 
