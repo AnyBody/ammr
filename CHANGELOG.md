@@ -3,41 +3,79 @@
 % To minimize the risk of merge conflicts insert the your changes at a
 % random empty or make a new entry a random place in the bullet lists.
 
-## AMMR beta
+## AMMR 2.4.4
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.7764841.svg)](https://doi.org/10.5281/zenodo.7764841)
+
+This version of AMMR adds a number fixes and tweaks to the body models which
+improves robustness of various kinematic and recruitment solvers. 
+
+**Added:**
+
+* Added kinematic joint angle limits in MoCap models for elbow and wrist joints to prevent the kinematic solver from finding postures that are physiologically impossible, such as bending the elbow backwards. These limits are active where marker tracking solver would occasionally find a local minima with unphysiological posture.
+
+* Tables with body model configuration parameter in the AMMR documentation now contain links showing their options. For example, see the page on {doc}`Leg model parameter </bm_config/leg>`.
 
 **Fixed:**
-* The `Main.ModelSetup.CreateVideo` operation was missing in some of the
-  MoCap examples. This has been fixed. If you have this problem update the `CreateVideo.any` file in your application. 
-* Fixed wrapping problem with the posterior deltoid muscle in the 2 parameter shoulder calibration. 
+
+* Fixed an issue with wrist joint segment's load time position (start guess). This greatly improves kinematic robustness of all models with arms as it creates a 'universal-joint' mechanism for wrist movement.
+
+* Further fixes made to pectoralis wrapping segment's robustness by optimizing initial load time positions to ensure model kinematics can more easily solve.
+
+* Fixed missing `LoadParameters` operation in `LoadAndReplay` operation in MoCap examples.
+
+* Fixed a problem with oblique muscles introduced in AMMR 2.4. A weak residual force was added to Y rotation of buckle to eliminate this problem.
+
+* Corrected wrong order of nonlinear intervertebral disc stiffness polynomial coefficients (affects only those who used polynomial disc stiffness).
+
+* Corrected small asymmetry in function for nonlinear intervertebral disc stiffness in coronal plane (affects only those who used polynomial disc stiffness).
+
+
+(ammr-2.4-changelog)=
+## AMMR 2.4.3 (2023-01-27)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.7572879.svg)](https://doi.org/10.5281/zenodo.7572879)  [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.4.3-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-4-3-8899_x64/)
 
 
 **Added:**
 
-* Added a few utility helper class templates (`Template_OperationSaveValues`/`Template_OperationLoadValues`/`Template_OperationUpdateValues`) 
+* Added a few utility helper class templates
+  
+  - `Template_OperationSaveValues`
+  - `Template_OperationLoadValues` 
+  - `Template_OperationUpdateValues`
+
   to make it easier to do common class operations without manually having to create the operations with macros.
 
-  To create a operation which loads a file do: 
+  To create an operation which loads a file, do: 
 
   ```{code-block} AnyScriptDoc
   Template_OperationLoadValues LoadAnySetFile = {
      FileName= "MyFile.anyset";
   };
   ```
-* 
+* A more helpful error message is now printed when MoCap markers in the marker protocol are missing the C3D file.
 
 **Changed:**
 * The load-time position of the box in the {ref}`BVH_BoxLift model <sphx_glr_auto_examples_Mocap_plot_BVH_BoxLift.py>` is now 
-  calculated using the position of the hands. Also, `Main.ModelSetup.EnvironmentParameters.GravityDirection` defined in `box.any` file
-  is now calculated automatically from `Main.ModelSetup.LabSpecificData.Gravity` defined in `LabSpecificData.any` file. These changes should 
-  make the model more robust when dealing with different bvh files.
+  calculated using the position of the hands. Also, `Main.ModelSetup.EnvironmentParameters.GravityDirection` defined in the `box.any` file
+  is now calculated automatically from `Main.ModelSetup.LabSpecificData.Gravity` defined in the `LabSpecificData.any` file. These changes should 
+  make the model more robust when dealing with different BVH files.
 * It is no longer necessasry to supply the `MarkerName` argument in the CreateMarkerDriver template
   MoCap models. The argument can still be used if the marker name and the data entry in the c3d file 
   are different.
 * The references to muscle models in the joint muscles of the detailed hand have been renamed to avoid future naming conflicts.
+* The "via-points" for the Psoas Major muscle have been adjusted to ensure that the muscles can better act the role of stabilizing muscle for the lumbar spine.
 
-(ammr-2.4-changelog)=
+**Fixed:**
+* The `Main.ModelSetup.CreateVideo` operation was missing in some of the
+  MoCap examples. This has been fixed. If you have this problem please update the `CreateVideo.any` file in your application.
+* Fixed a wrapping problem with the posterior deltoid muscle in the two-parameter shoulder calibration. 
+* Fixed a bug in the LegPressMachine example that caused the model view to zoom to infinity. 
+* The robustness of muscle recruitment with the abdominal muscles (`buckle support`) was futher tweaked by increasing the 
+  the strength of the recruited reactions on the balance of the buckle segment.  
+
+
 ## AMMR 2.4.2 (2022-07-08)
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.6809697.svg)](https://doi.org/10.5281/zenodo.6809697)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.6809697.svg)](https://doi.org/10.5281/zenodo.6809697) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.4.2-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-4-2-8845_x64/)
 
 AMMR version 2.4.2 contains only a few minor changes and fixes compared to  version 2.4.1.
 
@@ -61,7 +99,8 @@ AMMR version 2.4.2 contains only a few minor changes and fixes compared to  vers
   
 
 ## AMMR 2.4.1 (2022-05-30)
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.6533249.svg)](https://doi.org/10.5281/zenodo.6533249)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.6533249.svg)](https://doi.org/10.5281/zenodo.6533249) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.4.1-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-4-1-8830_x64/)
+
 
 **New example models:**
 
@@ -77,6 +116,7 @@ AMMR version 2.4.2 contains only a few minor changes and fixes compared to  vers
   This bug was visible when using `#define BM_LEG_TRUNK_INTERFACE _MORPH_LEG_TO_TRUNK_`, (i.e. when using the trunk pelvis morphology with the TLEM2 model), which is not the default. 
 * Fixed missing calibration for the new latissimus dorsi elements introduced in AMMR 2.4. This fix also ensures that all
   latissimus dorsi elements are calibrated in the same arm posture.
+  
 
 **Changed:**
 
@@ -104,7 +144,7 @@ The `HumeroUlnarJoint` is the elbow flexion extension, and together `HumeroRadia
 
 
 ## AMMR 2.4 (2022-04-28)
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.6471999.svg)](https://doi.org/10.5281/zenodo.6471999)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.6471999.svg)](https://doi.org/10.5281/zenodo.6471999) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.4.0-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-4-0-8782_x64/)
 
 
 **New example models:**
@@ -221,7 +261,7 @@ The `HumeroUlnarJoint` is the elbow flexion extension, and together `HumeroRadia
 - Renamed all deprecated ligament class names. `AnyViaPointLigament`-> `AnyLigamentViaPoint`.
 
 ## AMMR 2.3.4 (2021-07-05)
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.5060249.svg)](https://doi.org/10.5281/zenodo.5060249)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.5060249.svg)](https://doi.org/10.5281/zenodo.5060249) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.3.4-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-3-4-8518_x64/)
 
 **Fixed:**
 
@@ -262,7 +302,7 @@ The `HumeroUlnarJoint` is the elbow flexion extension, and together `HumeroRadia
 
 ## AMMR 2.3.3 (2021-03-24)
 
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.4616316.svg)](https://doi.org/10.5281/zenodo.4616316)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.4616316.svg)](https://doi.org/10.5281/zenodo.4616316) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.3.3-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-3-3-8440_x64/)
 
 
 
@@ -287,7 +327,7 @@ The `HumeroUlnarJoint` is the elbow flexion extension, and together `HumeroRadia
 ## AMMR 2.3.2 (2021-01-21)
 
 
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.4305559.svg)](https://doi.org/10.5281/zenodo.4305559)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.4305559.svg)](https://doi.org/10.5281/zenodo.4305559) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.3.2-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-3-2-8354_x64/)
 
 
 
@@ -369,7 +409,7 @@ requested body height.
  
 ## AMMR 2.3.1 (2020-09-30)
 
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.4023956.svg)](https://doi.org/10.5281/zenodo.4023956)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.4023956.svg)](https://doi.org/10.5281/zenodo.4023956) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.3.1-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-3-1-8217_x64/)
 
 **Added:**
 
@@ -455,7 +495,7 @@ requested body height.
 
 ## AMMR 2.3 (2020-07-07)
 
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.3932764.svg)](https://doi.org/10.5281/zenodo.3932764)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.3932764.svg)](https://doi.org/10.5281/zenodo.3932764) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.3.0-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-3-0-8065_x64/)
 
 
 **Added:**
@@ -599,7 +639,7 @@ requested body height.
 
 ## AMMR 2.2.3 (2019-11-13)
 
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.3521521.svg)](https://doi.org/10.5281/zenodo.3521521)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.3521521.svg)](https://doi.org/10.5281/zenodo.3521521) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.2.3-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-2-3-7075_x64/)
 
 
 **Added:**
@@ -659,7 +699,7 @@ requested body height.
 
 ## AMMR 2.2.2 (2019-09-12)
 
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.3404750.svg)](https://doi.org/10.5281/zenodo.3404750)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.3404750.svg)](https://doi.org/10.5281/zenodo.3404750) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.2.2-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-2-2-7000_x64/)
 
 
 **Fixed:**
@@ -686,7 +726,7 @@ requested body height.
 
 ## AMMR 2.2.1 (2019-05-13)
 
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.2657673.svg)](https://doi.org/10.5281/zenodo.2657673)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.2657673.svg)](https://doi.org/10.5281/zenodo.2657673) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.2.1-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-2-1-6927_x64/)
 
 
 **Fixed:**
@@ -723,7 +763,7 @@ requested body height.
 
 ## AMMR 2.2 (2019-04-03)
 
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.1481635.svg)](https://doi.org/10.5281/zenodo.1481635)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.1481635.svg)](https://doi.org/10.5281/zenodo.1481635) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.2.0-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-2-0-6876_x64/)
 
 
 **Added:**
@@ -980,7 +1020,8 @@ requested body height.
 
 ## AMMR 2.1.1 (2018-06-12)
 
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.1287730.svg)](https://doi.org/10.5281/zenodo.1287730)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.1287730.svg)](https://doi.org/10.5281/zenodo.1287730) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.1.2-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-1-2-6044_x64/)
+
 
 The AMMR 2.1.1 version is a minor release of the AMMR with smaller changes and bugfixes.
 The AnyBody Managed Model Repository now has a DOI ([10.5281/zenodo.1250764](https://doi.org/10.5281/zenodo.1250764)).
@@ -1029,7 +1070,8 @@ This is handled by [Zenodo.org](https://zenodo.org/) (The European Open Science 
 
 ## AMMR 2.1.0 (2018-03-22)
 
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.1251276.svg)](https://doi.org/10.5281/zenodo.1251276)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.1251276.svg)](https://doi.org/10.5281/zenodo.1251276) 
+[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.1.1-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-1-1-6029_x64/)
 
 **Added:**
 
@@ -1179,6 +1221,7 @@ the driver values are updated.
 ## AMMR 2.0.0 (2017-11-29)
 
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.1251274.svg)](https://doi.org/10.5281/zenodo.1251274)
+[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.1.0-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-1-0-5957_x64/)
 
 ### Major changes:
 

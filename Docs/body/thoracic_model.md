@@ -9,32 +9,41 @@ The model is used in various research projects and access to the model can be gi
 [contact us](mailto:sales@anybodytech.com) if you are interested in this work.
 :::
 
-The thoracic spine model consists of the thoracic vertebral column and the
-ribcage, including individual ribs and sternum. It can be used as a single
-segment or as a collection of several segments interconnected by joints
-replicating physiological connection and load transfer mechanisms.
 
-```{raw} html
-<video width="70%" style="display:block; margin: 0 auto;" controls autoplay loop>
-    <source src="../_static/thoracic1.mp4" type="video/mp4">
-Your browser does not support the video tag.
-</video>
+```{image} _static/Detailed-thorax.png
 ```
+
+The thoracic spine model consists of the thoracic vertebral column and the
+ribcage, including individual ribs and a two part sternum. The many segments interconnected by joints
+replicates the physiological connection and load transfer mechanisms.
+
+
+
+## Kinematics and spine rhythms 
 
 The thoracic vertebral column contains 12 vertebrae with 3 DoF spherical joints
 in between each 2 vertebrae, connecting to the cervical spine through a
 spherical joint at T1C7 levels, and a spherical joint to the lumbar spine at
 T12L1 levels. Costovertebral and sternocostal joint are also represented through
-kinematic joints. The majority of the muscle fascicles are defined for the
-thoracic column and ribcage region.
+kinematic joints. All vertebra are linked with rhythm drivers to allow easy use. 
 
-```{rst-class} without-title
+
+```{raw} html
+<video width="100%" style="display:block; margin: 0 auto;" controls autoplay loop>
+    <source src="../_static/rhythms.mp4" type="video/mp4">
+Your browser does not support the video tag.
+</video>
 ```
 
-:::{warning}
-**Complex model:** The Thoracic model is a high complexity model and not recommended for
-beginners in musculoskeletal modeling and AnyBody.
-:::
+## Muscles configurations
+
+The majority of the muscle fascicles are defined for the thoracic column, ribcage region 
+as well as a diaphragm muscles to simulatate breathing and abdominal volume pressure. 
+
+
+```{image} _static/Detailed-thorax2.png
+```
+
 
 % .. image:: _static/thoracic.png
 
@@ -42,15 +51,28 @@ beginners in musculoskeletal modeling and AnyBody.
 
 ## Example Configuration
 
-The thoracic column and ribcage model comes with several different configurations:
+The detailed thoracic model can be controlled using the `BM_*` statements like the rest of the body models. 
+
 
 ```{code-block} AnyScriptDoc
 :emphasize-lines: 3
 
-#define BM_TRUNK_RIGCAGE_MODE _RIBCAGE_RIGID_
-#define BM_TRUNK_RIGCAGE_MODE _RIBCAGE_SEMI_RIGID_
-#define BM_TRUNK_RIGCAGE_MODE _RIBCAGE_POTENTIAL_ENERGY_
+  #define BM_TRUNK_THORACIC_MODEL _THORACIC_MODEL_FLEXIBLE_   //Enables the detailed thoracic model
+
+  #define BM_TRUNK_CAVITY_MODEL _CAVITY_MODEL_VOLUME_  //Enables the new abdominal volume model
+
 ```
+
+
+```{rst-class} without-title
+```
+
+:::{note}
+**Planned for AMMR 3.0:** The model is scheduled to be released together with AMMR 3.0. But a beta release will be available on GitHub when AMMR 2.5 comes out.
+Otherwise, for early access please [contact us](mailto:sales@anybodytech.com).
+:::
+
+
 
 % .. rst-class:: float-right
 
@@ -65,3 +87,5 @@ The thoracic column and ribcage model comes with several different configuration
 - Ignasiak, D., Dendorfer, S., Fergusson, S.J. (2016), "Thoracolumbar spine model with
   articulated ribcage for the prediction of dynamic spinal loading",
   Journal of Biomechanics, vol. 49 (6), pp. 959-966.
+- Shayestehpour, H., Toerholm, S.,  Lund, M.E., Rasmussen, J. (To be submitted), "A generic detailed multibody thoracic spine and ribcage model."
+  Journal of Multibody system dynamics.

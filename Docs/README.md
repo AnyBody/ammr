@@ -1,4 +1,4 @@
-[![Nightly Full AMMR tests](https://github.com/AnyBody/ammr/workflows/Nightly%20Full%20AMMR%20tests/badge.svg)](https://github.com/AnyBody/ammr/actions?query=workflow%3A%22Nightly+Full+AMMR+tests%22+branch%3Amaster) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1251306.svg)](https://doi.org/10.5281/zenodo.1251306)<img src="_static/AMMR_Logo2.png" align="right" />
+[![Nightly Full AMMR tests](https://github.com/AnyBody/ammr/workflows/Nightly%20Full%20AMMR%20tests/badge.svg)](https://github.com/AnyBody/ammr/actions?query=workflow%3A%22Nightly+Full+AMMR+tests%22+branch%3Amaster) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1250764.svg)](https://doi.org/10.5281/zenodo.1250764)<img src="_static/AMMR_Logo2.png" align="right" />
 
 # AnyBody Managed Model Repository 
 > An open library of musculoskeletal models
@@ -48,6 +48,13 @@ who also often need to publish their models before release. Access to the closed
 Github repository is given on request. 
 
 Please [submit an issue here](https://github.com/AnyBody/ammr-doc/issues), to request access. 
+
+
+## Repository structure
+
+![Visualization of the codebase](./diagram.svg)
+
+
 
 <!---
 A [public mirror](https://gihub.com/anybody/ammr) exists on GitHub in which the
