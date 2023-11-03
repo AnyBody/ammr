@@ -24,17 +24,20 @@ jobs:
   sphinx-build:
     runs-on: ubuntu-latest
     if: github.repository_owner == 'anybody' || github.event_name != 'push'
+
+    defaults:
+      run:
+        shell: bash -leo pipefail {0} {0}
   
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         
       - name: Install mamba
-        uses: mamba-org/provision-with-micromamba@main
+        uses: mamba-org/setup-micromamba@v1
         with:
           environment-file: Docs/environment.yaml
                             
       - name: Build Documentation
-        shell: bash -l {0}
         run: |
           set -e
           cd Docs
@@ -44,7 +47,6 @@ jobs:
           cp -rT Docs/_build/html public/beta
 
       - name: Link check
-        shell: bash -l {0}
         run: |
           set -e
           cd Docs
@@ -52,7 +54,6 @@ jobs:
           
       - name: Build last tagged version
         if: github.ref == 'refs/heads/master'
-        shell: bash -l {0}
         run: |
           git fetch --shallow-since=2020-07-07
           git checkout $(git describe --tags `git rev-list --tags=ammr* --max-count=1`);
@@ -63,9 +64,12 @@ jobs:
           make html
           cd ..
           cp -rT Docs/_build/html public
-                    
+
+      - uses: actions/upload-pages-artifact@v2
+        with: 
+          path: public
            
-      - name: Deploy 🚀
+      - name: Deploy-old-ammr-doc 🚀
         if: github.ref == 'refs/heads/master'
         uses: peaceiris/actions-gh-pages@v3
         with:
@@ -73,3 +77,20 @@ jobs:
           external_repository: AnyBody/ammr-doc
           publish_branch: gh-pages
           publish_dir: ./public
+
+  deploy:
+    needs: sphinx-build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write    
+      id-token: write 
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2 # or the latest "vX.X.X" version tag for this action
+          
