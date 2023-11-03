@@ -99,9 +99,8 @@ myst_enable_extensions = [
     "dollarmath",
     "amsmath",
     "html_image",
-    "substitution"
+    "substitution",
 ]
-
 
 
 sphinx_gallery_conf = {
@@ -129,8 +128,8 @@ templates_path = ["_templates"]
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
-source_suffix = ['.rst', '.md']
-#source_suffix = ".rst"
+source_suffix = [".rst", ".md"]
+# source_suffix = ".rst"
 
 # The master toctree document.
 master_doc = "contents"
@@ -149,7 +148,7 @@ language = "en"
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ["_build", "README.md", "Thumbs.db", ".DS_Store", "exts" ]
+exclude_patterns = ["_build", "README.md", "Thumbs.db", ".DS_Store", "exts"]
 
 # The name of the Pygments (syntax highlighting) style to use.
 highlight_language = "AnyScriptDoc"
@@ -168,12 +167,12 @@ ams_version_x = ams_version_short + ".x"
 ammr_version = os.environ.get("AMMR_VERSION", None)
 if ammr_version is None:
     AMMR_VERSION_RE = re.compile(r'.*AMMR_VERSION\s"(?P<version>.*)"')
-    with open('../AMMR.version.any') as fh:
+    with open("../AMMR.version.any") as fh:
         match = AMMR_VERSION_RE.search(fh.read())
         if match:
-            ammr_version =  match.groupdict()["version"]
+            ammr_version = match.groupdict()["version"]
         else:
-            raise Exception('Could not parse AMMR version')
+            raise Exception("Could not parse AMMR version")
 
 
 if not re.match("^\d\.\d\.\d", ammr_version):
@@ -181,7 +180,7 @@ if not re.match("^\d\.\d\.\d", ammr_version):
 
 ammr_version_short = ammr_version.rpartition(".")[0]
 
-#.. include:: /bm_config/Substitutions.txt
+# .. include:: /bm_config/Substitutions.txt
 
 rst_epilog = f"""
 
@@ -200,18 +199,17 @@ rst_epilog = f"""
 
 
 myst_substitutions = {
-  "AMS": "AnyBody Modeling System™",
-  "AMS_VERSION_X": ams_version_x,
-  "AMS_VERSION": ams_version_x,
-  "AMS_VERSION_SHORT": ams_version_short,
-  "AMMR_VERSION_SHORT": ams_version_short,
-  "AMMR_VERSION": ammr_version,
-  "CURRENT_YEAR": current_year,
-  "AMMR_DEMO_INST_DIR": f"`~/Documents/{ams_version_x}/AMMR.v{ammr_version}-Demo`",
-  "DOI": "[![DOI image](https://zenodo.org/badge/DOI/10.5281/zenodo.1250764.svg)](https://doi.org/10.5281/zenodo.1250764)",
-  "WHAT_IS_NEW": f"{{ref}}`What's new in AMMR {ammr_version} <whats-new>`",
+    "AMS": "AnyBody Modeling System™",
+    "AMS_VERSION_X": ams_version_x,
+    "AMS_VERSION": ams_version_x,
+    "AMS_VERSION_SHORT": ams_version_short,
+    "AMMR_VERSION_SHORT": ams_version_short,
+    "AMMR_VERSION": ammr_version,
+    "CURRENT_YEAR": current_year,
+    "AMMR_DEMO_INST_DIR": f"`~/Documents/{ams_version_x}/AMMR.v{ammr_version}-Demo`",
+    "DOI": "[![DOI image](https://zenodo.org/badge/DOI/10.5281/zenodo.1250764.svg)](https://doi.org/10.5281/zenodo.1250764)",
+    "WHAT_IS_NEW": f"{{ref}}`What's new in AMMR {ammr_version} <whats-new>`",
 }
-
 
 
 no_index = """
@@ -223,10 +221,6 @@ myst_html_meta = {}
 if tags.has("draft"):
     rst_epilog = rst_epilog + no_index
     myst_html_meta["robots"] = "noindex"
-
-
-
-
 
 
 # General information about the project.
@@ -400,9 +394,8 @@ else:
 # settings to control how the OpenGraph extension generates meta tags
 ogp_site_url = "https://anyscript.org/"
 ogp_site_name = "AMMR Documentation"
-ogp_image = "https://anyscript.org/ammr-doc/_static/AMMR_Logo.png"
-ogp_use_first_image = True # if not found defaults to 'ogp_image'
-
+ogp_image = "https://anyscript.org/ammr/_static/AMMR_Logo.png"
+ogp_use_first_image = True  # if not found defaults to 'ogp_image'
 
 
 def setup(app):

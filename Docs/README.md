@@ -14,10 +14,10 @@ System](https://www.anybodytech.com/software/ams/).
 
 The AnyBody Managed Model Repository consists of two parts:
 
-* [Body Models](https://anyscript.org/ammr-doc/body/models.html): The human body
+* [Body Models](https://anyscript.org/ammr/body/models.html): The human body
   models which can be customized and scaled to build a specific musculoskeletal
   model.
-* [Application examples](https://anyscript.org/ammr-doc/auto_examples/index.html):
+* [Application examples](https://anyscript.org/ammr/auto_examples/index.html):
   in which the body models are utilized in specific applications (from everyday
   activities, like pushing the acceleration or brake pedals of a car, to
   workplace-specific scenarios).
@@ -37,7 +37,7 @@ also include documentation are distributed with the [AnyBody Modeling
 System](https://www.anybodytech.com/software/anybodymodelingsystem/), or available with a DOI from
 [zendo.org/communities/anybody](https://zenodo.org/communities/anybody/). 
 
-Please see the [AMMR documentation](https://anyscript.org/ammr-doc/beta) for more
+Please see the [AMMR documentation](https://anyscript.org/ammr/beta) for more
 information on getting started using the AMMR.
 
 ## Contributing
@@ -47,7 +47,7 @@ Github](https://github.com/anybody/ammr) to protect academic contributors
 who also often need to publish their models before release. Access to the closed
 Github repository is given on request. 
 
-Please [submit an issue here](https://github.com/AnyBody/ammr-doc/issues), to request access. 
+Please [submit an issue here](https://github.com/AnyBody/ammr/issues), to request access. 
 
 
 ## Repository structure
