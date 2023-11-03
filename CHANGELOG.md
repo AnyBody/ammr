@@ -1,7 +1,7 @@
 # Changelog
 
 % A nice version of the CHANGELOG is avaible here:
-%    https://anyscript.org/ammr-doc/beta/changelog.html
+%    https://anyscript.org/ammr/beta/changelog.html
 
 ## AMMR beta
 

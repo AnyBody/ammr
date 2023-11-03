@@ -404,7 +404,7 @@ else:
 # settings to control how the OpenGraph extension generates meta tags
 ogp_site_url = "https://anyscript.org/"
 ogp_site_name = "AMMR Documentation"
-ogp_image = "https://anyscript.org/ammr-doc/_static/AMMR_Logo.png"
+ogp_image = "https://anyscript.org/ammr/_static/AMMR_Logo.png"
 ogp_use_first_image = True  # if not found defaults to 'ogp_image'
 
 
