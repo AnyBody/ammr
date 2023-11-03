@@ -1,10 +1,10 @@
-[![Nightly Full AMMR tests](https://github.com/AnyBody/ammr/workflows/Nightly%20Full%20AMMR%20tests/badge.svg)](https://github.com/AnyBody/ammr/actions?query=workflow%3A%22Nightly+Full+AMMR+tests%22+branch%3Amaster) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1250764.svg)](https://doi.org/10.5281/zenodo.1250764)<img src="_static/AMMR_Logo2.png" align="right" />
+[![Nightly Full AMMR tests](https://github.com/AnyBody/ammr/workflows/Tests/badge.svg)](https://github.com/AnyBody/ammr/actions?query=workflow%3A%22Tests%22+branch%3Amaster) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1250764.svg)](https://doi.org/10.5281/zenodo.1250764)<img src="_static/AMMR_Logo2.png" align="right" /> [![View - Documentation](https://img.shields.io/badge/View-Documentation-2ea44f)](https://anyscript.org/ammr-doc/beta/)
 
 # AnyBody Managed Model Repository 
 > An open library of musculoskeletal models
 
 The AnyBody Model Repository (AMMR), is an open library of musculoskeletal
-models and examples ready to be used with the [AnyBody Modeling
+models and examples for the [AnyBody Modeling
 System](https://www.anybodytech.com/software/ams/).
 
 > [!IMPORTANT]
@@ -21,9 +21,8 @@ The AnyBody Managed Model Repository consists of two parts:
   models which can be customized and scaled to build a specific musculoskeletal
   model.
 * [Application examples](https://anyscript.org/ammr-doc/auto_examples/index.html):
-  in which the body models are utilized in specific applications (from everyday
-  activities, like pushing the acceleration or brake pedals of a car, to
-  workplace-specific scenarios).
+  where body models are used in specific applications (from everyday
+  activities with MoCap, othopaedics simulations, to ergonomic workcenarios).
 
 The models are developed in research projects at academic institutions or by
 [AnyBody Technology](https://www.anybodytech.com) in collaboration with academic
