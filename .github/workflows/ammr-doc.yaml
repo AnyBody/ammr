@@ -21,7 +21,7 @@ concurrency:
 
 
 jobs:
-  sphinx-build:
+  build:
     runs-on: ubuntu-latest
     if: github.repository_owner == 'anybody' || github.event_name != 'push'
 
@@ -50,15 +50,15 @@ jobs:
         run: |
           set -e
           cd Docs
-          make linkcheck
+          make linkcheck -q
           
       - name: Build last tagged version
         if: github.ref == 'refs/heads/master'
         run: |
           git fetch --shallow-since=2020-07-07
           git checkout $(git describe --tags `git rev-list --tags=ammr* --max-count=1`);
-          micromamba create -n ammr-doc-old -y -f Docs/environment.yaml
-          micromamba activate ammr-doc-old
+          micromamba create -n ammr-tagged -y -f Docs/environment.yaml
+          micromamba activate ammr-tagged
           cd Docs
           make clean
           make html
@@ -69,17 +69,10 @@ jobs:
         with: 
           path: public
            
-      - name: Deploy-old-ammr-doc 🚀
-        if: github.ref == 'refs/heads/master'
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
-          external_repository: AnyBody/ammr-doc
-          publish_branch: gh-pages
-          publish_dir: ./public
 
   deploy:
-    needs: sphinx-build
+    needs: build
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     permissions:
       pages: write    
@@ -92,5 +85,5 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v2 # or the latest "vX.X.X" version tag for this action
+        uses: actions/deploy-pages@v2
           
