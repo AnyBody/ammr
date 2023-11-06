@@ -33,7 +33,7 @@ All contributions are welcome and greatly appreciated. If you find a bug or have
 comments to the code please report it on the [AnyScript forum](https://forum.anyscript.org).
 
 If you have a fix or an improvement to the models we are happy to accept it. Code contributions and 
-fixes are submitted through [pull requests]() on GitHub. 
+fixes are submitted on GitHub. 
 
 Simply fork this repository, editor your fork and [start a pull
 request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request) 

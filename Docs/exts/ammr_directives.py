@@ -392,3 +392,9 @@ def setup(app):
     # this lets us do :ammr:git:`<file_path>` and link to the file on github
     app.add_role_to_domain("ammr", "git", make_git_link)
 
+    return {
+        'parallel_read_safe': True,
+        'parallel_write_safe': True,
+    }
+
+
