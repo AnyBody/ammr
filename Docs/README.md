@@ -1,4 +1,4 @@
-[![Nightly Full AMMR tests](https://github.com/AnyBody/ammr/workflows/Tests/badge.svg)](https://github.com/AnyBody/ammr/actions?query=workflow%3A%22Tests%22+branch%3Amaster) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1250764.svg)](https://doi.org/10.5281/zenodo.1250764)<img src="_static/AMMR_Logo2.png" align="right" /> [![View - Documentation](https://img.shields.io/badge/View-Documentation-2ea44f)](https://anyscript.org/ammr/beta/)
+[![Tests](https://github.com/AnyBody/ammr/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/AnyBody/ammr/actions/workflows/test.yml) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1250764.svg)](https://doi.org/10.5281/zenodo.1250764)<img src="_static/AMMR_Logo2.png" align="right" /> [![View - Documentation](https://img.shields.io/badge/View-Documentation-2ea44f)](https://anyscript.org/ammr-doc/beta/)
 
 # AnyBody Managed Model Repository 
 > An open library of musculoskeletal models
@@ -9,7 +9,7 @@ System](https://www.anybodytech.com/software/ams/).
 
 > [!IMPORTANT]
 An AnyBody license with active maintenance is required to use the models from GitHub. 
-Please see the [beta program](https://forum.anyscript.org/t/become-a-beta-tester/5056/6). 
+Please see the [beta program](https://forum.anyscript.org/t/become-a-beta-tester/5056/6), or request a [trial license ](https://www.anybodytech.com/contact/)
 
 <p align="center">
   <img src = "https://github.com/AnyBody/ammr/blob/master/Docs/_static/ammr_bodyparts.png" width=350>

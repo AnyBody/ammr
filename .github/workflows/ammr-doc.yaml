@@ -5,14 +5,8 @@ on:
   push:
      branches: [ master ]
      tags: ['*']
-     paths:
-       - 'Docs/**'
-       - 'CHANGELOG.md'
   pull_request:
      branches: [ master ]
-     paths:
-      - 'Docs/**'
-      - 'CHANGELOG.md'
   workflow_dispatch:
 
 concurrency: 
@@ -21,9 +15,9 @@ concurrency:
 
 
 jobs:
-  sphinx-build:
+  build:
     runs-on: ubuntu-latest
-    if: github.repository_owner == 'anybody' || github.event_name != 'push'
+    if: github.repository == 'anybody/ammr' || github.event_name != 'push'
 
     defaults:
       run:
@@ -41,7 +35,7 @@ jobs:
         run: |
           set -e
           cd Docs
-          make html-dev
+          sphinx-build -M html . _build -W --keep-going -a -t draft
           cd ..
           mkdir -p public/beta
           cp -rT Docs/_build/html public/beta
@@ -50,18 +44,18 @@ jobs:
         run: |
           set -e
           cd Docs
-          make linkcheck
+          sphinx-build -M linkcheck . _build -W --keep-going -a -q 
           
       - name: Build last tagged version
         if: github.ref == 'refs/heads/master'
         run: |
           git fetch --shallow-since=2020-07-07
           git checkout $(git describe --tags `git rev-list --tags=ammr* --max-count=1`);
-          micromamba create -n ammr-official -y -f Docs/environment.yaml
-          micromamba activate ammr-official
+          micromamba create -n ammr-tagged -y -f Docs/environment.yaml
+          micromamba activate ammr-tagged
           cd Docs
           make clean
-          make html
+          sphinx-build -M html . _build -a
           cd ..
           cp -rT Docs/_build/html public
 
@@ -70,9 +64,9 @@ jobs:
           path: public
            
 
-
   deploy:
-    needs: sphinx-build
+    needs: build
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     permissions:
       pages: write    
@@ -85,5 +79,5 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v2 # or the latest "vX.X.X" version tag for this action
+        uses: actions/deploy-pages@v2
           
