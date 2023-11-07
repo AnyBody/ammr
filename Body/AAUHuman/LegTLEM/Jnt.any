@@ -30,12 +30,78 @@ AnyRevoluteJoint SubTalar = {
 #endif
 
 #if (TLEM_JOINT_TYPE_KNEE != _JOINT_TYPE_USERDEFINED_)
+
+#if TLEM_JOINT_TYPE_KNEE == _JOINT_TYPE_SCREW_HOME_
+
+AnyKinMeasureOrg Knee = 
+{
+  AnyKinLinear Linear = {
+    AnyRefFrame &ThighNode = ...Seg.Thigh.KneeJointMedial;
+    AnyRefFrame &ShankNode = ...Seg.Shank.KneeJointMedial;
+  };
+  AnyKinRotational Orientation = {
+    AnyRefFrame &ThighNode = ...Seg.Thigh.KneeJoint;
+    AnyRefFrame &ShankNode = ...Seg.Shank.KneeJoint;
+    Type = RotAxesAngles;
+    Axis1=z; Axis2=x; Axis3=y;
+  };
+  MeasureOrganizer = {3}; // Knee Flexion DOF
+  AnyKinEq Constraints = {
+     // Constraints are applied at the center of the knee
+     AnyKinLinear& LinearCenter = .Linear;
+//     AnyKinLinear LinearCenter = {
+//       AnyRefFrame &ThighNode = ....Seg.Thigh.KneeJoint;
+//       AnyRefFrame &ShankNode = ....Seg.Shank.KneeJoint;
+//     };
+     AnyKinRotational& Orientation = .Orientation;
+     AnyKinMeasure& ScrewHomeGearing = .ScrewHomeRhythm; 
+     // 3 is Knee flexion which is free. 5 is old internal rotation, which is 
+     // replaced by the reaction on the screw-home gearing (6).
+     MeasureOrganizer = {0,1,2,4,6};
+   };
+ 
+   AnyKinMeasureLinComb ScrewHomeRhythm = 
+   {
+      AnyFolder Measures = {
+        AnyKinMeasureOrg KneeFlexion = {
+          AnyKinMeasure& ref = ...Orientation;
+          MeasureOrganizer = {0};
+        };
+        AnyKinMeasureOrg KneeInternalRotation = {
+          AnyKinMeasure& ref = ...Orientation;
+          MeasureOrganizer = {2};
+        };
+      };
+
+      AnyVar Screw = Measures.KneeInternalRotation.Pos[0]*180/pi;
+      AnyFunInterpol Gearing = {
+        Type = Bspline;
+        T = flip(-1*{-20, -5,5, 10, 20, 30, 45, 90, 110, 120, 180}*pi/180);
+        Data = {flip({0.0, 0.0, -1.26, -2.52, -3.15, -3.78, -5.03, -13.75, -18.77, -20.03, -20.03})}*pi/180;
+      };
+
+      AnyKinMeasureFunComb1 Rhythm = {
+        AnyKinMeasure& ref = .Measures.KneeFlexion;
+        Functions = {&.Gearing};
+      };
+        
+      AnyKinMeasure& Ref = Measures.KneeInternalRotation;
+      OutDim = 1;
+      Coef = {{1, 1}};
+      Const = {0.0};
+   };
+
+};
+
+
+#else
 AnyRevoluteJoint Knee = {
   Axis = z;
   AnyRefNode &ThighNode = ..Seg.Thigh.KneeJoint;
   AnyRefNode &ShankNode = ..Seg.Shank.KneeJoint;
-  //AnyDrawStdJoint Knee = {  };
-}; // End of knee
+};
+
+#endif
 #endif
 
 #if (TLEM_JOINT_TYPE_PATELLOFEMORAL != _JOINT_TYPE_USERDEFINED_)
