@@ -317,6 +317,24 @@ Parameter to define muscle behavior of the right leg
 ::::
 
 
+::::{dropdown} `BM_LEG_KNEE_SCREWHOME_RHYTHM`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_LEG_KNEE_SCREWHOME_RHYTHM
+
+Parameter to define the rhythm linking knee flexion to internal rotaiton of the knee
+
+:Default: OFF
+:Example: `#define BM_LEG_KNEE_SCREWHOME_RHYTHM OFF`
+:Options:
+  - {any}`OFF` -> Switch OFF
+  - {any}`ON` -> Switch ON
+
+```
+::::
+
+
 ::::{dropdown} `BM_LEG_DATASET`
 :animate: fade-in-slide-down
 :margin: 0 0 3 3

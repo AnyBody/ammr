@@ -512,18 +512,6 @@ Joint definition based on bony landmarks. This will create a joint which resembl
 
 
 
-::::{dropdown} `_JOINT_TYPE_SCREW_HOME_`
-:animate: fade-in-slide-down
-:margin: 0 0 2 2
-
-:::{ammr:bm_constant} _JOINT_TYPE_SCREW_HOME_
-:value: 3
-Knee joint definition with the screw-home mechanism implemented as rhythm between knee flexion and tibial axial rotation.
-:::
-::::
-
-
-
 ::::{dropdown} `_CALIBRATION_TYPE_1PAR_`
 :animate: fade-in-slide-down
 :margin: 0 0 2 2
