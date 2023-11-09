@@ -126,6 +126,42 @@ Switch to use leg model: "Leg"
 
 
 
+::::{dropdown} `_TIBIA_KNEE_AXIS_STRAIGHT_PATELLA_TENDON_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _TIBIA_KNEE_AXIS_STRAIGHT_PATELLA_TENDON_
+:value: 0
+Tibia knee axis with a correction to achive a straight patella tendon during knee flexion.
+:::
+::::
+
+
+
+::::{dropdown} `_TIBIA_KNEE_AXIS_UNLOADED_CT_SCAN_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _TIBIA_KNEE_AXIS_UNLOADED_CT_SCAN_
+:value: 1
+This config is similart to AMMR 2.4. It gives a tibia knee axis which results in extended knee posture identical to the CT scan of the cadaver specimen (with somewhat external rotation of the tibia)
+:::
+::::
+
+
+
+::::{dropdown} `_TIBIA_KNEE_AXIS_SCREWHOME_RHYTHM_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _TIBIA_KNEE_AXIS_SCREWHOME_RHYTHM_
+:value: 2
+Experimental setting which adds a rhythm between knee-flexion and tibia internal rotation at the knee. This adds a ~20 deg internal rotation of the tibia at 120 deg knee flexion.
+:::
+::::
+
+
+
 ::::{dropdown} `_FOOT_MODEL_DEFAULT_`
 :animate: fade-in-slide-down
 :margin: 0 0 2 2

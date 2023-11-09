@@ -317,19 +317,20 @@ Parameter to define muscle behavior of the right leg
 ::::
 
 
-::::{dropdown} `BM_LEG_KNEE_SCREWHOME_RHYTHM`
+::::{dropdown} `BM_LEG_TIBIA_KNEE_AXIS`
 :animate: fade-in-slide-down
 :margin: 0 0 3 3
 
-```{ammr:bm_statement} BM_LEG_KNEE_SCREWHOME_RHYTHM
+```{ammr:bm_statement} BM_LEG_TIBIA_KNEE_AXIS
 
-Parameter to define the rhythm linking knee flexion to internal rotaiton of the knee
+Parameter control different options for the tibia knee axis implementation
 
 :Default: OFF
-:Example: `#define BM_LEG_KNEE_SCREWHOME_RHYTHM OFF`
+:Example: `#define BM_LEG_TIBIA_KNEE_AXIS OFF`
 :Options:
-  - {any}`OFF` -> Switch OFF
-  - {any}`ON` -> Switch ON
+  - {any}`_TIBIA_KNEE_AXIS_STRAIGHT_PATELLA_TENDON_` -> Tibia knee axis with a correction to achive a straight patella tendon during knee flexion.
+  - {any}`_TIBIA_KNEE_AXIS_UNLOADED_CT_SCAN_` -> This config is similart to AMMR 2.4. It gives a tibia knee axis which results in extended knee posture identical to the CT scan of the cadaver specimen (with somewhat external rotation of the tibia)
+  - {any}`_TIBIA_KNEE_AXIS_SCREWHOME_RHYTHM_` -> Experimental setting which adds a rhythm between knee-flexion and tibia internal rotation at the knee. This adds a ~20 deg internal rotation of the tibia at 120 deg knee flexion.
 
 ```
 ::::
