@@ -393,7 +393,7 @@ if tags.has("offline"):
 else:
     if tags.has("draft"):
         intersphinx_mapping["tutorials"] = (
-            "https://anyscript.org/tutorials/dev/",
+            "https://anyscript.org/tutorials/beta/",
             None,
         )
     else:
