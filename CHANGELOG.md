@@ -1,7 +1,7 @@
 # Changelog
 
 % A nice version of the CHANGELOG is avaible here:
-%    https://anyscript.org/ammr-doc/beta/changelog.html
+%    https://anyscript.org/ammr/beta/changelog.html
 
 ## AMMR beta
 
@@ -61,6 +61,11 @@ achieve same marker position and joint angle output.
   C3D file.
 
 ### Changed:
+
+* The lumbar joint reaction force (L5Sacrum, L4L5, L3L4, L2L3, L1L2, and T12L1)
+  are now expressed in new reference nodes that are aligned with the vertebral body.
+  These new reference nodes are created inside the lumbar joint nodes of the proximal
+  lumbar segment.
 
 * Adjustments to pelvic tilt have changed position of MoCap markers on the
   pelvis segment. This mostly affect markers with hardcoded positions.

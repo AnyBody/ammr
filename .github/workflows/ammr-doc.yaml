@@ -5,14 +5,8 @@ on:
   push:
      branches: [ master ]
      tags: ['*']
-     paths:
-       - 'Docs/**'
-       - 'CHANGELOG.md'
   pull_request:
      branches: [ master ]
-     paths:
-      - 'Docs/**'
-      - 'CHANGELOG.md'
   workflow_dispatch:
 
 concurrency: 
@@ -21,55 +15,69 @@ concurrency:
 
 
 jobs:
-  sphinx-build:
+  build:
     runs-on: ubuntu-latest
-    if: github.repository_owner == 'anybody' || github.event_name != 'push'
+    if: github.repository == 'anybody/ammr' || github.event_name != 'push'
+
+    defaults:
+      run:
+        shell: bash -leo pipefail {0} {0}
   
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         
       - name: Install mamba
-        uses: mamba-org/provision-with-micromamba@main
+        uses: mamba-org/setup-micromamba@v1
         with:
           environment-file: Docs/environment.yaml
                             
       - name: Build Documentation
-        shell: bash -l {0}
         run: |
           set -e
           cd Docs
-          make html-dev
+          sphinx-build -M html . _build -W --keep-going -a -t draft
           cd ..
           mkdir -p public/beta
           cp -rT Docs/_build/html public/beta
 
       - name: Link check
-        shell: bash -l {0}
         run: |
           set -e
           cd Docs
-          make linkcheck
+          sphinx-build -M linkcheck . _build -W --keep-going -a -q 
           
       - name: Build last tagged version
         if: github.ref == 'refs/heads/master'
-        shell: bash -l {0}
         run: |
           git fetch --shallow-since=2020-07-07
           git checkout $(git describe --tags `git rev-list --tags=ammr* --max-count=1`);
-          micromamba create -n ammr-doc-old -y -f Docs/environment.yaml
-          micromamba activate ammr-doc-old
+          micromamba create -n ammr-tagged -y -f Docs/environment.yaml
+          micromamba activate ammr-tagged
           cd Docs
           make clean
-          make html
+          sphinx-build -M html . _build -a
           cd ..
           cp -rT Docs/_build/html public
-                    
+
+      - uses: actions/upload-pages-artifact@v2
+        with: 
+          path: public
            
-      - name: Deploy 🚀
-        if: github.ref == 'refs/heads/master'
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
-          external_repository: AnyBody/ammr-doc
-          publish_branch: gh-pages
-          publish_dir: ./public
+
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write    
+      id-token: write 
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
+          

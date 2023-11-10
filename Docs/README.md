@@ -1,15 +1,15 @@
-[![Nightly Full AMMR tests](https://github.com/AnyBody/ammr/workflows/Nightly%20Full%20AMMR%20tests/badge.svg)](https://github.com/AnyBody/ammr/actions?query=workflow%3A%22Nightly+Full+AMMR+tests%22+branch%3Amaster) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1250764.svg)](https://doi.org/10.5281/zenodo.1250764)<img src="_static/AMMR_Logo2.png" align="right" />
+[![Tests](https://github.com/AnyBody/ammr/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/AnyBody/ammr/actions/workflows/test.yml) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1250764.svg)](https://doi.org/10.5281/zenodo.1250764)<img src="_static/AMMR_Logo2.png" align="right" /> [![View - Documentation](https://img.shields.io/badge/View-Documentation-2ea44f)](https://anyscript.org/ammr-doc/beta/)
 
 # AnyBody Managed Model Repository 
 > An open library of musculoskeletal models
 
 The AnyBody Model Repository (AMMR), is an open library of musculoskeletal
-models and examples ready to be used with the [AnyBody Modeling
+models and examples for the [AnyBody Modeling
 System](https://www.anybodytech.com/software/ams/).
 
 > [!IMPORTANT]
 An AnyBody license with active maintenance is required to use the models from GitHub. 
-Please see the [beta program](https://forum.anyscript.org/t/become-a-beta-tester/5056/6). 
+Please see the [beta program](https://forum.anyscript.org/t/become-a-beta-tester/5056/6), or request a [trial license ](https://www.anybodytech.com/contact/)
 
 <p align="center">
   <img src = "https://github.com/AnyBody/ammr/blob/master/Docs/_static/ammr_bodyparts.png" width=350>
@@ -17,13 +17,12 @@ Please see the [beta program](https://forum.anyscript.org/t/become-a-beta-tester
 
 The AnyBody Managed Model Repository consists of two parts:
 
-* [Body Models](https://anyscript.org/ammr-doc/body/models.html): The human body
+* [Body Models](https://anyscript.org/ammr/body/models.html): The human body
   models which can be customized and scaled to build a specific musculoskeletal
   model.
-* [Application examples](https://anyscript.org/ammr-doc/auto_examples/index.html):
-  in which the body models are utilized in specific applications (from everyday
-  activities, like pushing the acceleration or brake pedals of a car, to
-  workplace-specific scenarios).
+* [Application examples](https://anyscript.org/ammr/auto_examples/index.html):
+  where body models are used in specific applications (from everyday
+  activities with MoCap, othopaedics simulations, to ergonomic workcenarios).
 
 The models are developed in research projects at academic institutions or by
 [AnyBody Technology](https://www.anybodytech.com) in collaboration with academic
@@ -40,7 +39,7 @@ files for building the documentation, and testing the models. Official releases 
 with the [AnyBody Modeling System](https://www.anybodytech.com/software/anybodymodelingsystem/),
 or available with a DOI from [zendo.org/communities/anybody](https://zenodo.org/communities/anybody/). 
 
-Please see the [AMMR documentation](https://anyscript.org/ammr-doc/beta) for more
+Please see the [AMMR documentation](https://anyscript.org/ammr/beta) for more
 information on getting started using the AMMR.
 
 ## Licensing
