@@ -37,6 +37,9 @@ achieve same marker position and joint angle output.
   ARel to be constructed from unscaled landmarks.
 * Fixed small inaccuracy in the mass scaling of the shank. It did not account for the
   mass of the patella segment which uses the same scaling coefficient as the shank.
+* Visualizaiton of muscles in AMMR now use the builtin `.viewMuscle` drawing objects 
+  in the muscle class. Hence, all manually created `AnyDrawMuscle` objects, usually named
+  `DrwMus` have been removed. 
 
 
 ### Added:
