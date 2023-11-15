@@ -37,6 +37,9 @@ achieve same marker position and joint angle output.
   ARel to be constructed from unscaled landmarks.
 * Fixed small inaccuracy in the mass scaling of the shank. It did not account for the
   mass of the patella segment which uses the same scaling coefficient as the shank.
+* Visualizaiton of muscles in AMMR now use the builtin `.viewMuscle` drawing objects 
+  in the muscle class. Hence, all manually created `AnyDrawMuscle` objects, usually named
+  `DrwMus` have been removed. 
 
 
 ### Added:
@@ -62,10 +65,12 @@ achieve same marker position and joint angle output.
 
 ### Changed:
 
-* The lumbar joint reaction force (L5Sacrum, L4L5, L3L4, L2L3, L1L2, and T12L1)
+* The trunk joint reaction force in SelectedOutputs
   are now expressed in new reference nodes that are aligned with the vertebral body.
-  These new reference nodes are created inside the lumbar joint nodes of the proximal
-  lumbar segment.
+  Therefore, the names of the outputs now include CompressionForce and 
+  ShearForce. The new reference nodes are created inside the joint node on the proximal
+  segment. The implementation from AMMR 2.4 can be enabled by using the compatibility
+  switch: `#define BM_COMPATIBILITY_24_TRUNK_SELECTED_OUTPUTS_JRF ON`
 
 * Adjustments to pelvic tilt have changed position of MoCap markers on the
   pelvis segment. This mostly affect markers with hardcoded positions.
