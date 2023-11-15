@@ -191,6 +191,22 @@ Parameter defining the Leg model used.
 ::::
 
 
+::::{dropdown} `BM_LEG_MODEL_IS_TLEM`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_LEG_MODEL_IS_TLEM
+
+Read only parameter to check if Leg Model is a variant of the TLEM model.
+
+:Default: 
+:Example: `#define BM_LEG_MODEL_IS_TLEM `
+:Options:
+
+```
+::::
+
+
 ::::{dropdown} `BM_ARM_THORAX_SCAPULA_CONTACT`
 :animate: fade-in-slide-down
 :margin: 0 0 3 3
