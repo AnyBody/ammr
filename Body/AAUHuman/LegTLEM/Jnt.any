@@ -31,71 +31,6 @@ AnyRevoluteJoint SubTalar = {
 
 #if (TLEM_JOINT_TYPE_KNEE != _JOINT_TYPE_USERDEFINED_)
 
-#if BM_LEG_TIBIA_KNEE_AXIS == _TIBIA_KNEE_AXIS_SCREWHOME_RHYTHM_
-
-AnyKinMeasureOrg Knee = 
-{
-  AnyKinLinear Linear = {
-    AnyRefFrame &ThighNode = ...Seg.Thigh.KneeJointMedial;
-    AnyRefFrame &ShankNode = ...Seg.Shank.KneeJointMedial;
-  };
-  AnyKinRotational Orientation = {
-    AnyRefFrame &ThighNode = ...Seg.Thigh.KneeJoint;
-    AnyRefFrame &ShankNode = ...Seg.Shank.KneeJoint;
-    Type = RotAxesAngles;
-    Axis1=z; Axis2=x; Axis3=y;
-  };
-  MeasureOrganizer = {3}; // Knee Flexion DOF
-  AnyKinEq Constraints = {
-     // Constraints are applied at the center of the knee
-     AnyKinLinear& LinearCenter = .Linear;
-//     AnyKinLinear LinearCenter = {
-//       AnyRefFrame &ThighNode = ....Seg.Thigh.KneeJoint;
-//       AnyRefFrame &ShankNode = ....Seg.Shank.KneeJoint;
-//     };
-     AnyKinRotational& Orientation = .Orientation;
-     AnyKinMeasure& ScrewHomeGearing = .ScrewHomeRhythm; 
-     // 3 is Knee flexion which is free. 5 is old internal rotation, which is 
-     // replaced by the reaction on the screw-home gearing (6).
-     MeasureOrganizer = {0,1,2,4,6};
-   };
- 
-   AnyKinMeasureLinComb ScrewHomeRhythm = 
-   {
-      AnyFolder Measures = {
-        AnyKinMeasureOrg KneeFlexion = {
-          AnyKinMeasure& ref = ...Orientation;
-          MeasureOrganizer = {0};
-        };
-        AnyKinMeasureOrg KneeInternalRotation = {
-          AnyKinMeasure& ref = ...Orientation;
-          MeasureOrganizer = {2};
-        };
-      };
-
-      AnyVar Screw = Measures.KneeInternalRotation.Pos[0]*180/pi;
-      AnyFunInterpol Gearing = {
-        Type = Bspline;
-        T = flip(-1*{  -60,-10,   0,     10,   20,     45,     90, 110, 120, 180}*pi/180);
-        AnyFloat val = {0.4, 0.4, 0.0, -0.6,  -1.2  , -3.7, -12.5, -17, -17.5, -17.5};
-        Data = {flip({val})}*pi/180;
-      };
-
-      AnyKinMeasureFunComb1 Rhythm = {
-        AnyKinMeasure& ref = .Measures.KneeFlexion;
-        Functions = {&.Gearing};
-      };
-        
-      AnyKinMeasure& Ref = Measures.KneeInternalRotation;
-      OutDim = 1;
-      Coef = {{1, 1}};
-      Const = {0.0};
-   };
-
-};
-#endif
-
-#if BM_LEG_TIBIA_KNEE_AXIS != _TIBIA_KNEE_AXIS_SCREWHOME_RHYTHM_
 
 AnyRevoluteJoint Knee = {
   Axis = z;
@@ -103,7 +38,6 @@ AnyRevoluteJoint Knee = {
   AnyRefNode &ShankNode = ..Seg.Shank.KneeJoint;
 };
 
-#endif
 
 #endif
 
