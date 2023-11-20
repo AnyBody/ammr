@@ -1,0 +1,114 @@
+AnyFolder ShinCal ={
+  AnyComponentDefinition obj = {};  
+  
+  AnyFolder &Pelvis = ...HumanFolderRef.Trunk.SegmentsLumbar.PelvisSeg;
+  AnyFolder &Sacrum = ...HumanFolderRef.Trunk.SegmentsLumbar.SacrumSeg;
+  
+  AnyFolder &LegSegSide = .SideHumanFolderRef.Leg.Seg;
+  
+  AnyFolder &LegJointsSide = .SideHumanFolderRef.Leg.Jnt;
+  AnyFolder &SacrumPelvisJnt = ...HumanFolderRef.Trunk.JointsLumbar.SacrumPelvisJnt;
+  
+  
+  AnyFixedRefFrame ground = {
+    AnyRefNode node = {
+      ARel=..Pelvis.Axes0;
+      sRel=..Pelvis.r0;
+    };
+  };
+  
+  AnyKinEq PelvisFix = {
+    AnyKinLinear PelvisSacrumLinFix = {
+      AnyRefFrame &ground = ..ground.node;
+      AnyRefFrame &Pelvis = .....HumanFolderRef.Trunk.SegmentsLumbar.PelvisSeg;
+    };
+    AnyKinRotational PelvisSacrumRotFix = {
+      Type = RotAxesAngles;
+      AnyRefFrame &ground = ..ground.node;
+      AnyRefFrame &Pelvis = .....HumanFolderRef.Trunk.SegmentsLumbar.PelvisSeg;
+    };
+  };
+  
+  AnyKinEqSimpleDriver PelvisSacrumFix = {
+    AnyKinMeasure& Jnt = .SacrumPelvisJnt;
+    DriverPos = {0,0,0};
+    DriverVel = {0,0,0};
+    Reaction.Type = {Off,Off,Off};
+  };
+  
+  AnyKinEqInterPolDriver Hip = {
+    AnyKinRotational &Spherical = ..SideInterfaceFolderRef.HipFlexion.HipMeasure;
+    Type = PiecewiseLinear;
+    T =      {0.0, 1.0 };
+    Data = { {-5,  35},
+             {0,  0},
+             {0,  0}
+    }*pi/180; // Flexion - Abduction - internal rotation 
+    
+    Reaction.Type = {Off, Off, Off};
+  };
+  
+  AnyKinEqInterPolDriver Knee = {
+    AnyKinMeasure& Hinge = ..SideInterfaceFolderRef.KneeFlexion;
+    Type = PiecewiseLinear;
+    T =      {0.0, 1.0 };
+    Data = {{0,145}}*pi/180; // ? degrees knee flexion
+    Reaction.Type = {Off};
+  };
+  
+  
+  AnyKinEqInterPolDriver Ankle = {
+    AnyKinMeasure& Hinge = ..SideInterfaceFolderRef.AnklePlantarFlexion;
+    Type = PiecewiseLinear;
+    T =      {0.0, 1.0 };
+    Data = {{-20,45}}*pi/180;
+    Reaction.Type = {Off};
+  };
+  
+  AnyKinEqInterPolDriver SubTalar = {
+    AnyKinMeasure& Hinge = ..SideInterfaceFolderRef.SubTalarEversion;
+    Type = PiecewiseLinear;
+    T =      {0.0, 1.0 };
+    Data = {{0,0}}*pi/180;
+    Reaction.Type = {Off};
+  };
+  
+  AnyString MusPrefix = CompleteNameOf(&.SideHumanFolderRef.Leg.Mus);
+  
+  AnyObjectPtrArray TibialisAnteriorMuscles = ObjSearch(MusPrefix+".TibialisAnterior*", "AnyMuscle");
+  AnyFloat  TibialisAnteriorRmin = repmat(NumElemOf(TibialisAnteriorMuscles), 0.5);
+  AnyFloat  TibialisAnteriorRmax = repmat(NumElemOf(TibialisAnteriorMuscles), 1.2);
+  
+  AnyObjectPtrArray ExtensorDigitorumLongusMuscles = ObjSearch(MusPrefix+".ExtensorDigitorumLongus*", "AnyMuscle");
+  AnyFloat  ExtensorDigitorumLongusRmin = repmat(NumElemOf(ExtensorDigitorumLongusMuscles), 0.5);
+  AnyFloat  ExtensorDigitorumLongusRmax = repmat(NumElemOf(ExtensorDigitorumLongusMuscles), 1.2);
+  
+  AnyObjectPtrArray ExtensorHallucisLongusMuscles = ObjSearch(MusPrefix+".ExtensorHallucisLongus*", "AnyMuscle");
+  AnyFloat  ExtensorHallucisLongusRmin = repmat(NumElemOf(ExtensorHallucisLongusMuscles), 0.5);
+  AnyFloat  ExtensorHallucisLongusRmax = repmat(NumElemOf(ExtensorHallucisLongusMuscles), 1.2);
+  
+  
+};
+
+// The study: Operations to be performed on the model
+AnyBodyCalibrationStudy LegCalibrationStudyShin = {
+  AnyFolder &ref=.ShinCal; 
+  nStep = 2;
+  MuscleArr = arrcat(
+      ref.TibialisAnteriorMuscles,
+      ref.ExtensorDigitorumLongusMuscles,
+      ref.ExtensorHallucisLongusMuscles
+  );
+  RminMuscleFiber = arrcat(
+      ref.TibialisAnteriorRmin,
+      ref.ExtensorDigitorumLongusRmin,
+      ref.ExtensorHallucisLongusRmin
+  );
+  RmaxMuscleFiber = arrcat(
+      ref.TibialisAnteriorRmax,
+      ref.ExtensorDigitorumLongusRmax,
+      ref.ExtensorHallucisLongusRmax
+  );
+  InitialConditions.SolverType = KinSolOverDeterminate;
+};
+

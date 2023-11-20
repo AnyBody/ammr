@@ -181,9 +181,27 @@ Parameter defining the Leg model used.
 :Example: `#define BM_LEG_MODEL _LEG_MODEL_TLEM2_`
 :Options:
   - {any}`OFF` -> Switch OFF
-  - {any}`_LEG_MODEL_TLEM_` -> Switch to use leg model: "TLEM 1"
   - {any}`_LEG_MODEL_TLEM2_` -> Switch to use leg model: "TLEM 2"
+  - {any}`_LEG_MODEL_TLEM_` -> Switch to use leg model: "TLEM 2"
+  - {any}`_LEG_MODEL_TLEM21_` -> Switch to use leg model: "TLEM 2.1"
+  - {any}`_LEG_MODEL_TLEM1_` -> Switch to use leg model: "TLEM 1"
   - {any}`_LEG_MODEL_LEG_` -> Switch to use leg model: "Leg"
+
+```
+::::
+
+
+::::{dropdown} `BM_LEG_MODEL_IS_TLEM`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_LEG_MODEL_IS_TLEM
+
+Read only parameter to check if Leg Model is a variant of the TLEM model.
+
+:Default: 
+:Example: `#define BM_LEG_MODEL_IS_TLEM `
+:Options:
 
 ```
 ::::
@@ -2180,6 +2198,23 @@ An object path leading to the selected global reference frame
 
 :Default: ..GenericGlobalRefFrame
 :Example: `#define BM_GLOBAL_REFERENCE_FRAME ..GenericGlobalRefFrame`
+
+```
+::::
+
+
+::::{dropdown} `BM_COMPATIBILITY_24_TRUNK_SELECTED_OUTPUTS_JRF`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_COMPATIBILITY_24_TRUNK_SELECTED_OUTPUTS_JRF
+
+A compatability switch to include the trunk selected outputs joint reaction force from AMMR 2.4
+
+:Default: OFF
+:Example: `#define BM_COMPATIBILITY_24_TRUNK_SELECTED_OUTPUTS_JRF OFF`
+:Options: {ammr:bm_constant}`ON`/{ammr:bm_constant}`OFF`
+
 
 ```
 ::::
