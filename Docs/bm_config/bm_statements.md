@@ -301,7 +301,7 @@ Parameter to define muscle behavior of both right and left leg
 
 ```{ammr:bm_statement} BM_LEG_MUSCLES_LEFT
 
-Parameter to define muscle behavior of the lBM_LEG_eft leg
+Parameter to define muscle behavior of the left leg
 
 :Default: {any}`BM_LEG_MUSCLES_BOTH`
 :Example: `#define BM_LEG_MUSCLES_LEFT BM_LEG_MUSCLES_BOTH`
