@@ -82,8 +82,32 @@ Switch off a leg
 :margin: 0 0 2 2
 
 :::{ammr:bm_constant} _LEG_MODEL_TLEM_
-:value: 1
-Switch to use leg model: "TLEM 1"
+:value: 2
+Switch to use leg model: "TLEM 2"
+:::
+::::
+
+
+
+::::{dropdown} `_LEG_MODEL_TLEM2_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _LEG_MODEL_TLEM2_
+:value: 2
+Switch to use leg model: "TLEM 2"
+:::
+::::
+
+
+
+::::{dropdown} `_LEG_MODEL_TLEM21_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _LEG_MODEL_TLEM21_
+:value: 4
+Switch to use leg model: "TLEM 2.1"
 :::
 ::::
 
@@ -97,18 +121,6 @@ Switch to use leg model: "TLEM 1"
 :value: 1
 :deprecated:
 Switch to use leg model: "TLEM 1"
-:::
-::::
-
-
-
-::::{dropdown} `_LEG_MODEL_TLEM2_`
-:animate: fade-in-slide-down
-:margin: 0 0 2 2
-
-:::{ammr:bm_constant} _LEG_MODEL_TLEM2_
-:value: 2
-Switch to use leg model: "TLEM 2"
 :::
 ::::
 
