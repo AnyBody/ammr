@@ -58,34 +58,33 @@ jobs:
           git fetch --shallow-since=2020-07-07
           git checkout $(git describe --tags `git rev-list --tags=ammr* --max-count=1`);
       
-      - name: Install mamba
-        id: mamba
-        continue-on-error: true
-        uses: mamba-org/setup-micromamba@v1
-        with:
-          environment-file: Docs/environment.yaml
-
       - uses: prefix-dev/setup-pixi@v0.4.1
-        id: pixi
         continue-on-error: true
+        id: pixisetup
         with:
             pixi-version: v0.8.0
             manifest-path: Docs/pixi.toml
             cache: true
             cache-write: ${{ github.event_name == 'push' && github.ref_name == 'master' }}
   
-      - name: build with mamba
-        if: steps.mamba.outcome == 'success'
-        shell: bash -leo pipefail {0} {0}
-        run: 
-          sphinx-build -M Docs/html Docs _build -a
-
-      - name: build with pixi
-        if: steps.pixi.outcome == 'success'
+      - name: Build Documentation
+        if: steps.pixisetup.outcome == 'success'
         run: |
           cd Docs
           pixi run sphinx-build -M html . _build -a
-      
+    
+      # Fall back to mamba when buildig old versions
+      - name: Install mamba
+        if: steps.pixisetup.outcome == 'failure'
+        uses: mamba-org/setup-micromamba@v1
+        with:
+          environment-file: Docs/environment.yaml
+            
+      - name: build with mamba
+        if: steps.pixisetup.outcome == 'failure'
+        shell: bash -leo pipefail {0} {0}
+        run: sphinx-build -M html Docs Docs/_build -a
+        
       - uses: actions/upload-artifact@v3
         with:
           name: tagged-version
