@@ -145,6 +145,7 @@ exclude_patterns = [
     ".DS_Store",
     "exts",
     "auto_examples",
+    ".pixi",
 ]
 
 # The name of the Pygments (syntax highlighting) style to use.

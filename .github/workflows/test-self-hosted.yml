@@ -49,20 +49,17 @@ jobs:
           custom-anybodycon: ${{ inputs.custom-anybodycon-name }}
           connection-string:  ${{ secrets.AZURE_CONN_STR }}
 
-
-      - name: Install micro mamba
-        uses: ./.github/actions/setup-micromamba
+      - uses: prefix-dev/setup-pixi@v0.4.1
         with:
-          environment-file: Tests/test-environment.yml
-          environment-name: _ammr_test  
+          cache: true
+          cache-write: ${{ github.event_name == 'push' && github.ref_name == 'master' }}
+          post-cleanup: true
+          pixi-bin-path: ${{ runner.temp }}/bin/pixi
 
       - name: Run AMMR tests
         run: |
-          ~\micromamba.exe shell hook -s powershell | Out-String | iex
-          micromamba activate _ammr_test
-          
           cd Tests
-          pytest -n auto --dist worksteal `
+          pixi run pytest -n auto --dist worksteal `
             --splits 5 --group ${{ matrix.test_group }} --splitting-algorithm=least_duration `
             --durations=10 `
             --anybodycon="$Env:ANYBODYCON" `
