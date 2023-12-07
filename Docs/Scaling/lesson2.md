@@ -91,19 +91,17 @@ To change the scaling of the model you can start the plugin by clicking the
 \ANSUR Configuration\ from the tools line:
 
 ```{image} _static/lesson2/ANSUR_plugin_toolbar_icon.jpg
-:width: 49%
 ```
 
 This will bring up the plugin window:
 
 ```{image} _static/lesson2/ANSUR_plugin_window.jpg
-:width: 49%
 ```
 
 The plugin has 4 tabs:
 
 - **Basic Input**: This tab allows you to overwrite *Stature*, *Weight*, *BMI*,
-  *Fat percentage* and select gender. 
+  *Fat percentage* and select gender.
 - **Functional Dimensions**: This tab allows you to select a functional
   dimension from a drop down list. It will display a image of the dimension
   applied to the model and allow you to enter a value for the dimension or
