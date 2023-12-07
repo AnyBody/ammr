@@ -88,7 +88,7 @@ After saving this file, you can load the model and the anthropometrics from the
 file will be used to scale the model.
 
 To change the scaling of the model you can start the plugin by clicking the
-\ANSUR Configuration\ from the tools line:
+**ANSUR Configuration** from the tools line:
 
 ```{image} _static/lesson2/ANSUR_plugin_toolbar_icon.jpg
 ```
