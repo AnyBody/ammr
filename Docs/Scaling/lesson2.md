@@ -18,7 +18,7 @@ scaling is provided that use only distances between external
 bony landmarks.
 
 Here is where our [Statistical Scaling
-PLugin](https://anyscript.org/ammr/beta/Applications/Other/StatisticalScalingPlugin.html)
+Plugin](https://anyscript.org/ammr/beta/Applications/Other/StatisticalScalingPlugin.html)
 comes into play. It is a plugin that can be used to scale a model by specifying
 a few anatomical or functional anthropometric parameters while calculating the
 remaining parameters based on statistical data from the ANSUR [^f1] database.
