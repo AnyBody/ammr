@@ -33,10 +33,6 @@ selected like this:
 §//  #define BM_SCALING _SCALING_LENGTHMASSFAT_§
 
 
-// Scaling laws using external measures
-//  #define BM_SCALING_SCALING_UNIFORM_EXTMEASUREMENTS
-//  #define BM_SCALING_SCALING_LENGTHMASS_EXTMEASUREMENTS
-§   #define BM_SCALING_SCALING_LENGTHMASSFAT_EXTMEASUREMENTS §
 
 // Anthropometric data file (unchanged files can be found in AAUHuman\Scaling\AnyFamily)
 §//  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyMan.any"§

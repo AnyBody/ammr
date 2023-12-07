@@ -54,13 +54,6 @@ Currently there are nine pre-defined scaling laws available in AnyBody
    * - :any:`ScalingLengthMassFat <_SCALING_LENGTHMASSFAT_>`
      - scale taking mass and fat into account; input
        is joint to joint distances
-   * - :any:`ScalingUniformExt <_SCALING_UNIFORM_EXTMEASUREMENTS_>`
-     - scale equally in all directions; input is external
-       measurements
-   * - :any:`ScalingLengthMassExt <_SCALING_LENGTHMASS_EXTMEASUREMENTS_>`
-     - scale taking mass into account; input is external measurement
-   * - :any:`ScalingLengthMassFatExt  <_SCALING_LENGTHMASSFAT_EXTMEASUREMENTS_>`
-     - scale taking mass and fat into account; input is external measurements.
    * - :any:`ScalingXYZ  <_SCALING_XYZ_>`
      - scale taking mass and fat into account; scale segments along X, Y, Z axes;
        input is scale factors along X, Y, Z axes.

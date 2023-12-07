@@ -77,20 +77,10 @@ switch it on like shown below:
 //  #define BM_SCALING _SCALING_LENGTHMASSFAT_
 §   #define BM_SCALING _SCALING_XYZ_§
 
-
-// Scaling laws using external measures
-//  #define BM_SCALING _SCALING_UNIFORM_EXTMEASUREMENTS
-//  #define BM_SCALING _SCALING_LENGTHMASS_EXTMEASUREMENTS
-§//  #define BM_SCALING _SCALING_LENGTHMASSFAT_EXTMEASUREMENTS§
-```
-
 And let us choose a special AnyMan file that can be used with this particular
 scaling law:
 
 ```AnyScriptDoc
-//  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyManExternal.any"
-§//  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyManExtPercentile.any"§
-//  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyWomanExtPercentile.any"
 §#path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyManXYZ.any"§
 ```
 

@@ -47,18 +47,9 @@ will be set to use the default value:
 //  #define BM_SCALING _SCALING_XYZ_
 
 
-// Scaling laws using external measures
-//  #define BM_SCALING _SCALING_UNIFORM_EXTMEASUREMENTS_
-//  #define BM_SCALING _SCALING_LENGTHMASS_EXTMEASUREMENTS_
-//  #define BM_SCALING _SCALING_LENGTHMASSFAT_EXTMEASUREMENTS_
-
 // Anthropometric data file (unchanged files can be found in AAUHuman\Scaling\AnyFamily)
 //  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyMan.any"
 //  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyManUniform.any"
-//  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyManExternal.any"
-//  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyManExtPercentile.any"
-//  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyWomanExtPercentile.any"
-//  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyWomanExtPercentile.any"
 //  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyManXYZ.any"
 
 //--------------- END OF SCALING CONFIGURATION -------------------
@@ -91,19 +82,9 @@ option in order to switch to this scaling law.
 //  #define BM_SCALING _SCALING_LENGTHMASSFAT_
 //  #define BM_SCALING _SCALING_XYZ_
 
-
-// Scaling laws using external measures
-//  #define BM_SCALING _SCALING_UNIFORM_EXTMEASUREMENTS_
-//  #define BM_SCALING _SCALING_LENGTHMASS_EXTMEASUREMENTS_
-//  #define BM_SCALING _SCALING_LENGTHMASSFAT_EXTMEASUREMENTS_
-
 // Anthropometric data file (unchanged files can be found in AAUHuman\Scaling\AnyFamily)
 //  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyMan.any"
 //  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyManUniform.any"
-//  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyManExternal.any"
-//  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyManExtPercentile.any"
-//  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyWomanExtPercentile.any"
-//  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyWomanExtPercentile.any"
 //  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyManXYZ.any"
 ```
 
