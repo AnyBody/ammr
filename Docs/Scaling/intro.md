@@ -30,8 +30,7 @@ are seldom defined as constant numbers, but instead computed from global measure
 expect the definition of a scaling law, although user can
 choose the actual law.
 
-Currently there are nine pre-defined scaling laws available in AnyBody
-
+Currently there are six pre-defined scaling laws available in AnyBody:
 
 
 ```{eval-rst}
@@ -59,10 +58,6 @@ Currently there are nine pre-defined scaling laws available in AnyBody
        input is scale factors along X, Y, Z axes.
 ```
 
-**Input parameters of scaling laws are specified in a file that is always named
-AnyMan.any.** Several versions of this file are available, each for a different scaling law.
-More details can be found the in the tutorial below.
-
 **Please also notice that each scaling law scales the strength of the
 muscles, in addition to the size and mass of the bone.** This strength
 scaling is done automatically in most cases. We will come back to it
@@ -71,8 +66,29 @@ this recorded previous webcast titled [“Anthropometrical Scaling of
 Musculoskeletal
 Models”](https://www.anybodytech.com/download/anthropometrical-scaling-of-musculoskeletal-models).
 
+## Overwriting default input parameters
 
+After selecting a scaling law, the user can override the default input
+parameters. All input parameters can be accesed in the
+`Main.HumanModel.Anthropometrics` folder.
 
+For example, to adjust the height of
+the model, the user can add the following code to the `Main` file:
+
+```AnyScriptDoc
+Main.HumanModel.Anthropometrics.BodyHeight = 1.8; // overwrites the default value
+```
+
+### Using legacy `AnyMan.any` files
+
+To keep backward compatibility with older models, AnyBody still supports using custom `AnyMan.any` files.
+You can specify your own file with by setting the `BM_SCALING_ANTHRO_FILE` BM statement:
+
+```AnyScriptDoc
+#path BM_SCALING_ANTHRO_FILE "My_Own_AnyMan.any"
+```
+
+This method is not recommended for new models, but it is still supported for older models.
 
 :::{admonition} **Next lesson:**
 :class: seealso
