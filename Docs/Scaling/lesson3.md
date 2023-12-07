@@ -70,8 +70,8 @@ switch it on like shown below:
 §   #define BM_SCALING _SCALING_XYZ_§
 ```
 
-Let us inspect what segment dimension are available for this scaling law. 
-Go to `Main.HumanModel.Anthropometrics.SegmentDimensions` in the model tree:
+Let us inspect what segment dimension are available for this scaling law. Go to
+`Main.HumanModel.Anthropometrics.SegmentDimensions` in the model tree:
 
 ```{image} _static/lesson3/XYZ_segment_dimensions.jpg
 ```
