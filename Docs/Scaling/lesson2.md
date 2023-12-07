@@ -90,12 +90,12 @@ file will be used to scale the model.
 To change the scaling of the model you can start the plugin by clicking the
 **ANSUR Configuration** from the tools line:
 
-```{image} _static/lesson2/ansur_plugin_toolbar_icon.jpg
+```{image} _static/lesson2/ANSUR_Plugin_toolbar_icon.jpg
 ```
 
 This will bring up the plugin window:
 
-```{image} _static/lesson2/ansur_plugin_window.jpg
+```{image} _static/lesson2/ANSUR_plugin_window.jpg
 ```
 
 The plugin has 4 tabs:
