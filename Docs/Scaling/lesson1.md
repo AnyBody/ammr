@@ -13,11 +13,10 @@ This lesson covers five of the scaling laws available in AnyBody:
 
 ## ScalingStandard
 
-This scaling law produces a model with the default parameters for mass and
-size (corresponding roughly to the 50th percentile European male). It is
-used by default for non-specific models, or when there is no data
-available about the modeled subject. This law does not use the AnyMan
-file because there is no parameter to modify.
+This scaling law produces a model with the default parameters for mass and size
+(corresponding roughly to the 50th percentile European male). It is used by
+default for non-specific models, or when there is no data available about the
+modeled subject. This law has no input parameter to modify.
 
 With the AnyBody Modeling System you already have a repository of models
 available; for details please see the AnyBody Assistant available from
@@ -103,7 +102,11 @@ segmental measurements or scale factors. This is done like below:
 ```
 
 The above line shows how it can be overwritten from, say, the Main folder.
-We have now succesfully personalized the model using anthropometric measurements.
+We cannow easily personalize the model using anthropometric measurements.
+
+### Do I need to overwrite all the anthropometric variables?
+
+No, you do not need to overwrite all the anthropometric variables. The implementation allows you to overwrite the ones you need. For example, if you only know the body mass and height, you can overwrite only these two variables and the rest will be calculated automatically.
 
 ## ScalingUniform
 
@@ -113,7 +116,7 @@ joint to joint distance and the bone is then scaled in three dimensions
 proportionally to its length. To use this law you must change the
 scaling parameter to be \_SCALING_UNIFORM\_.
 
-In the previous section we showed how this can be done. Please now load the
+In the previous section we showed how this can be done. Please do so, then load the
 model and have a look at the Model View window. Notice that the body size did
 not change from the standard scaling version. This is because the default values
 for segment masses and sizes in this file are the same as the standard values.
@@ -395,7 +398,7 @@ resultant value.
 ```
 
 For the same load on the hands (50 N) the tall heavy model has a muscle
-activity of 44.9 %, whereas the short model reaches 59.6 % of muscle
+activity of 53.3 %, whereas the short model reaches 67.7 % of muscle
 activity. So our small model is definitely weaker than the tall one.
 
 ## ScalingLengthMassFat
@@ -478,7 +481,7 @@ following results:
 
 If we compare these two activity values, the difference is clear. The
 ScalingLengthMassFat law is increasing the muscle activity by
-approximately 13 % in this case, from 46 % to 59 %. This shows the
+approximately 16 % in this case, from 50 % to 66 %. This shows the
 limits of the ScalingLengthMass law for extreme cases.
 ScalingLengthMassFat is able to cover a wider range of cases while
 keeping its accuracy.

@@ -13,27 +13,19 @@ solutions when it comes to anthropometric scaling
 
 The scaling laws discussed in the previous measurements rely on standard
 measurements and distance estimates such as joint-to-joint distances or
-predefined external measurements, e.g. manual palpations and so on.
-This is a good approach, when a corresponding measurement study can be
-designed in advance, or a particular measurement protocol can be adjusted
-to fit the model requirements. However, sometimes this is not feasible
-and the modeller needs to rely on available data, such as an anthopometric
-database, or data coming from an old study with measurements different
-to the standard ones. In this case individual segmental scaling can be
-constructed by establishing a correspondence between available data and
-virtual measurements on the model. Let us consider the following example:
-
-Looking at the AnyMan.any we could notice that the head scaling depends only
-on a single parameter:
-
-```AnyScriptDoc
-AnyVar HeadHeight = 0.14*.BodyHeight/1.75;
-```
-
-and in case of the `_SCALING_LENGTHMASSFAT_` it would also depend on the
-corresponding mass of the head segment. But we could actually know even more
-accurate dimensions of our subject's head. And these measurements should
-be used by the model. Let's say that our subject corresponds to the 50th
+predefined external measurements, e.g. manual palpations and so on. This is a
+good approach, when a corresponding measurement study can be designed in
+advance, or a particular measurement protocol can be adjusted to fit the model
+requirements. However, sometimes this is not feasible and the modeller needs to
+rely on available data, such as an anthopometric database, or data coming from
+an old study with measurements different to the standard ones. In this case
+individual segmental scaling can be constructed by establishing a correspondence
+between available data and virtual measurements on the model. Let us consider
+the following example: For `_SCALING_UNIFORM_` the head is scaled by a single
+factor (`HeadHeight`), and in case of the `_SCALING_LENGTHMASSFAT_` it would
+also depend on the corresponding mass of the head segment. But we could actually
+know even more accurate dimensions of our subject's head. And these measurements
+should be used by the model. Let's say that our subject corresponds to the 50th
 percentile male and the measurements will be taken from DIN 1986 (Deutsches
 Institut fur Normung) anthropometric dataset.
 
@@ -76,57 +68,21 @@ switch it on like shown below:
 //  #define BM_SCALING _SCALING_LENGTHMASS_
 //  #define BM_SCALING _SCALING_LENGTHMASSFAT_
 §   #define BM_SCALING _SCALING_XYZ_§
-
-And let us choose a special AnyMan file that can be used with this particular
-scaling law:
-
-```AnyScriptDoc
-§#path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyManXYZ.any"§
 ```
 
-Let us double-click on the last line, which defines an anthropometric scaling file.
+Let us inspect what segment dimension are available for this scaling law. 
+Go to `Main.HumanModel.Anthropometrics.SegmentDimensions` in the model tree:
 
-```AnyScriptDoc
-AnyVar BMI = BodyMass/(BodyHeight*BodyHeight);
-///Estimation from Frankenfield et al. (2001) valid for men
-AnyVar FatPercent = (-0.09 + 0.0149*BMI - 0.00009*BMI*BMI)*100;
-
-AnyVar BodyMass = 75 ;
-AnyVar BodyHeight = 180 /100;
-
-AnyFolder SegmentMasses = {
-
-  //Segment masses in kg from Winter ("Biomechanics and motor control of human movement." David A. Winter)
-  AnyVar Lumbar = 0139*.BodyMass; // T12-L1 to L5-Sacrum
-  ...
-};
-
-AnyFolder SegmentScaleFactors =
-{
-  AnyFolder Pelvis = { AnyFloat LengthScale = 1; AnyFloat DepthScale = 1; AnyFloat WidthScale = 1; };
-  AnyFolder Trunk = { AnyFloat LengthScale = 1; AnyFloat DepthScale = 1; AnyFloat WidthScale = 1; };
-  AnyFolder Head = { AnyFloat LengthScale = 1; AnyFloat DepthScale = 1; AnyFloat WidthScale = 1;
-  AnyFolder Neck = { AnyFloat LengthScale = 1; AnyFloat DepthScale = 1; AnyFloat WidthScale = 1;
-  AnyFolder Lumbar = { AnyFloat LengthScale = 1; AnyFloat DepthScale = 1; AnyFloat WidthScale = 1; };
-
-  AnyFolder Right =
-  {
-      AnyFolder Clavicula =  { AnyFloat LengthScale = 1; AnyFloat DepthScale = 1; AnyFloat WidthScale = 1; };
-      AnyFolder Scapula =  { AnyFloat LengthScale = 1; AnyFloat DepthScale = 1; AnyFloat WidthScale = 1; };
-      ...
-      AnyFolder Thigh =  { AnyFloat LengthScale = 1; AnyFloat DepthScale = 1; AnyFloat WidthScale = 1; };
-  };
-  AnyFolder Left = { ... };
-};
+```{image} _static/lesson3/XYZ_segment_dimensions.jpg
 ```
 
 We could see that the first section containing overall body parameters and the
-SegmentMasses folder are identical to any other AnyMan file. But instead of having
-a folder called SegmentDimensions, we now have another called SegmentScaleFactors.
-Looking at the content it is clear that this folder contains invidual scaling
-factors along main axes. By default all values are set to be 1, meaning that
-the cadaveric data will not scale and the law will behave similarly to the
-`_SCALING_NONE_`.
+SegmentMasses folder are identical to any other scaling law. But instead of only
+having a folder called SegmentDimensions, we now have another called
+SegmentScaleFactors. Looking at the content it is clear that this folder
+contains invidual scaling factors along main axes. By default all values are set
+to be 1, meaning that the cadaveric data will not scale and the law will behave
+similarly to the `_SCALING_NONE_`.
 
 Let us define the head scaling factors as expected lengths divided by unscaled
 head dimensions. In HeadScalingXYZ.any we have already prepared the
@@ -145,18 +101,16 @@ the following block of code inside the `AnyManXYZ.any`. Please apply this change
 reload the model:
 
 ```AnyScriptDoc
-AnyFolder Pelvis = { AnyFloat LengthScale = 1; AnyFloat DepthScale = 1; AnyFloat WidthScale = 1; };
-AnyFolder Trunk = { AnyFloat LengthScale = 1; AnyFloat DepthScale = 1; AnyFloat WidthScale = 1; };
-AnyFolder Head = {
+Main.HumanModel.Anthropometrics.SegmentScaleFactors.Head = {
   §// Standard unscaled values
   AnyVar HEAD_BREADTH = 0.19;
   AnyVar HEAD_LENGTH  = 0.239;
   AnyVar HEAD_HEIGHT  = 0.26;
 
   // Scale factor computation
-  AnyFloat LengthScale = 0.228/HEAD_HEIGHT;///< 228mm, DIN 1986
-  AnyFloat DepthScale = 0.193/HEAD_LENGTH; ///< 193mm, DIN 1986
-  AnyFloat WidthScale = 0.156/HEAD_BREADTH;///< 156mm, DIN 1986 §
+  LengthScale = 0.228/HEAD_HEIGHT;///< 228mm, DIN 1986
+  DepthScale = 0.193/HEAD_LENGTH; ///< 193mm, DIN 1986
+  WidthScale = 0.156/HEAD_BREADTH;///< 156mm, DIN 1986 §
 };
 ```
 
@@ -176,25 +130,23 @@ of the 50th percentile man should be 173.3mm. We could mimic `_SCALING_UNIFORM_`
 by defining a common scaling factor and applying it to all dimensions like this:
 
 ```AnyScriptDoc
-AnyVar BodyMass = 75 ;
-AnyVar BodyHeight = 180 /100;
+Main.HumanModel.Anthropometrics.BodyMass = 75 ;
+Main.HumanModel.Anthropometrics.BodyHeight = 180 /100;
 
 §#define STATURE_SCALE_FACTOR 1.733/1.75§
 
 ...
 
-AnyFolder SegmentScaleFactors =
-{
-  AnyFolder Pelvis = {
-    AnyFloat LengthScale = §STATURE_SCALE_FACTOR§;
-    AnyFloat DepthScale = §STATURE_SCALE_FACTOR§;
-    AnyFloat WidthScale = §STATURE_SCALE_FACTOR§;
-  };
-  AnyFolder Trunk = {
-    AnyFloat LengthScale = §STATURE_SCALE_FACTOR§;
-    AnyFloat DepthScale = §STATURE_SCALE_FACTOR§;
-    AnyFloat WidthScale = §STATURE_SCALE_FACTOR§;
-  };
+Main.HumanModel.Anthropometrics.SegmentScaleFactors.Pelvis = {
+  LengthScale = §STATURE_SCALE_FACTOR§;
+  DepthScale = §STATURE_SCALE_FACTOR§;
+  WidthScale = §STATURE_SCALE_FACTOR§;
+};
+Main.HumanModel.Anthropometrics.SegmentScaleFactors.Thorax = {
+  LengthScale = §STATURE_SCALE_FACTOR§;
+  DepthScale = §STATURE_SCALE_FACTOR§;
+  WidthScale = §STATURE_SCALE_FACTOR§;
+};
 
 ...
 ```
