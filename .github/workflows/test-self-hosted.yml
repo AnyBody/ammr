@@ -34,7 +34,6 @@ jobs:
     env:
       # Triggers a warning at 20 deg
       ShortestPathMaxAngle: 0.3491
-      ANYBODYCON: C:\Program Files\AnyBody Technology\AnyBody.7.5_Beta\AnyBodyCon.exe
  
 
     runs-on: [self-hosted, Windows, AnyBody]
@@ -42,26 +41,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         
+      - uses: prefix-dev/setup-pixi@v0.4.1
+        with:
+          cache: true
+          pixi-bin-path: ${{ runner.temp }}\Scripts\pixi.exe
+          cache-write: ${{ github.event_name == 'push' && github.ref_name == 'master' }}
+          post-cleanup: true
+
+
       - name: Patch with custom version
         if: inputs.use-custom-anybodycon
         uses: ./.github/actions/custom-anybodycon
         with:
           custom-anybodycon: ${{ inputs.custom-anybodycon-name }}
           connection-string:  ${{ secrets.AZURE_CONN_STR }}
-
-      - uses: prefix-dev/setup-pixi@v0.4.1
-        id: pixi
-        continue-on-error: true
-        with:
-          cache: true
-          cache-write: ${{ github.event_name == 'push' && github.ref_name == 'master' }}
-          post-cleanup: true
-
-      - name: try pixi-setup recover
-        if: steps.pixi.outcome != 'success'
-        run: | 
-          Add-Content $env:GITHUB_PATH "$HOME/.pixi/bin"
-          & $HOME/.pixi/bin/pixi.exe install
 
       - name: Run AMMR tests
         run: |
