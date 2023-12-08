@@ -14,6 +14,14 @@ pelvis and the foot segments.  The Y component may need to be adjusted to
 achieve same marker position and joint angle output.
 :::
 
+### Removed:
+
+* The three scaling laws `_SCALING_UNIFORM_EXTMEASUREMENTS_`,
+  `_SCALING_LENGTHMASS_EXTMEASUREMENTS_`,
+  `_SCALING_LENGTHMASSFAT_EXTMEASUREMENTS_` have been deprecated. They are
+  superseeded by the Statistical Scaling Plugin which cover the same
+  functionality. The AMMR guide on scaling have been updated to reflect this
+  change.
 
 ### Fixed:
 * Fixed a couple of bugs in the {ref}`Seated Human model <example_seatedhuman>`:  

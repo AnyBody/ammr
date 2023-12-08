@@ -21,7 +21,6 @@ jobs:
     runs-on: windows-latest
     
     steps:
-
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
@@ -33,13 +32,22 @@ jobs:
           anybody-version-suffix: "Beta"
 
       - uses: prefix-dev/setup-pixi@v0.4.1
+        id: pixi
+        continue-on-error: true
         with:
+          post-cleanup: true
           cache: false
   
+      - name: try pixi-setup recover
+        if: steps.pixi.outcome != 'success'
+        run: | 
+          Add-Content $env:GITHUB_PATH "$HOME/.pixi/bin"
+          & $HOME/.pixi/bin/pixi.exe install
+            
       - name: Run AMMR tests
         run: |
           cd Tests
-          pixi run pytest -n auto --dist worksteal `
+          pixi run pytest -n 5 --dist worksteal `
              --splits 10 --group ${{ matrix.test_group }} --splitting-algorithm=least_duration `
              --durations=10 `
              --runslow

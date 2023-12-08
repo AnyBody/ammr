@@ -20,9 +20,6 @@ Definition of an anthropometric scaling law
   - {any}`_SCALING_UNIFORM_` -> Uniform anthropometric scaling law to be used by the entire model.
   - {any}`_SCALING_LENGTHMASS_` -> Length/mass anthropometric scaling law to be used by the entire model.
   - {any}`_SCALING_LENGTHMASSFAT_` -> Length/mass/fat anthropometric scaling law to be used by the entire model.
-  - {any}`_SCALING_UNIFORM_EXTMEASUREMENTS_` -> Uniform anthropometric scaling law  with external measurements to be used by the entire model.
-  - {any}`_SCALING_LENGTHMASS_EXTMEASUREMENTS_` -> Length/mass anthropometric with external measurements scaling law to be used by the entire model.
-  - {any}`_SCALING_LENGTHMASSFAT_EXTMEASUREMENTS_` -> Length/mass/fat anthropometric with external measurements scaling law to be used by the entire model.
   - {any}`_SCALING_XYZ_` -> Scaling using xyz factors for all Segments.
   - {any}`_SCALING_USERDEFINED_` -> Don't use a builtin scaling law. A user-defined law must be specified with ``BM_SCALING_FILE``.
 
