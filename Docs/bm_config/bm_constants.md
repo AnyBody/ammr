@@ -408,6 +408,7 @@ Length/mass/fat anthropometric scaling law to be used by the entire model.
 
 :::{ammr:bm_constant} _SCALING_UNIFORM_EXTMEASUREMENTS_
 :value: 5
+:deprecated:
 Uniform anthropometric scaling law  with external measurements to be used by the entire model.
 :::
 ::::
@@ -420,6 +421,7 @@ Uniform anthropometric scaling law  with external measurements to be used by the
 
 :::{ammr:bm_constant} _SCALING_LENGTHMASS_EXTMEASUREMENTS_
 :value: 6
+:deprecated:
 Length/mass anthropometric with external measurements scaling law to be used by the entire model.
 :::
 ::::
@@ -432,6 +434,7 @@ Length/mass anthropometric with external measurements scaling law to be used by 
 
 :::{ammr:bm_constant} _SCALING_LENGTHMASSFAT_EXTMEASUREMENTS_
 :value: 7
+:deprecated:
 Length/mass/fat anthropometric with external measurements scaling law to be used by the entire model.
 :::
 ::::
