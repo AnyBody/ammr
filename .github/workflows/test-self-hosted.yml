@@ -24,7 +24,7 @@ concurrency:
 jobs:
   test:
     # Run all private AMMR forks on self-hosted runners
-    if: ${{ github.repository_owner == 'anybody' && github.repository != 'anybody/ammr' }}
+    if: ${{ (github.event_name == 'workflow_dispatch')  || (github.repository_owner == 'anybody' && github.repository != 'anybody/ammr') }}
 
     strategy:
       fail-fast: false
@@ -34,7 +34,6 @@ jobs:
     env:
       # Triggers a warning at 20 deg
       ShortestPathMaxAngle: 0.3491
-      ANYBODYCON: C:\Program Files\AnyBody Technology\AnyBody.7.5_Beta\AnyBodyCon.exe
  
 
     runs-on: [self-hosted, Windows, AnyBody]
@@ -42,6 +41,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         
+      - uses: prefix-dev/setup-pixi@v0.4.1
+        with:
+          cache: true
+          pixi-bin-path: ${{ runner.temp }}\Scripts\pixi.exe
+          cache-write: ${{ github.event_name == 'push' && github.ref_name == 'master' }}
+          post-cleanup: true
+
+
       - name: Patch with custom version
         if: inputs.use-custom-anybodycon
         uses: ./.github/actions/custom-anybodycon
@@ -49,20 +56,10 @@ jobs:
           custom-anybodycon: ${{ inputs.custom-anybodycon-name }}
           connection-string:  ${{ secrets.AZURE_CONN_STR }}
 
-
-      - name: Install micro mamba
-        uses: ./.github/actions/setup-micromamba
-        with:
-          environment-file: Tests/test-environment.yml
-          environment-name: _ammr_test  
-
       - name: Run AMMR tests
         run: |
-          ~\micromamba.exe shell hook -s powershell | Out-String | iex
-          micromamba activate _ammr_test
-          
           cd Tests
-          pytest -n auto --dist worksteal `
+          pixi run pytest -n 5 --dist worksteal `
             --splits 5 --group ${{ matrix.test_group }} --splitting-algorithm=least_duration `
             --durations=10 `
             --anybodycon="$Env:ANYBODYCON" `

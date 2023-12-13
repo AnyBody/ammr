@@ -12,5 +12,86 @@ AnyFolder EnvironmentModel = {
    
     AnyDrawRefFrame drw={ScaleXYZ=0.3*{1,1,1};};
     
+    
+    AnyDrawSurf OriginalFoot = {
+      FileName = Main.HumanModel.BodyModel.Right.Leg.Seg.Foot.DrwSurf.FileName;
+    };
+    AnyDrawSurf OriginalTalus = {
+      FileName = Main.HumanModel.BodyModel.Right.Leg.Seg.Talus.DrwSurf.FileName;
+    };
+    
+//    AnyRefNode NodeForNewTalus = {
+//      sRel = {4.4,-1,-4} * 0.001;
+//      ARel = RotMat(26*pi/180,y)*RotMat(12*pi/180,x)*RotMat(0*pi/180,z);
+//      AnyDrawSurf NewTalus = {
+//        FileName = Main.HumanModel.BodyModel.Right.Leg.Seg.Talus.DrwSurf.FileName;
+//        RGB = {0.5,0,0};
+//      };
+//    };
+    AnyRefNode NodeForNewTalus = {
+      sRel = {5.9,-2.5,-4.9} * 0.001;
+      ARel = RotMat(25.5*pi/180,y)*RotMat(7.0*pi/180,x)*RotMat(2.0*pi/180,z);
+      AnyDrawSurf NewTalus = {
+        FileName = Main.HumanModel.BodyModel.Right.Leg.Seg.Talus.DrwSurf.FileName;
+        RGB = {0.5,0,0};
+      };
+    };
   };//GlobalRef
 };
+
+
+Main.HumanModel.BodyModel.Right.Leg.Seg.Foot.Talus = {
+  AnyRefNode NewTalusJointNode = {
+    sRel = {0,0,0};
+    AnyDrawSurf NewTalus = {
+      FileName = Main.HumanModel.BodyModel.Right.Leg.Seg.Talus.DrwSurf.FileName;
+      RGB = {0.7,0,0};
+      RelPos = Main.Model.EnvironmentModel.GlobalRef.NodeForNewTalus.sRel;
+      RelRotMat = Main.Model.EnvironmentModel.GlobalRef.NodeForNewTalus.ARel;
+    };
+  };  
+};
+
+#if BM_JOINT_TYPE_ANKLE_RIGHT == _JOINT_TYPE_USERDEFINED_
+Main.HumanModel.BodyModel.Right.Leg.Seg.Foot.Talus = {
+  AnyRefNode AnkleJoint = {
+      AnyVec3 sRelUnscaled = .StdPar.AnkleJoint;
+      AnyMat33 ARelUnscaled = RotMat({0.0,0,0}, .StdPar.AnkleJointAxis, .AnatomicalFrame.ARelUnscaled'[1])*RotMat(pi/2,y);
+      /// Control point for the Ankle joint. Found by projecting the malleolus bony landmarks onto the
+      /// ankle axis from the cadaver data set. Thus, scaling that moves the control points will also scale the ankle joint axis
+      AnyVec3 LateralControlPoint = .Scale(.StdPar.AnkleJoint + (.StdPar.LateralMalleolus - .StdPar.AnkleJoint)*.StdPar.AnkleJointAxis'*.StdPar.AnkleJointAxis);
+      /// Control point for the Ankle joint. Found by projecting the malleolus bony landmarks onto the
+      /// ankle axis from the cadaver data set. Thus, scaling that moves the control points will also scale the ankle joint axis
+      AnyVec3 MedialControlPoint = .Scale(.StdPar.AnkleJoint + (.StdPar.MedialMalleolus - .StdPar.AnkleJoint)*.StdPar.AnkleJointAxis'*.StdPar.AnkleJointAxis );
+      /// Ankle Joint defined directly from the cadaver dataset.
+      sRel = .Scale(.StdPar.AnkleJoint + Main.Model.EnvironmentModel.GlobalRef.NodeForNewTalus.sRel + {0,0.00,0});// {-10,2,5}*0.001);
+      /// Ankle Joint orientation is calculated based on the direction between the two control points.
+      ARel = RotMat(0.0*{0,0,0}, .Sign*(LateralControlPoint-MedialControlPoint ),  .AnatomicalFrame.ARel'[1] )*RotMat(pi/2,y)*Main.Model.EnvironmentModel.GlobalRef.NodeForNewTalus.ARel
+              *RotMat(-5*pi/180,x);
+    };
+};
+
+Main.HumanModel.BodyModel.Right.Leg.Seg.Shank = {
+  AnyRefNode AnkleJoint = {
+     AnyVar TibialTorsionOffset = DesignVar(0);
+       AnyVec3 sRelUnscaled =  .StdPar.AnkleJoint;
+       AnyMat33 ARelUnscaled =   RotMat({0, 0, 0.0}, .Sign*(AnkleLateralControlPoint-AnkleMedialControlPoint ), .AnatomicalFrame.ARelUnscaled'[1])*RotMat(pi/2,y);
+       // Control point for the Ankle joint. Found by projecting the malleolus bony landmarks onto the
+       // ankle axis from the cadaver data set. Thus, scaling the control points will also scale the ankle joint axis
+       AnyVec3 AnkleLateralControlPoint =  .StdPar.AnkleJoint + (.StdPar.LateralMalleolus - .StdPar.AnkleJoint)*.StdPar.AnkleJointAxis'*.StdPar.AnkleJointAxis;
+       // Control point for the Ankle joint. Found by projecting the malleolus bony landmarks onto the
+       // ankle axis from the cadaver data set. Thus, scaling the control points will also scale the ankle joint axis
+       AnyVec3 AnkleMedialControlPoint = .StdPar.AnkleJoint + (.StdPar.MedialMalleolus - .StdPar.AnkleJoint)*.StdPar.AnkleJointAxis'*.StdPar.AnkleJointAxis;
+       sRel = .Scale(.StdPar.AnkleJoint);
+       // Ankle Joint orientation is calculated based on the direction between the two control points.
+       ARel = RotMat({0,0,0.0}, .Sign*(.Scale(AnkleLateralControlPoint) - .Scale(AnkleMedialControlPoint) ),  .AnatomicalFrame.ARel'[1])*RotMat(pi/2,y)*RotMat(TibialTorsionOffset,y);
+     };    
+};
+Main.HumanModel.BodyModel.Right.Leg.Jnt = {
+AnyRevoluteJoint Ankle = {
+  Axis = z; //flexion extension
+  AnyRefNode &ShankNode = ..Seg.Shank.AnkleJoint;
+  AnyRefNode &FootNode  = ..Seg.Talus.AnkleJoint;
+};
+};  
+#endif

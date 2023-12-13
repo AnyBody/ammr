@@ -2,22 +2,21 @@
 
 This lesson covers five of the scaling laws available in AnyBody:
 
-- ScalingStandard (scale to a standard size)
-- ScalingNone (do not scale)
-- ScalingUniform (scale equally in all directions; input is joint to
+- `_SCALING_STANDARD_` (scale to a standard size)
+- `_SCALING_NONE_` (do not scale)
+- `_SCALING_UNIFORM_` (scale equally in all directions; input is joint to
   joint distances)
-- ScalingLengthMass (scale taking mass into account; input is joint to
+- `_SCALING_LENGTHMASS_` (scale taking mass into account; input is joint to
   joint distances and mass)
-- ScalingLengthMassFat (scale taking mass and fat into account; input
+- `_SCALING_LENGTHMASSFAT_` (scale taking mass and fat into account; input
   is joint to joint distances)
 
 ## ScalingStandard
 
-This scaling law produces a model with the default parameters for mass and
-size (corresponding roughly to the 50th percentile European male). It is
-used by default for non-specific models, or when there is no data
-available about the modeled subject. This law does not use the AnyMan
-file because there is no parameter to modify.
+This scaling law produces a model with the default parameters for mass and size
+(corresponding roughly to the 50th percentile European male). It is used by
+default for non-specific models, or when there is no data available about the
+modeled subject. This law has no input parameter to modify.
 
 With the AnyBody Modeling System you already have a repository of models
 available; for details please see the AnyBody Assistant available from
@@ -27,12 +26,8 @@ find this model:
 ```{image} _static/lesson1/ScalingDisplayHelp.png
 ```
 
-This tutorial has been written using the AnyBody Managed Model
-Repository Version 2.0 (AMMRV2.0), so you may see differences between the
-tutorial and your own results.
-
 To use this law you do not need to do anything at all; however, for
-demonstration purposes scaling law configuration parameter (BM_SCALING)
+demonstration purposes the scaling law configuration parameter (BM_SCALING)
 will be set to use the default value:
 
 ```AnyScriptDoc
@@ -45,21 +40,6 @@ will be set to use the default value:
 //  #define BM_SCALING _SCALING_LENGTHMASS_
 //  #define BM_SCALING _SCALING_LENGTHMASSFAT_
 //  #define BM_SCALING _SCALING_XYZ_
-
-
-// Scaling laws using external measures
-//  #define BM_SCALING _SCALING_UNIFORM_EXTMEASUREMENTS_
-//  #define BM_SCALING _SCALING_LENGTHMASS_EXTMEASUREMENTS_
-//  #define BM_SCALING _SCALING_LENGTHMASSFAT_EXTMEASUREMENTS_
-
-// Anthropometric data file (unchanged files can be found in AAUHuman\Scaling\AnyFamily)
-//  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyMan.any"
-//  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyManUniform.any"
-//  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyManExternal.any"
-//  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyManExtPercentile.any"
-//  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyWomanExtPercentile.any"
-//  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyWomanExtPercentile.any"
-//  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyManXYZ.any"
 
 //--------------- END OF SCALING CONFIGURATION -------------------
 ```
@@ -78,7 +58,7 @@ standing model with the standard size.
 ## ScalingNone
 
 This particular scaling law can be used for the studies, which require the unscaled cadaveric
-datasets, which were used for the construction of the body parts. Please enable \_SCALING_NONE\_
+datasets, which were used for the construction of the body parts. Please enable the \_SCALING_NONE\_
 option in order to switch to this scaling law.
 
 ```AnyScriptDoc
@@ -91,20 +71,6 @@ option in order to switch to this scaling law.
 //  #define BM_SCALING _SCALING_LENGTHMASSFAT_
 //  #define BM_SCALING _SCALING_XYZ_
 
-
-// Scaling laws using external measures
-//  #define BM_SCALING _SCALING_UNIFORM_EXTMEASUREMENTS_
-//  #define BM_SCALING _SCALING_LENGTHMASS_EXTMEASUREMENTS_
-//  #define BM_SCALING _SCALING_LENGTHMASSFAT_EXTMEASUREMENTS_
-
-// Anthropometric data file (unchanged files can be found in AAUHuman\Scaling\AnyFamily)
-//  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyMan.any"
-//  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyManUniform.any"
-//  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyManExternal.any"
-//  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyManExtPercentile.any"
-//  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyWomanExtPercentile.any"
-//  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyWomanExtPercentile.any"
-//  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyManXYZ.any"
 ```
 
 The result will not noticeably change as compared to the ScalingStandard, but minor differences
@@ -117,11 +83,10 @@ height, body part lengths, etc., these details need to be incorporated into the 
 In this case \_SCALING_STANDARD\_ and \_SCALING_NONE\_ are not applicable, since they
 correspond to predetermined human sizes and weights, which cannot be overwritten.
 
-For these purpose a number of additional scaling laws were implemented, which all share
-an input mechanism for subject-specific measurements. This mechanism loads a file, called an
-AnyMan file, which contains height, weight, fat percentage, and individual segmental measurements
-or scale factors. This is done by setting a value to the special body configuration variable,
-BM_SCALING_ANTHRO_FILE. Please enable a predefined AnyMan like shown below:
+For these purposes a number of additional scaling laws were implemented, which
+all share an input mechanism for subject-specific measurements. This mechanism
+lets the user overwrite the height, weight, fat percentage, and individual
+segmental measurements or scale factors. This is done like below:
 
 ```AnyScriptDoc
 /*------------- SCALING CONFIGURATION SECTION --------------------*/
@@ -131,104 +96,17 @@ BM_SCALING_ANTHRO_FILE. Please enable a predefined AnyMan like shown below:
 §    #define BM_SCALING _SCALING_UNIFORM_§
 //  #define BM_SCALING _SCALING_LENGTHMASS_
 ...
-// Anthropometric data file (unchanged files can be found in AAUHuman\Scaling\AnyFamily)
-§    #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyMan.any"§
-//  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyManUniform.any"
-...
+// Example of how to overwrite the default values
+§//  Main.HumanModel.Anthropometrics.BodyHeight = 1.8;§
+§//  Main.HumanModel.Anthropometrics.BodyMass = 80;§
 ```
 
-We have succesfully personalized the model using anthropometric measurements from
-an existing file. In order to change some dimensions or provide a completely new set of them
-in your model - please copy this file and make modifications at your model location. One can
-also find unchanged AnyMan files, that were used in this tutorial in the following folder:
-AMMR\\AAUHuman\\Scaling\\AnyFamily.
+The above line shows how it can be overwritten from, say, the Main folder.
+We cannow easily personalize the model using anthropometric measurements.
 
-Let's have a look at the content of the AnyMan file to learn what can be entered.
+### Do I need to overwrite all the anthropometric variables?
 
-```AnyScriptDoc
-// File of anthropometric data
-// In this file you have to enter the legnth of each segment individualy
-
-AnyVar BMI = BodyMass/(BodyHeight*BodyHeight);
-///Estimation from Frankenfield et al. (2001) valid for men
-AnyVar FatPercent = (-0.09 + 0.0149*BMI - 0.00009*BMI*BMI)*100;
-
-AnyVar BodyMass = 75 ;
-AnyVar BodyHeight = 180 /100;
-
-
-
-AnyFolder SegmentMasses = {
-
-  //Segment masses in kg from Winter ("Biomechanics and motor control of human movement." David A. Winter)
-  AnyVar Lumbar = 0.139*.BodyMass; // T12-L1 to L5-Sacrum
-  AnyVar Thorax = 0.1894*.BodyMass; // C7-T1 to T12-L1 (modified from 0.216 winter to separate scapula)
-  AnyVar Pelvis = 0.142*.BodyMass;
-  AnyVar Head = 0.081*.BodyMass; // head and cervical
-
-  AnyFolder Right =
-  {
-    AnyVar Shoulder = 0.0133*..BodyMass;
-    AnyVar UpperArm = 0.028*..BodyMass;
-    AnyVar LowerArm = 0.016*..BodyMass;
-    AnyVar Hand = 0.006*..BodyMass;
-    AnyVar Thigh = 0.1*..BodyMass;
-    AnyVar Shank = 0.0465*..BodyMass;
-    AnyVar Talus = 0.2*0.0145*..BodyMass; //20% of total foot (from bone volume ratio)
-    AnyVar Foot =  0.8*0.0145*..BodyMass; //80% of total foot (from bone volume ratio)
-  };
-
-  ...
-};
-
-
-AnyFolder SegmentDimensions = {
-  AnyVar PelvisWidth = 0.176*.BodyHeight/1.75; //distance between hip joints (0.16 for simple leg model)
-  AnyVar HeadHeight = 0.14*.BodyHeight/1.75;//height in neutral position from  C1HatNode to top of head
-  AnyVar TrunkHeight = 0.620233*.BodyHeight/1.75;//height in neautral position from  C1HatNode to L5SacrumJnt
-
-
- // These two folders are used by the scaling laws
-  AnyFolder Right =
-  {
-    AnyVar UpperArmLength = 0.340079*..BodyHeight/1.75;
-    AnyVar LowerArmLength =0.2690167*..BodyHeight/1.75;
-    AnyVar HandLength = 0.182*..BodyHeight/1.75;
-    AnyVar HandBreadth = 0.085*..BodyHeight/1.75;
-
-    AnyVar ThighLength = 0.4098364*..BodyHeight/1.75;
-    AnyVar ShankLength = 0.4210448*..BodyHeight/1.75;
-    AnyVar FootLength = 0.2571425*..BodyHeight/1.75;
-    AnyVar TalusLength = 0.133*FootLength;
-  };
-
-  ...
-};
-```
-
-You can see that mass and lengths of individual segments are proportional
-to the provided overall mass and height, and changing these values will
-change the entire model. It is also possible to change individual lengths
-in case such data is available. An example will be given in the following
-section.
-
-But what happens if the BM_SCALING_ANTHRO_FILE variable is not set? The
-default values will be provided, and these values can be overwritten due to
-the specifics of the implementation. This creates a slightly different
-personalization workflow. For example, one can navigate in the Model Tree
-and select a variable that needs to be defined:
-
-```{image} _static/lesson1/ModelTreeAnthro.png
-```
-
-The following line shows how it can be overwritten from, say, the Main folder.
-
-```AnyScriptDoc
-Main.HumanModel.Anthropometrics.BodyMass = 90;
-```
-
-But for this tutorial we will predefined AnyMan files to have an
-overview of the entire personalization scheme in one place.
+No, you do not need to overwrite all the anthropometric variables. The implementation allows you to overwrite the ones you need. For example, if you only know the body mass and height, you can overwrite only these two variables and the rest will be calculated automatically.
 
 ## ScalingUniform
 
@@ -238,58 +116,35 @@ joint to joint distance and the bone is then scaled in three dimensions
 proportionally to its length. To use this law you must change the
 scaling parameter to be \_SCALING_UNIFORM\_.
 
-In the previous section we showed how this can be done and how an AnyMan
-file can be set. Please now load the model and have a look at the Model
-View window. Notice that the body size did not change from the standard
-scaling version. This is because the default values for segment masses
-and sizes in this file are the same as the standard values. But if you
-change them, the model will scale according to your specifications.
+In the previous section we showed how this can be done. Please do so, then load the
+model and have a look at the Model View window. Notice that the body size did
+not change from the standard scaling version. This is because the default values
+for segment masses and sizes in this file are the same as the standard values.
+But if you change them, the model will scale according to your specifications.
 
-Please double-click on the following line to access your AnyMan.any
-file:
+Let us try to change the mass of the body. First, inspect the *BodyMass* variable in the Model Tree window.
+You can find it at `Main.HumanModel.Anthropometrics.BodyMass`.
+The default value is 75 kg.
 
-```AnyScriptDoc
-#path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyMan.any"
-```
-
-Let us have a closer look. The total body weight is expressed in
-kilograms by the variable `Body_Mass` at the top of the file:
+Try changing it to 90 kg by adding the following to your main file:
 
 ```AnyScriptDoc
-AnyVar Body_Mass = 75;
+§Main.HumanModel.Anthropometrics.BodyMass = 90;§
 ```
 
-Try changing it to 90 kg and load the model again. Once again the size
-of the body did not change. In the ScalingUniform law, the `Body_Mass`
+Now load the model again. Once again the size
+of the body did not change. In the ScalingUniform law, the `BodyMass`
 parameter controls the mass of the segments but not their sizes. As shown
 previously the overall body mass is distributed to each segment.
 
-So the `Body_Mass` parameter only controls the segment masses. The size
+So the `BodyMass` parameter only controls the segment masses. The size
 of the model is controlled by another list of variables defining the
 lengths of the different bones. The length of each segment can be set
 independently, for example we can increase the length of the thigh
-by modifying the corresponding variable:
+by adding the following line to the main file:
 
 ```AnyScriptDoc
-AnyFolder SegmentDimensions = {
-  AnyVar PelvisWidth = 0.176*.BodyHeight/1.75; //distance between hip joints (0.16 for simple leg model)
-  AnyVar HeadHeight = 0.14*.BodyHeight/1.75;//height in neutral position from  C1HatNode to top of head
-  AnyVar TrunkHeight = 0.620233*.BodyHeight/1.75;//height in neautral position from  C1HatNode to L5SacrumJnt
-
-
- // These two folders are used by the scaling laws
-  AnyFolder Right =
-  {
-    AnyVar UpperArmLength = 0.340079*..BodyHeight/1.75;
-    AnyVar LowerArmLength =0.2690167*..BodyHeight/1.75;
-    AnyVar HandLength = 0.182*..BodyHeight/1.75;
-    AnyVar HandBreadth = 0.085*..BodyHeight/1.75;
-
-    AnyVar ThighLength = §0.626§;
-    AnyVar ShankLength = 0.4210448*..BodyHeight/1.75;
-    AnyVar FootLength = 0.2571425*..BodyHeight/1.75;
-    AnyVar TalusLength = 0.133*FootLength;
-  };
+§Main.HumanModel.Anthropometrics.SegmentDimensions.Right.ThighLength = 0.626§;
 ```
 
 Load the model again and have a look at the Model View window. The
@@ -308,40 +163,22 @@ Let us apply a more reasonable size. Please change the default values
 to the following set of consistent measures:
 
 ```AnyScriptDoc
-AnyFolder SegmentDimensions = {
-  AnyVar PelvisWidth = §0.180§; //distance between hip joints (0.16 for simple leg model)
-  AnyVar HeadHeight = §0.169§;//height in neutral position from  C1HatNode to top of head
-  AnyVar TrunkHeight = §0.754§;//height in neautral position from  C1HatNode to L5SacrumJnt
+§Main.HumanModel.Anthropometrics.SegmentDimensions.PelvisWidth = 0.180§;
+§Main.HumanModel.Anthropometrics.SegmentDimensions.HeadHeight = 0.169§;
+§Main.HumanModel.Anthropometrics.SegmentDimensions.TrunkHeight = 0.754§;
 
+§Main.HumanModel.Anthropometrics.SegmentDimensions.Right.UpperArmLength = 0.405§;
+§Main.HumanModel.Anthropometrics.SegmentDimensions.Right.LowerArmLength =0.316§;
+Main.HumanModel.Anthropometrics.SegmentDimensions.Right.ThighLength = §0.548§;
+§Main.HumanModel.Anthropometrics.SegmentDimensions.Right.ShankLength = 0.551§;
+§Main.HumanModel.Anthropometrics.SegmentDimensions.Right.FootLength = 0.243§;
 
- // These two folders are used by the scaling laws
-  AnyFolder Right =
-  {
-    AnyVar UpperArmLength = §0.405§;
-    AnyVar LowerArmLength =§0.316§;
-    AnyVar HandLength = 0.182*..BodyHeight/1.75;
-    AnyVar HandBreadth = 0.085*..BodyHeight/1.75;
+§Main.HumanModel.Anthropometrics.SegmentDimensions.Left.UpperArmLength = 0.405§;
+§Main.HumanModel.Anthropometrics.SegmentDimensions.Left.LowerArmLength =0.316§;
+§Main.HumanModel.Anthropometrics.SegmentDimensions.Left.ThighLength = 0.548§;
+§Main.HumanModel.Anthropometrics.SegmentDimensions.Left.ShankLength = 0.551§;
+§Main.HumanModel.Anthropometrics.SegmentDimensions.Left.FootLength = 0.243§;
 
-    AnyVar ThighLength = §0.548§;
-    AnyVar ShankLength = §0.551§;
-    AnyVar FootLength = §0.243§;
-    AnyVar TalusLength = 0.133*FootLength;
-  };
-
-  AnyFolder Left =
-  {
-    AnyVar UpperArmLength = §0.405§;
-    AnyVar LowerArmLength =§0.316§;
-    AnyVar HandLength = 0.182*..BodyHeight/1.75;
-    AnyVar HandBreadth = 0.085*..BodyHeight/1.75;
-
-    AnyVar ThighLength = §0.548§;
-    AnyVar ShankLength = §0.551§;
-    AnyVar FootLength = §0.243§;
-    AnyVar TalusLength = 0.133*FootLength;
-  };
-
-};
 ```
 
 ```{image} _static/lesson1/ScalingUniformFront.jpg
@@ -353,29 +190,40 @@ proportionate sizes of the segments. If you can't see the difference
 from the standard size model, notice how the feet are now sticking down
 below the reference frame.
 
-It should be obvious that this type of scaling requires good
-anthropometric data to give reasonable results. But such data is not
-always easily available. So there is a version of the AnyMan file called
-AnyManUniform.any. This file only takes as input the body mass and the
-body height and subsequently scales all the segment lengths uniformly
-according to the defined body height. This may not give you a model
-where each bone matches a given subject, but it can be a reasonable
-estimate in cases where only the overall mass and height of the body is
-known. Try using the AnyManUniform.any file:
+It should be obvious that this type of scaling requires good anthropometric data
+to give reasonable results. But such data is not always easily available. To
+help with this, the default values of the `_SCALING_UNIFORM_` law is implemented
+in a way that it only takes as input the body mass and the body height and
+subsequently scales all the segment lengths uniformly according to the defined
+body height. This may not give you a model where each bone matches a given
+subject, but it can be a reasonable estimate in cases where only the overall
+mass and height of the body is known. Try to comment out these lines again:
 
 ```AnyScriptDoc
-§//#path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyMan.any"
-#path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyManUniform.any"§
+§//Main.HumanModel.Anthropometrics.SegmentDimensions.PelvisWidth = 0.180§;
+§//Main.HumanModel.Anthropometrics.SegmentDimensions.HeadHeight = 0.169§;
+§//Main.HumanModel.Anthropometrics.SegmentDimensions.TrunkHeight = 0.754§;
+
+§//Main.HumanModel.Anthropometrics.SegmentDimensions.Right.UpperArmLength = 0.405§;
+§//Main.HumanModel.Anthropometrics.SegmentDimensions.Right.LowerArmLength =0.316§;
+§//Main.HumanModel.Anthropometrics.SegmentDimensions.Right.ThighLength = 0.548§;
+§//Main.HumanModel.Anthropometrics.SegmentDimensions.Right.ShankLength = 0.551§;
+§//Main.HumanModel.Anthropometrics.SegmentDimensions.Right.FootLength = 0.243§;
+
+§//Main.HumanModel.Anthropometrics.SegmentDimensions.Left.UpperArmLength = 0.405§;
+§//Main.HumanModel.Anthropometrics.SegmentDimensions.Left.LowerArmLength =0.316§;
+§//Main.HumanModel.Anthropometrics.SegmentDimensions.Left.ThighLength = 0.548§;
+§//Main.HumanModel.Anthropometrics.SegmentDimensions.Left.ShankLength = 0.551§;
+§//Main.HumanModel.Anthropometrics.SegmentDimensions.Left.FootLength = 0.243§;
+
 ```
 
-Now it is easy to scale the body down to represent a small person. Open
-the AnyManUniform file from the Files tab again and change the mass and
-height variable as following:
+Now it is easy to scale the body down to represent a small person.
+Use thefollowing line to set the body height to 1.65 m and the body mass to 60 kg:
 
 ```AnyScriptDoc
-AnyFolder AnthroData = {
-AnyVar Body_Mass = §60§;
-AnyVar body_height = §165/100§;
+§Main.HumanModel.Anthropometrics.BodyHeight = 1.65;§
+§Main.HumanModel.Anthropometrics.BodyMass = 60;§
 ```
 
 When you load the model you will see all the segments automatically
@@ -388,7 +236,7 @@ This law scales the size of the body according not only to the segment
 lengths but also to the segments masses, so unlike the ScalingUniform
 law it provides the opportunity to define tall and skinny people or
 small and squat people. Like in the ScalingUniform law, the total body
-mass is defined by the variable `Body_Mass`. Just as previously, this
+mass is defined by the variable `BodyMass`. Just as previously, this
 total mass is then divided between the segments by means of
 coefficients, but the size scaling is different. Let us investigate it.
 In the main file, please choose the ScalingLengthMass law and switch
@@ -400,50 +248,13 @@ back to the AnyMan file:
   #define BM_SCALING _SCALING_LENGTHMASS_§
 //  #define BM_SCALING _SCALING_LENGTHMASSFAT_
 ...
-// Anthropometric data file (unchanged files can be found in AAUHuman\Scaling\AnyFamily)
-§#path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyMan.any"
-//  #path BM_SCALING_ANTHRO_FILE "Model\AnyFamily\AnyManUniform.any"§
-...
 ```
 
-In the AnyMan file, switch back the segment length values to the initial
-ones and increase the body mass to 110 kg:
+In the Main file, switch back the segment length values to the initial
+ones (by outcommenting the added lines) and increase the body mass to 110 kg:
 
 ```AnyScriptDoc
-AnyVar Body_Mass = §110§;
-...
-AnyFolder SegmentDimensions = {
-  AnyVar PelvisWidth = 0.176*.BodyHeight/1.75; //distance between hip joints (0.16 for simple leg model)
-  AnyVar HeadHeight = 0.14*.BodyHeight/1.75;//height in neutral position from  C1HatNode to top of head
-  AnyVar TrunkHeight = 0.620233*.BodyHeight/1.75;//height in neautral position from  C1HatNode to L5SacrumJnt
-
-
- // These two folders are used by the scaling laws
-  AnyFolder Right =
-  {
-    AnyVar UpperArmLength = 0.340079*..BodyHeight/1.75;
-    AnyVar LowerArmLength =0.2690167*..BodyHeight/1.75;
-    AnyVar HandLength = 0.182*..BodyHeight/1.75;
-    AnyVar HandBreadth = 0.085*..BodyHeight/1.75;
-
-    AnyVar ThighLength = 0.4098364*..BodyHeight/1.75;
-    AnyVar ShankLength = 0.4210448*..BodyHeight/1.75;
-    AnyVar FootLength = 0.2571425*..BodyHeight/1.75;
-    AnyVar TalusLength = 0.133*FootLength;
-  };
-
-  AnyFolder Left =
-  {
-    AnyVar UpperArmLength = 0.340079*..BodyHeight/1.75;
-    AnyVar LowerArmLength =0.2690167*..BodyHeight/1.75;
-    AnyVar HandLength = 0.182*..BodyHeight/1.75;
-    AnyVar HandBreadth = 0.085*..BodyHeight/1.75;
-
-    AnyVar ThighLength = 0.4098364*..BodyHeight/1.75;
-    AnyVar ShankLength = 0.4210448*..BodyHeight/1.75;
-    AnyVar FootLength = 0.2571425*..BodyHeight/1.75;
-    AnyVar TalusLength = 0.133*FootLength;
-  };
+Main.HumanModel.Anthropometrics.BodyMass = §110§;
 ```
 
 Load the model and look at the Model View. Our model looks strange!
@@ -465,51 +276,10 @@ variables just control one scaling direction and not the two others.
 
 So to have a normal-looking model we have to adjust segment mass and
 length simultaneously. As the mass we defined is 110 kg, a height of
-1.98 m could be reasonable. As we do not have a clear idea of the
-individual segment lengths, we shall simply multiply all of them by a
-single coefficient (it is also a good opportunity to use the
-AnyManUniform file and directly enter the 1.98 m height, you can try
-it). The initial segment lengths correspond to a body of 1.80 m, so the
-ratio we are going to multiply the segment length with is 1.1. Let's add
-a scale factor variable and multiply all dimensions using this one:
-
+1.98 m could be reasonable:
+  
 ```AnyScriptDoc
-AnyFolder SegmentDimensions = {
-
-  §AnyVar ScaleFactor = 1.1;§
-  AnyVar PelvisWidth = 0.176§*ScaleFactor§; //distance between hip joints (0.16 for simple leg model)
-  AnyVar HeadHeight = 0.14§*ScaleFactor§;//height in neutral position from  C1HatNode to top of head
-  AnyVar TrunkHeight = 0.620233§*ScaleFactor§;//height in neautral position from  C1HatNode to L5SacrumJnt
-
-
-  // These two folders are used by the scaling laws
-  AnyFolder Right =
-  {
-    AnyVar UpperArmLength = 0.340079§*.ScaleFactor§;
-    AnyVar LowerArmLength =0.2690167§*.ScaleFactor§;
-    AnyVar HandLength = 0.182§*.ScaleFactor§;
-    AnyVar HandBreadth = 0.085§*.ScaleFactor§;
-
-    AnyVar ThighLength = 0.4098364§*.ScaleFactor§;
-    AnyVar ShankLength = 0.4210448§*.ScaleFactor§;
-    AnyVar FootLength = 0.2571425§*.ScaleFactor§;
-    AnyVar TalusLength = 0.133*FootLength;
-  };
-
-  AnyFolder Left =
-  {
-    AnyVar UpperArmLength = 0.340079§*.ScaleFactor§;
-    AnyVar LowerArmLength =0.2690167§*.ScaleFactor§;
-    AnyVar HandLength = 0.182§*.ScaleFactor§;
-    AnyVar HandBreadth = 0.085§*.ScaleFactor§;
-
-    AnyVar ThighLength = 0.4098364§*.ScaleFactor§;
-    AnyVar ShankLength = 0.4210448§*.ScaleFactor§;
-    AnyVar FootLength = 0.2571425§*.ScaleFactor§;
-    AnyVar TalusLength = 0.133*FootLength;
-  };
-
-};
+§Main.HumanModel.Anthropometrics.BodyHeight = 1.98§;
 ```
 
 ```{image} _static/lesson1/ScalingLengthMassCorrectFront.jpg
@@ -527,7 +297,7 @@ We mentioned at the beginning of the tutorial that the muscle strength
 is also scaled. It is time to have a look at it and compare muscle
 forces from different scaled models. To do so we need a body with
 muscles. Please add the muscles by commenting out the following section
-of the general configuration block:
+of the general configuration block in the `BodyModelConfiguration.any` file:
 
 ```AnyScriptDoc
 §//#ifndef BM_LEG_MUSCLES_BOTH
@@ -613,18 +383,12 @@ should get the following value:
 ```
 
 We will now try to model a small person to compare his muscle activity
-with the one we have just plotted. In the AnyMan file let us enter the
+with the one we have just plotted. Let us enter the
 parameters for a 65kg and 1.70 m person:
 
 ```AnyScriptDoc
-AnyVar Body_Mass = §65§ ;
-AnyVar body_height = §170§ /100;
-
-    ...
-
-AnyFolder SegmentDimensions = {
-
-  AnyVar ScaleFactor = §0.95§;
+Main.HumanModel.Anthropometrics.BodyHeight = §1.70§;
+Main.HumanModel.Anthropometrics.BodyMass = §65§;
 ```
 
 We can load the model, run the inverse dynamics analysis and check the
@@ -634,7 +398,7 @@ resultant value.
 ```
 
 For the same load on the hands (50 N) the tall heavy model has a muscle
-activity of 42.1 %, whereas the short model reaches 56.5 % of muscle
+activity of 53.3 %, whereas the short model reaches 67.7 % of muscle
 activity. So our small model is definitely weaker than the tall one.
 
 ## ScalingLengthMassFat
@@ -652,9 +416,9 @@ percentage will have less muscle strength, because the volume
 otherwise occupied by the muscles is replaced by inactive fat.
 
 So the mass and size scales are controlled as in the ScalingLengthMass
-model by the `Body_Mass` variable and all the segment length variables
+model by the `BodyMass` variable and all the segment length variables
 respectively. The fat percentage is controlled in concert by the
-variables `Body_Height` and `Body_Mass`. These two variables are used to
+variables `BodyHeight` and `BodyMass`. These two variables are used to
 calculate the BMI (Body-Mass Index), and the BMI is used to calculate
 the fat percentage of the body according to Frankenfield, D. C.; Rowe,
 W. A.; Cooney, R. N.; Smith, J. S. & Becker, D. (2001): Limits of body
@@ -662,6 +426,7 @@ mass index to detect obesity and predict body composition, Nutrition
 17(1), 26-30.
 
 ```AnyScriptDoc
+// Default values for the fat percentage found in (ammr\Body\AAUHuman\Scaling\DefaultAnthropometrics.any)
 AnyVar BMI = AnthroData.Body_Mass/(AnthroData.body_height*AnthroData.body_height);
 AnyVar FatPercent = (-0.09 + 0.0149*BMI - 0.00009 *BMI*BMI)*100; //Estimation from Frankenfield et al. (2001) valid for men
 ```
@@ -683,11 +448,11 @@ high fat percentage that is not taken into account by the law.
 
 We will try to illustrate this by plotting the muscle activity of the
 same short and heavy model with both ScalingLengthMass and
-ScalingLengthMassFat laws. We will begin by adjusting the AnyMan file
+ScalingLengthMassFat laws. We will begin by adjusting the anthropometrics
 to match a 90kg and 1.70 m person:
 
 ```AnyScriptDoc
-AnyVar Body_Mass = §90§;
+Main.HumanModel.Anthropometrics.BodyMass = §90§;
 ```
 
 Then please load the model and re-run the application. Notice that we
@@ -716,16 +481,12 @@ following results:
 
 If we compare these two activity values, the difference is clear. The
 ScalingLengthMassFat law is increasing the muscle activity by
-approximately 13 % in this case, from 43 % to 56 %. This shows the
+approximately 16 % in this case, from 50 % to 66 %. This shows the
 limits of the ScalingLengthMass law for extreme cases.
 ScalingLengthMassFat is able to cover a wider range of cases while
 keeping its accuracy.
 
-Just like the ScalingLengthMass law this law can also be used with the
-AnyManUniform file.
-
 This completes scaling Lesson 1: Joint to joint scaling methods.
-
 
 :::{admonition} **Next lesson:**
 :class: seealso

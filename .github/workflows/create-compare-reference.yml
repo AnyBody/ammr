@@ -47,32 +47,20 @@ jobs:
           ref: ${{ env.GIT_REFERENCE }}
           fetch-depth: 0
 
-      - name: Install conda
-        run: | 
-          Invoke-Webrequest -URI https://anybodycloudci.blob.core.windows.net/micromamba/micromamba-0.25.1-0.tar.bz2 -OutFile ~\micromamba.tar.bz2
-          (Get-FileHash ~\micromamba.tar.bz2).hash -eq "ED3B12B747F05A630198D3A8A8F7120BDE22AE9033CB62AF95D6F3DF57FE9B0C"
-          $env:Path = "C:\PROGRA~1\Git\usr\bin;" + $env:Path
-          tar -xvjf ~/micromamba.tar.bz2 --strip-components 2 -C ~ Library/bin/micromamba
-          echo "MAMBA_ROOT_PREFIX=$HOME\micromamba" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
-
-      - name: Create conda environment
-        run: | 
-          ~\micromamba.exe shell hook -s powershell | Out-String | iex
-          micromamba create --allow-downgrade -y -n _ammr_test -f Tests\test-environment.yml
-
+      - uses: prefix-dev/setup-pixi@v0.4.1
+        with:
+          cache-write: ${{ github.event_name == 'push' && github.ref_name == 'master' }}
+          post-cleanup: true
+    
       - name: Store AMS Version
         run: |
-          ~\micromamba.exe shell hook -s powershell | Out-String | iex
-          micromamba activate _ammr_test
-          $AMS_VERSION = $(python -c "import anypytools; print(anypytools.tools.anybodycon_version('${{ env.ANYBODYCON }}'))")
+          $AMS_VERSION = $(pixi run python -c "import anypytools; print(anypytools.tools.anybodycon_version('${{ env.ANYBODYCON }}'))")
           echo "AMS_VERSION=$AMS_VERSION" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Run test for compare
         run: |
-          ~\micromamba.exe shell hook -s powershell | Out-String | iex
-          micromamba activate _ammr_test
-
-          pytest --runslow --anytest-output=${{runner.temp}} --anytest-name=${{ env.GIT_REFERENCE }} --anybodycon="$Env:ANYBODYCON" Tests
+          cd Tests
+          pixi run pytest --runslow --anytest-output=${{runner.temp}} --anytest-name=${{ env.GIT_REFERENCE }} --anybodycon="$Env:ANYBODYCON"
 
       - name: Compress compare data
         working-directory: ${{runner.temp}}
@@ -104,11 +92,8 @@ jobs:
           AZURE_CONN_STR: ${{ secrets.AZURE_CONN_STR }}
           AZURE_BLOB_NAME: ${{ env.COMPARE_TEST_NAME }}
         run: |
-          ~\micromamba.exe shell hook -s powershell | Out-String | iex
-          micromamba create -y -q -c conda-forge -n _azure-storage-blob azure-storage-blob
-          micromamba activate _azure-storage-blob
           echo $env:AZURE_BLOB_NAME
           echo $env:AZURE_CONTAINER_NAME
 
-          python upload.py compare-data.zip
+          pixi run python upload.py compare-data.zip
 
