@@ -12,7 +12,6 @@ import anypytools.macro_commands as mc
 mocap_path = pathlib.Path(__file__).parent.parent / "Application/MocapExamples"
 
 
-
 macros1 =[
     [
         mc.Load(mocap_path / "Plug-in-gait_MultiTrial_StandingRef\Subjects\S1\S1_StandingRef\Main.any"),
@@ -39,11 +38,11 @@ macros1 =[
     ]
 ]
 
-for standingref in (mocap_path / "ADL_Gait_[beta]\Subjects").glob("**/*_ST/Main.any"):
-    macros1.append([
-        mc.Load(standingref),
-        mc.OperationRun("Main.RunParameterIdentification"),
-    ])
+# for standingref in (mocap_path / "ADL_Gait_[beta]\Subjects").glob("**/*_ST/Main.any"):
+#     macros1.append([
+#         mc.Load(standingref),
+#         mc.OperationRun("Main.RunParameterIdentification"),
+#     ])
 
 
 macros2 = [
@@ -55,7 +54,8 @@ macros2 = [
 ]
 
 
-abc_path = r"C:\Program Files\AnyBody Technology\AnyBody.7.5_Beta\AnyBodyCon.exe"
+# abc_path = r"C:\Program Files\AnyBody Technology\AnyBody.7.5_Beta\AnyBodyCon.exe"
+abc_path = None
 
 app1 = anypytools.AnyPyProcess(anybodycon_path=abc_path, num_processes=10)
 
@@ -63,4 +63,3 @@ app1.start_macro(macros1)
 
 app2 = anypytools.AnyPyProcess(anybodycon_path=abc_path)
 app2.start_macro(macros2)
-
