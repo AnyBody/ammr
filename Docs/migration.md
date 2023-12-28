@@ -1,7 +1,7 @@
-# Update models to AMMR 2.5
+# Update models to AMMR 3.0
 
 Models created earlier versions of AnyBody may need to be updated to work with
-AnyBody 7.5 and the new model repository (AMMR 2.5).
+AnyBody 7.5 and the new model repository (AMMR 3.0).
 
 This document outlines important changes which may break
 older models or change results.
@@ -17,10 +17,9 @@ warnings and how to fix them.
 
 ### Trunk and pelvis neutral posture
 
-The trunk model in AMMR 2.5 changes which posture is considered
+The trunk model in AMMR 3.0 changes which posture is considered
 neutral. This was done in preparation for a new [detailed thoracic
-model](#thoracic-model) which will be available in [AMMR
-3.0](https://github.com/anybody/ammr). Pelvic tilt for the model has been updated as well as the the neutral orientation of the thoracic segment.
+model](#thoracic-model) which will be available in [AMMR 4.0](https://github.com/anybody/ammr). Pelvic tilt for the model has been updated as well as the the neutral orientation of the thoracic segment.
 
 ::: {warning}
 These postural changes will affect older applications. Especially, in models
@@ -98,7 +97,7 @@ The `StringMesh` variable have changed type from `AnyVar` to `AnyInt`. So if `St
 
 ## Deprecation warnings
 
-Below is a set of possible errors you may encounter if old models are used with AMMR 2.5. 
+Below is a set of possible errors you may encounter if old models are used with AMMR 3.0. 
 
 
 :::{dropdown} `AnyViaPointMuscle  :  Deprecated class`
