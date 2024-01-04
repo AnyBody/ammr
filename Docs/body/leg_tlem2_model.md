@@ -90,7 +90,7 @@ More details on the TLEM2 model can be found online:
 
 (TLEM2-v2.2)=
 
-TLEM v2.2 (Released in AMMR 2.5.0)
+TLEM v2.2 (Released in AMMR 3.0.0)
 : Wrapping surfaces have been added to the Achilles tendon around the ankle in
   the TLEM 2 leg model (now designated TLEM 2.2). This ensures an even ratio of moment arms between
   the soleus and gastrocnemius muscles. Hence, gastrocnemius is recruited less, 
