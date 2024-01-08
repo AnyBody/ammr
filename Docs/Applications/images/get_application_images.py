@@ -11,7 +11,7 @@ from anypytools import AnyPyProcess, macro_commands as mc
 APP_FOLDER = Path(__file__).parent / "../../../Tests/Applications"
 MOCAP_FOLDER = Path(__file__).parent / "../../../Tests/AnyMocap"
 app_opts = {
-    "anybodycon_path": r"C:\Program Files\AnyBody Technology\AnyBody.7.5_Beta\AnyBodyCon.exe",
+    "anybodycon_path": os.path.expandvars("${LocalAppData}\Programs\AnyBody Technology\AnyBody.8.0_Beta\AnyBodyCon.exe"),
     "num_processes": 2,
 }
 

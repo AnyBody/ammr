@@ -159,7 +159,7 @@ achieve same marker position and joint angle output.
   `AnySurfCylinderFit` have been changed. Since `AnySurfCylinderFit` is now a
   sub class of `AnyRefNode` it should no longer be nested inside inside an other
   parent reference frame to provide the pos `sRel` and orientation `ARel`. This
-  fixes a number of deprecated warnings which would have triggered with AMS 7.5. 
+  fixes a number of deprecated warnings which would have triggered with AnyBody version 8. 
 
 * Added new `AnatomicalFrameTrunk` reference frame to pelvis segment consistent
   with anatomical frames in rest of the trunk model. All joint angles relative
