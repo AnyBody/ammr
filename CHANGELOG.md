@@ -14,6 +14,14 @@ pelvis and the foot segments.  The Y component may need to be adjusted to
 achieve same marker position and joint angle output.
 :::
 
+### Removed:
+
+* The three scaling laws `_SCALING_UNIFORM_EXTMEASUREMENTS_`,
+  `_SCALING_LENGTHMASS_EXTMEASUREMENTS_`,
+  `_SCALING_LENGTHMASSFAT_EXTMEASUREMENTS_` have been deprecated. They are
+  superseeded by the Statistical Scaling Plugin which cover the same
+  functionality. The AMMR guide on scaling have been updated to reflect this
+  change.
 
 ### Fixed:
 * Fixed a couple of bugs in the {ref}`Seated Human model <example_seatedhuman>`:  
@@ -143,7 +151,7 @@ achieve same marker position and joint angle output.
   `AnySurfCylinderFit` have been changed. Since `AnySurfCylinderFit` is now a
   sub class of `AnyRefNode` it should no longer be nested inside inside an other
   parent reference frame to provide the pos `sRel` and orientation `ARel`. This
-  fixes a number of deprecated warnings which would have triggered with AMS 7.5. 
+  fixes a number of deprecated warnings which would have triggered with AnyBody version 8. 
 
 * Added new `AnatomicalFrameTrunk` reference frame to pelvis segment consistent
   with anatomical frames in rest of the trunk model. All joint angles relative

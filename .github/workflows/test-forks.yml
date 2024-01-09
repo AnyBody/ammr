@@ -21,7 +21,6 @@ jobs:
     runs-on: windows-latest
     
     steps:
-
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
@@ -32,17 +31,23 @@ jobs:
           anybody-version: "7.5.0"
           anybody-version-suffix: "Beta"
 
-      - name: Install pytest
-        uses: mamba-org/setup-micromamba@v1
+      - uses: prefix-dev/setup-pixi@v0.4.1
+        id: pixi
+        continue-on-error: true
         with:
-          environment-file: Tests/test-environment.yml
-          init-shell: powershell
-          cache-environment: true
-
+          post-cleanup: true
+          cache: false
+  
+      - name: try pixi-setup recover
+        if: steps.pixi.outcome != 'success'
+        run: | 
+          Add-Content $env:GITHUB_PATH "$HOME/.pixi/bin"
+          & $HOME/.pixi/bin/pixi.exe install
+            
       - name: Run AMMR tests
         run: |
           cd Tests
-          pytest -n auto --dist worksteal `
+          pixi run pytest -n 5 --dist worksteal `
              --splits 10 --group ${{ matrix.test_group }} --splitting-algorithm=least_duration `
              --durations=10 `
              --runslow

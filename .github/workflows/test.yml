@@ -15,7 +15,7 @@ on:
       custom-anybodycon-name:
           description: 'Name of the custom AnyBody version to use. (E.g. path on the I:\ drive)'
           required: false
-          default: 'AnyBody.7.5-CI-master.AnyBody.7.5.x/AnyBodyCon.exe'
+          default: 'AnyBody.7.5-CI-master.AnyBody.8.0.x/AnyBodyCon.exe'
       custom-pytest-arg:
           description: 'Specify which test to run. E.g. `Tests/test_example.any`. Default is entire test suite.'
           required: false
@@ -42,15 +42,12 @@ jobs:
     steps:
 
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
 
-      - uses: anybody/setup-anybody@main
-        name: Install AnyBody
+      - uses: prefix-dev/setup-pixi@v0.4.1
         with:
-          anybody-version: "7.5.0"
-          anybody-version-suffix: "Beta"
-
+          cache: true
+          cache-write: ${{ github.event_name == 'push' && github.ref_name == 'master' }}
+        
       - name: Patch with custom version
         if: inputs.use-custom-anybodycon
         uses: ./.github/actions/custom-anybodycon
@@ -59,18 +56,10 @@ jobs:
           connection-string:  ${{ secrets.AZURE_CONN_STR }}
           overwrite: true
             
-      - name: Install pytest
-        uses: mamba-org/setup-micromamba@v1
-        with:
-          environment-file: Tests/test-environment.yml
-          init-shell: powershell
-          cache-environment: true
-  
-
       - name: Run AMMR tests
         run: |
           cd Tests
-          pytest -n auto --dist worksteal `
+          pixi run pytest -n auto --dist worksteal `
              --splits 20 --group ${{ matrix.test_group }} --splitting-algorithm=least_duration `
              --durations=10 `
              --runslow
