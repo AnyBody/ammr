@@ -38,11 +38,11 @@ macros1 =[
     ]
 ]
 
-# for standingref in (mocap_path / "ADL_Gait_[beta]\Subjects").glob("**/*_ST/Main.any"):
-#     macros1.append([
-#         mc.Load(standingref),
-#         mc.OperationRun("Main.RunParameterIdentification"),
-#     ])
+for standingref in (mocap_path / "ADL_Gait_[beta]\Subjects").glob("**/*_ST/Main.any"):
+    macros1.append([
+        mc.Load(standingref),
+        mc.OperationRun("Main.RunParameterIdentification"),
+    ])
 
 
 macros2 = [
@@ -54,7 +54,6 @@ macros2 = [
 ]
 
 
-# abc_path = r"C:\Program Files\AnyBody Technology\AnyBody.7.5_Beta\AnyBodyCon.exe"
 abc_path = None
 
 app1 = anypytools.AnyPyProcess(anybodycon_path=abc_path, num_processes=10)
