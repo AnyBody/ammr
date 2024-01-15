@@ -1,0 +1,186 @@
+#path ANYBODY_PATH_OUTPUT "."
+#include "../../../libdef.any"
+
+#define BM_ARM_LEFT OFF
+#define BM_ARM_RIGHT OFF
+#define BM_TRUNK_MUSCLES OFF
+#define BM_LEG_MODEL _LEG_MODEL_TLEM2_
+
+#define BM_SCALING _SCALING_NONE_
+#define SHOW_AMMR24_FOOT 1
+#define SHOW_AMMR25_FOOT 0
+#define BM_LEG_MUSCLES_BOTH OFF
+#define BM_LEG_LEFT OFF
+
+
+#include "<ANYBODY_PATH_MODELUTILS>/Video/VideoLookAtCamera.any"
+
+
+
+
+Main = {
+  
+  
+  Main.HumanModel.BodyModel.Right.Leg.Seg.Shank = {
+  AnyRefNode OldAnkleJoint = {
+     AnyVar TibialTorsionOffset = DesignVar(0);
+       AnyVec3 sRelUnscaled =  .StdPar.AnkleJoint;
+       
+       AnyVec3 OldAnkleJoint = {0.01337003, -0.01126083, 0.0007477404};
+       AnyVec3 OldAnkleJointAxis = normalize({0.362799, 0.1304906, -0.9226858});
+       
+       AnyMat33 ARelUnscaled =   RotMat({0, 0, 0.0}, .Sign*(AnkleLateralControlPoint-AnkleMedialControlPoint ), .AnatomicalFrame.ARelUnscaled'[1])*RotMat(pi/2,y);
+       // Control point for the Ankle joint. Found by projecting the malleolus bony landmarks onto the
+       // ankle axis from the cadaver data set. Thus, scaling the control points will also scale the ankle joint axis
+       AnyVec3 AnkleLateralControlPoint =  OldAnkleJoint + (.StdPar.LateralMalleolus - OldAnkleJoint)*OldAnkleJointAxis'*OldAnkleJointAxis;
+       // Control point for the Ankle joint. Found by projecting the malleolus bony landmarks onto the
+       // ankle axis from the cadaver data set. Thus, scaling the control points will also scale the ankle joint axis
+       AnyVec3 AnkleMedialControlPoint = OldAnkleJoint + (.StdPar.MedialMalleolus - OldAnkleJoint)*OldAnkleJointAxis'*OldAnkleJointAxis;
+       sRel = .Scale(OldAnkleJoint);
+       // Ankle Joint orientation is calculated based on the direction between the two control points.
+       ARel = RotMat({0,0,0.0}, .Sign*(.Scale(AnkleLateralControlPoint) - .Scale(AnkleMedialControlPoint) ),  .AnatomicalFrame.ARel'[1])*RotMat(pi/2,y)*RotMat(TibialTorsionOffset,y);
+     };    
+  };
+
+  Main.HumanModel.BodyModel.Right.Leg.Seg.Shank.OldAnkleJoint = {
+    AnyDrawLine line = {
+      p0 = 0.05*{0,0,1};
+      p1 = -0.05*{0,0,1};
+
+      Line.RGB = {0,1,0};
+//      p0 = 0.05*.ARel'[2];
+//      p1 = -0.05*.ARel'[2];
+      GlobalCoord = Off;
+      
+    };
+  };
+  Main.HumanModel.BodyModel.Right.Leg.Seg.Foot.Talus.AnkleJoint = {
+    AnyDrawLine line = {
+      p0 = 0.05*{0,0,1};
+      p1 = -0.05*{0,0,1};
+
+      
+//      p0 = 0.05*.ARel'[2];
+//      p1 = -0.05*.ARel'[2];
+      GlobalCoord = Off;
+      
+    };
+  };
+
+  Main.HumanModel.BodyModel.Right.Leg.Seg.Shank = {
+    
+    
+    #if SHOW_AMMR25_FOOT == 1
+    AnyRefNode AMMR25Foot = {
+      // LinRotZYXPos is the output of linear and rotational (RotAxesAngles) measures between the shank and foot with Ref = 0 for lin measure.
+      // AMMR 25 foot uses the values from AMMR shipped with AMS 7.5.0.10984. This includes the update of talus segmental frame to be coincident 
+      // with the foot segmental frame and redefinition of foot/talus anatomical frame using bony landmarks. See AMMR master PR #800 and #810 on
+      // github for details.
+      AnyFloat LinRotZYXPos = {0.0073004129631475583, -0.030270340545254942, 0.0068700894472033197, 0.044073349632333815, -0.013175969238109486, -0.031498255158394939};
+      sRel = take(LinRotZYXPos, {0,1,2});
+      ARel = RotMat(LinRotZYXPos[3],z)*RotMat(LinRotZYXPos[4],y)*RotMat(LinRotZYXPos[5],x);
+      AnyDrawSurf FootSurf = {
+        //        FileName = Main.HumanModel.BodyModel.Right.Leg.Seg.Foot.DrwSurf.FileName;
+        FileName = "Surfs25/foot";
+        RGB = {1,0,0};
+      };
+      AnyDrawSurf TalusSurf = {
+        FileName = "Surfs25/talus";
+        RGB = {1,0,0};
+      };
+    };
+    #endif
+    
+    #if SHOW_AMMR24_FOOT == 1
+    AnyRefNode AMMR24Foot = {
+      // LinRotZYXPos is the output of linear and rotational (RotAxesAngles) measures between the shank and foot with Ref = 0 for lin measure.
+      // AMMR 24 foot uses the values from AMMR 2.4.4. 
+      AnyFloat LinRotZYXPos =  {0.0066484131164842976, -0.030121205310853393, 0.006633998007163501, 0.0078587544343148297, -0.0084462997063536882, -0.017192110582242365};
+      sRel = take(LinRotZYXPos, {0,1,2});
+      ARel = RotMat(LinRotZYXPos[3],z)*RotMat(LinRotZYXPos[4],y)*RotMat(LinRotZYXPos[5],x);
+      AnyDrawSurf FootSurf = {
+        FileName = "Surfs24/foot";
+        RGB = {0,1,0};
+      };
+      AnyRefNode AMMR24TalusNodeInFoot = {
+        // LinRotZYXPos is the output of linear and rotational (RotAxesAngles) measures between the foot and talus with Ref = 0 for lin measure.
+        // AMMR 2.4.4 has separate segmental frames for talus and foot. Therefore, the need for two nodes.
+        AnyFloat LinRotZYXPos = {0.0064517313882190806, 0.024429377011198451, -0.0055430553948084332, 0.0018108189479568528, 0.0070842459268321001, 0.013447326605168291}; //
+        //{0.012958866336459846, -0.0057403859490013399, 0.00072649518666837104, 0.0095474755358000256, -0.0013319584159514619, -0.0037594545457295004}; AMMR 24 Talus in Shank
+        sRel = take(LinRotZYXPos, {0,1,2});
+        ARel = RotMat(LinRotZYXPos[3],z)*RotMat(LinRotZYXPos[4],y)*RotMat(LinRotZYXPos[5],x);
+        AnyDrawSurf TalusSurf = {
+          FileName = "Surfs24/talus";
+          RGB = {0,1,0};
+        };
+      };
+    };
+    #endif
+    
+  };
+  
+  
+  VideoLookAtCamera SnapShot1(UP_DIRECTION=y, _AUTO_OPEN_PREVIEW_=0) =
+  {
+    VideoName = "TLEM22_TLEM21_closeup";
+    Analysis = {
+      AnyOperation &ref = Main.study.InitialConditions;
+    };
+    Camera.Perspective = On;
+    CameraDistance = 1.04;
+    VideoInputScale = 5;
+    VideoResolution = {600,600};
+//    CameraLookAtPoint = Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.r+{0,-0.96,0};
+    CameraLookAtPoint = Main.HumanModel.BodyModel.Right.Leg.Seg.Foot.r;
+    CameraFieldOfView = DesignVar(0.27);
+    CameraDirection  = {1,0.2,-0.50};
+    BackgroundColor = DesignVar({1,1,1});
+    Preview.FileName = VideoName + ".jpg";
+  };   
+
+  
+  VideoLookAtCamera RotatingVideo(UP_DIRECTION=y , _AUTO_PLAY_VIDEOS=OFF) =
+  {
+    VideoName = "TLEM22_TLEM21_rotating_model";
+    
+    Analysis = {
+      AnyOperation &ref = Main.study.Kinematics;
+    };
+    VideoInputScale = 5;
+    VideoResolution = {350,350};
+    VideoCodec = "libx264";
+    VideoInputFrameRate = 30; 
+    VideoOutputFrameRate = 30;
+//    CameraLookAtPoint = Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.r+{0, -0.90, 0};
+    CameraLookAtPoint = Main.HumanModel.BodyModel.Right.Leg.Seg.Foot.r;
+    CameraFieldOfView = DesignVar(0.45);
+    CameraDirection  = {cos(2*pi*Main.study.t),0,sin(2*pi*Main.study.t) };
+    BackgroundColor = DesignVar({1,1,1});
+    Counter = Main.study.iStep;
+  }; 
+   
+  
+  #include "<ANYBODY_PATH_BODY>\HumanModel.any"
+    
+  HumanModel.Mannequin.Posture.Right = {
+    ElbowPronation = -70;
+    WristAbduction = 15;
+  };
+ 
+  AnyBodyStudy study = 
+  {
+    AnyFolder& CameraRef1 = Main.RotatingVideo;
+    AnyFolder& Model = Main.HumanModel.BodyModelWithDefaultDrivers;
+    Gravity = {0, -9.81, 0};
+    nStep = 150;
+  };
+  
+  
+  AnyOperationSequence RunApplication = 
+  {
+     AnyOperation& initpos = Main.study.InitialConditions;
+     AnyOperation& SnapShot1 = Main.SnapShot1.Preview;
+     AnyOperation& RotatingVideo = Main.RotatingVideo.Create_Video;
+  };
+  
+};
