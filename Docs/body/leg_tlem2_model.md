@@ -108,7 +108,7 @@ TLEM v2.2 (Released in AMMR 3.0.0)
   talus, and calcaneus bones.
   
   With the redefined alignment of the ankle complex, the ankle joint axis was updated using 
-  the method described in Montefiori et al.[^cite_mmmmmprhdwwvm19] The joint axis was defined 
+  the method described in Montefiori et al.[^cite_mmmmmprhdww19] The joint axis was defined 
   as the axis of a cylinder fitted to the talar trochlea. The ankle joint centre was defined 
   at the midpoint of the medial and lateral malleoli projected on the ankle axis.
 
@@ -196,9 +196,9 @@ If you need to cite the model use the following references [^cite_dlgr17], [^cit
 
 [^cite_slnbrmv22]: Stolle,J., Lintz,F., de Cesar Netto,C., Bernasconi,A., Rincon,MR., Mathew,R., Vispute,D., Siegler,S. 
     "Three-dimensional ankle, subtalar, and hindfoot alignment of the normal, weightbearing hindfoot, in bilateral 
-    posture", J. Orthop. Res., 40(10) (2022) 2430-2439 ([link](https://doi.org/10.1002/jor.25267)).
+    posture", J. Orthop. Res., 40(10) (2022) 2430-2439 ([link](https://onlinelibrary.wiley.com/doi/10.1002/jor.25267)).
 
-[^cite_mmmmmprhdwwvm19]: Montefiori,E., Modenese,L., Di Marco,R., Magni-Manzoni,S., Malattia,C., Petrarca,M., Ronchetti,A., 
-    de Horatio,LT., van Dijkhuizen,P., Wang,A., Wesarg,S., Viceconti,M., Mazzà,C., 
-    "Linking Joint Impairment and Gait Biomechanics in Patients with Juvenile Idiopathic Arthritis", Ann. Biomed. 
-    Eng., 47(11) (2019) 2155-2167 ([link](https://doi.org/10.1007%2Fs10439-019-02287-0)).
+[^cite_mmmmmprhdww19]: Montefiori,E., Modenese,L., Di Marco,R., Magni-Manzoni,S., Malattia,C., Petrarca,M., 
+    Ronchetti,A., de Horatio,LT., van Dijkhuizen,P., Wang,A., Wesarg,S., "An image-based kinematic model of 
+    the tibiotalar and subtalar joints and its application to gait analysis in children with Juvenile 
+    Idiopathic Arthritis", J. Biomech., 85 (2019), 27-36. ([link](https://doi.org/10.1016/j.jbiomech.2018.12.041)).
