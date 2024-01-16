@@ -20,6 +20,154 @@
 
 Main = {
   
+  AnyFloat AMMR24Color = {0.6,0.6,0.6};
+  
+  Main.HumanModel.BodyModel.Right.Leg.Seg = {
+    AnySeg Shank2 = {
+      Mass = 0;
+      Jii = {0,0,0};
+      r0=.Thigh.KneeJoint.sRel*.Thigh.Axes0'+.Thigh.r0-OldKneeJoint.sRel*Axes0';
+      Axes0 = 
+          .Thigh.Axes0*
+          .Thigh.KneeJoint.ARel*
+          .Thigh.KneeJoint.RotNode.ARel*
+          RotMat((-pi/180)*...JointPos.KneeFlexion,z)*
+          OldKneeJoint.RotNode.ARel'*
+          OldKneeJoint.ARel';
+
+      AnyVar Sign = .Shank.Sign;      
+      AnyFunTransform3D &Scale =.Shank.Scale;      
+      AnyDrawSurf DrwSurfTibia =
+      {
+        FileName ??= ..STL.FilenameShank;
+        ScaleXYZ ??= {1.0, 1.0, ...Sign*1.0};
+        RGB ??= Main.AMMR24Color;
+        AnyFunTransform3D &Scale =.Scale;
+        Opacity ??= ...BonesOpacity.Shank;
+        Face=-1;
+      };
+      AnyDrawSurf DrwSurfFibula = {
+        FileName ??= ..STL.FilenameFibula;
+        ScaleXYZ ??= {1.0, 1.0, ...Sign*1.0};
+        RGB ??= Main.AMMR24Color;
+        AnyFunTransform3D &Scale =.Scale; 
+        Opacity ??= ...BonesOpacity.Shank;
+        Face=-1;
+      };  
+      AnyMat33 TF = {{1,0,0},{0,1,0},{0,0,Sign}};
+      AnyFolder StdPar = {
+        AnyVec3 MedialMalleolus = {0.017065441344676, 0.004967186589899, -0.027608399085015}*.TF';
+        AnyVec3 LateralMalleolus = {-0.017065441344676,  -0.004967186589900,   0.027608399085015}*.TF';
+        AnyFloat KneeJointAxis = .Sign*{0.02081402, 0.1209213,0.9924439}*.TF'/ vnorm({0.02081402, 0.1209213,0.9924439});
+        AnyVec3 KneeJoint = ..Shank.StdPar.KneeJoint;
+        AnyVec3 LateralFemuralCondyleInNeutralConf = ..Shank.StdPar.LateralFemuralCondyleInNeutralConf;
+        AnyVec3 MedialFemuralCondyleInNeutralConf = ..Shank.StdPar.MedialFemuralCondyleInNeutralConf;
+        AnyVec3 Insertion_patella_tendon = ..Shank.StdPar.Insertion_patella_tendon;
+        AnyVec3 LateralTibialEpicondyle = ..Shank.StdPar.LateralTibialEpicondyle;
+        AnyVec3 MedialTibialEpicondyle = ..Shank.StdPar.MedialTibialEpicondyle;        
+      };
+      
+      AnyFloat pUnscaled = {StdPar.LateralMalleolus, StdPar.MedialMalleolus, StdPar.LateralTibialEpicondyle, StdPar.MedialTibialEpicondyle};
+      AnyFunTransform3D& GeomScale = ..GeoScaling.Shank.ScaleFunction;
+      #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(p, SIGN) 0.5*(p[2]+p[3])
+      #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(p, SIGN) RotMat(0.5*(p[2]+p[3]), 0.5*(p[0]+p[1]), p[2]) *RotMat(0.5*pi,y)*RotMat(-0.5*pi,x)*RotMat(0.5*(SIGN-1)*pi,y)
+      
+//      #include "..\Scaling\SegScaleFunWrtAnatomicalFrame.any"
+      
+      AnyRefNode AnatomicalFrame =
+      {
+        AnyFloat pScaled = .Scale(.pUnscaled);
+        sRel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(pScaled, .Sign);
+        ARel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(pScaled, .Sign);
+        AnyVec3 sRelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(.pUnscaled, .Sign); ///< Generic unscaled position of shank ScalingNode
+        AnyMat33 ARelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(.pUnscaled, .Sign);///< Generic unscaled rotation of shank ScalingNode
+      };
+      #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_s
+      #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_A
+
+//      AnyRefNode &AnatomicalFrame = .Shank.AnatomicalFrame;
+      AnyRefNode Insertion_patella_tendon = { sRel =.Scale(.StdPar.Insertion_patella_tendon);};
+      
+      AnyKinPLine PatellaTendon = {
+        // These are the nodes that the measure refers to. The connection is regarded
+        // as being stiff. 
+        AnyRefNode &Origin_patella_tendon = ..Patella.Origin_patella_tendon;
+        AnyRefNode &Insertion_patella_tendon = .Insertion_patella_tendon;
+        
+        
+        //AnyRefNode &Insertion_patella_tendon = ...Seg.Shank.Insertion_patella_tendon;
+        
+        AnyDrawPLine Patella_tendon = 
+        {
+          Thickness = 0.001;
+          RGB = Main.AMMR24Color;
+          Opacity = ....BonesOpacity.Patella;
+        };
+      };
+      
+      
+      AnyRefNode OldAnkleJoint = {
+        AnyVar TibialTorsionOffset = DesignVar(0);
+//        AnyVec3 sRelUnscaled =  .StdPar.AnkleJoint;
+        
+        AnyVec3 OldAnkleJoint = {0.01337003, -0.01126083, 0.0007477404};
+        AnyVec3 OldAnkleJointAxis = normalize({0.362799, 0.1304906, -0.9226858});
+        
+        AnyMat33 ARelUnscaled =   RotMat({0, 0, 0.0}, .Sign*(AnkleLateralControlPoint-AnkleMedialControlPoint ), .AnatomicalFrame.ARelUnscaled'[1])*RotMat(pi/2,y);
+        // Control point for the Ankle joint. Found by projecting the malleolus bony landmarks onto the
+        // ankle axis from the cadaver data set. Thus, scaling the control points will also scale the ankle joint axis
+        AnyVec3 AnkleLateralControlPoint =  OldAnkleJoint + (.StdPar.LateralMalleolus - OldAnkleJoint)*OldAnkleJointAxis'*OldAnkleJointAxis;
+        // Control point for the Ankle joint. Found by projecting the malleolus bony landmarks onto the
+        // ankle axis from the cadaver data set. Thus, scaling the control points will also scale the ankle joint axis
+        AnyVec3 AnkleMedialControlPoint = OldAnkleJoint + (.StdPar.MedialMalleolus - OldAnkleJoint)*OldAnkleJointAxis'*OldAnkleJointAxis;
+        sRel = .Scale(OldAnkleJoint);
+        // Ankle Joint orientation is calculated based on the direction between the two control points.
+        ARel = RotMat({0,0,0.0}, .Sign*(.Scale(AnkleLateralControlPoint) - .Scale(AnkleMedialControlPoint) ),  .AnatomicalFrame.ARel'[1])*RotMat(pi/2,y)*RotMat(TibialTorsionOffset,y);
+      }; 
+      
+      AnyRefNode OldKneeJoint = {
+        AnyVec3 sRelUnscaled = .StdPar.KneeJoint;
+        AnyMat33 ARelUnscaled =  RotMat({0,0,0.0},
+                                .Sign*(LateralControlPoint - MedialControlPoint),
+                                -1*.AnatomicalFrame.ARelUnscaled'[1])*RotMat(pi,z)*RotMat(-pi/2,y);
+        /// Control point for the knee joint. Found by projecting the EpicondylusFemoris bony landmarks onto the
+        /// knee axis from the cadaver data set. Thus, scaling the control points will also scale the Knee joint axis
+        AnyVec3 LateralControlPoint = .StdPar.KneeJoint + (.StdPar.LateralFemuralCondyleInNeutralConf - .StdPar.KneeJoint)*.StdPar.KneeJointAxis'*.StdPar.KneeJointAxis;
+        /// Control point for the knee joint. Found by projecting the EpicondylusFemoris bony landmarks onto the
+        /// knee axis from the cadaver data set. Thus, scaling the control points will also scale the Knee joint axis
+        AnyVec3 MedialControlPoint = .StdPar.KneeJoint + (.StdPar.MedialFemuralCondyleInNeutralConf - .StdPar.KneeJoint)*.StdPar.KneeJointAxis'*.StdPar.KneeJointAxis;      
+        
+        sRel = .Scale(.StdPar.KneeJoint);
+        /// Knee Joint orientation is calculated based on the direction between the two control points.
+        ARel = RotMat({0,0,0.0}, .Sign*(.Scale(LateralControlPoint)-.Scale(MedialControlPoint)), -1*.AnatomicalFrame.ARel'[1])*RotMat(pi,z)*RotMat(-pi/2,y);
+        
+        AnyRefNode RotNode={
+          ARel={{....Sign*1,0,0},{0,....Sign*1,0},{0,0,1}};
+        };  
+        AnyDrawLine line = {
+          p0 = 0.05*{0,0,1};
+          p1 = -0.05*{0,0,1};
+          Line.RGB = Main.AMMR24Color;
+          GlobalCoord = Off;
+        };        
+      };
+    };
+  };
+  Main.HumanModel.BodyModel.Right.Leg = {
+    Jnt = {
+      
+      AnyRevoluteJoint Knee2 = {
+        AnyRefFrame &thigh = .Knee.ThighNode;
+        AnyRefFrame &shank = ..Seg.Shank2.OldKneeJoint;
+        Axis = z;
+      };
+      AnyKinEqSimpleDriver Knee2Drv = {
+        AnyKinMeasure &KneeJoint2 = .Knee2;
+        DriverPos = {Main.HumanModel.Mannequin.Posture.Right.KneeFlexion*pi/180};
+        DriverVel = {Main.HumanModel.Mannequin.PostureVel.Right.KneeFlexion*pi/180};
+      };
+    };
+  };
   
   Main.HumanModel.BodyModel.Right.Leg.Seg.Shank = {
   AnyRefNode OldAnkleJoint = {
@@ -46,28 +194,26 @@ Main = {
     AnyDrawLine line = {
       p0 = 0.05*{0,0,1};
       p1 = -0.05*{0,0,1};
-
-      Line.RGB = {0,1,0};
-//      p0 = 0.05*.ARel'[2];
-//      p1 = -0.05*.ARel'[2];
+      Line.RGB = Main.AMMR24Color;
       GlobalCoord = Off;
-      
     };
   };
   Main.HumanModel.BodyModel.Right.Leg.Seg.Foot.Talus.AnkleJoint = {
     AnyDrawLine line = {
       p0 = 0.05*{0,0,1};
       p1 = -0.05*{0,0,1};
-
-      
-//      p0 = 0.05*.ARel'[2];
-//      p1 = -0.05*.ARel'[2];
       GlobalCoord = Off;
-      
+    };
+  };
+  Main.HumanModel.BodyModel.Right.Leg.Seg.Shank.KneeJoint = {
+    AnyDrawLine line = {
+      p0 = 0.05*{0,0,1};
+      p1 = -0.05*{0,0,1};
+      GlobalCoord = Off;
     };
   };
 
-  Main.HumanModel.BodyModel.Right.Leg.Seg.Shank = {
+  Main.HumanModel.BodyModel.Right.Leg.Seg.Shank2 = {
     
     
     #if SHOW_AMMR25_FOOT == 1
@@ -100,7 +246,7 @@ Main = {
       ARel = RotMat(LinRotZYXPos[3],z)*RotMat(LinRotZYXPos[4],y)*RotMat(LinRotZYXPos[5],x);
       AnyDrawSurf FootSurf = {
         FileName = "Surfs24/foot";
-        RGB = {0,1,0};
+        RGB = Main.AMMR24Color;
       };
       AnyRefNode AMMR24TalusNodeInFoot = {
         // LinRotZYXPos is the output of linear and rotational (RotAxesAngles) measures between the foot and talus with Ref = 0 for lin measure.
@@ -111,7 +257,7 @@ Main = {
         ARel = RotMat(LinRotZYXPos[3],z)*RotMat(LinRotZYXPos[4],y)*RotMat(LinRotZYXPos[5],x);
         AnyDrawSurf TalusSurf = {
           FileName = "Surfs24/talus";
-          RGB = {0,1,0};
+          RGB = Main.AMMR24Color;
         };
       };
     };
@@ -131,9 +277,9 @@ Main = {
     VideoInputScale = 5;
     VideoResolution = {600,600};
 //    CameraLookAtPoint = Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.r+{0,-0.96,0};
-    CameraLookAtPoint = Main.HumanModel.BodyModel.Right.Leg.Seg.Foot.r;
-    CameraFieldOfView = DesignVar(0.27);
-    CameraDirection  = {1,0.2,-0.50};
+    CameraLookAtPoint = Main.HumanModel.BodyModel.Right.Leg.Seg.Foot.r + {0,0.15,0};
+    CameraFieldOfView = DesignVar(0.45);
+    CameraDirection  = {1,0.2,0.50};
     BackgroundColor = DesignVar({1,1,1});
     Preview.FileName = VideoName + ".jpg";
   };   
@@ -147,13 +293,13 @@ Main = {
       AnyOperation &ref = Main.study.Kinematics;
     };
     VideoInputScale = 5;
-    VideoResolution = {350,350};
+    VideoResolution = {650,650};
     VideoCodec = "libx264";
     VideoInputFrameRate = 30; 
     VideoOutputFrameRate = 30;
 //    CameraLookAtPoint = Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.r+{0, -0.90, 0};
-    CameraLookAtPoint = Main.HumanModel.BodyModel.Right.Leg.Seg.Foot.r;
-    CameraFieldOfView = DesignVar(0.45);
+    CameraLookAtPoint = Main.HumanModel.BodyModel.Right.Leg.Seg.Foot.r + {0,0.18,0};
+    CameraFieldOfView = DesignVar(0.55);
     CameraDirection  = {cos(2*pi*Main.study.t),0,sin(2*pi*Main.study.t) };
     BackgroundColor = DesignVar({1,1,1});
     Counter = Main.study.iStep;
