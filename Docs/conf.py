@@ -449,18 +449,18 @@ for folder, section in gallery.items():
 import generate_class_template_docs
 generate_class_template_docs.run_all()
 
-
+# Ensure the link check is not blocked by the server
+user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
 linkcheck_ignore = [
     r".*linkcheck_ignore",
-    "https://doi.org/10.1115/1.4037100",  # asme.org prevents the linkcheck
-    "https://doi.org/10.1115/1.4052115",  # asme.org prevents the linkcheck
-    "https://dx.doi.org/10.1115/1.4001678",  # asme.org prevents the linkcheck
-    "https://dx.doi.org/10.1115/1.4029258",  # asme.org prevents the linkcheck
-    "https://doi.org/10.1080/10255842.2020.1851367",  # tandfonline.com prevents the linkcheck
-    "https://dx.doi.org/10.1002/jor.20255",  # wiley.com prevents the linkcheck
-    "https://doi.org/10.1016/j.clinbiomech.2006.10.003",  # clinbiomech.com prevents the linkcheck
-    "https://github.com/anybody/ammr",  # AMMR is not yet public
+    # "https://doi.org/10.1115/1.4037100",  # asme.org prevents the linkcheck
+    # "https://doi.org/10.1115/1.4052115",  # asme.org prevents the linkcheck
+    # "https://dx.doi.org/10.1115/1.4001678",  # asme.org prevents the linkcheck
+    # "https://dx.doi.org/10.1115/1.4029258",  # asme.org prevents the linkcheck
+    # "https://doi.org/10.1080/10255842.2020.1851367",  # tandfonline.com prevents the linkcheck
+    # "https://dx.doi.org/10.1002/jor.20255",  # wiley.com prevents the linkcheck
+    # "https://doi.org/10.1016/j.clinbiomech.2006.10.003",  # clinbiomech.com prevents the linkcheck
 ]
 
 linkcheck_allowed_redirects = {
