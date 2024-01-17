@@ -196,7 +196,7 @@ If you need to cite the model use the following references [^cite_dlgr17], [^cit
 
 [^cite_slnbrmv22]: Stolle,J., Lintz,F., de Cesar Netto,C., Bernasconi,A., Rincon,MR., Mathew,R., Vispute,D., Siegler,S. 
     "Three-dimensional ankle, subtalar, and hindfoot alignment of the normal, weightbearing hindfoot, in bilateral 
-    posture", J. Orthop. Res., 40(10) (2022) 2430-2439 ([link](https://onlinelibrary.wiley.com/doi/10.1002/jor.25267)).
+    posture", J. Orthop. Res., 40(10) (2022) 2430-2439 ([link](https://doi.org/10.1002/jor.25267)).
 
 [^cite_mmmmmprhdww19]: Montefiori,E., Modenese,L., Di Marco,R., Magni-Manzoni,S., Malattia,C., Petrarca,M., 
     Ronchetti,A., de Horatio,LT., van Dijkhuizen,P., Wang,A., Wesarg,S., "An image-based kinematic model of 
