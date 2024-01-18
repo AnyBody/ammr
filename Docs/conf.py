@@ -462,7 +462,6 @@ linkcheck_ignore = [
     "https://doi.org/10.1016/j.clinbiomech.2006.10.003",  # clinbiomech.com prevents the linkcheck
     "https://doi.org/10.5281/zenodo.10527958",  # AMMR 3 not released yet
     "https://www.anybodytech.com/download/anybodysetup-8-0-0-????_x64/",  # AMMR 8 not released yet
-    "https://github.com/anybody/ammr",  # AMMR is not yet public
 ]
 
 linkcheck_allowed_redirects = {
