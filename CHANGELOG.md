@@ -1,9 +1,25 @@
 # Changelog
 
-% A nice version of the CHANGELOG is avaible here:
+% A rendered version of the CHANGELOG is avaible here:
 %    https://anyscript.org/ammr/beta/changelog.html
 
 ## AMMR beta
+(ammr-3.0-changelog)=
+## AMMR 3.0.0 (2024-02-10)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.10527958.svg)](https://doi.org/10.5281/zenodo.10527958)
+[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.0.0-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-8-0-0-????_x64/)
+
+
+### ✨ Highlights 
+
+* Integrated pelvis, lumbar, and thorax models into a consistent trunk model in
+  preparation for a full thoracic model in [AMMR 4](https://anyscript.org/ammr/beta/body/thoracic_model.html).
+* Updated the leg model (TLEM 2.2) with improvements to the ankle complex, 
+  shank orientation, and alignment of the patella tendon.
+* Added new wrapping surfaces to the Achilles tendon around the 
+  ankle in the TLEM 2.2 leg model.
+* Made numerous improvements and fixes to the Body models, MoCap models,
+  and application examples.
 
 :::{Warning} Care must be taken when porting existing MoCap models to the 
 new AMMR. Changes to the pelvic tilt, and changes to the foot anatomical
@@ -14,16 +30,8 @@ pelvis and the foot segments.  The Y component may need to be adjusted to
 achieve same marker position and joint angle output.
 :::
 
-### Removed:
 
-* The three scaling laws `_SCALING_UNIFORM_EXTMEASUREMENTS_`,
-  `_SCALING_LENGTHMASS_EXTMEASUREMENTS_`,
-  `_SCALING_LENGTHMASSFAT_EXTMEASUREMENTS_` have been deprecated. They are
-  superseeded by the Statistical Scaling Plugin which cover the same
-  functionality. The AMMR guide on scaling have been updated to reflect this
-  change.
-
-### Fixed:
+### 🩹 Fixed:
 * Fixed a couple of bugs in the {ref}`Seated Human model <example_seatedhuman>`:  
   - Reactions for subtalar joint driver are switched off.
   - GHDriverLeft was using velocity value from GHExternalRotation instead of GHAbduction.
@@ -48,16 +56,15 @@ achieve same marker position and joint angle output.
 * Visualizaiton of muscles in AMMR now use the builtin `.viewMuscle` drawing objects 
   in the muscle class. Hence, all manually created `AnyDrawMuscle` objects, usually named
   `DrwMus` have been removed. 
+* The kinematic start guess for left patalla joint has been adjusted to improve
+  robustness of the kinematic solver. This does not changed the result of
+  models. 
 
 
-### Added:
+### ➕ Added:
 * Added two small helper code macros:
   `NON_UNIQUE_VALUES()`/`NON_UNIQUE_POINTERS()` for finding duplicate
   (non-unique) entries in arrays of values and pointers.
-* Added new set of hip joint measures (`Interface.Right.HipISB`) that strictly
-  follow International Society of Biomechanics (ISB) definition. These measures
-  are similar to existing angles but do not have zero hip-flexion in neutral
-  position due to different definition of pelvis coordinate system.
 
 * Added new set of hip joint measures (`Interface.Right.HipISB`) that strictly
   follow the International Society of Biomechanics' (ISB) definitions. These
@@ -71,31 +78,34 @@ achieve same marker position and joint angle output.
 * Improved error message when MoCap markers in marker protocol are missing from
   C3D file.
 
-### Changed:
+* Add an option to override the default kinematic joint limits in the MoCap
+  framework
 
-* The trunk joint reaction force in SelectedOutputs
-  are now expressed in new reference nodes that are aligned with the vertebral body.
+### 🔧 Changed:
+
+* The trunk joint reaction force in `SelectedOutputs`
+  is now expressed in new reference nodes that are aligned with the vertebral body.
   Therefore, the names of the outputs now include CompressionForce and 
   ShearForce. The new reference nodes are created inside the joint node on the proximal
   segment. The implementation from AMMR 2.4 can be enabled by using the compatibility
   switch: `#define BM_COMPATIBILITY_24_TRUNK_SELECTED_OUTPUTS_JRF ON`
 
-* Adjustments to pelvic tilt have changed position of MoCap markers on the
-  pelvis segment. This mostly affect markers with hardcoded positions.
+* Adjustments to pelvic tilt have changed the position of MoCap markers on the
+  pelvis segment. This mostly affects markers with hardcoded positions.
   Particularly PSIS markers furthest posterior from the origin between ASIS.
   When migrating from AMMR 2.4 models without adjusting marker positions, PSIS
   markers may move 2 cm lower.
 
   - Most [non-MoCap model examples](#example-gallery)
-    has been updated to account for the new pelvic tilt value. Either by using the 
-    `AnatomicalFrameTrunk` reference frame  in the pelvic driver or by adjusting the 
+    have been updated to account for the new pelvic tilt value. Either by using the 
+    `AnatomicalFrameTrunk` reference frame in the pelvic driver or by adjusting the 
     Pelvis-Thorax Extension slightly.
 
 * The Twente Lower Extremity Model (TLEM) 2 leg model has several updates and is
   now designated as [TLEM 2.2](#TLEM2-v2.2).
 
   - Wrapping surfaces have been added to the Achilles tendon around the ankle in
-    the TLEM 2.2 leg model. Giving a more even ratio of moment arms between
+    the TLEM 2.2 leg model, giving a more even ratio of moment arms between
     the soleus and gastrocnemius muscles. Hence, gastrocnemius is recruited
     less, especially during downhill walking and stair descent, solving the
     tendency of the model to over-predict the knee contact forces at toe off.
@@ -106,7 +116,7 @@ achieve same marker position and joint angle output.
     preparation for the release of advanced multi-segment foot models in the
     future:
 
-    - The coordinate system of talus is updated to be coincident with foot
+    - The coordinate system of the talus is updated to be coincident with the foot
       coordinate system. A new reference node, `TalusCompatibilityFrameAMMR24`,
       is created in the talus segment to be consistent with the previous
       coordinate system for backwards compatibility.
@@ -123,46 +133,55 @@ achieve same marker position and joint angle output.
       foot segment. For backwards compatibility, a pointer to the talus segment
       still exists outside the foot segment.
 
-  - The implementation of the TLEM model has been split into two separates folders
+  - The implementation of the TLEM model has been split into two separate folders,
     `LegTLEM/` and `LegTLEM1/`. All references to TLEM 1 code have been removed in
     the code implementing the TLEM 2 model. 
 
-  - The TLEM 1 model now triggers a deprecation warning suggesting to use TLEM 2.
+  - The TLEM 1 model now triggers a deprecation warning suggesting using TLEM 2.
    
+* The InverseDynamics analysis in MoCap models now uses the first step of Marker
+  tracking as a start guess (initial conditions)  
+  for the kinematic solver. This improves robustness in certain cases.
 
-* Scaling laws defined by `BM_SCALING` setting have been updated to calculate
+* The marker protocol in the {ref}`"ADL gait (MoCap model)"
+  <sphx_glr_auto_examples_MoCap_plot_ADL_Gait.py>` was updated/tweaked to
+  improve the robustness of the model. Some special exceptions were added to
+  trials where we discovered that some markers were swapped by accident in the
+  original open access dataset.
+
+* Scaling laws defined by the `BM_SCALING` setting have been updated to calculate
   offsets between different scaling regions and apply them at load time. Scaling
-  remains the same but users can now create scaling functions that account for
+  remains the same, but users can now create scaling functions that account for
   offsets between regions with different scaling.
 
-* Glenoid reaction forces are now expressed in the coordinate system of glenoid
-  cup instead of general scapula coordinate system. Variables
+* Glenoid reaction forces are now expressed in the coordinate system of the glenoid
+  cup instead of the general scapula coordinate system. Variables
   `GlenoHumeral_DistractionForce`, `GlenoHumeral_InferoSuperiorForce`,
-  `GlenoHumeral_AnteroPosteriorForce`represent three directions given by the
-  glenoid cup. Variables may differ slightly even if force remains same.
+  `GlenoHumeral_AnteroPosteriorForce` represent three directions given by the
+  glenoid cup. Variables may differ slightly even if the force remains the same.
 
-* Resolved inconsistencies in arm muscle parameters. Same underlying parameters
+* Resolved inconsistencies in arm muscle parameters. The same underlying parameters
   are now used for both simple and 3-element muscle models.
 
 * MoCap marker protocols: Users must now explicitly specify a coordinate system
-  relative to which markers are placed on segment using `PlaceMarkerAt` argument
-  in the class template. Previously this defaulted to the `AnatomicalFrame` of
+  relative to which markers are placed on the segment using the `PlaceMarkerAt` argument
+  in the class template. Previously, this defaulted to the `AnatomicalFrame` of
   the segment.
 
-* Organization of segmental scaling functions was reworked and now configured
+* The organization of segmental scaling functions was reworked and now configured
   slightly simpler. This modification is expected not to affect users working
   with default and non-default scaling laws and patient-specific morphing.
   Additionally, all spinal segments share a scaling reference frame.
 
 * We updated how the class `AnySurfCylinderFit` is used in the {ref}`Knee
   Simulator example <example_kneesimulator>`. The deprecated way of using the
-  `AnySurfCylinderFit` have been changed. Since `AnySurfCylinderFit` is now a
-  sub class of `AnyRefNode` it should no longer be nested inside inside an other
+  `AnySurfCylinderFit` has been changed. Since `AnySurfCylinderFit` is now a
+  subclass of `AnyRefNode`, it should no longer be nested inside another
   parent reference frame to provide the pos `sRel` and orientation `ARel`. This
-  fixes a number of deprecated warnings which would have triggered with AnyBody version 8. 
+  fixes a number of deprecated warnings that would have triggered with AnyBody version 8. 
 
-* Added new `AnatomicalFrameTrunk` reference frame to pelvis segment consistent
-  with anatomical frames in rest of the trunk model. All joint angles relative
+* Added the new `AnatomicalFrameTrunk` reference frame to the pelvis segment consistent
+  with anatomical frames in the rest of the trunk model. All joint angles relative
   to the pelvis segment now use this frame. This aligns the neutral position of
   the model with the neutral position of the trunk dataset and results in more
   pelvic tilt in the neutral position, better reflecting reported values in
@@ -171,29 +190,28 @@ achieve same marker position and joint angle output.
 
 * Updated trend validation in ["Wilke Spine Pressure validation
   models"](example_wilkespinepressure) to reflect changes to the thoracic model
-  and the pelvis frame. Although absolute pressures in spine have changed,
-  trends (relative changes in spine pressure between models) remain same.
+  and the pelvis frame. Although absolute pressures in the spine have changed,
+  trends (relative changes in spine pressure between models) remain the same.
 
-* Reduced discretization (number of elements) of pectoralis major and
+* Reduced discretization (number of elements) of the pectoralis major and
   semispinalis muscles for consistency with textbook anatomy. Pectoralis no
-  longer has it's origin on rib 2 and semispinalis no longer inserts on the
+  longer has its origin on rib 2, and semispinalis no longer inserts on the
   lumbar region.
 
-* Refactored implementation of muscle parameters in the arm model. All
-  parameters are now given as muscle volume, optimal fiber length and tendon
+* Refactored the implementation of muscle parameters in the arm model. All
+  parameters are now given as muscle volume, optimal fiber length, and tendon
   slack length. Physiological cross-sectional area (PCSA), previously a
   hardcoded parameter, is now an intermediate value used for calculating muscle
   strength from muscle volume and optimal fiber length.
 
-  This new structure allows for overwriting complete set of muscle volumes with
-  alternative dataset.
+  This new structure allows for overwriting the complete set of muscle volumes with
+  an alternative dataset.
 
-* `MarkerName` argument in `CreateMarkerDriver` template for MoCap models is no
-  longer necessary. The argument can still be used if marker class and data
-  entry in C3D file differ.
+* The `MarkerName` argument in the `CreateMarkerDriver` template for MoCap models is no
+  longer necessary. The argument can still be used if the marker class and data
+  entry in the C3D file differ.
 
-
-* Updated implementation of muscle parameters section in models to use the new
+* Updated the implementation of muscle parameters section in models to use the new
   `??=` (optional assignment) operator introduced in AnyBody 7.4.1. This allows
   for direct overriding/redefinition of muscle parameters and volumes.
 
@@ -202,51 +220,40 @@ achieve same marker position and joint angle output.
   ```{code-block} AnyScriptDoc
   Main.HumanModel.BodyModel.Right.Leg.ModelParameters.Muscles = {
      SoleusMedialis.MuscleVolume = 540; //ml
-     SoleusLateralis.MuscleVolume = 450; /ml
+     SoleusLateralis.MuscleVolume = 450; //ml
   };
   ```
 
 * Updated methods for distributing muscle volume among discretized muscle
   elements. This allows for different optimal fiber lengths among elements of a
-  muscle. If one element has smaller optimal fiber length (e.g., through
-  calibration), volume of muscle elements is redistributed and PCSA remains
+  muscle. If one element has a smaller optimal fiber length (e.g., through
+  calibration), the volume of muscle elements is redistributed, and PCSA remains
   constant across elements. 
   
-  If optimal fiber length of different elements is
-  same, this method yields same result as before.
+  If the optimal fiber length of different elements is
+  the same, this method yields the same result as before.
   
 * Renamed the folders holding muscle models from `MusPar` to `MuscleModels` for
   better clarity.
-* The `CameraClassTemplate.any` include file in model utilities have been renamed to
+
+* The `CameraClassTemplate.any` include file in model utilities has been renamed to
   `VideoLookAtCamera.any` to have the same name as the class template it
   contains. 
 
-**Removed:**
+### Removed:
+
 - The template `DEFAULT_PARAMETER_FOLDER` has been removed. It is no longer needed 
-  since the same functionality is now provided by the `??=` operator. 
+  since the same functionality is now provided by the `??=` operator.
+
+- The three scaling laws `_SCALING_UNIFORM_EXTMEASUREMENTS_`,
+  `_SCALING_LENGTHMASS_EXTMEASUREMENTS_`,
+  `_SCALING_LENGTHMASSFAT_EXTMEASUREMENTS_` have been deprecated. They are
+  superseeded by the "Statistical Scaling Plugin" which cover the same
+  functionality. The AMMR guide on scaling have been updated to reflect this
+  change.
 
 
-## AMMR 2.4.5-beta
 
-**Fixed:**
-* The kinematic start guess for left patalla joint has been adjusted to improve
-  robustness of the kinematic solver. This does not changed the result of
-  models. 
-
-**Changed:**
-* The InverseDynamics analysis in MoCap models now use the first step of Marker
-  tracking as a start guess (initial conditions)  
-  for the kinematic solver. This improves robustness in certain cases.
-* The marker protocol in the {ref}`"ADL gait (MoCap model)"
-  <sphx_glr_auto_examples_MoCap_plot_ADL_Gait.py>` was updated/tweaked to
-  improve the robustness of the model. Some special exception where added to
-  trials where we discovered that some markers where swapped by accident in the
-  original open access dataset.
-  
-
-**Added:**
-* Add an option to override the default kinematic joint limits in the MoCap
-  framework
 
 (ammr-2.4-changelog)=
 ## AMMR 2.4.4 (2023-04-03)
