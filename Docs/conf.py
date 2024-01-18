@@ -449,7 +449,7 @@ for folder, section in gallery.items():
 import generate_class_template_docs
 generate_class_template_docs.run_all()
 
-
+user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
 linkcheck_ignore = [
     r".*linkcheck_ignore",
@@ -460,6 +460,8 @@ linkcheck_ignore = [
     "https://doi.org/10.1080/10255842.2020.1851367",  # tandfonline.com prevents the linkcheck
     "https://dx.doi.org/10.1002/jor.20255",  # wiley.com prevents the linkcheck
     "https://doi.org/10.1016/j.clinbiomech.2006.10.003",  # clinbiomech.com prevents the linkcheck
+    "https://doi.org/10.5281/zenodo.10527958",  # AMMR 3 not released yet
+    "https://www.anybodytech.com/download/anybodysetup-8-0-0-????_x64/",  # AMMR 8 not released yet
     "https://github.com/anybody/ammr",  # AMMR is not yet public
 ]
 
