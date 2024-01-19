@@ -104,6 +104,13 @@ achieve same marker position and joint angle output.
 * The Twente Lower Extremity Model (TLEM) 2 leg model has several updates and is
   now designated as [TLEM 2.2](#TLEM2-v2.2).
 
+  - The ankle complex and the knee joint axis have been redefined to compensate for
+    the non-neutral position in which the cadaver was scanned. This improves the 
+    alignment of the tibia, talus, and calcaneus bones. The updated knee joint ensures 
+    that the patella tendon is straight in the neutral position. The net effect is 
+    rotation of the tibia about its long axis with the feet still pointing in the 
+    same direction in the neutral position. 
+    
   - Wrapping surfaces have been added to the Achilles tendon around the ankle in
     the TLEM 2.2 leg model, giving a more even ratio of moment arms between
     the soleus and gastrocnemius muscles. Hence, gastrocnemius is recruited
