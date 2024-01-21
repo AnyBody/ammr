@@ -243,13 +243,13 @@ html_theme_options = {
     "use_download_button": False,
 
     "home_page_in_toc": False,
-    "show_navbar_depth": 1,
+    "show_toc_level": 1,
+
     "pygment_light_style": "AnyScript",
     "pygment_dark_style": "stata-dark",
 
 
     # "use_sidenotes": True,
-    # "show_toc_level": 2,
     # "announcement": (
     #     "⚠️The latest release refactored our HTML, "
     #     "so double-check your custom CSS rules!⚠️"
@@ -265,11 +265,11 @@ html_theme_options = {
         #     # "icon": "_static/ebp-logo.png",
         #     "type": "local",
         # },
-        {
-            "name": "GitHub",
-            "url": "https://github.com/anybody/ammr",
-            "icon": "fa-brands fa-github",
-        },
+        # {
+        #     "name": "GitHub",
+        #     "url": "https://github.com/anybody/ammr",
+        #     "icon": "fa-brands fa-github",
+        # },
     ],
     # For testing
     # "use_fullscreen_button": False,
