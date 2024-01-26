@@ -1,17 +1,13 @@
-name: AMMR tests
+name: Tests
+
 
 on:
+  push:
+    branches: [master]
   pull_request:
-    branches: [ master, master-ammr-2.5 ]
-    paths-ignore:
-      - 'Docs/**'
+
   workflow_dispatch:
     inputs:
-      run-slow-tests:
-        type: boolean
-        description: 'Run full tests (--runslow)'
-        required: false
-        default: false
       use-custom-anybodycon:
           type: boolean
           description: 'Use a custom version of AnyBody from AMS build system.'
@@ -19,50 +15,55 @@ on:
       custom-anybodycon-name:
           description: 'Name of the custom AnyBody version to use. (E.g. path on the I:\ drive)'
           required: false
-          default: 'AnyBody.7.5-CI-master.AnyBody.7.5.x/AnyBodyCon.exe'
+          default: 'AnyBody.7.5-CI-master.AnyBody.8.0.x/AnyBodyCon.exe'
       custom-pytest-arg:
           description: 'Specify which test to run. E.g. `Tests/test_example.any`. Default is entire test suite.'
           required: false
           default: ''
 
 concurrency: 
-  group: ci-${{ github.ref }}
+  group: Test-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   test:
-    
+    if: ${{ !github.event.pull_request.head.repo.fork && github.repository == 'anybody/ammr' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        test_group: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+
     env:
       # Triggers a warning at 20 deg
       ShortestPathMaxAngle: 0.3491 
-      ANYBODYCON: C:\Program Files\AnyBody Technology\AnyBody.7.5_Beta\AnyBodyCon.exe
 
-    runs-on: [self-hosted, Windows, AnyBody]
-
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: windows-latest
     
     steps:
-      - uses: actions/checkout@v3
+
+      - uses: actions/checkout@v4
+
+      - uses: prefix-dev/setup-pixi@v0.4.3
+        with:
+          cache: true
+          cache-write: ${{ github.event_name == 'push' && github.ref_name == 'master' }}
         
-      - name: Download custom AnyBodyCon
+      - name: Patch with custom version
         if: inputs.use-custom-anybodycon
         uses: ./.github/actions/custom-anybodycon
         with:
           custom-anybodycon: ${{ inputs.custom-anybodycon-name }}
           connection-string:  ${{ secrets.AZURE_CONN_STR }}
-
-      - name: Install micro mamba
-        uses: ./.github/actions/setup-micromamba
-        with:
-          environment-file: Tests/test-environment.yml
-          environment-name: _ammr_test
-
-      - name: Run AMMR tests (${{ github.event.inputs.run-slow-tests == 'true' && 'slow' || 'fast' }} tests)
+          overwrite: true
+            
+      - name: Run AMMR tests
         run: |
-          ~\micromamba.exe shell hook -s powershell | Out-String | iex
-          micromamba activate _ammr_test
-        
-          pytest -n 4 --instafail --durations=20 --anybodycon="$Env:ANYBODYCON" `
-           ${{ github.event.inputs.run-slow-tests == 'true' && '--runslow' || '' }} `
-           ${{ github.event.inputs.custom-pytest-arg  || 'Tests' }}
-  
+          cd Tests
+          pixi run pytest -n auto --dist worksteal `
+             --splits 20 --group ${{ matrix.test_group }} --splitting-algorithm=least_duration `
+             --durations=10 `
+             --runslow
+             ${{ github.event.inputs.custom-pytest-arg  || '' }}
+        env:
+          RLM_LICENSE: ${{ secrets.LICENSE_SERVER }}
+          RLM_LICENSE_PASSWORD: ${{ secrets.LICENSE_PASSWORD }}

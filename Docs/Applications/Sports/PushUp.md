@@ -1,6 +1,6 @@
 ---
 gallery_title: "Push Up"
-gallery_image: "/Applications/images/PushUp.jpg"
+gallery_image: "/Applications/images/PushUp.webp"
 ---
 
 (sphx_glr_auto_examples_Sports_plot_PushUp.py)=
@@ -8,7 +8,7 @@ gallery_image: "/Applications/images/PushUp.jpg"
 # Push Up
 
 ````{sidebar} **Example**
-<img src="/Applications/images/PushUp.jpg" width="70%" align="center">
+<img src="/Applications/images/PushUp.webp" width="70%" align="center">
 ````
 
 

@@ -1,6 +1,6 @@
 ---
 gallery_title: "Free posture"
-gallery_image: "/Applications/images/FreePostureFullBodyShoulderRhythmStatic.jpg"
+gallery_image: "/Applications/images/FreePostureFullBodyShoulderRhythmStatic.webp"
 ---
 
 (sphx-glr-auto-examples-adls-and-ergonomics-plot-freeposture-py)=
@@ -9,7 +9,7 @@ gallery_image: "/Applications/images/FreePostureFullBodyShoulderRhythmStatic.jpg
 
 
 ````{sidebar} **Example**
-<img src="/Applications/images/FreePostureFullBodyShoulderRhythmStatic.jpg" width="70%" align="center">
+<img src="/Applications/images/FreePostureFullBodyShoulderRhythmStatic.webp" width="70%" align="center">
 
 ````
 

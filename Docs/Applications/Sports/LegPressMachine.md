@@ -1,6 +1,6 @@
 ---
 gallery_title: "Leg Press Machine"
-gallery_image: "/Applications/images/LegPressMachine.jpg"
+gallery_image: "/Applications/images/LegPressMachine.webp"
 ---
 
 (sphx_glr_auto_examples_Sports_plot_LegPressMachine.py)=
@@ -8,7 +8,7 @@ gallery_image: "/Applications/images/LegPressMachine.jpg"
 # Leg Press Machine
 
 ````{sidebar} **Example**
-<img src="/Applications/images/LegPressMachine.jpg" width="70%" align="center">
+<img src="/Applications/images/LegPressMachine.webp" width="70%" align="center">
 ````
 
 

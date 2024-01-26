@@ -90,7 +90,7 @@ More details on the TLEM2 model can be found online:
 
 (TLEM2-v2.2)=
 
-TLEM v2.2 (Released in AMMR 2.5.0)
+TLEM v2.2 (Released in AMMR 3.0.0)
 : Wrapping surfaces have been added to the Achilles tendon around the ankle in
   the TLEM 2 leg model (now designated TLEM 2.2). This ensures an even ratio of moment arms between
   the soleus and gastrocnemius muscles. Hence, gastrocnemius is recruited less, 
@@ -98,6 +98,24 @@ TLEM v2.2 (Released in AMMR 2.5.0)
   to overpredict the knee contact forces at toe off. 
   This is the first of a number of improvements to the leg model by Dr. Enrico De Pieri, 
   who is working on a publication on improvements and validation of the TLEM 2 leg model.
+: The ankle complex has been redefined to compensate for the non-neutral position in which the 
+  cadaver was scanned. The method described in Stolle et al.[^cite_slnbrmv22] was adapted to 
+  identify coordinate systems at the tibia, talus, and calcaneus using their respective 
+  bone surfaces. The coordinate systems were then used to reposition the bone surfaces using 
+  the average values provided in Stolle et al.[^cite_slnbrmv22] for talus-calcaneus and 
+  calcaneus-tibia. These values are based on weight-bearing scans in neutral, bilateral 
+  standing position of 95 healthy adult subjects. This improves the alignment of the tibia, 
+  talus, and calcaneus bones.
+  
+  With the redefined alignment of the ankle complex, the ankle joint axis was updated using 
+  the method described in Montefiori et al.[^cite_mmmmmprhdww19] The joint axis was defined 
+  as the axis of a cylinder fitted to the talar trochlea. The ankle joint centre was defined 
+  at the midpoint of the medial and lateral malleoli projected on the ankle axis.
+
+  The knee joint was also updated to compensate for the non-neutral scan of the cadaver. The
+  updated joint ensures that the patella tendon is straight in the neutral position. 
+  The net effect is rotation of the tibia about its long axis with the feet still pointing in 
+  the same direction in the neutral position. 
 : The foot and talus models have several updates in preparation for the 
   release of advanced multi-segment foot models in the future:  
   - The talus coordinate system is updated to be coincident with the foot 
@@ -129,7 +147,23 @@ TLEM v2.2 (Released in AMMR 2.5.0)
     foot segment. For backwards compatibility, a pointer to the talus segment 
     still exists outside the foot segment.
 
+The following video compares TLEM v2.2 with TLEM v2.1 (in gray). The knee and
+and ankle joint axes in blue belong to TLEM v2.2 while the ankle joint axes in
+gray belongs to TLEM v2.1
+```{raw} html
+<video width="45%" style="display:block; margin: 0 auto;" controls autoplay loop>
+    <source src="../_static/TLEM22_TLEM21_rotating_model.mp4" type="video/mp4">
+Your browser does not support the video tag.
+</video>
+```
+::::{figure} _static/TLEM22_TLEM21_closeup.jpg
+:width: 80%
 
+Comparison of TLEM v2.2 with TLEM v2.1 (in gray). Please note the patella tendon in
+gray inserts in TLEM v2.1 shank. It depicts the rotational offset of the tibia along
+its axis.
+
+::::
 (TLEM2-v2.1)=
 
 TLEM v2.1 (Released in AMMR 2.0.0)
@@ -159,3 +193,12 @@ If you need to cite the model use the following references [^cite_dlgr17], [^cit
 [^cite_ckkv16]: Carbone,V., van der Krogt,MM., Koopman,HF., Verdonschot,N., "Sensitivity of subject-specific
     models to Hill muscle-tendon model parameters in simulations of gait",
     J. Biomech.,49 (2016) 1953-1960.
+
+[^cite_slnbrmv22]: Stolle,J., Lintz,F., de Cesar Netto,C., Bernasconi,A., Rincon,MR., Mathew,R., Vispute,D., Siegler,S. 
+    "Three-dimensional ankle, subtalar, and hindfoot alignment of the normal, weightbearing hindfoot, in bilateral 
+    posture", J. Orthop. Res., 40(10) (2022) 2430-2439 ([link](https://doi.org/10.1002/jor.25267)).
+
+[^cite_mmmmmprhdww19]: Montefiori,E., Modenese,L., Di Marco,R., Magni-Manzoni,S., Malattia,C., Petrarca,M., 
+    Ronchetti,A., de Horatio,LT., van Dijkhuizen,P., Wang,A., Wesarg,S., "An image-based kinematic model of 
+    the tibiotalar and subtalar joints and its application to gait analysis in children with Juvenile 
+    Idiopathic Arthritis", J. Biomech., 85 (2019), 27-36. ([link](https://doi.org/10.1016/j.jbiomech.2018.12.041)).

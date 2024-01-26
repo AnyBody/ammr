@@ -1,6 +1,6 @@
 ---
 gallery_title: "Evaluate moment arms"
-gallery_image: "/Applications/images/EvaluateMomentArms.jpg"
+gallery_image: "/Applications/images/EvaluateMomentArms.webp"
 ---
 
 (sphx_glr_auto_examples_Validation_plot_EvaluateMomentArms.py)=
@@ -8,7 +8,7 @@ gallery_image: "/Applications/images/EvaluateMomentArms.jpg"
 # Evaluate moment arms
 
 ````{sidebar} **Example**
-<img src="/Applications/images/EvaluateMomentArms.jpg" width="70%" align="center">
+<img src="/Applications/images/EvaluateMomentArms.webp" width="70%" align="center">
 ````
 
 This model shows how to enable the built-in moment arm evaluation studies.

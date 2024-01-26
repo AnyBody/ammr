@@ -1,6 +1,6 @@
 ---
 gallery_title: "Wilke Spine Disc Pressure"
-gallery_image: "/Applications/images/SpinePressureStanding.jpg"
+gallery_image: "/Applications/images/SpinePressureStanding.webp"
 ---
 
 (sphx_glr_auto_examples_Validation_plot_WilkeSpinePressure.py)=
@@ -8,7 +8,7 @@ gallery_image: "/Applications/images/SpinePressureStanding.jpg"
 # Wilke Spine Disc Pressure Model
 
 ````{sidebar} **Example**
-<img src="/Applications/images/SpinePressureStanding.jpg" width="70%" align="center">
+<img src="/Applications/images/SpinePressureStanding.webp" width="70%" align="center">
 ````
 
 The Wilke Spine Pressure models are eight models that compare intradiscal pressure measured between L4 and L5 discs in different postures.
@@ -34,37 +34,37 @@ Both papers refer to the same trial, but supplements each other with study infor
 :gutter: 3
 
 :::{grid-item-card} **Relaxed Standing**
-![Relaxed Standing](/Applications/images/SpinePressureStanding.jpg)
+![Relaxed Standing](/Applications/images/SpinePressureStanding.webp)
 :::
 
 
 :::{grid-item-card} **Lying in prone**
-![Relaxed Standing](/Applications/images/SpinePressureLyingOnBack.jpg)
+![Relaxed Standing](/Applications/images/SpinePressureLyingOnBack.webp)
 :::
 
 :::{grid-item-card} **Seating relaxed**
-![Relaxed Standing](/Applications/images/SpinePressureSeatingRelaxed.jpg)
+![Relaxed Standing](/Applications/images/SpinePressureSeatingRelaxed.webp)
 :::
 
 :::{grid-item-card} **Relaxed Erect Sitting**
-![Relaxed Standing](/Applications/images/SpinePressureSeatingStraitNoSupport.jpg)
+![Relaxed Standing](/Applications/images/SpinePressureSeatingStraitNoSupport.webp)
 :::
 
 :::{grid-item-card} **Standing flexed foward**
-![Relaxed Standing](/Applications/images/SpinePressureStandingFlexed.jpg)
+![Relaxed Standing](/Applications/images/SpinePressureStandingFlexed.webp)
 :::
 
 
 :::{grid-item-card} **Crate of beer held close at chest level**
-![Relaxed Standing](/Applications/images/SpinePressureStandingLiftClose.jpg)
+![Relaxed Standing](/Applications/images/SpinePressureStandingLiftClose.webp)
 :::
 
 :::{grid-item-card} **Lifting bent over with round back**
-![Relaxed Standing](/Applications/images/SpinePressureStandingLiftFlexed.jpg)
+![Relaxed Standing](/Applications/images/SpinePressureStandingLiftFlexed.webp)
 :::
 
 :::{grid-item-card} **Held away about 60 cm**
-![Relaxed Standing](/Applications/images/SpinePressureStandingLiftStretchedArms.jpg)
+![Relaxed Standing](/Applications/images/SpinePressureStandingLiftStretchedArms.webp)
 :::
 
 ::::

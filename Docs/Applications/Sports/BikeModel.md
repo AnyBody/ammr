@@ -1,6 +1,6 @@
 ---
 gallery_title: "Bike Model"
-gallery_image: "/Applications/images/BikeModel.jpg"
+gallery_image: "/Applications/images/BikeModel.webp"
 ---
 
 (sphx_glr_auto_examples_Sports_plot_BikeModel.py)=
@@ -8,7 +8,7 @@ gallery_image: "/Applications/images/BikeModel.jpg"
 # Bike Model
 
 ````{sidebar} **Example**
-<img src="/Applications/images/BikeModel.jpg" width="70%" align="center">
+<img src="/Applications/images/BikeModel.webp" width="70%" align="center">
 ````
 
 

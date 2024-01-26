@@ -1,6 +1,6 @@
 ---
 gallery_title: "Knee Simulator Model"
-gallery_image: "/Applications/images/KneeSimulator.jpg"
+gallery_image: "/Applications/images/KneeSimulator.webp"
 ---
 
 (sphx_glr_auto_examples_Orthopedics_and_rehab_plot_KneeSimulator.py)=
@@ -9,7 +9,7 @@ gallery_image: "/Applications/images/KneeSimulator.jpg"
 
 
 ````{sidebar} **Example**
-<img src="/Applications/images/KneeSimulator.jpg" width="70%" align="center">
+<img src="/Applications/images/KneeSimulator.webp" width="70%" align="center">
 ````
 
 Model of a Knee Simulator using a knee implant model and force-dependent kinematics (FDK).

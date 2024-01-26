@@ -1,6 +1,6 @@
 ---
 gallery_title: "Femoral Torsion tool"
-gallery_image: "/Applications/images/FemoralTorsion.jpg"
+gallery_image: "/Applications/images/FemoralTorsion.webp"
 ---
 
 (sphx_glr_auto_examples_Orthopedics_and_rehab_plot_FemoralTorsionTool.py)=
@@ -9,7 +9,7 @@ gallery_image: "/Applications/images/FemoralTorsion.jpg"
 
 
 ````{sidebar} **Example**
-<img src="/Applications/images/FemoralTorsion.jpg" width="70%" align="center">
+<img src="/Applications/images/FemoralTorsion.webp" width="70%" align="center">
 ````
 
 This is an example of modifying the femoral torsion of the default leg

@@ -1,6 +1,6 @@
 ---
 gallery_title: "Standing Model"
-gallery_image: "/Applications/images/StandingLift.jpg"
+gallery_image: "/Applications/images/StandingLift.webp"
 ---
 
 (sphx_glr_auto_examples_ADLs_and_ergonomics_plot_StandingLift.py)=
@@ -8,7 +8,7 @@ gallery_image: "/Applications/images/StandingLift.jpg"
 # Lifting Model
 
 ````{sidebar} **Example**
-<img src="/Applications/images/StandingLift.jpg" width="70%" align="center">
+<img src="/Applications/images/StandingLift.webp" width="70%" align="center">
 
 ````
 

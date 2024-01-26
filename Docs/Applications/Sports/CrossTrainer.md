@@ -1,6 +1,6 @@
 ---
 gallery_title: "Cross Trainer"
-gallery_image: "/Applications/images/CrossTrainer.jpg"
+gallery_image: "/Applications/images/CrossTrainer.webp"
 ---
 
 (sphx_glr_auto_examples_Sports_plot_CrossTrainer.py)=
@@ -8,7 +8,7 @@ gallery_image: "/Applications/images/CrossTrainer.jpg"
 # Cross Trainer
 
 ````{sidebar} **Example**
-<img src="/Applications/images/CrossTrainer.jpg" width="70%" align="center">
+<img src="/Applications/images/CrossTrainer.webp" width="70%" align="center">
 ````
 
 

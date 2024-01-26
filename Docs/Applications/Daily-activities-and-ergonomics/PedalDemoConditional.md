@@ -1,6 +1,6 @@
 ---
 gallery_title: "Pedel demo"
-gallery_image: "/Applications/images/PedalDemoConditional.jpg"
+gallery_image: "/Applications/images/PedalDemoConditional.webp"
 ---
 
 (sphx-glr-auto-examples-adls-and-ergonomics-plot-pedaldemoconditional-py)=
@@ -8,7 +8,7 @@ gallery_image: "/Applications/images/PedalDemoConditional.jpg"
 # Pedel demo
 
 ````{sidebar} **Example**
-<img src="/Applications/images/PedalDemoConditional.jpg" width="70%" align="center">
+<img src="/Applications/images/PedalDemoConditional.webp" width="70%" align="center">
 
 ````
 

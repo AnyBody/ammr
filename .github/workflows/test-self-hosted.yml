@@ -1,0 +1,67 @@
+name: Tests (self hosted)
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      use-custom-anybodycon:
+          type: boolean
+          description: 'Use a custom version of AnyBody from AMS build system.'
+          default: false
+      custom-anybodycon-name:
+          description: 'Name of the custom AnyBody version to use. (E.g. path on the I:\ drive)'
+          required: false
+          default: 'AnyBody.7.5-CI-master.AnyBody.8.0.x/AnyBodyCon.exe'
+      custom-pytest-arg:
+          description: 'Specify which test to run. E.g. `Tests/test_example.any`. Default is entire test suite.'
+          required: false
+          default: ''
+
+concurrency: 
+  group: test-self-hosted-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    # Run all private AMMR forks on self-hosted runners
+    if: ${{ (github.event_name == 'workflow_dispatch')  || (github.repository_owner == 'anybody' && github.repository != 'anybody/ammr') }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        test_group: [1, 2, 3, 4, 5]
+
+    env:
+      # Triggers a warning at 20 deg
+      ShortestPathMaxAngle: 0.3491
+ 
+
+    runs-on: [self-hosted, Windows, AnyBody]
+    
+    steps:
+      - uses: actions/checkout@v4
+        
+      - uses: prefix-dev/setup-pixi@v0.4.3
+        with:
+          cache: true
+          pixi-bin-path: ${{ runner.temp }}\Scripts\pixi.exe
+          cache-write: ${{ github.event_name == 'push' && github.ref_name == 'master' }}
+          post-cleanup: true
+
+
+      - name: Patch with custom version
+        if: inputs.use-custom-anybodycon
+        uses: ./.github/actions/custom-anybodycon
+        with:
+          custom-anybodycon: ${{ inputs.custom-anybodycon-name }}
+          connection-string:  ${{ secrets.AZURE_CONN_STR }}
+
+      - name: Run AMMR tests
+        run: |
+          cd Tests
+          pixi run pytest -n 5 --dist worksteal `
+            --splits 5 --group ${{ matrix.test_group }} --splitting-algorithm=least_duration `
+            --durations=10 `
+            --anybodycon="$Env:ANYBODYCON" `
+            --runslow `
+          ${{ github.event.inputs.custom-pytest-arg  || '' }}

@@ -1,45 +1,121 @@
 #ifndef _ANYMOCAP_CREATE_MARKER_DRIVER_CLASS_ANY_
 #define _ANYMOCAP_CREATE_MARKER_DRIVER_CLASS_ANY_
+/*
+---
+group: MoCap
+topic: Markers
+descr: Creates MoCap markers and links them to the C3D file data.
+---
 
-// Class template arguments:
+See below for more details
 
-// MarkerName: 
-// MarkerPlacement,
-// Weight<X|Y|Z>: = 1
-// Opt<X|Y|Z>: = OFF
-// ScaleMarkerPosOnOff: = ON,
-// FilterCutOffFrequency: = 0,
-// FilterOrder: = 2,
-// UseC3DWeightResiduals = OFF,
-// PARAMETER_OPT_STUDY = Main.Studies.ParameterIdentification,
-// C3D_OBJECT = Main.ModelSetup.C3DFileData,
-// BODY_MODEL_FOLDER = Main.HumanModel.BodyModel,
-// PlaceMarkerAt = AnatomicalFrame,
-// DRAW_SCALE = 1,
-// SKIP_MARKER_EXIST_CHECK = 0, // This must be disabled if creating markers before the C3D file have been defined
+*/
 
+// This template is used by all the MoCap models to link the model to the C3D file data.
+// It creates a marker driver on the specified segment on the model and creates the
+// necessary drivers to link the marker position to the C3D file data. 
+// 
+// The class template has special options to add optimizations of the marker positions 
+// and to add filters to the marker positions.
+// 
+// :::{rubric} For example
+// :::
+// 
+// :::{code-block} AnyScript
+// CreateMarkerDriver RPSI (
+//   MarkerPlacement=Trunk.Segments.PelvisSeg,
+//   PlaceMarkerAt=Right.PSIS,
+//   OptX=OFF, OptY=OFF, OptZ=ON,
+//   UseC3DWeightResiduals=ON
+// ) = {
+//     sRelOpt = {-0.025,0,0.0};
+// };
+// :::
+// 
+#class_template CreateMarkerDriver (
+  MarkerName=_NOT_DEFINED_,
+  MarkerPlacement,
+  WeightX=1, WeightY=1, WeightZ=1,
+  OptX=0, OptY=0, OptZ=0,
+  ScaleMarkerPosOnOff = 1,
+  FilterCutOffFrequency = 0,
+  FilterOrder = 2,
+  UseC3DWeightResiduals = 0,
+  PARAMETER_OPT_STUDY = Main.Studies.ParameterIdentification,
+  C3D_OBJECT = Main.ModelSetup.C3DFileData,
+  BODY_MODEL_FOLDER = Main.HumanModel.BodyModel,
+  PlaceMarkerAt = MoCapMarkerFrameAMMR24,
+  USE_BVH_INPUT = 0,
+  BVH_OBJECT = Main.ModelSetup.BVHFileData,
+  MarkerPlacementBVH = REQUIRED_FOR_BVH_INPUT,
+  DRAW_SCALE = 1,
+  SKIP_MARKER_EXIST_CHECK = 0,
+)
+{
 
+//Class template arguments:
+//---------------------------
+// CreateMarkerDriver#MarkerPlacement
+//    (Required) The segment on which the marker is place, relative to the Body model.
+// CreateMarkerDriver#PlaceMarkerAt
+//    Specifies which coordinate system on the segment the marker is place.
+//    This is used when placing markers relative to bony landmarks. (Defaults to `AnatomicalFrame`)
+// CreateMarkerDriver#WeightX
+//     The weight of soft driver for the marker in X direction
+// CreateMarkerDriver#WeightY
+//     The weight of soft driver for the marker in Y direction
+// CreateMarkerDriver#WeightZ
+//     The weight of soft driver for the marker in Z direction
+// CreateMarkerDriver#OptX
+//     Switch to determine if the markers positions can be optimized in the X direction
+// CreateMarkerDriver#OptY
+//     Switch to determine if the markers positions can be optimized in the Y direction
+// CreateMarkerDriver#OptZ
+//     Switch to determine if the markers positions can be optimized in the Z direction
+// CreateMarkerDriver#ScaleMarkerPosOnOff
+//     Switch to indicate if the marker position should be scaled with the segment
+//     which it is attached. If the marker is located relative the segments original
+//     this should be ON. If the marker is located relative to a bony landmark it
+//     may make sense to turn this off.
+// CreateMarkerDriver#FilterCutOffFrequency
+//     If set to something different that zero, it will use a special low pass filter
+//     on this marker, instead of using the default filter applied by the AnyInputC3D
+//     object.
+// CreateMarkerDriver#FilterOrder
+//     Filter order to use if FilterCutOffFrequency > 0
+// CreateMarkerDriver#MarkerName
+//    The name of marker in the C3D file. It defaults to the name of the class template.
+// CreateMarkerDriver#UseC3DWeightResiduals
+//     Switch to specify if the Marker residual value in the C3D file should be
+//     used when creating weights for the marker. This is can be used to automatically
+//     set the weight of the marker to zero when the marker drops out.
+// CreateMarkerDriver#PARAMETER_OPT_STUDY
+//     Can be used to specify which optimization study marker design values should be
+//     added. It is useful in advanced cases where multiple marker optimization studies
+//     are used.
+// CreateMarkerDriver#C3D_OBJECT
+//     Specifies from which C3D object to link the markers. This only for advanced cases
+//     using multiple C3D files for input.
+// CreateMarkerDriver#BODY_MODEL_FOLDER
+//     Specifies the folder where the body model is located. This is only for advanced
+//     cases where the body model is not located in the default location.
+// CreateMarkerDriver#USE_BVH_INPUT
+//     Switch to specify if the marker should be linked to a BVH file instead of a C3D file.
+// CreateMarkerDriver#BVH_OBJECT
+//     Specifies from which BVH object to link the markers. This only for advanced cases
+//     using multiple BVH files for input.
+// CreateMarkerDriver#MarkerPlacementBVH
+//     Specifies the segment on which the marker is place, relative to the Body model.
+//     This is only used when using BVH input.
+// CreateMarkerDriver#DRAW_SCALE
+//     Specifies the scale of the marker in the model view. This is only used for
+//     visualization purposes.
+// CreateMarkerDriver#SKIP_MARKER_EXIST_CHECK
+//     Disable the check if the marker exists in the C3D file. This switch must be 
+//     enabled if you model is structured so markers are created
+//     before the AnyInputC3D file have been defined. (Defaults to 0)
 
-#class_template CreateMarkerDriver (MarkerName=_NOT_DEFINED_,
-                                    MarkerPlacement,
-                                    WeightX=1, WeightY=1, WeightZ=1,
-                                    OptX=0, OptY=0, OptZ=0,
-                                    ScaleMarkerPosOnOff = 1,
-                                    FilterCutOffFrequency = 0,
-                                    FilterOrder = 2,
-                                    UseC3DWeightResiduals = 0,
-                                    PARAMETER_OPT_STUDY = Main.Studies.ParameterIdentification,
-                                    C3D_OBJECT = Main.ModelSetup.C3DFileData,
-                                    BODY_MODEL_FOLDER = Main.HumanModel.BodyModel,
-                                    PlaceMarkerAt = MoCapMarkerFrameAMMR24,
-                                    USE_BVH_INPUT = 0,
-                                    BVH_OBJECT = Main.ModelSetup.BVHFileData,
-                                    MarkerPlacementBVH = REQUIRED_FOR_BVH_INPUT,
-                                    DRAW_SCALE = 1,
-                                    SKIP_MARKER_EXIST_CHECK = 0
-                                    ){
-                                      
-                                     
+                                
 //  #if  MarkerName != _NOT_DEFINED_
 //  AnyInt Deprecated_MarkerName_argument = warn(0, strformat("\n"+
 //       "------------------------------------------------------------------------------------------------------\n"+
@@ -118,10 +194,17 @@ AnyMessage TestMarkerExist ={
   
   #var AnyObjectPtrVar MarkerWeightsPtr = &MarkerWeightsFun;
     
+
+
+  // CreateMarkerDriver
+  /// Position of the marker within its local reference frame
   #var AnyVec3 sRelOpt; 
   
   #if USE_BVH_INPUT
-  #var AnyVec3 sRelOnBVH ; 
+  // CreateMarkerDriver
+  /// Position of the marker on the BVH stick figure model. This is only
+  /// used when using BVH input.
+  #var AnyVec3 sRelOnBVH = {0,0,0};
   #endif
 
   #var AnyVec3 sRelOptDelta = {0, 0, 0};
@@ -319,7 +402,7 @@ AnyMessage TestMarkerExist ={
       {
         #var RGB = {0, 1, 0};
         #var ScaleXYZ = 0.015*{1, 1, 1};     
-        Visible = Main.ModelSetup.BVHFileData.ModelDrawOnOff;
+        Visible = BVH_OBJECT.ModelDrawOnOff;
       };
     };
   };//

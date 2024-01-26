@@ -12,7 +12,7 @@ you will realize the given code structure is actually quite universal.
 
 **STEP 1**
 
-Open a new AnyScript file (Cntrl + I) and type in the `Main` declaration shown below. This file now becomes
+Open a new AnyScript file (Ctrl + I) and type in the `Main` declaration shown below. This file now becomes
 the main model file, and all its contents (e.g, model objects, simulation objects) should be typed between the two curly braces.
 
 ```AnyScriptDoc
@@ -34,7 +34,7 @@ Otherwise, make the necessary changes.
 ```{code-block} AnyScriptDoc
 :emphasize-lines: 1
 
-#include "<ANYBODY_PATH_MYFILES>/AnyBody.7.1.x/AMMR.v2.1.1-Demo/libdef.any"
+#include "<ANYBODY_PATH_MYFILES>/AnyBody.8.0.x/AMMR.v3.0.0-Demo/libdef.any"
 Main =
 {
 
@@ -52,7 +52,7 @@ Kinematics and Inverse Dynamics simulations on your model.
 ```{code-block} AnyScriptDoc
 :emphasize-lines: 4-8,11-16
 
-#include "<ANYBODY_PATH_MYFILES>/AnyBody.7.1.x/AMMR.v2.1.1-Demo/libdef.any"
+#include "<ANYBODY_PATH_MYFILES>/AnyBody.8.0.x/AMMR.v3.0.0-Demo/libdef.any"
 Main =
 {
 
@@ -88,7 +88,7 @@ two `AnyBodyStudy` objects - one with references to (human & chair) and the othe
 ```{code-block} AnyScriptDoc
 :emphasize-lines: 13
 
-#include "<ANYBODY_PATH_MYFILES>/AnyBody.7.1.x/AMMR.v2.1.1-Demo/libdef.any"
+#include "<ANYBODY_PATH_MYFILES>/AnyBody.8.0.x/AMMR.v3.0.0-Demo/libdef.any"
 Main =
 {
 
@@ -119,7 +119,7 @@ the human body model alone. The file path `<ANYBODY_PATH_BODY>` is defined in `l
 ```{code-block} AnyScriptDoc
 :emphasize-lines: 4
 
-#include "<ANYBODY_PATH_MYFILES>/AnyBody.7.1.x/AMMR.v2.1.1-Demo/libdef.any"
+#include "<ANYBODY_PATH_MYFILES>/AnyBody.8.0.x/AMMR.v3.0.0-Demo/libdef.any"
 Main =
 {
     #include "<ANYBODY_PATH_BODY>/HumanModel.any"
@@ -150,7 +150,7 @@ Create a reference to the human body model inside `Model` so that it is consider
 ```{code-block} AnyScriptDoc
 :emphasize-lines: 8
 
-#include "<ANYBODY_PATH_MYFILES>/AnyBody.7.1.x/AMMR.v2.1.1-Demo/libdef.any"
+#include "<ANYBODY_PATH_MYFILES>/AnyBody.8.0.x/AMMR.v3.0.0-Demo/libdef.any"
 Main =
 {
     #include "<ANYBODY_PATH_BODY>/HumanModel.any"
@@ -197,7 +197,7 @@ constraints enforced by soft drivers. The alternative would have been to create 
 ```{code-block} AnyScriptDoc
 :emphasize-lines: 9,20-21
 
-#include "<ANYBODY_PATH_MYFILES>/AnyBody.7.1.x/AMMR.v2.1.1-Demo/libdef.any"
+#include "<ANYBODY_PATH_MYFILES>/AnyBody.8.0.x/AMMR.v3.0.0-Demo/libdef.any"
 Main =
 {
     #include "<ANYBODY_PATH_BODY>/HumanModel.any"
@@ -236,7 +236,7 @@ of the Pelvis w.r.t ground.
 ```{code-block} AnyScriptDoc
 :emphasize-lines: 11-19
 
-#include "<ANYBODY_PATH_MYFILES>/AnyBody.7.1.x/AMMR.v2.1.1-Demo/libdef.any"
+#include "<ANYBODY_PATH_MYFILES>/AnyBody.8.0.x/AMMR.v3.0.0-Demo/libdef.any"
 Main =
 {
     #include "<ANYBODY_PATH_BODY>/HumanModel.any"

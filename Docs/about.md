@@ -2,11 +2,15 @@
 
 ## Cite 
 
-The AnyBody Managed Model Repository has a DOI {{ DOI }}. This is handled by [Zenodo.org](https://zenodo.org/), which is an European Open Science platform hosted at CERN.
-You can download all archived versions of the AMMR from [Zenodo.org](https://doi.org/10.5281/zenodo.1250764).
+The AnyBody Managed Model Repository has a DOI {{ DOI }}. This is handled by
+[Zenodo.org](https://zenodo.org/), which is an European Open Science platform
+hosted at CERN. You can download all archived versions of the AMMR from
+[Zenodo.org](https://doi.org/10.5281/zenodo.1250764).
 
-You can download all archived versions of the AMMR from [Zenodo.org](https://doi.org/10.5281/zenodo.1250764).
-The DOI is usefull when citing the a specific version of the AMMR. For example, when citing the AMMR 2.4.3:
+You can download all archived versions of the AMMR from
+[Zenodo.org](https://doi.org/10.5281/zenodo.1250764). The DOI is useful when
+citing the a specific version of the AMMR. For example, when citing the AMMR
+2.4.3:
 
 :::{note}
 :class: margin
@@ -14,23 +18,27 @@ Remember to use the DOI for the specific version you use.
 :::
 
 :::{card} {material-regular}`format_quote;2em;` Citation
-Lund, Morten Enemark, Tørholm, Søren, et al. (2023, Jan 29). The AnyBody Managed Model Repository (AMMR) (Version 2.4.3). Zenodo. <https://doi.org/10.5281/zenodo.7572879>
+Lund, Morten Enemark, Tørholm, Søren, et al. (2023, Jan 29). The AnyBody Managed 
+Model Repository (AMMR) (Version 2.4.3). Zenodo. <https://doi.org/10.5281/zenodo.7572879>
 :::
 
 
 ## Contribute
 
 The Model Repository is the product of collaboration between AnyBody Technology,
-and many academic institutions and research projects.
+and many academic institutions and research projects. Development happens on GitHub
+where you can follow the development and contribute to the models.
 
-If you are interested in beta models/repositories you can get access to the
-development version of the AMMR. Development takes place in a semi-closed
-repository. The repository is closed to protect academic contributors who also
-often need to publish their models before release.
+All contributions are welcome and greatly appreciated. If you find a bug or have 
+comments to the code please report it on the [AnyScript forum](https://forum.anyscript.org).
 
-However, access is given on request. Please [submit an issue here](https://github.com/AnyBody/ammr-doc/issues), to request access.
+If you have a fix or an improvement to the models we are happy to accept it. Code contributions and 
+fixes are submitted on GitHub. 
 
-You can also view other freely available models and resources hosted on [GitHub](https://github.com/anybody).
+Simply fork this repository, editor your fork and [start a pull
+request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request) 
+
+
 
 :::{only} draft
 ::::{dropdown} Release checklist

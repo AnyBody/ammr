@@ -5,14 +5,8 @@ on:
   push:
      branches: [ master ]
      tags: ['*']
-     paths:
-       - 'Docs/**'
-       - 'CHANGELOG.md'
   pull_request:
      branches: [ master ]
-     paths:
-      - 'Docs/**'
-      - 'CHANGELOG.md'
   workflow_dispatch:
 
 concurrency: 
@@ -21,55 +15,110 @@ concurrency:
 
 
 jobs:
-  sphinx-build:
+  build-latest:
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
-    
+    if: github.repository == 'anybody/ammr' || github.event_name != 'push'
+  
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         
-      - name: Install mamba
-        uses: mamba-org/provision-with-micromamba@main
+      - uses: prefix-dev/setup-pixi@v0.4.3
         with:
-          environment-file: Docs/environment.yaml
+          manifest-path: Docs/pixi.toml
+          cache: true
+          cache-write: ${{ github.event_name == 'push' && github.ref_name == 'master' }}
+  
+      - name: Link check
+        run: |
+          cd Docs
+          pixi run sphinx-build -M linkcheck . _build -W --keep-going -a -q 
                             
       - name: Build Documentation
-        shell: bash -l {0}
         run: |
-          set -e
           cd Docs
-          make html-dev
-          cd ..
-          mkdir -p public/beta
-          cp -rT Docs/_build/html public/beta
+          pixi run sphinx-build -M html . _build -W --keep-going -a -t draft
 
-      - name: Link check
-        shell: bash -l {0}
-        run: |
-          set -e
-          cd Docs
-          make linkcheck
-          
-      - name: Build last tagged version
-        if: github.ref == 'refs/heads/master'
-        shell: bash -l {0}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: beta-version
+          path: Docs/_build/html
+
+    
+  build-tagged:
+    runs-on: ubuntu-latest
+    if: (github.repository == 'anybody/ammr' || github.event_name != 'push') && github.ref == 'refs/heads/master'
+  
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout last tagged version
         run: |
           git fetch --shallow-since=2020-07-07
           git checkout $(git describe --tags `git rev-list --tags=ammr* --max-count=1`);
-          micromamba create -n ammr-doc-old -y -f Docs/environment.yaml
-          micromamba activate ammr-doc-old
-          cd Docs
-          make clean
-          make html
-          cd ..
-          cp -rT Docs/_build/html public
-                    
-           
-      - name: Deploy 🚀
-        if: github.ref == 'refs/heads/master'
-        uses: peaceiris/actions-gh-pages@v3
+      
+      - uses: prefix-dev/setup-pixi@v0.4.3
+        continue-on-error: true
+        id: pixisetup
         with:
-          deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
-          external_repository: AnyBody/ammr-doc
-          publish_branch: gh-pages
-          publish_dir: ./public
+            manifest-path: Docs/pixi.toml
+            cache: true
+            cache-write: ${{ github.event_name == 'push' && github.ref_name == 'master' }}
+  
+      - name: Build Documentation
+        if: steps.pixisetup.outcome == 'success'
+        run: |
+          cd Docs
+          pixi run sphinx-build -M html . _build -a
+    
+      # Fall back to mamba when buildig old versions
+      - name: Install mamba
+        if: steps.pixisetup.outcome == 'failure'
+        uses: mamba-org/setup-micromamba@v1
+        with:
+          environment-file: Docs/environment.yaml
+            
+      - name: build with mamba
+        if: steps.pixisetup.outcome == 'failure'
+        shell: bash -leo pipefail {0} {0}
+        run: sphinx-build -M html Docs Docs/_build -a
+        
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tagged-version
+          path: Docs/_build/html
+
+
+  prepare-pages:
+    needs: [build-latest, build-tagged]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: tagged-version
+          path: public
+      - uses: actions/download-artifact@v4
+        with:
+          name: beta-version
+          path: public/beta
+      - uses: actions/upload-pages-artifact@v3
+        with: 
+          path: public
+
+
+  deploy:
+    needs: prepare-pages
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write    
+      id-token: write 
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+          

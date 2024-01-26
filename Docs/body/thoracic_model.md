@@ -1,3 +1,5 @@
+(thoracic-model)=
+
 # Thoracic spine model
 
 :::{admonition} **Unreleased model:** 
@@ -66,7 +68,7 @@ The detailed thoracic model can be controlled using the `BM_*` statements like t
 ```
 
 :::{note}
-**Planned for AMMR 3.0:** The model is scheduled to be released together with AMMR 3.0. But a beta release will be available on GitHub when AMMR 2.5 comes out.
+**Planned for AMMR 4.0:** The model is scheduled to be released together with AMMR 4.0. But a beta release will be available on GitHub when AMMR 3.0 comes out.
 Otherwise, for early access please [contact us](mailto:sales@anybodytech.com).
 :::
 

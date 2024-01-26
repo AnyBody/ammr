@@ -1,6 +1,6 @@
 ---
 gallery_title: "ADL Gait (beta)"
-gallery_image: "/Applications/images/Rehazenter-adult-walking-model.jpg"
+gallery_image: "/Applications/images/ADL_Gait.webp"
 ---
 
 (sphx_glr_auto_examples_MoCap_plot_ADL_Gait.py)=
@@ -8,7 +8,7 @@ gallery_image: "/Applications/images/Rehazenter-adult-walking-model.jpg"
 # ADL Gait (beta)
 
 ````{sidebar} **Example**
-<img src="/Applications/images/Rehazenter-adult-walking-model.jpg" width="70%" align="center">
+<img src="/Applications/images/ADL_Gait.webp" width="70%" align="center">
 ````
 
 Fullbody MoCap model with multiple subjects and trials based on the 

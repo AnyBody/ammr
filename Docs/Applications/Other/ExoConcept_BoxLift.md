@@ -1,6 +1,6 @@
 ---
 gallery_title: "Exoskeleton concept model"
-gallery_image: "/Applications/images/ExoskeletonConcept_BoxLift.jpg"
+gallery_image: "/Applications/images/ExoConcept_BoxLift.webp"
 ---
 
 (sphx_glr_auto_examples_Other_plot_ExoConcept_BoxLift.py)=
@@ -9,7 +9,7 @@ gallery_image: "/Applications/images/ExoskeletonConcept_BoxLift.jpg"
 
 
 ````{sidebar} **Example**
-<img src="/Applications/images/ExoskeletonConcept_BoxLift.jpg" width="70%" align="center">
+<img src="/Applications/images/ExoConcept_BoxLift.webp" width="70%" align="center">
 ````
 
 

@@ -79,32 +79,6 @@ Apr.  Restructure scaling for more accurate definition of anatomical
 #endif
 
 
-#ifdef JOINT_TYPE_HIP
-#undef JOINT_TYPE_HIP
-#undef JOINT_TYPE_KNEE
-#undef JOINT_TYPE_ANKLE
-#undef JOINT_TYPE_PATELLOFEMORAL
-#undef JOINT_TYPE_SUBTALAR
-#undef JOINT_TYPE_PATELLATENDON
-#endif
-
-#if _LEFT_RIGHT_ == "Right"
-#define JOINT_TYPE_HIP            BM_JOINT_TYPE_HIP_RIGHT
-#define JOINT_TYPE_KNEE           BM_JOINT_TYPE_KNEE_RIGHT
-#define JOINT_TYPE_ANKLE          BM_JOINT_TYPE_ANKLE_RIGHT
-#define JOINT_TYPE_PATELLOFEMORAL BM_JOINT_TYPE_PATELLOFEMORAL_RIGHT
-#define JOINT_TYPE_SUBTALAR       BM_JOINT_TYPE_SUBTALAR_RIGHT
-#define JOINT_TYPE_PATELLATENDON  BM_JOINT_TYPE_PATELLATENDON_RIGHT
-#endif
-
-#if _LEFT_RIGHT_ == "Left"
-#define JOINT_TYPE_HIP            BM_JOINT_TYPE_HIP_LEFT
-#define JOINT_TYPE_KNEE           BM_JOINT_TYPE_KNEE_LEFT
-#define JOINT_TYPE_ANKLE          BM_JOINT_TYPE_ANKLE_LEFT
-#define JOINT_TYPE_PATELLOFEMORAL BM_JOINT_TYPE_PATELLOFEMORAL_LEFT
-#define JOINT_TYPE_SUBTALAR       BM_JOINT_TYPE_SUBTALAR_LEFT
-#define JOINT_TYPE_PATELLATENDON  BM_JOINT_TYPE_PATELLATENDON_LEFT
-#endif
 
 
 AnyFolder STL =
@@ -197,17 +171,24 @@ AnySeg Foot =
       AnyMat33 ARelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(.pUnscaled, .Sign);///< Generic unscaled rotation of talus ScalingNode
     };
     
-    /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
+    /// For backwards Compatibility with AMMR 2.4 MoCap Marker protocols
     AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;
     
     AnyRefNode& ScalingNode = AnatomicalFrame ;
     
-    /// For backwards compatability with AMMR 2.4 talus coordinate system
+    /// For backwards Compatibility with AMMR 2.4 talus coordinate system
     AnyRefNode TalusCompatibilityFrameAMMR24 = {
-      sRel = .Scale({0.006451731, 0.02442938, ..Sign*-0.005543055});
-      ARel = {{0.9999733, -0.001715394, 0.007107884}, 
-              {0.001810773, 0.9999081, -0.01343407}, 
-              {-0.007084187, 0.01344658, 0.9998845}};
+      sRel = .Scale({0.01113461, 0.01995294, ..Sign*-0.01282196});
+      #if _LEFT_RIGHT_ == "Right"
+      ARel = {{0.9729412, -0.02857795, 0.2292786}, 
+              {0.01838066, 0.9987497, 0.04648894}, 
+              {-0.2303205, -0.04101672, 0.97225}};
+      #endif
+      #if _LEFT_RIGHT_ == "Left"
+      ARel = {{0.9729412, -0.02857795, -0.2292786}, 
+              {0.01838066, 0.9987497, -0.04648894}, 
+              {0.2303205, 0.04101672, 0.97225}};
+      #endif
     };
     
     sCoM = Scale(StdPar.sCoM);
@@ -218,29 +199,94 @@ AnySeg Foot =
     AnyRefNode MedialMalleolus =
     {
       sRel = .Scale(.StdPar.MedialMalleolus );
-      #include "../DrawSettings/BML.any"
+      //  #include "../DrawSettings/BML.any"
     };
     
     AnyRefNode LateralMalleolus =
     {
       sRel = .Scale(.StdPar.LateralMalleolus );
-      #include "../DrawSettings/BML.any"
+      //  #include "../DrawSettings/BML.any"
     };
-        
+    
+    #if TLEM_JOINT_TYPE_SUBTALAR != _JOINT_TYPE_USERDEFINED_
+    AnyRefNode SubTalarJoint =
+    {
+      sRel = .Scale(.StdPar.SubTalarJoint);
+      ARel = RotMat({0.0,0,0}, .StdPar.SubTalarJointAxis, .AnatomicalFrame.ARel'[1])*RotMat(pi/2,y);
+      
+      #include "../DrawSettings/JointAxesProximal.any"
+      
+      #if DRAWAXES
+      AnyDrawLine SJaxis2 =
+      {
+        Visible = On;
+        p0 = ..StdPar.SubTalarJoint + {..StdPar.SubTalarJointAxis[2],..StdPar.SubTalarJointAxis[1],..StdPar.SubTalarJointAxis[0]}*0.2;
+        p1 = ..StdPar.SubTalarJoint - {..StdPar.SubTalarJointAxis[2],..StdPar.SubTalarJointAxis[1],..StdPar.SubTalarJointAxis[0]}*0.2;      //Offset = {0, 0, 0};
+        Line = {
+          Thickness = 0.001;
+          RGB = {0, 0, 0};
+        };
+      };
+      #endif
+    };
+    #endif
+    
+    #if TLEM_JOINT_TYPE_ANKLE != _JOINT_TYPE_USERDEFINED_
+    AnyRefNode AnkleJoint =
+    {
+      #if TLEM_JOINT_TYPE_ANKLE == _JOINT_TYPE_BONY_LANDMARK_
+      AnyVec3 sRelUnscaled =  0.5*(.StdPar.LateralMalleolus+.StdPar.MedialMalleolus);
+      AnyMat33 ARelUnscaled = RotMat({0.0,0,0},
+                                      ....Sign*(.StdPar.LateralMalleolus - .StdPar.MedialMalleolus ),
+                                      .AnatomicalFrame.ARelUnscaled'[1])*RotMat(pi/2,y);
+      /// Ankle joint is defined from the two malleolus bony landmarks
+      sRel = 0.5*(.Scale(.StdPar.LateralMalleolus)+.Scale(.StdPar.MedialMalleolus));
+      /// Ankle joint axis is defined from the two malleolus bony landmarks
+      ARel = RotMat({0.0,0,0}, ....Sign*(.Scale(.StdPar.LateralMalleolus) - .Scale(.StdPar.MedialMalleolus) ), .AnatomicalFrame.ARel'[1]  )*RotMat(pi/2,y);
+      #endif
+      #if TLEM_JOINT_TYPE_ANKLE == _JOINT_TYPE_DEFAULT_
+      AnyVec3 sRelUnscaled = .StdPar.AnkleJoint;
+      AnyMat33 ARelUnscaled = RotMat({0.0,0,0}, .StdPar.AnkleJointAxis, .AnatomicalFrame.ARelUnscaled'[1])*RotMat(pi/2,y);
+      /// Control point for the Ankle joint. Found by projecting the malleolus bony landmarks onto the
+      /// ankle axis from the cadaver data set. Thus, scaling that moves the control points will also scale the ankle joint axis
+      AnyVec3 LateralControlPoint = .Scale(.StdPar.AnkleJoint + (.StdPar.LateralMalleolus - .StdPar.AnkleJoint)*.StdPar.AnkleJointAxis'*.StdPar.AnkleJointAxis);
+      /// Control point for the Ankle joint. Found by projecting the malleolus bony landmarks onto the
+      /// ankle axis from the cadaver data set. Thus, scaling that moves the control points will also scale the ankle joint axis
+      AnyVec3 MedialControlPoint = .Scale(.StdPar.AnkleJoint + (.StdPar.MedialMalleolus - .StdPar.AnkleJoint)*.StdPar.AnkleJointAxis'*.StdPar.AnkleJointAxis );
+      /// Ankle Joint defined directly from the cadaver dataset.
+      sRel = .Scale(.StdPar.AnkleJoint);
+      /// Ankle Joint orientation is calculated based on the direction between the two control points.
+      ARel = RotMat(0.0*{0,0,0}, .Sign*(LateralControlPoint-MedialControlPoint ),  .AnatomicalFrame.ARel'[1] )*RotMat(pi/2,y);
+      #endif
+      
+      #include "../DrawSettings/JointAxesDistal.any"
+      
+      #if DRAWAXES
+      AnyDrawLine SJaxis2 =
+      {
+        Visible = On;
+        p0 = ..StdPar.TalocruralsRel + {..StdPar.AnkleJointAxis[2],..StdPar.AnkleJointAxis[1],..StdPar.AnkleJointAxis[0]}*0.2;
+        p1 = ..StdPar.TalocruralsRel - {..StdPar.AnkleJointAxis[2],..StdPar.AnkleJointAxis[1],..StdPar.AnkleJointAxis[0]}*0.2;      //Offset = {0, 0, 0};
+        Line = {Thickness = 0.001; RGB = {0, 0, 0};};
+      };
+      #endif
+    };
+    #endif
+    
     #include "../DrawSettings/Nodes.any"
     #include "../DrawSettings/SegmentAxes.any"
     
     AnyDrawSurf DrwSurf =
     {
-      FileName = ...STL.FilenameTalus;
-      ScaleXYZ = {1.0, 1.0, ....Sign*1.0};
-      RGB = ....ColorRef.Segments;
+      FileName ??= ...STL.FilenameTalus;
+      ScaleXYZ ??= {1.0, 1.0, ....Sign*1.0};
+      RGB ??= ....ColorRef.Segments;
       AnyFunTransform3D &Scale =.Scale;
-      Opacity = ....BonesOpacity.Talus;
+      Opacity ??= ....BonesOpacity.Talus;
     };
   }; // end of Talus segment
   
-  /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
+  /// For backwards Compatibility with AMMR 2.4 MoCap Marker protocols
   AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;
 
   AnyRefNode& ScalingNode=AnatomicalFrame;
@@ -255,6 +301,16 @@ AnySeg Foot =
   Jij = StdPar.Jij;
 
   AnyRefNode &HeelJoint = HeelContactNodeLow;
+
+  #if TLEM_JOINT_TYPE_SUBTALAR != _JOINT_TYPE_USERDEFINED_ 
+  AnyRefNode SubTalarJoint =
+  {
+    AnyVec3 sRelUnscaled = .StdPar.SubTalarJoint;
+    AnyMat33 ARelUnscaled = RotMat({0.0, 0.0, 0.0 }, .StdPar.SubTalarJointAxis, .AnatomicalFrame.ARelUnscaled'[1])*RotMat(pi/2,y);
+    sRel = .Scale(.StdPar.SubTalarJoint);
+    ARel = RotMat({0.0, 0.0, 0.0 }, .StdPar.SubTalarJointAxis, .AnatomicalFrame.ARel'[1])*RotMat(pi/2,y);
+  };
+  #endif
   
   /// This coordinate system is placed according the International Society of Biomechanics' (ISB)
   /// recommendations for an anatomical coordinate system for the ankle joint in the foot segment.
@@ -263,7 +319,7 @@ AnySeg Foot =
   /// Section 3.4
   AnyRefNode AnkleJointComplexAnatomicalFrame =
   {
-    #if JOINT_TYPE_ANKLE == _JOINT_TYPE_BONY_LANDMARK_
+    #if TLEM_JOINT_TYPE_ANKLE == _JOINT_TYPE_BONY_LANDMARK_
       sRel = (.MedialMalleolus.sRel + .LateralMalleolus.sRel)*0.5;
     #else
       sRel = .Scale(.StdPar.AnkleJointInNeutralConf);
@@ -276,18 +332,18 @@ AnySeg Foot =
   AnyRefNode MedialMalleolus =
   {
     sRel = .Scale(.StdPar.MedialMalleolusInNeutralConf );
-    #include "../DrawSettings/BML.any"
+    //  #include "../DrawSettings/BML.any"
   };
   AnyRefNode LateralMalleolus =
   {
     sRel = .Scale(.StdPar.LateralMalleolusInNeutralConf );
-    #include "../DrawSettings/BML.any"
+    //  #include "../DrawSettings/BML.any"
   };
 
   AnyRefNode IntraMallolar =
   {
     sRel =0.5* (.MedialMalleolus.sRel+.LateralMalleolus.sRel);
-    #include "../DrawSettings/BML.any"
+    //  #include "../DrawSettings/BML.any"
   };
   AnyRefNode HeelPlantar = 
   {
@@ -485,20 +541,20 @@ AnySeg Foot =
 
   AnyDrawSurf DrwSurf =
   {
-    FileName = ..STL.FilenameFoot;
-    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
-    RGB = ...ColorRef.Segments;
+    FileName ??= ..STL.FilenameFoot;
+    ScaleXYZ ??= {1.0, 1.0, ...Sign*1.0};
+    RGB ??= ...ColorRef.Segments;
     AnyFunTransform3D &Scale =.Scale;
-    Opacity = ...BonesOpacity.Foot;
+    Opacity ??= ...BonesOpacity.Foot;
   };
 
   #if SKIN
   AnyDrawSurf Drw2 =
   {
-    FileName = ..STL.FilenameFootSkin;
-    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
-    RGB = ...ColorRef.Skin;
-    Opacity = Main.DrawSettings.SkinOpacity.Opacity;
+    FileName ??= ..STL.FilenameFootSkin;
+    ScaleXYZ ??= {1.0, 1.0, ...Sign*1.0};
+    RGB ??= ...ColorRef.Skin;
+    Opacity ??= Main.DrawSettings.SkinOpacity.Opacity;
     AnyFunTransform3D &Scale =.Scale;
     Face=-1;
   };
@@ -507,10 +563,10 @@ AnySeg Foot =
   #if MUSCLETISSUE
   AnyDrawSurf Drw1 =
   {
-    FileName = ..STL.FilenameFootMuscleTissue;
-    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
-    RGB = ...ColorRef.MuscleTissue;
-    Opacity = Main.DrawSettings.MuscleTissueOpacity.Opacity;
+    FileName ??= ..STL.FilenameFootMuscleTissue;
+    ScaleXYZ ??= {1.0, 1.0, ...Sign*1.0};
+    RGB ??= ...ColorRef.MuscleTissue;
+    Opacity ??= Main.DrawSettings.MuscleTissueOpacity.Opacity;
     AnyFunTransform3D &Scale =.Scale;
     Face=-1;
   };
@@ -637,7 +693,7 @@ AnySeg Shank =
     AnyVec3 sRelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(.pUnscaled, .Sign); ///< Generic unscaled position of shank ScalingNode
     AnyMat33 ARelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(.pUnscaled, .Sign);///< Generic unscaled rotation of shank ScalingNode
   };
-  /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
+  /// For backwards Compatibility with AMMR 2.4 MoCap Marker protocols
   AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;
   
   AnyRefNode& ScalingNode=AnatomicalFrame ;
@@ -674,7 +730,7 @@ AnySeg Shank =
   /// Section 3.3
   AnyRefNode AnkleJointComplexAnatomicalFrame =
   {
-    #if JOINT_TYPE_ANKLE ==  _JOINT_TYPE_BONY_LANDMARK_
+    #if TLEM_JOINT_TYPE_ANKLE ==  _JOINT_TYPE_BONY_LANDMARK_
       AnyVec3 O = 0.5*(.Scale(.StdPar.LateralAnkleAxisMarker) + .Scale(.StdPar.MedialAnkleAxisMarker) );
       AnyVec3 Z = ...Sign*(.Scale(.StdPar.LateralAnkleAxisMarker) - .Scale(.StdPar.MedialAnkleAxisMarker) );
     #else
@@ -687,17 +743,17 @@ AnySeg Shank =
     ARel = {X/vnorm(X),Y/vnorm(Y),Z/vnorm(Z)}';
   };
 
-  #if JOINT_TYPE_ANKLE != _JOINT_TYPE_USERDEFINED_
+  #if TLEM_JOINT_TYPE_ANKLE != _JOINT_TYPE_USERDEFINED_
   AnyRefNode AnkleJoint =
   {
      AnyVar TibialTorsionOffset = DesignVar(0);
-     #if JOINT_TYPE_ANKLE == _JOINT_TYPE_BONY_LANDMARK_
+     #if TLEM_JOINT_TYPE_ANKLE == _JOINT_TYPE_BONY_LANDMARK_
        AnyVec3 sRelUnscaled =  0.5*(.StdPar.LateralAnkleAxisMarker+ .StdPar.MedialAnkleAxisMarker);
        AnyMat33 ARelUnscaled = RotMat({0.0, 0, 0 } , .Sign*(.StdPar.LateralAnkleAxisMarker - .StdPar.MedialAnkleAxisMarker ), .AnatomicalFrame.ARelUnscaled'[1])*RotMat(pi/2,y);
        sRel = 0.5*(.Scale(.StdPar.LateralAnkleAxisMarker) + .Scale(.StdPar.MedialAnkleAxisMarker));
        ARel = RotMat(sRel, sRel+ .Sign*(.Scale(.StdPar.LateralAnkleAxisMarker) - .Scale(.StdPar.MedialAnkleAxisMarker) ),  .AnatomicalFrame.ARel'[1])*RotMat(pi/2,y)*RotMat(TibialTorsionOffset,y);
      #endif
-     #if JOINT_TYPE_ANKLE == _JOINT_TYPE_DEFAULT_
+     #if TLEM_JOINT_TYPE_ANKLE == _JOINT_TYPE_DEFAULT_
        AnyVec3 sRelUnscaled =  .StdPar.AnkleJoint;
        AnyMat33 ARelUnscaled =   RotMat({0, 0, 0.0}, .Sign*(AnkleLateralControlPoint-AnkleMedialControlPoint ), .AnatomicalFrame.ARelUnscaled'[1])*RotMat(pi/2,y);
        // Control point for the Ankle joint. Found by projecting the malleolus bony landmarks onto the
@@ -715,11 +771,11 @@ AnySeg Shank =
   };
   #endif
   
-  #if JOINT_TYPE_KNEE != _JOINT_TYPE_USERDEFINED_
+  #if TLEM_JOINT_TYPE_KNEE != _JOINT_TYPE_USERDEFINED_
   AnyRefNode KneeJoint =
-  {
-    #if JOINT_TYPE_KNEE == _JOINT_TYPE_BONY_LANDMARK_
-       AnyVec3 sRelUnscaled = 0.5*(.StdPar.LateralFemuralCondyleInNeutralConf + .StdPar.MedialFemuralCondyleInNeutralConf);
+  {    
+    #if TLEM_JOINT_TYPE_KNEE == _JOINT_TYPE_BONY_LANDMARK_ 
+    AnyVec3 sRelUnscaled = 0.5*(.StdPar.LateralFemuralCondyleInNeutralConf + .StdPar.MedialFemuralCondyleInNeutralConf);
        AnyMat33 ARelUnscaled =  RotMat({0,0,0.0},
                                        .Sign*(.StdPar.LateralFemuralCondyleInNeutralConf - .StdPar.MedialFemuralCondyleInNeutralConf),
                                        -1*.AnatomicalFrame.ARelUnscaled'[1])*RotMat(pi,z)*RotMat(-pi/2,y);
@@ -730,7 +786,7 @@ AnySeg Shank =
                      .Sign*(.Scale(.StdPar.LateralFemuralCondyleInNeutralConf) - .Scale(.StdPar.MedialFemuralCondyleInNeutralConf)),
                      -1*.AnatomicalFrame.ARel'[1])*RotMat(pi,z)*RotMat(-pi/2,y);
     #endif
-    #if JOINT_TYPE_KNEE == _JOINT_TYPE_DEFAULT_
+    #if TLEM_JOINT_TYPE_KNEE == _JOINT_TYPE_DEFAULT_ 
        AnyVec3 sRelUnscaled = .StdPar.KneeJoint;
        AnyMat33 ARelUnscaled =  RotMat({0,0,0.0},
                                        .Sign*(LateralControlPoint - MedialControlPoint),
@@ -740,7 +796,8 @@ AnySeg Shank =
        AnyVec3 LateralControlPoint = .StdPar.KneeJoint + (.StdPar.LateralFemuralCondyleInNeutralConf - .StdPar.KneeJoint)*.StdPar.KneeJointAxis'*.StdPar.KneeJointAxis;
        /// Control point for the knee joint. Found by projecting the EpicondylusFemoris bony landmarks onto the
        /// knee axis from the cadaver data set. Thus, scaling the control points will also scale the Knee joint axis
-       AnyVec3 MedialControlPoint = .StdPar.KneeJoint + (.StdPar.MedialFemuralCondyleInNeutralConf - .StdPar.KneeJoint)*.StdPar.KneeJointAxis'*.StdPar.KneeJointAxis;
+       AnyVec3 MedialControlPoint = .StdPar.KneeJoint + (.StdPar.MedialFemuralCondyleInNeutralConf - .StdPar.KneeJoint)*.StdPar.KneeJointAxis'*.StdPar.KneeJointAxis;      
+       
        sRel = .Scale(.StdPar.KneeJoint);
        /// Knee Joint orientation is calculated based on the direction between the two control points.
        ARel = RotMat({0,0,0.0}, .Sign*(.Scale(LateralControlPoint)-.Scale(MedialControlPoint)), -1*.AnatomicalFrame.ARel'[1])*RotMat(pi,z)*RotMat(-pi/2,y);
@@ -750,6 +807,7 @@ AnySeg Shank =
   
   };
   #endif
+   
 
   #if BM_FOOT_MODEL != _FOOT_MODEL_NONE_
   AnyRefNode AchillesWrapping1 = {
@@ -816,7 +874,7 @@ AnySeg Shank =
     #include "../DrawSettings/BML.any"
   };
 
-  #if JOINT_TYPE_PATELLATENDON != _JOINT_TYPE_USERDEFINED_
+  #if TLEM_JOINT_TYPE_PATELLATENDON != _JOINT_TYPE_USERDEFINED_
   /// This node is a reference node for the patella tendon to define the movement of
   /// the patella. The tendon will be regarded as being stiff, so the length will not change.
   /// This is defined by an AnyKinPLine in the file Jnt.any.
@@ -996,30 +1054,30 @@ AnySeg Shank =
 
   AnyDrawSurf DrwSurfTibia =
   {
-    FileName = ..STL.FilenameShank;
-    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
-    RGB = ...ColorRef.Segments;
+    FileName ??= ..STL.FilenameShank;
+    ScaleXYZ ??= {1.0, 1.0, ...Sign*1.0};
+    RGB ??= ...ColorRef.Segments;
     AnyFunTransform3D &Scale =.Scale;
-    Opacity = ...BonesOpacity.Shank;
+    Opacity ??= ...BonesOpacity.Shank;
     Face=-1;
   };
 
   AnyDrawSurf DrwSurfFibula = {
-    FileName = ..STL.FilenameFibula;
-    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
-    RGB = ...ColorRef.Segments;
+    FileName ??= ..STL.FilenameFibula;
+    ScaleXYZ ??= {1.0, 1.0, ...Sign*1.0};
+    RGB ??= ...ColorRef.Segments;
     AnyFunTransform3D &Scale =.Scale; 
-    Opacity = ...BonesOpacity.Shank;
+    Opacity ??= ...BonesOpacity.Shank;
     Face=-1;
   };  
   
   #if SKIN
   AnyDrawSurf Drw2 =
   {
-    FileName = ..STL.FilenameShankSkin;
-    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
-    RGB = ...ColorRef.Skin;
-    Opacity = Main.DrawSettings.SkinOpacity.Opacity;
+    FileName ??= ..STL.FilenameShankSkin;
+    ScaleXYZ ??= {1.0, 1.0, ...Sign*1.0};
+    RGB ??= ...ColorRef.Skin;
+    Opacity ??= Main.DrawSettings.SkinOpacity.Opacity;
     AnyFunTransform3D &Scale =.Scale;
     Face=-1;
   };
@@ -1028,10 +1086,10 @@ AnySeg Shank =
   #if MUSCLETISSUE
   AnyDrawSurf Drw1 =
   {
-    FileName = ..STL.FilenameShankMuscleTissue;
-    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
-    RGB = ...ColorRef.MuscleTissue;
-    Opacity = Main.DrawSettings.MuscleTissueOpacity.Opacity;
+    FileName ??= ..STL.FilenameShankMuscleTissue;
+    ScaleXYZ ??= {1.0, 1.0, ...Sign*1.0};
+    RGB ??= ...ColorRef.MuscleTissue;
+    Opacity ??= Main.DrawSettings.MuscleTissueOpacity.Opacity;
     AnyFunTransform3D &Scale =.Scale;
     Face=-1;
   };
@@ -1068,7 +1126,7 @@ AnySeg Thigh =
     AnyVec3 sRelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(.pUnscaled, .Sign); ///< Generic unscaled position of thigh ScalingNode
     AnyMat33 ARelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(.pUnscaled, .Sign);///< Generic unscaled rotation of thigh ScalingNode
   };
-  /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
+  /// For backwards Compatibility with AMMR 2.4 MoCap Marker protocols
   AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;
 
   AnyRefNode& ScalingNode=AnatomicalFrame ;
@@ -1166,14 +1224,14 @@ AnySeg Thigh =
     };
   };
 
-   #if JOINT_TYPE_KNEE != _JOINT_TYPE_USERDEFINED_
+   #if TLEM_JOINT_TYPE_KNEE != _JOINT_TYPE_USERDEFINED_ 
    AnyRefNode KneeJoint =
    {
     /// Deprecated name the variable 'VarusValgusRotation'.
     AnyVar AxisRot= VarusValgusRotation;
     /// Variable that allows for changing the varus valgus rotation in the model.
     AnyVar VarusValgusRotation = DesignVar(0);
-     #if JOINT_TYPE_KNEE == _JOINT_TYPE_BONY_LANDMARK_
+     #if TLEM_JOINT_TYPE_KNEE == _JOINT_TYPE_BONY_LANDMARK_ 
        AnyVec3 sRelUnscaled = 0.5*(.StdPar.EpicondylusFemorisLateralis + .StdPar.EpicondylusFemorisMedialis);
        AnyMat33 ARelUnscaled = RotMat({0.0,0,0}, .Sign*(.StdPar.EpicondylusFemorisLateralis - .StdPar.EpicondylusFemorisMedialis), .AnatomicalFrame.ARelUnscaled'[1])
                                *RotMat(pi/2,y)*RotMat(AxisRot,x);
@@ -1182,7 +1240,7 @@ AnySeg Thigh =
        /// Knee joint orientation. Defined from the two epicondyle bony landmarks
        ARel = RotMat({0.0,0,0}, .Sign*(.Scale(.StdPar.EpicondylusFemorisLateralis) - .Scale(.StdPar.EpicondylusFemorisMedialis)), .AnatomicalFrame.ARel'[1])*RotMat(pi/2,y)*RotMat(AxisRot,x);
      #endif
-     #if JOINT_TYPE_KNEE == _JOINT_TYPE_DEFAULT_
+     #if TLEM_JOINT_TYPE_KNEE == _JOINT_TYPE_DEFAULT_ 
       AnyVec3 sRelUnscaled = .StdPar.KneeJoint;
       AnyMat33 ARelUnscaled = RotMat({0,0,0.0},
                                      .Sign * (KneeLateralControlPoint - KneeMedialControlPoint ),
@@ -1216,7 +1274,8 @@ AnySeg Thigh =
   };
   #endif
   
-  #if JOINT_TYPE_HIP != _JOINT_TYPE_USERDEFINED_
+  
+  #if TLEM_JOINT_TYPE_HIP != _JOINT_TYPE_USERDEFINED_
   AnyRefNode HipJoint =
   {
     AnyVec3 sRelUnscaled = .StdPar.HipJoint;
@@ -1229,7 +1288,7 @@ AnySeg Thigh =
   };
   #endif
   
-  #if JOINT_TYPE_PATELLOFEMORAL != _JOINT_TYPE_USERDEFINED_
+  #if TLEM_JOINT_TYPE_PATELLOFEMORAL != _JOINT_TYPE_USERDEFINED_
    AnyRefNode PatellaFemurJoint =
    {
      AnyVec3 sRelUnscaled = .StdPar.PatellaFemurJoint;
@@ -1477,10 +1536,10 @@ AnySeg Thigh =
 
   AnyDrawSurf Drw3 =
   {
-    FileName = ..STL.FilenameThigh;
-    ScaleXYZ = {1.0, 1.0, ...Sign*1.0}*1;
-    RGB = ...ColorRef.Segments;
-    Opacity = ...BonesOpacity.Thigh;
+    FileName ??= ..STL.FilenameThigh;
+    ScaleXYZ ??= {1.0, 1.0, ...Sign*1.0}*1;
+    RGB ??= ...ColorRef.Segments;
+    Opacity ??= ...BonesOpacity.Thigh;
     AnyFunTransform3D &Scale =.Scale;
     Face=-1;
   };
@@ -1493,10 +1552,10 @@ AnySeg Thigh =
     ARel = RotMat(...Sign*-27*pi/180, y);
     AnyDrawSurf Drw2 =
     {
-      FileName = ...STL.FilenameThighSkin;
-      ScaleXYZ = {1.0, 1.0, ....Sign*1.0};
-      RGB = ....ColorRef.Skin;
-      Opacity = Main.DrawSettings.SkinOpacity.Opacity;
+      FileName ??= ...STL.FilenameThighSkin;
+      ScaleXYZ ??= {1.0, 1.0, ....Sign*1.0};
+      RGB ??= ....ColorRef.Skin;
+      Opacity ??= Main.DrawSettings.SkinOpacity.Opacity;
       AnyFunTransform3D &Scale =..Scale;
       Face=-1;
     };
@@ -1509,10 +1568,10 @@ AnySeg Thigh =
     sRel = {0,0,0};
     ARel = RotMat(...Sign*-27*pi/180, y);
     AnyDrawSurf Drw2 = {
-      FileName = ...STL.FilenameThighMuscleTissue;
-      ScaleXYZ = {1.0, 1.0, ....Sign*1.0};
-      RGB = ....ColorRef.MuscleTissue;
-      Opacity = Main.DrawSettings.MuscleTissueOpacity.Opacity;
+      FileName ??= ...STL.FilenameThighMuscleTissue;
+      ScaleXYZ ??= {1.0, 1.0, ....Sign*1.0};
+      RGB ??= ....ColorRef.MuscleTissue;
+      Opacity ??= Main.DrawSettings.MuscleTissueOpacity.Opacity;
       AnyFunTransform3D &Scale =..Scale;
       Face=-1;
     };
@@ -1550,11 +1609,11 @@ AnySeg Patella =
     ARel = ..Thigh.AnatomicalFrame.ARel;
     sRel = .PatellaFemurJoint.sRel;
   };
-  /// For backwards compatability with AMMR 2.4 MoCap Marker protocols
+  /// For backwards Compatibility with AMMR 2.4 MoCap Marker protocols
   AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;
   AnyRefNode& ScalingNode=AnatomicalFrame ;
 
-  #if JOINT_TYPE_PATELLOFEMORAL != _JOINT_TYPE_USERDEFINED_
+  #if TLEM_JOINT_TYPE_PATELLOFEMORAL != _JOINT_TYPE_USERDEFINED_
   AnyRefNode PatellaFemurJoint =
   {
     AnyVec3 sRelUnscaled = .StdPar.PatellaFemurJoint;
@@ -1574,14 +1633,14 @@ AnySeg Patella =
   
   AnyDrawSurf DrwSurf =
   {
-   FileName = ..STL.FilenamePatella;
-    ScaleXYZ = {1.0, 1.0, ...Sign*1.0};
-    RGB = ...ColorRef.Segments;
+   FileName ??= ..STL.FilenamePatella;
+    ScaleXYZ ??= {1.0, 1.0, ...Sign*1.0};
+    RGB ??= ...ColorRef.Segments;
     AnyFunTransform3D &Scale =.Scale;
-    Opacity = ...BonesOpacity.Patella;
+    Opacity ??= ...BonesOpacity.Patella;
   };
 
-  #if JOINT_TYPE_PATELLATENDON != _JOINT_TYPE_USERDEFINED_
+  #if TLEM_JOINT_TYPE_PATELLATENDON != _JOINT_TYPE_USERDEFINED_
   /// A reference node for the patella tendon to define the movement of
   /// the patella. The tendon will be regarded as being stiff, so the length will not change.
   /// This is defined by an AnyKinPLine in the file Jnt.any.
@@ -1684,7 +1743,7 @@ PelvisSeg =
   {
   #undef __RightLeft__
   
-    #if JOINT_TYPE_HIP != _JOINT_TYPE_USERDEFINED_
+    #if TLEM_JOINT_TYPE_HIP != _JOINT_TYPE_USERDEFINED_
     AnyRefNode HipJoint = {
       AnyVec3 sRelUnscaled = .Muscles.StdPar.HipJoint;
       sRel = ..AnatomicalFrame.Scale_Leg_Pelvis(sRelUnscaled );
@@ -1998,9 +2057,9 @@ PelvisSeg =
       AnyDrawSurf DrwPelvis =
       #endif
       {
-        FileName = ..STL.FilenamePelvis;
-        Opacity =  Main.DrawSettings.BonesOpacity.Pelvis;
-        RGB = ...ColorRef.Segments;
+        FileName ??= ..STL.FilenamePelvis;
+        Opacity ??=  Main.DrawSettings.BonesOpacity.Pelvis;
+        RGB ??= ...ColorRef.Segments;
         AnyFunTransform3D &Scale = .AnatomicalFrame.Scale_Leg_Pelvis ;
       };
       
@@ -2010,9 +2069,9 @@ PelvisSeg =
       AnyDrawSurf DrwSacrum =
       #endif
       {
-        FileName = ..STL.FilenameSacrum;
-        Opacity =  Main.DrawSettings.BonesOpacity.Pelvis;
-        RGB = ...ColorRef.Segments;
+        FileName ??= ..STL.FilenameSacrum;
+        Opacity ??=  Main.DrawSettings.BonesOpacity.Pelvis;
+        RGB ??= ...ColorRef.Segments;
         AnyFunTransform3D &Scale = .AnatomicalFrame.Scale_Leg_Pelvis ;
       };
       
