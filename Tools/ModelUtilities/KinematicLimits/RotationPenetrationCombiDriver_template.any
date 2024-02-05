@@ -1,0 +1,73 @@
+/*
+This class template can be used to set up a driver that combines a rotational and
+linear measure to ensure that the rotational measure is normally at zero unless it 
+deviates to prevent negative value of the linear measure.
+
+Use cases of such a combi driver can be flexion of toes in combination with the 
+presence of ground. The driver will ensure that the toes stay normally at their 
+neutral angle and extend only when necessary to prevent penetration with the floor,
+for e.g, at toe-off phase in gait. 
+Another example could be to grab a box in combination with wrist flexion. The driver
+can be used to ensure that the wrist deviates from the neutral posture only when 
+penetration with the box must be avoided.
+*/
+
+#class_template RotationPenetrationCombiDriver (
+  PLANE_BASE_FRAME = Main.EnvironmentModel.GlobalRef,
+  UP_DIRECTION = "Y",
+  NEUTRAL_ANGLE_MEASURE,
+  TARGET_FRAME)
+  {
+    #var AnyVar PlaneBaseFrameOffset = 0.0;
+    AnyKinMeasure &NeutralAngleMeasure = NEUTRAL_ANGLE_MEASURE;
+    AnyRefFrame &PlaneBaseFrame = PLANE_BASE_FRAME;
+    PlaneBaseFrame = {
+      AnyRefNode OffsetFrame_##__NAME__ = {
+        #if UP_DIRECTION == "X"
+        sRel = {..PlaneBaseFrameOffset, 0, 0};
+        #endif
+        #if UP_DIRECTION == "Y"
+        sRel = {0, ..PlaneBaseFrameOffset, 0};
+        #endif
+        #if UP_DIRECTION == "Z"
+        sRel = {0, 0, ..PlaneBaseFrameOffset};
+        #endif
+      };
+    };
+
+    AnyKinEqSimpleDriver ExpCombMesaureDriver = {
+      AnyKinMeasureExpComb ExpCombMeasure = {
+        AnyKinMeasure &Rot = ..NeutralAngleMeasure;
+        AnyKinMeasureOrg DistMeasure = {
+          AnyKinLinear Lin = {
+            AnyRefFrame &PlaneBaseFrame = PLANE_BASE_FRAME.OffsetFrame_##__NAME__;
+            AnyRefFrame &TargetFrame = TARGET_FRAME;
+            Ref = 0;
+          };
+          #if UP_DIRECTION == "X"
+          MeasureOrganizer = {0};
+          #endif
+          #if UP_DIRECTION == "Y"
+          MeasureOrganizer = {1};
+          #endif
+          #if UP_DIRECTION == "Z"
+          MeasureOrganizer = {2};
+          #endif
+          #if (UP_DIRECTION != "X") & (UP_DIRECTION != "Y") & (UP_DIRECTION != "Z")
+          AnyInt ErrorMsg = assert(0,"Incorrect selection of UP_DIRECTION. Please select "X", "Y" or "Z".");
+          #endif
+        };
+        
+        #var a = -400;
+        #var AveragingOnOff = Off;
+      };
+      
+      DriverPos = {0};
+      DriverVel = {0};
+      Reaction = {
+        #var Type = {Off};
+      };
+      #var CType = {Soft};
+    };
+
+  };
