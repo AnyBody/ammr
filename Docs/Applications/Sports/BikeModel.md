@@ -1,6 +1,6 @@
 ---
 gallery_title: "Bike Model"
-gallery_image: "/Applications/images/BikeModel.webp"
+gallery_image: "/Applications/images/BikeModel-FullBody.webp"
 ---
 
 (sphx_glr_auto_examples_Sports_plot_BikeModel.py)=
@@ -44,5 +44,3 @@ BikeLegConnection.any.
 
 The model can run in two configurations FullBodyModel and LowerExtremityModel this
 can be changed in the "Config.any" file
-
-gallery.show()
