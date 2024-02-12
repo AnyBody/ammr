@@ -1,16 +1,6 @@
 # Getting Started
 
-## AMMR Intallation
-
-:::{seealso}
-:class: margin
-{doc}`Detailed guide on how to install the AMMR <ammr_installation>`:
-:::
-
-The *AnyBody Model Repository* (AMMR) comes bundled with the
-[AnyBody Modeling System]. But it must be installed/unpacked manually after you installed AnyBody.
-You can install the AMMR from the *AnyBody Assistent* dialog which is presented when AnyBody starts.
-
+The *AnyBody Model Repository* (AMMR) is included with the [AnyBody Modeling System](https://anybodytech.com), but it needs to be manually installed or unpacked after installing AnyBody. You can install the AMMR from the *AnyBody Assistant* dialog that appears when AnyBody starts.
 
 
 ```{toctree}

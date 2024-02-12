@@ -115,7 +115,7 @@ exclude_patterns = [
 highlight_language = "AnyScriptDoc"
 pygments_style = "AnyScript"
 
-ams_version = os.environ.get("AMS_VERSION", "7.4.3")
+ams_version = os.environ.get("AMS_VERSION", "8.0.0")
 if not re.match("^\d\.\d\.\d", ams_version):
     raise ValueError("Wrong format for AMS version, environment variable")
 ams_version_short = ams_version.rpartition(".")[0]
@@ -149,8 +149,8 @@ rst_epilog = f"""
 .. |AMMR_DEMO_INST_DIR| replace:: :literal:`~/Documents/{ams_version_x}/AMMR.v{ammr_version}-Demo`
 .. |CURRENT_YEAR| replace:: {current_year}
 .. |WHAT_IS_NEW| replace:: :ref:`What's new in AMMR {ammr_version} <whats-new>`
-.. |DOI| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.1250764.svg
-                 :target: https://doi.org/10.5281/zenodo.1250764
+.. |DOI| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.10527958.svg
+                 :target: https://doi.org/10.5281/zenodo.10527958
 """
 
 myst_substitutions = {
@@ -162,7 +162,7 @@ myst_substitutions = {
     "AMMR_VERSION": ammr_version,
     "CURRENT_YEAR": current_year,
     "AMMR_DEMO_INST_DIR": f"`~/Documents/{ams_version_x}/AMMR.v{ammr_version}-Demo`",
-    "DOI": "[![DOI image](https://zenodo.org/badge/DOI/10.5281/zenodo.1250764.svg)](https://doi.org/10.5281/zenodo.1250764)",
+    "DOI": "[![DOI image](https://zenodo.org/badge/DOI/10.5281/zenodo.10527958.svg)](https://doi.org/10.5281/zenodo.10527958)",
     "WHAT_IS_NEW": f"{{ref}}`What's new in AMMR {ammr_version} <whats-new>`",
     "WHAT_IS_NEW2": f"{{material-outlined}}`update;1em` New in AMMR {ammr_version}",
 }
