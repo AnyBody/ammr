@@ -171,8 +171,9 @@ achieve same marker position and joint angle output.
   are now used for both simple and 3-element muscle models.
 
 * MoCap marker protocols: Users must now explicitly specify a coordinate system
-  relative to which markers are placed on the segment using the `PlaceMarkerAt` argument
-  in the class template. Previously, this defaulted to the `AnatomicalFrame` of
+  relative to which markers are placed on the segment using the 
+  [`PlaceMarkerAt`](#MoCap.Markers.CreateMarkerDriverClass.CreateMarkerDriver:PlaceMarkerAt) 
+  argument in the class template. Previously, this defaulted to the `AnatomicalFrame` of
   the segment.
 
 * The organization of segmental scaling functions was reworked and now configured
@@ -214,9 +215,10 @@ achieve same marker position and joint angle output.
   This new structure allows for overwriting the complete set of muscle volumes with
   an alternative dataset.
 
-* The `MarkerName` argument in the `CreateMarkerDriver` template for MoCap models is no
-  longer necessary. The argument can still be used if the marker class and data
-  entry in the C3D file differ.
+* The [`MarkerName`](#MoCap.Markers.CreateMarkerDriverClass.CreateMarkerDriver:MarkerName) 
+  argument in the [`CreateMarkerDriver`](#MoCap.Markers.CreateMarkerDriverClass.CreateMarkerDriver)
+  template for MoCap models is no longer necessary. The argument can still be used 
+  if the marker class and data entry in the C3D file differ.
 
 * Updated the implementation of muscle parameters section in models to use the new
   `??=` (optional assignment) operator introduced in AnyBody 7.4.1. This allows
@@ -244,7 +246,7 @@ achieve same marker position and joint angle output.
   better clarity.
 
 * The `CameraClassTemplate.any` include file in model utilities has been renamed to
-  `VideoLookAtCamera.any` to have the same name as the class template it
+  [`VideoLookAtCamera.any`](#Video-tools.Video.VideoLookAtCamera.any) to have the same name as the class template it
   contains. 
 
 ### 🧹 Removed:
