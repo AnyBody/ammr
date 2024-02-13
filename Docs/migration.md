@@ -1,6 +1,6 @@
 # Update models to AMMR 3
 
-Models created earlier versions of AnyBody may need to be updated to work with
+Models created in earlier versions of AnyBody may need to be updated to work with
 AnyBody 8 and the new model repository (AMMR 3.0).
 
 This document outlines important changes which may break
