@@ -1,7 +1,7 @@
-# Update models to AMMR 3.0
+# Update models to AMMR 3
 
-Models created earlier versions of AnyBody may need to be updated to work with
-AnyBody 7.5 and the new model repository (AMMR 3.0).
+Models created in earlier versions of AnyBody may need to be updated to work with
+AnyBody 8 and the new model repository (AMMR 3.0).
 
 This document outlines important changes which may break
 older models or change results.
@@ -30,19 +30,20 @@ where trunk joint angles are driven directly and in models where a driver is app
 
 #### Pelvic markers
 
-Changes to the pelvic tilt means that pelvic markers located relative to the
-pelvis Anatomical frame will appear to have moved slightly. This is most
-noticeable for markers on the posterior part of the pelvis, like the PSIS
-markers. The Y component of the marker position may need to be adjusted to achieve same marker position and joint angle output. 
+Changes to the pelvic tilt mean that pelvic markers located relative to the
+pelvis anatomical frame will appear to have moved slightly. This is most
+noticeable for markers on the posterior part of the pelvis, such as the PSIS
+markers. The Y component of the marker position may need to be adjusted to
+achieve the same marker position and joint angle output. 
 
 If markers are placed relative to bony landmarks (using the `PlaceMarkerAt=`
 argument) this problem will often not occur.
 
 #### Foot markers
 
-Changes to the anatomical frame of the foot and talus segment may cause markers
-to have moved slightly. The Y component may need to be adjusted to achieve the
-same marker position and joint angle output.
+Changes to the anatomical frame of the foot and talus segment may have resulted
+in slight movement of markers. Adjust the Y component as necessary to maintain
+the desired marker position and joint angle output.
 
 
 ## Load time errors

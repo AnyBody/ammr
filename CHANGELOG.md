@@ -3,11 +3,11 @@
 % A rendered version of the CHANGELOG is avaible here:
 %    https://anyscript.org/ammr/beta/changelog.html
 
-## AMMR beta
+
 (ammr-3.0-changelog)=
-## AMMR 3.0.0 (2024-02-10)
+## AMMR 3.0 (2024-02-13)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.10527958.svg)](https://doi.org/10.5281/zenodo.10527958)
-[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.0.0-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-8-0-0-????_x64/)
+[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.0.0-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
 
 
 ### ✨ Highlights 
@@ -247,7 +247,7 @@ achieve same marker position and joint angle output.
   `VideoLookAtCamera.any` to have the same name as the class template it
   contains. 
 
-### Removed:
+### 🧹 Removed:
 
 - The template `DEFAULT_PARAMETER_FOLDER` has been removed. It is no longer needed 
   since the same functionality is now provided by the `??=` operator.
