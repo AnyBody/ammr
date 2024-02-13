@@ -7,7 +7,7 @@
 (ammr-3.0-changelog)=
 ## AMMR 3.0 (2024-02-13)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.10527958.svg)](https://doi.org/10.5281/zenodo.10527958)
-[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.0.0-yellowgreen)](https://www.anybodytech.com/download/)
+[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.0.0-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
 
 
 ### ✨ Highlights 
