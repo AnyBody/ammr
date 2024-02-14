@@ -1,7 +1,7 @@
 [![Tests](https://github.com/AnyBody/ammr-spine/actions/workflows/test.yml/badge.svg?branch=master-ammr-4.0)](https://github.com/AnyBody/ammr/actions/workflows/test.yml) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1250764.svg)](https://doi.org/10.5281/zenodo.1250764)<img src="_static/AMMR_Logo2.png" align="right" /> [![View - Documentation](https://img.shields.io/badge/View-Documentation-2ea44f)](https://anyscript.org/ammr-doc/beta/)
 
-# AnyBody Managed Model Repository 
-> An open library of musculoskeletal models
+# AnyBody Managed Model Repository 4 ✨ Beta
+> The beta version of the AMMR 4 with a full thoracic model and new abdominal pressure model
 
 The AnyBody Model Repository (AMMR), is an open library of musculoskeletal
 models and examples for the [AnyBody Modeling
