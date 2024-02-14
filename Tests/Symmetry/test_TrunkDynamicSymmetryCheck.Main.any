@@ -1,10 +1,33 @@
 //save_study= "Main.Study"
+//define = (
+//  [
+//    {'BM_TRUNK_CAVITY_MODEL': '_CAVITY_MODEL_BUCKLE_'},
+//    {'BM_TRUNK_CAVITY_MODEL': '_CAVITY_MODEL_VOLUME_'},
+//  ],
+//  [
+//    {'BM_TRUNK_THORACIC_MODEL': '_THORACIC_MODEL_RIGID_'},
+//    {'BM_TRUNK_THORACIC_MODEL': '_THORACIC_MODEL_FLEXIBLE_'},
+//  ],
+//)
+
+//define = (
+//  [
+//    {'BM_TRUNK_CAVITY_MODEL': '_CAVITY_MODEL_BUCKLE_'},
+//    {'BM_TRUNK_CAVITY_MODEL': '_CAVITY_MODEL_VOLUME_'},
+//  ],
+//  [
+//    {'BM_TRUNK_THORACIC_MODEL': '_THORACIC_MODEL_RIGID_'},
+//    {'BM_TRUNK_THORACIC_MODEL': '_THORACIC_MODEL_FLEXIBLE_'},
+//  ],
+//)
+
 
 #define ANYBODY_PATH_OUTPUT "."
 
-
+ 
+  
 #include "libdef.any"
-
+#include "../tools.any"
 // ----------------------------------------------------------
 // Model configuration:
 // For more info on body model configuration options please load the model and double click on: 
@@ -13,31 +36,149 @@
 
 #define BM_ARM_RIGHT OFF
 #define BM_ARM_LEFT OFF
-#define BM_LEG_RIGHT OFF
-#define BM_LEG_LEFT OFF
+#define BM_LEG_RIGHT ON
+#define BM_LEG_LEFT ON
 
+#ifndef TEST_NAME
+  #define BM_TRUNK_THORACIC_MODEL 0
+  #define BM_TRUNK_CAVITY_MODEL _CAVITY_MODEL_VOLUME_
+#endif
 
 #define BM_SCALING _SCALING_LENGTHMASSFAT_
 
 // Use interpolation drivers to define motion
 #define DriverSelection "FreePostureMove"
-
+#define TEST_SEVERITY assert
 // actual model  
 #include "DynamicTest/FreePostureFullBodyStatic.Main.any" 
 Main = {
+  
+  #if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_
+  #include "../enable_pos_outputs.any"
+  #endif
   
   Main.HumanModel.Anthropometrics.SegmentDimensions.HeadHeight = 0.14;
   Main.HumanModel.Anthropometrics.SegmentDimensions.TrunkHeight = 0.54;
   Main.HumanModel.Anthropometrics.SegmentDimensions.PelvisWidth = 0.16;
   
+  AnyInt TestTrigger = DesignVar(0);
+ 
+  OPERATION_TEST_TRIGGER(Main.Study.InverseDynamics.PreOperation, Main.TestTrigger);
   
   Main.Study ={
     
-    AnyInt test1= assert(ltfun(Main.Study.SymmetryCheck.Trunk.MuscleLumbar.Comparison.MaxFtDif, 1e-12),
-    "Trunk lumbar model symmetry");
-  };
-  
+    AnyFloat force_tol = 1e-4; 
+    AnyFloat kin_tol = 1e-6;
+    
+    AnyInt TrunkPositions = TEST_SEVERITY( 
+      orfun( 
+        not(Main.TestTrigger),  
+        ltfun(Main.Study.SymmetryCheck.Trunk.Kinematics.pos.NormalizedDifference, kin_tol)
+      ),
+      "Trunk model positions asymmetric"
+    );
+    
+    #if BM_TRUNK_CAVITY_MODEL == _CAVITY_MODEL_VOLUME_
+      AnyInt TrunkAbdomPositions = TEST_SEVERITY( 
+        orfun( 
+          not(Main.TestTrigger),  
+          ltfun(Main.Study.SymmetryCheck.Trunk.Kinematics.abdom_pos.NormalizedDifference, kin_tol)
+        ),
+        "Trunk abdom model positions asymmetric"
+      );
+    #endif
+    
+    #if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_
+      AnyInt TrunkRibInertiaPos = TEST_SEVERITY( 
+        orfun( 
+          not(Main.TestTrigger),  
+          ltfun(Main.Study.SymmetryCheck.Trunk.Inertia.rib_inertia_pos.NormalizedDifference, kin_tol)
+        ),
+        "Trunk model inertia positions asymmetric"
+      );
+      
+      AnyInt TrunkCentersCoM = TEST_SEVERITY( 
+        orfun( 
+          not(Main.TestTrigger),  
+          ltfun(Main.Study.SymmetryCheck.Trunk.Inertia.sCoM_compare.center_scom_z_comp, kin_tol)
+        ),
+        "Trunk model centered inertia sCoM asymmetric"
+      );
+      
+      AnyInt TrunksCoMs = TEST_SEVERITY( 
+        orfun( 
+          not(Main.TestTrigger),  
+          ltfun(Main.Study.SymmetryCheck.Trunk.Inertia.sCoM_compare.scoms.NormalizedDifference, kin_tol)
+        ),
+        "Trunk model inertia sCoM asymmetric"
+      );
+      #if BM_TRUNK_CAVITY_MODEL == _CAVITY_MODEL_VOLUME_      
+        AnyInt AbdomsCoM = TEST_SEVERITY( 
+          orfun( 
+            not(Main.TestTrigger),  
+            ltfun(Main.Study.SymmetryCheck.Trunk.Inertia.sCoM_compare.abdom_scom_z_comp, kin_tol)
+          ),
+          "Abdominal model inertia sCoM asymmetric"
+        );
+      #endif
+    #endif
+    
+    AnyInt TrunkMuscleLengths = TEST_SEVERITY(
+      orfun(
+        not(Main.TestTrigger),
+        ltfun(Main.Study.SymmetryCheck.Trunk.Muscle.lmt.NormalizedDifference, kin_tol)
+      ),
+      "Trunk muscle lengths asymmetric"
+    );
+    
+    AnyInt TrunkMuscleLengthVelocities = TEST_SEVERITY(
+      orfun(
+        not(Main.TestTrigger),
+        ltfun(Main.Study.SymmetryCheck.Trunk.Muscle.lmtDot.NormalizedDifference, kin_tol),
+      ),
+      "Trunk muscle length velocities asymmetric"
+    );
+
+    AnyInt TrunkMuscleStrengths = TEST_SEVERITY(
+      orfun(
+        not(Main.TestTrigger),
+        ltfun(Main.Study.SymmetryCheck.Trunk.Muscle.strength.NormalizedDifference, kin_tol),
+        ),
+      "Trunk muscle strength asymmetric"
+    );
+    
+   
+
+    
+    AnyInt TrunkMusForces = TEST_SEVERITY(
+      orfun(
+        not(Main.TestTrigger),
+        ltfun(Main.Study.SymmetryCheck.Trunk.Muscle.ft.NormalizedDifference, force_tol),
+        ),
+      "Trunk model muscle forces asymmetric: " + strval(max(Main.Study.SymmetryCheck.Trunk.Muscle.ft.NormalizedDifference))
+    );
+
+    
+   
+    
+    #if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_
+      AnyInt TrunkActuatorForces = TEST_SEVERITY(
+        orfun(
+          not(Main.TestTrigger),
+          ltfun(Main.Study.SymmetryCheck.Trunk.RecruitedActuators.actuators.NormalizedDifference, force_tol),
+          ),
+        "Trunk model recruited actuator forces asymmetric"
+      );
+    #endif
+
+    AnyInt TrunkPolylinePoints = TEST_SEVERITY(
+      orfun(
+        not(Main.TestTrigger),
+        ltfun(Main.Study.SymmetryCheck.Trunk.Wrapping.AbsDifference, kin_tol),
+      ),
+      "Trunk wrapping polyline points asymmetric"
+    );
+  };  
   
   AnyOperation& RunTest = Main.RunApplication;
 };
-

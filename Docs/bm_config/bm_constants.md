@@ -101,18 +101,6 @@ Switch to use leg model: "TLEM 2"
 
 
 
-::::{dropdown} `_LEG_MODEL_TLEM21_`
-:animate: fade-in-slide-down
-:margin: 0 0 2 2
-
-:::{ammr:bm_constant} _LEG_MODEL_TLEM21_
-:value: 4
-Switch to use leg model: "TLEM 2.1"
-:::
-::::
-
-
-
 ::::{dropdown} `_LEG_MODEL_TLEM1_`
 :animate: fade-in-slide-down
 :margin: 0 0 2 2
@@ -325,6 +313,174 @@ Constant to switch linear disc spring on in the spine
 :::{ammr:bm_constant} _DISC_STIFFNESS_NONLINEAR_
 :value: 2
 Constant to switch nonlinear disc spring on in the spine
+:::
+::::
+
+
+
+::::{dropdown} `_RIBCAGE_RIGID_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _RIBCAGE_RIGID_
+:value: 0
+A completely rigid model of the thoracic spine and ribcage.
+:::
+::::
+
+
+
+::::{dropdown} `_RIBCAGE_SEMI_RIGID_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _RIBCAGE_SEMI_RIGID_
+:value: 1
+A model of the ribcage where ribs are rigidly attached to relevant vertebrae, sternum follows superior ribs.
+:::
+::::
+
+
+
+::::{dropdown} `_RIBCAGE_POTENTIAL_ENERGY_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _RIBCAGE_POTENTIAL_ENERGY_
+:value: 2
+Kinematic behaviour of the ribcage is defined by minimization of potential energy in ligamentous tissues.
+:::
+::::
+
+
+
+::::{dropdown} `_RIBCAGE_USERDEFINED_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _RIBCAGE_USERDEFINED_
+:value: 3
+Kinematic behaviour of the ribcage is provided by the user.
+:::
+::::
+
+
+
+::::{dropdown} `_THORACIC_MODEL_RIGID_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _THORACIC_MODEL_RIGID_
+:value: 0
+A completely rigid model of the thoracic spine and ribcage.
+:::
+::::
+
+
+
+::::{dropdown} `_THORACIC_MODEL_FLEXIBLE_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _THORACIC_MODEL_FLEXIBLE_
+:value: 1
+A full model of the thorax and ribcage with a kinematically determinate set of drivers.
+:::
+::::
+
+
+
+::::{dropdown} `_THORACIC_MODEL_USERDEFINED_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _THORACIC_MODEL_USERDEFINED_
+:value: 2
+A full model of the thorax and ribcage where drivers/rythmns are specified by the users.
+:::
+::::
+
+
+
+::::{dropdown} `_FLOATING_RIBEND_KINETICS_OFF_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _FLOATING_RIBEND_KINETICS_OFF_
+:value: 0
+ No recruited actuators to rib end of Floating ribs (rib11, rib12).
+:::
+::::
+
+
+
+::::{dropdown} `_FLOATING_RIBEND_KINETICS_ENDRIBS_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _FLOATING_RIBEND_KINETICS_ENDRIBS_
+:value: 1
+ Add recruited actuators to rib end of Floating ribs (rib11, rib12).
+:::
+::::
+
+
+
+::::{dropdown} `_RIBCAGE_CC_ACTUATORS_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _RIBCAGE_CC_ACTUATORS_
+:value: 0
+3-direction Recruited actuators in CC (costochondral) joints.
+:::
+::::
+
+
+
+::::{dropdown} `_RIBCAGE_CC_REACTION_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _RIBCAGE_CC_REACTION_
+:value: 1
+Z-direction reaction in CC (costochondral) joints, which is along the relavant rib, togehter with having the rib-sternum averaging constraints reaction ON
+:::
+::::
+
+
+
+::::{dropdown} `_RIBCAGE_CC_ZACTUATORS_STERNUMREACTION_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _RIBCAGE_CC_ZACTUATORS_STERNUMREACTION_
+:value: 2
+Z-direction actuators in CC (costochondral) joints, which is along the relavant rib, togehter with having the rib-sternum averaging constraints reaction ON
+:::
+::::
+
+
+
+::::{dropdown} `_CAVITY_MODEL_BUCKLE_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _CAVITY_MODEL_BUCKLE_
+:value: 0
+The old buckle implementation of the abdominal pressure.
+:::
+::::
+
+
+
+::::{dropdown} `_CAVITY_MODEL_VOLUME_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _CAVITY_MODEL_VOLUME_
+:value: 1
+A volume measure implementation of the pressure in the abdominal cavity and lungs.
 :::
 ::::
 

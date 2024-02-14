@@ -1,0 +1,66 @@
+//define = (
+//  [ 
+//    {'BM_TRUNK_THORACIC_MODEL': '_THORACIC_MODEL_RIGID_'},
+//    {'BM_TRUNK_THORACIC_MODEL': '_THORACIC_MODEL_FLEXIBLE_'},
+//  ],  
+//  [ 
+//    {'BM_TRUNK_CAVITY_MODEL': '_CAVITY_MODEL_BUCKLE_'},
+//    {'BM_TRUNK_CAVITY_MODEL': '_CAVITY_MODEL_VOLUME_'},
+//  ],
+//  [
+//    {'BM_SCALING': 1},
+//    {'BM_SCALING': 2},
+//    {'BM_SCALING': 3},
+//    {'BM_SCALING': 4},
+//    {'BM_SCALING': 9},
+//  ],
+//)
+//ignore_errors = ['BodyModel.UnallowedCombination','Model loading skipped']
+//
+#define ANYBODY_PATH_OUTPUT "."
+#include "../libdef.any"
+
+#define BM_TRUNK_MUSCLES ON
+#define BM_ARM_MUSCLES_LEFT OFF
+#define BM_ARM_MUSCLES_RIGHT OFF
+#define BM_LEG_MUSCLES_RIGHT OFF
+#define BM_LEG_MUSCLES_LEFT OFF
+
+
+#ifndef TEST_NAME 
+    #define BM_TRUNK_THORACIC_MODEL _THORACIC_MODEL_RIGID_
+    #define BM_TRUNK_CAVITY_MODEL _CAVITY_MODEL_BUCKLE_
+    #define BM_SCALING 1
+#endif
+
+#define BM_MANNEQUIN_DRIVER_DEFAULT ON
+
+Main = { 
+  #include "<ANYBODY_PATH_BODY>/HumanModel.any" 
+  
+  
+  
+  AnyVar ShoulderMass_diff= Main.HumanModel.Anthropometrics.SegmentMasses.Right.Shoulder- (Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Clavicula.Mass+Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Scapula.Mass);
+  AnyVar UpperArm_diff= Main.HumanModel.Anthropometrics.SegmentMasses.Right.UpperArm-Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Humerus.Mass;
+  AnyVar LowerArm_diff=  Main.HumanModel.Anthropometrics.SegmentMasses.Right.LowerArm -(Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Ulna.Mass+ Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Radius.Mass);
+  AnyVar Hand_diff=  Main.HumanModel.Anthropometrics.SegmentMasses.Right.Hand-(Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Hand.Mass+Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Glove.Mass);
+  
+  AnyVar Thigh_diff=Main.HumanModel.Anthropometrics.SegmentMasses.Right.Thigh-Main.HumanModel.BodyModel.Right.Leg.Seg.Thigh.Mass;
+  AnyVar Shank_diff=  Main.HumanModel.Anthropometrics.SegmentMasses.Right.Shank-Main.HumanModel.BodyModel.Right.Leg.Seg.Shank.Mass;
+  AnyVar Talus_diff=  Main.HumanModel.Anthropometrics.SegmentMasses.Right.Talus-Main.HumanModel.BodyModel.Right.Leg.Seg.Foot.Talus.Mass;
+  AnyVar Foot_diff=Main.HumanModel.Anthropometrics.SegmentMasses.Right.Foot-Main.HumanModel.BodyModel.Right.Leg.Seg.Foot.Mass;
+  
+  AnyVar Leg_Mass = 
+Main.HumanModel.BodyModel.Right.Leg.Seg.Thigh.Mass+
+Main.HumanModel.BodyModel.Right.Leg.Seg.Shank.Mass+
+Main.HumanModel.BodyModel.Right.Leg.Seg.Foot.Talus.Mass+
+Main.HumanModel.BodyModel.Left.Leg.Seg.Patella.Mass+
+Main.HumanModel.BodyModel.Right.Leg.Seg.Foot.Mass;
+  
+  
+  AnyFloatVar bodymass_diff = HumanModel.Anthropometrics.BodyMass - HumanModel.BodyModel.TotalBodyMass;
+  AnyInt TestTotalBodyMass = expect(
+    ltfun(abs(bodymass_diff), 1e-4), 
+    "Total Bodymass is not equal to input mass from Anthropometrics folder"
+  );
+};

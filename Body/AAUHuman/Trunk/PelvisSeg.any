@@ -35,29 +35,70 @@ AnySeg PelvisSeg = {
     #endif
   #endif
 
- 
-  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(p, SIGN) (0.5*(p[0]+p[1]))
-  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(p, SIGN) (RotMat(0.5*(p[0]+p[1]), p[0], 0.5*(p[2]+p[3]))*RotMat(pi/2, y)*RotMat(pi,z))
-  
+  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(p) (0.5*(p[0]+p[1]))
+  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(p) (RotMat(0.5*(p[0]+p[1]), p[0], 0.5*(p[2]+p[3]))*RotMat(pi/2, y)*RotMat(pi,z))
+
   #include "PelvisInterfaceMorphing.any"
 
-  AnyFunTransform3D &GeomScale = ..Scaling.GeometricalScaling.PelvisSeg.ScaleFunction;
-
-  AnyRefNode& MoCapMarkerFrameAMMR24 = ScalingNode; ///< For backwards Compatibility with AMMR 2.4 MoCap Marker protocols
+  #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_s
+  #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_A
+  
+  AnyRefNode& MoCapMarkerFrameAMMR24 = ScalingNode; ///< For backwards compatibility with AMMR 2.4 MoCap Marker protocols
   
   /// This is the anatomical frame that has axes aligned with the global coordinate system
-  ///of the trunk dataset. This frame defines the neutral orientation of the pelvis
-  ///segment.
+  /// of the trunk dataset. This frame defines the neutral orientation of the pelvis
+  /// segment.
   AnyRefNode AnatomicalFrameTrunk = {
-     sRel = .AnatomicalFrame.sRel;
-  };
+    sRel = definition.sRel;
+    ARel = definition.ARel;
+    
+    TrunkAnatomicalFrameDefinition definition() = {
+      asis_right = ..Right.ASIS.sRel;
+      asis_left = ..Left.ASIS.sRel;
+      sacrum_point = ...SacrumSeg.SacrumPosteriorSuperior.sRel;
+      c7_point = ...C7Seg.MidNode.sRel; 
+    };
   
+    TrunkPelvisScaleWithInterfaceMorphing Scale_Trunk_Pelvis(
+      InterfaceMorphing = ..InterfaceMorphingDef.IM_Trunk_To_Leg_Unscaled,
+      InterfaceMorphingC7 = ..InterfaceMorphingDef.IM_Trunk_To_Leg_AboveSacrum,
+      GeomScale = ....Scaling.GeometricalScaling.Pelvis.ScaleFunction,
+      GeomScaleC7 = ....Scaling.GeometricalScaling.C7Seg.ScaleFunction,
+    ) = {
+      unscaled = {
+        asis_right = ...Data.Right.ASIS;
+        asis_left = ...Data.Left.ASIS;
+        c7_point = .....Data.unscaled.ModelParameters.C7.MidNode_pos;
+        sacrum_point = .....Data.unscaled.ModelParameters.Sacrum.SacrumPosteriorSuperior_pos;
+      };
+    };
+      
+    #if (BM_LEG_MODEL_IS_TLEM)
+      AnyFunTransform3D Scale_Leg_Pelvis = {
+        PreTransforms = {
+          &..InterfaceMorphingDef.IM_Leg_To_Trunk_Unscaled,
+          &.Scale_Trunk_Pelvis.ScaleAfterInterfaceMorphing,
+        };
+
+        AnyFloat unscaled_points =  {
+          .....LEG_MODEL_PARAM_DIRECTION.Leg.ModelParameters.Pelvis.RASIS,
+          .....LEG_MODEL_PARAM_DIRECTION.Leg.ModelParameters.Pelvis.LASIS,
+          .....LEG_MODEL_PARAM_DIRECTION.Leg.ModelParameters.Pelvis.RPT, 
+          .....LEG_MODEL_PARAM_DIRECTION.Leg.ModelParameters.Pelvis.LPT
+        };
+      };
+    #else
+      AnyFunTransform3D& Scale_Leg_Pelvis = Scale_Trunk_Pelvis;
+    #endif
+  };   
+
+
   /// This is the anatomical frame that has axes aligned with the global coordinate system
   ///of the trunk dataset. This frame defines the neutral orientation of the pelvis
   ///segment (AMMR<2.5)
   AnyRefNode AnatomicalFrameISB = {
-     sRel = 0.5*(.Scale(.StdPar.Right.ASIS)+.Scale(.StdPar.Left.ASIS));
-     ARel = RotMat(sRel, .Scale(.StdPar.Right.ASIS), 0.5*(.Scale(.StdPar.Right.PSIS)+.Scale(.StdPar.Left.PSIS))) * RotMat(-pi/2,x) * RotMat(pi/2,y);
+     sRel = 0.5*(.Scale(.Data.Right.ASIS)+.Scale(.Data.Left.ASIS));
+     ARel = RotMat(sRel, .Scale(.Data.Right.ASIS), 0.5*(.Scale(.Data.Right.PSIS)+.Scale(.Data.Left.PSIS))) * RotMat(-pi/2,x) * RotMat(pi/2,y);
   };
   
   
@@ -78,109 +119,20 @@ AnySeg PelvisSeg = {
   /// This is an anatomical frame aligned with the ASIS and Pubic tubercle bony landmarks
   /// This was previously used as the neutral frame for pelvis. 
   AnyRefNode AnatomicalFrame = {
+    #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(p) (RotMat(0.5*(p[0]+p[1]), p[0], 0.5*(p[2]+p[3]))*RotMat(pi/2, y)*RotMat(pi,z))
+
     AnyFloat pUnscaled_Trunk_Pelvis =  {
-      .StdPar.Right.ASIS, 
-      .StdPar.Left.ASIS, 
-      .StdPar.Right.PT, 
-      .StdPar.Left.PT
-    };
-    AnyFloat pScaled = Scale_Trunk_Pelvis(pUnscaled_Trunk_Pelvis);
-    sRel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(pScaled, .Scale.ScaleAfterInterfaceMorphingDef.Sign );
-    ARel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(pScaled, .Scale.ScaleAfterInterfaceMorphingDef.Sign );
-    AnyVec3 sRelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(pUnscaled_Trunk_Pelvis, .Scale.ScaleAfterInterfaceMorphingDef.Sign); ///< Generic unscaled position of thigh ScalingNode
-    AnyMat33 ARelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(pUnscaled_Trunk_Pelvis, .Scale.ScaleAfterInterfaceMorphingDef.Sign);///< Generic unscaled rotation of thigh ScalingNode
-
-    #ifdef SKIN
-     #if SKIN
-     AnyDrawSurf Drw2 = {
-       FileName = .....LEG_MODEL_PARAM_DIRECTION.Leg.Seg.STL.FilenamePelvisSkin;
-       ScaleXYZ = {1.0, 1.0, 1.0};
-       RGB = ....ColorRef.Skin;
-       Opacity = Main.DrawSettings.SkinOpacity.Opacity;
-       AnyFunTransform3D &Scale =..GeomScale;
-       Face=-1;
-     };
-     #endif
-    #endif
-    #ifdef MUSCLETISSUE
-     #if MUSCLETISSUE
-       AnyDrawSurf Drw1 = {
-       FileName = .....LEG_MODEL_PARAM_DIRECTION.Leg.Seg.STL.FilenamePelvisMuscleTissue;
-       ScaleXYZ = {1.0, 1.0, 1.0};
-       RGB = ....ColorRef.MuscleTissue;
-       Opacity = Main.DrawSettings.MuscleTissueOpacity.Opacity;
-       AnyFunTransform3D &Scale =..GeomScale;
-       Face=-1;
-     };
-     #endif
-    #endif
-
-    AnyFunTransform3D Scale_Trunk_Pelvis = {
-      AnyFolder ScaleAfterInterfaceMorphingDef = {
-    #ifndef SCALE_TYPE
-    #define SCALE_TYPE 1
-    #endif
-      
-        AnyFloat pUnscaledOrg = ...InterfaceMorphingDef.IM_Trunk_To_Leg_Unscaled(..pUnscaled_Trunk_Pelvis );
-     AnyVar fixedX = 0.5*(pUnscaledOrg[0][0]+pUnscaledOrg[1][0]);
-     // Pelvis scaling shouldn't not happen in the ASIS-PT defined anatomical frame. 
-        // But in the Trunk Anatomical (i.e. the segmental trunk frame), which also define
-        // the neutral position So we project the ASIS-PT points into the same vertical
-        // plane. 
-     AnyFloat pUnscaled = {
-         {fixedX, pUnscaledOrg[0][1], pUnscaledOrg[0][2]},
-         {fixedX, pUnscaledOrg[1][1], pUnscaledOrg[1][2]},
-         {fixedX, pUnscaledOrg[2][1], pUnscaledOrg[2][2]},
-         {fixedX, pUnscaledOrg[3][1], pUnscaledOrg[3][2]},
-       };
-     
-        AnyFunTransform3D& GeomScale = ...GeomScale;
-
-     #include "..\Scaling\SegScaleFunWrtAnatomicalFrame.any"
+      .Data.Right.ASIS, 
+      .Data.Left.ASIS, 
+      .Data.Right.PT, 
+      .Data.Left.PT
     };
 
-      PreTransforms = {
-        &..InterfaceMorphingDef.IM_Trunk_To_Leg_Unscaled,
-      &ScaleAfterInterfaceMorphingDef.Scale
-    };
-  };
-
-#if BM_LEG_MODEL_IS_TLEM
-      AnyFloat pUnscaled_Leg_Pelvis =  {
-        ....LEG_MODEL_PARAM_DIRECTION.Leg.ModelParameters.Pelvis.RASIS,
-        ....LEG_MODEL_PARAM_DIRECTION.Leg.ModelParameters.Pelvis.LASIS,
-        ....LEG_MODEL_PARAM_DIRECTION.Leg.ModelParameters.Pelvis.RPT, 
-        ....LEG_MODEL_PARAM_DIRECTION.Leg.ModelParameters.Pelvis.LPT
- };
-      AnyFunTransform3D Scale_Leg_Pelvis = {
-        AnyFolder ScaleAfterInterfaceMorphingDef = {
-          AnyFloat pUnscaledOrg = ...InterfaceMorphingDef.IM_Leg_To_Trunk_Unscaled(..pUnscaled_Leg_Pelvis );
-     
-     // Pelvis scaling shouldn't not happen in the ASIS-PT defined anatomical frame. 
-          // But in the Trunk Anatomical (i.e. the segmental trunk frame), which also
-          // define the neutral position So we we project the ASIS-PT points into the same
-          // vertical plane. 
-      AnyVar fixedX = 0.5*(pUnscaledOrg[0][0]+pUnscaledOrg[1][0]);
-      AnyFloat pUnscaled = {
-         {fixedX, pUnscaledOrg[0][1], pUnscaledOrg[0][2]},
-         {fixedX, pUnscaledOrg[1][1], pUnscaledOrg[1][2]},
-         {fixedX, pUnscaledOrg[2][1], pUnscaledOrg[2][2]},
-         {fixedX, pUnscaledOrg[3][1], pUnscaledOrg[3][2]},
-       };
-       
-          AnyFunTransform3D& GeomScale = ...GeomScale;
-
-       #include "..\Scaling\SegScaleFunWrtAnatomicalFrame.any"
-     };
-
-        PreTransforms = {
-          &..InterfaceMorphingDef.IM_Leg_To_Trunk_Unscaled,
-       &ScaleAfterInterfaceMorphingDef.Scale
-     };
-   };
-  #else
-    AnyFunTransform3D& Scale_Leg_Pelvis = Scale_Trunk_Pelvis;
-  #endif
+    AnyFloat pScaled = .AnatomicalFrameTrunk.Scale_Trunk_Pelvis(pUnscaled_Trunk_Pelvis);
+    sRel = .AnatomicalFrameTrunk.sRel;
+    ARel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(pScaled);
+ 
+    #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_A
 
     /// Folder containing the origins for defining each body region
     /// each region has it's own scalefunction that needs to know where the region starts.
@@ -188,70 +140,150 @@ AnySeg PelvisSeg = {
     /// transfered into the trunk anatomical frame 
     AnyFolder ScalingOrigins = {
       AnyVec3 Pelvis = 0.5 * (
-        ..InterfaceMorphingDef.IM_Trunk_To_Leg_Unscaled(....ModelParameters.Pelvis.Right.ASIS) 
-        + ..InterfaceMorphingDef.IM_Trunk_To_Leg_Unscaled(....ModelParameters.Pelvis.Left.ASIS)
+        ..InterfaceMorphingDef.IM_Trunk_To_Leg_Unscaled(....Data.unscaled.ModelParameters.Pelvis.Right.ASIS) 
+        + ..InterfaceMorphingDef.IM_Trunk_To_Leg_Unscaled(....Data.unscaled.ModelParameters.Pelvis.Left.ASIS)
       );
 
       AnyVec3 Lumbar = (
-        ..InterfaceMorphingDef.IM_Trunk_To_Leg_AboveSacrum(....ModelParameters.Sacrum.SacrumL5JntNode_pos)
+        ..InterfaceMorphingDef.IM_Trunk_To_Leg_AboveSacrum(....Data.unscaled.ModelParameters.Sacrum.SacrumL5JntNode_pos)
         - Pelvis
       );
 
       AnyVec3 Thorax = (
-        ..InterfaceMorphingDef.IM_Trunk_To_Leg_AboveSacrum(....ModelParameters.Thorax.T12L1JntNode_pos)
+        ..InterfaceMorphingDef.IM_Trunk_To_Leg_AboveSacrum(....Data.unscaled.ModelParameters.T12.T12L1JntNode_pos)
         - Pelvis
       );
 
       AnyVec3 Cervical = (
-        ..InterfaceMorphingDef.IM_Trunk_To_Leg_AboveSacrum(....ModelParameters.C7.T1C7JntNode_pos)
+        ..InterfaceMorphingDef.IM_Trunk_To_Leg_AboveSacrum(....Data.unscaled.ModelParameters.C7.T1C7JntNode_pos)
         - Pelvis
       );
     };
   };
 
   AnyRefNode& ScalingNode = AnatomicalFrameTrunk;
-  AnyFunTransform3D& Scale = AnatomicalFrame.Scale_Trunk_Pelvis;
+  AnyFunTransform3D& Scale = AnatomicalFrameTrunk.Scale_Trunk_Pelvis;
 
-  #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_s
-  #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_A
-
-
-  // (Trunk to Leg Interface Morphing) -> Use the mass property of pelvis from the Leg
-  #if BM_LEG_TRUNK_INTERFACE == _MORPH_TRUNK_TO_LEG_ & (BM_LEG_MODEL_IS_TLEM) 
-    AnyVar MassStandard = ...LEG_MODEL_PARAM_DIRECTION.Leg.ModelParameters.Pelvis.MassStandard;
-    Jii = ...LEG_MODEL_PARAM_DIRECTION.Leg.ModelParameters.Pelvis.Jii;
-    Jij = ...LEG_MODEL_PARAM_DIRECTION.Leg.ModelParameters.Pelvis.Jij;
-    sCoM = AnatomicalFrame.Scale_Leg_Pelvis(...LEG_MODEL_PARAM_DIRECTION.Leg.ModelParameters.Pelvis.sCoM);
-  #else //(Leg to Trunk Interface Morphing) or (No Interface Morphing) -> Use the mass property of pelvis from the Trunk
-    AnyVar MassStandard = ..StandardParameters.Pelvis.Mass;
-    Jii = {0.0221,0.01,0.0221}; //Taken from SimpleSpineModel
-    Jij = {0, 0, 0};
-    sCoM = AnatomicalFrame.Scale_Trunk_Pelvis(StdPar.sCoM_pos);
-    #if BM_LEG_MODEL == _LEG_MODEL_LEG_ 
-      AnyRefNode HipJointRight = { sRel = .Scale({0.05002253, -0.1149108, 0.0895978});ARel=.AnatomicalFrame.ARel;};
-      AnyRefNode HipJointLeft = {sRel = .Scale({0.05002253, -0.1149108, -0.0895978});ARel=.AnatomicalFrame.ARel;};
-      AnyRefNode HipJointsCenter = { sRel = .Scale({0.05002253, -0.1149108, 0});ARel=.AnatomicalFrame.ARel;};
+  #ifdef SKIN
+    #if SKIN
+      AnyDrawSurf Drw2 = {
+        FileName = .....LEG_MODEL_PARAM_DIRECTION.Leg.Seg.STL.FilenamePelvisSkin;
+        ScaleXYZ = {1.0, 1.0, 1.0};
+        RGB = ....ColorRef.Skin;
+        Opacity = Main.DrawSettings.SkinOpacity.Opacity;
+        AnyFunTransform3D &Scale =..GeomScale;
+        Face=-1;
+      };
+    #endif
+  #endif
+  #ifdef MUSCLETISSUE
+    #if MUSCLETISSUE
+      AnyDrawSurf Drw1 = {
+        FileName = .....LEG_MODEL_PARAM_DIRECTION.Leg.Seg.STL.FilenamePelvisMuscleTissue;
+        ScaleXYZ = {1.0, 1.0, 1.0};
+        RGB = ....ColorRef.MuscleTissue;
+        Opacity = Main.DrawSettings.MuscleTissueOpacity.Opacity;
+        AnyFunTransform3D &Scale =..GeomScale;
+        Face=-1;
+      };
     #endif
   #endif
 
+  UseInertiaObjects = On;
+  
+  #if (BM_TRUNK_CAVITY_MODEL == _CAVITY_MODEL_VOLUME_) & (BM_TRUNK_MUSCLES == ON)
+    AnyInertiaSolid BoneInertiaObject = {
+      BodyMassCorrection massCorrection() = {
+        DensityTheoretical = ....Data.unscaled.ModelParameters.BoneDensity;
+        enableMassCorrection = Off;
+      };
 
-  AnyVar MassS = ..Scaling.MassScaling.Pelvis.MassScale;
+      AnySurfSTL surface = {
+        FileName = ....Data.unscaled.STL.FilenamePelvisSeg;
+        AnyFunTransform3D &scale = ..Scale;
+      };
+    };
+
+    // Outer inertia representing skin
+    AnyInertiaSolid OuterInertiaObject = {
+      BodyMassCorrection massCorrection() = {};
+      
+      AnySurfSTL surface = {
+        FileName = ....Data.unscaled.STL.FilenamePelvisInertia;
+        AnyFunTransform3DLin scale = {
+          ScaleMat = diag({1.1, 1.0, 1.1}); // Scaled 10% in x,z
+          Offset = zeros(3);
+        };
+      };
+
+      // We need to subtract sacrum and pelvis bones, and pelvic cavity inertia from the
+      // outer since that encapsulates the whole volume
+      AnySurfSTL negativePelvisBoneInertia = {
+        FileName = ..BoneInertiaObject.surface.FileName;
+        TriangleDirection = RotClockwise;
+        viewSurface = {Visible = Off;};
+      };
+      AnySurfSTL negativeSacrumBoneInertia = {
+        FileName = ...SacrumSeg.BoneInertiaObject.surface.FileName;
+        TriangleDirection = RotClockwise;
+        viewSurface = {Visible = Off;};
+      };
+      AnySurfTriCylMesh negativePelvicCavityInertia = {
+        Points = ..PelvicCavityInertiaObject.inertia_cyl.Points;
+        CylMesh = ..PelvicCavityInertiaObject.inertia_cyl.CylMesh;
+        TriangleDirection = RotClockwise;
+        viewSurface = {Visible = Off;};
+      };
+    };
+  #else
+  
+    AnyInertiaMatrix InertiaObject = {
+      BodyMassCorrectionCompatibility massCorrection() = {
+        DensityTheoretical = .MassStandard;
+      };
+      JaboutCoMOnOff = On;
+  
+      // (Trunk to Leg Interface Morphing) -> Use the mass property of pelvis from the Leg
+      #if BM_LEG_TRUNK_INTERFACE == _MORPH_TRUNK_TO_LEG_ & ( BM_LEG_MODEL_IS_TLEM ) 
+        AnyVar MassStandard = ....LEG_MODEL_PARAM_DIRECTION.Leg.ModelParameters.Pelvis.MassStandard;
+        Jii = ....LEG_MODEL_PARAM_DIRECTION.Leg.ModelParameters.Pelvis.Jii;
+        Jij = ....LEG_MODEL_PARAM_DIRECTION.Leg.ModelParameters.Pelvis.Jij;
+        sCoM = .AnatomicalFrameTrunk.Scale_Leg_Pelvis(....LEG_MODEL_PARAM_DIRECTION.Leg.ModelParameters.Pelvis.sCoM);
+      #else //(Leg to Trunk Interface Morphing) or (No Interface Morphing) -> Use the mass property of pelvis from the Trunk
+        AnyVar MassStandard = ...Data.unscaled.StandardParameters.Pelvis.Mass;
+        Jii = {0.0221,0.01,0.0221}; //Taken from SimpleSpineModel
+        Jij = {0, 0, 0};
+        sCoM = .AnatomicalFrameTrunk.Scale_Trunk_Pelvis(.Data.sCoM_pos);
+      #endif
+    };
+  #endif  
+  
+  #if BM_LEG_MODEL == _LEG_MODEL_LEG_ 
+    AnyRefNode HipJointRight = { sRel = .Scale({0.05002253, -0.1149108, 0.0895978});ARel=.AnatomicalFrame.ARel;};
+    AnyRefNode HipJointLeft = {sRel = .Scale({0.05002253, -0.1149108, -0.0895978});ARel=.AnatomicalFrame.ARel;};
+    AnyRefNode HipJointsCenter = { sRel = .Scale({0.05002253, -0.1149108, 0});ARel=.AnatomicalFrame.ARel;};
+  #endif
+  
   #include "../DrawSettings/SegmentAxes.any"
-  Mass = MassS*MassStandard;
-  JaboutCoMOnOff = On;
+  AnyRefNode GroundPelvisJntNode = {sRel = .Scale(.Data.GroundPelvisJntNode_pos);};
+  AnyRefNode PelvisSacrumJntNode = {sRel = .Scale(.Data.PelvisSacrumJntNode_pos);};
+  AnyRefNode Seat2MidContactNode={sRel=0.5*(.Right.Seat2ContactNode.sRel+.Left.Seat2ContactNode.sRel);}; 
 
-  AnyRefNode GroundPelvisJntNode = {sRel = .Scale(.StdPar.GroundPelvisJntNode_pos);};
-  AnyRefNode PelvisSacrumJntNode = {sRel = .Scale(.StdPar.PelvisSacrumJntNode_pos);};
- 
   /// The Right node is used by different body part for adding mirrored nodes
   /// (muscle origins/insertions etc) to the pelvis segment
   AnyRefNode Right= {
     AnyRefNode ScalingNode ={};
     AnyInt Sign = 1;
       AnyFunTransform3D& Scale = .Scale;
-      AnyRefNode ASIS = {sRel = .Scale(..StdPar.Right.ASIS);};
-      AnyRefNode PSIS = {sRel = .Scale(..StdPar.Right.PSIS);};
-      AnyRefNode PT = {sRel = .Scale(..StdPar.Right.PT);};
+      AnyRefNode ASIS = {sRel = .Scale(..Data.Right.ASIS);};
+      AnyRefNode PSIS = {sRel = .Scale(..Data.Right.PSIS);};
+      AnyRefNode PT = {sRel = .Scale(..Data.Right.PT);};
+      AnyRefNode PosteriorContactNode = {sRel = .Scale(..Data.Right.PosteriorContactNode_pos);};
+      AnyRefNode Seat1ContactNode={sRel = .Scale(..Data.Right.Seat1ContactNode_pos);};    
+      AnyRefNode Seat2ContactNode={sRel = .Scale(..Data.Right.Seat2ContactNode_pos);};    
+      AnyRefNode Seat3ContactNode={sRel = .Scale(..Data.Right.Seat3ContactNode_pos);};    
+      AnyRefNode Seat4ContactNode={sRel = .Scale(..Data.Right.Seat4ContactNode_pos);};    
+      AnyRefNode TrochanterBonyTip ={sRel = .Scale(..Data.Right.TrochanterBonyTip_pos);};
   };
 
   /// The Left node is used by different body part for adding mirrored nodes
@@ -260,9 +292,15 @@ AnySeg PelvisSeg = {
     AnyRefNode ScalingNode ={};
     AnyInt Sign = -1;
       AnyFunTransform3D& Scale = .Scale;
-      AnyRefNode ASIS = {sRel = .Scale(..StdPar.Left.ASIS);};
-      AnyRefNode PSIS = {sRel = .Scale(..StdPar.Left.PSIS);};
-      AnyRefNode PT = {sRel = .Scale(..StdPar.Left.PT);};
+      AnyRefNode ASIS = {sRel = .Scale(..Data.Left.ASIS);};
+      AnyRefNode PSIS = {sRel = .Scale(..Data.Left.PSIS);};
+      AnyRefNode PT = {sRel = .Scale(..Data.Left.PT);};
+      AnyRefNode PosteriorContactNode = {sRel = .Scale(..Data.Left.PosteriorContactNode_pos);};
+      AnyRefNode Seat1ContactNode={sRel = .Scale(..Data.Left.Seat1ContactNode_pos);};    
+      AnyRefNode Seat2ContactNode={sRel = .Scale(..Data.Left.Seat2ContactNode_pos);};    
+      AnyRefNode Seat3ContactNode={sRel = .Scale(..Data.Left.Seat3ContactNode_pos);};    
+      AnyRefNode Seat4ContactNode={sRel = .Scale(..Data.Left.Seat4ContactNode_pos);};
+      AnyRefNode TrochanterBonyTip ={sRel = .Scale(..Data.Left.TrochanterBonyTip_pos);}; 
   };
 
 
@@ -273,12 +311,12 @@ AnySeg PelvisSeg = {
   AnyDrawSurf DrwPelvis =
   #endif
   {
-    FileName = ...STL.FilenamePelvisWOS; 
-    #if (! BM_LEG_MODEL_IS_TLEM)
-      Opacity = Main.DrawSettings.BonesOpacity.Pelvis;
+    FileName = ...Data.unscaled.STL.FilenamePelvisWOS; 
+    #if ! BM_LEG_MODEL_IS_TLEM
+      Opacity ??= Main.DrawSettings.BonesOpacity.Pelvis;
       RGB = ...ColorRef.Segments;
     #else
-      Opacity = Main.DrawSettings.BonesOpacity.Pelvis * 0.5;
+      Opacity ??= Main.DrawSettings.BonesOpacity.Pelvis * 0.5;
       RGB = ...ColorRef.Segments;
     #endif
     AnyFunTransform3D &Scale = .Scale;
@@ -290,18 +328,21 @@ AnySeg PelvisSeg = {
   AnyDrawSurf DrwSacrum =
   #endif
   {
-    FileName = ...STL.FilenameSacrumSeg           ; 
+    FileName = ...Data.unscaled.STL.FilenameSacrumSeg           ; 
     #if (BM_LEG_MODEL == _LEG_MODEL_TLEM1_) | ((BM_LEG_LEFT == OFF) & (BM_LEG_RIGHT == OFF))
-      Opacity = Main.DrawSettings.BonesOpacity.Pelvis;
+      Opacity ??= Main.DrawSettings.BonesOpacity.Pelvis;
       RGB = ...ColorRef.Segments;
     #else
-      Opacity = Main.DrawSettings.BonesOpacity.Pelvis * 0.5;
+      Opacity ??= Main.DrawSettings.BonesOpacity.Pelvis * 0.5;
       RGB = ...ColorRef.Segments;
     #endif
     AnyFunTransform3D &Scale = .Scale;
   };
 
   #endif
+
+  AnyFolder &Data=..Data.unscaled.ModelParameters.Pelvis;    
+  #include "PelvisMuscleAttachementNodes.any"
 }; // End of PelvisSeg
 
 #ifdef LEG_MODEL_PARAM_DIRECTION

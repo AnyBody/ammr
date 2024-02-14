@@ -1,0 +1,65 @@
+//define = (
+//  [ 
+//    {'BM_TRUNK_MUSCLES': 'OFF'},
+//    {'BM_TRUNK_MUSCLES': '_MUSCLES_SIMPLE_'},
+//  ], 
+//  [ 
+//    {'BM_TRUNK_THORACIC_MODEL': '_THORACIC_MODEL_RIGID_'},
+//    {'BM_TRUNK_THORACIC_MODEL': '_THORACIC_MODEL_FLEXIBLE_'},
+//  ],  
+//  [ 
+//    {'BM_TRUNK_CAVITY_MODEL': '_CAVITY_MODEL_BUCKLE_'},
+//    {'BM_TRUNK_CAVITY_MODEL': '_CAVITY_MODEL_VOLUME_'},
+//  ],  
+//)
+//ignore_errors = ['BodyModel.UnallowedCombination','Model loading skipped']
+//
+#define ANYBODY_PATH_OUTPUT "."
+#include "../libdef.any"
+
+#ifndef TEST_NAME 
+    #define BM_TRUNK_THORACIC_MODEL _THORACIC_MODEL_RIGID_
+    #define BM_TRUNK_CAVITY_MODEL _CAVITY_MODEL_BUCKLE_
+    #define BM_TRUNK_MUSCLES OFF
+#endif
+
+
+#define BM_MANNEQUIN_DRIVER_DEFAULT ON
+
+Main = {
+  #include "<ANYBODY_PATH_BODY>/HumanModel.any"
+  
+  Main.HumanModel.DefaultMannequinDrivers.PelvisGroundDriverPosX.Reaction.Type = On;
+  Main.HumanModel.DefaultMannequinDrivers.PelvisGroundDriverPosY.Reaction.Type = On;
+  Main.HumanModel.DefaultMannequinDrivers.PelvisGroundDriverPosZ.Reaction.Type = On;
+  Main.HumanModel.DefaultMannequinDrivers.PelvisGroundDriverRotX.Reaction.Type = On;
+  Main.HumanModel.DefaultMannequinDrivers.PelvisGroundDriverRotY.Reaction.Type = On;
+  Main.HumanModel.DefaultMannequinDrivers.PelvisGroundDriverRotZ.Reaction.Type = On;
+
+  // For now it does not make sense to run inverse when running with the flexible thorax
+  // and not enabling trunk muscles but the load and kinematics should work
+  #if (\
+    (\
+      BM_TRUNK_MUSCLES == OFF & \
+      BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_ \
+      & BM_TRUNK_CAVITY_MODEL == _CAVITY_MODEL_BUCKLE_ \
+    ) | \
+    (\
+      BM_TRUNK_MUSCLES == OFF & \
+      BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_ & \
+      BM_TRUNK_CAVITY_MODEL == _CAVITY_MODEL_VOLUME_ \
+    ) \
+  )
+    AnyOperation &RunTest = Main.Study.Kinematics;
+  #else
+    AnyOperation &RunTest = Main.Study.InverseDynamics;
+  #endif
+
+  AnyBodyStudy Study = {
+    Gravity = {0,-9.81,0};
+    nStep = 1;
+    
+    AnyFolder &BodyModel = .HumanModel.BodyModel;
+    AnyFolder &MannequinDrivers = .HumanModel.DefaultMannequinDrivers;
+  };
+};

@@ -28,15 +28,15 @@
 // Pairwise distances between observations in n-dimensional space.
 #define PDIST(X) sum(vnorm(DIFFMAT(SizesOf(X)[0])*(X)))
 
+
 // Upper triangle of the array. Return a copy of an array with elements below the diagonal zeroed out 
 #define TRIU(IN) mult(IN, gteqfun(transpose(repmat(1,SizesOf(IN)[0] ,iarr(1,SizesOf(IN)[1]))), repmat(1,SizesOf(IN)[1],iarr(1,SizesOf(IN)[0]))))
 
 // Lower triangle of the array. Return a copy of an array with elements above the diagonal zeroed out 
 #define TRIL(IN) mult(IN, lteqfun(transpose(repmat(1,SizesOf(IN)[0] ,iarr(1,SizesOf(IN)[1]))), repmat(1,SizesOf(IN)[1],iarr(1,SizesOf(IN)[0]))))
 
-
-
-
+// compute the cumulative sum of a vector
+#define CUMSUM(IN) (IN * (iffun(gteqfun(repmat(1,NumElemOf(IN), linspace(0,NumElemOf(IN)-1,NumElemOf(IN))),repmat(1,NumElemOf(IN), linspace(0,NumElemOf(IN)-1,NumElemOf(IN)))'), 1, 0))   ')
 
 // Projection of P onto the line BA
 #define VECTOR_PROJECTION(P, A, B) (A) + ( ((P)-(A))*((B)-(A))' / ( ((B)-(A))*((B)-(A))') )*((B)-(A))
@@ -48,6 +48,13 @@
 // Remove artificial muscles' contribution to the total Pmet calculation
 // Is defined in all relevant AnyMuscles and some AnyMusclesViaPoint
 #define EXCLUDE_MUSCLE_METABOLISM AnyMetabModelSimple ZeroMetabolicMdl = {EtaCon = 2e22; EtaEcc = 2e22;}; MetabModel = &ZeroMetabolicMdl;
+
+
+
+#define MACRO_MOTION_OUTPUT_OFF CreateMotionOutput = {r=Off; rDot=Off; rDDot=Off; Axes=Off; omega=Off; omegaDot=Off;}
+#define MACRO_MOTION_OUTPUT_POS CreateMotionOutput = {r=On; rDot=Off; rDDot=Off; Axes=Off; omega=Off; omegaDot=Off;}
+
+
 
 // Extract non unique elements from an array
 // one version for pointers and one for values
@@ -272,7 +279,7 @@ E.g.:
    ORDER = "Desending",
    FORMAT="%.4f",
    STUDY_T = .MaxMuscleActivity,
-   AGGEGRATION=max,
+   AGGREGATION=max,
 ){
   #var AnyObjectPtr ValuePtrs;
   #var AnyObjectPtr NamePtrs = ValuePtrs;
@@ -282,7 +289,7 @@ E.g.:
     AnyInt SecondDim = prod(take(ValueSizes, iarr(1,NumElemOf(ValueSizes)-1) ));
 
     
-    AnyFloat Values = AGGEGRATION(reshape(Obj2Num(ValuePtrs), {FirstDim,SecondDim})) + 0*STUDY_T;
+    AnyFloat Values = AGGREGATION(reshape(Obj2Num(ValuePtrs), {FirstDim,SecondDim})) + 0*STUDY_T;
     AnyString Names = NAMEOF_FUN(NamePtrs);
 
     #if ORDER == "Desending"

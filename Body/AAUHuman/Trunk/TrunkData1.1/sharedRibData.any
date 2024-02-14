@@ -1,0 +1,347 @@
+/// Folder for data across all ribs
+AnyFolder AllRibs = {
+
+  /* 
+    Costovertebral/Costotransvers complex (CVCT) has to have
+    stiffness/ReactionForce to prevent the ribcage from falling down. CV is a
+    spherical joint, and CT has Springs to create force and also it affects the
+    kinematics. However, with only one CT node, the torsional degree of freedom
+    will not have stiffness, thus we defined two CTsup, CTinf nodes to compensate
+    the force that we need. Costovertebral nodes position: CV position is
+    calculated as an average between the rib head and relative CV nodes on the
+    vertebrae. Costotransvers nodes position: The z-position of CT nodes were
+    specified from Andriacchi et al., 1974, A model for studies of mechanical
+    interactions between the human spine and rib cage. Then the x and y position of
+    CTs were adjusted based on the geometry of the bone surfaces.
+
+    The moment arm around torsional axis of the rib relative to vertebra. The
+    torsional stiffness in Rib10, Rib6 and Rib2 are not much different. The moment
+    arms were adjusted to create the torsional stiffness with same springs values.
+    Data order: [R12, R11 ... R1].  Data reference: Lemosse et al, 1998,
+    Characterization of the mechanical behaviour parameters of the costo- vertebral
+    joint. 
+  */
+  AnyFloat CCOffset = linspace((0.01699881 / 2 * 700 / 750) , (0.01699881 / 2 * 700 / 750), 10);
+  AnyFloat CTOffset = {
+    0.0216, 0.0201343, 0.01640915, 0.01333815, 0.008158126, 0.01157705, 
+    0.00927076, 0.01153334, 0.01101291, 0.01063944, 0.01562571, 0.01699881
+  } * 0.075 / 0.152 / 2;
+
+  AnyFolder CostoCartilage = {
+    ///^ The relative strength of CostoChondrals (CCs) in different levels were
+    ///^ defined based on the following reference. Reference: Andriacchi, T.,
+    ///^ Schultz, A., Belytschko, T., Galante, J.: A model for studies of mechanical
+    ///^ interactions between the human spine and rib cage. J. Biomech. 7, 497 507
+    ///^ (1974). https://doi.org/10.1016/0021-9290(74)90084-0 */ 
+    
+    /// Coefficient for each CostoChondral joint R1 -> R10 
+    AnyFloat Kx = 0.6 * linspace(1, 0.21, 10);
+  
+    /// The current implementation requires the same weight in x,y,z direction
+    AnyMatrix weights = (ones(6,10) *  diag(Kx))';
+      
+    /// This defines how much strength the CostoCartilage reaction forces has per direction
+    /// 8 N/mm F0 at top relative force for 30mm movement
+    /// 51.85 N/mm F0 at top relative force for 30mm movement
+    AnyMatrix DirectionalScales = diag({
+      0.5 * 8*30, 
+      0.5 * 8*30, 
+      0.5 * 0.5 * 51.85*30, 
+      0.5 * 8*30, 
+      0.5 * 8*30, 
+      0.5 * 51.85*30, 
+    });
+    AnyMatrix ReactionForceStrength = weights * DirectionalScales;
+  };
+
+  /* 
+    The relative strength of CostoChondral (CC) and CostoTransverse (CT) were
+    defined based on cadavar measurements. Reference: Schultz, A.B., Benson, D.R.,
+    Hirsch, C.: Force-deformation properties of human costo-sternal and
+    costo-vertebral articulations. J. Biomech. 7, 311 318 (1974).
+    https://doi.org/10.1016/0021-9290(74)90024-4
+
+    In the top levels: From references: Relative Bending Strength of CT/CC= 0.72
+    Calculated according to distances and Relative Bending Strength (in upper rib
+    levels) --> Relative linear Strength CT/CC = 3.6
+
+    CT_Weight linear_strength = 2 (2 is because we have 2 CT nodes and each gets
+    1) --> CC_Weight(first rib) = 0.6 
+  */ 
+  AnyFloat CostoTransverseWeight = 1;
+  AnyFloat InterCostalWeight = 0.1;
+  
+  /// The idea is to utilize existing
+  /// interpolation functions to generate a set of points for each rib to define a
+  /// box-like shape around each rib (above,below),(inner,outer)
+  AnyFolder OuterInertiaPoints = {
+
+    // Shorthand function to reshape the output of the point function to be easier to work with
+    #define INNER_RIB_POINTS(rib_indexes) transpose(reshape(calculations.InnerPointFun(rib_indexes)', {3, SizesOf(calculations.InnerPointFun.data_values)[2], NumElemOf(rib_indexes)}))
+    #define OUTER_RIB_POINTS(rib_indexes) reshape(calculations.OuterPointFun(rib_indexes), {NumElemOf(rib_indexes), SizesOf(calculations.OuterPointFun.data_values)[1], 3,})
+
+    // Get the midpoints above and below each rib using the inner rib interpol function
+    AnyFloat inner_points_below = INNER_RIB_POINTS(calculations.InnerPointFun.below_indexes);
+    AnyFloat inner_points_above = INNER_RIB_POINTS(calculations.InnerPointFun.above_indexes);
+
+    // Get the points on the "outside"    
+    AnyFloat outer_points_below = OUTER_RIB_POINTS(calculations.InnerPointFun.below_indexes);
+    AnyFloat outer_points_above = OUTER_RIB_POINTS(calculations.InnerPointFun.above_indexes);
+    
+    AnyFolder calculations = {
+      
+      /// Function to generate points on the inside of each rib. The function takes an index of
+      /// what rib to generate n points for. calling InnerPointFun(1.0) will give n_points
+      /// along rib 1 
+      AnyFunInterpol InnerPointFun = {
+        T = farr(0.0, 1.0, SizesOf(data_values)[0]);
+        Data = reshape(data_values, {SizesOf(data_values)[0], 3*SizesOf(data_values)[2]})';
+        Type = Bspline;
+        BsplineOrder = 4;
+    
+        AnyIntVar n_ribs = 12; ///< number of ribs per side in the body
+        AnyFloatVar first_rib = 1.0; ///< we want rib one data when calling the function with param=1
+        AnyInt n_points ??= 20; ///< number of data points along each rib
+
+        /// index array to get points midway below rib
+        AnyFloat below_indexes = farr(first_rib - 0.5, 1.0, n_ribs);
+        /// index array to get points midway above rib
+        AnyFloat above_indexes = farr(first_rib + 0.5, 1.0, n_ribs);
+    
+        // Since each interpol function for the Thoracic Cavity points can generate points for
+        // the vertebrate, rib and sternum part we cannot directly use the `Data` member of
+        // each function. Instead we construct an equal amount of data points with only the
+        // rib part of the Data.
+        AnyFloat data_values = {
+          rib01_points', // The top rib closed at itself instead of going above
+          rib01_points',
+          rib02_points',
+          rib03_points',
+          rib04_points',
+          rib05_points',
+          rib06_points',
+          rib07_points',
+          rib08_points',
+          rib09_points',
+          rib10_points',
+          rib11_points',
+          rib12_points',
+          // To encapsulate the lowest rib we push the same points vertically down
+          (rib12_points + reshape(repmat(n_points, {0,-0.02,0}), {n_points, 3}))', 
+        };
+        
+    
+        /// Directional vectors for each rib - used to find points outside the ribs
+        AnyFloat along_rib_directions = {
+          rib01_dir,
+          rib02_dir,
+          rib03_dir,
+          rib04_dir,
+          rib05_dir,
+          rib06_dir,
+          rib07_dir,
+          rib08_dir,
+          rib09_dir,
+          rib10_dir,
+          rib11_dir,
+          rib12_dir,
+        };
+        
+        // while constructing new points from the underlying interpol function we also create
+        // a set of pertubated directions. These directions are needed to find the direction
+        // that is pointing "out" towards a "skin"
+        AnyFloat pertubation = 0.01;
+    
+        AnyFloat rib01_index = farr(
+          ....ThoracicCavity.Level01.Right.Rib_StartStop[0], 
+          (....ThoracicCavity.Level01.Right.Rib_StartStop[1] - ....ThoracicCavity.Level01.Right.Rib_StartStop[0]) / (n_points -1), 
+          n_points
+        );
+          
+        AnyFloat rib01_points = ....ThoracicCavity.Level01.Right.Parametric.Fun(rib01_index);
+        AnyFloat rib01_dir = (....ThoracicCavity.Level01.Right.Parametric.Fun(rib01_index+pertubation) - rib01_points) / pertubation;
+        
+        AnyFloat rib02_indexes = farr(
+          ....ThoracicCavity.Level02.Right.Rib_StartStop[0], 
+          (....ThoracicCavity.Level02.Right.Rib_StartStop[1] - ....ThoracicCavity.Level02.Right.Rib_StartStop[0]) / (n_points -1), 
+          n_points
+        );
+        AnyFloat rib02_points = ....ThoracicCavity.Level02.Right.Parametric.Fun(rib02_indexes);
+        AnyFloat rib02_dir = (....ThoracicCavity.Level02.Right.Parametric.Fun(rib02_indexes+pertubation) - rib02_points) / pertubation;
+    
+        AnyFloat rib03_indexes = farr(
+          ....ThoracicCavity.Level03.Right.Rib_StartStop[0], 
+          (....ThoracicCavity.Level03.Right.Rib_StartStop[1] - ....ThoracicCavity.Level03.Right.Rib_StartStop[0]) / (n_points -1), 
+          n_points
+        );
+        AnyFloat rib03_points = ....ThoracicCavity.Level03.Right.Parametric.Fun(rib03_indexes);
+        AnyFloat rib03_dir = (....ThoracicCavity.Level03.Right.Parametric.Fun(rib03_indexes+pertubation) - rib03_points) / pertubation;
+        
+        AnyFloat rib04_indexes = farr(
+          ....ThoracicCavity.Level04.Right.Rib_StartStop[0], 
+          (....ThoracicCavity.Level04.Right.Rib_StartStop[1] - ....ThoracicCavity.Level04.Right.Rib_StartStop[0]) / (n_points -1), 
+          n_points
+        );
+        AnyFloat rib04_points = ....ThoracicCavity.Level04.Right.Parametric.Fun(rib04_indexes);
+        AnyFloat rib04_dir = (....ThoracicCavity.Level04.Right.Parametric.Fun(rib04_indexes+pertubation) - rib04_points) / pertubation;
+        
+        AnyFloat rib05_indexes = farr(
+          ....ThoracicCavity.Level05.Right.Rib_StartStop[0], 
+          (....ThoracicCavity.Level05.Right.Rib_StartStop[1] - ....ThoracicCavity.Level05.Right.Rib_StartStop[0]) / (n_points -1), 
+          n_points
+        );
+        AnyFloat rib05_points = ....ThoracicCavity.Level05.Right.Parametric.Fun(rib05_indexes);
+        AnyFloat rib05_dir = (....ThoracicCavity.Level05.Right.Parametric.Fun(rib05_indexes+pertubation) - rib05_points) / pertubation;
+        
+        AnyFloat rib06_indexes = farr(
+          ....ThoracicCavity.Level06.Right.Rib_StartStop[0], 
+          (....ThoracicCavity.Level06.Right.Rib_StartStop[1] - ....ThoracicCavity.Level06.Right.Rib_StartStop[0]) / (n_points -1), 
+          n_points
+        );
+        AnyFloat rib06_points = ....ThoracicCavity.Level06.Right.Parametric.Fun(rib06_indexes);
+        AnyFloat rib06_dir = (....ThoracicCavity.Level06.Right.Parametric.Fun(rib06_indexes+pertubation) - rib06_points) / pertubation;
+        
+        AnyFloat rib07_indexes = farr(
+          ....ThoracicCavity.Level07.Right.Rib_StartStop[0], 
+          (....ThoracicCavity.Level07.Right.Rib_StartStop[1] - ....ThoracicCavity.Level07.Right.Rib_StartStop[0]) / (n_points -1), 
+          n_points
+        );
+        AnyFloat rib07_points = ....ThoracicCavity.Level07.Right.Parametric.Fun(rib07_indexes);
+        AnyFloat rib07_dir = (....ThoracicCavity.Level07.Right.Parametric.Fun(rib07_indexes+pertubation) - rib07_points) / pertubation;
+        
+        AnyFloat rib08_indexes = farr(
+          ....ThoracicCavity.Level08.Right.Rib_StartStop[0], 
+          (....ThoracicCavity.Level08.Right.Rib_StartStop[1] - ....ThoracicCavity.Level08.Right.Rib_StartStop[0]) / (n_points -1), 
+          n_points
+        );
+        AnyFloat rib08_points = ....ThoracicCavity.Level08.Right.Parametric.Fun(rib08_indexes);
+        AnyFloat rib08_dir = (....ThoracicCavity.Level08.Right.Parametric.Fun(rib08_indexes+pertubation) - rib08_points) / pertubation;
+        
+        AnyFloat rib09_indexes = farr(
+          ....ThoracicCavity.Level09.Right.Rib_StartStop[0], 
+          (....ThoracicCavity.Level09.Right.Rib_StartStop[1] - ....ThoracicCavity.Level09.Right.Rib_StartStop[0]) / (n_points -1), 
+          n_points
+        );
+        AnyFloat rib09_points = ....ThoracicCavity.Level09.Right.Parametric.Fun(rib09_indexes);
+        AnyFloat rib09_dir = (....ThoracicCavity.Level09.Right.Parametric.Fun(rib09_indexes+pertubation) - rib09_points) / pertubation;
+        
+        AnyFloat rib10_indexes = farr(
+          ....ThoracicCavity.Level10.Right.Rib_StartStop[0], 
+          (....ThoracicCavity.Level10.Right.Rib_StartStop[1] - ....ThoracicCavity.Level10.Right.Rib_StartStop[0]) / (n_points -1), 
+          n_points
+        );
+        AnyFloat rib10_points = ....ThoracicCavity.Level10.Right.Parametric.Fun(rib10_indexes);
+        AnyFloat rib10_dir = (....ThoracicCavity.Level10.Right.Parametric.Fun(rib10_indexes+pertubation) - rib10_points) / pertubation;
+        
+        // Rib 11 and 12 do not have ThoracicCavityNodes as they are free floating ribs below
+        // it. We therefore use the intercostal spline functions which are similar in their
+        // structure
+        AnyFloat rib11_indexes = farr(0.0, (1-pertubation) / (n_points-1), n_points);
+        AnyFloat rib11_points = ....R11.Right.IC_R11_Int_Inf0.Fun(rib11_indexes);
+        AnyFloat rib11_dir = (....R11.Right.IC_R11_Int_Inf0.Fun(rib11_indexes+pertubation) - rib11_points) / pertubation;
+    
+        AnyFloat rib12_indexes = rib11_indexes;
+//        AnyFloat rib12_points = ....R12.Right.IC_R12_Ext_Inf.Fun(rib12_indexes);
+        AnyFloat rib12_points = ....R12.Right.IC_R12_Int_Inf0.Fun(rib12_indexes);
+//        AnyFloat rib12_dir = (....R12.Right.IC_R12_Ext_Inf.Fun(rib12_indexes+pertubation) - rib12_points) / pertubation;
+         AnyFloat rib12_dir = (....R12.Right.IC_R12_Int_Inf0.Fun(rib12_indexes+pertubation) - rib12_points) / pertubation;
+
+      };     
+      
+      /// Function to find outer inertia points of each rib
+      /// It uses a thickness together with the inner points
+      AnyFunInterpol OuterPointFun = {
+        T = .InnerPointFun.T;
+        Data = reshape(data_values, {SizesOf(data_values)[0], 3*SizesOf(data_values)[1]})';
+        
+        /// to compute outer points data we add our thickness to the inner points at each rib level
+        AnyFloat data_values = (
+          transpose(reshape(.InnerPointFun(T)', {3, SizesOf(.InnerPointFun.data_values)[2], NumElemOf(T)})) + 
+          arrcat({thickness_matrix[0]}, thickness_matrix, {thickness_matrix[.InnerPointFun.n_ribs - 1]})
+        );
+
+        Type = Bspline;
+        BsplineOrder = 4; 
+        
+        /// vectors pointing from below towards above
+        AnyFloat up_vectors = (..inner_points_below - ..inner_points_above) / 0.5;
+      
+        // Find the out direction
+        AnyFloat out_vectors = cross(up_vectors, .InnerPointFun.along_rib_directions);
+        
+        /// Here we compute the cross product of the two directions going along the ribs and up
+        /// this provides us the direction pointing directly out away from the ribs. 
+        /// we use repmat and transpose to make the tensor match the tensor of out vectors
+        AnyFloat out_vectors_t = transpose(
+          transpose(
+            reshape(
+              repmat(3, vnorm(cross(up_vectors, .InnerPointFun.along_rib_directions))), 
+              {3, .InnerPointFun.n_ribs, .InnerPointFun.n_points})
+            ),
+          {1,0,2}
+        );
+        
+        /// We construct a matrix of thickness vectors based on the unit vectors of the out
+        /// direction vectors multiplied by a fixed thickness
+        AnyFloatVar thickness ??= -0.015; ///< thickness of outer inertia 'box'
+        AnyFloat thickness_matrix = mult(mult(out_vectors, 1 / out_vectors_t), thickness);
+
+      };
+  
+//      // Drawings for development and debugging
+//      AnyFixedRefFrame ref = {
+//        AnyDrawPointCloud drw_data_values = {
+//          AnyFloat idx = farr(1.0,1.0,12);
+//          Points =  transpose(reshape(..InnerPointFun(idx)', {3, SizesOf(..InnerPointFun.data_values)[2], NumElemOf(idx)}));
+//          RGB = {0.5,0.5,0.5};
+//          Points3D = On;
+//          // Vectors3D = On;
+//          PointStyle.Size = 0.005;
+//        };
+//  
+//        AnyDrawPointCloud drw_inner_below = {
+//          Points = ...inner_points_below;
+//          RGB = {1,0,0};
+//          Points3D = On;
+//          // Vectors3D = On;
+//          PointStyle.Size = 0.01;
+//        };
+//        AnyDrawPointCloud drw_outer_below = {
+//          Points = ...outer_points_below;
+//          RGB = {1,0.6,0};
+//          Points3D = On;
+//          // Vectors3D = On;
+//          PointStyle.Size = 0.01;
+//        };
+//    
+//        AnyDrawPointCloud drw_inner_above = {
+//          Points = ...inner_points_above;
+//          RGB = {0,0,1};
+//          Points3D = On;
+//          // Vectors3D = On;
+//          PointStyle.Size = 0.01;
+//        };
+//        AnyDrawPointCloud drw_outer_above = {
+//          Points = ...outer_points_above;
+//          RGB = {0,0.6,1};
+//          Points3D = On;
+//          // Vectors3D = On;
+//          PointStyle.Size = 0.01;
+//        };
+//        AnyDrawPointCloud drw_raw = {
+//          AnyObjectPtrArray cavity_data = ObjSearch(".....ThoracicCavity.*.Right.Parametric.Fun.Data");
+//          AnyFloat cavity_values = Obj2Num(cavity_data);
+//          Points = transpose(cavity_values, {0,2,1});
+//          RGB = {0.9,0.6,1};
+//          Points3D = On;
+//          // Vectors3D = On;
+//          PointStyle.Size = 0.01;
+//        };
+//
+//      };
+    };
+
+    #undef INNER_RIB_POINTS
+    #undef OUTER_RIB_POINTS
+  };
+};

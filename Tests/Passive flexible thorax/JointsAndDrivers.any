@@ -1,0 +1,50 @@
+AnyFolder Drivers = {
+  
+  // Aliases for convenient referencing
+  AnyFolder &JntPos=..Mannequin.Posture;  
+  AnyFolder &JntVel=..Mannequin.PostureVel;
+  
+  AnyKinEqSimpleDriver PelvisFix = {
+    AnyKinLinear lin = {
+      //      AnyFixedRefFrame &Ground = Main.Model.EnvironmentModel.GlobalRef;
+      AnySeg &Pelvis = Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg;
+    };
+    AnyKinRotational rot = {
+      //      AnyFixedRefFrame &Ground = Main.Model.EnvironmentModel.GlobalRef;
+      AnySeg &Pelvis = Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg;
+      Type = RotVector;
+    };
+    DriverPos = {-0.07408, 1.210092, 0.0, 0,0,0};
+    DriverVel = repmat(nDim, 0);
+  };
+  
+  //Neck driver 
+  AnyKinEqSimpleDriver NeckJntDriver = {
+    AnyKinMeasure& lb = ...BodyModel.Interface.Trunk.SkullThoraxLateralBending;
+    AnyKinMeasure& ar = ...BodyModel.Interface.Trunk.SkullThoraxRotation;
+    AnyKinMeasure& fe = ...BodyModel.Interface.Trunk.SkullThoraxFlexion;
+    DriverPos = pi/180*{0, .JntPos.NeckRotation, -1*.JntPos.NeckExtension};
+    DriverVel = pi/180*{0, .JntVel.NeckRotation, -1*.JntVel.NeckExtension};
+    //    Reaction.Type = {Off, Off, Off};
+  };
+  
+  //Thorax pelvis rotation driver
+  AnyKinEqSimpleDriver PostureDriver ={
+    AnyKinMeasure& Ref2 = Main.HumanModel.BodyModel.Interface.Trunk.PelvisThoraxLateralBending;        
+    AnyKinMeasure& Ref3 = Main.HumanModel.BodyModel.Interface.Trunk.PelvisThoraxRotation;   
+    AnyKinMeasure& Ref1 = Main.HumanModel.BodyModel.Interface.Trunk.PelvisThoraxExtension;
+    
+    DriverPos = pi/180*{
+      Main.Model.ModelEnvironmentConnection.Drivers.JntPos.PelvisThoraxLateralBending,
+      Main.Model.ModelEnvironmentConnection.Drivers.JntPos.PelvisThoraxRotation,
+      Main.Model.ModelEnvironmentConnection.Drivers.JntPos.PelvisThoraxExtension
+    };
+    DriverVel = pi/180*{
+      Main.Model.ModelEnvironmentConnection.Drivers.JntVel.PelvisThoraxLateralBending,
+      Main.Model.ModelEnvironmentConnection.Drivers.JntVel.PelvisThoraxRotation,
+      Main.Model.ModelEnvironmentConnection.Drivers.JntVel.PelvisThoraxExtension
+    };
+  };
+  
+};//Drivers
+

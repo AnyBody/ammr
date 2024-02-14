@@ -1,0 +1,392 @@
+// Class template for creating multiple points distributed along a spline function
+
+
+
+// Class template for creating multiple points distributed along a spline function
+
+
+ 
+
+
+
+
+#class_template Spline_template(
+  NAME,
+  NUM_ELEM,
+  POINTS,
+  START, 
+  END 
+){
+  
+  AnyFloat Data=POINTS';
+ 
+  AnyInt   Data_Size = SizesOf(Data')[0];
+  AnyFloat Data_Accum_L = arrcat(0.0,vnorm((DIFFMAT(Data_Size))*Data')*(UPPER(Data_Size-1)));
+  AnyFloat Data_L = LENGTH(Data');
+  AnyFloat Data_REL_L =  Data_Accum_L/Data_L;
+
+
+//T as length
+AnyFunInterpol Fun = { 
+ T= .Data_Accum_L/.Data_L;
+ AnyInt Size =.Data_Size; 
+ Type=Bspline; 
+ Data = .Data;
+}; 
+  
+  
+   
+//  
+//  AnyFloat d ={ vnorm(Data'[0]-Data'[1]),vnorm(Data'[1]-Data'[2]),  vnorm(Data'[2]-Data'[3]),  vnorm(Data'[3]-Data'[4]),  vnorm(Data'[4]-Data'[5]),  vnorm(Data'[5]-Data'[6]),  vnorm(Data'[6]-Data'[7]) };
+//  AnyFloat S ={
+//  0,
+//  d[0],
+//  d[0]+d[1],
+//  d[0]+d[1]+d[2],
+//  d[0]+d[1]+d[2]+d[3],
+//  d[0]+d[1]+d[2]+d[3]+d[4],
+//  d[0]+d[1]+d[2]+d[3]+d[4]+d[5],
+//  d[0]+d[1]+d[2]+d[3]+d[4]+d[5]+d[6]
+////  d[0]+d[1]+d[2]+d[3]+d[4]+d[5]+d[6]+d[7],
+////  d[0]+d[1]+d[2]+d[3]+d[4]+d[5]+d[6]+d[7]+d[8],
+////  d[0]+d[1]+d[2]+d[3]+d[4]+d[5]+d[6]+d[7]+d[8]+d[9],
+////  d[0]+d[1]+d[2]+d[3]+d[4]+d[5]+d[6]+d[7]+d[8]+d[9]+d[10]
+//  //d[0]+d[1]+d[2]+d[3]+d[4]+d[5]+d[6]+d[7]+d[8]+d[9]+d[10]+d[11]
+//};
+
+//AnyFunInterpol Fun = { 
+//  AnyFloat L= max(.S);
+//  T= .S/L; 
+//  Type=Bspline;  
+//  Data = .Data;
+//};  
+
+
+AnyFunInterpol Fun_Resample = { 
+  AnyFloat Temp = linspace(START,1-END,floor((1-START-END)*100));
+ Type=PiecewiseLinear; //Bspline;  
+ //Type=Bspline;  
+
+AnyFloat L=.Data_L ; //max(.S);
+  
+  //Add extra points to allow extrapolations
+  AnyFloat p0 = .Fun(0.0);
+  AnyFloat p1 = .Fun(1/100);
+  AnyFloat p_pre= p0+ 5*(p0-p1);
+  AnyVar L_pre = vnorm(p0-p_pre)/L;
+  
+  AnyFloat p100= .Fun(1.0);
+  AnyFloat p99 = .Fun(99/100);
+  AnyFloat p_post= p100+5* (p100-p99);
+  AnyVar L_post = 1+vnorm(p100-p_post)/L;  
+
+  T= arrcat(-L_pre,linspace(0,1,floor((1-START-END)*100)),L_post);
+  Data = arrcat({p_pre},.Fun(Temp),{p_post})';
+};  
+
+
+  AnyVector a = linspace(0,1,NUM_ELEM);
+
+
+  
+   AnyFloat Points = Fun_Resample(a);
+
+};
+
+
+
+
+
+#class_template Spline_template2(
+  NAME,
+  NUM_ELEM,
+  POINTS,
+  START, 
+  END 
+){
+  
+  
+  
+  AnyFloat Data=POINTS';
+ 
+  AnyInt   Data_Size = SizesOf(Data')[0];
+  AnyFloat Data_Accum_L = arrcat(0.0,vnorm((DIFFMAT(Data_Size))*Data')*(UPPER(Data_Size-1)));
+  AnyFloat Data_L = LENGTH(Data');
+  AnyFloat Data_REL_L =  Data_Accum_L/Data_L;
+
+
+//T as length
+AnyFunInterpol Fun = { 
+ T= .Data_Accum_L/.Data_L;
+ AnyInt Size =.Data_Size; 
+ Type=Bspline; 
+ Data = .Data;
+}; 
+
+  
+  
+//  AnyFloat Data=POINTS';
+//  AnyFloat d ={ vnorm(Data'[0]-Data'[1]),vnorm(Data'[1]-Data'[2]),  vnorm(Data'[2]-Data'[3]),  vnorm(Data'[3]-Data'[4]),  vnorm(Data'[4]-Data'[5]),  vnorm(Data'[5]-Data'[6]),  vnorm(Data'[6]-Data'[7]) };
+//  AnyFloat S ={
+//  0,
+//  d[0],
+//  d[0]+d[1],
+//  d[0]+d[1]+d[2],
+//  d[0]+d[1]+d[2]+d[3],
+//  d[0]+d[1]+d[2]+d[3]+d[4],
+//  d[0]+d[1]+d[2]+d[3]+d[4]+d[5],
+//  d[0]+d[1]+d[2]+d[3]+d[4]+d[5]+d[6]
+////  d[0]+d[1]+d[2]+d[3]+d[4]+d[5]+d[6]+d[7],
+////  d[0]+d[1]+d[2]+d[3]+d[4]+d[5]+d[6]+d[7]+d[8],
+////  d[0]+d[1]+d[2]+d[3]+d[4]+d[5]+d[6]+d[7]+d[8]+d[9],
+////  d[0]+d[1]+d[2]+d[3]+d[4]+d[5]+d[6]+d[7]+d[8]+d[9]+d[10]
+//  //d[0]+d[1]+d[2]+d[3]+d[4]+d[5]+d[6]+d[7]+d[8]+d[9]+d[10]+d[11]
+//};
+//
+//AnyFunInterpol Fun = { 
+//  AnyFloat L= max(.S);
+//  T= .S/L; 
+//  Type=Bspline;  
+//  Data = .Data;
+//};  
+
+//here we extend function
+AnyFunInterpol Fun_Resample_Ext = { 
+  AnyFloat Temp = linspace(0.0,1.0,100);
+
+  Type=PiecewiseLinear; 
+  
+  AnyFloat L= .Data_L; //max(.S);
+  
+  //Add extra points to allow extrapolations
+  AnyFloat p0    = .Fun(0.0);
+  AnyFloat p8    = .Fun(8/100);
+  AnyFloat p_pre =  p0 + (p0-p8);
+  AnyVar   L_pre = vnorm(p0-p_pre)/L;
+  
+  AnyFloat p100= .Fun(1.0);
+  AnyFloat p92 = .Fun(1.0-8/100);
+  AnyFloat p_post= p100+(p100-p92);
+  AnyVar   L_post = 1+vnorm(p100-p_post)/L;  
+  
+  T= arrcat(-L_pre,linspace(0.0,1.0,100),L_post);
+  Data = arrcat({p_pre},.Fun(Temp),{p_post})';
+};  
+
+//Here we crop function function has T= 0..1
+AnyFunInterpol Fun_Resample = { 
+  Type=PiecewiseLinear; 
+  T = linspace(0.0,1.0,100);
+  AnyFloat Temp = linspace(START+0.0,END+0.0,100);
+  Data = .Fun_Resample_Ext(Temp)';
+  AnyFloat L=LENGTH(Data');
+};  
+
+
+AnyFunInterpol Fun_Resample_ABS = { 
+  Type=PiecewiseLinear;
+  AnyFloat test   = .Fun_Resample.T*.Fun_Resample.L;
+  T= .Fun_Resample.T*.Fun_Resample.L;
+  Data = .Fun_Resample.Data;
+  AnyFloat L=LENGTH(Data');
+};  
+
+ AnyVector a = linspace(0,1,NUM_ELEM);
+ AnyFloat Points = Fun_Resample(a);
+  
+};
+
+
+
+#class_template Spline_template_ABS(
+  NAME,
+  NUM_ELEM,
+  POINTS,
+  START, 
+  END 
+){
+  
+//  AnyFloat Data=POINTS';
+//  AnyFloat d ={ vnorm(Data'[0]-Data'[1]),vnorm(Data'[1]-Data'[2]),  vnorm(Data'[2]-Data'[3]),  vnorm(Data'[3]-Data'[4]),  vnorm(Data'[4]-Data'[5]),  vnorm(Data'[5]-Data'[6]),  vnorm(Data'[6]-Data'[7]) };
+//  AnyFloat S ={
+//  0,
+//  d[0],
+//  d[0]+d[1],
+//  d[0]+d[1]+d[2],
+//  d[0]+d[1]+d[2]+d[3],
+//  d[0]+d[1]+d[2]+d[3]+d[4],
+//  d[0]+d[1]+d[2]+d[3]+d[4]+d[5],
+//  d[0]+d[1]+d[2]+d[3]+d[4]+d[5]+d[6]
+////  d[0]+d[1]+d[2]+d[3]+d[4]+d[5]+d[6]+d[7],
+////  d[0]+d[1]+d[2]+d[3]+d[4]+d[5]+d[6]+d[7]+d[8],
+////  d[0]+d[1]+d[2]+d[3]+d[4]+d[5]+d[6]+d[7]+d[8]+d[9],
+////  d[0]+d[1]+d[2]+d[3]+d[4]+d[5]+d[6]+d[7]+d[8]+d[9]+d[10]
+//  //d[0]+d[1]+d[2]+d[3]+d[4]+d[5]+d[6]+d[7]+d[8]+d[9]+d[10]+d[11]
+//};
+//
+//AnyFunInterpol Fun = { 
+//  AnyFloat L= max(.S);
+//  T= .S/L; 
+//  Type=Bspline;  
+//  Data = .Data;
+//};  
+
+  
+  AnyFloat Data=POINTS';
+ 
+  AnyInt   Data_Size = SizesOf(Data')[0];
+  AnyFloat Data_Accum_L = arrcat(0.0,vnorm((DIFFMAT(Data_Size))*Data')*(UPPER(Data_Size-1)));
+  AnyFloat Data_L = LENGTH(Data');
+  AnyFloat Data_REL_L =  Data_Accum_L/Data_L;
+
+
+//T as length
+AnyFunInterpol Fun = { 
+ T= .Data_Accum_L/.Data_L;
+ AnyInt Size =.Data_Size; 
+ Type=Bspline; 
+ Data = .Data;
+}; 
+
+
+AnyFunInterpol Fun_Resample = { 
+  AnyVar L=. Data_L; //.Fun.L;
+  
+  Type=Bspline;  //PiecewiseLinear; 
+  AnyFloat T_Temp = linspace(START/L,1-END/L,floor((1-START/L-END/L)*100)); // linspace(0,1,100);
+  
+  AnyVar Factor =100;
+  //Add extra points to allow extrapolations
+  AnyFloat p0 = .Fun(0.0);
+  AnyFloat p1 = .Fun(1/100);
+  AnyFloat p_pre= p0+ Factor*(p0-p1);
+  AnyVar L_pre = vnorm(p0-p_pre)/L;
+  
+  AnyFloat p100= .Fun(1.0);
+  AnyFloat p99 = .Fun(99/100);
+  AnyFloat p_post= p100+Factor* (p100-p99);
+  AnyVar L_post = 1+vnorm(p100-p_post)/L;  
+  
+  
+  T= arrcat(-L_pre,T_Temp,L_post);
+  Data = arrcat({p_pre},.Fun(T_Temp),{p_post})';
+  
+  
+};  
+
+AnyVar L=Data_L; //Fun.L;
+AnyFloat a = linspace(START/L,1-END/L,floor((1-START/L-END/L)*100));
+AnyFloat Points = Fun_Resample(a);
+
+};
+
+
+
+
+
+#class_template Spline_template_ABS_OFFSETS(
+  NAME,
+  NUM_ELEM,
+  POINTS,
+  OFFSETS,
+  SIGN
+){
+  
+  #var AnyFloat START = 0.0;
+  #var AnyFloat END = 0.0;
+ 
+//  AnyFloat Data=POINTS';
+//  AnyFloat d ={ vnorm(Data'[0]-Data'[1]),vnorm(Data'[1]-Data'[2]),  vnorm(Data'[2]-Data'[3]),  vnorm(Data'[3]-Data'[4]),  vnorm(Data'[4]-Data'[5]),  vnorm(Data'[5]-Data'[6]),  vnorm(Data'[6]-Data'[7]) };
+//  AnyFloat S ={
+//      0,
+//      d[0],
+//      d[0]+d[1],
+//      d[0]+d[1]+d[2],
+//      d[0]+d[1]+d[2]+d[3],
+//      d[0]+d[1]+d[2]+d[3]+d[4],
+//      d[0]+d[1]+d[2]+d[3]+d[4]+d[5],
+//      d[0]+d[1]+d[2]+d[3]+d[4]+d[5]+d[6]
+//    //d[0]+d[1]+d[2]+d[3]+d[4]+d[5]+d[6]+d[7],
+//    //d[0]+d[1]+d[2]+d[3]+d[4]+d[5]+d[6]+d[7]+d[8],
+//    //d[0]+d[1]+d[2]+d[3]+d[4]+d[5]+d[6]+d[7]+d[8]+d[9],
+//    //d[0]+d[1]+d[2]+d[3]+d[4]+d[5]+d[6]+d[7]+d[8]+d[9]+d[10]
+//    //d[0]+d[1]+d[2]+d[3]+d[4]+d[5]+d[6]+d[7]+d[8]+d[9]+d[10]+d[11]
+//  };
+//
+//   AnyFunInterpol Fun = { 
+//     AnyFloat L= max(.S);
+//     T= .S/L; 
+//     Type=Bspline;  
+//     Data = .Data;
+//   };  
+   
+ AnyFloat Data=POINTS';
+ 
+  AnyInt   Data_Size = SizesOf(Data')[0];
+  AnyFloat Data_Accum_L = arrcat(0.0,vnorm((DIFFMAT(Data_Size))*Data')*(UPPER(Data_Size-1)));
+  AnyFloat Data_L = LENGTH(Data');
+  AnyFloat Data_REL_L =  Data_Accum_L/Data_L;
+
+
+//T as length
+AnyFunInterpol Fun = { 
+ T= .Data_Accum_L/.Data_L;
+ AnyInt Size =.Data_Size; 
+ Type=Bspline; 
+ Data = .Data;
+}; 
+ 
+
+   
+//function will have T from 0 to 1 and evenly space points.  
+AnyFunInterpol Fun_Resample = { 
+  AnyVar L=.Data_L;//.Fun.L;
+  AnyFloat Temp = linspace(.START/L,1-.END/L,floor((1-.START/L-.END/L)*100));
+  Type=Bspline;  
+  AnyFloat T_temp= linspace(0,1,floor((1-.START/L-.END/L)*100));
+  //Data = .Fun(Temp)';
+  
+  //Add extra points to allow extrapolations
+  AnyFloat p0 = .Fun(0.0);
+  AnyFloat p1 = .Fun(1/100);
+  AnyFloat p_pre= p0+ 10*(p0-p1);
+  AnyVar L_pre = vnorm(p0-p_pre)/L;
+  
+  AnyFloat p100= .Fun(1.0);
+  AnyFloat p99 = .Fun(99/100);
+  AnyFloat p_post= p100+10* (p100-p99);
+  AnyVar L_post = 1+vnorm(p100-p_post)/L;  
+
+  
+  T= arrcat(-L_pre,T_temp,L_post);
+  Data = arrcat({p_pre},.Fun(Temp),{p_post})';
+};  
+
+//
+//AnyFunInterpol Offset_Fun = { 
+//   T=   linspace(0,1,NUM_ELEM); 
+//   Type=Bspline;  
+//   Data = {.OFFSETS}/.Fun.L;
+//};
+//
+//  AnyFunInterpol Offset_Fun_Resample = { 
+//    AnyVar L=.Fun.L;
+//    Type=Bspline;  
+//    AnyFloat T_temp= linspace(0,1,floor((1-.START/L-.END/L)*100));
+//    T= arrcat(-0.1,T_temp,1.1);
+//    Data = {arrcat({0.0}',.Offset_Fun(.Fun_Resample.Temp),{0.0}')'};
+//  };
+//  
+//  //AnyVector a_pos_temp = linspace(0,1,NUM_ELEM)+Offset_Fun_Resample(linspace(0,1,NUM_ELEM))'[0];
+//  AnyVector a_pos_temp = linspace(0,1,NUM_ELEM)+Offset_Fun(Fun_Resample.Temp)'[0];
+//  AnyFloat Points = Fun_Resample(a_pos_temp);
+  
+  AnyFloat Offsets_normalize = OFFSETS/(Fun_Resample.L);
+  AnyVector a_pos = linspace(0,1,NUM_ELEM)+Offsets_normalize;
+  AnyFloat Points = Fun_Resample(a_pos);
+};
+
+
+
+
+

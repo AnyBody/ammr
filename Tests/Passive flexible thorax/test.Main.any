@@ -1,0 +1,98 @@
+#include "../../libdef.any"
+
+Main = {
+  #define BM_LEG_MODEL OFF
+  #define BM_ARM_LEFT OFF
+  #define BM_ARM_RIGHT OFF
+  #define BM_TRUNK_CERVICAL_MUSCLES OFF
+  #define BM_TRUNK_MUSCLES OFF
+  //#define BM_TRUNK_LIGAMENTS ON
+  // New thorax is enabled with
+//  #define BM_TRUNK_THORACIC_MODEL _THORACIC_MODEL_FLEXIBLE_
+//  #define BM_TRUNK_CAVITY_MODEL _CAVITY_MODEL_BUCKLE_
+  //////////////////////////////////////////
+//#define BM_TRUNK_EXPERIMENTAL_FLOATINGRIBS_KINETICS _FLOATING_RIBEND_KINETICS_ENDRIBS_
+//  #define ReactionCC
+  #define CCActuator_OFF
+//  #define ReactionRibAxisRot
+//  #define ReactionRibAVG_OFF
+//  #define ReactionSternumRibAVG
+  
+  #define Draw_RibcageForces
+  
+  #include "<ANYBODY_PATH_BODY>/HumanModel.any"
+  // This folder collects the elements of the model. It is referred by the
+  // study section below as the target of the analyses.  
+  AnyFolder Model = {
+    AnyFolder &BodyModel=.HumanModel.BodyModel;
+    
+    // The Mannequin file specifies load-time positions for all the segments
+    // in the HumanModel. This is important for the model's ablity to resolve
+    // all the kinematic constraints when the model is analyzed.
+    // The mannequin file also drives those degrees of freedom of the human 
+    // model that are not governed by problem-specific drivers at run time.    
+    AnyFolder& Mannequin = .HumanModel.Mannequin;
+    
+    AnyFolder ModelEnvironmentConnection = {
+      #include "JointsAndDrivers.any"
+    };
+  };
+  
+  AnyBodyStudy Study = {
+    AnyFolder &Model = .Model;
+    
+    tEnd = 10.0;
+    Gravity = {0.0, -9.81, 0.0} ;
+    nStep = 10;
+    
+    #if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_
+    #ifdef CCActuator_OFF
+    MechObjectExclude = {
+      &Main.HumanModel.BodyModel.Trunk.Joints.RibCage.Right.R1.CostoChondralReactionForce,
+      &Main.HumanModel.BodyModel.Trunk.Joints.RibCage.Right.R2.CostoChondralReactionForce,
+      &Main.HumanModel.BodyModel.Trunk.Joints.RibCage.Right.R3.CostoChondralReactionForce,
+      &Main.HumanModel.BodyModel.Trunk.Joints.RibCage.Right.R4.CostoChondralReactionForce,
+      &Main.HumanModel.BodyModel.Trunk.Joints.RibCage.Right.R5.CostoChondralReactionForce,
+      &Main.HumanModel.BodyModel.Trunk.Joints.RibCage.Right.R6.CostoChondralReactionForce,
+      &Main.HumanModel.BodyModel.Trunk.Joints.RibCage.Right.R7.CostoChondralReactionForce,
+      &Main.HumanModel.BodyModel.Trunk.Joints.RibCage.Right.R8.CostoChondralReactionForce,
+      &Main.HumanModel.BodyModel.Trunk.Joints.RibCage.Right.R9.CostoChondralReactionForce,
+      &Main.HumanModel.BodyModel.Trunk.Joints.RibCage.Right.R10.CostoChondralReactionForce,
+      &Main.HumanModel.BodyModel.Trunk.Joints.RibCage.Left.R1.CostoChondralReactionForce,
+      &Main.HumanModel.BodyModel.Trunk.Joints.RibCage.Left.R2.CostoChondralReactionForce,
+      &Main.HumanModel.BodyModel.Trunk.Joints.RibCage.Left.R3.CostoChondralReactionForce,
+      &Main.HumanModel.BodyModel.Trunk.Joints.RibCage.Left.R4.CostoChondralReactionForce,
+      &Main.HumanModel.BodyModel.Trunk.Joints.RibCage.Left.R5.CostoChondralReactionForce,
+      &Main.HumanModel.BodyModel.Trunk.Joints.RibCage.Left.R6.CostoChondralReactionForce,
+      &Main.HumanModel.BodyModel.Trunk.Joints.RibCage.Left.R7.CostoChondralReactionForce,
+      &Main.HumanModel.BodyModel.Trunk.Joints.RibCage.Left.R8.CostoChondralReactionForce,
+      &Main.HumanModel.BodyModel.Trunk.Joints.RibCage.Left.R9.CostoChondralReactionForce,
+      &Main.HumanModel.BodyModel.Trunk.Joints.RibCage.Left.R10.CostoChondralReactionForce
+    };
+    #endif
+    #endif
+    
+    Main.HumanModel.Mannequin.PostureVel = {
+      PelvisThoraxLateralBending= 0;  
+      PelvisThoraxRotation= 0; 
+      PelvisThoraxExtension= 0;
+    };
+    
+    
+    AnyForce3D sternumforce = {
+//        viewForce = { Visible = On;};
+        F = 100* {cos(Main.Study.t*2*pi/Main.Study.tEnd), 0, sin(Main.Study.t*2*pi/Main.Study.tEnd)}; //x-z plane
+//        F = 100* {cos(Main.Study.t*2*pi/Main.Study.tEnd), sin(Main.Study.t*2*pi/Main.Study.tEnd), 0}; //x-y plane
+//        F = 100* {0, cos(Main.Study.t*2*pi/Main.Study.tEnd), sin(Main.Study.t*2*pi/Main.Study.tEnd)}; //y-z plane
+//        AnyRefFrame &s = Main.HumanModel.BodyModel.Trunk.Segments.SternalBodySeg.ManubriosternalJointNode;
+AnyRefFrame &s = Main.HumanModel.BodyModel.Trunk.Segments.ThoraxSeg.SternalBody.Xiphoid_DiaphragmNodeR;
+};
+
+      #include "CreateVideo.any" 
+    }; // End of study
+        
+  }; //Main
+
+
+
+

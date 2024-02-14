@@ -1,0 +1,226 @@
+/* 
+  Class template to create one multi-dimension AnyKinLinear from an array of kinematic
+  measures
+*/ 
+#class_template MeasuresToMultiDimLinear(__CLASS__ = AnyKinLinear) {
+  
+  #var AnyObjectPtrArray InputMeasures;
+
+  AnyObjectPtr _nodes = ObjGetParent(ObjSearchRecursive(InputMeasures, "*.sRel", 1));
+  AnyIntArray _ref0_idx = iarr(0, 2, NumElemOf(_nodes)-1);
+  AnyIntArray _ref1_idx = iarr(1, 2, NumElemOf(_nodes));
+  Ref = 0;
+  RefFrames = {
+    take(_nodes, _ref0_idx),
+    take(_nodes, _ref1_idx),
+  };
+};
+
+
+
+/*
+  Class template to generate a averaging kinematic measure
+
+  Arguments:
+  - ROTATIONAL -> controls whether or not to create the skewmatrix 
+  - LINEAR -> controls whether or not to compute the linear coefficients
+
+  It returnes a combination measure
+*/
+#class_template RigidBodyAverageMeasure(
+  __CLASS__ = AnyKinMeasureLinComb, 
+  LINEAR = On, 
+  ROTATIONAL = On,
+   POWER =1
+) {
+  
+  #var AnyObjectPtrArray InputMeasures; ///< Array of AnyKinMeasure to combine
+  #var AnyObjectPtr LocalReferenceFrame; ///< Ref frame to express measures relative to
+
+  /// The sign of each weight coefficient determines in what direction of the measure the
+  /// weight applies 
+  #var AnyFloat WeightCoefficients = repmat(NumElemOf(InputMeasures), 1);
+
+  /// Weight coefficient for each measure - expanded to x,y,z direction
+  AnyFloat xyz_weights = flatten({WeightCoefficients, WeightCoefficients,WeightCoefficients}');
+
+  // Here we construct a matrix of coefficients in the correct shape
+  AnyFloat identity_matrices = repmat(NumElemOf(InputMeasures), eye(3))';
+  AnyFloat linear_coefficients = identity_matrices * diag(xyz_weights);
+
+  
+  
+  
+  //This function takes the multi dimensional linear measure through a polynomial function, this can be used to get a behaviour which attempts to do 
+  //more even distribution of "errors" the higher the power the more even a distribution it will try to make at the individual displacements
+  //default POWER=1 so the PolynomialFunction will not change results.
+  AnyKinMeasureFunComb1 PolynomialFunction ={
+    MeasuresToMultiDimLinear lin()={ InputMeasures = ..InputMeasures; };
+    AnyFunPolynomial F0 ={   
+      //Here we are constructing a polynomial function
+      //we have a linear term to be always 1, when we add one higher order term e.g. 3 5 7...  
+      //the linear terms gives better robustness for models with bad starting guesses, 
+      //and models having 100% perfect starting guesses..here a power3 function may fail because there are no "slope"
+      //if Power = 0 This is not allowed
+      //if Power = 1 PolyCoef={0,1}
+      //if Power = 2 This is not allowed....
+      //if Power = 3 PolyCoef={0,1,0,1}
+      //if Power = 5 PolyCoef={0,1,0,0,1}
+      PolyCoef = arrcat({0.0,1},repmat(iffun(ltfun(POWER-2,0),0,POWER-2),0.0),iffun(ltfun(POWER-2,0.0),0.0,pow(10.0,POWER))); 
+      
+    }; //this will create the polynomial function e.g. for Power=3 {0,0,0,1}
+    AnyInt Size = SizesOf(.WeightCoefficients)[0];  //size of measure
+    Functions =repmat(Size*3, &F0);  //repeat the function
+  };
+
+ 
+  //The POWER needs to be uneven number for function to work otherwise all outcome is positive.., so check this ...
+  AnyMessage EvenError = {
+   AnyVar check =POWER/2-floor(POWER/2);
+    TriggerConst = iffun(eqfun(check,0),On,Off);  //check for even or odd power... we need to have always uneven power...
+    Type = MSG_Error;
+    Message = "Do not use even POWER use e.g. 1,3,5,7";
+  };
+  
+  #if ROTATIONAL == On
+    AnyFloat measure_srels = Obj2Num(ObjGetMember(PolynomialFunction.lin.RefFrames[0], "sRel")) + (0*Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.r0[0]);
+    AnyFloat local_srel = Obj2Num(ObjGetMember(ObjRefResolve(LocalReferenceFrame), "sRel")) + (0*Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.r0[0]);
+    AnyFloat srel_relative_to_local = measure_srels - reshape(repmat(SizesOf(measure_srels)[0], local_srel), SizesOf(measure_srels));
+
+    /// Skew matrix with weight coefficients added
+    ///the minus in front cancel the transpose of the skew matriw
+    AnyMatrix rotational_coefficients = -reshape(
+      skewmat3d(diag(WeightCoefficients) * srel_relative_to_local), 
+      {PolynomialFunction.lin.nDim, 3}
+    )'; 
+    Coef ??= -rotational_coefficients;
+    OutDim ??= 3; 
+  #else
+    // For the case of only computing the linear part - we do not need the skewmatrix
+    Coef = linear_coefficients;
+    
+    OutDim = 3; 
+  #endif
+  
+  #if ROTATIONAL == On & LINEAR == On
+    Coef = arrcat(linear_coefficients, -rotational_coefficients);
+    OutDim = 6; 
+  #endif
+ };
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ #class_template RigidBodyAverageMeasure_Custom(
+  __CLASS__ = AnyKinMeasureLinComb, 
+  LINEAR = On, 
+  ROTATIONAL = On,
+   POWER =1
+) {
+  
+  #var AnyObjectPtrArray InputMeasures; ///< Array of AnyKinMeasure to combine
+  #var AnyObjectPtr LocalReferenceFrame; ///< Ref frame to express measures relative to
+
+  /// The sign of each weight coefficient determines in what direction of the measure the
+  /// weight applies 
+  #var AnyFloat WeightCoefficients = repmat(NumElemOf(InputMeasures), 1);
+
+  /// Weight coefficient for each measure - expanded to x,y,z direction
+  AnyFloat xyz_weights = flatten({WeightCoefficients, WeightCoefficients,WeightCoefficients}');
+
+  // Here we construct a matrix of coefficients in the correct shape
+  AnyFloat identity_matrices = repmat(NumElemOf(InputMeasures), eye(3))';
+  AnyFloat linear_coefficients = identity_matrices * diag(xyz_weights);
+
+  
+  
+  
+  //This function takes the multi dimensional linear measure through a polynomial function, this can be used to get a behaviour which attempts to do 
+  //more even distribution of "errors" the higher the power the more even a distribution it will try to make at the individual displacements
+  //default POWER=1 so the PolynomialFunction will not change results.
+  AnyKinMeasureFunComb1 PolynomialFunction ={
+    MeasuresToMultiDimLinear lin()={ InputMeasures = ..InputMeasures; };
+//    AnyFunPolynomial F0 ={   
+//      //Here we are constructing a polynomial function
+//      //we have a linear term to be always 1, when we add one higher order term e.g. 3 5 7...  
+//      //the linear terms gives better robustness for models with bad starting guesses, 
+//      //and models having 100% perfect starting guesses..here a power3 function may fail because there are no "slope"
+//      //if Power = 0 This is not allowed
+//      //if Power = 1 PolyCoef={0,1}
+//      //if Power = 2 This is not allowed....
+//      //if Power = 3 PolyCoef={0,1,0,1}
+//      //if Power = 5 PolyCoef={0,1,0,0,1}
+//      PolyCoef = arrcat({0.0,1},repmat(iffun(ltfun(POWER-2,0),0,POWER-2),0.0),iffun(ltfun(POWER-2,0.0),0.0,pow(10.0,POWER))); 
+//      
+//    }; //this will create the polynomial function e.g. for Power=3 {0,0,0,1}
+    
+  AnyFunInterpol F0 = {
+      Type=Bspline;
+      AnyVar ROM =1;
+      AnyVar StepSize = 0.0025;
+      T    = farr(-0.5*ROM,StepSize,1+floor(ROM/StepSize));
+//      Data = {mult(iffun(ltfun(T,0),-1,1),pow(T,Power))};  //mult by -1 if using even power
+ //     Data = {pow(T,Power)};  
+
+  };
+  
+
+
+AnyInt Size = SizesOf(.WeightCoefficients)[0];  //size of measure
+    Functions =repmat(Size*3, &F0);  //repeat the function
+  };
+
+  
+  
+  
+
+  
+  
+  
+  //The POWER needs to be uneven number for function to work otherwise all outcome is positive.., so check this ...
+  AnyMessage EvenError = {
+   AnyVar check =POWER/2-floor(POWER/2);
+    TriggerConst = iffun(eqfun(check,0),On,Off);  //check for even or odd power... we need to have always uneven power...
+    Type = MSG_Error;
+    Message = "Do not use even POWER use e.g. 1,3,5,7";
+  };
+  
+  #if ROTATIONAL == On
+    AnyFloat measure_srels = Obj2Num(ObjGetMember(PolynomialFunction.lin.RefFrames[0], "sRel")) + (0*Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.r0[0]);
+    AnyFloat local_srel = Obj2Num(ObjGetMember(ObjRefResolve(LocalReferenceFrame), "sRel")) + (0*Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.r0[0]);
+    AnyFloat srel_relative_to_local = measure_srels - reshape(repmat(SizesOf(measure_srels)[0], local_srel), SizesOf(measure_srels));
+
+    /// Skew matrix with weight coefficients added
+    ///the minus in front cancel the transpose of the skew matriw
+    AnyMatrix rotational_coefficients = -reshape(
+      skewmat3d(diag(WeightCoefficients) * srel_relative_to_local), 
+      {PolynomialFunction.lin.nDim, 3}
+    )'; 
+    Coef ??= -rotational_coefficients;
+    OutDim ??= 3; 
+  #else
+    // For the case of only computing the linear part - we do not need the skewmatrix
+    Coef = linear_coefficients;
+    
+    OutDim = 3; 
+  #endif
+  
+  #if ROTATIONAL == On & LINEAR == On
+    Coef = arrcat(linear_coefficients, -rotational_coefficients);
+    OutDim = 6; 
+  #endif
+ };
+
+ 
+ 
+
+ 
+ 
+ 
+

@@ -1,0 +1,131 @@
+
+
+// Adds wrapping surfaces for Pectoralis, Serratus, and Latisimus. 
+
+#if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_
+AnyFolder& ThoraxSegRef = ..Trunk.ThoracicCavity.Inertia.segment._SIDE_;
+#else
+AnyFolder& ThoraxSegRef = ..Trunk.Segments.ThoraxSeg._SIDE_;
+#endif
+ 
+ 
+ThoraxSegRef = {
+  
+  
+  #if BM_ARM_THORAX_SCAPULA_CONTACT == _ELLIPSOID_CONTACT_
+  
+  // This code was moved from the old implementation in the IJ/IJI nodes. 
+  AnyRefNode ScapulaContactSurface = {
+  
+    
+  AnyVar a_AI=0.25; //This is the original size of the elipsoid before any scaling
+  AnyVar b_AI=0.16;
+    
+  //This node is used for controlling the size and orientation of the AI elipsoid
+  //Remember the entire content of this folder is rotated wrt. to the thorax segment 
+  //because it has been inserted in the ij and iji nodes which are both rotated
+  //The ARel used below is the rotation of the node ShoulderRef.
+  
+  AnyVar a=0.25;
+  AnyVar b=0.16;
+
+  
+  //input point 1
+  AnyRefNode P1={
+    sRel = ..Scale({-0.063, 0.29, ..Sign*0.02}); 
+  };
+  //Input point2
+  AnyRefNode P2={
+    sRel = ..Scale({-0.0100, 0.29, ..Sign*0.15}); 
+  };  
+  
+  //Standard origin of ellipsoid
+//  AnyVec3  ScapulaEllipsoidOriginStandard= {0.079427, 0.338994, ..Sign*0.03522}; 
+  
+  AnyVec3  ScapulaEllipsoidOriginStandardScaled= .Scale({0.079427, 0.338994, .Sign*0.03522}); 
+
+  AnyVar R1=((ScapulaEllipsoidOriginStandardScaled[0]-P1.sRel[0])^2+(ScapulaEllipsoidOriginStandardScaled[1]-P1.sRel[1])^2+(ScapulaEllipsoidOriginStandardScaled[2]-P1.sRel[2])^2)^0.5;
+  AnyVar R2=((ScapulaEllipsoidOriginStandardScaled[0]-P2.sRel[0])^2+(ScapulaEllipsoidOriginStandardScaled[1]-P2.sRel[1])^2+(ScapulaEllipsoidOriginStandardScaled[2]-P2.sRel[2])^2)^0.5;
+
+  AnyVar RScaleFactor=(R1+R2)*0.5/RStandard;
+  AnyVar R=RStandard*RScaleFactor;
+  
+  
+  //Point for controlling the normal 
+  AnyRefNode NormalControlPoint={
+    sRel =..Scale({-0.07, 0.36, ..Sign*0.08}); 
+  };
+  
+  //Input point3
+  AnyRefNode P3={
+    sRel =..Scale({-0.04, 0.42, ..Sign*0.08}); 
+  };
+  
+  //Midpoint of the line p1,p2
+  AnyRefNode P4={
+    sRel=(.P1.sRel+.P2.sRel)/2;
+    //Normal vector to plane p1,p2,p3
+    ARel=RotMat(.P2.sRel,.P1.sRel,.NormalControlPoint.sRel); 
+  };
+  
+  //Standard radius
+  AnyVar RStandard=0.16;
+  
+  //Distance between p1 p2
+  AnyVar w=((P1.sRel[0]-P2.sRel[0])^2+(P1.sRel[1]-P2.sRel[1])^2+(P1.sRel[2]-P2.sRel[2])^2)^0.5;
+  
+  //Distance from midpoint to center of circle
+  AnyVar D=(R^2-(0.5*w)^2)^0.5;   
+  
+  AnyVec3 n=D*{.Sign*P4.ARel[0][2],.Sign*P4.ARel[1][2],.Sign*P4.ARel[2][2]};
+  
+  //Distance between p3 p4
+  //AnyVar p3p4=((P3.sRel[0]-P4.sRel[0])^2+(P3.sRel[1]-P4.sRel[1])^2+(P3.sRel[2]-P4.sRel[2])^2)^0.5;
+  
+  
+  
+  
+  //Corresponding to P5
+
+  AnyRefNode ScapulaEllipsoidOrigin={
+    sRel=.P4.sRel+.n + {0.0, -0.016, 0}; 
+    AnyMat33 MAT=RotMat(.P2.sRel,.P1.sRel,.P3.sRel); 
+    ARel=MAT;
+    
+    AnyVec3 P1LocalEllipCoo = (.P1.sRel-sRel)*ARel;
+    AnyVec3 P2LocalEllipCoo = (.P3.sRel-sRel)*ARel;
+    
+    AnyVar X1 = P1LocalEllipCoo[0];
+    AnyVar Y1 = P1LocalEllipCoo[1];
+    AnyVar Z1 = P1LocalEllipCoo[2];
+    
+    AnyVar X2 = P2LocalEllipCoo[0];
+    AnyVar Y2 = P2LocalEllipCoo[1];
+    AnyVar Z2 = P2LocalEllipCoo[2];
+    
+    AnyVar A = ((Y2^2 - Y1^2*((X2^2 + Z2^2)/(X1^2 + Z1^2))) / (1 - ((X2^2 + Z2^2)/(X1^2 + Z1^2))))^0.5;
+    AnyVar B = (- (X1^2 + Z1^2) / ((Y1^2 / A^2) - 1))^0.5;
+    
+    AnySurfEllipsoid  Elipse ={
+      Radius={.B, .A, .B};
+      //AnyDrawParamSurf drw={ Opacity = 0.5; };
+    };
+    
+    AnyRefNode RotNode = 
+    {
+      ARel = RotMat( iffun(gtfun(...Sign,0), pi, 0.0), y)* RotMat( iffun(ltfun(...Sign,0), pi, 0.0), z);
+    };
+  };
+  
+   
+  
+  };
+  
+  
+  #endif
+        
+      
+
+
+
+};

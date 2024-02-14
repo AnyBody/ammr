@@ -1,0 +1,137 @@
+/*
+Template to generate a transformation function from the segmental reference frame to the anatomical frame.
+It also generates the inverse transformation.
+*/
+#class_template TransformToAnatomical(
+  __CLASS__ = AnyFunTransform3DLin,
+){
+  /// s0: the relative location of the anatomical frame w.r.t. the segment reference frame.
+  #var AnyVec3 sRel;
+  /// A0: the relative orientation of the anatomical frame w.r.t. the segment reference frame.
+  #var AnyMat33 ARel;
+  
+  ScaleMat = ARel';
+  Offset = -sRel;
+
+  /// Inv:  A transform to the segmental ref. frame from the anatomical frame 
+  AnyFunTransform3DLin Inv = {
+    ScaleMat = .ScaleMat';
+    Offset = -( .ScaleMat * .Offset')' ;
+  };          
+};
+
+
+/**
+Template to generate a scaling function that scales in the anatomical frame
+*/
+#class_template ScaleAnatomicalFrame(
+  __CLASS__= AnyFunTransform3D,
+  AnyFunTransform3D &GeomScale,
+){
+  PreTransforms = {
+    &T0,
+    &GeomScale,
+    &T1.Inv,
+  };
+};
+
+
+// Trunk specific templates
+/////////////////////////////////// 
+
+
+#class_template TrunkAnatomicalFrameDefinition(
+){
+  #var AnyVec3 asis_right;
+  #var AnyVec3 asis_left;
+  #var AnyVec3 c7_point;
+  #var AnyVec3 sacrum_point;
+  
+  AnyVec3 sRel = 0.5 * (asis_right + asis_left);
+
+    //Step 1 - Find Transformation for zero-anatomical angles 
+    //d is vertical, but l is not necessarily horizontal
+    AnyFloat l = asis_right - asis_left;
+    AnyFloat d = c7_point - sacrum_point;
+    AnyFloat i = cross(d, l) / vnorm(cross(d, l));
+    AnyFloat j = d / vnorm(d);
+    AnyFloat k = cross(i, j);
+    AnyMatrix A1 = {i,j,k}';
+    
+    //Step 2 - find the anatomical angles that neutralizes the rotation above
+    // Calculating Euler angles in YZX order
+    AnyFloat R = A1;
+    AnyFloat alpha_y ??= atan2(-R[2][0] , R[0][0]);
+    AnyFloat alpha_z ??= atan2(R[1][0] * cos(alpha_y) , R[0][0]);
+    AnyFloat alpha_x ??= atan2(-R[1][2] , R[1][1]);
+    
+    AnyMat33 A2 = RotMat(alpha_y, y) * RotMat(alpha_z, z) * RotMat(alpha_x, x);
+    
+    AnyMat33 ARel = A1 * A2';
+};
+
+
+#class_template TrunkPelvisScaleWithInterfaceMorphing(
+  __CLASS__= AnyFunTransform3D,
+  AnyFunTransform3D &GeomScale,
+  AnyFunTransform3D &GeomScaleC7,
+  AnyFunTransform3D &InterfaceMorphing,
+  AnyFunTransform3D &InterfaceMorphingC7,
+){
+  
+  // parameters are set during initialization of the mixin
+  TrunkAnatomicalFrameDefinition unscaled() = {};
+  
+  ScaleAnatomicalFrame ScaleAfterInterfaceMorphing(GeomScale = .GeomScale) = {
+    TransformToAnatomical T0() = {
+      TrunkAnatomicalFrameDefinition interfacemorphed() = {
+        asis_right = ...InterfaceMorphing(...unscaled.asis_right);
+        asis_left = ...InterfaceMorphing(...unscaled.asis_left);
+        sacrum_point = ...InterfaceMorphing(...unscaled.sacrum_point);
+
+        /// Notice that C7 is scaled with its own Interfacemorphing
+        c7_point = ...InterfaceMorphingC7(...unscaled.c7_point); 
+      };
+
+      sRel = interfacemorphed.sRel;
+      ARel = interfacemorphed.ARel;
+    };
+  
+    TransformToAnatomical T1() = {
+      TrunkAnatomicalFrameDefinition geomscaled() = {
+        asis_right = ..T0.Inv(...GeomScale(..T0(..T0.interfacemorphed.asis_right)));
+        asis_left = ..T0.Inv(...GeomScale(..T0(..T0.interfacemorphed.asis_left)));
+        sacrum_point = ..T0.Inv(...GeomScale(..T0(..T0.interfacemorphed.sacrum_point)));
+  
+        /// Notice that C7 is scaled with its own GeomScale
+        c7_point = ..T0.Inv(...GeomScaleC7(..T0(..T0.interfacemorphed.c7_point))); 
+      };
+       
+      sRel = geomscaled.sRel;
+      ARel = geomscaled.ARel;
+      };
+    };
+
+  PreTransforms = {
+    &InterfaceMorphing,
+    &ScaleAfterInterfaceMorphing,      
+  };
+};
+
+/** 
+  Scaling function to be used by segments in the trunk model
+  This functions ensures that we transform into the anatomical frame
+  before applying the geometrical scaling.
+*/
+#class_template TrunkScaleWithInterfaceMorphing(
+  __CLASS__= AnyFunTransform3D,
+  AnyFunTransform3D &GeomScale,
+  PelvisSeg,
+){
+  PreTransforms = {
+    &PelvisSeg.InterfaceMorphingDef.IM_Trunk_To_Leg_AboveSacrum,
+    &PelvisSeg.Scale.ScaleAfterInterfaceMorphing.T0,
+    &GeomScale,
+    &PelvisSeg.Scale.ScaleAfterInterfaceMorphing.T1.Inv,
+  };
+};

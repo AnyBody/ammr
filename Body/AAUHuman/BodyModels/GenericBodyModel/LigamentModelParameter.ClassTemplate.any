@@ -1,0 +1,333 @@
+// Class template for creating ligament parameter sections. The implementation as a template
+// ensures that the the parameter can be overridden by the user. 
+
+#class_template SubjectLigamentParameter_template(NAME) {
+  /// Descriptive name for the muscle, e.g. for plotting
+  #var AnyString Ligament = NAME.Ligament; 
+  
+  /// Number of elements in the ligament
+  #var AnyIntVar LigamentElemAmount = NAME.LigamentElemAmount;
+
+  /// L0 Slacklength of the ligament
+  #var AnyFloat L0 = NAME.L0; 
+  
+  /// Nominal strain of the ligament
+  #var AnyFloat eps1 = NAME.eps1; 
+  
+  /// Factor for determining shortening speed at optimum length
+  #var AnyFloat F1 = NAME.F1; 
+
+  /// Factor for determining shortening speed at optimum length
+  #var AnyFloat a0 = NAME.a0; 
+  
+  /// Factor for determining shortening speed at optimum length
+  #var AnyFloat a1 = NAME.a1;
+
+  /// Stiffness coefficient for the ligament
+  #var AnyFloat k = NAME.k; 
+};
+
+/* Class template Ligament_template
+
+Class to construct a series of ligaments using interpolation functions between points
+
+*/
+
+#class_template Ligament_template(
+  NAME,
+  NUM_ELEM,
+  AnyFolder &OriginSegment,
+  ORIGIN_POINTS,
+  AnyFolder &InsertionSegment,
+  INSERTION_POINTS,
+  LIGAMENT_MODEL_PARAMETERS
+){
+  AnyVec3 LigamentRGB = {0.85, 0.85, 0.85}; //< Default ligament color
+
+  // Construct interpolation functions
+  AnyFunInterpol OriginFun = {
+    Type = Bezier;
+    Data = .OriginSegment.Scale(.ORIGIN_POINTS)';
+    T = linspace(0, 1, SizesOf(Data)[1]);
+  };
+  
+  AnyFunInterpol InsertionFun = {
+    Type = Bezier;
+    Data = .InsertionSegment.Scale(.INSERTION_POINTS)';
+    T = linspace(0,1, SizesOf(Data)[1]);
+  };
+
+  // Create function nodes on segments
+  OriginSegment = {
+    AnyRefNodeGroup NAME##_Org = {
+      NodeAmount = NUM_ELEM;
+      NodeName = "Node";
+      Node_sRels = ..OriginFun(linspace(0,1,NodeAmount));
+      CreateMotionOutput = {r=Off;rDot=Off;rDDot=Off;Axes=Off;EulerPar=Off;omega=Off;omegaDot=Off;};
+    };
+  };
+
+  InsertionSegment = {
+    AnyRefNodeGroup NAME##_Ins = {
+      NodeAmount = NUM_ELEM;
+      NodeName = "Node";
+      Node_sRels = ..InsertionFun(linspace(0,1,NodeAmount));
+      CreateMotionOutput = {r=Off;rDot=Off;rDDot=Off;Axes=Off;EulerPar=Off;omega=Off;omegaDot=Off;};
+    };
+  };
+
+  AnyFloat Lengths = Obj2Num(ObjSelect("elem*.Pos"))+0*elem0.Pos;
+  AnyFloat L0s =     Obj2Num(ObjSelect("elem*.LigamentModel.L0"))+0*elem0.Pos;
+  AnyFloat Elongations = div(Lengths, L0s);
+  AnyFloat MeanElongation = mean(Elongations);
+
+  AnyFloat Forces = Obj2Num(ObjSelect("elem*.Fout"))+0*elem0.Pos;
+  AnyFloat TotalForce = sum(Forces');
+  AnyFloat MeanForce = mean(Forces');
+  AnyFloat MaxForce = max(Forces');
+  AnyFloat MinForce = min(Forces');
+  
+  #var AnySwitch Drawing = On; 
+  
+  // Create ligaments
+  #if NUM_ELEM > 0
+    AnyLigamentViaPoint elem0 = {
+      AnyRefNode &Org = .OriginSegment.NAME##_Org.Node0;
+      AnyRefNode &Ins = .InsertionSegment.NAME##_Ins.Node0;
+      AnyLigamentModelPol LigamentModel = {
+        AnyFolder &LigamentParameters = LIGAMENT_MODEL_PARAMETERS;
+        L0 = LigamentParameters.L0; //< Slack length
+        eps1 = LigamentParameters.eps1; // Nominal strain
+        F1 = LigamentParameters.F1 / NUM_ELEM; ///< Nominal force at eps1
+        a0 = LigamentParameters.a0; ///< Relative Initial Stiffness     
+        a1 = LigamentParameters.a1; ///< Relative Stiffness at eps1
+      };
+      AnyDrawPLine DrwLigament = {Visible = ..Drawing; Thickness = {0.001}; RGB = {..LigamentRGB};};
+    };
+  #endif
+  #if NUM_ELEM > 1
+    AnyLigamentViaPoint elem1 = {
+      AnyRefNode &Org = .OriginSegment.NAME##_Org.Node1;
+      AnyRefNode &Ins = .InsertionSegment.NAME##_Ins.Node1;
+      AnyLigamentModelPol LigamentModel = {
+        AnyFolder &LigamentParameters = LIGAMENT_MODEL_PARAMETERS;
+        L0 = LigamentParameters.L0; //< Slack length
+        eps1 = LigamentParameters.eps1; // Nominal strain
+        F1 = LigamentParameters.F1 / NUM_ELEM; ///< Nominal force at eps1
+        a0 = LigamentParameters.a0; ///< Relative Initial Stiffness     
+        a1 = LigamentParameters.a1; ///< Relative Stiffness at eps1
+      };
+      AnyDrawPLine DrwLigament = {Visible = ..Drawing; Thickness = {0.001}; RGB = {..LigamentRGB};};
+    };
+  #endif
+  #if NUM_ELEM > 2
+    AnyLigamentViaPoint elem2 = {
+      AnyRefNode &Org = .OriginSegment.NAME##_Org.Node2;
+      AnyRefNode &Ins = .InsertionSegment.NAME##_Ins.Node2;
+      AnyLigamentModelPol LigamentModel = {
+        AnyFolder &LigamentParameters = LIGAMENT_MODEL_PARAMETERS;
+        L0 = LigamentParameters.L0; //< Slack length
+        eps1 = LigamentParameters.eps1; // Nominal strain
+        F1 = LigamentParameters.F1 / NUM_ELEM; ///< Nominal force at eps1
+        a0 = LigamentParameters.a0; ///< Relative Initial Stiffness     
+        a1 = LigamentParameters.a1; ///< Relative Stiffness at eps1
+      };
+      AnyDrawPLine DrwLigament = {Visible = ..Drawing; Thickness = {0.001}; RGB = {..LigamentRGB};};
+    };
+  #endif
+  #if NUM_ELEM > 3
+    AnyLigamentViaPoint elem3 = {
+      AnyRefNode &Org = .OriginSegment.NAME##_Org.Node3;
+      AnyRefNode &Ins = .InsertionSegment.NAME##_Ins.Node3;
+      AnyLigamentModelPol LigamentModel = {
+        AnyFolder &LigamentParameters = LIGAMENT_MODEL_PARAMETERS;
+        L0 = LigamentParameters.L0; //< Slack length
+        eps1 = LigamentParameters.eps1; // Nominal strain
+        F1 = LigamentParameters.F1 / NUM_ELEM; ///< Nominal force at eps1
+        a0 = LigamentParameters.a0; ///< Relative Initial Stiffness     
+        a1 = LigamentParameters.a1; ///< Relative Stiffness at eps1
+      };
+      AnyDrawPLine DrwLigament = {Visible = ..Drawing; Thickness = {0.001}; RGB = {..LigamentRGB};};
+    };
+  #endif
+  #if NUM_ELEM > 4
+    AnyLigamentViaPoint elem4 = {
+      AnyRefNode &Org = .OriginSegment.NAME##_Org.Node4;
+      AnyRefNode &Ins = .InsertionSegment.NAME##_Ins.Node4;
+      AnyLigamentModelPol LigamentModel = {
+        AnyFolder &LigamentParameters = LIGAMENT_MODEL_PARAMETERS;
+        L0 = LigamentParameters.L0; //< Slack length
+        eps1 = LigamentParameters.eps1; // Nominal strain
+        F1 = LigamentParameters.F1 / NUM_ELEM; ///< Nominal force at eps1
+        a0 = LigamentParameters.a0; ///< Relative Initial Stiffness     
+        a1 = LigamentParameters.a1; ///< Relative Stiffness at eps1
+      };
+      AnyDrawPLine DrwLigament = {Visible = ..Drawing; Thickness = {0.001}; RGB = {..LigamentRGB};};
+    };
+  #endif
+  #if NUM_ELEM > 5
+    AnyLigamentViaPoint elem5 = {
+      AnyRefNode &Org = .OriginSegment.NAME##_Org.Node5;
+      AnyRefNode &Ins = .InsertionSegment.NAME##_Ins.Node5;
+      AnyLigamentModelPol LigamentModel = {
+        AnyFolder &LigamentParameters = LIGAMENT_MODEL_PARAMETERS;
+        L0 = LigamentParameters.L0; //< Slack length
+        eps1 = LigamentParameters.eps1; // Nominal strain
+        F1 = LigamentParameters.F1 / NUM_ELEM; ///< Nominal force at eps1
+        a0 = LigamentParameters.a0; ///< Relative Initial Stiffness     
+        a1 = LigamentParameters.a1; ///< Relative Stiffness at eps1
+      };
+      AnyDrawPLine DrwLigament = {Visible = ..Drawing; Thickness = {0.001}; RGB = {..LigamentRGB};};
+    };
+  #endif
+  #if NUM_ELEM > 6
+    AnyLigamentViaPoint elem6 = {
+      AnyRefNode &Org = .OriginSegment.NAME##_Org.Node6;
+      AnyRefNode &Ins = .InsertionSegment.NAME##_Ins.Node6;
+      AnyLigamentModelPol LigamentModel = {
+        AnyFolder &LigamentParameters = LIGAMENT_MODEL_PARAMETERS;
+        L0 = LigamentParameters.L0; //< Slack length
+        eps1 = LigamentParameters.eps1; // Nominal strain
+        F1 = LigamentParameters.F1 / NUM_ELEM; ///< Nominal force at eps1
+        a0 = LigamentParameters.a0; ///< Relative Initial Stiffness     
+        a1 = LigamentParameters.a1; ///< Relative Stiffness at eps1
+      };
+      AnyDrawPLine DrwLigament = {Visible = ..Drawing; Thickness = {0.001}; RGB = {..LigamentRGB};};
+    };
+  #endif
+  #if NUM_ELEM > 7
+    AnyLigamentViaPoint elem7 = {
+      AnyRefNode &Org = .OriginSegment.NAME##_Org.Node7;
+      AnyRefNode &Ins = .InsertionSegment.NAME##_Ins.Node7;
+      AnyLigamentModelPol LigamentModel = {
+        AnyFolder &LigamentParameters = LIGAMENT_MODEL_PARAMETERS;
+        L0 = LigamentParameters.L0; //< Slack length
+        eps1 = LigamentParameters.eps1; // Nominal strain
+        F1 = LigamentParameters.F1 / NUM_ELEM; ///< Nominal force at eps1
+        a0 = LigamentParameters.a0; ///< Relative Initial Stiffness     
+        a1 = LigamentParameters.a1; ///< Relative Stiffness at eps1
+      };
+      AnyDrawPLine DrwLigament = {Visible = ..Drawing; Thickness = {0.001}; RGB = {..LigamentRGB};};
+    };
+  #endif
+  #if NUM_ELEM > 8
+    AnyLigamentViaPoint elem8 = {
+      AnyRefNode &Org = .OriginSegment.NAME##_Org.Node8;
+      AnyRefNode &Ins = .InsertionSegment.NAME##_Ins.Node8;
+      AnyLigamentModelPol LigamentModel = {
+        AnyFolder &LigamentParameters = LIGAMENT_MODEL_PARAMETERS;
+        L0 = LigamentParameters.L0; //< Slack length
+        eps1 = LigamentParameters.eps1; // Nominal strain
+        F1 = LigamentParameters.F1 / NUM_ELEM; ///< Nominal force at eps1
+        a0 = LigamentParameters.a0; ///< Relative Initial Stiffness     
+        a1 = LigamentParameters.a1; ///< Relative Stiffness at eps1
+      };
+      AnyDrawPLine DrwLigament = {Visible = ..Drawing; Thickness = {0.001}; RGB = {..LigamentRGB};};
+    };
+  #endif
+  #if NUM_ELEM > 9
+    AnyLigamentViaPoint elem9 = {
+      AnyRefNode &Org = .OriginSegment.NAME##_Org.Node9;
+      AnyRefNode &Ins = .InsertionSegment.NAME##_Ins.Node9;
+      AnyLigamentModelPol LigamentModel = {
+        AnyFolder &LigamentParameters = LIGAMENT_MODEL_PARAMETERS;
+        L0 = LigamentParameters.L0; //< Slack length
+        eps1 = LigamentParameters.eps1; // Nominal strain
+        F1 = LigamentParameters.F1 / NUM_ELEM; ///< Nominal force at eps1
+        a0 = LigamentParameters.a0; ///< Relative Initial Stiffness     
+        a1 = LigamentParameters.a1; ///< Relative Stiffness at eps1
+      };
+      AnyDrawPLine DrwLigament = {Visible = ..Drawing; Thickness = {0.001}; RGB = {..LigamentRGB};};
+    };
+  #endif
+  #if NUM_ELEM > 10
+    AnyLigamentViaPoint elem10 = {
+      AnyRefNode &Org = .OriginSegment.NAME##_Org.Node10;
+      AnyRefNode &Ins = .InsertionSegment.NAME##_Ins.Node10;
+      AnyLigamentModelPol LigamentModel = {
+        AnyFolder &LigamentParameters = LIGAMENT_MODEL_PARAMETERS;
+        L0 = LigamentParameters.L0; //< Slack length
+        eps1 = LigamentParameters.eps1; // Nominal strain
+        F1 = LigamentParameters.F1 / NUM_ELEM; ///< Nominal force at eps1
+        a0 = LigamentParameters.a0; ///< Relative Initial Stiffness     
+        a1 = LigamentParameters.a1; ///< Relative Stiffness at eps1
+      };
+      AnyDrawPLine DrwLigament = {Visible = ..Drawing; Thickness = {0.001}; RGB = {..LigamentRGB};};
+    };
+  #endif
+  #if NUM_ELEM > 11
+    AnyLigamentViaPoint elem11 = {
+      AnyRefNode &Org = .OriginSegment.NAME##_Org.Node11;
+      AnyRefNode &Ins = .InsertionSegment.NAME##_Ins.Node11;
+      AnyLigamentModelPol LigamentModel = {
+        AnyFolder &LigamentParameters = LIGAMENT_MODEL_PARAMETERS;
+        L0 = LigamentParameters.L0; //< Slack length
+        eps1 = LigamentParameters.eps1; // Nominal strain
+        F1 = LigamentParameters.F1 / NUM_ELEM; ///< Nominal force at eps1
+        a0 = LigamentParameters.a0; ///< Relative Initial Stiffness     
+        a1 = LigamentParameters.a1; ///< Relative Stiffness at eps1
+      };
+      AnyDrawPLine DrwLigament = {Visible = ..Drawing; Thickness = {0.001}; RGB = {..LigamentRGB};};
+    };
+  #endif
+  #if NUM_ELEM > 12
+    AnyLigamentViaPoint elem12 = {
+      AnyRefNode &Org = .OriginSegment.NAME##_Org.Node12;
+      AnyRefNode &Ins = .InsertionSegment.NAME##_Ins.Node12;
+      AnyLigamentModelPol LigamentModel = {
+        AnyFolder &LigamentParameters = LIGAMENT_MODEL_PARAMETERS;
+        L0 = LigamentParameters.L0; //< Slack length
+        eps1 = LigamentParameters.eps1; // Nominal strain
+        F1 = LigamentParameters.F1 / NUM_ELEM; ///< Nominal force at eps1
+        a0 = LigamentParameters.a0; ///< Relative Initial Stiffness     
+        a1 = LigamentParameters.a1; ///< Relative Stiffness at eps1
+      };
+      AnyDrawPLine DrwLigament = {Visible = ..Drawing; Thickness = {0.001}; RGB = {..LigamentRGB};};
+    };
+  #endif
+  #if NUM_ELEM > 13
+    AnyLigamentViaPoint elem13 = {
+      AnyRefNode &Org = .OriginSegment.NAME##_Org.Node13;
+      AnyRefNode &Ins = .InsertionSegment.NAME##_Ins.Node13;
+      AnyLigamentModelPol LigamentModel = {
+        AnyFolder &LigamentParameters = LIGAMENT_MODEL_PARAMETERS;
+        L0 = LigamentParameters.L0; //< Slack length
+        eps1 = LigamentParameters.eps1; // Nominal strain
+        F1 = LigamentParameters.F1 / NUM_ELEM; ///< Nominal force at eps1
+        a0 = LigamentParameters.a0; ///< Relative Initial Stiffness     
+        a1 = LigamentParameters.a1; ///< Relative Stiffness at eps1
+      };
+      AnyDrawPLine DrwLigament = {Visible = ..Drawing; Thickness = {0.001}; RGB = {..LigamentRGB};};
+    };
+  #endif
+  #if NUM_ELEM > 14
+    AnyLigamentViaPoint elem14 = {
+      AnyRefNode &Org = .OriginSegment.NAME##_Org.Node14;
+      AnyRefNode &Ins = .InsertionSegment.NAME##_Ins.Node14;
+      AnyLigamentModelPol LigamentModel = {
+        AnyFolder &LigamentParameters = LIGAMENT_MODEL_PARAMETERS;
+        L0 = LigamentParameters.L0; //< Slack length
+        eps1 = LigamentParameters.eps1; // Nominal strain
+        F1 = LigamentParameters.F1 / NUM_ELEM; ///< Nominal force at eps1
+        a0 = LigamentParameters.a0; ///< Relative Initial Stiffness     
+        a1 = LigamentParameters.a1; ///< Relative Stiffness at eps1
+      };
+      AnyDrawPLine DrwLigament = {Visible = ..Drawing; Thickness = {0.001}; RGB = {..LigamentRGB};};
+    };
+  #endif
+  #if NUM_ELEM > 15
+    AnyLigamentViaPoint elem15 = {
+      AnyRefNode &Org = .OriginSegment.NAME##_Org.Node15;
+      AnyRefNode &Ins = .InsertionSegment.NAME##_Ins.Node15;
+      AnyLigamentModelPol LigamentModel = {
+        AnyFolder &LigamentParameters = LIGAMENT_MODEL_PARAMETERS;
+        L0 = LigamentParameters.L0; //< Slack length
+        eps1 = LigamentParameters.eps1; // Nominal strain
+        F1 = LigamentParameters.F1 / NUM_ELEM; ///< Nominal force at eps1
+        a0 = LigamentParameters.a0; ///< Relative Initial Stiffness     
+        a1 = LigamentParameters.a1; ///< Relative Stiffness at eps1
+      };
+      AnyDrawPLine DrwLigament = {Visible = ..Drawing; Thickness = {0.001}; RGB = {..LigamentRGB};};
+    };
+  #endif
+};

@@ -17,12 +17,56 @@
   \
 }
 
+/*
+Class template to compare to sets of object pointer arrays
+
+The output will be a list of {Name, Difference} for each object.
+
+*/
+#class_template ComparePtrArrays(
+  NAMEOF_FUN = CompleteNameOf,
+  ORDER = "Descending",
+  FORMAT = "%.12f",
+  STUDY_T = Main.Study.MaxMuscleActivity,
+  USE_SCALING = On,
+  AGGREGATION_FUNC = max,
+){
+  #var AnyObjectPtrArray Array1;
+  #var AnyObjectPtrArray Array2;
+  #var AnyFloat MirrorMatrix = eye(SecondDim);
+
+  AnyFloat Array1Values = Obj2Num(Array1);
+  AnyFloat Array2Values = squeeze(reshape(Obj2Num(Array2), {FirstDim,SecondDim}) * MirrorMatrix);
+  
+  AnyInt ValueSizes = arrcat(SizesOf(Array1Values),  {1,1,1,1,1,1,1});
+  AnyInt FirstDim = ValueSizes[0];
+  AnyInt SecondDim = prod(take(ValueSizes, iarr(1,NumElemOf(ValueSizes)-1)));
+  
+  AnyFloat AbsDifference = abs(Array1Values - Array2Values);
+  
+  #if USE_SCALING == On  
+    AnyFloat Scaling = iffun(ltfun(abs(Array1Values), 1.0), 1.0, abs(Array1Values));
+    /// if value is less than 1, use absolute difference
+    /// if value larger than 1, divide by value (relative difference)
+    AnyFloat NormalizedDifference = mult(AbsDifference, 1 / Scaling);
+  #else
+    AnyFloat NormalizedDifference = AbsDifference;
+  #endif
+  
+  AnyFloat AggregatedDifference = AGGREGATION_FUNC(reshape(NormalizedDifference, {FirstDim, SecondDim}));
+  AnyFloat SortedDifference = ObjSort(AggregatedDifference);
+  
+  AnyObjectPtrArray SortedNames = ObjSort(Array1, &AggregatedDifference);
+  AnyString NameValuePaired = transpose({NAMEOF_FUN(SortedNames), strval(SortedDifference)});
+  AnyObjectPtr NameOfMaxDiff = ObjRefResolve(Array1[argmax(AggregatedDifference)]);
+};
+
 
 #class_template FixTestStudyConfig(
   KINTOL = 1,
   UPPERBOUND = 0,
 ){ 
-  AnyVar KinematicTol ??= 1e-8;
+  AnyVar KinematicTol ??= 1e-6;
   
   #if KINTOL == 1
   AnyFolder& Kinematics = .Kinematics;

@@ -24,7 +24,7 @@ concurrency:
 jobs:
   test:
     # Run all private AMMR forks on self-hosted runners
-    if: ${{ (github.event_name == 'workflow_dispatch')  || (github.repository_owner == 'anybody' && github.repository != 'anybody/ammr') }}
+    if: ${{ (github.event_name == 'workflow_dispatch')  || (github.repository_owner == 'anybody' && !(github.repository == 'anybody/ammr' || github.repository == 'anybody/ammr4-beta'))  }}
 
     strategy:
       fail-fast: false
@@ -63,4 +63,24 @@ jobs:
             --durations=10 `
             --anybodycon="$Env:ANYBODYCON" `
             --runslow `
+          ${{ github.event.inputs.custom-pytest-arg != '' && ' ' || '$(Get-content .\known-failing-tests.txt | foreach {"--deselect={0}" -f $_.split("#")[0].trim() })' }} `
           ${{ github.event.inputs.custom-pytest-arg  || '' }}
+          
+              
+      - name: Run known failing AMMR tests
+        if: github.event.inputs.custom-pytest-arg == '' && matrix.test_group == 1
+        run: |
+          ~\micromamba.exe shell hook -s powershell | Out-String | iex
+          micromamba activate _ammr_test
+
+          cd Tests
+          # Check if the file .\known-failing-tests.txt is emtpty
+          if ((Get-Content .\known-failing-tests.txt | Measure-Object).Count -gt 0) {
+            pytest -n auto `
+              --durations=20 `
+              --anybodycon="$Env:ANYBODYCON" `
+              --xfail-all `
+              --runslow `
+              --suppress-no-test-exit-code `
+              $(Get-content .\known-failing-tests.txt | foreach {"{0}" -f $_.split('#')[0].trim()})
+          }

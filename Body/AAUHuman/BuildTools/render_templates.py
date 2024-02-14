@@ -1,41 +1,47 @@
+
+import os
 import re
 
 from pathlib import Path
 
 from jinja2 import Template
 
-try:
-    import tomllib
-except ImportError:
-    import tomli as tomllib
+
+def read_toml(path):
+    try:
+       import tomllib
+    except ModuleNotFoundError:
+        try: 
+            import tomli as tomllib
+        except ModuleNotFoundError:
+            import toml as tomllib
+       
+    return tomllib.loads(path.read_text())
 
 
-tmplpath = Path(__file__).parent.absolute()
+
+
+tmplpath =  Path(__file__).parent.absolute()
 
 rootpath = tmplpath.parents[2]
 
-with open(rootpath / "Body/AAUHuman/bm-parameters.toml", "rb") as fh:
-    data = tomllib.load(fh)
-
+data = read_toml(rootpath / "Body/AAUHuman/bm-parameters.toml")
 
 def filterp(match):
     prog = re.compile(match)
-    return {k: v for k, v in data["parameters"].items() if prog.match(k)}
-
+    return {k:v for k,v in data['parameters'].items() if prog.match(k) }
 
 bm_all = filterp(".*")
-bm_leg = filterp("^BM_LEG")
-bm_trunk = filterp("^BM_TRUNK")
-bm_arm = filterp("^BM_ARM")
-bm_scaling = filterp("^BM_SCALING")
-bm_mannequin = filterp("^BM_MANNEQUIN_DRIVER")
-bm_jointtype = filterp("^BM_JOINT_TYPE")
+bm_leg = filterp('^BM_LEG')
+bm_trunk = filterp('^BM_TRUNK')
+bm_arm = filterp('^BM_ARM')
+bm_scaling = filterp('^BM_SCALING')
+bm_mannequin = filterp('^BM_MANNEQUIN_DRIVER')
+bm_jointtype = filterp('^BM_JOINT_TYPE')
 
-used_param = set().union(
-    *[bm_leg, bm_trunk, bm_arm, bm_scaling, bm_mannequin, bm_jointtype]
-)
+used_param = set().union(*[bm_leg, bm_trunk, bm_arm, bm_scaling, bm_mannequin, bm_jointtype])
 
-bm_other = {k: bm_all[k] for k in sorted(set(bm_all) - used_param)}
+bm_other ={k: bm_all[k] for k in sorted(set(bm_all) - used_param)}
 
 
 targets = [
@@ -58,12 +64,14 @@ targets = [
 ]
 
 
-for target, template, data in targets:
+for target,template, data in targets:
     target = rootpath / target
     if not template:
-        template = target.name + ".jinja"
+        template = (target.name + ".jinja")
     template = tmplpath / template
     with open(template) as fh:
         tmpl = Template(fh.read())
     with open(target, "w") as fh:
         fh.write(tmpl.render(data=data))
+
+

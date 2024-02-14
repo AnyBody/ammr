@@ -1,0 +1,89 @@
+/* 
+Test model to compare inertia properties between the rigid and flexible thorax and
+buckle and volume based models
+
+We aim to test that:
+- the mass of each model is the same
+- the JMatrix is equal when summed across segments
+
+It is called from python
+
+*/ 
+
+#include "../libdef.any"
+#include "../tools.any"
+
+#ifndef TEST_NAME
+  #define TEST_NAME "test_inertia_0"
+  #define BM_TRUNK_THORACIC_MODEL _THORACIC_MODEL_RIGID_
+  #define BM_TRUNK_CAVITY_MODEL _CAVITY_MODEL_VOLUME_
+#endif
+
+// Ensure zero posture when using flexible thorax
+#if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_
+  #define BM_MANNEQUIN_DRIVER_PELVIS_THORAX_EXTENSION OFF
+  #define BM_MANNEQUIN_DRIVER_PELVIS_THORAX_ROTATION OFF
+  #define BM_MANNEQUIN_DRIVER_PELVIS_THORAX_LATERAL_BENDING OFF
+  #define BM_TRUNK_LUMBAR_THORACIC_LINK OFF
+  #define BM_TRUNK_THORACIC_RHYTHM OFF
+#endif
+
+// Volume model requires muscles to work
+#if BM_TRUNK_CAVITY_MODEL == _CAVITY_MODEL_VOLUME_
+  #define BM_TRUNK_MUSCLES ON
+#else
+  #define BM_TRUNK_MUSCLES OFF
+#endif
+
+#define BM_ARM_RIGHT OFF
+#define BM_ARM_LEFT OFF
+#define BM_LEG_MODEL OFF
+#define BM_MANNEQUIN_DRIVER_DEFAULT ON
+
+
+#define TEST_SEVERITY assert
+
+Main = {
+  #include "<ANYBODY_PATH_BODY>/HumanModel.any"
+      
+  DrawSettings.InertiaSolids.Visible = On;
+  DrawSettings.InertiaSolids.PickableZOrdering = 1;
+  Main.DrawSettings.Muscle.Visible = Off;
+
+  
+  AnyFolder test_variables = {
+    AnyFloat tol = 1e-3;
+
+    AnyFloat trunk_mass = Main.HumanModel.BodyModel.Trunk.MassSummation.Mass;
+
+    AnyObjectPtrArray trunk_segments = arrcat(
+      ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Segments", "*Seg", "AnySeg"),
+      ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Segments.Right", "R*Seg", "AnySeg"),
+      ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Segments.Left", "R*Seg", "AnySeg"),
+    );
+
+    AnyFloat trunk_segments_masses = Obj2Num(ObjGetMember(trunk_segments, "Mass")) + (0*Main.Study.t);
+
+    AnyInt NonNegativeMasses = TEST_SEVERITY( 
+      gtfun(trunk_segments_masses, 0),
+      "Trunk segment masses are negative"
+    );
+
+    #if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_
+      ComparePtrArrays rib_segment_masses() = {
+        Array1 = ObjGetMember(ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Segments.Right", "R*Seg", "AnySeg"), "Mass");
+        Array2 = ObjGetMember(ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Segments.Left", "R*Seg", "AnySeg"), "Mass");
+      };
+  
+      AnyInt SymmetricRibMasses = TEST_SEVERITY( 
+        ltfun(rib_segment_masses.NormalizedDifference, tol),
+        "Rib segment masses are asymmetric"
+      );
+    #endif
+  };
+
+  AnyBodyStudy Study = {
+    Gravity = {0.0, -9.81, 0.0};
+    nStep = 1;
+  };
+};

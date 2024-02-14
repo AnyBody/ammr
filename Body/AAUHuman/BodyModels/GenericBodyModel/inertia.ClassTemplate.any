@@ -1,0 +1,100 @@
+/*
+Template to inject a calculation of the Density of an geometry based inertia object
+This allows the density to be variable to make the overall Mass of the body correct
+*/
+#class_template BodyMassCorrection(){
+  /// Litterature based density
+  AnyFloatVar DensityTheoretical ??= Main.HumanModel.BodyModel.Trunk.Data.unscaled.ModelParameters.AdiposeTissueDensity;
+  
+  /// Setting to determine if this inertia is part of the mass correction
+  AnySwitchVar enableMassCorrection ??= On;
+  
+  // Calculated Density accounting for correct mass distribution throughout whole body region
+  AnyFolder &inertiaObject = #parent;
+  inertiaObject.Density = iffun(enableMassCorrection, Main.HumanModel.BodyModel.Trunk.Data.MassDistribution.mass_scale, 1.0) * DensityTheoretical;
+};
+
+/* 
+  Template to make inertia objects that are not based on geometry compatible with the mass correction calculation
+  This is used for the inertia objects of type AnyInertiaMatrix that do no have Density and Volume properties
+*/ 
+#class_template BodyMassCorrectionCompatibility(){
+  /// For this compatibility template we need to set the DensityTheoretical to the mass of the object given from the StandardParameters
+  #var AnyFloatVar DensityTheoretical;
+  
+  /// Setting to determine if this inertia is part of the mass correction
+  AnySwitchVar enableMassCorrection ??= On;
+  
+  // Calculated Mass accounting for correct mass distribution throughout whole body region
+  AnyFolder &inertiaObject = #parent;
+
+  inertiaObject = {
+    /// Volume is set to one since we specify the DensityTheoretical to be the standardParamter mass 
+    AnyFloatVar Volume = 1.0; 
+    Mass = iffun(.enableMassCorrection, Main.HumanModel.BodyModel.Trunk.Data.MassDistribution.mass_scale, 1.0) * .DensityTheoretical;
+  };
+};
+
+#class_template rib_outer_inertia(
+    __CLASS__ = AnyInertiaSolid,
+){ 
+
+  // Select which rib to generate inertia for
+  #var AnyInt rib_index;
+
+  /// This is temporary untill we can generate for all 12 ribs
+  /// it ensures that rib2 can set rib_index = 2;
+  AnyInt _rib_index = rib_index - round(.Data.AllRibs.OuterInertiaPoints.calculations.InnerPointFun.first_rib);
+
+  BodyMassCorrection massCorrection() = {};
+  
+  AnySurfTriCylMesh inertia_cyl = {
+    /// ensure that left side ribs are not getting a negative volume
+    TriangleDirection = iffun(gtfun(...Sign, 0), RotCounterclockwise, RotClockwise);
+    
+    viewSurface = {
+      Visible ??= Main.DrawSettings.InertiaSolids.Visible;
+      PickableZOrdering ??= Main.DrawSettings.InertiaSolids.PickableZOrdering;
+      RGB ??= {0.8, 0, 0};
+      Opacity ??= Main.DrawSettings.InertiaSolids.Opacity;
+    };  
+    
+    // Handle left-right mirroring
+    AnyFloat mirror_transform = reshape(
+      repmat(..Data.AllRibs.OuterInertiaPoints.calculations.InnerPointFun.n_points, {1, 1, ...Sign}), 
+      {..Data.AllRibs.OuterInertiaPoints.calculations.InnerPointFun.n_points, 3}
+    );
+    
+    Points = arrcat(
+      {..CT.sRel}, // Pole1
+      ..Scale(mult(..Data.AllRibs.OuterInertiaPoints.inner_points_below[._rib_index], mirror_transform)),
+      ..Scale(mult(..Data.AllRibs.OuterInertiaPoints.outer_points_below[._rib_index], mirror_transform)),
+      ..Scale(mult(..Data.AllRibs.OuterInertiaPoints.outer_points_above[._rib_index], mirror_transform)),
+      ..Scale(mult(..Data.AllRibs.OuterInertiaPoints.inner_points_above[._rib_index], mirror_transform)),
+      {..CC.sRel}, // Pole2
+    );
+
+    /// number of points per line along rib
+    AnyInt step ??= ..Data.AllRibs.OuterInertiaPoints.calculations.InnerPointFun.n_points; 
+    AnyInt n_lines ??= 4; ///< number of lines along rib to draw cyl from
+    AnyInt end ??= n_lines * step; ///< index of the last point before pole2
+    
+    // we create the maximum number of rings to get the smoothest surface
+    // each column has the pole indexes inserted at the start and end
+    CylMesh = {
+      arrcat(0, iarr(1,1, step), end+1),
+      arrcat(0, iarr(step+1, 1, step*(n_lines-2)), end+1),
+      arrcat(0, iarr(step*2+1, 1, step*(n_lines-1)), end+1),
+      arrcat(0, iarr(step*3+1, 1, step*n_lines), end+1)
+    }';
+  };
+
+  // we need to subtract the bone inertia
+  AnySurfSTL negativeBoneInertia = {
+    FileName = ..BoneInertiaObject.surface.FileName;
+    TriangleDirection = RotClockwise; ///< using clockwise gives us a negative volume of the surface
+    AnyFunTransform3D &scale = ..BoneInertiaObject.surface.scale;
+    ScaleXYZ = ..BoneInertiaObject.surface.ScaleXYZ;
+    viewSurface = {Visible ??= Off;};
+  };
+};

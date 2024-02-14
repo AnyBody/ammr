@@ -1,0 +1,191 @@
+AnyOperationSequence RunTest = {
+  AnyOperation& test_load_pos = Main.Operations.TestLoadPos;
+  AnyOperation& test_init_pos = Main.Operations.TestInitPos;
+};
+
+AnyFolder Operations = {
+  AnyOperationMacro UpdateValues = {
+    MacroStr = {"classoperation Main " + strquote("Update Values")};
+  };
+  
+  AnyOperationSetValue SetLoadTestTrigger = {
+    AnyInt dummy = 1;
+    Source = {&dummy};
+    Target = {&.TestLoadTrigger};
+  };
+  AnyOperationSetValue ResetLoadTestTrigger = {
+    AnyInt dummy = 0;
+    Source = {&dummy};
+    Target = {&.TestLoadTrigger};
+  };
+  AnyOperationSetValue SetInitPosTestTrigger = {
+    AnyInt dummy = 1;
+    Source = {&dummy};
+    Target = {&.TestInitPosTrigger};
+  };
+  
+  AnyOperationSequence TestLoadPos = {
+    AnyOperation& set_trigger = .SetLoadTestTrigger;
+    AnyOperation& reevaluate_test = .UpdateValues;
+    AnyOperation& reset_trigger = .ResetLoadTestTrigger;
+  };
+  
+  AnyOperationSequence TestInitPos = {
+    AnyOperation& init_cond = Main.Study.InitialConditions;
+    AnyOperation& set_trigger = .SetInitPosTestTrigger;
+    AnyOperation& reevaluate_test = .UpdateValues;
+  };
+  
+  AnyInt TestLoadTrigger = DesignVar(0);
+  AnyInt TestInitPosTrigger = DesignVar(0);
+};
+
+AnyFolder Tests = {
+    AnyFloatVar abs_tol = 1e-10;
+    
+    /// This test is merely a test that AMS sets r to r0 upon load
+    AnyInt test_seg_load_positions = expect(
+      orfun(
+        not(Main.Operations.TestLoadTrigger),
+        eqfun(SegmentVars.pos_diff, 0)
+      )
+    );
+
+      // This is a test of all trunk nodes sRel vs. r at load time
+      AnyInt test_node_load_positions = expect(
+        orfun(
+          not(Main.Operations.TestLoadTrigger),
+          ltfun(NodeVars.pos_diff, abs_tol)
+        )
+      );
+    
+    /// Test to ensure Axes0 and Axes is equal upon load
+    AnyInt test_seg_load_axes = expect(
+      orfun(
+        not(Main.Operations.TestLoadTrigger),
+        ltfun(SegmentVars.axes_diff, abs_tol)
+      )
+    );
+    
+    /// This test ensures that all thorax segments r0 is equal to r after solving the kinematics
+    AnyInt test_seg_initial_positions = expect(
+      orfun(
+        not(Main.Operations.TestInitPosTrigger), 
+        ltfun(SegmentVars.pos_diff, abs_tol)
+      )
+    );
+
+      // This test ensures that all thorax node sRels are equal to their r pos vector after
+      // kinematics are solved
+      AnyInt test_node_initial_positions = expect(
+        orfun(
+          not(Main.Operations.TestInitPosTrigger),
+          ltfun(NodeVars.pos_diff, abs_tol)
+        )
+      );
+    
+    /// Test that Axes0 and Axes are equal after kinematics are solved
+    AnyInt test_seg_initial_axes = expect(
+      orfun(
+        not(Main.Operations.TestInitPosTrigger), 
+        ltfun(SegmentVars.axes_diff, abs_tol)
+      )
+    );
+    
+
+  AnyFolder SegmentVars = {
+    AnyObjectPtrArray all_segments = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk", "*", "AnySeg");
+    AnyObjectPtrArray buckle = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Buckle", "*", "AnySeg");
+    
+    /// Array of all relevant segments to compare positions for
+    /// The buckle segments are removed since their positions are solved during the kinematic analysis
+    AnyObjectPtrArray segments = set_difference(all_segments,buckle);
+    
+    AnyObjectPtrArray seg_r0 = ObjGetMember(segments, "r0");
+    AnyFloat seg_r0_vals = Obj2Num(seg_r0);
+    
+    AnyObjectPtrArray seg_axes0 = ObjGetMember(segments, "Axes0");
+    AnyFloat seg_axes0_vals = Obj2Num(seg_axes0);
+    
+    AnyObjectPtrArray seg_pos = ObjGetMember(segments, "r"); 
+    AnyFloat seg_pos_vals = Obj2Num(seg_pos);
+    
+    AnyObjectPtrArray seg_axes = ObjGetMember(segments, "Axes"); 
+    AnyFloat seg_axes_vals = Obj2Num(seg_axes);
+    
+    AnyFloat pos_diff = max(abs(seg_r0_vals - seg_pos_vals)); 
+    AnyFloat pos_diff_sorted = ObjSort(pos_diff, &pos_diff);
+    AnyFloat axes_diff = ObjSort(max(abs(seg_axes0_vals - seg_axes_vals))); 
+    AnyFloat axes_diff_sorted = ObjSort(axes_diff, &axes_diff);
+
+    AnyObjectPtrArray sorted_by_pos_diff = ObjSort(segments, &pos_diff);
+    AnyObjectPtrArray sorted_by_axes_diff = ObjSort(segments, &axes_diff);
+    AnyString paired = transpose({strval(pos_diff_sorted), CompleteNameOf(sorted_by_pos_diff)});
+  };
+
+  AnyFolder NodeVars = {
+    AnyObjectPtrArray all_nodes = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk", "*", "AnyRefNode");
+    AnyObjectPtrArray skull_nodes = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Segments.SkullSeg", "*", "AnyRefNode");
+    AnyObjectPtrArray buckle_nodes = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Buckle", "*", "AnyRefNode");      
+    AnyObjectPtrArray ij_nodes = ObjSearchRecursive(ObjRefResolve(&Main.HumanModel.BodyModel.Trunk.Segments.SternumSeg.ij), "*", "AnyRefNode");             
+    AnyObjectPtrArray iji_nodes = ObjSearchRecursive(ObjRefResolve(&Main.HumanModel.BodyModel.Trunk.Segments.SternumSeg.iji), "*", "AnyRefNode");             
+    AnyObjectPtrArray cyl_nodes = arrcat(
+      ObjSearch("Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.*.Muscles.GlueteusMaximusWrapSurfaces.*.cyl"),
+      ObjSearch("Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.*.Muscles.*.cyl"),
+      ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Abdominal", "*", "AnySurfCylinder"),
+    );
+    AnyObjectPtrArray ellipsoid_nodes = arrcat(
+      ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Abdominal.Diaphragm", "*", "AnySurfEllipsoid"),
+      ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Abdominal", "*", "AnySurfEllipsoid"),
+    );
+    AnyObjectPtrArray HipSubNodes = arrcat(
+      ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.Right.HipJoint", "*", "AnyRefNode"),          
+      ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.Left.HipJoint", "*", "AnyRefNode"),
+    );
+    AnyObjectPtrArray rot_nodes = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Segments","*.RotNode","AnyRefNode");
+    AnyObjectPtrArray manusternal_nodes = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Segments","*.ManubriosternalJointNode.*","AnyRefNode");
+    AnyObjectPtrArray obliquus_wrap_surfs = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Segments.SternalBodySeg","*.Surf","AnySurfTorus");
+    AnyObjectPtrArray abdom_wrap_cylnodes = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Abdominal", "Translate.*", "AnyRefNode");
+    AnyObjectPtrArray abdom_wrap_translate = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Abdominal", "Translate", "AnyRefNode");
+    AnyObjectPtrArray abdom_wrap_ribcyls = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Abdominal", "*CylR*", "AnyRefNode");
+    
+    // The skull is filtered out since it has another reference system than the remaining trunk so sRel will not be equal to r
+    // The buckle is removed since it is kinematically solved and thereby will move during the kinematics.
+    // The ij sub nodes are removed since they are the interface nodes for the arm reference system
+    // The hip nodes expressed in the leg coordinates are removed
+    // The sternum RotNodes are removed since they are note part of the trunk reference system
+    // The sternal obliquus wrap surfaces are removed 
+    // The Manubriosternal Lat/Med nodes are removed as they are local to the two sternumsegs
+    AnyObjectPtrArray nodes = set_difference(
+      all_nodes,
+      arrcat(arrcat(
+      skull_nodes,
+      buckle_nodes,
+      ij_nodes,
+      iji_nodes,
+      cyl_nodes,
+      ellipsoid_nodes,
+      HipSubNodes,
+      rot_nodes,
+      obliquus_wrap_surfs,
+      manusternal_nodes,),
+      abdom_wrap_cylnodes,
+      abdom_wrap_translate,
+      abdom_wrap_ribcyls
+    ));
+    
+    AnyObjectPtrArray node_srel = ObjGetMember(nodes, "sRel");
+    AnyFloat node_srel_vals = Obj2Num(node_srel);
+
+    AnyObjectPtrArray node_pos = ObjGetMember(nodes, "r");
+    AnyFloat node_pos_vals = Obj2Num(node_pos);
+    
+    AnyFloat pos_diff = (max(abs(node_srel_vals - node_pos_vals)));
+    AnyFloat pos_diffSort = ObjSort(pos_diff, &pos_diff);
+    AnyObjectPtrArray sorted_by_pos_diff = ObjSort(nodes, &pos_diff);
+    
+    
+    AnyString paired = transpose({strval(pos_diffSort), CompleteNameOf(sorted_by_pos_diff)});
+  };
+};
+

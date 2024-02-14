@@ -4,7 +4,7 @@ AnyFolder InterfaceMorphingDef = {
     AnyFunTransform3DIdentity IM_Trunk_To_Leg_Unscaled= {};     
   #else
     /// IM landmarks of the trunk's pelvis 
-    AnyMatrix points_RBF_TrunkPelvis_Unscaled = .StdPar.points_RBF_unscaled;
+    AnyMatrix points_RBF_TrunkPelvis_Unscaled = .Data.points_RBF_unscaled;
     #if BM_LEG_MODEL_IS_TLEM
       /// IM landmarks of the leg's pelvis  
       AnyMatrix points_RBF_LegPelvis_Unscaled = ....LEG_MODEL_PARAM_DIRECTION.Leg.ModelParameters.Pelvis.points_RBF_unscaled;
@@ -26,10 +26,10 @@ AnyFolder InterfaceMorphingDef = {
         /// No morphing is applied.
         AnyFunTransform3D IM_Leg_To_Trunk_Unscaled = {
 
-          AnyFloat Trunk_Pelvis_AnatomicalFrame_s = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(..AnatomicalFrame.pUnscaled_Trunk_Pelvis, 1) ;
-          AnyFloat Trunk_Pelvis_AnatomicalFrame_A = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(..AnatomicalFrame.pUnscaled_Trunk_Pelvis, 1) ;
-          AnyFloat Leg_Pelvis_AnatomicalFrame_s = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(..AnatomicalFrame.pUnscaled_Leg_Pelvis, 1) ;
-          AnyFloat Leg_Pelvis_AnatomicalFrame_A = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(..AnatomicalFrame.pUnscaled_Leg_Pelvis, 1) ;
+          AnyFloat Trunk_Pelvis_AnatomicalFrame_s = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(..AnatomicalFrame.pUnscaled_Trunk_Pelvis) ;
+          AnyFloat Trunk_Pelvis_AnatomicalFrame_A = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(..AnatomicalFrame.pUnscaled_Trunk_Pelvis) ;
+          AnyFloat Leg_Pelvis_AnatomicalFrame_s = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(..AnatomicalFrameTrunk.Scale_Leg_Pelvis.unscaled_points) ;
+          AnyFloat Leg_Pelvis_AnatomicalFrame_A = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(..AnatomicalFrameTrunk.Scale_Leg_Pelvis.unscaled_points) ;
 
           AnyFunTransform3DLin tr1 = {
             ScaleMat = (.Leg_Pelvis_AnatomicalFrame_A)' ;
@@ -139,17 +139,6 @@ AnyFolder InterfaceMorphingDef = {
       AnyFunTransform3DIdentity IM_Trunk_To_Leg_Unscaled = {};
     #endif
   #endif
-  /// A combined transformation that prepares trunk pelvis geometry 
-  /// prior to applying geometric scaling
-  AnyFunTransform3DIdentity IM_Trunk_To_Leg = {
-    PreTransforms = {&.IM_Trunk_To_Leg_Unscaled, &..GeomScale};
-  };
-  
-  /// A combined transformation that prepares leg pelvis geometry 
-  /// prior to applying geometric scaling
-  AnyFunTransform3DIdentity IM_Leg_To_Trunk = {
-    PreTransforms = {&.IM_Leg_To_Trunk_Unscaled, &..GeomScale};
-  };
 
   /// Function to correct segments above the pelvis
   /// These segments have an offset after the pelvis interface morphing
@@ -157,7 +146,7 @@ AnyFolder InterfaceMorphingDef = {
   AnyFunTransform3DLin IM_Trunk_To_Leg_AboveSacrum = {
     ScaleMat = eye(3,3);
     /// We find the joint point where sacrum joins L5
-    AnyFloat sacrum_unscaled = ....ModelParameters.Sacrum.SacrumL5JntNode_pos;
+    AnyFloat sacrum_unscaled = ....Data.unscaled.ModelParameters.Sacrum.SacrumL5JntNode_pos;
     AnyFloat sacrum_im = .IM_Trunk_To_Leg_Unscaled(sacrum_unscaled);
     /// The offset is the difference from unscaled to IM scaled of the point
     Offset = sacrum_im - sacrum_unscaled;

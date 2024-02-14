@@ -1,15 +1,8 @@
 //This is the definition of the joints in the arm
 
-
-#if BM_ARM_THORAX_SCAPULA_CONTACT == _MULTIPLE_POINT_CONTACT_
-
-
-#endif
-
-
 /// Definition of SternoClavicular (SC) joint
 AnySphericalJoint SternoClavicularJoint = {
-  AnyRefNode &thorax_sc = ..ShoulderRef.scj;
+  AnyRefNode &thorax_sc = ....Trunk.Segments.SternumSeg._SIDE_.scj;
   AnyRefNode &clavicula_sc = ..Seg.Clavicula.scj;
   Orientation = {
     // These settings are kept to mimic the  
@@ -172,43 +165,72 @@ AnyRevoluteJoint WristJointDeviation = {
 
 #if BM_ARM_THORAX_SCAPULA_CONTACT == _MULTIPLE_POINT_CONTACT_
 
-AnyKinMeasureExpComb ScapulaAIThoraxMeasure = {
+#include "EllipsoidsForMultiPointScapulaContact.any"
+ 
+AnyKinMeasureExpComb ScapulaAIThoraxMeasure = 
+{
   // A large negative number for the exponential combination measures causes
   // the measure to put emphasis on the "penetration" of the points,
   // while "ignoring" points far from the surface.
-  a ??= -200;
-  AnyKinPointSurface point_surface_measure = 
-  {
+  a ??= -400;
+  AnyKinPointSurface m1 = {
     #include "ThoraxScapulaContactPoints.any"
-    AnyFolder &surf3 =...Seg.Scapula.Ellipsoid_ai.ellipsoid;
+    AnyFolder &surf3 = ...Seg.Scapula.Ellipsoid_0.ellipsoid;
   };
-  
+  AnyKinPointSurface m2 = {
+    #include "ThoraxScapulaContactPoints.any"
+    AnyFolder &surf3 = ...Seg.Scapula.Ellipsoid_2.ellipsoid;
+  };
+  AnyKinPointSurface m3 = {
+    #include "ThoraxScapulaContactPoints.any"
+    AnyFolder &surf3 = ...Seg.Scapula.Ellipsoid_3.ellipsoid;
+  };
+  AnyKinPointSurface m4 = {
+    #include "ThoraxScapulaContactPoints.any"
+    AnyFolder &surf3 = ...Seg.Scapula.Ellipsoid_4.ellipsoid;
+  };
+  AnyKinPointSurface m5 = {
+    #include "ThoraxScapulaContactPoints.any"
+    AnyFolder &surf3 = ...Seg.Scapula.Ellipsoid_5.ellipsoid;
+  };
+  AnyKinPointSurface m6 = {
+    #include "ThoraxScapulaContactPoints.any"
+    AnyFolder &surf3 = ...Seg.Scapula.Ellipsoid_6.ellipsoid;
+  };
 };
 
-AnyKinEqSimpleDriver ScapulaAIThoraxNodeDriver = {  
-  
-  AnyKinMeasure &Measure1=.ScapulaAIThoraxMeasure;
-  
+AnyKinEqSimpleDriver ScapulaAIThoraxNodeDriver = 
+{  
+  AnyKinMeasure &Measure1 = .ScapulaAIThoraxMeasure;
   DriverPos = {0};
   DriverVel = {0};
   Reaction.Type = {Off};
-  
 };
 
+
+// Driver on this measures is in the "ScapulaConoideumDriver.any" include
+// It is only applied when the shoulder rhythm is disabled.
+AnyKinMeasureExpComb ScapulaTSThoraxMeasure =
+{
+  a ??= .ScapulaAIThoraxMeasure.a;
+  AnyKinPointSurface m1 = {
+    #include "ThoraxScapulaContactPoints.any"
+    AnyFolder &surf3 = ...Seg.Scapula.Ellipsoid_1.ellipsoid;
+  };
+ };
+ 
 #endif
+
 
 
 
 #if BM_ARM_THORAX_SCAPULA_CONTACT == _ELLIPSOID_CONTACT_
 
-
-
-
 AnyKinEqSimpleDriver ScapulaAIThoraxNodeDriver = {
   
   AnyKinPointSurface Measure1 = {
     AnyRefFrame &r1 = ...Seg.Scapula.ScapulaSlidingAI;
-    AnySurface &s1 = ...ShoulderRef.ScapulaEllipsoidOrigin.Elipse;
+    AnySurface &s1 = ...ThoraxSegRef.ScapulaContactSurface.ScapulaEllipsoidOrigin.Elipse;
   };
   
   DriverPos = {0};
@@ -263,106 +285,6 @@ AnyMuscleViaPoint TrapezoidLigamentReaction = {
 };
 
 
-#if BM_ARM_THORAX_SCAPULA_CONTACT == _MULTIPLE_POINT_CONTACT_
-
-AnyKinMeasureExpComb ScapulaTSThoraxMeasure = 
-{
-  a ??= .ScapulaAIThoraxMeasure.a;
-  AnyKinPointSurface point_surface_measure = 
-  {
-    #include "ThoraxScapulaContactPoints.any"
-    AnyFolder &surf3 =...Seg.Scapula.Ellipsoid_ts.ellipsoid;
-  };
-  
-};
-
-
-AnyFolder &scapula_ai_org  =.Seg.Scapula.ai;
-scapula_ai_org ={
-  AnyRefNode node_org ={ 
-    sRel= {-0.02,0,0};
-    AnySurfEllipsoid  ellipsoid ={ 
-      Radius={0.065,0.06,0.015};
-      //      AnyDrawParamSurf drw ={RGB={0,1,0};};
-    };
-  };
-};
-
-
-AnyFolder &scapula_ts_org  =.Seg.Scapula.ts;
-scapula_ts_org ={
-  AnyRefNode node_org ={ 
-    sRel= {-0.02,0,0};
-    
-    AnySurfEllipsoid  ellipsoid ={ 
-      Radius={0.05,0.05,0.015};
-      //      AnyDrawParamSurf drw ={RGB={0,1,0};};
-    };
-  };  
-};
-
-AnyFolder &scapula  =.Seg.Scapula;
-
-scapula ={
-  AnyRefNode ControlNode0_ai = {sRel= .ai.sRel+...Seg.Scapula.Scale({-0.02,...Sign*0.01,0.01}); 
-//    AnyDrawNode drw ={RGB={1,0,0};ScaleXYZ={1,1,1}*0.005;};
-  };
-  AnyRefNode ControlNode1_ai = {sRel= .ControlNode0_ai.sRel+...Seg.Scapula.Scale({0.07,...Sign*0.01,0});
-//    AnyDrawNode drw ={RGB={1,0,0};ScaleXYZ={1,1,1}*0.005;};
-  };
-  AnyRefNode ControlNode2_ai = {sRel= .ControlNode0_ai.sRel+...Seg.Scapula.Scale({0.0,...Sign*(0.07+0.01),0}); 
-//    AnyDrawNode drw={RGB={1,0,0};ScaleXYZ={1,1,1}*0.005;};
-  };
-  AnyRefNode ControlNode3_ai = {sRel= .ControlNode0_ai.sRel+...Seg.Scapula.Scale({0,...Sign*0.01,0.015});
-//    AnyDrawNode drw={RGB={1,0,0};ScaleXYZ={1,1,1}*0.005;};
-  };
-  
-  AnyRefNode Ellipsoid_ai ={ 
-    sRel=.ControlNode0_ai.sRel;
-    
-    AnySurfEllipsoid  ellipsoid ={ 
-      AnyVar r1 = vnorm(..ControlNode0_ai.sRel-..ControlNode1_ai.sRel);
-      AnyVar r2 = vnorm(..ControlNode0_ai.sRel-..ControlNode2_ai.sRel);
-      AnyVar r3 = vnorm(..ControlNode0_ai.sRel-..ControlNode3_ai.sRel);
-      Radius ={r1,r2,r3};
-      // Radius={0.085,0.06,0.015};
-      // Radius={0.07,0.06,0.015};
-    //  AnyDrawParamSurf drw ={};
-    };
-  };
-  
-  AnyRefNode ControlNode0_ts = {sRel= .ts.sRel+...Seg.Scapula.Scale({-0.02,...Sign*(0.01),0.00});
-//    AnyDrawNode drw ={RGB={1,0,0};ScaleXYZ={1,1,1}*0.005;};
-  };
-  AnyRefNode ControlNode1_ts = {sRel= ...Seg.Scapula.Scale({-0.094471940+0.005, ...Sign*(-0.034+0.01), 0.01015005});
-//    AnyDrawNode drw ={RGB={1,0,0};ScaleXYZ={1,1,1}*0.005;};
-};
-  AnyRefNode ControlNode2_ts = {sRel= ...Seg.Scapula.Scale({-0.1319359, ...Sign*(-0.0667+0.01), 0.008610081}); 
-//    AnyDrawNode drw={RGB={1,0,0};ScaleXYZ={1,1,1}*0.005;};
-};
-  AnyRefNode ControlNode3_ts = {sRel= .ControlNode0_ts.sRel+...Seg.Scapula.Scale({0,...Sign*(0.01),0.015}); 
-//    AnyDrawNode drw={RGB={1,0,0};ScaleXYZ={1,1,1}*0.005;};
-  };
-  
-  
-  
-  AnyRefNode Ellipsoid_ts ={
-    
-    sRel=.ControlNode0_ts.sRel;
-    AnySurfEllipsoid  ellipsoid ={ 
-      
-      AnyVar r1 = vnorm(..ControlNode0_ts.sRel-..ControlNode1_ts.sRel);
-      AnyVar r2 = vnorm(..ControlNode0_ts.sRel-..ControlNode2_ts.sRel);
-      AnyVar r3 = vnorm(..ControlNode0_ts.sRel-..ControlNode3_ts.sRel);
-   
-      Radius ={r1,r2,r3};
-//      AnyDrawParamSurf drw ={};
-    };
-  };  
-};
-
-
-#endif
 
 
 #if BM_ARM_THORAX_SCAPULA_CONTACT == _ELLIPSOID_CONTACT_
@@ -370,7 +292,7 @@ scapula ={
 //measure needs to always exist 
 AnyKinPointSurface  ScapulaTSThoraxMeasure = {
     AnyRefFrame &r1 = ..Seg.Scapula.ScapulaSlidingTS;
-    AnySurface &s1 = ..ShoulderRef.ScapulaEllipsoidOrigin.Elipse;
+    AnySurface &s1 = ..ThoraxSegRef.ScapulaContactSurface.ScapulaEllipsoidOrigin.Elipse;
   };
 
 #endif

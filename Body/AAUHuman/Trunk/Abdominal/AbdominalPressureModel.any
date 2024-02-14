@@ -1,0 +1,1049 @@
+
+#define PELVIC_LAYER_MOVES
+#define RECTUS_MUSCLE_LINE_CONTROL
+
+/// The abdominal model consists of a series of layers with individual volumes and pressure muscles
+AnyFolder Abdominal={  
+  
+  
+  
+  AnyFolder Parameters ={
+    AnyVar LayerMeasureSplineStart= 0.6;
+    AnyInt LayerMeasureAmount=6;
+  };
+  
+
+  
+//  #if BM_TRUNK_CAVITY_MODEL == _CAVITY_MODEL_VOLUME_
+  #include "..\NodesForThoracicCavity.any"
+  AnyKinVolumeCylMesh Volume = {
+    //      #include "<ANYBODY_PATH_MODELUTILS>/DrawSettings/KinematicVolume.any"
+    viewKinMeasure.RGB2 = {0.9, 0.7, 0.7};
+    CylMesh  = ({
+      
+      .Edges.Edge10,
+      .Edges.Edge9,
+      .Edges.Edge8
+    });     
+  };
+//  #endif
+  
+  /// The Diaphragm is part of the abdominal model and introduces it's own layers
+  /// It is also part of the Thoracic cavity model
+  AnyFolder Diaphragm = {
+    AnySeg CavitySegSuperoanterior = {
+      r0 = .CavitySeg.r0;
+      Axes0 = .CavitySeg.Axes0;
+      Mass = 1e-5;
+      Jii = {0,0,0};
+      AnyFolder &Data = ...Data.unscaled.ModelParameters.Abdominal;
+      AnyFunTransform3D &Scale = ...Scaling.GeometricalScaling.Lumbar.ScaleFunction;
+      AnyRefNode DiaphragmJntNode = {sRel = ...Layer_L1.BaseSegPosterior.DiaphragmJntNode.sRel;};
+      AnyRefNode DiaphragmPosteriorBreathNodeRotated = {sRel = ..CavitySeg.DiaphragmPosteriorBreathNodeRotated.sRel; ARel = ..CavitySeg.DiaphragmPosteriorBreathNodeRotated.ARel;};
+      AnyRefNode DiaphragmAnteriorBreathNodeRotated = {sRel = ..CavitySeg.DiaphragmAnteriorBreathNodeRotated.sRel; ARel = .DiaphragmPosteriorBreathNodeRotated.ARel;};
+      AnyRefNode DiaphragmRLateralNodeRotated = {sRel = ..CavitySeg.DiaphragmRLateralNodeRotated.sRel; ARel = .DiaphragmPosteriorBreathNodeRotated.ARel;};
+      AnyRefNode DiaphragmLLateralNodeRotated = {sRel = ..CavitySeg.DiaphragmLLateralNodeRotated.sRel; ARel = .DiaphragmPosteriorBreathNodeRotated.ARel;};
+      AnyRefNode Xiphoid_Diaphragm = {sRel = (.Layer_T10.Right.Xiphoid_Diaphragm.sRel + .Layer_T10.Left.Xiphoid_Diaphragm.sRel)/2;};      
+      AnyRefNode T11_MidNode = {sRel = ....Segments.T11Seg.MidPoint.sRel; ARel = ..CavitySeg.DiaphragmPosteriorBreathNodeRotated.ARel;};
+      
+      //layer at T10 level height
+      AnyRefNode Layer_T10 = {
+        AnyFolder &Data = .....Trunk.Data.unscaled.ModelParameters.Abdominal.Layer_Diaphragm1;
+        AnyFolder &SegRef = .....Trunk.Segments.T10Seg;
+        
+        #include "Diaphragm_Layer_Non_Flat.any"       
+        Right = {#include "DiaphragmWrappingSurfaces.any"};
+        Left = {#include "DiaphragmWrappingSurfaces.any"};
+        
+        /// Diaphraghm inertia is covered by the Thoracic cavity inertia - it
+        /// collects these points
+        AnyFolder InertiaPoints = {
+          
+          AnyVec3 point_center = mean(arrcat(points_right.points, points_left.points)');
+          
+          PointGenerator points_right(fun=SplineFun, scale_fun=..SegRef.Scale)={
+            amount = ......Data.unscaled.ModelParameters.Abdominal.DiscretizationAnterior;  
+            AnyFunInterpol &SplineFun = ..Data.AbdominalCavityPoints.Right.Parametric.Fun;
+          };
+          PointGenerator points_left(fun=SplineFun, scale_fun=..SegRef.Scale)={
+            amount = ......Data.unscaled.ModelParameters.Abdominal.DiscretizationAnterior;  
+            AnyFunInterpol &SplineFun = ..Data.AbdominalCavityPoints.Left.Parametric.Fun;
+          };
+        };
+      }; 
+      
+      AnyRefNodeGroup nodes = {
+        NodeAmount = (n_levels * (
+        (....Data.unscaled.ModelParameters.Abdominal.DiscretizationPosterior + ....Data.unscaled.ModelParameters.Abdominal.DiscretizationAnterior) * 2)) - 
+        (2 * (CAVITY_DISCRETIZATION )
+        ); 
+        NodeName = strval(iarr(1, NodeAmount), "_node%04i");
+        CreateMotionOutput = {
+          r=On;rDot=Off;rDDot=Off;Axes=Off;EulerPar=Off;omega=Off;omegaDot=Off;
+        };
+        NodeDefaults.CreateMotionOutput = {
+          r=On;rDot=Off;rDDot=Off;Axes=Off;EulerPar=Off;omega=Off;omegaDot=Off;
+        };
+        
+        Node_sRels = Obj2Num(ObjGetMember(segmental_refframes, "sRel")) + 0*.r0[0]; 
+//        #if BM_TRUNK_CAVITY_MODEL == _CAVITY_MODEL_VOLUME_
+        AnyInt n_levels = 4;
+        
+        /// We included cavity volumes of 8, 9, 10 levels, since the most superior postion of the diaphragm is approximately in the 8th level.
+        AnyObjectPtr segmental_refframes = unique(
+        take(...Volume.CylMesh, iarr(0, SizesOf(...Volume.CylMesh)[0]-1), 0)
+        //          take(...Volume.CylMesh, iarr(4,2), 0)
+        );
+        
+//        #else
+//        AnyInt n_levels = 4;
+//        AnyObjectPtr segmental_refframes = arrcat(
+//        ...Edges.Edge8,
+//        ...Edges.Edge9,
+//        ...Edges.Edge10,
+//        );
+//        #endif
+      }; 
+      
+    };
+    
+    AnySeg CavitySegSuperoposterior = {
+      r0 = .CavitySeg.r0;
+      Axes0 = .CavitySeg.Axes0;
+      Mass = 1e-5;
+      Jii = {0,0,0};
+      AnyFolder &Data = ...Data.unscaled.ModelParameters.Abdominal;
+      AnyFunTransform3D &Scale = ...Scaling.GeometricalScaling.Lumbar.ScaleFunction;
+      AnyRefNode T11_MidNode = {sRel = ....Segments.T11Seg.MidPoint.sRel; ARel = ..CavitySeg.DiaphragmPosteriorBreathNodeRotated.ARel;};
+      
+      //layer at T10 level height
+      AnyRefNode Layer_T10 = {
+        AnyFolder &Data = .....Trunk.Data.unscaled.ModelParameters.Abdominal.Layer_Diaphragm1;
+        AnyFolder &SegRef = .....Trunk.Segments.T10Seg;
+        
+        #include "Diaphragm_Layer_Non_Flat.any"       
+        Right = {#include "DiaphragmWrappingSurfaces.any"};
+        Left = {#include "DiaphragmWrappingSurfaces.any"};
+        
+      }; 
+    };
+    
+    AnySeg CavitySeg = {
+      r0 = {InitialPositionTransform.TransformationMatrix[0][3],InitialPositionTransform.TransformationMatrix[1][3],InitialPositionTransform.TransformationMatrix[2][3]};
+      Axes0 = {
+        {InitialPositionTransform.TransformationMatrix[0][0],InitialPositionTransform.TransformationMatrix[0][1],InitialPositionTransform.TransformationMatrix[0][2]},
+        {InitialPositionTransform.TransformationMatrix[1][0],InitialPositionTransform.TransformationMatrix[1][1],InitialPositionTransform.TransformationMatrix[1][2]},
+        {InitialPositionTransform.TransformationMatrix[2][0],InitialPositionTransform.TransformationMatrix[2][1],InitialPositionTransform.TransformationMatrix[2][2]}
+      };
+      Mass = 1e-5;
+      Jii = {0,0,0};
+      
+      AnyFunTransform3DLin2 InitialPositionTransform = {
+        Points0 = {
+          ....Segments.Left.R10Seg.ThoracicCavityNodes.nn09.sRel,
+          ....Segments.Left.R8Seg.ThoracicCavityNodes.nn09.sRel,
+          ....Segments.Left.R9Seg.ThoracicCavityNodes.nn09.sRel,
+          ....Segments.Right.R10Seg.ThoracicCavityNodes.nn09.sRel,
+          ....Segments.Right.R8Seg.ThoracicCavityNodes.nn09.sRel,
+          ....Segments.Right.R9Seg.ThoracicCavityNodes.nn09.sRel,
+          ....Segments.SternalBodySeg.ThoracicCavityNodes.Level10.Left.nn05.sRel,
+          ....Segments.SternalBodySeg.ThoracicCavityNodes.Level10.Right.nn05.sRel,
+          ....Segments.T10Seg.ThoracicCavityNodes.Level10.Left.nn01.sRel,
+          ....Segments.T8Seg.ThoracicCavityNodes.Level08.Left.nn01.sRel,
+          ....Segments.T9Seg.ThoracicCavityNodes.Level09.Left.nn01.sRel
+        };
+        Points1 = {
+          ....Segments.Left.R10Seg.r0 + (....Segments.Left.R10Seg.Axes0 * ....Segments.Left.R10Seg.ThoracicCavityNodes.nn09.sRel')',
+          ....Segments.Left.R8Seg.r0 + (....Segments.Left.R8Seg.Axes0 * ....Segments.Left.R8Seg.ThoracicCavityNodes.nn09.sRel')',
+          ....Segments.Left.R9Seg.r0 + (....Segments.Left.R9Seg.Axes0 * ....Segments.Left.R9Seg.ThoracicCavityNodes.nn09.sRel')',
+          ....Segments.Right.R10Seg.r0 + (....Segments.Right.R10Seg.Axes0 * ....Segments.Right.R10Seg.ThoracicCavityNodes.nn09.sRel')',
+          ....Segments.Right.R8Seg.r0 + (....Segments.Right.R8Seg.Axes0 * ....Segments.Right.R8Seg.ThoracicCavityNodes.nn09.sRel')',
+          ....Segments.Right.R9Seg.r0 + (....Segments.Right.R9Seg.Axes0 * ....Segments.Right.R9Seg.ThoracicCavityNodes.nn09.sRel')',
+          ....Segments.SternalBodySeg.r0 + (....Segments.SternalBodySeg.Axes0 * ....Segments.SternalBodySeg.ThoracicCavityNodes.Level10.Left.nn05.sRel')',
+          ....Segments.SternalBodySeg.r0 + (....Segments.SternalBodySeg.Axes0 * ....Segments.SternalBodySeg.ThoracicCavityNodes.Level10.Right.nn05.sRel')',
+          ....Segments.T10Seg.r0 + (....Segments.T10Seg.Axes0 * ....Segments.T10Seg.ThoracicCavityNodes.Level10.Left.nn01.sRel')',
+          ....Segments.T8Seg.r0 + (....Segments.T8Seg.Axes0 * ....Segments.T8Seg.ThoracicCavityNodes.Level08.Left.nn01.sRel')',
+          ....Segments.T9Seg.r0 + (....Segments.T9Seg.Axes0 * ....Segments.T9Seg.ThoracicCavityNodes.Level09.Left.nn01.sRel')'
+        };
+        
+        Mode = VTK_LANDMARK_RIGIDBODY;
+      };
+      
+      AnyFunTransform3D &Scale = .CavitySegSuperoanterior.Scale;
+      AnyRefNode DiaphragmJntNode = {sRel = ..CavitySegSuperoanterior.DiaphragmJntNode.sRel;};      
+      AnyRefNode DiaphragmPosteriorBreathNodeRotated = {sRel = ....Segments.T11Seg.MidPoint.sRel; ARel = RotMat (....Segments.T11Seg.MidPoint.sRel, ....Segments.T8Seg.MidPoint.sRel, ....Segments.SternalBodySeg.Xiphoid_DiaphragmNodeR.sRel) * RotMat (-pi/2,z) * RotMat (pi,y);};
+      AnyRefNode DiaphragmAnteriorBreathNodeRotated = {sRel = ....Segments.SternalBodySeg.Xiphoid_DiaphragmNodeR.sRel; ARel = .DiaphragmPosteriorBreathNodeRotated.ARel;};
+      AnyRefNode DiaphragmRLateralNodeRotated = {sRel = ....Segments.Right.R10Seg.MidNode.sRel; ARel = .DiaphragmPosteriorBreathNodeRotated.ARel;};
+      AnyRefNode DiaphragmLLateralNodeRotated = {sRel = ....Segments.Left.R10Seg.MidNode.sRel; ARel = .DiaphragmPosteriorBreathNodeRotated.ARel;};
+      AnyRefNode Xiphoid_Diaphragm = {sRel = ..CavitySegSuperoanterior.Xiphoid_Diaphragm.sRel;};      
+      
+      // This Layer curves upward towards the thoracic cavity
+      AnyRefNode Layer_T12 = {
+        AnyFolder &Data = .....Trunk.Data.unscaled.ModelParameters.Abdominal.Layer_Diaphragm3;
+        AnyFolder &SegRef = .....Trunk.Segments.T12Seg;
+        #include "Diaphragm_Layer_Non_Flat.any"
+      };
+      
+      AnyFolder InertiaObject = {  
+        AnyVec3 point_center = mean(arrcat(points_right.points, points_left.points)');
+        
+        PointGenerator points_right(fun=SplineFun, scale_fun=..Scale)={
+          amount = .....Data.unscaled.ModelParameters.Abdominal.DiscretizationAnterior;  
+          AnyFunInterpol &SplineFun = ....Layer_L1.Data.AbdominalCavityPoints.Right.Parametric.Fun;
+        };
+        PointGenerator points_left(fun=SplineFun, scale_fun=..Scale)={
+          amount = .....Data.unscaled.ModelParameters.Abdominal.DiscretizationAnterior;  
+          AnyFunInterpol &SplineFun = ....Layer_L1.Data.AbdominalCavityPoints.Left.Parametric.Fun;
+        };
+        
+      };
+      
+      AnyRefNode LayerConstraintNodes = {
+        AnyFolder LayerPoints = {
+          PointGenerator points_right(fun=SplineFun, scale_fun=...Scale)={
+            start=.....Parameters.LayerMeasureSplineStart;
+            amount = .....Parameters.LayerMeasureAmount;  
+            AnyFunInterpol &SplineFun = .....Layer_L1.Data.AbdominalCavityPoints.Right.Parametric.Fun;
+          };
+          PointGenerator points_left(fun=SplineFun, scale_fun=...Scale)={
+            start=.....Parameters.LayerMeasureSplineStart;
+            amount = .....Parameters.LayerMeasureAmount;  
+            AnyFunInterpol &SplineFun = .....Layer_L1.Data.AbdominalCavityPoints.Left.Parametric.Fun;
+          };
+        };
+        
+        AnyRefNodeGroup Nodes_Below_Layer ={
+          NodeAmount = ....Layer_L1.BaseSegAnterior.LayerConstraintNodes.Nodes_Above_Layer.NodeAmount; // number nodes in group
+          NodeName = strval(iarr(1, NodeAmount), "_node%04i");
+          Node_sRels =....Layer_L1.BaseSegAnterior.LayerConstraintNodes.Nodes_Above_Layer.Node_sRels; 
+          NodeDefaults.CreateMotionOutput.r = On;
+        };
+      };
+      
+      AnyRefNodeGroup nodes = {
+        NodeAmount = (n_levels * (
+        (....Data.unscaled.ModelParameters.Abdominal.DiscretizationPosterior + ....Data.unscaled.ModelParameters.Abdominal.DiscretizationAnterior) * 2)) - 
+        (2 * (CAVITY_DISCRETIZATION )
+        ); 
+        NodeName = strval(iarr(1, NodeAmount), "_node%04i");
+        CreateMotionOutput = {
+          r=On;rDot=Off;rDDot=Off;Axes=Off;EulerPar=Off;omega=Off;omegaDot=Off;
+        };
+        NodeDefaults.CreateMotionOutput = {
+          r=On;rDot=Off;rDDot=Off;Axes=Off;EulerPar=Off;omega=Off;omegaDot=Off;
+        };
+        
+        Node_sRels = Obj2Num(ObjGetMember(segmental_refframes, "sRel")) + 0*.r0[0]; 
+//        #if BM_TRUNK_CAVITY_MODEL == _CAVITY_MODEL_VOLUME_
+        AnyInt n_levels = 4;
+        
+        /// We included cavity volumes of 8, 9, 10 levels, since the most superior postion of the diaphragm is approximately in the 8th level.
+        AnyObjectPtr segmental_refframes = unique(
+        take(...Volume.CylMesh, iarr(0, SizesOf(...Volume.CylMesh)[0]-1), 0)
+        //          take(...Volume.CylMesh, iarr(4,2), 0)
+        );
+        
+//        #else
+//        AnyInt n_levels = 4;
+//        AnyObjectPtr segmental_refframes = arrcat(
+//        ...Edges.Edge8,
+//        ...Edges.Edge9,
+//        ...Edges.Edge10,
+//        );
+//        #endif
+      };  
+      
+    };
+    
+    AnySeg BaseSegInferior = {
+      r0 = .CavitySeg.r0;
+      Axes0 = .CavitySeg.Axes0;
+      Mass = 1e-5;
+      Jii = {0,0,0};
+      AnyFunTransform3D &Scale = .CavitySegSuperoanterior.Scale;
+      AnyRefNode DiaphragmJntNode = {sRel = ..CavitySegSuperoanterior.DiaphragmJntNode.sRel;};      
+      
+      // This Layercurves upward toward the thoracic cavity
+      AnyRefNode Layer_T12 = {
+        AnyFolder &Data = .....Trunk.Data.unscaled.ModelParameters.Abdominal.Layer_Diaphragm3;
+        AnyFolder &SegRef = .....Trunk.Segments.T12Seg;
+        #include "Diaphragm_Layer_Non_Flat.any"
+      };
+      
+      AnyRefNodeGroup nodes = {
+        NodeAmount = (n_levels * (
+        (....Data.unscaled.ModelParameters.Abdominal.DiscretizationPosterior + ....Data.unscaled.ModelParameters.Abdominal.DiscretizationAnterior) * 2)) - 
+        (2 * (CAVITY_DISCRETIZATION )
+        ); 
+        NodeName = strval(iarr(1, NodeAmount), "_node%04i");
+        CreateMotionOutput = {
+          r=On;rDot=Off;rDDot=Off;Axes=Off;EulerPar=Off;omega=Off;omegaDot=Off;
+        };
+        NodeDefaults.CreateMotionOutput = {
+          r=On;rDot=Off;rDDot=Off;Axes=Off;EulerPar=Off;omega=Off;omegaDot=Off;
+        };
+        
+        Node_sRels = Obj2Num(ObjGetMember(segmental_refframes, "sRel")) + 0*.r0[0]; 
+//        #if BM_TRUNK_CAVITY_MODEL == _CAVITY_MODEL_VOLUME_
+        AnyInt n_levels = 4;
+        
+        /// We included cavity volumes of 8, 9, 10 levels, since the most superior postion of the diaphragm is approximately in the 8th level.
+        AnyObjectPtr segmental_refframes = unique(
+        take(...Volume.CylMesh, iarr(0, SizesOf(...Volume.CylMesh)[0]-1), 0)
+        //          take(...Volume.CylMesh, iarr(4,2), 0)
+        );
+        
+//        #else
+//        AnyInt n_levels = 4;
+//        AnyObjectPtr segmental_refframes = arrcat(
+//        ...Edges.Edge8,
+//        ...Edges.Edge9,
+//        ...Edges.Edge10,
+//        );
+//        #endif
+      };
+    };
+    
+    
+    #if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_
+    AnyFolder& ThoraxSegRef = ...Trunk.ThoracicCavity.Inertia.segment;
+    #else
+    AnyFolder& ThoraxSegRef = ...Trunk.Segments.ThoraxSeg;
+    #endif
+    
+    AnyFolder &T11SegRef = ..Segments.T11Seg;        
+      T11SegRef = {
+        AnyRefNode CavitySegSuperoposteriorDriverNodeRotated = {sRel = .MidPoint.sRel; ARel = ....Abdominal.Diaphragm.CavitySeg.DiaphragmPosteriorBreathNodeRotated.ARel;};
+      };
+
+    ThoraxSegRef = {
+      AnyRefNode DiaphragmJntNode = {sRel = ....Abdominal.Layer_L1.BaseSegPosterior.VolumePoints.Center.sRel;};
+    };
+    
+    
+    AnyFolder Joints = {
+      /// The CavitySegSuperoanterior segment is carried by the diaphragm muscles
+      AnyKinEq CavitySegSuperoanteriorConstraint = {
+        AnyMatrix skew = reshape(
+        skewmat3d(..CavitySegSuperoanterior.nodes.Node_sRels), 
+        {3 * ..CavitySegSuperoanterior.nodes.NodeAmount,3}
+        )';
+        AnyKinMeasureLinComb measure = {
+          /// Multi-dimensional kinematic measure between the segment and trunk segments
+          AnyKinLinear lin = {
+            RefFrames = {
+              {ObjSelect(&....CavitySegSuperoanterior.nodes, "_node*")},
+              {....CavitySegSuperoanterior.nodes.segmental_refframes}
+            };
+            Ref = 0;
+          };
+          Coef = arrcat(repmat(...CavitySegSuperoanterior.nodes.NodeAmount, eye(3,3))', -.skew);
+          OutDim = 6;
+        };
+        MeasureOrganizer = {2};
+        Reaction.Type = {Off};
+      };
+      
+      AnyKinEq LateralRotDriver = {
+        AnyKinMeasureLinComb LateralRotMeasure = 
+        {
+          OutDim = 1;
+          Coef = {{0,1,0,0,-1,0}};
+          AnyKinLinear RightMeasure = {
+            Ref = 0;
+            AnyRefNode &Cavity = ....CavitySeg.DiaphragmRLateralNodeRotated;
+            AnyRefNode &BaseSuperior = ....CavitySegSuperoanterior.DiaphragmRLateralNodeRotated;
+          };
+          AnyKinLinear LeftMeasure = {
+            Ref = 0;
+            AnyRefNode &Cavity = ....CavitySeg.DiaphragmLLateralNodeRotated;
+            AnyRefNode &BaseSuperior = ....CavitySegSuperoanterior.DiaphragmLLateralNodeRotated;
+          };
+        };
+        Reaction.Type = {Off};
+      };
+      
+      AnyKinEq SagittalRotDriver = {
+        AnyKinMeasureLinComb SagittalRotMeasure = 
+        {
+          OutDim = 1;
+          Coef = {{0,1,0,0,-10,0}};
+          AnyKinLinear PosteriorMeasure = {
+            Ref = 0;
+            AnyRefNode &Cavity = ....CavitySeg.DiaphragmPosteriorBreathNodeRotated;
+            AnyRefNode &BaseSuperior = ....CavitySegSuperoanterior.DiaphragmPosteriorBreathNodeRotated;
+          };
+          AnyKinLinear AnteriorMeasure = {
+            Ref = 0;
+            AnyRefNode &Cavity = ....CavitySeg.DiaphragmAnteriorBreathNodeRotated;
+            AnyRefNode &BaseSuperior = ....CavitySegSuperoanterior.DiaphragmAnteriorBreathNodeRotated;
+          };
+        };
+        Reaction.Type = {Off};
+      };
+      
+      AnyKinEq AxialRotDriver = {
+        MeasureOrganizer = {1};
+        AnyKinRotational PosteriorMeasure = {
+          Type = RotAxesAngles;
+          AnyRefNode &Cavity = ...CavitySeg.DiaphragmPosteriorBreathNodeRotated;
+          AnyRefNode &BaseSuperior = ...CavitySegSuperoanterior.DiaphragmPosteriorBreathNodeRotated;
+        };
+        Reaction.Type = {Off};
+      };
+      
+      AnyKinEq AnteroPosteriorLinDriver = {
+        MeasureOrganizer = {0};
+        AnyKinLinear lin = {
+          Ref = 0;
+          AnyRefNode &ref1 = ...CavitySeg.Xiphoid_Diaphragm;
+          AnyRefNode &ref2 = ...CavitySegSuperoanterior.Xiphoid_Diaphragm;
+        };
+        Reaction.Type = {Off};
+      };
+      
+      /// Force connection between CavitySegSuperoanterior and CavitySeg 
+      AnyReacForce CavitySegSuperoanteriorKinetic = {
+        AnyKinLinear lin = {
+          Ref = 0;
+          AnyRefNode &ref1 = ...CavitySeg.DiaphragmJntNode;
+          AnyRefNode &ref2 = ...CavitySegSuperoanterior.DiaphragmJntNode;
+        };
+        AnyKinRotational rot = {
+          Type = RotAxesAngles;
+          AnyRefNode &ref1 = ...CavitySeg.DiaphragmJntNode;
+          AnyRefNode &ref2 = ...CavitySegSuperoanterior.DiaphragmJntNode;
+        };
+      };
+      
+      /// constrain the cavity segment to be place by ribcage segments, with all reactions on
+      AnyKinEq CavitySegConstraint = {  
+        AnyMatrix skew = reshape(
+        skewmat3d(..CavitySeg.nodes.Node_sRels), 
+        {3 * ..CavitySeg.nodes.NodeAmount,3}
+        )';
+        AnyKinMeasureLinComb measure = {
+          /// Multi-dimensional kinematic measure between the segment and trunk segments
+          AnyKinLinear lin = {
+            RefFrames = {
+              {ObjSelect(&....CavitySeg.nodes, "_node*")},
+              {....CavitySeg.nodes.segmental_refframes}
+            };
+            Ref = 0;
+          };
+          Coef = arrcat(repmat(...CavitySeg.nodes.NodeAmount, eye(3,3))', -.skew);
+          OutDim = 6;
+        };
+        
+        Reaction.Type = {On, Off, On, On, On, On};
+      };
+      /// constrain the BaseSegInferior to be placed by ribcage segments
+      /// it is also kept in place by inertia seg.. so all ribs etc.. with reactions on
+      AnyKinEq BaseSegInferiorConstraint = {  
+        AnyMatrix skew = reshape(
+        skewmat3d(..BaseSegInferior.nodes.Node_sRels), 
+        {3 * ..BaseSegInferior.nodes.NodeAmount,3}
+        )';
+        AnyKinMeasureLinComb measure = {
+          /// Multi-dimensional kinematic measure between the segment and trunk segments
+          AnyKinLinear lin = {
+            RefFrames = {
+              {ObjSelect(&....BaseSegInferior.nodes, "_node*")},
+              {....BaseSegInferior.nodes.segmental_refframes}
+            };
+            Ref = 0;
+          };
+          Coef = arrcat(repmat(...BaseSegInferior.nodes.NodeAmount, eye(3,3))', -.skew);
+          OutDim = 6;
+        };
+        
+        //    Reaction.Type = {On, On, On, On, On, On};
+      };
+      
+      // CavitySegSuperoposterior Constraints
+      AnyPrismaticJoint CavitySegSuperoposteriorConstraint1 = 
+      {
+        Axis = x;
+        Ref = 0;
+        AnyRefNode &ant = ..CavitySegSuperoanterior.Layer_T10.Right.DomeNodeMid;
+        AnyRefNode &pos = ..CavitySegSuperoposterior.Layer_T10.Right.DomeNodeMid; 
+        Constraints.Reaction.Type = {Off, Off, Off, Off, Off};
+      };
+      
+      AnyKinEqSimpleDriver CavitySegSuperoposterior_DriverX = {
+        AnyKinLinear lin = {
+          Ref = 0;
+          AnyRefNode &T11Seg = .....Segments.T11Seg.CavitySegSuperoposteriorDriverNodeRotated;      
+          AnyRefNode &CavitySegSuperoanterior = ...CavitySegSuperoposterior.T11_MidNode;    
+        };
+        MeasureOrganizer = {0};
+        DriverPos = {0};
+        DriverVel ??=  {0};
+        Reaction.Type = {Off};
+      }; 
+      
+      // Force connection for CavitySegSuperoposterior 
+      AnyReacForce CavitySegSuperoposteriorKinetic = {
+        AnyKinLinear lin = {
+          Ref = 0;
+          AnyRefNode &ant = ...CavitySegSuperoanterior.Layer_T10.Right.DomeNodeMid;
+          AnyRefNode &pos = ...CavitySegSuperoposterior.Layer_T10.Right.DomeNodeMid; 
+        };
+        AnyKinRotational rot = {
+          Type = RotAxesAngles;
+          AnyRefNode &ant = ...CavitySegSuperoanterior.Layer_T10.Right.DomeNodeMid;
+          AnyRefNode &pos = ...CavitySegSuperoposterior.Layer_T10.Right.DomeNodeMid; 
+        };
+      };
+      
+    }; 
+    
+    #if BM_TRUNK_DIAGPHRAM_FIXED_POSITION | (BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_RIGID_)
+    /// This degree of freedom controls volume of lungs and abdominal
+    AnyKinEqSimpleDriver DiaphragmPositionFixed = {
+      MeasureOrganizer = {1};
+      AnyKinMeasure &SagittalRotPosteriorMeasure = .Joints.SagittalRotDriver.SagittalRotMeasure.PosteriorMeasure;
+      DriverPos = {0.0};
+      DriverVel ??=  {0.07} *0;
+      Reaction.Type = {Off};  
+    };    
+    #endif
+  }; // end of Diaghragm
+  
+
+
+  AnyFolder Layer_L1 = {
+    
+    AnySeg &Segref = ...Trunk.Segments.L1Seg;
+    AnyFolder &Data =...Trunk.Data.unscaled.ModelParameters.Abdominal.Layer_L1;    
+    AnyRefFrame &MomentProvider = .Layer_L2.BaseSegPosterior;
+    BaseSegPosterior = {AnyFileVar OuterInertiaSTL = ...Data.unscaled.STL.FilenameLayer1Inertia;};
+    AnyFolder &layer_above = .Diaphragm.CavitySeg;//...Trunk.ThoracicCavity.Inertia.segment; //...Trunk.Segments.SternalBodySeg; //.Diaphragm.BaseSegAnterior;
+    AnyFolder &layer_below = .Layer_L2.BaseSegAnterior; 
+    AnyFolder &layer_above_inertia =  .Diaphragm.CavitySeg;
+    AnyFolder &layer_below_inertia = .Layer_L2.CavitySegAnterior; 
+    
+    #include "Layer.any"
+
+   AnyFolder LayerConstraints ={
+        AnyVar K_top =2;
+        AnyVar K_bot =1;
+
+      
+        #ifdef RECTUS_MUSCLE_LINE_CONTROL 
+          AnyIntArray   MeasureOrganizer = {3,4,5}; 
+        #else
+           AnyIntArray   MeasureOrganizer = {0,3,4,5}; 
+       #endif   
+          #include "LayerConstraints.any" 
+      };
+
+
+    BaseSegPosterior = {
+      AnyRefNode DiaphragmJntNode = {sRel = .VolumePoints.Center.sRel;};
+    };
+    
+    // The inertia of the diaphraghm is placed here at the L1 layer 
+    CavitySegAnterior = {
+      AnyInertiaSolid DiaphragmInertiaObject = {
+        
+        BodyMassCorrection massCorrection() = {};
+        
+        AnySurfTriCylMesh inertia_cyl = {
+          #include "<ANYBODY_PATH_MODELUTILS>/DrawSettings/InertiaSolids.any"
+          
+          AnyIntVar number_of_points = .....Data.unscaled.ModelParameters.Abdominal.DiscretizationAnterior*2;
+          
+          Points = arrcat(
+          {.....Abdominal.Layer_L1.CavitySegAnterior.InertiaObject.point_center},
+          arrcat(
+          .....Abdominal.Layer_L1.CavitySegAnterior.InertiaObject.points_right.points, 
+          flip(.....Abdominal.Layer_L1.CavitySegAnterior.InertiaObject.points_left.points,0)
+          ),
+          arrcat(
+          .....Abdominal.Diaphragm.CavitySegSuperoanterior.Layer_T10.InertiaPoints.points_right.points, 
+          flip(.....Abdominal.Diaphragm.CavitySegSuperoanterior.Layer_T10.InertiaPoints.points_left.points,0)
+          ),
+          {.....Abdominal.Diaphragm.CavitySegSuperoanterior.Layer_T10.InertiaPoints.point_center}
+          );
+          
+          CylMesh = {
+            repmat(number_of_points, 0),
+            iarr(1, 1, number_of_points),
+            iarr(number_of_points + 1, 1, number_of_points * 2),
+            repmat(number_of_points, (number_of_points * 2 + 1))
+          };         
+        };
+      };
+    };
+    
+  };
+  
+  
+  
+  AnyFolder Layer_L2 = {
+    AnySeg &Segref = ...Trunk.Segments.L2Seg;
+    AnyFolder &Data = ...Trunk.Data.unscaled.ModelParameters.Abdominal.Layer_L2;
+    AnyRefFrame &MomentProvider = .Layer_L3.BaseSegPosterior;
+    BaseSegPosterior = {AnyFileVar OuterInertiaSTL = ...Data.unscaled.STL.FilenameLayer2Inertia;};
+    AnyFolder &layer_above = .Layer_L1.BaseSegAnterior;
+    AnyFolder &layer_below = .Layer_L3.BaseSegAnterior;
+    AnyFolder &layer_above_inertia = .Layer_L1.CavitySegAnterior;
+    AnyFolder &layer_below_inertia = .Layer_L3.CavitySegAnterior; 
+    
+    
+    #include "Layer.any"    
+    AnyFolder LayerConstraints ={
+      AnyVar K_top =1;
+      AnyVar K_bot =1;
+     
+       
+        #ifdef RECTUS_MUSCLE_LINE_CONTROL 
+          AnyIntArray   MeasureOrganizer = {3,4,5}; 
+        #else
+           AnyIntArray   MeasureOrganizer = {0,3,4,5}; 
+       #endif
+       #include "LayerConstraints.any" 
+    };
+  };
+  
+  AnyFolder Layer_L3 = {
+    
+    AnySeg &Segref = ...Trunk.Segments.L3Seg;
+    AnyFolder &Data =...Trunk.Data.unscaled.ModelParameters.Abdominal.Layer_L3;
+    AnyRefFrame &MomentProvider = .Layer_L4.BaseSegPosterior;
+    BaseSegPosterior = {AnyFileVar OuterInertiaSTL = ...Data.unscaled.STL.FilenameLayer3Inertia;};
+    AnyFolder &layer_above = .Layer_L2.BaseSegAnterior;
+    AnyFolder &layer_below = .Layer_L4.BaseSegAnterior; 
+    AnyFolder &layer_above_inertia = .Layer_L2.CavitySegAnterior;
+    AnyFolder &layer_below_inertia = .Layer_L4.CavitySegAnterior; 
+    
+    #include "Layer.any"  
+    AnyFolder LayerConstraints ={
+      AnyVar K_top =1;
+      AnyVar K_bot =1;
+    
+        #ifdef RECTUS_MUSCLE_LINE_CONTROL 
+          AnyIntArray   MeasureOrganizer = {3,4,5}; 
+        #else
+           AnyIntArray   MeasureOrganizer = {0,3,4,5}; 
+       #endif
+      #include "LayerConstraints.any" 
+    };
+  };
+  
+  AnyFolder Layer_L4 = {
+    
+    AnySeg &Segref = ...Trunk.Segments.L4Seg;    
+    AnyFolder &Data =...Trunk.Data.unscaled.ModelParameters.Abdominal.Layer_L4;
+    AnyRefFrame &MomentProvider = .Layer_L5.BaseSegPosterior;
+    BaseSegPosterior = {AnyFileVar OuterInertiaSTL = ...Data.unscaled.STL.FilenameLayer4Inertia;};
+    AnyFolder &layer_above = .Layer_L3.BaseSegAnterior;
+    AnyFolder &layer_below = .Layer_L5.BaseSegAnterior; 
+    AnyFolder &layer_above_inertia = .Layer_L3.CavitySegAnterior;
+    AnyFolder &layer_below_inertia = .Layer_L5.CavitySegAnterior; 
+    #include "Layer.any"
+    AnyFolder LayerConstraints ={
+      AnyVar K_top =1;
+      AnyVar K_bot =1;
+    
+      
+        #ifdef RECTUS_MUSCLE_LINE_CONTROL 
+          AnyIntArray   MeasureOrganizer = {3,4,5}; 
+        #else
+           AnyIntArray   MeasureOrganizer = {0,3,4,5}; 
+       #endif
+       #include "LayerConstraints.any" 
+    };
+  };
+  
+  AnyFolder Layer_L5 = {
+    
+    AnySeg &Segref = ...Trunk.Segments.L5Seg;    
+    AnyFolder &Data =...Trunk.Data.unscaled.ModelParameters.Abdominal.Layer_L5;
+    AnyRefFrame &MomentProvider = .Layer_Pelvic4.LayerRef;
+    BaseSegPosterior = {AnyFileVar OuterInertiaSTL = ...Data.unscaled.STL.FilenameLayer5Inertia;};
+    AnyFolder &layer_above = .Layer_L4.BaseSegAnterior;
+    AnyFolder &layer_below = .Layer_Pelvic1.BaseSegAnterior;  
+    AnyFolder &layer_above_inertia = .Layer_L4.CavitySegAnterior;
+    AnyFolder &layer_below_inertia = .Layer_Pelvic1.CavitySegAnterior; 
+    #include "Layer.any"
+    AnyFolder LayerConstraints ={
+      AnyVar K_top =1;
+      AnyVar K_bot =1;
+   
+        #ifdef RECTUS_MUSCLE_LINE_CONTROL 
+          AnyIntArray   MeasureOrganizer = {3,4,5}; 
+        #else
+           AnyIntArray   MeasureOrganizer = {0,3,4,5}; 
+       #endif
+      #include "LayerConstraints.any" 
+    };
+  };
+  
+  #ifdef RECTUS_MUSCLE_LINE_CONTROL  
+  AnyFolder Layer_Constraints_RectusLine ={
+ 
+    AnySeg Dummy ={
+      AnyRefNode JntNode={
+        sRel = ....Segments.PelvisSeg.RA_1_R.sRel;
+        ARel =  RotMat (sRel, ....Segments.SternalBodySeg.RACP_CO6_2_mid.sRel, sRel+{0.1,0,0})* RotMat (-pi/2,z)*RotMat(pi,y);
+      };
+      Mass=0;Jii={0,0,0};
+      r0 = ...Segments.PelvisSeg.r0;
+      Axes0 = ...Segments.PelvisSeg.Axes0;
+    };
+    AnySphericalJoint Jnt ={
+      AnyRefNode &ref=  ...Segments.PelvisSeg.RA_1_R;
+      AnyRefNode &ref2=.Dummy.JntNode;
+    };
+    AnyReacForce Jnt_Rot_Reactions ={
+      AnySphericalJoint &ref=.Jnt;
+    };
+    AnyKinEq ConXZ ={
+      AnyKinMeasureOrg OrgXZ ={
+        MeasureOrganizer={0,2};
+        AnyKinLinear Lin={
+          Ref=0;
+          AnyRefNode &ref2 = ...Dummy.JntNode;
+          AnyRefNode &ref1 = .....Segments.SternalBodySeg.RACP_CO6_2_mid;
+        };
+      };
+      AnyKinMeasureOrg OrgY ={
+        MeasureOrganizer={1};
+        AnySphericalJoint &ref=..Jnt;
+      };
+      Reaction.Type={Off,Off,Off};
+      
+    };
+    
+  AnyFolder Layer1 ={
+    AnyRefFrame &LayerNode =..Layer_L1.BaseSegAnterior.mid;
+    AnyKinMeasure &MeasureLayer = ..Layer_L1.Joints.BaseSeg_Posterior_Anterior_constraint;
+    #include "PointToLineDist.any"
+  };
+  
+  AnyFolder Layer2 ={
+    AnyRefFrame &LayerNode = ..Layer_L2.BaseSegAnterior.mid;
+    AnyKinMeasure &MeasureLayer = ..Layer_L2.Joints.BaseSeg_Posterior_Anterior_constraint;
+    #include "PointToLineDist.any"
+  };
+  
+  
+  AnyFolder Layer3 ={
+    AnyRefFrame &LayerNode = ..Layer_L3.BaseSegAnterior.mid;
+    AnyKinMeasure &MeasureLayer = ..Layer_L3.Joints.BaseSeg_Posterior_Anterior_constraint;
+    #include "PointToLineDist.any"
+  };
+  
+  
+  AnyFolder Layer4 ={
+    AnyRefFrame &LayerNode = ..Layer_L4.BaseSegAnterior.mid;
+    AnyKinMeasure &MeasureLayer = ..Layer_L4.Joints.BaseSeg_Posterior_Anterior_constraint;
+    #include "PointToLineDist.any"
+  };
+  
+  
+  AnyFolder Layer5 ={
+    AnyRefFrame &LayerNode = ..Layer_L5.BaseSegAnterior.mid;
+    AnyKinMeasure &MeasureLayer =..Layer_L5.Joints.BaseSeg_Posterior_Anterior_constraint;
+    
+    #include "PointToLineDist.any"
+  };
+
+    
+AnyKinEqSimpleDriver LayerDrivers ={
+AnyKinMeasure &ref1=.Layer1.Norm;
+AnyKinMeasure &ref2=.Layer2.Norm;
+AnyKinMeasure &ref3=.Layer3.Norm;
+AnyKinMeasure &ref4=.Layer4.Norm;
+AnyKinMeasure &ref5=.Layer5.Norm;
+DriverPos ={0,0,0,0,0};
+DriverVel ={0,0,0,0,0};
+Reaction.Type ??={Off,Off,Off,Off,Off};
+}; 
+
+   
+  };
+
+  #endif
+  
+  
+  
+  
+  AnyFolder Layer_Pelvic1 = {
+    AnyVar K_top =1;
+    AnyVar K_bot =1;
+    
+    AnyFolder &Data = ...Trunk.Data.unscaled.ModelParameters.Abdominal.Layer_L5;
+    AnySeg &BaseSegPosterior = ...Trunk.Segments.PelvisSeg;
+    BaseSegPosterior = {
+      AnyRefNode Layer1 = {ARel = .AnatomicalFrameTrunk.ARel;};
+    };
+    AnyRefNode &LayerRef = BaseSegPosterior.Layer1;
+    #ifdef PELVIC_LAYER_MOVES
+    AnyFolder &layer_above = .Layer_L5;
+    AnyFolder &layer_below =  .Layer_Pelvic2; 
+    #endif
+    #include "Pelvic_Layer.any"
+    
+    BaseSegAnterior = {
+      
+      AnyFolder InertiaObject = {  
+        AnyVec3 point_center = mean(arrcat(points_right.points, points_left.points)');
+        
+        PointGenerator points_right(fun=SplineFun, scale_fun=...ScaleAndProjectToLayer)={
+          amount = .....Data.unscaled.ModelParameters.Abdominal.DiscretizationAnterior;  
+          AnyFunInterpol &SplineFun = ...Data.AbdominalCavityPoints.Right.Parametric.Fun;
+        };
+        PointGenerator points_left(fun=SplineFun, scale_fun=...ScaleAndProjectToLayer)={
+          amount = .....Data.unscaled.ModelParameters.Abdominal.DiscretizationAnterior;  
+          AnyFunInterpol &SplineFun = ...Data.AbdominalCavityPoints.Left.Parametric.Fun;
+        };
+      };
+      
+      
+    };
+    AnySeg &CavitySegAnterior = BaseSegAnterior;
+  };
+  
+  AnyFolder Layer_Pelvic2 = {
+    AnyVar K_top =1;
+    AnyVar K_bot =0.5;
+    AnyFolder &Data =...Trunk.Data.unscaled.ModelParameters.Abdominal.Layer_Pelvic2;
+    AnySeg &BaseSegPosterior = ...Trunk.Segments.PelvisSeg;   
+    BaseSegPosterior ={
+      AnyRefNode Layer2 = {ARel = .AnatomicalFrameTrunk.ARel;};
+    };
+    AnyRefNode &LayerRef = BaseSegPosterior.Layer2;
+    #ifdef PELVIC_LAYER_MOVES
+    AnyFolder &layer_above = .Layer_Pelvic1;
+    AnyFolder &layer_below =  .Layer_Pelvic3; 
+    #endif
+    #include "Pelvic_Layer.any"
+  };
+  
+  AnyFolder Layer_Pelvic3 = {
+    AnyVar K_top =1;
+    AnyVar K_bot =0.5;
+    AnyFolder &Data =...Trunk.Data.unscaled.ModelParameters.Abdominal.Layer_Pelvic3;
+    AnySeg &BaseSegPosterior = ...Trunk.Segments.PelvisSeg;  
+    BaseSegPosterior ={
+      AnyRefNode Layer3 = {ARel = .AnatomicalFrameTrunk.ARel;};
+    };
+    AnyRefNode &LayerRef = BaseSegPosterior.Layer3;
+    #ifdef PELVIC_LAYER_MOVES
+    AnyFolder &layer_above = .Layer_Pelvic2;
+    AnyFolder &layer_below =  .Layer_Pelvic4; 
+    #endif
+    #include "Pelvic_Layer.any"
+  };
+  
+  AnyFolder Layer_Pelvic4 ={
+    AnyVar K_top =1;
+    AnyVar K_bot =0.5;
+    
+    AnyFolder &Data = ...Trunk.Data.unscaled.ModelParameters.Abdominal.Layer_Pelvic4;
+    AnySeg &BaseSegPosterior = ...Trunk.Segments.PelvisSeg;
+    BaseSegPosterior ={
+      AnyRefNode Layer4 = {ARel = .AnatomicalFrameTrunk.ARel;};
+    };
+    AnyRefNode &LayerRef = BaseSegPosterior.Layer4;
+    #ifdef PELVIC_LAYER_MOVES
+    AnyFolder &layer_above = .Layer_Pelvic3;
+    AnyFolder &layer_below =  .Layer_Pelvic5; 
+    #endif
+    #include "Pelvic_Layer_Fixed.any"
+  };
+  
+  AnyFolder Layer_Pelvic5 = {
+    AnyVar K_top =1;
+    AnyVar K_bot =0.5;
+    AnyFolder &Data =...Trunk.Data.unscaled.ModelParameters.Abdominal.Layer_Pelvic5; 
+    AnySeg &BaseSegPosterior = ...Trunk.Segments.PelvisSeg; 
+    AnyFunTransform3D &Scale = BaseSegPosterior.Scale;
+    
+    BaseSegPosterior = {
+      AnyRefNode Layer5 = {
+        ARel = .AnatomicalFrameTrunk.ARel;
+        AnyRefNode Origin = {sRel = ..Scale(...Data.Origin);};
+        
+        CavityPoints VolumePoints(data=...Data.AbdominalCavityPoints, scale_fun=..Scale) = {
+          Right.points_generator = {
+            amount = .......Data.unscaled.ModelParameters.Abdominal.DiscretizationAnterior + .......Data.unscaled.ModelParameters.Abdominal.DiscretizationPosterior;
+          };
+          Left.points_generator = {
+            amount = .......Data.unscaled.ModelParameters.Abdominal.DiscretizationAnterior + .......Data.unscaled.ModelParameters.Abdominal.DiscretizationPosterior;
+          };
+          AnyRefNode Center = { 
+            sRel = mean({
+              .Right.points_generator.points[.Right.points_generator.amount - 1], 
+              .Left.points_generator.points[.Left.points_generator.amount - 1]}');
+          };
+        };
+      };
+      
+      AnyInertiaSolid PelvicCavityInertiaObject = {
+        
+        BodyMassCorrection massCorrection() = {};
+        
+        ARel = .AnatomicalFrameTrunk.ARel;
+        
+        AnySurfTriCylMesh inertia_cyl = {
+          #include "<ANYBODY_PATH_MODELUTILS>/DrawSettings/InertiaSolids.any"
+          
+          AnyIntVar num_points = .points_right.amount + .points_left.amount; 
+          Points = arrcat(
+          {.point_center},          
+          arrcat(.points_right.points, flip(.points_left.points, 0)),
+          (arrcat(
+          ....Layer_Pelvic1.CavitySegAnterior.InertiaObject.points_right.points, 
+          flip(....Layer_Pelvic1.CavitySegAnterior.InertiaObject.points_left.points, 0) 
+          ) + 
+          arrcat(
+          ....Layer_L5.CavitySegAnterior.InertiaObject.points_right.points, 
+          flip(....Layer_L5.CavitySegAnterior.InertiaObject.points_left.points, 0) 
+          )) / 2,
+          {((....Layer_Pelvic1.CavitySegAnterior.InertiaObject.point_center +
+            ....Layer_L5.CavitySegAnterior.InertiaObject.point_center) / 2)}
+          );
+          CylMesh = {
+            repmat(num_points, 0),
+            iarr(1, 1, num_points),
+            iarr(num_points + 1, 1, num_points * 2),
+            repmat(num_points, (num_points * 2 + 1))
+          };
+        };  
+      };
+      PelvicCavityInertiaObject = {  
+        AnyVec3 point_center = mean(arrcat(points_right.points, points_left.points)');
+        
+        PointGenerator points_right(fun=SplineFun, scale_fun=...Scale)={
+          amount = .....Data.unscaled.ModelParameters.Abdominal.DiscretizationAnterior;  
+          AnyFunInterpol &SplineFun = ...Data.AbdominalCavityPoints.Right.Parametric.Fun;
+        };
+        PointGenerator points_left(fun=SplineFun, scale_fun=...Scale)={
+          amount = .....Data.unscaled.ModelParameters.Abdominal.DiscretizationAnterior;  
+          AnyFunInterpol &SplineFun = ...Data.AbdominalCavityPoints.Left.Parametric.Fun;
+        };
+      };
+    };
+    
+    AnyObjectPtrArray FullEdge_Base = arrcat(
+    BaseSegPosterior.Layer5.VolumePoints.Right.NodePointers,
+    flip(BaseSegPosterior.Layer5.VolumePoints.Left.NodePointers)
+    );
+  };
+  
+  
+  #ifdef RECTUS_MUSCLE_LINE_CONTROL 
+  
+  AnyFolder Layer_Pelvic_Constraints_RectusLine ={
+    
+    AnySeg &Dummy=.Layer_Constraints_RectusLine.Dummy;
+    
+    AnyFolder Layer_Pelvic1 ={
+      AnyRefFrame &LayerNode = ..Layer_Pelvic1.BaseSegAnterior.mid;
+      AnyKinMeasureOrg MeasureLayer ={ MeasureOrganizer={0}; AnyKinMeasure &MeasureLayer = ...Layer_Pelvic1.PelvicLayer_BaseSegAnterior;};
+        #include "PointToLineDist.any"
+    };
+    
+    AnyFolder Layer_Pelvic2 ={
+      AnyRefFrame &LayerNode = ..Layer_Pelvic2.BaseSegAnterior.mid;
+      AnyKinMeasureOrg MeasureLayer ={ MeasureOrganizer={0}; AnyKinMeasure &MeasureLayer = ...Layer_Pelvic2.PelvicLayer_BaseSegAnterior;};
+       #include "PointToLineDist.any"
+    };
+    
+    AnyFolder Layer_Pelvic3 ={
+      AnyRefFrame &LayerNode = ..Layer_Pelvic3.BaseSegAnterior.mid;
+      AnyKinMeasureOrg MeasureLayer ={ MeasureOrganizer={0}; AnyKinMeasure &MeasureLayer = ...Layer_Pelvic3.PelvicLayer_BaseSegAnterior;};
+       #include "PointToLineDist.any"
+    };
+    
+    
+    AnyKinEqSimpleDriver LayerDrivers ={
+      AnyKinMeasure &ref1=.Layer_Pelvic1.Norm;
+      AnyKinMeasure &ref2=.Layer_Pelvic2.Norm;
+      AnyKinMeasure &ref3=.Layer_Pelvic3.Norm;
+      
+      DriverPos ={0,0,0};
+      DriverVel ={0,0,0};
+      Reaction.Type={On,On,On};  //we do not have muscles in the area yet so reactions need to be on...
+    }; 
+    
+    
+  };
+
+  
+  
+  
+  
+  #endif
+
+  
+  
+  
+  AnyFolder BetweenLayerReactions = {
+    
+    #if BM_TRUNK_EXPERIMENTAL_RECTUS_ABDOMINIS == ON
+//    // This ensures that the different abdominal layers are balanced when
+//    // rectus abdominal muscles is not implemented between the layers but
+//    // instead as a single muscle. 
+    AnyRecruitedActuator LayerMomentReactionsNonNegative = {
+      AnyKinMeasureOrg Measures = {
+//        AnyKinRotational ThoraxL1 = {
+//          AnyRefFrame& r0 = .....Segments.SternalBodySeg;
+//          AnyRefFrame& r1 = ....Layer_L1.BaseSegAnterior;
+//          Axis1 = x; Axis2 = y; Axis3 = z;
+//          Type = RotAxesAngles;
+//        };
+        AnyKinRotational L1L2 = {
+          AnyRefFrame& r0 = ....Layer_L1.BaseSegAnterior;
+          AnyRefFrame& r1 = ....Layer_L2.BaseSegAnterior;
+          Axis1 = x; Axis2 = y; Axis3 = z;
+          Type = RotAxesAngles;
+        };
+        AnyKinRotational L2L3 = {
+          AnyRefFrame& r0 = ....Layer_L2.BaseSegAnterior;
+          AnyRefFrame& r1 = ....Layer_L3.BaseSegAnterior;
+          Axis1 = x; Axis2 = y; Axis3 = z;
+          Type = RotAxesAngles;
+        };
+        AnyKinRotational L3L4 = {
+          AnyRefFrame& r0 = ....Layer_L3.BaseSegAnterior;
+          AnyRefFrame& r1 = ....Layer_L4.BaseSegAnterior;
+          Axis1 = x; Axis2 = y; Axis3 = z;
+          Type = RotAxesAngles;
+        };
+        AnyKinRotational L4L5 = {
+          AnyRefFrame& r0 = ....Layer_L4.BaseSegAnterior;
+          AnyRefFrame& r1 = ....Layer_L5.BaseSegAnterior;
+          Axis1 = x; Axis2 = y; Axis3 = z;
+          Type = RotAxesAngles;
+        };
+        MeasureOrganizer = {0,2,3,5,6,8,9,11}; //{0,2,3,5,6,8,9,11,12,14};
+        
+      }; 
+      Type = NonNegative;
+      Strength = 10;
+      SET_DEFAULT_ACTUATOR_VOLUME;
+    };
+    
+    AnyRecruitedActuator LayerMomentReactionsNonPositive = {
+      AnyKinMeasureOrg &Measures = .LayerMomentReactionsNonNegative.Measures;
+      Type = NonPositive;
+      Strength = 10;
+      SET_DEFAULT_ACTUATOR_VOLUME;
+    };
+    
+    #endif
+  }; // Constraints
+  
+  //in this file the layers defined are connected into separate volumes and pressure muscles are applied to the volumes.
+  #include "VolumesAndPressureMuscles.any"
+  
+  //code that creates forcemoment measures between discs to measure pressure CoP from volume above and below disc
+  //  #include "DisplayCoPBetweenDiscs.any"
+};
+
+

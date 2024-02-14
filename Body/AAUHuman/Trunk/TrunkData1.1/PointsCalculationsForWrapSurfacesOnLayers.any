@@ -1,0 +1,214 @@
+     
+
+
+
+
+AnyFunInterpol PointFun7 = {
+  T = farr(-0.0001, 1.0001, SizesOf(data_values)[0]);
+  Data = reshape(data_values, {SizesOf(data_values)[0], 3*SizesOf(data_values)[2]})';
+  Type = Bspline;
+  BsplineOrder = 5;
+ // Type = PiecewiseLinear;
+
+  AnyFloat indexes = .indexes;
+  
+  
+  // Since each interpol function for the Thoracic Cavity points can generate points for
+  // the vertebrate, layer and sternum part we cannot directly use the `Data` member of
+  // each function. Instead we construct an equal amount of data points with only the
+  // layer part of the Data.
+  AnyFloat data_values = {
+    layer00_points', 
+    layer01_points', 
+    layer02_points',
+    layer03_points',
+    layer04_points',
+    layer05_points', 
+    layer06_points', 
+  };
+  
+  /// Directional vectors for each layer - used to find points outside the layers
+  AnyFloat along_layer_directions = {
+    #if _LAYER_ == Layer_L1 
+    layer01_dir,layer01_dir,layer01_dir,layer01_dir,layer01_dir, layer01_dir,layer01_dir,layer01_dir,layer01_dir, layer01_dir,layer01_dir
+    #endif
+    #if _LAYER_ == Layer_L2 
+    layer02_dir,layer02_dir,layer02_dir,layer02_dir,layer02_dir,layer02_dir,layer02_dir,layer02_dir,layer02_dir,layer02_dir,layer02_dir
+    #endif
+    #if _LAYER_ == Layer_L3 
+    layer03_dir,layer03_dir,layer03_dir,layer03_dir,layer03_dir,layer03_dir,layer03_dir,layer03_dir,layer03_dir,layer03_dir,layer03_dir
+    #endif
+    #if _LAYER_ == Layer_L4 
+    layer04_dir,layer04_dir,layer04_dir,layer04_dir,layer04_dir,layer04_dir,layer04_dir,layer04_dir,layer04_dir,layer04_dir,layer04_dir
+    #endif
+    #if _LAYER_ == Layer_L5 
+    layer05_dir,layer05_dir,layer05_dir,layer05_dir,layer05_dir,layer05_dir,layer05_dir,layer05_dir,layer05_dir,layer05_dir,layer05_dir
+    #endif
+    
+  };
+  
+  
+  
+  // while constructing new points from the underlying interpol function we also create
+  // a set of pertubated directions. These directions are needed to find the direction
+  // that is pointing "inwards"
+  AnyFloat pertubation = 0.01;
+  AnyFloat SafetyTol_Front = 0.025;  //to avoid spline to "shoot" into left side... this may eventually create a flipped mesh around the center
+  AnyFloat SafetyTol_Back = 0.025;  //to avoid spline to "shoot" into left side... this may eventually create a flipped mesh around the center
+  
+  AnyFloat offset = reshape(repmat(.n_points,{0,0.03,0}),{.n_points,3});
+  
+  AnyFloat layer00_points = layer01_points+offset;
+  AnyFloat layer00_dir = layer01_dir;
+
+  
+  AnyFloat layer01_index = farr(
+  .......Abdominal.Layer_L1.AbdominalCavityPoints._SIDE_.Posterior_Spline_Start+ SafetyTol_Back,
+  (.......Abdominal.Layer_L1.AbdominalCavityPoints._SIDE_.Anterior_Spline_End-SafetyTol_Front-SafetyTol_Back - .......Abdominal.Layer_L1.AbdominalCavityPoints._SIDE_.Posterior_Spline_Start-pertubation) / (.n_points -1), 
+  .n_points
+  );
+  
+  
+  AnyFloat layer01_points = .......Abdominal.Layer_L1.AbdominalCavityPoints._SIDE_.Parametric.Fun(layer01_index);
+  AnyFloat layer01_dir = (.......Abdominal.Layer_L1.AbdominalCavityPoints._SIDE_.Parametric.Fun(layer01_index+pertubation) - layer01_points) / pertubation;
+  
+  
+  AnyFloat layer02_index = farr(
+  .......Abdominal.Layer_L2.AbdominalCavityPoints._SIDE_.Posterior_Spline_Start+ SafetyTol_Back,
+  (.......Abdominal.Layer_L2.AbdominalCavityPoints._SIDE_.Anterior_Spline_End-SafetyTol_Front-SafetyTol_Back - .......Abdominal.Layer_L2.AbdominalCavityPoints._SIDE_.Posterior_Spline_Start-pertubation) / (.n_points -1), 
+  .n_points
+  );
+  AnyFloat layer02_points = .......Abdominal.Layer_L2.AbdominalCavityPoints._SIDE_.Parametric.Fun(layer02_index);
+  AnyFloat layer02_dir = (.......Abdominal.Layer_L2.AbdominalCavityPoints._SIDE_.Parametric.Fun(layer02_index+pertubation) - layer02_points) / pertubation;
+  
+  AnyFloat layer03_index = farr(
+  .......Abdominal.Layer_L3.AbdominalCavityPoints._SIDE_.Posterior_Spline_Start+ SafetyTol_Back,
+  (.......Abdominal.Layer_L3.AbdominalCavityPoints._SIDE_.Anterior_Spline_End -SafetyTol_Front-SafetyTol_Back- .......Abdominal.Layer_L3.AbdominalCavityPoints._SIDE_.Posterior_Spline_Start-pertubation) / (.n_points -1), 
+  .n_points
+  );
+  AnyFloat layer03_points = .......Abdominal.Layer_L3.AbdominalCavityPoints._SIDE_.Parametric.Fun(layer03_index);
+  AnyFloat layer03_dir = (.......Abdominal.Layer_L3.AbdominalCavityPoints._SIDE_.Parametric.Fun(layer03_index+pertubation) - layer03_points) / pertubation;
+  
+  AnyFloat layer04_index = farr(
+  .......Abdominal.Layer_L4.AbdominalCavityPoints._SIDE_.Posterior_Spline_Start+ SafetyTol_Back,
+  (.......Abdominal.Layer_L4.AbdominalCavityPoints._SIDE_.Anterior_Spline_End -SafetyTol_Front-SafetyTol_Back- .......Abdominal.Layer_L4.AbdominalCavityPoints._SIDE_.Posterior_Spline_Start-pertubation) / (.n_points -1), 
+  .n_points
+  );
+  AnyFloat layer04_points = .......Abdominal.Layer_L4.AbdominalCavityPoints._SIDE_.Parametric.Fun(layer04_index);
+  AnyFloat layer04_dir = (.......Abdominal.Layer_L4.AbdominalCavityPoints._SIDE_.Parametric.Fun(layer04_index+pertubation) - layer04_points) / pertubation;
+  
+  AnyFloat layer05_index = farr(
+  .......Abdominal.Layer_L5.AbdominalCavityPoints._SIDE_.Posterior_Spline_Start+ SafetyTol_Back,
+  (.......Abdominal.Layer_L5.AbdominalCavityPoints._SIDE_.Anterior_Spline_End -SafetyTol_Front-SafetyTol_Back- .......Abdominal.Layer_L5.AbdominalCavityPoints._SIDE_.Posterior_Spline_Start-pertubation) / (.n_points -1), 
+  .n_points
+  );
+  AnyFloat layer05_points = .......Abdominal.Layer_L5.AbdominalCavityPoints._SIDE_.Parametric.Fun(layer05_index);
+  AnyFloat layer05_dir = (.......Abdominal.Layer_L5.AbdominalCavityPoints._SIDE_.Parametric.Fun(layer05_index+pertubation) - layer05_points) / pertubation;
+  
+  AnyFloat layer06_points = layer05_points-offset;
+  AnyFloat layer06_dir = layer05_dir;
+ 
+
+  
+}; 
+
+
+
+
+
+/// Function to find outer inertia points of each layer
+/// It uses a thickness together with the inner points
+AnyFunInterpol InnerPointFun = {
+  
+  AnyFloat pertubation = 0.01;
+  
+  
+  
+    
+  AnyFloat up_vectors = {
+    (.points[0] - .points[1]),
+    (.points[1] - .points[2]),
+    (.points[2] - .points[3]),
+    (.points[3] - .points[4]),
+    (.points[4] - .points[5]),
+    (.points[5] - .points[6]),
+    (.points[6] - .points[7]),
+    (.points[7] - .points[8]),
+    (.points[8] - .points[9]),
+    (.points[9] - .points[10]),
+    (.points[9] - .points[10])
+  };
+  
+ 
+
+
+  
+  T =  .indexes;
+  Data = reshape(data_values, {SizesOf(data_values)[0], 3*SizesOf(data_values)[1]})';
+  
+  
+ AnyFloat data_values = ( transpose(reshape(.PointFun7(.indexes)', {3, .n_points, NumElemOf(T)})) +   thickness_matrix);
+  
+ //AnyFloat data_values = ( transpose(reshape(.PointFun(T)', {3, SizesOf(.PointFun.data_values)[2], NumElemOf(T)})) +   thickness_matrix);
+  
+  
+  Type = Bspline;
+  BsplineOrder = 4; 
+ //   Type = PiecewiseLinear;
+
+  // vectors pointing from below towards above
+  // AnyFloat up_vectors = (..._SIDE_.points_below - ..._SIDE_.points_above) / 0.5;
+  
+  // Find the out direction
+  //AnyFloat out_vectors = cross(up_vectors, .PointFun.along_layer_directions);
+  AnyFloat out_vectors = cross(up_vectors, .PointFun7.along_layer_directions);
+  
+
+  /// Here we compute the cross product of the two directions going along the layers and up
+  /// this provides us the direction pointing directly out away from the layers. 
+  /// we use repmat and transpose to make the tensor match the tensor of out vectors
+  AnyFloat out_vectors_t = transpose(
+  transpose(
+  reshape(
+  repmat(3, vnorm(cross(up_vectors, .PointFun7.along_layer_directions))), 
+  //repmat(3, vnorm(cross(up_vectors, .PointFun.along_layer_directions))), 
+  {3, .n_layers, .n_points})
+  ),
+  {1,0,2}
+  );
+  
+  /// We construct a matrix of thickness vectors based on the unit vectors of the out
+  /// direction vectors multiplied by a fixed thickness
+  AnyFloat thickness_array ??= .thickness_array; ///< thickness of outer inertia 'box'
+  
+ 
+  
+  AnyFloat thickness_matrix_0 = mult(mult(out_vectors, 1 / out_vectors_t)[0] , thickness_array[0]);
+  AnyFloat thickness_matrix_1 = mult(mult(out_vectors, 1 / out_vectors_t)[1] , thickness_array[1]);
+  AnyFloat thickness_matrix_2 = mult(mult(out_vectors, 1 / out_vectors_t)[2] , thickness_array[2]);
+  AnyFloat thickness_matrix_3 = mult(mult(out_vectors, 1 / out_vectors_t)[3] , thickness_array[3]);
+  AnyFloat thickness_matrix_4 = mult(mult(out_vectors, 1 / out_vectors_t)[4] , thickness_array[4]);
+  AnyFloat thickness_matrix_5 = mult(mult(out_vectors, 1 / out_vectors_t)[5] , thickness_array[5]);
+  AnyFloat thickness_matrix_6 = mult(mult(out_vectors, 1 / out_vectors_t)[6] , thickness_array[6]);
+  AnyFloat thickness_matrix_7 = mult(mult(out_vectors, 1 / out_vectors_t)[7] , thickness_array[7]);
+  AnyFloat thickness_matrix_8 = mult(mult(out_vectors, 1 / out_vectors_t)[8] , thickness_array[8]);
+  AnyFloat thickness_matrix_9 = mult(mult(out_vectors, 1 / out_vectors_t)[9] , thickness_array[9]);
+  AnyFloat thickness_matrix_10= mult(mult(out_vectors, 1 / out_vectors_t)[10], thickness_array[10]);
+  
+  AnyFloat thickness_matrix = { 
+    thickness_matrix_0,
+    thickness_matrix_1, 
+    thickness_matrix_2,
+    thickness_matrix_3,
+    thickness_matrix_4,
+    thickness_matrix_5, 
+    thickness_matrix_6,
+    thickness_matrix_7,
+    thickness_matrix_8,
+    thickness_matrix_9, 
+    thickness_matrix_10
+  };
+  
+  
+  
+};

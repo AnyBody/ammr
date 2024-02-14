@@ -3,6 +3,69 @@
 % A rendered version of the CHANGELOG is avaible here:
 %    https://anyscript.org/ammr/beta/changelog.html
 
+(ammr-4.0-changelog)=
+
+## AMMR 4.0 beta
+
+:::{warning} 
+The default pelvis model used in all models have changed. The pelvis morphology now comes from trunk pelivs. The toplogy remain unchanged as the leg model pelvis is morphed to match the Trunk. See below how to control this behaviour.
+:::
+
+**Fixed:**
+
+* Fixed the inclusion of the buckle segmental masses in the calculation of the TotalBodyMass variable.
+
+**Added:**
+
+* A new detailed thoracic model was addded. This model consists of the thoracic vertebral column and the
+  ribcage, including individual ribs and a two part sternum. The many segments interconnected by joints
+  replicates the physiological connection and load transfer mechanisms.
+
+  The detailed thoracic model can be enabled with the switch {bm_statement}`BM_TRUNK_THORACIC_MODEL`: 
+
+  ```
+  #define BM_TRUNK_THORACIC_MODEL _THORACIC_MODEL_FLEXIBLE_
+  ```
+
+  :::{note} The detailed thoracic model is not enabled by default. It adds many more segments to the body model so 
+  only use this new model if you need the added complexity. 
+  :::
+
+  The model is based on the work of Ignasiak, D (2016) and Shayestehpour (2023). See the {ref}`documentaiton page <thoracic-model>` for more info. 
+
+* A new abdmoninal model was added to replace the old 'buckle' model. 
+  I uses a new kinematic volume measure from AnyBody 7.5 to model the abdominal pressure 
+  and includes new oblique, rectus and tranversus muscles. The new abdominal model is 
+  more robust and allows a bigger range of motion of the trunk. See the {ref}`documentaiton page <thoracic-model>` 
+  for the thoracic model for more info. 
+
+  It is possible to revert ot the old buckle implmenation with switch {bm_statement}`_CAVITY_MODEL_BUCKLE_`. 
+
+* A new system for handling mass and inertia calculation for segments in the
+  Trunk. Now we utilize the new inertia classes derived from `AnyInertia`. The
+  new Abdominal and Thoracic model uses geometry based inertia. The old models
+  keep the standard mass and inertia properties. The system also controls how
+  mass is scaled when setting `Main.HumanModel.Anthropometrics.BodyMass`. It
+  will distribute the mass to the different segments based on whether they are
+  marked as being part of the distribution.
+
+
+
+**Changed:**
+
+* The default pelvis morphology is now the one from the trunk model, as oposed to the pelvis belonging
+  to whatever leg model has been selected. This was done to get a consistent
+  trunk model and considering all the recent improvements to the trunk. This option can be controlled with: 
+
+  ```
+  #define BM_LEG_TRUNK_INTERFACE _MORPH_LEG_TO_TRUNK_
+  ```
+
+  In practice, this means that the morphology of the leg pelvis is moprhed to match the Trunk pelvis.
+  Using `_MORPH_TRUNK_TO_LEG_` instead will revert to the old behaviour. 
+
+
+
 
 (ammr-3.0-changelog)=
 ## AMMR 3.0 (2024-02-13)
@@ -74,9 +137,9 @@ achieve same marker position and joint angle output.
 
 * Segments in trunk model (lumbar, thoracic and cervical) now explicitly define
   a `ScalingNode` node indicating coordinate system for segment scaling.
+* When using the `_THORACIC_MODEL_FLEXIBLE_` The sternum mass is now distributed over the
+  the sternum segments.
 
-* Improved error message when MoCap markers in marker protocol are missing from
-  C3D file.
 
 * Add an option to override the default kinematic joint limits in the MoCap
   framework
@@ -169,6 +232,11 @@ achieve same marker position and joint angle output.
 
 * Resolved inconsistencies in arm muscle parameters. The same underlying parameters
   are now used for both simple and 3-element muscle models.
+* MoCap: The marker driver class template now adds a "*_Marker" postfix to the reference nodes in creates on the models. 
+  This prevents name conflicts when adding a markers with the same name as a reference frame/node already in the model. 
+
+* A new `AnatomicalFrameTrunk` reference frame has been added to the pelvis segment. The frame is
+  consistent with the anatomical frames in the rest of the trunk model. Also, all joint angles in relative to the pelvis segment now uses this frame. This implies that the neutral position of the model is identical to the neutral position of the trunk dataset. 
 
 * MoCap marker protocols: Users must now explicitly specify a coordinate system
   relative to which markers are placed on the segment using the 
@@ -447,6 +515,17 @@ The `HumeroUlnarJoint` is the elbow flexion extension, and together
 * A few previously renamed nodes in pelvis were added back to improve backwards
   compatibility when loading old seating models. 
 
+
+**Changed:**
+
+* The trunk segment folders was combined to one `Segments` folder. This might require
+  updating references to the trunk segments in user defined models.
+
+**Added:**
+
+* The complete set of trunk segments was added to the trunk segment folder regardless of
+  rigid or flexible trunk configuration. This ensures that all segments are present in the
+  trunk segment folder. no matter what the configuration is.
 
 ## AMMR 2.4 (2022-04-28)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.6471999.svg)](https://doi.org/10.5281/zenodo.6471999) [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-7.4.0-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-7-4-0-8782_x64/)

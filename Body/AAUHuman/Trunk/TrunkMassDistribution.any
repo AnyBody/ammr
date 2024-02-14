@@ -1,0 +1,53 @@
+AnyFolder MassDistribution = {
+
+  // Search for all inertia objects
+  AnyObjectPtrArray inertia_objects = ObjSearchRecursive("...Trunk", "*", "AnyInertia");
+  
+  // Debug code to find segments without inertia objects
+   AnyObjectPtrArray trunk_segs = ObjSearchRecursive("...Trunk", "*", "AnySeg");
+   AnyObjectPtrArray inertia_parent_segs = unique(ObjGetParent(inertia_objects));
+   AnyObjectPtrArray seg_with_no_inertia = set_difference(trunk_segs, inertia_parent_segs);
+
+  // DesignVar is needed to overcome work item #2019
+  AnyFloat volumes = Obj2Num(DesignVar(ObjGetMember(inertia_objects, "Volume")));
+
+  AnyFloat densities = (
+    Obj2Num(ObjGetMember(ObjGetMember(inertia_objects, "massCorrection"),"DensityTheoretical"))
+  );
+  AnyFloat enable_mass_corr = (
+    Obj2Num(ObjGetMember(ObjGetMember(inertia_objects, "massCorrection"), "enableMassCorrection")) 
+  );
+
+  /// Calculated mass of all geometrical shapes (inertia objects) before
+  /// correction to match the required mass 
+  AnyFloat calculated_mass = volumes * densities'; 
+  
+  /// trunk mass we aim to hit after correction 
+  AnyFloat required_mass = ( 
+    ....Anthropometrics.SegmentMasses.Lumbar +
+    ....Anthropometrics.SegmentMasses.Thorax +
+    ....Anthropometrics.SegmentMasses.Pelvis +
+    ....Anthropometrics.SegmentMasses.Head 
+  );
+  
+  AnyFloat mass_diff_before_corr = required_mass - calculated_mass;
+
+  #if BM_SCALING == _SCALING_NONE_
+    /// When scaling is set to none we do not scale the masses either - standard parameter masses will be applied
+    AnyFloat mass_scale = 1.0;
+  #else
+    /// the scale factor is calculated based on the difference between 
+    /// the mass of the geometrical objects (inertia_objects) before correction
+    /// and the required_mass set from the Anthropometrics folder
+    /// we use the enableMassCorrection switch to only apply the scaling to desired objects
+    AnyFloat mass_scale = (
+      (required_mass - (volumes * mult(densities, not(enable_mass_corr))')) / 
+      (volumes * mult(densities, enable_mass_corr)')
+    );
+  #endif
+  // mass after applying mass_scale
+  AnyFloat corrected_mass = sum(Obj2Num(DesignVar(ObjGetMember(inertia_objects, "Mass"))));
+  
+  AnyFloat mass_diff_after_corr = required_mass - corrected_mass;
+  AnyInt test_trunk_mass = warn(ltfun(abs(mass_diff_after_corr), 1e-8), "Trunk mass is not equal to input mass from Anthropometrics folder");
+};

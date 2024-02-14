@@ -1,0 +1,79 @@
+// Actuators/Reactions for 1st to 10th ribs
+#ifndef FLOATING_RIBEND_ACTUATOR
+
+#if BM_TRUNK_MUSCLES == ON & (BM_TRUNK_EXPERIMENTAL_RIBCAGE_REACTION == _RIBCAGE_CC_ACTUATORS_ | _RIBCAGE_CC_ZACTUATORS_STERNUMREACTION_)
+AnyRecruitedActuator CostoChondralReactionForce = {
+  AnyIntVar RibIndex ??= .RotationConstraint.RibIndex; ///< Define which rib we are constructing for
+  
+  AnyKinMeasure &PositiveDirection = .RotationConstraint.Measures.CostoChondralAligned; 
+  AnyKinMeasure &NegativeDirection = .RotationConstraint.Measures.CostoChondralAligned; 
+  
+  Type = {
+    #if _LEFT_RIGHT_ == Right
+    NonNegative, NonNegative, NonNegative,
+    NonPositive, NonPositive, NonPositive
+    #else
+    NonNegative, NonNegative, NonPositive,
+    NonPositive, NonPositive, NonNegative
+    #endif
+  };
+  
+  #if BM_TRUNK_MUSCLES == ON & (BM_TRUNK_EXPERIMENTAL_RIBCAGE_REACTION == _RIBCAGE_CC_ACTUATORS_) 
+  Strength = .....MuscleModels.StrengthScaleSpine * .....Data.unscaled.ModelParameters.AllRibs.CostoCartilage.ReactionForceStrength[ RibIndex -1 ];   
+  #endif                            
+  #if BM_TRUNK_MUSCLES == ON & (BM_TRUNK_EXPERIMENTAL_RIBCAGE_REACTION == _RIBCAGE_CC_ZACTUATORS_STERNUMREACTION_)
+  Strength = .....MuscleModels.StrengthScaleSpine * {0,0,.....Data.unscaled.ModelParameters.AllRibs.CostoCartilage.ReactionForceStrength[ RibIndex -1 ][2],
+                                                     0,0,.....Data.unscaled.ModelParameters.AllRibs.CostoCartilage.ReactionForceStrength[ RibIndex -1 ][5]};
+  #endif
+
+  Volume = 0.5 * ( mean( Obj2Num(DesignVar(ObjGetMember(ObjSearchRecursive(".....Muscles.Right.ExternalInterCostalis", "*", "AnyMuscleModel"), "Vol0"))) )
+  + mean( Obj2Num(DesignVar(ObjGetMember(ObjSearchRecursive(".....Muscles.Right.InternalInterCostalis", "*", "AnyMuscleModel"), "Vol0"))) )
+  + mean( Obj2Num(DesignVar(ObjGetMember(ObjSearchRecursive(".....Muscles.Right.InnermostInterCostalis", "*", "AnyMuscleModel"), "Vol0"))) )
+  + mean( Obj2Num(DesignVar(ObjGetMember(ObjSearchRecursive(".....MuscleModels.Right.TransversusThoracis", "*", "AnyMuscleModel"), "Vol0"))) )
+  + mean( Obj2Num(DesignVar(ObjGetMember(ObjSearchRecursive(".....Muscles.Left.ExternalInterCostalis", "*", "AnyMuscleModel"), "Vol0"))) )
+  + mean( Obj2Num(DesignVar(ObjGetMember(ObjSearchRecursive(".....Muscles.Left.InternalInterCostalis", "*", "AnyMuscleModel"), "Vol0"))) )
+  + mean( Obj2Num(DesignVar(ObjGetMember(ObjSearchRecursive(".....Muscles.Left.InnermostInterCostalis", "*", "AnyMuscleModel"), "Vol0"))) )
+  + mean( Obj2Num(DesignVar(ObjGetMember(ObjSearchRecursive(".....MuscleModels.Left.TransversusThoracis", "*", "AnyMuscleModel"), "Vol0"))) ) );
+}; // The volume is calculatedon the average of right and left side: Volume = mean(InternalIntercostalis_Vol)+mean(ExternalIntercostalis_Vol)+mean(TransversusThoracis_Vol)
+#endif
+
+#if BM_TRUNK_MUSCLES == ON & (BM_TRUNK_EXPERIMENTAL_RIBCAGE_REACTION == _RIBCAGE_CC_REACTION_)
+AnyReacForce ReactionCC_Z = {Type = {Off, Off, On}; AnyKinMeasure &CCAligned = .RotationConstraint.Measures.CostoChondralAligned;};
+#endif
+
+#endif
+
+
+
+// Actuators for floating ribs
+#ifdef FLOATING_RIBEND_ACTUATOR
+
+#if BM_TRUNK_MUSCLES == ON & (BM_TRUNK_EXPERIMENTAL_FLOATINGRIBS_KINETICS == _FLOATING_RIBEND_KINETICS_ENDRIBS_)
+AnyRecruitedActuator EndRibReactionForce = {
+  AnyKinMeasureOrg Measure = 
+  {
+    AnyKinMeasure &PositiveDirection = ..RotationConstraint.Measures.TipAligned; 
+    AnyKinMeasure &NegativeDirection = ..RotationConstraint.Measures.TipAligned;      
+  };
+  Type = {
+    #if _LEFT_RIGHT_ == Right
+    NonNegative, NonNegative, NonNegative,
+    NonPositive, NonPositive, NonPositive
+    #else
+    NonNegative, NonNegative, NonPositive,
+    NonPositive, NonPositive, NonNegative
+    #endif
+  };
+  Strength = .....MuscleModels.StrengthScaleSpine * {0,0,.....Data.unscaled.ModelParameters.AllRibs.CostoCartilage.ReactionForceStrength[9][2],
+                                                     0,0,.....Data.unscaled.ModelParameters.AllRibs.CostoCartilage.ReactionForceStrength[9][2]};// Use ReactionForceStrength of the 10th level
+  
+  Volume = 0.5 * ( mean( Obj2Num(DesignVar(ObjGetMember(ObjSearchRecursive(".....Muscles.Right.ExternalInterCostalis", "*", "AnyMuscleModel"), "Vol0"))) )
+  + mean( Obj2Num(DesignVar(ObjGetMember(ObjSearchRecursive(".....Muscles.Right.InternalInterCostalis", "*", "AnyMuscleModel"), "Vol0"))) )
+  + mean( Obj2Num(DesignVar(ObjGetMember(ObjSearchRecursive(".....MuscleModels.Right.TransversusThoracis", "*", "AnyMuscleModel"), "Vol0"))) )
+  + mean( Obj2Num(DesignVar(ObjGetMember(ObjSearchRecursive(".....Muscles.Left.ExternalInterCostalis", "*", "AnyMuscleModel"), "Vol0"))) )
+  + mean( Obj2Num(DesignVar(ObjGetMember(ObjSearchRecursive(".....Muscles.Left.InternalInterCostalis", "*", "AnyMuscleModel"), "Vol0"))) )
+  + mean( Obj2Num(DesignVar(ObjGetMember(ObjSearchRecursive(".....MuscleModels.Left.TransversusThoracis", "*", "AnyMuscleModel"), "Vol0"))) ) );
+};
+#endif
+
+#endif

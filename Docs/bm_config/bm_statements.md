@@ -67,23 +67,6 @@ Path with the ScalingLaw used. Can be set to override the BM_SCALING parameter a
 ::::
 
 
-::::{dropdown} `BM_SCALING_STANDARDPARAM_EXTERIOR`
-:animate: fade-in-slide-down
-:margin: 0 0 3 3
-
-```{ammr:bm_statement} BM_SCALING_STANDARDPARAM_EXTERIOR
-
-Specifies if the standard parameters and anthropometrics parameters are given as external measurements. This defaults to OFF, which means that all segment length are joint-joint distances. This is set automatically based on the ``BM_SCALING`` parameter, but can be overridden if you implement your own scaling law and need to use external mesaurements.
-
-:Default: OFF
-:Example: `#define BM_SCALING_STANDARDPARAM_EXTERIOR OFF`
-:Options: {ammr:bm_constant}`ON`/{ammr:bm_constant}`OFF`
-
-
-```
-::::
-
-
 ::::{dropdown} `BM_CONFIG_MESSAGES`
 :animate: fade-in-slide-down
 :margin: 0 0 3 3
@@ -180,7 +163,6 @@ Parameter defining the Leg model used.
   - {any}`OFF` -> Switch OFF
   - {any}`_LEG_MODEL_TLEM2_` -> Switch to use leg model: "TLEM 2"
   - {any}`_LEG_MODEL_TLEM_` -> Switch to use leg model: "TLEM 2"
-  - {any}`_LEG_MODEL_TLEM21_` -> Switch to use leg model: "TLEM 2.1"
   - {any}`_LEG_MODEL_TLEM1_` -> Switch to use leg model: "TLEM 1"
   - {any}`_LEG_MODEL_LEG_` -> Switch to use leg model: "Leg"
 
@@ -210,7 +192,7 @@ Read only parameter to check if Leg Model is a variant of the TLEM model.
 
 ```{ammr:bm_statement} BM_ARM_THORAX_SCAPULA_CONTACT
 
-Parameter defining the contact type between Thorax and Scapula
+Parameter defining the contact type between Thorax and Scapula. This defaults to _MULTIPLE_POINT_CONTACT_ when full thoracic model is used.
 
 :Default: {any}`_ELLIPSOID_CONTACT_`
 :Example: `#define BM_ARM_THORAX_SCAPULA_CONTACT _ELLIPSOID_CONTACT_`
@@ -375,20 +357,128 @@ Index parameter to specify strength for trunk muscles.
 ::::
 
 
-::::{dropdown} `BM_TRUNK_THORACIC_FUTURE`
+::::{dropdown} `BM_TRUNK_EXPERIMENTAL_RECTUS_ABDOMINIS`
 :animate: fade-in-slide-down
 :margin: 0 0 3 3
 
-```{ammr:bm_statement} BM_TRUNK_THORACIC_FUTURE
+```{ammr:bm_statement} BM_TRUNK_EXPERIMENTAL_RECTUS_ABDOMINIS
 :deprecated:
 
-Internal swtich to enable some of the future detailed thoracic components in the model. This switch is for internal development use.
+Internal swtich to enable a different implementation of the Rectus Abdominis muscles.
 
-:Default: OFF
-:Example: `#define BM_TRUNK_THORACIC_FUTURE OFF`
+:Default: ON
+:Example: `#define BM_TRUNK_EXPERIMENTAL_RECTUS_ABDOMINIS ON`
 :Options:
   - {any}`OFF` -> Switch OFF
   - {any}`ON` -> Switch ON
+
+```
+::::
+
+
+::::{dropdown} `BM_TRUNK_EXPERIMENTAL_FLOATINGRIBS_KINETICS`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_TRUNK_EXPERIMENTAL_FLOATINGRIBS_KINETICS
+:deprecated:
+
+Internal swtich to enable a recruited actuators on the rib end of floating ribs (rib11, rib12).
+
+:Default: {any}`_FLOATING_RIBEND_KINETICS_ENDRIBS_`
+:Example: `#define BM_TRUNK_EXPERIMENTAL_FLOATINGRIBS_KINETICS _FLOATING_RIBEND_KINETICS_ENDRIBS_`
+:Options:
+  - {any}`_FLOATING_RIBEND_KINETICS_OFF_` ->  No recruited actuators to rib end of Floating ribs (rib11, rib12).
+  - {any}`_FLOATING_RIBEND_KINETICS_ENDRIBS_` ->  Add recruited actuators to rib end of Floating ribs (rib11, rib12).
+
+```
+::::
+
+
+::::{dropdown} `BM_TRUNK_EXPERIMENTAL_RIBCAGE_REACTION`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_TRUNK_EXPERIMENTAL_RIBCAGE_REACTION
+:deprecated:
+
+Internal swtich to change the ribcage reaction between three versions
+
+:Default: {any}`_RIBCAGE_CC_ZACTUATORS_STERNUMREACTION_`
+:Example: `#define BM_TRUNK_EXPERIMENTAL_RIBCAGE_REACTION _RIBCAGE_CC_ZACTUATORS_STERNUMREACTION_`
+:Options:
+  - {any}`_RIBCAGE_CC_ACTUATORS_` -> 3-direction Recruited actuators in CC (costochondral) joints.
+  - {any}`_RIBCAGE_CC_REACTION_` -> Z-direction reaction in CC (costochondral) joints, which is along the relavant rib, togehter with having the rib-sternum averaging constraints reaction ON
+  - {any}`_RIBCAGE_CC_ZACTUATORS_STERNUMREACTION_` -> Z-direction actuators in CC (costochondral) joints, which is along the relavant rib, togehter with having the rib-sternum averaging constraints reaction ON
+
+```
+::::
+
+
+::::{dropdown} `BM_TRUNK_THORACIC_MODEL`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_TRUNK_THORACIC_MODEL
+
+The type of thoracic/ribcage model used in the model.
+
+:Default: {any}`_THORACIC_MODEL_RIGID_`
+:Example: `#define BM_TRUNK_THORACIC_MODEL _THORACIC_MODEL_RIGID_`
+:Options:
+  - {any}`_THORACIC_MODEL_RIGID_` -> A completely rigid model of the thoracic spine and ribcage.
+  - {any}`_THORACIC_MODEL_FLEXIBLE_` -> A full model of the thorax and ribcage with a kinematically determinate set of drivers.
+  - {any}`_THORACIC_MODEL_USERDEFINED_` -> A full model of the thorax and ribcage where drivers/rythmns are specified by the users.
+
+```
+::::
+
+
+::::{dropdown} `BM_TRUNK_CAVITY_MODEL`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_TRUNK_CAVITY_MODEL
+
+The type of thoracic/ribcage model used in the model.
+
+:Default: {any}`_CAVITY_MODEL_VOLUME_`
+:Example: `#define BM_TRUNK_CAVITY_MODEL _CAVITY_MODEL_VOLUME_`
+:Options:
+  - {any}`_CAVITY_MODEL_BUCKLE_` -> The old buckle implementation of the abdominal pressure.
+  - {any}`_CAVITY_MODEL_VOLUME_` -> A volume measure implementation of the pressure in the abdominal cavity and lungs.
+
+```
+::::
+
+
+::::{dropdown} `BM_TRUNK_DIAGPHRAM_FIXED_POSITION`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_TRUNK_DIAGPHRAM_FIXED_POSITION
+
+Switch to control a fix on the diaphragm position. To simulate breathing this needs to be disabled, and replaced by an other driver on `Trunk.Abdominal.Diaphragm.Joints.AbdominalLayerBase_DiaphragmBase`.
+
+:Default: ON
+:Example: `#define BM_TRUNK_DIAGPHRAM_FIXED_POSITION ON`
+:Options: {ammr:bm_constant}`ON`/{ammr:bm_constant}`OFF`
+
+
+```
+::::
+
+
+::::{dropdown} `BM_TRUNK_THORACIC_STERNUM_TOPOLOGY`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_TRUNK_THORACIC_STERNUM_TOPOLOGY
+
+The topology of the sternum segment, i.e. number of segments into which sternum is split. Current options are 2, or 4 segments. 
+
+:Default: 2
+:Example: `#define BM_TRUNK_THORACIC_STERNUM_TOPOLOGY 2`
 
 ```
 ::::
@@ -407,25 +497,7 @@ Definition of the type of all spine muscles.
 :Options:
   - {any}`OFF` -> Switch OFF
   - {any}`_MUSCLES_SIMPLE_` -> Constant to use simple muscles
-
-```
-::::
-
-
-::::{dropdown} `BM_TRUNK_LUMBAR_MUSCLES`
-:animate: fade-in-slide-down
-:margin: 0 0 3 3
-
-```{ammr:bm_statement} BM_TRUNK_LUMBAR_MUSCLES
-
-Definition of the lumbar spine muscles type.
-
-:Default: {any}`BM_TRUNK_MUSCLES`
-:Example: `#define BM_TRUNK_LUMBAR_MUSCLES BM_TRUNK_MUSCLES`
-:Options:
-  - {any}`OFF` -> Switch OFF
-  - {any}`_MUSCLES_SIMPLE_` -> Constant to use simple muscles
-  - {any}`BM_TRUNK_MUSCLES` -> 
+  - {any}`_MUSCLES_3E_HILL_` -> Constant to use 3 element Hill-type muscle
 
 ```
 ::::
@@ -479,6 +551,26 @@ Definition of the lumbar spine disc model.
 
 :Default: {any}`BM_TRUNK_DISC_STIFNESS`
 :Example: `#define BM_TRUNK_LUMBAR_DISC_STIFNESS BM_TRUNK_DISC_STIFNESS`
+:Options:
+  - {any}`_DISC_STIFFNESS_NONE_` -> Constant to switch off disc spring in the spine
+  - {any}`_DISC_STIFFNESS_LINEAR_` -> Constant to switch linear disc spring on in the spine
+  - {any}`_DISC_STIFFNESS_NONLINEAR_` -> Constant to switch nonlinear disc spring on in the spine
+  - {any}`BM_TRUNK_DISC_STIFNESS` -> 
+
+```
+::::
+
+
+::::{dropdown} `BM_TRUNK_THORACIC_DISC_STIFNESS`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_TRUNK_THORACIC_DISC_STIFNESS
+
+Definition of the thoracic spine disc model.
+
+:Default: {any}`BM_TRUNK_DISC_STIFNESS`
+:Example: `#define BM_TRUNK_THORACIC_DISC_STIFNESS BM_TRUNK_DISC_STIFNESS`
 :Options:
   - {any}`_DISC_STIFFNESS_NONE_` -> Constant to switch off disc spring in the spine
   - {any}`_DISC_STIFFNESS_LINEAR_` -> Constant to switch linear disc spring on in the spine
@@ -547,6 +639,25 @@ A switch to use a kinematic rhythm for the lumbar spine. ON indicate that the rh
 ::::
 
 
+::::{dropdown} `BM_TRUNK_THORACIC_RHYTHM`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_TRUNK_THORACIC_RHYTHM
+
+A switch to use a kinematic rhythm for the thoracic spine. ON indicate that the rhythm is a hard contraint while _RHYTHM_SOFT_ will make the rhythm as soft kinematic contraint.
+
+:Default: {any}`BM_TRUNK_RHYTHM`
+:Example: `#define BM_TRUNK_THORACIC_RHYTHM BM_TRUNK_RHYTHM`
+:Options:
+  - {any}`OFF` -> Switch OFF
+  - {any}`ON` -> Switch ON
+  - {any}`_RHYTHM_SOFT_` -> Constant to switch kinematic rhythms as soft contraints
+
+```
+::::
+
+
 ::::{dropdown} `BM_TRUNK_CERVICAL_RHYTHM`
 :animate: fade-in-slide-down
 :margin: 0 0 3 3
@@ -566,6 +677,42 @@ A switch to use a kinematic rhythm for the cervical spine. ON indicate that the 
 ::::
 
 
+::::{dropdown} `BM_TRUNK_CERVICAL_THORACIC_LINK`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_TRUNK_CERVICAL_THORACIC_LINK
+
+The cervical and thoracic movements are linked so the move simultaneously. This switch is used to enable this link.
+
+:Default: OFF
+:Example: `#define BM_TRUNK_CERVICAL_THORACIC_LINK OFF`
+:Options:
+  - {any}`OFF` -> Switch OFF
+  - {any}`ON` -> Switch ON
+
+```
+::::
+
+
+::::{dropdown} `BM_TRUNK_LUMBAR_THORACIC_LINK`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_TRUNK_LUMBAR_THORACIC_LINK
+
+The lumbar and thoracic movements are linked so the move simultaneously. This switch is used to enable this link.
+
+:Default: ON
+:Example: `#define BM_TRUNK_LUMBAR_THORACIC_LINK ON`
+:Options:
+  - {any}`ON` -> Switch ON
+  - {any}`OFF` -> Switch OFF
+
+```
+::::
+
+
 ::::{dropdown} `BM_TRUNK_LIGAMENTS`
 :animate: fade-in-slide-down
 :margin: 0 0 3 3
@@ -576,8 +723,47 @@ A switch to control all the ligaments in the spine.
 
 :Default: OFF
 :Example: `#define BM_TRUNK_LIGAMENTS OFF`
-:Options: {ammr:bm_constant}`ON`/{ammr:bm_constant}`OFF`
+:Options:
+  - {any}`OFF` -> Switch OFF
+  - {any}`ON` -> Switch ON
 
+```
+::::
+
+
+::::{dropdown} `BM_TRUNK_CERVICAL_LIGAMENTS`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_TRUNK_CERVICAL_LIGAMENTS
+
+A switch to control the cervical spine ligaments.
+
+:Default: {any}`BM_TRUNK_LIGAMENTS`
+:Example: `#define BM_TRUNK_CERVICAL_LIGAMENTS BM_TRUNK_LIGAMENTS`
+:Options:
+  - {any}`OFF` -> Switch OFF
+  - {any}`ON` -> Switch ON
+  - {any}`BM_TRUNK_LIGAMENTS` -> 
+
+```
+::::
+
+
+::::{dropdown} `BM_TRUNK_THORACIC_LIGAMENTS`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_TRUNK_THORACIC_LIGAMENTS
+
+A switch to control the thoracic spine ligaments.
+
+:Default: {any}`BM_TRUNK_LIGAMENTS`
+:Example: `#define BM_TRUNK_THORACIC_LIGAMENTS BM_TRUNK_LIGAMENTS`
+:Options:
+  - {any}`OFF` -> Switch OFF
+  - {any}`ON` -> Switch ON
+  - {any}`BM_TRUNK_LIGAMENTS` -> 
 
 ```
 ::::
@@ -593,6 +779,10 @@ A switch to control the lumbar spine ligaments.
 
 :Default: {any}`BM_TRUNK_LIGAMENTS`
 :Example: `#define BM_TRUNK_LUMBAR_LIGAMENTS BM_TRUNK_LIGAMENTS`
+:Options:
+  - {any}`OFF` -> Switch OFF
+  - {any}`ON` -> Switch ON
+  - {any}`BM_TRUNK_LIGAMENTS` -> 
 
 ```
 ::::
@@ -926,8 +1116,8 @@ By default constraint type of mannequin drivers will be soft.
 
 Keyword for the interface morhping between the trunk and the leg pelvis segments.
 
-:Default: {any}`_MORPH_TRUNK_TO_LEG_`
-:Example: `#define BM_LEG_TRUNK_INTERFACE _MORPH_TRUNK_TO_LEG_`
+:Default: {any}`_MORPH_LEG_TO_TRUNK_`
+:Example: `#define BM_LEG_TRUNK_INTERFACE _MORPH_LEG_TO_TRUNK_`
 :Options:
   - {any}`_MORPH_TRUNK_TO_LEG_` -> Constant for the trunk-to-leg morphing
   - {any}`_MORPH_LEG_TO_TRUNK_` -> Constant for the leg-to-trunk morhping

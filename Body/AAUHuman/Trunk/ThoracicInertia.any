@@ -1,0 +1,136 @@
+AnyFolder Inertia = {
+  
+  /// Segment on which we add the inertia and suspend the segment inside the thoracic cavity
+  AnySeg segment = {
+    Axes0 = ...Segments.SternumSeg.Axes0;
+    r0 = ...Segments.SternumSeg.r0;
+    AnyFunTransform3D &Scale = ...Segments.SternumSeg.Scale;
+    UseInertiaObjects = On;
+    
+    
+    #if (BM_TRUNK_CAVITY_MODEL == _CAVITY_MODEL_VOLUME_) & (BM_TRUNK_MUSCLES == ON)
+      AnyInertiaSolid InertiaObject = {
+
+        BodyMassCorrection massCorrection() = {
+          DensityTheoretical = .....Data.unscaled.ModelParameters.LungTissueDensity;
+          enableMassCorrection = Off;
+        };
+  
+        AnySurfTriCylMesh inertia_cyl = {
+          #include "<ANYBODY_PATH_MODELUTILS>/DrawSettings/InertiaSolids.any"
+        
+          /// We use the thoracic volume mesh values to construct the inertia cylinder 
+          AnyObjectPtr mesh = ....Volume.CylMesh;
+          
+          Points = Obj2Num(ObjGetMember(flatten(mesh), "sRel"))  + 0*..r0[0]; 
+          CylMesh = reshape(iarr(0, NumElemOf(mesh) -1), SizesOf(mesh));   
+        };
+      };
+    #else
+    
+      // When running the model with the buckle abdominal and the flexible thorax the
+      // inertia is taken from the rigid thorax segment.  
+      // The inertia is applied to the inertia segment as it is representative of the rigid thorax segment
+      
+      AnyInertiaMatrix InertiaObject = {
+        BodyMassCorrectionCompatibility massCorrection() = {
+          DensityTheoretical = .....Data.unscaled.StandardParameters.Trunk.Mass;
+        };
+        sCoM = .Scale(....Data.unscaled.ModelParameters.Thorax.sCoM_pos);
+        JaboutCoMOnOff = On;  
+    
+        AnyVar Radius = (Mass / (pi * ....Data.unscaled.ModelParameters.Thorax.UBHeight * 1000))^0.5;
+        AnyVar Ixx = 0.25 * Mass * Radius^2 + 1/12 * Mass * ....Data.unscaled.ModelParameters.Thorax.UBHeight^2;
+        AnyVar Izz = Ixx;
+        AnyVar Iyy = 0.5 * Mass * Radius^2;
+       
+        AnyMat33 JMatRot = (
+          ....Segments.PelvisSeg.AnatomicalFrame.ARel * 
+          {{Ixx,0,0}, {0,Iyy,0}, {0,0,Izz}} * 
+          ....Segments.PelvisSeg.AnatomicalFrame.ARel'
+        );
+
+        Jii = {JMatRot[0][0], JMatRot[1][1], JMatRot[2][2]};
+        Jij = {JMatRot[1][0], JMatRot[2][1], JMatRot[2][0]};
+      };    
+      
+    #endif
+    
+      
+    AnyRefNodeGroup nodes = {
+      NodeAmount = (n_levels * (
+        (....Data.unscaled.ModelParameters.ThoracicCavity.DiscretizationPosterior + ....Data.unscaled.ModelParameters.ThoracicCavity.DiscretizationAnterior) * 2)) - 
+        (2 * (CAVITY_DISCRETIZATION )
+      ); 
+      NodeName = strval(iarr(1, NodeAmount), "_node%04i");
+      CreateMotionOutput = {
+        r=On;rDot=Off;rDDot=Off;Axes=Off;EulerPar=Off;omega=Off;omegaDot=Off;
+      };
+      NodeDefaults.CreateMotionOutput = {
+        r=On;rDot=Off;rDDot=Off;Axes=Off;EulerPar=Off;omega=Off;omegaDot=Off;
+      };
+           
+      Node_sRels = Obj2Num(ObjGetMember(segmental_refframes, "sRel")) + 0*.r0[0]; 
+      #if (BM_TRUNK_CAVITY_MODEL == _CAVITY_MODEL_VOLUME_) & (BM_TRUNK_MUSCLES == ON)
+        AnyInt n_levels = 12;
+        
+        /// We exclude the diaphragm part of the volume as that is not part of the inertia
+        /// moreover the inertia segment has muscle wrapping objects and hence, the
+        /// diaphraghm could transmit forces to these segments wrongly
+        AnyObjectPtr segmental_refframes = unique(
+          take(...Volume.CylMesh, iarr(4, SizesOf(...Volume.CylMesh)[0]-1), 0)
+        );
+
+      #else
+        AnyInt n_levels = 11;
+        AnyObjectPtr segmental_refframes = arrcat(
+          ...Edges.Edge1,
+          ...Edges.Edge2,
+          ...Edges.Edge3,
+          ...Edges.Edge4,
+          ...Edges.Edge5,
+          ...Edges.Edge6,
+          ...Edges.Edge7,
+          ...Edges.Edge8,
+          ...Edges.Edge9,
+          ...Edges.Edge10,
+        );
+      #endif
+    };
+  };
+  
+  /// Constraint that suspend the inertia segment inside the thoracic cavity
+  AnyKinEq constraint = {  
+    AnyMatrix skew = reshape(
+      skewmat3d(.segment.nodes.Node_sRels), 
+      {3 * .segment.nodes.NodeAmount,3}
+    )';
+
+    AnyKinMeasureLinComb measure = {
+      /// Multi-dimensional kinematic measure between inertia segment and trunk segments
+      AnyKinLinear lin = {
+        RefFrames = {
+          {ObjSelect(&...segment.nodes, "_node*")},
+          {...segment.nodes.segmental_refframes}
+        };
+        Ref = 0;
+      };
+      Coef = arrcat(repmat(..segment.nodes.NodeAmount, eye(3,3))', -.skew);
+      OutDim = 6;
+    };
+  };
+
+
+  // Structure used for adding wrapping surfaces
+  segment={
+    AnyRefNode Right = {
+      AnyVar Sign = 1;
+      AnyFun3D& Scale = .Scale;
+    };
+    AnyRefNode Left = {
+      AnyVar Sign = -1;
+      AnyFun3D& Scale = .Scale;
+    };
+  };
+};
+

@@ -1,0 +1,55 @@
+ AnyFolder StiffnessDriver  ={
+  
+  AnyFolder &ref = .Measure;
+  ref = {AnyDrawPLine line = {Thickness=0.0025;RGB={1,0,0};};};
+  AnyKinMeasureOrg Dof0 ={    AnyKinMeasure &ref=..Measure; MeasureOrganizer ={0}; };
+  AnyKinMeasureOrg Dof1 ={    AnyKinMeasure &ref=..Measure; MeasureOrganizer ={1}; };
+  AnyKinMeasureOrg Dof2 ={    AnyKinMeasure &ref=..Measure; MeasureOrganizer ={2}; };
+  
+  
+  AnyFunPolynomial SpringDof0 = { PolyCoef = {{0,0,0.5*..Stiffness[0]}};};
+  AnyFunPolynomial SpringDof1 = { PolyCoef = {{0,0,0.5*..Stiffness[1]}};};
+  AnyFunPolynomial SpringDof2 = { PolyCoef = {{0,0,0.5*..Stiffness[2]}};};
+  
+  AnyInt NumberOfSteps = 10000;
+  
+
+  AnyFunInterpol funPotSpringDof0Sqrt = {
+    T=farr(-7.0, 1.0/.NumberOfSteps, 14*.NumberOfSteps); 
+    Data={sqrt(.SpringDof0 (T))'};
+  };
+  
+  AnyFunInterpol funPotSpringDof1Sqrt = {
+    T=farr(-7.0, 1.0/.NumberOfSteps, 14*.NumberOfSteps); 
+    Data={sqrt(.SpringDof1 (T))'};
+  };
+  
+  AnyFunInterpol funPotSpringDof2Sqrt = {
+    T=farr(-7.0, 1.0/.NumberOfSteps, 14*.NumberOfSteps); 
+    Data={sqrt(.SpringDof2 (T))'};
+  };
+  
+  
+  funPotSpringDof0Sqrt.Type = PiecewiseLinear;
+  funPotSpringDof1Sqrt.Type = funPotSpringDof0Sqrt.Type;  
+  funPotSpringDof2Sqrt.Type = funPotSpringDof0Sqrt.Type;
+  //AnyFloat test = funPotSpringDof2Sqrt(farr(-6.990, 1.0, 101));
+
+  
+  AnyKinMeasureFunComb1 PotSpringDof0= {AnyKinMeasure &org = .Dof0 ; Functions = {&.funPotSpringDof0Sqrt }; };
+  AnyKinMeasureFunComb1 PotSpringDof1= {AnyKinMeasure &org = .Dof1 ; Functions = {&.funPotSpringDof1Sqrt }; };
+  AnyKinMeasureFunComb1 PotSpringDof2= {AnyKinMeasure &org = .Dof2 ; Functions = {&.funPotSpringDof2Sqrt }; };
+  
+  AnyKinEqSimpleDriver PotDriverSpring0= {
+    AnyKinMeasure &ref0=.PotSpringDof0;
+    AnyKinMeasure &ref1=.PotSpringDof1;
+    AnyKinMeasure &ref2=.PotSpringDof2;
+    
+    DriverPos={0,0,0}; DriverVel={0,0,0};Reaction.Type={Off,Off,Off};
+    CType = {Soft,Soft,Soft};
+    AnyFunConst wf ={Value = 0.0000001*{1,1,1};};
+    WeightFun = {&wf};
+  };
+
+};
+

@@ -1,67 +1,88 @@
   AnySeg SkullSeg = {
     
-    AnyFolder &StdPar=..ModelParameters.Skull;
+    AnyFolder &Data=..Data.unscaled.ModelParameters.Skull;
     
-    AnyFunTransform3D &Scale =..ScalingTrunk.SkullSeg.ScaleFunction;
+    AnyFunTransform3D &Scale =..Scaling.GeometricalScaling.Head.ScaleFunction;
+    Scale = { AnyFunTransform3D& GeomScale = .Scale; };
     
-    r0=..SegmentsCervicalSpine.C1Seg.C1C0JntNode.sRel*..SegmentsCervicalSpine.C1Seg.Axes0'+..SegmentsCervicalSpine.C1Seg.r0; 
+    r0=..Segments.C1Seg.C1C0JntNode.sRel*..Segments.C1Seg.Axes0'+..Segments.C1Seg.r0; 
     
-    AnyVar MassS = ..Scaling.MassScaling.Head.MassScale;
-    
-    AnyVar MassStandard = ..StandardParameters.HeadWithoutNeck.Mass;
-    Mass = MassS*MassStandard;
-    
-    Jii = StdPar.Jii;
-    
+    // Inertia properties for the segment
+    UseInertiaObjects = On;
+    #if (BM_TRUNK_CAVITY_MODEL == _CAVITY_MODEL_VOLUME_)
+    AnyInertiaSolid BoneInertiaObject = {
+      BodyMassCorrection massCorrection() = {
+        DensityTheoretical = ....Data.unscaled.ModelParameters.BoneDensity;
+        enableMassCorrection = Off;
+      };
+      AnySurfSTL surface = {
+        FileName = ..BoneDraw.FileName;
+        AnyFunTransform3D &scale = ..Scale;
+        viewSurface.RGB = {0,0,1};
+        ScaleXYZ = ..BoneDraw.ScaleXYZ;
+      };
+    };
+    #else
+      AnyInertiaMatrix InertiaObject = {
+        BodyMassCorrectionCompatibility massCorrection() = {
+          DensityTheoretical = ....Data.unscaled.StandardParameters.HeadWithoutNeck.Mass;
+        };
+        Jii = .Data.Jii;
+        sCoM = .Scale(.Data.sCoM_pos);
+        JaboutCoMOnOff = On;
+      };
+    #endif
+
     /// The AnatomicalFrame of skull is different from the remaining spine model since the
     ///skull has it's own coordinate system relative to the c1 - c0 joint.
     AnyRefNode AnatomicalFrame = {};
     AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards Compatibility with AMMR 2.4 MoCap Marker protocols
     AnyRefNode& ScalingNode = AnatomicalFrame;
-    AnyFunTransform3D& GeomScale = Scale;
-    
-    sCoM = Scale(StdPar.sCoM_pos);
-    JaboutCoMOnOff = On;
-    
-    AnyRefNode C1C0JntNode = {sRel = .Scale(.StdPar.C1C0JntNode_pos); AnyDrawNodes DrwNode = {Visible ??=..DrwSurf.Visible; ScaleXYZ = {1,1,1}*0.003;RGB = {0, 1, 0};};};
-    AnyRefNode NeckNode={sRel=.Scale(.StdPar.NeckNode_pos);};
+        
+    AnyRefNode C1C0JntNode = {sRel = .Scale(.Data.C1C0JntNode_pos);AnyDrawNodes DrwNode = {ScaleXYZ = {1,1,1}*0.003;RGB = {0, 1, 0};};};
+    AnyRefNode NeckNode={sRel=.Scale(.Data.NeckNode_pos);};
     
     //Lumped Hyoid
-    AnyRefNode LumpedHyoidT1C0NodeR = {sRel = .Scale(.StdPar.Right.LumpedHyoidT1C0Node_pos);};
-    AnyRefNode LumpedHyoidT1C0NodeL = {sRel = .Scale(.StdPar.Left.LumpedHyoidT1C0Node_pos);};
+    AnyRefNode LumpedHyoidT1C0NodeR = {sRel = .Scale(.Data.Right.LumpedHyoidT1C0Node_pos);};
+    AnyRefNode LumpedHyoidT1C0NodeL = {sRel = .Scale(.Data.Left.LumpedHyoidT1C0Node_pos);};
     
     //Longus Colli nodes
-    AnyRefNode LongusColliT1C0NodeR = {sRel = .Scale(.StdPar.Right.LongusColliT1C0Node_pos);};
-    AnyRefNode LongusColliT1C0NodeL = {sRel = .Scale(.StdPar.Left.LongusColliT1C0Node_pos);};    
+    AnyRefNode LongusColliT1C0NodeR = {sRel = .Scale(.Data.Right.LongusColliT1C0Node_pos);};
+    AnyRefNode LongusColliT1C0NodeL = {sRel = .Scale(.Data.Left.LongusColliT1C0Node_pos);};    
     
     //Longus cappitis nodes
-    AnyRefNode LongusCapitisC0NodeR = {sRel = .Scale(.StdPar.Right.LongusCapitisC0Node_pos);};
-    AnyRefNode LongusCapitisC0NodeL = {sRel = .Scale(.StdPar.Left.LongusCapitisC0Node_pos);};    
+    AnyRefNode LongusCapitisC0NodeR = {sRel = .Scale(.Data.Right.LongusCapitisC0Node_pos);};
+    AnyRefNode LongusCapitisC0NodeL = {sRel = .Scale(.Data.Left.LongusCapitisC0Node_pos);};    
     
     //Splenius capitis nodes
-    AnyRefNode SpleniusCapitisNodeR = {sRel = .Scale(.StdPar.Right.SpleniusCapitisNode_pos);};
-    AnyRefNode SpleniusCapitisNodeL = {sRel = .Scale(.StdPar.Left.SpleniusCapitisNode_pos);}; 
+    AnyRefNode SpleniusCapitisNodeR = {sRel = .Scale(.Data.Right.SpleniusCapitisNode_pos);};
+    AnyRefNode SpleniusCapitisNodeL = {sRel = .Scale(.Data.Left.SpleniusCapitisNode_pos);}; 
     
     //Semispinalis capitis nodes
-    AnyRefNode SemispinalisCapitisNodeR = {sRel = .Scale(.StdPar.Right.SemispinalisCapitisNode_pos);};
-    AnyRefNode SemispinalisCapitisNodeL = {sRel = .Scale(.StdPar.Left.SemispinalisCapitisNode_pos);};
+    AnyRefNode SemispinalisCapitisNodeR = {sRel = .Scale(.Data.Right.SemispinalisCapitisNode_pos);};
+    AnyRefNode SemispinalisCapitisNodeL = {sRel = .Scale(.Data.Left.SemispinalisCapitisNode_pos);};
     
     //Longissimus capitis nodes
-    AnyRefNode LongissimusCapitisNodeR = {sRel = .Scale(.StdPar.Right.LongissimusCapitisNode_pos);};
-    AnyRefNode LongissimusCapitisNodeL = {sRel = .Scale(.StdPar.Left.LongissimusCapitisNode_pos);};
+    AnyRefNode LongissimusCapitisNodeR = {sRel = .Scale(.Data.Right.LongissimusCapitisNode_pos);};
+    AnyRefNode LongissimusCapitisNodeL = {sRel = .Scale(.Data.Left.LongissimusCapitisNode_pos);};
 
-    AnyDrawSurf DrwSurf = {
-      FileName = ...STL.FilenameSkull;
+    AnyDrawSurf BoneDraw = {
+      FileName = ...Data.unscaled.STL.FilenameSkull;
       RGB = ...ColorRef.Segments;
       AnyFunTransform3D &Scale =.Scale; 
       Opacity = Main.DrawSettings.BonesOpacity.Skull;
     };
     
-    AnyRefNode TopOfHead = {sRel = .Scale(.StdPar.TopOfHead_pos);};
+    AnyRefNode TopOfHead = {sRel = .Scale(.Data.TopOfHead_pos);};
     
     AnyRefNode Right ={};
     AnyRefNode Left ={};    
     
+    AnyRefNode SkullContactNode = {sRel= .Scale(.Data.SkullContactNode_pos);};
+    AnyRefNode ChinBonyTip ={
+      sRel = .Scale(.Data.ChinBonyTip_pos);
+      ARel = RotMat(-0.04,z);
+    };
   };
   
   

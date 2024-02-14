@@ -1,0 +1,299 @@
+
+
+#define ANYBODY_PATH_OUTPUT "."
+#include "../libdef.any"
+
+#include "<ANYBODY_PATH_MODELUTILS>/Drivers/Fourier.any"
+
+#define RECTUS_MUSCLE_LINE VIA
+//#define RECTUS_MUSCLE_LINE_CONTROL already defined in AbdominalPressureModel file
+
+  #define Thoracic_Flexion 65
+  #define Lumbar_Flexion 40
+  #define Thoracic_Extension 22
+  #define Lumbar_Extension  26
+  #define Thoracic_LateralBend 30
+  #define Lumbar_LateralBend  30
+  #define Thoracic_Rotation  47
+  #define Lumbar_Rotation  15
+
+  #define BM_TRUNK_EXPERIMENTAL_RECTUS_ABDOMINIS ON
+
+  #define EXTENSION_ROM 1*{ -(Thoracic_Flexion+ Lumbar_Flexion) ,Thoracic_Extension+Lumbar_Extension  }
+  #define ROTATION_ROM 1*{ -(Thoracic_Rotation+Lumbar_Rotation) , Thoracic_Rotation+Lumbar_Rotation  }
+  #define LATBEND_ROM 1*{-(Thoracic_LateralBend+Lumbar_LateralBend),(Thoracic_LateralBend+Lumbar_LateralBend)}
+
+  #ifndef TEST_NAME 
+    #define TEST_NAME "test_thoracic.any_0"
+  #endif
+
+#define BM_TRUNK_MUSCLES ON
+#define BM_LEG_MODEL OFF
+#define BM_ARM_LEFT OFF
+#define BM_ARM_RIGHT OFF
+#define BM_TRUNK_THORACIC_MODEL _THORACIC_MODEL_FLEXIBLE_
+#define BM_TRUNK_CAVITY_MODEL _CAVITY_MODEL_VOLUME_ 
+#define BM_MANNEQUIN_DRIVER_DEFAULT ON
+#define BM_MANNEQUIN_DRIVER_PELVIS_THORAX_EXTENSION OFF
+#define BM_MANNEQUIN_DRIVER_PELVIS_THORAX_ROTATION OFF
+#define BM_MANNEQUIN_DRIVER_PELVIS_THORAX_LATERAL_BENDING OFF
+#define BM_MANNEQUIN_DRIVER_PELVIS_POS_X OFF
+#define BM_MANNEQUIN_DRIVER_PELVIS_POS_Y OFF
+#define BM_MANNEQUIN_DRIVER_PELVIS_POS_Z OFF
+#define BM_MANNEQUIN_DRIVER_PELVIS_ROT_X OFF
+#define BM_MANNEQUIN_DRIVER_PELVIS_ROT_Y OFF
+#define BM_MANNEQUIN_DRIVER_PELVIS_ROT_Z OFF
+
+
+
+
+
+Main = {
+
+  #include "<ANYBODY_PATH_BODY>/HumanModel.any"
+
+  AnyOperation& RunTest = Study.InverseDynamics;
+  
+  AnyBodyStudy Study = {
+    // Correct the load time position of the Pelvis so we can drive the AnatomicalFrameTrunk to zero, without the model moving
+    Main.HumanModel.Mannequin.Posture.PelvisPosX = Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.AnatomicalFrameTrunk.sRel[0];
+    Main.HumanModel.Mannequin.Posture.PelvisPosY = Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.AnatomicalFrameTrunk.sRel[1];
+    Main.HumanModel.Mannequin.Posture.PelvisPosZ = Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.AnatomicalFrameTrunk.sRel[2];
+    
+    
+    AnyFixedRefFrame global ={
+      AnyDrawRefFrame  drw ={};
+    };
+    AnyStdJoint lock ={
+      AnyFixedRefFrame &ref1=.global;
+      AnySeg &ref2 = Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg;
+    };
+    AnyFolder& BodyModel = Main.HumanModel.BodyModel;
+    AnyFolder& DefaultDrivers = Main.HumanModel.DefaultMannequinDrivers;
+    
+    
+    AnyVar DownScaleROM =0.6; //we downscale the ROM in this study... ideally we would want to know more about coupling between DOF
+    
+    SimpleFourierDriver Trunk_Extension = {
+      AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxExtension;
+      RangeOfMotion =.DownScaleROM* EXTENSION_ROM * pi/180;
+      Freq = 1/(Main.Study.tEnd-Main.Study.tStart);
+    };
+    
+    SimpleFourierDriver Trunk_LateralBending = {
+      AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxLateralBending;
+      RangeOfMotion =.DownScaleROM* LATBEND_ROM * pi/180;
+      Freq = 4/(Main.Study.tEnd-Main.Study.tStart);
+      Phase = -90*pi/180;
+    };
+    
+    SimpleFourierDriver Trunk_AxialRotation = {
+      AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxRotation;
+      RangeOfMotion =.DownScaleROM* ROTATION_ROM * pi/180;
+      Freq = 2*1/(Main.Study.tEnd-Main.Study.tStart);
+      Phase = 90*pi/180;
+    };
+    
+    tEnd = 10.0;
+    Gravity = {0, -9.81, 0};
+    nStep = 50;
+  };  
+
+
+  AnyBodyStudy Study_Flexion = {
+    AnyFixedRefFrame global ={
+      AnyDrawRefFrame  drw ={};
+    };
+    AnyStdJoint lock ={
+      AnyFixedRefFrame &ref1=.global;
+      AnySeg &ref2 = Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg;
+    };
+    AnyFolder& BodyModel = Main.HumanModel.BodyModel;
+    AnyFolder& DefaultDrivers = Main.HumanModel.DefaultMannequinDrivers;
+    
+    SimpleFourierDriver Trunk_Extension = {
+      AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxExtension;
+      RangeOfMotion = EXTENSION_ROM * pi/180;
+          Phase=90;
+          Freq = 1/(Main.Study.tEnd-Main.Study.tStart);
+    };
+    
+   AnyKinEqSimpleDriver Trunk_LateralBending = {
+      AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxLateralBending;
+      DriverPos ={0};
+      DriverVel ={0};
+      Reaction.Type ={Off};
+    };
+    
+     AnyKinEqSimpleDriver Trunk_AxialRotation  = {
+      AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxRotation;
+      DriverPos ={0};
+      DriverVel ={0};
+      Reaction.Type ={Off};
+    };
+    tEnd = 10.0;
+    Gravity = {0, -9.81, 0};
+    nStep = 10;
+  };  
+
+  
+  
+  AnyBodyStudy Study_LateralBending = {
+    AnyFixedRefFrame global ={
+      AnyDrawRefFrame  drw ={};
+    };
+    AnyStdJoint lock ={
+      AnyFixedRefFrame &ref1=.global;
+      AnySeg &ref2 = Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg;
+    };
+    AnyFolder& BodyModel = Main.HumanModel.BodyModel;
+    AnyFolder& DefaultDrivers = Main.HumanModel.DefaultMannequinDrivers;
+    
+    SimpleFourierDriver Trunk_LateralBending = {
+      AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxLateralBending;
+      RangeOfMotion = LATBEND_ROM * pi/180;
+      Phase=0;
+      Freq = 1/(Main.Study.tEnd-Main.Study.tStart);
+    };
+    
+   AnyKinEqSimpleDriver Trunk_Extension  = {
+      AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxExtension ;
+      DriverPos ={0};
+      DriverVel ={0};
+      Reaction.Type ={Off};
+    };
+    
+     AnyKinEqSimpleDriver Trunk_AxialRotation  = {
+      AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxRotation;
+      DriverPos ={0};
+      DriverVel ={0};
+      Reaction.Type ={Off};
+    };
+    tEnd = 10.0;
+    Gravity = {0, -9.81, 0};
+    nStep = 10;
+  };  
+
+  
+  AnyBodyStudy Study_ThoraxRotation = {
+    AnyFixedRefFrame global ={
+      AnyDrawRefFrame  drw ={};
+    };
+    AnyStdJoint lock ={
+      AnyFixedRefFrame &ref1=.global;
+      AnySeg &ref2 = Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg;
+    };
+    AnyFolder& BodyModel = Main.HumanModel.BodyModel;
+    AnyFolder& DefaultDrivers = Main.HumanModel.DefaultMannequinDrivers;
+    
+    SimpleFourierDriver Trunk_PelvisThoraxRotation = {
+      AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxRotation;
+      RangeOfMotion = ROTATION_ROM * pi/180;
+           Phase=0;
+           Freq = 1/(Main.Study.tEnd-Main.Study.tStart);
+    };
+    
+   AnyKinEqSimpleDriver Trunk_Extension  = {
+      AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxExtension ;
+      DriverPos ={0};
+      DriverVel ={0};
+      Reaction.Type ={Off};
+    };
+    AnyKinEqSimpleDriver Trunk_LateralBending = {
+      AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxLateralBending;
+      DriverPos ={0};
+      DriverVel ={0};
+      Reaction.Type ={Off};
+    };
+    tEnd = 10.0;
+    Gravity = {0, -9.81, 0};
+    nStep = 10;
+  };  
+
+  
+    AnyBodyStudy Study_Critical_ThoraxRotation_Flexion = {
+    AnyFixedRefFrame global ={
+      AnyDrawRefFrame  drw ={};
+    };
+    AnyStdJoint lock ={
+      AnyFixedRefFrame &ref1=.global;
+      AnySeg &ref2 = Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg;
+    };
+    AnyFolder& BodyModel = Main.HumanModel.BodyModel;
+    AnyFolder& DefaultDrivers = Main.HumanModel.DefaultMannequinDrivers;
+    
+    
+     AnyKinEqSimpleDriver Trunk_AxialRotation  = {
+      AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxRotation;
+      DriverPos ={30*pi/180};
+      DriverVel ={0};
+      Reaction.Type ={Off};
+    };
+
+    
+   AnyKinEqSimpleDriver Trunk_Extension  = {
+      AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxExtension ;
+      DriverPos ={-100*pi/180};
+      DriverVel ={0};
+      Reaction.Type ={Off};
+    };
+    AnyKinEqSimpleDriver Trunk_LateralBending = {
+      AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxLateralBending;
+      DriverPos ={0};
+      DriverVel ={0};
+      Reaction.Type ={Off};
+    };
+    tEnd = 10.0;
+    Gravity = {0, -9.81, 0};
+    nStep = 10;
+  };  
+
+  
+  
+  
+    AnyBodyStudy Study_Critical_ThoraxLateralBending = {
+    AnyFixedRefFrame global ={
+      AnyDrawRefFrame  drw ={};
+    };
+    AnyStdJoint lock ={
+      AnyFixedRefFrame &ref1=.global;
+      AnySeg &ref2 = Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg;
+    };
+    AnyFolder& BodyModel = Main.HumanModel.BodyModel;
+    AnyFolder& DefaultDrivers = Main.HumanModel.DefaultMannequinDrivers;
+    
+    
+     AnyKinEqSimpleDriver Trunk_AxialRotation  = {
+      AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxRotation;
+      DriverPos ={0*pi/180};
+      DriverVel ={0};
+      Reaction.Type ={Off};
+    };
+
+    
+   AnyKinEqSimpleDriver Trunk_Extension  = {
+      AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxExtension ;
+      DriverPos ={0*pi/180};
+      DriverVel ={0};
+      Reaction.Type ={Off};
+    };
+    AnyKinEqSimpleDriver Trunk_LateralBending = {
+      AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxLateralBending;
+      DriverPos =(pi/180)*{Thoracic_LateralBend + Lumbar_LateralBend};
+      DriverVel ={0};
+      Reaction.Type ={Off};
+    };
+    tEnd = 10.0;
+    Gravity = {0, -9.81, 0};
+    nStep = 10;
+  }; 
+  
+  AnyOperationSequence RunAll ={
+AnyOperation &CriticalPosture1=  .Study_Critical_ThoraxRotation_Flexion.Kinematics; 
+AnyOperation &Rotation=  .Study_ThoraxRotation.Kinematics;
+AnyOperation &LateralBending= .Study_LateralBending.Kinematics; 
+AnyOperation &Flexion=   .Study_Flexion.Kinematics;
+AnyOperation &Range=   .Study.Kinematics;
+  };
+  
+};
