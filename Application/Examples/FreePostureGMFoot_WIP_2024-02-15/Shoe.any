@@ -1,0 +1,128 @@
+ Main.Model.EnvironmentModel.GlobalRef = {
+  AnyRefNode ShoeNode = {
+    sRel = {-0.10,-0.1,0.2};
+    ARel = RotMat(pi/2,z);
+    viewRefFrame.Visible = On;
+    AnyDrawSurf DrwSkin = {
+      FileName = "FootGMSkinScaledPOS2";
+      ScaleXYZ = {1.0, 1.0, 1.0};
+      RGB = Main.DrawSettings.Colors.Segments;
+      //      AnyFunTransform3D &Scale =..Scale; 
+      Opacity=0.5;      
+    }; 
+    
+    AnyRefNode Ground = { 
+      sRel = {-0.07,0.1,0};
+      ARel =RotMat(10*pi/180,z);
+      viewRefFrame.Visible = On;
+    };
+    
+    AnyFloat H1 = 0.04; // heel depth offset to shoe sole
+    AnyFloat H2 = 0.02; // metatarsal depth offset to shoe sole
+    AnyFloat W1 = 0.07; // shoe width at heel
+    AnyFloat W2 = 0.10; // shoe width at metatarsal heads
+    AnyMatrix SkinPoints = {
+      
+      {0.042917121,	0.08156582,	0.032547954}, // Lat Mal
+      {0.060413681,	0.063059002,	-0.040192958}, // Med Mal
+      {-0.03514256,	0.10760508,	0.000414679}, //Heel contacct
+      {-0.02001146,	-0.065335438,	-0.02414603}, // Foot medial contact
+      {-0.020102393,	-0.063794315,	0.010928103}, // Metatarsal2 contact
+      {-0.021428669,	-0.039274629,	0.059964657}, // foot lateral contact
+      {0.002581115,	-0.12967819,	-2.26E-06} // Toe tip
+    };
+    
+    AnyFloat check12 = SkinPoints[2] + {-H1,0,0};
+    AnyFloat ch = SkinPoints[5][2];
+    AnyFloat check123 = SkinPoints[3] + {H2,0,-(W2-(SkinPoints[5][2]-SkinPoints[3][2]))};
+    AnyMatrix ShoeSolePoints = {
+      SkinPoints[2] + {-H1,0,0},
+      SkinPoints[3] + {-H2,0,-(W2-(SkinPoints[5][2]-SkinPoints[3][2]))},
+      SkinPoints[5] + {-H2,0,(W2-(SkinPoints[5][2]-SkinPoints[3][2]))}
+    };
+
+    AnyDrawPointCloud drawpoints = {
+      Points = .SkinPoints;
+      Points3D = On;
+      PointStyle.Size = 0.01;
+    };
+    AnyDrawPointCloud drawShoeSolepoints = {
+      Points = .ShoeSolePoints;
+      Points3D = On;
+      PointStyle.Size = 0.01;
+      RGB = {0.2,0.5,0.6};
+    };
+
+  };
+};
+
+
+
+
+
+Main.HumanModel.BodyModel.Right.Leg.Seg.Foot = {
+  AnyFolder Shoe = { 
+    
+    AnyFolder Transformation = {
+      AnyMatrix ShoePoints = Main.Model.EnvironmentModel.GlobalRef.ShoeNode.SkinPoints;
+      AnyMatrix ShoeSolePoints = Main.Model.EnvironmentModel.GlobalRef.ShoeNode.ShoeSolePoints;
+      AnyMatrix FootPoints = {
+        ..Talus.LatMalleoli.sRel,
+        ..Talus.MedMalleoli.sRel,
+        ..Calcaneus.HeelFlatNode.sRel,
+        ..Metatarsal1.MTHeadPlantarNode.sRel,
+        ..Metatarsal2.MTHeadPlantarNode.sRel,
+        ..Metatarsal5.MTHeadPlantarNode.sRel,
+        ..DistalPhalange1.ToeTip.sRel        
+      };
+      
+      AnyFunTransform3DLin2 Scale_Shoe_To_Foot_Affine = {
+        Points0 = .ShoePoints;
+        Points1 = .FootPoints;
+        Mode = VTK_LANDMARK_AFFINE;
+      };
+      
+    };
+    
+  }; // Shoe
+  Calcaneus= {
+    AnyFunTransform3DLin2 &ShoeScale = .Shoe.Transformation.Scale_Shoe_To_Foot_Affine;
+    AnyDrawPointCloud drawScaledpoints = {
+      Points = .ShoeScale(..Shoe.Transformation.ShoePoints);
+      Points3D = On;
+      PointStyle.Size = 0.01;
+    };
+    AnyDrawPointCloud drawScaledShoeSolepoints = {
+      Points = .ShoeScale(..Shoe.Transformation.ShoeSolePoints);
+      Points3D = On;
+      PointStyle.Size = 0.01;
+      RGB = {0.2,0.5,0.6};
+    };
+    AnyRefNode ShoeGround = {
+      sRel = .ShoeScale(Main.Model.EnvironmentModel.GlobalRef.ShoeNode.Ground.sRel);
+      ARel = .ShoeScale(Main.Model.EnvironmentModel.GlobalRef.ShoeNode.Ground.ARel);
+      viewRefFrame.Visible = On;
+      AnyMat33 ProjectionMat = {{0, 0, 0}, {0, 1, 0}, {0, 0, 1}}; // Projection to XY plane!
+    };
+    
+    //Projection of points to ground node
+    AnyRefNode CalcShoeGround = {
+      sRel =(.HeelFlatNode.sRel - (.HeelFlatNode.sRel -.ShoeGround.sRel))*.ShoeGround.ARel*.ShoeGround.ProjectionMat;
+    };
+    AnyRefNode CalcShoeGround2 = {
+      AnyFloat P = .HeelFlatNode.sRel;
+      AnyFloat A = .ShoeScale(..Shoe.Transformation.ShoeSolePoints[0]);
+      AnyFloat B = .ShoeScale(..Shoe.Transformation.ShoeSolePoints[1]);
+      AnyFloat C = .ShoeScale(..Shoe.Transformation.ShoeSolePoints[2]);
+      
+      sRel =PLANE_PROJECTION(P,A,B,C) ;      
+    };
+
+    
+  };
+  
+};// Foot
+
+
+
+
