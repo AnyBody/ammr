@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: 0 3 * * *
   workflow_dispatch: {}
+    inputs:
+      force-update-durations:
+          type: boolean
+          description: 'Force creation of new .test-duration files and create a PR with them. Default is false.'
+          default: false
 
 
 concurrency: 
@@ -112,7 +117,7 @@ jobs:
               data.update(json.loads(file.read_text()))
           data = {k: v for k, v in sorted(data.items(), key=lambda x: x[1], reverse=True)}
           test_durations = pathlib.Path('Tests/.test_durations')
-          if set(data) != set(json.loads(test_durations.read_text())):
+          if set(data) != set(json.loads(test_durations.read_text())) or "${{ github.event.inputs.force-update-durations }}" == "true":
               test_durations.write_text(json.dumps(data, indent=2))
         shell: python
 
