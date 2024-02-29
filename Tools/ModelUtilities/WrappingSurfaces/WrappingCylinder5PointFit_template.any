@@ -1,0 +1,70 @@
+#class_template TSurfCylinder5PointFit (__CLASS__=AnySurfCylinder, __DEBUG__=0){
+
+#var AnyFloat p;
+
+AnyFloat Q1 = p[0];
+AnyFloat Q2 = p[1];
+AnyFloat Q3 = p[2];
+AnyFloat Q4 = p[3];
+AnyFloat Q5 = p[4];
+
+viewRefFrame = {
+   #var Visible = #default;
+   #var Opacity = #default;
+   #var Pickable = #default;
+   #var RGB = #default;
+   #var ScaleXYZ = #default;   
+};
+
+viewSurface = {
+   #var Visible = #default;
+   #var Opacity = #default;
+   #var Pickable = #default;
+   #var RGB = #default;
+   #var ScaleXYZ = #default;   
+};
+
+
+
+#if __DEBUG__
+// AnyDrawSphere p1 = {Position = (p[0]-sRel)*.ARel;ScaleXYZ = 0.003*{1,1,1};};
+// AnyDrawSphere p2 = {Position = (p[1]-sRel)*.ARel;ScaleXYZ = 0.003*{1,1,1};};
+// AnyDrawSphere p3 = {Position = (p[2]-sRel)*.ARel;ScaleXYZ = 0.003*{1,1,1};};
+// AnyDrawSphere p4 = {Position = (p[3]-sRel)*.ARel;ScaleXYZ = 0.003*{1,1,1};};
+// AnyDrawSphere p5 = {Position = (p[4]-sRel)*.ARel;ScaleXYZ = 0.003*{1,1,1};};
+#endif
+
+
+#var Length = abs(lengthscalefactor * vnorm(Q2 - Q1));
+
+// get direction from the first two points
+AnyFloat dir = (Q2 - Q1) / vnorm(Q2 - Q1);
+
+// projection of the points 3-5 to the plane through Q1 with normal dir
+AnyFloat Q3p = Q1 + (Q3 - Q1) - dir * (Q3 - Q1)' * dir;
+AnyFloat Q4p = Q1 + (Q4 - Q1) - dir * (Q4 - Q1)' * dir;
+AnyFloat Q5p = Q1 + (Q5 - Q1) - dir * (Q5 - Q1)' * dir;
+
+AnyFloat alpha = ((Q4p - Q5p) * (Q4p - Q5p)' * (Q3p - Q4p) * (Q3p - Q5p)') 
+/ (2 * cross(Q3p - Q4p, Q4p - Q5p) * cross(Q3p - Q4p, Q4p - Q5p)');
+AnyFloat beta = ((Q3p - Q5p) * (Q3p - Q5p)' * (Q4p - Q3p) * (Q4p - Q5p)') 
+/ (2 * cross(Q3p - Q4p, Q4p - Q5p) * cross(Q3p - Q4p, Q4p - Q5p)');
+AnyFloat gamma = ((Q3p - Q4p) * (Q3p - Q4p)' * (Q5p - Q3p) * (Q5p - Q4p)') 
+/ (2 * cross(Q3p - Q4p, Q4p - Q5p) * cross(Q3p - Q4p, Q4p - Q5p)');
+AnyVec3 U = (alpha * Q3p + beta * Q4p + gamma * Q5p);
+
+#var Radius = radiusscalefactor*vnorm(U-Q3p);
+AnyVec3 dir1 = (Q3p - U) / vnorm(Q3p - U);
+AnyVec3 dir2tmp = (Q4p - U) - (Q4p - U) * dir1' * dir1;
+AnyVec3 dir2 = dir2tmp / vnorm(dir2tmp);
+
+AnyFloat  signtmp = cross(dir1,dir2)*dir';
+AnyFloat sign = iffun(gtfun(signtmp,0),1,-1);
+
+ARel = RotMat(U, U + dir1, U  +sign*dir2)*RotMat(Z_rotation,z);
+
+sRel = U- (Length-vnorm(Q2-Q1))/2 *dir;
+//AnyDrawRefFrame drw ={RGB={0,0,1};ScaleXYZ={1,1,1}*0.1;};
+
+};
+

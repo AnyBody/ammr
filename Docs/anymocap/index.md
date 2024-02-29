@@ -4,7 +4,7 @@
 
 The AnyMoCap model is an effort to create a simple and unified framework for
 doing any kind of MoCap analysis with the [AnyBody Modeling
-System](https://anybodytech.com).
+System](https://www.anybodytech.com).
 
 :::{figure-md} 
 :align: center
@@ -23,14 +23,15 @@ Making MoCap models the easier
 - {doc}`Prediction of ground reaction forces <grf-prediction>`
 - Easy setup with multiple trials and subjects
 
-```{toctree}
-:hidden: true
-:maxdepth: 2
-
-grf-prediction
-```
 
 ## Over determinate kinematic analysis
+
+:::{seealso}
+:class: margin
+The AnyBody tutorials, and the lesson on using the
+{doc}`AnyMoCap model <tutorials:Making_things_move/lesson5>`
+:::
+
 
 Musculoskeletal models that use Motion capture data are different from other
 types of models found the AMMR.  Most importantly, MoCap models usually require
@@ -55,32 +56,28 @@ The over determinate kinematic analysis solves the model for positions, and
 writes joint angles to a a set of files. These joint angles can then be used
 with the determinate kinematic solver in the inverse dynamic analysis.
 
-:::{seealso}
-The AnyBody tutorials, and the lesson on using the
-{doc}`AnyMoCap model <tutorials:Making_things_move/lesson5>`
-:::
-
 ## AnyMoCap examples
 
 The following gallery shows different examples using the AnyMoCap framework.
 
-```{eval-rst}
-.. include:: /auto_examples/backreferences/gallery.anymocap.examples
-```
-
-```{raw} html
-<div style='clear:both'></div>
-```
-
-:::{note}
-The *Multi trial MoCap model* is likely the best starting point when
+:::{tip}
+:class: margin
+The {ref}`example_mocap_multitrial` is likely the best starting point when
 working with many trials/subjects from a MoCap experiment.
 :::
 
-```{rst-class} emphasize-children
-```
+
+:::{include} /Applications/Mocap/gallery.txt
+:::
+
 
 ## Get started
+
+:::{caution}
+:class: margin
+It is recommended *not* to place working models inside the AMMR folder.
+Copy the example elsewhere before using.
+:::
 
 The easiest way to get started, is to adapt one the example application above.
 
@@ -102,10 +99,7 @@ A typical application using the AnyMoCap framework will look something like this
 You can place this main file anywhere on your computer as long the
 `libdef.any` file points to model repository (AMMR) you want to use.
 
-:::{caution}
-It is recommended *not* to place working models inside the AMMR folder.
-Copy the example elsewhere before using.
-:::
+
 
 ### Model structure
 
@@ -114,16 +108,14 @@ When loading the AnyMoCap model the following layout shows up in the model tree:
 :::{figure} model-structure.png
 :::
 
-```{rst-class} html-toggle
-```
-
 #### Description of Model folders
 
-```{rst-class} plain
-```
+::::{dropdown} Top-level model structure.
+:animate: fade-in-slide-down
+:icon: file-directory
 
 ```{eval-rst}
-.. table:: Top-level model structure
+.. table::
 
     ======================================= ==============================================================================================
     Folder name                             Description
@@ -140,12 +132,10 @@ When loading the AnyMoCap model the following layout shows up in the model tree:
     ``LoadAndReplay``                       This loads any previously saved data and starts the replay operation.
     ======================================= ==============================================================================================
 
-```
+::::
 
 (anymocap-settings)=
 
-```{rst-class} emphasize-children
-```
 
 ## Options and settings
 
@@ -161,16 +151,18 @@ Main.ModelSetup.TrialSpecificData.LastFrame = 240;
 
 The following two sections gives an overview of the settings available:
 
-```{rst-class} html-toggle
-```
-
 ### Paths settings and switches
 
 Path settings and switches are usually prefixed by `MOCAP_` to indicate that
 they are specific to the AnyMoCap framework.
 
+
+::::{dropdown} `#path` settings for AnyMoCap.
+:animate: fade-in-slide-down
+:icon: code
+
 ```{eval-rst}
-.. table:: ``#path`` settings for AnyMoCap.
+.. table:: 
 
     ======================================= ============================================================================================== ========================================
     Settings                                Description                                                                                    Default
@@ -199,8 +191,15 @@ they are specific to the AnyMoCap framework.
     ``TEMP_PATH``                           Path to where temporary files are saved (joint angles etc.)                                    ``ANYBODY_PATH_OUTPUT``
     ======================================= ============================================================================================== ========================================
 
-
 ```
+
+::::
+
+
+
+::::{dropdown} `#define` settings for AnyMoCap.
+:animate: fade-in-slide-down
+:icon: code
 
 ```{eval-rst}
 .. table:: ``#define`` settings for AnyMoCap.
@@ -211,7 +210,7 @@ they are specific to the AnyMoCap framework.
     ``MOCAP_INPUT_DATA_TYPE``                      Data type ("C3D", "BVH") used by the AnyMoCap application.                                     "C3D"
     ``MOCAP_CREATE_PARAMETER_ID_SHORTCUT``         Setting for creating the ``Main.RunParameterIdentification`` shortcut operation  .             ON
     ``MOCAP_OUTPUT_FILENAME_PREFIX``               Prefix added to all output files from the model.                                               ""
-    ``MOCAP_PARAMETER_FILE_PREFIX``                Prefix for the parameter identfication files. Can be usefull to set explicitly                 ``MOCAP_OUTPUT_FILENAME_PREFIX``
+    ``MOCAP_PARAMETER_FILE_PREFIX``                Prefix for the parameter identfication files. Can be usefull to set explicitly                 ""
                                                    in special cases where subjects share a common parameter file.
     ``MOCAP_USE_GRF_PREDICTION``                   Switch to indicate that the model uses Ground Reaction Force (GRF) prediction. It will ensure  OFF
                                                    that the AnyMoCap framework uses the appropriate settings. (e.g. recruited actuators as weak
@@ -226,9 +225,8 @@ they are specific to the AnyMoCap framework.
 
 
 ```
+::::
 
-```{rst-class} html-toggle
-```
 
 ### Configurable variables
 
@@ -241,8 +239,14 @@ These three folders contain variables specific to the application but also has
 a few variables which can be assigned directly by the user.
 :::
 
+
+::::{dropdown} Variables in the `Main.ModelSetup.TrialSpecificData` folder which can be overridden.
+:animate: fade-in-slide-down
+:icon: code
+
+
 ```{eval-rst}
-.. table:: Variables in the ``Main.ModelSetup.TrialSpecificData`` folder which can be overridden.
+.. table:: 
 
     ======================================= ============================================================================================== ========================================
     ``Main.ModelSetup.TrialSpecificData``   Description                                                                                     Default value
@@ -260,9 +264,15 @@ a few variables which can be assigned directly by the user.
 
 
 ```
+::::
+
+
+::::{dropdown} Variables in the ``Main.ModelSetup.LabSpecificData`` folder which can be overridden.
+:animate: fade-in-slide-down
+:icon: code
 
 ```{eval-rst}
-.. table:: Variables in the ``Main.ModelSetup.LabSpecificData`` folder which can be overridden.
+.. table:: 
 
     ======================================= ============================================================================================== ========================================
     ``Main.ModelSetup.LabSpecificData``     Description                                                                                       Default value
@@ -283,6 +293,7 @@ a few variables which can be assigned directly by the user.
 
 
 ```
+::::
 
 ## More resources
 

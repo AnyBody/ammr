@@ -1,9 +1,9 @@
 name: Create compare reference
 
 on:
-  push:
-    tags:
-      - 'ammr-*'
+#  push:
+#    tags:
+#      - 'ammr-*'
   workflow_dispatch:
     inputs:
       git_reference:
@@ -19,10 +19,17 @@ concurrency:
 
 jobs:
   test:
-    runs-on: [self-hosted, AnyBody]
+    if: github.repository_owner == 'anybody'
+    runs-on: [self-hosted, Windows, AnyBody]
 
     strategy:
-      fail-fast: false
+      matrix:
+        include:
+          - ams_version: "7.5_Beta"
+
+    env:
+      ANYBODYCON: C:\Program Files\AnyBody Technology\AnyBody.${{ matrix.ams_version }}\AnyBodyCon.exe
+
 
     steps:
       - name: Set variables
@@ -35,38 +42,27 @@ jobs:
 
 
       - name: Checkout repository at ${{ env.GIT_REFERENCE }}
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           ref: ${{ env.GIT_REFERENCE }}
           fetch-depth: 0
 
-      - name: Install conda
-        run: | 
-          Invoke-Webrequest -URI https://anybodycloudci.blob.core.windows.net/micromamba/micromamba.tar.bz2 -OutFile ~\micromamba.tar.bz2
-          (Get-FileHash ~\micromamba.tar.bz2).hash -eq "49A22AB05DEE3AB7DC44B6EEB2515C763D598642739ED4E8421163426A6C5CAC"
-          $env:Path = "C:\PROGRA~1\Git\usr\bin;" + $env:Path
-          tar -xvjf ~/micromamba.tar.bz2 --strip-components 2 -C ~ Library/bin/micromamba.exe
-          echo "MAMBA_ROOT_PREFIX=$HOME\micromamba" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
-
-      - name: Create conda environment
-        run: | 
-          ~\micromamba.exe shell hook -s powershell | Out-String | iex
-          if (Test-Path -Path $Env:MAMBA_ROOT_PREFIX\envs\_ammr_test) {$OPR = "update"} else {$OPR = "create"}
-          micromamba env $OPR -y -n _ammr_test -f Tests\test-environment.yml
-
+      - uses: prefix-dev/setup-pixi@v0.5.1
+        with:
+          environments: test
+          cache-write: ${{ github.event_name == 'push' && github.ref_name == 'master' }}
+          post-cleanup: true
+    
       - name: Store AMS Version
         run: |
-          ~\micromamba.exe shell hook -s powershell | Out-String | iex
-          micromamba activate _ammr_test
-          $AMS_VERSION = $(python -c "import anypytools; print(anypytools.tools.anybodycon_version())")
+          $AMS_VERSION = $(pixi run python -c "import anypytools; print(anypytools.tools.anybodycon_version('${{ env.ANYBODYCON }}'))")
           echo "AMS_VERSION=$AMS_VERSION" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Run test for compare
         run: |
-          ~\micromamba.exe shell hook -s powershell | Out-String | iex
-          micromamba activate _ammr_test
-
-          pytest --runslow --anytest-output=${{runner.temp}} --anytest-name=${{ env.GIT_REFERENCE }} Tests
+          cd Tests
+          pixi run -e test `
+            pytest --runslow --anytest-output=${{runner.temp}} --anytest-name=${{ env.GIT_REFERENCE }} --anybodycon="$Env:ANYBODYCON"
 
       - name: Compress compare data
         working-directory: ${{runner.temp}}
@@ -98,11 +94,9 @@ jobs:
           AZURE_CONN_STR: ${{ secrets.AZURE_CONN_STR }}
           AZURE_BLOB_NAME: ${{ env.COMPARE_TEST_NAME }}
         run: |
-          ~\micromamba.exe shell hook -s powershell | Out-String | iex
-          micromamba create -y -q -c conda-forge -n _azure-storage-blob azure-storage-blob
-          micromamba activate _azure-storage-blob
           echo $env:AZURE_BLOB_NAME
           echo $env:AZURE_CONTAINER_NAME
 
-          python upload.py compare-data.zip
+          pixi run -e test `
+           python upload.py compare-data.zip
 

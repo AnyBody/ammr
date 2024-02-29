@@ -2,6 +2,21 @@
 
 # Introduction to Scaling
 
+:::{sidebar} Scaling Tutorials
+
+The three tutorials covers the different scaling 
+methods shown in the table below:
+
+```{toctree}
+:maxdepth: 1
+
+lesson1
+lesson2
+lesson3
+
+```
+:::
+
 Musculoskeletal models must be scalable to sizes of different
 individuals to be useful for product design. Scaling pertains not only to the overall geometry,
 but also muscle insertion points, muscle parameters, wrapping
@@ -15,13 +30,11 @@ are seldom defined as constant numbers, but instead computed from global measure
 expect the definition of a scaling law, although user can
 choose the actual law.
 
-Currently there are nine pre-defined scaling laws available in AnyBody
+Currently there are six pre-defined scaling laws available in AnyBody:
 
-```{rubric} Scaling
-```
 
 ```{eval-rst}
-.. list-table:: Scaling laws
+.. list-table::
    :widths: 3 7
    :header-rows: 1
 
@@ -40,21 +53,10 @@ Currently there are nine pre-defined scaling laws available in AnyBody
    * - :any:`ScalingLengthMassFat <_SCALING_LENGTHMASSFAT_>`
      - scale taking mass and fat into account; input
        is joint to joint distances
-   * - :any:`ScalingUniformExt <_SCALING_UNIFORM_EXTMEASUREMENTS_>`
-     - scale equally in all directions; input is external
-       measurements
-   * - :any:`ScalingLengthMassExt <_SCALING_LENGTHMASS_EXTMEASUREMENTS_>`
-     - scale taking mass into account; input is external measurement
-   * - :any:`ScalingLengthMassFatExt  <_SCALING_LENGTHMASSFAT_EXTMEASUREMENTS_>`
-     - scale taking mass and fat into account; input is external measurements.
    * - :any:`ScalingXYZ  <_SCALING_XYZ_>`
      - scale taking mass and fat into account; scale segments along X, Y, Z axes;
        input is scale factors along X, Y, Z axes.
 ```
-
-**Input parameters of scaling laws are specified in a file that is always named
-AnyMan.any.** Several versions of this file are available, each for a different scaling law.
-More details can be found the in the tutorial below.
 
 **Please also notice that each scaling law scales the strength of the
 muscles, in addition to the size and mass of the bone.** This strength
@@ -62,35 +64,35 @@ scaling is done automatically in most cases. We will come back to it
 when needed. Users who need a more comprehensive introduction can view
 this recorded previous webcast titled [“Anthropometrical Scaling of
 Musculoskeletal
-Models”](https://www.anybodytech.com/anthropometrical-scaling-of-musculoskeletal-models/).
+Models”](https://www.anybodytech.com/download/anthropometrical-scaling-of-musculoskeletal-models).
 
-```{rubric} Tutorial
+## Overwriting default input parameters
+
+After selecting a scaling law, the user can override the default input
+parameters. All input parameters can be accesed in the
+`Main.HumanModel.Anthropometrics` folder.
+
+For example, to adjust the height of
+the model, the user can add the following code to the `Main` file:
+
+```AnyScriptDoc
+Main.HumanModel.Anthropometrics.BodyHeight = 1.8; // overwrites the default value
 ```
 
-The first five scaling methods are covered in {doc}`Lesson 1 <lesson1>`. They are often
-referred to as Joint to joint scaling methods. {doc}`Lesson 2 <lesson2>` covers the
-next three which are based on external body measurement. And Lesson 3 covers
-the ScalingXYZ scaling law, since the usage logic slightly differs from
-the rest of the laws.
+### Using legacy `AnyMan.any` files
 
-With the AnyBody Modeling System you already have a repository of models
-available, for details please see the AnyBody Assistant available from
-the menu. As a starting point for this tutorial please find the model
-{ref}`StandingModelScalingDisplay <sphx_glr_auto_examples_Other_plot_StandingModelScalingDisplay.py>`.
+To keep backward compatibility with older models, AnyBody still supports using custom `AnyMan.any` files.
+You can specify your own file with by setting the `BM_SCALING_ANTHRO_FILE` BM statement:
 
-```{toctree}
-:maxdepth: 1
-
-lesson1
-lesson2
-lesson3
+```AnyScriptDoc
+#path BM_SCALING_ANTHRO_FILE "My_Own_AnyMan.any"
 ```
 
-```{rst-class} without-title
-```
+This method is not recommended for new models, but it is still supported for older models.
 
-:::{seealso}
-**Next lesson:** Now head for {doc}`lesson1`.
+:::{admonition} **Next lesson:**
+:class: seealso
+Now head for {doc}`lesson1`.
 :::
 
 % ..  image:: _static/intro/image1.jpeg

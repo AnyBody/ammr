@@ -1,0 +1,293 @@
+//This is the calibration1 file, it will calibrate all muscle in the leg in
+//a neutral position (all joint angles in the drivers are zero)
+//The subsequent calibrations 2 and 3 will overwrite some of the values
+//obtained in this study
+
+AnyFolder LegCalHip =
+{  
+  AnyComponentDefinition obj = {};  
+  AnyFolder &Pelvis = ...BodyModel.Trunk.SegmentsLumbar.PelvisSeg;
+  AnyFolder &Sacrum = ...BodyModel.Trunk.SegmentsLumbar.SacrumSeg;
+  
+  // Segments needed for the Psoas Major muscles
+  AnyFolder &SegmentsLumbar = ...BodyModel.Trunk.SegmentsLumbar;
+  AnyFolder &Thorax = ...BodyModel.Trunk.SegmentsThorax.ThoraxSeg;
+  
+  AnyFolder &LegSegSide = .SideHumanFolderRef.Leg.Seg;
+  
+  AnyFolder &LegJointsSide = .SideHumanFolderRef.Leg.Jnt;
+  AnyFolder &TrunkJoints = ...BodyModel.Trunk.JointsLumbar;
+  
+  AnyFolder &MusCalSide =  .SideHumanFolderRef.Leg.Mus;
+  
+  
+  // Hip position variables // Flexion - Abduction - internal rotation 
+  AnyFloat HipInternalRot      = {   0,   0,  35} * pi/180;
+  AnyFloat HipAdducted         = {   5, -25,   0} * pi/180;
+  AnyFloat HipFlexedKneeMedial = { 120, -15,   0} * pi/180;
+  AnyFloat MaxHipFlex          = { 120,   0,   0} * pi/180;
+  AnyFloat FlexedOpenHip       = {  90,  30,   0} * pi/180;
+  AnyFloat ExtendedOpenHip     = {   0,  85,  80} * pi/180;
+  AnyFloat MaxHipExtension     = { -20,   0,   0} * pi/180;
+  AnyFloat HipExtensionAdduct  = { -15, -25,   0} * pi/180;
+  AnyFloat HipExternalRot      = {   0,   0, -45} * pi/180;
+  
+  
+  AnyFloat KneeFlexed      = { 155} * pi/180;
+  AnyFloat KneeExtended    = {  -3} * pi/180;
+  
+  AnyFloat HipPositionData = repmat(1,2,{
+      HipInternalRot,
+      HipAdducted,
+      HipFlexedKneeMedial,
+      MaxHipFlex,
+      FlexedOpenHip,
+      ExtendedOpenHip,
+      MaxHipExtension,
+      HipExtensionAdduct,
+      HipExternalRot
+  }'); // columns repeated twice
+  AnyFloat KneePositions = flatten({repmat(9,KneeFlexed),repmat(9,KneeExtended)});
+  
+  
+  AnyFixedRefFrame ground = 
+  {
+    AnyRefNode node = 
+    { 
+      ARel=..Pelvis.Axes0;
+      sRel=..Pelvis.r0;
+    };
+  };
+
+  AnyKinEq ThoraxFix = 
+  {
+    AnyKinMeasure& PelvisThoraxExtension = ....BodyModel.Interface.Trunk.PelvisThoraxExtension;
+    AnyKinMeasure& PelvisThoraxLateralBending = ....BodyModel.Interface.Trunk.PelvisThoraxLateralBending;
+    AnyKinMeasure& PelvisThoraxRotation = ....BodyModel.Interface.Trunk.PelvisThoraxRotation;
+  };
+  
+  AnyKinEq PelvisFix = 
+  {
+    AnyKinLinear Lin = 
+    {
+      AnyRefFrame &ground = ..ground.node;
+      AnyRefFrame &Pelvis = .....BodyModel.Trunk.SegmentsLumbar.PelvisSeg;
+    };
+    AnyKinRotational Rot = 
+    {
+      Type = RotAxesAngles;
+      AnyRefFrame &ground = ..ground.node;
+      AnyRefFrame &Pelvis = .....BodyModel.Trunk.SegmentsLumbar.PelvisSeg;
+    };
+  };
+  
+  AnyKinEqInterPolDriver Hip = 
+  {
+    AnyKinRotational &Spherical = ..SideInterfaceFolderRef.HipFlexion.HipMeasure;
+    Type = PiecewiseLinear;
+    T = linspace(0,1,SizesOf(Data)[1]);
+    Data = .HipPositionData;
+    Reaction.Type = {Off, Off, Off};
+  };
+  
+  AnyKinEqInterPolDriver Knee = 
+  {
+    AnyKinMeasure& Hinge = ..SideInterfaceFolderRef.KneeFlexion;
+    Type = PiecewiseLinear;
+    T = linspace(0,1,SizesOf(Data)[1]);
+    Data = {.KneePositions}; // ? degrees knee flexion
+    Reaction.Type = {Off};
+  };
+  
+  #if BM_FOOT_MODEL == _FOOT_MODEL_DEFAULT_
+  AnyKinEqInterPolDriver Ankle = 
+  {
+    AnyKinMeasure& Hinge = ..SideInterfaceFolderRef.AnklePlantarFlexion;
+    Type = PiecewiseLinear;
+    T =      {0.0, 1.0};
+    Data = {{0,0}}*pi/180;
+    Reaction.Type = {Off};
+  };
+  
+  AnyKinEqInterPolDriver SubTalar = 
+  {
+    AnyKinMeasure& Hinge = ..SideInterfaceFolderRef.SubTalarEversion;
+    Type = PiecewiseLinear;
+    T =      {0.0, 1.0};
+    Data = {{0,0}}*pi/180;
+    Reaction.Type = {Off};
+  };
+  #endif
+  
+  AnyString MusPrefix = CompleteNameOf(&.SideHumanFolderRef.Leg.Mus);
+  
+  AnyObjectPtrArray GluteusMaximusMuscles = ObjSearch(MusPrefix+".GluteusMaximus*", "AnyMuscle");
+  AnyFloat  GluteusMaximusRmin = repmat(NumElemOf(GluteusMaximusMuscles), ..RMin);
+  AnyFloat  GluteusMaximusRmax = repmat(NumElemOf(GluteusMaximusMuscles), ..RMax);
+  
+  AnyObjectPtrArray GluteusMediusMuscles = ObjSearch(MusPrefix+".GluteusMedius*", "AnyMuscle");
+  AnyFloat  GluteusMediusRmin = repmat(NumElemOf(GluteusMediusMuscles), ..RMin);
+  AnyFloat  GluteusMediusRmax = repmat(NumElemOf(GluteusMediusMuscles), ..RMax);
+
+  AnyObjectPtrArray GluteusMinimusMuscles = ObjSearch(MusPrefix+".GluteusMinimus*", "AnyMuscle");
+  AnyFloat  GluteusMinimusRmin = repmat(NumElemOf(GluteusMinimusMuscles), ..RMin);
+  AnyFloat  GluteusMinimusRmax = repmat(NumElemOf(GluteusMinimusMuscles), ..RMax);
+  
+  AnyObjectPtrArray PiriformisMuscles = ObjSearch(MusPrefix+".Piriformis*", "AnyMuscle");
+  AnyFloat  PiriformisRmin = repmat(NumElemOf(PiriformisMuscles), ..RMin);
+  AnyFloat  PiriformisRmax = repmat(NumElemOf(PiriformisMuscles), ..RMax);
+  
+  AnyObjectPtrArray GemellusMuscles = ObjSearch(MusPrefix+".Gemellus*", "AnyMuscle");
+  AnyFloat  GemellusRmin = repmat(NumElemOf(GemellusMuscles), ..RMin);
+  AnyFloat  GemellusRmax = repmat(NumElemOf(GemellusMuscles), ..RMax);
+  
+  AnyObjectPtrArray ObturatorInternusMuscles = ObjSearch(MusPrefix+".ObturatorInternus*", "AnyMuscle");
+  AnyFloat  ObturatorInternusRmin = repmat(NumElemOf(ObturatorInternusMuscles), ..RMin);
+  AnyFloat  ObturatorInternusRmax = repmat(NumElemOf(ObturatorInternusMuscles), ..RMax);
+  
+  AnyObjectPtrArray ObturatorExternusMuscles = ObjSearch(MusPrefix+".ObturatorExternus*", "AnyMuscle");
+  AnyFloat  ObturatorExternusRmin = repmat(NumElemOf(ObturatorExternusMuscles), ..RMin);
+  AnyFloat  ObturatorExternusRmax = repmat(NumElemOf(ObturatorExternusMuscles), ..RMax);
+  
+  AnyObjectPtrArray QuadratusFemorisMuscles = ObjSearch(MusPrefix+".QuadratusFemoris*", "AnyMuscle");
+  AnyFloat  QuadratusFemorisRmin = repmat(NumElemOf(QuadratusFemorisMuscles), ..RMin);
+  AnyFloat  QuadratusFemorisRmax = repmat(NumElemOf(QuadratusFemorisMuscles), ..RMax);
+  
+  AnyObjectPtrArray AdductorMagnusMuscles = ObjSearch(MusPrefix+".AdductorMagnus*", "AnyMuscle");
+  AnyFloat  AdductorMagnusRmin = repmat(NumElemOf(AdductorMagnusMuscles), ..RMin);
+  AnyFloat  AdductorMagnusRmax = repmat(NumElemOf(AdductorMagnusMuscles), ..RMax);
+  
+  AnyObjectPtrArray AdductorLongusMuscles = ObjSearch(MusPrefix+".AdductorLongus*", "AnyMuscle");
+  AnyFloat  AdductorLongusRmin = repmat(NumElemOf(AdductorLongusMuscles), ..RMin);
+  AnyFloat  AdductorLongusRmax = repmat(NumElemOf(AdductorLongusMuscles), ..RMax);
+  
+  AnyObjectPtrArray AdductorBrevisMuscles = ObjSearch(MusPrefix+".AdductorBrevis*", "AnyMuscle");
+  AnyFloat  AdductorBrevisRmin = repmat(NumElemOf(AdductorBrevisMuscles), ..RMin);
+  AnyFloat  AdductorBrevisRmax = repmat(NumElemOf(AdductorBrevisMuscles), ..RMax);
+  
+  AnyObjectPtrArray PectineusMuscles = ObjSearch(MusPrefix+".Pectineus*", "AnyMuscle");
+  AnyFloat  PectineusRmin = repmat(NumElemOf(PectineusMuscles), ..RMin);
+  AnyFloat  PectineusRmax = repmat(NumElemOf(PectineusMuscles), ..RMax);
+  
+  AnyObjectPtrArray IliacusMuscles = ObjSearch(MusPrefix+".Iliacus*", "AnyMuscle");
+  AnyFloat  IliacusRmin = repmat(NumElemOf(IliacusMuscles), ..RMin);
+  AnyFloat  IliacusRmax = repmat(NumElemOf(IliacusMuscles), ..RMax);
+  
+  // Psoas muscles are created in the trunk folder, and search function is not returning pointers  
+  AnyObjectPtrArray PsoasMajorMuscles = ObjSearch(CompleteNameOf(&.SidePsoasRef)+".PM*", "AnyMuscle");
+  AnyFloat  PsoasMajorRmin = repmat(NumElemOf(PsoasMajorMuscles), ..RMin);
+  AnyFloat  PsoasMajorRmax = repmat(NumElemOf(PsoasMajorMuscles), ..RMax);
+  
+  // Two-joint muscles
+  
+  AnyObjectPtrArray TensorFasciaeLataeMuscles = ObjSearch(MusPrefix+".TensorFasciaeLatae*", "AnyMuscle");
+  AnyFloat  TensorFasciaeLataeRmin = repmat(NumElemOf(TensorFasciaeLataeMuscles), ..RMin);
+  AnyFloat  TensorFasciaeLataeRmax = repmat(NumElemOf(TensorFasciaeLataeMuscles), ..RMax);
+  
+  AnyObjectPtrArray RectusFemorisMuscles = ObjSearch(MusPrefix+".RectusFemoris*", "AnyMuscle");
+  AnyFloat  RectusFemorisRmin = repmat(NumElemOf(RectusFemorisMuscles), ..RMin);
+  AnyFloat  RectusFemorisRmax = repmat(NumElemOf(RectusFemorisMuscles), ..RMax);
+  
+  AnyObjectPtrArray SartoriusMuscles = ObjSearch(MusPrefix+".Sartorius*", "AnyMuscle");
+  AnyFloat  SartoriusRmin = repmat(NumElemOf(SartoriusMuscles), ..RMin);
+  AnyFloat  SartoriusRmax = repmat(NumElemOf(SartoriusMuscles), ..RMax);
+  
+  AnyObjectPtrArray GracilisMuscles = ObjSearch(MusPrefix+".Gracilis*", "AnyMuscle");
+  AnyFloat  GracilisRmin = repmat(NumElemOf(GracilisMuscles), ..RMin);
+  AnyFloat  GracilisRmax = repmat(NumElemOf(GracilisMuscles), ..RMax);
+  
+  AnyObjectPtrArray BicepsFemorisMuscles = ObjSearch(MusPrefix+".BicepsFemoris*", "AnyMuscle");
+  AnyFloat  BicepsFemorisRmin = repmat(NumElemOf(BicepsFemorisMuscles), ..RMin);
+  AnyFloat  BicepsFemorisRmax = repmat(NumElemOf(BicepsFemorisMuscles), ..RMax);
+  
+  AnyObjectPtrArray SemimembranosusMuscles = ObjSearch(MusPrefix+".Semimembranosus*", "AnyMuscle");
+  AnyFloat  SemimembranosusRmin = repmat(NumElemOf(SemimembranosusMuscles), ..RMin);
+  AnyFloat  SemimembranosusRmax = repmat(NumElemOf(SemimembranosusMuscles), ..RMax);
+  
+  AnyObjectPtrArray SemitendinosusMuscles = ObjSearch(MusPrefix+".Semitendinosus*", "AnyMuscle");
+  AnyFloat  SemitendinosusRmin = repmat(NumElemOf(SemitendinosusMuscles), ..RMin);
+  AnyFloat  SemitendinosusRmax = repmat(NumElemOf(SemitendinosusMuscles), ..RMax);  
+};
+
+// The study: Operations to be performed on the model
+AnyBodyCalibrationStudy LegCalibrationStudyHip = {
+  AnyFolder &ref=.LegCalHip; 
+  nStep = 18;
+  FiberAndTendonLengthAdjustment.CalibrateTendonAtMaxForceOnOff = On;
+  Kinematics.SmallStepAssumptionOnOff = Off;
+  InitialConditions.SmallStepAssumptionOnOff = Off;
+  Kinematics.PosAnalysisOnlyOnOff = On;
+  InitialConditions.PosAnalysisOnlyOnOff = On;
+  
+  MuscleArr = arrcat(arrcat(arrcat(
+      ref.GluteusMaximusMuscles,
+      ref.GluteusMediusMuscles,
+      ref.GluteusMinimusMuscles,
+      ref.PiriformisMuscles,
+      ref.GemellusMuscles,
+      ref.ObturatorInternusMuscles,
+      ref.ObturatorExternusMuscles,
+      ref.QuadratusFemorisMuscles,
+      ref.AdductorMagnusMuscles,
+      ref.AdductorLongusMuscles),
+      ref.AdductorBrevisMuscles,
+      ref.PectineusMuscles,
+      ref.IliacusMuscles,
+      ref.PsoasMajorMuscles,
+      ref.TensorFasciaeLataeMuscles,
+      ref.RectusFemorisMuscles,
+      ref.SartoriusMuscles,
+      ref.GracilisMuscles,
+      ref.BicepsFemorisMuscles),
+      ref.SemimembranosusMuscles,
+      ref.SemitendinosusMuscles
+  );
+  RminMuscleFiber = arrcat(arrcat(arrcat(
+      ref.GluteusMaximusRmin,
+      ref.GluteusMediusRmin,
+      ref.GluteusMinimusRmin,
+      ref.PiriformisRmin,
+      ref.GemellusRmin,
+      ref.ObturatorInternusRmin,
+      ref.ObturatorExternusRmin,
+      ref.QuadratusFemorisRmin,
+      ref.AdductorMagnusRmin,
+      ref.AdductorLongusRmin),
+      ref.AdductorBrevisRmin,
+      ref.PectineusRmin,
+      ref.IliacusRmin,
+      ref.PsoasMajorRmin,
+      ref.TensorFasciaeLataeRmin,
+      ref.RectusFemorisRmin,
+      ref.SartoriusRmin,
+      ref.GracilisRmin,
+      ref.BicepsFemorisRmin),
+      ref.SemimembranosusRmin,
+      ref.SemitendinosusRmin
+  );
+  RmaxMuscleFiber = arrcat(arrcat(arrcat(
+      ref.GluteusMaximusRmax,
+      ref.GluteusMediusRmax,
+      ref.GluteusMinimusRmax,
+      ref.PiriformisRmax,
+      ref.GemellusRmax,
+      ref.ObturatorInternusRmax,
+      ref.ObturatorExternusRmax,
+      ref.QuadratusFemorisRmax,
+      ref.AdductorMagnusRmax,
+      ref.AdductorLongusRmax),
+      ref.AdductorBrevisRmax,
+      ref.PectineusRmax,
+      ref.IliacusRmax,
+      ref.PsoasMajorRmax,
+      ref.TensorFasciaeLataeRmax,
+      ref.RectusFemorisRmax,
+      ref.SartoriusRmax,
+      ref.GracilisRmax,
+      ref.BicepsFemorisRmax),
+      ref.SemimembranosusRmax,
+      ref.SemitendinosusRmax
+  );
+  
+};
+

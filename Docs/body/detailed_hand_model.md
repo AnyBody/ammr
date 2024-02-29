@@ -12,6 +12,12 @@ be used for dynamic analysis.
 
 Short example of how to configure and enable the model:
 
+:::{seealso}
+:class: margin
+The {doc}`Arm configuration parameters <../bm_config/arm>` for a
+full list of parmaeters.
+:::
+
 ```AnyScriptDoc
 #define BM_ARM_DETAILED_HAND  ON
 #define BM_MANNEQUIN_DRIVER_HAND_RIGHT ON
@@ -47,10 +53,5 @@ Your browser does not support the video tag.
 </video>
 ```
 
-```{rst-class} float-right
-```
 
-:::{seealso}
-The {doc}`Arm configuration parameters <../bm_config/arm>` for a
-full list of parmaeters.
-:::
+

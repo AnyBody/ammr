@@ -10,7 +10,7 @@ developed by Dr. Mark de Zee at Aarhus University, Denmark and
 and presented at several scientific meetings. [^cite_dezee2007]
 
 :::{seealso}
-{ref}`sphx_glr_auto_examples_Validation_plot_MandibleModel.py` for an
+{ref}`example_mandiblemodel` for an
 example of how the model is used.
 :::
 

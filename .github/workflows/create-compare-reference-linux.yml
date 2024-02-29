@@ -1,9 +1,9 @@
 name: Save compare reference (Linux worker)
 
 on:
-  push:
-    tags:
-      - 'ammr-*'
+#  push:
+#    tags:
+#      - 'ammr-*'
   workflow_dispatch:
     inputs:
       git_reference:
@@ -23,7 +23,12 @@ concurrency:
 
 jobs:
   save_compare_test_data:
-    runs-on: [self-hosted, linux]
+    if: github.repository_owner == 'anybody'
+    runs-on: [self-hosted-linux]
+    strategy:
+      matrix:
+        include:
+          - ams_version: "7.5_Beta"
     env:
       GIT_REFERENCE: ${{ github.event.inputs.git_reference || github.ref }}
 
@@ -33,13 +38,13 @@ jobs:
           echo ${{ github.event.inputs.debug_config }} >> $GITHUB_ENV
 
       - name: Checkout repository at ${{ env.GIT_REFERENCE }}
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           ref: ${{ env.GIT_REFERENCE }}
           fetch-depth: 0
 
       - id: RunAnyBody
-        uses: anybody/anybodycon-action@7.3.4
+        uses: anybody/anybodycon-action@$v{{ matrix.ams_version }}
         with:
           license_server_password: ${{ secrets.LICENSE_PASSWORD }}
           license_server: ${{ secrets.LICENSE_SERVER }}

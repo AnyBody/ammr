@@ -105,4 +105,7 @@ HTMLTranslator.depart_literal = html_depart_literal
 
 
 def setup(app):
-    pass
+    return {
+        'parallel_read_safe': True,
+        'parallel_write_safe': True,
+    }

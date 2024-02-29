@@ -18,7 +18,7 @@ The work was supported by the Sapere Aude program of the Danish Council for
 Independent Research under grant number: DFF‐4184‐00018.
 
 :::{seealso}
-{ref}`sphx_glr_auto_examples_Validation_plot_AalborgMandible.py` for an
+{ref}`example_aalborgmandible` for an
 example of how the model is used.
 :::
 

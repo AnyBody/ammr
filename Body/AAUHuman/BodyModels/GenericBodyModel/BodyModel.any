@@ -6,6 +6,7 @@ AnyFolder BodyModel = {
   
   // The folder containing the selected human model output.
   AnyFolder SelectedOutput = {
+    
     AnyFolder Trunk = {};
   };
   
@@ -13,13 +14,15 @@ AnyFolder BodyModel = {
   // Check for non-allowed combinations
   // **********************************
     
-  
-  #define ERROR (ErrorMessage) AnyMessage UnhallowedCombination = { TriggerPreProcess = On; Type = MSG_ErrorFatal; Message = ErrorMessage; };
+  #ifdef ERROR_UNALLOWED_COMBINATION
+  #undef ERROR_UNALLOWED_COMBINATION
+  #endif
+  #define ERROR_UNALLOWED_COMBINATION (ErrorMessage) AnyMessage UnallowedCombination = { TriggerPreProcess = On; Type = MSG_ErrorFatal; Message = ErrorMessage; };
   
   
   #if (BM_LEG_RIGHT > 1) | (BM_LEG_LEFT > 1)
     #ifndef FORBIDDEN_COMBINATION
-    ERROR ("BM_LEG_RIGHT/LEFT are only used switch Legs ON/OFF. Please use BM_LEG_MODEL to set the model type.")
+    ERROR_UNALLOWED_COMBINATION ("BM_LEG_RIGHT/LEFT are only used switch Legs ON/OFF. Please use BM_LEG_MODEL to set the model type.")
     #define FORBIDDEN_COMBINATION
     #endif
   #endif  
@@ -29,7 +32,7 @@ AnyFolder BodyModel = {
     #if !((BM_ARM_RIGHT & BM_ARM_MUSCLES_RIGHT) | (BM_ARM_LEFT & BM_ARM_MUSCLES_LEFT))
     #ifdef FORBIDDEN_COMBINATION
       #else
-      ERROR ("Combination is forbidden: As some neck muscles are in the shoulder model, the neck model with muscles must be used with the neck part of the shoulder muscles to be complete.")
+      ERROR_UNALLOWED_COMBINATION ("Combination is forbidden: As some neck muscles are in the shoulder model, the neck model with muscles must be used with the neck part of the shoulder muscles to be complete.")
       #define FORBIDDEN_COMBINATION
       #endif
     #endif
@@ -40,7 +43,7 @@ AnyFolder BodyModel = {
     #if (BM_LEG_RIGHT | BM_LEG_LEFT) & (BM_LEG_MODEL != _LEG_MODEL_TLEM2_)
     #ifdef FORBIDDEN_COMBINATION
       #else
-      ERROR ("Combination is forbidden: The GM Foot model only works with the TLEM2 leg model")
+      ERROR_UNALLOWED_COMBINATION ("Combination is forbidden: The GM Foot model only works with the TLEM2 leg model")
       #define FORBIDDEN_COMBINATION
       #endif
     #endif
@@ -51,7 +54,7 @@ AnyFolder BodyModel = {
 //    #if (BM_LEG_RIGHT | BM_LEG_LEFT) & (BM_LEG_MODEL != _LEG_MODEL_TLEM2_ & BM_LEG_MODEL != _LEG_MODEL_TLEM1_)
 //    #ifdef FORBIDDEN_COMBINATION
 //      #else
-//      ERROR ("Combination is forbidden: Disabling the default feet are only allowed with the TLEM1/2 leg models")
+//      ERROR_UNALLOWED_COMBINATION ("Combination is forbidden: Disabling the default feet are only allowed with the TLEM1/2 leg models")
 //      #define FORBIDDEN_COMBINATION
 //      #endif
 //    #endif
@@ -97,7 +100,9 @@ AnyFolder BodyModel = {
   
     #include "RightLegModel.any"
     
-    IndividualMasses = {AnyVar RightLegMass = .Right.Leg.MassSummation.Mass;};
+    IndividualMasses = {
+      AnyVar RightLegMass = .Right.Leg.MassSummation.Mass;
+    };
   
   #else
     IndividualMasses = {AnyVar RightLegMass = 0;};
@@ -119,7 +124,9 @@ AnyFolder BodyModel = {
   
     #include "LeftLegModel.any"
     
-    IndividualMasses = {AnyVar LeftLegMass = .Left.Leg.MassSummation.Mass;};
+    IndividualMasses = {
+      AnyVar LeftLegMass = .Left.Leg.MassSummation.Mass;
+    };
   
   #else
     IndividualMasses = {AnyVar LeftLegMass = 0;};
@@ -136,19 +143,19 @@ AnyFolder BodyModel = {
   
   
   
-  #if BM_LEG_RIGHT & (BM_LEG_MODEL == _LEG_MODEL_TLEM_ | BM_LEG_MODEL == _LEG_MODEL_TLEM2_)
+  #if BM_LEG_RIGHT & BM_LEG_MODEL_IS_TLEM
       
     #include "RightLegTDModel.any"
     
     IndividualMasses = {AnyVar RightLegTDMass = .Right.Leg.MassSummation.Mass;};
-      
+
   #else
     IndividualMasses = {AnyVar RightLegTDMass = 0;};
   #endif
   
   
   
-  #if BM_LEG_LEFT & (BM_LEG_MODEL == _LEG_MODEL_TLEM_ | BM_LEG_MODEL == _LEG_MODEL_TLEM2_)
+  #if BM_LEG_LEFT & BM_LEG_MODEL_IS_TLEM
       
     #include "LeftLegTDModel.any"
     
@@ -178,23 +185,10 @@ AnyFolder BodyModel = {
   
   
   AnyFolder Interface = {
-        AnyKinCoM CenterOfMass = {
-          #if  BM_ARM_RIGHT
-          AnyFolder &RightArmSeg = ..Right.ShoulderArm.Seg;
-          #endif
-          #if  BM_ARM_LEFT
-          AnyFolder &LeftArmSeg = ..Left.ShoulderArm.Seg;
-          #endif
-          #if BM_LEG_RIGHT
-          AnyFolder &RightLegSeg = ..Right.Leg.Seg;
-          #endif          
-          #if BM_LEG_LEFT
-          AnyFolder &LeftLegSeg = ..Left.Leg.Seg;
-          #endif
-          AnyFolder &TrunkSegmentsLumbar = ..Trunk.SegmentsLumbar;
-          AnyFolder &TrunkSegmentsThorax = ..Trunk.SegmentsThorax;
-          AnyFolder &TrunkSegmentsCervicalSpine = ..Trunk.SegmentsCervicalSpine;
-        };  
+    AnyKinCoM CenterOfMass = {
+      RefFrames = ObjSearchRecursive( &...BodyModel, "*", "AnySeg");
+    };  
+ 
   };
   
   AnyFolder IndividualMasses = {};

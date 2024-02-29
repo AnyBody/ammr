@@ -25,7 +25,7 @@ defined in a special file that contains segmental scaling vectors.
       
       AnyFolder Foot = { AnyVar MassScale = (....Anthropometrics.SegmentMasses.Right.Foot ) / ...StandardParameters.Right.Foot.Mass; };
       AnyFolder Talus = { AnyVar MassScale = ....Anthropometrics.SegmentMasses.Right.Talus / ...StandardParameters.Right.Talus.Mass; };  
-      AnyFolder Shank = { AnyVar MassScale = ....Anthropometrics.SegmentMasses.Right.Shank / ...StandardParameters.Right.Shank.Mass; };
+      AnyFolder Shank = { AnyVar MassScale = (....Anthropometrics.SegmentMasses.Right.Shank) / (...StandardParameters.Right.Shank.Mass+...StandardParameters.Right.Patella.Mass); };
       AnyFolder Thigh = { AnyVar MassScale = ....Anthropometrics.SegmentMasses.Right.Thigh / ...StandardParameters.Right.Thigh.Mass; };  
     };
     AnyFolder Left = 
@@ -39,7 +39,7 @@ defined in a special file that contains segmental scaling vectors.
       
       AnyFolder Foot = { AnyVar MassScale = ....Anthropometrics.SegmentMasses.Left.Foot  / ...StandardParameters.Left.Foot.Mass; };
       AnyFolder Talus = { AnyVar MassScale = ....Anthropometrics.SegmentMasses.Left.Talus / ...StandardParameters.Left.Talus.Mass; };  
-      AnyFolder Shank = { AnyVar MassScale = ....Anthropometrics.SegmentMasses.Left.Shank / ...StandardParameters.Left.Shank.Mass; };
+      AnyFolder Shank = { AnyVar MassScale = (....Anthropometrics.SegmentMasses.Left.Shank) / (...StandardParameters.Right.Shank.Mass+...StandardParameters.Left.Patella.Mass); };
       AnyFolder Thigh = { AnyVar MassScale = ....Anthropometrics.SegmentMasses.Left.Thigh / ...StandardParameters.Left.Thigh.Mass; };  
     };
   };
@@ -408,31 +408,49 @@ defined in a special file that contains segmental scaling vectors.
       AnyFloat LengthScale = ...Anthropometrics.SegmentScaleFactors.Pelvis.LengthScale;
       AnyFloat DepthScale  = ...Anthropometrics.SegmentScaleFactors.Pelvis.DepthScale;
       AnyFloat WidthScale  = ...Anthropometrics.SegmentScaleFactors.Pelvis.WidthScale;
-      
-      AnyFunTransform3DLin ScaleFunction = 
-      {
-          ScaleMat ={
-            {.DepthScale, 0.0,          0.0        }, 
-            {0.0,         .LengthScale, 0.0        },            
-            {0.0,         0.0,          .WidthScale}
-          }; 
-          Offset = {0, 0, 0};
-      };      
+
+      AnyFunTransform3DLin ScaleFunction = {
+        ScaleMat = diag({.DepthScale, .LengthScale, .WidthScale});
+        AnyMatrix ScaleMatInverse = diag({1/.DepthScale, 1/.LengthScale, 1/.WidthScale}); 
+        Offset = {0, 0, 0};
+      };
     };
     
+    AnyFolder Lumbar = {
+      AnyFloat LengthScale = ...Anthropometrics.SegmentScaleFactors.Lumbar.LengthScale;
+      AnyFloat DepthScale  = ...Anthropometrics.SegmentScaleFactors.Lumbar.DepthScale;
+      AnyFloat WidthScale  = ...Anthropometrics.SegmentScaleFactors.Lumbar.WidthScale;
+
+      AnyFloat OriginUnscaled ??= warn(
+        0, "To ensure continuity in the scaling law the lumbar origin must be specified"
+      );
+
+      AnyFunTransform3DLin ScaleFunction = {
+        ScaleMat = diag({.DepthScale, .LengthScale, .WidthScale});
+        AnyMatrix ScaleMatInverse = diag({1/.DepthScale, 1/.LengthScale, 1/.WidthScale});
+      
+        Offset = (
+          ..Pelvis.ScaleFunction(.OriginUnscaled) - (.OriginUnscaled * ScaleMat')
+        ) * ScaleMatInverse;
+      };
+    };
+
     AnyFolder Thorax = {
       AnyFloat LengthScale = ...Anthropometrics.SegmentScaleFactors.Thorax.LengthScale;
       AnyFloat DepthScale  = ...Anthropometrics.SegmentScaleFactors.Thorax.DepthScale;
       AnyFloat WidthScale  = ...Anthropometrics.SegmentScaleFactors.Thorax.WidthScale;
       
-      AnyFunTransform3DLin ScaleFunction = 
-      {
-          ScaleMat ={
-            {.DepthScale, 0.0,          0.0        }, 
-            {0.0,         .LengthScale, 0.0        },            
-            {0.0,         0.0,          .WidthScale}
-          }; 
-          Offset = {0, 0, 0};
+      AnyFloat OriginUnscaled ??= warn(
+        0, "To ensure continuity in the scaling law the thoracic origin must be specified"
+      );
+
+      AnyFunTransform3DLin ScaleFunction = {
+        ScaleMat = diag({.DepthScale, .LengthScale, .WidthScale}); 
+        AnyMatrix ScaleMatInverse = diag({1/.DepthScale, 1/.LengthScale, 1/.WidthScale});
+
+        Offset = (
+          ..Lumbar.ScaleFunction(.OriginUnscaled) - (.OriginUnscaled * ScaleMat')
+        ) * ScaleMatInverse;
       };      
     };
     
@@ -441,14 +459,10 @@ defined in a special file that contains segmental scaling vectors.
       AnyFloat DepthScale  = ...Anthropometrics.SegmentScaleFactors.Head.DepthScale;
       AnyFloat WidthScale  = ...Anthropometrics.SegmentScaleFactors.Head.WidthScale;
       
-      AnyFunTransform3DLin ScaleFunction = 
-      {
-          ScaleMat ={
-            {.DepthScale, 0.0,          0.0        }, 
-            {0.0,         .LengthScale, 0.0        },            
-            {0.0,         0.0,          .WidthScale}
-          }; 
-          Offset = {0, 0, 0};
+      AnyFunTransform3DLin ScaleFunction = {
+        ScaleMat = diag({.DepthScale, .LengthScale, .WidthScale}); 
+        AnyMatrix ScaleMatInverse = diag({1/.DepthScale, 1/.LengthScale, 1/.WidthScale});
+        Offset = {0, 0, 0};
       };      
     };
     
@@ -457,66 +471,17 @@ defined in a special file that contains segmental scaling vectors.
       AnyFloat DepthScale  = ...Anthropometrics.SegmentScaleFactors.Neck.DepthScale;
       AnyFloat WidthScale  = ...Anthropometrics.SegmentScaleFactors.Neck.WidthScale;
       
-      AnyFunTransform3DLin ScaleFunction = 
-      {
-          ScaleMat ={
-            {.DepthScale, 0.0,          0.0        }, 
-            {0.0,         .LengthScale, 0.0        },            
-            {0.0,         0.0,          .WidthScale}
-          }; 
-          Offset = {0, 0, 0};
-      };      
+      AnyFloat OriginUnscaled ??= warn(
+        0, "To ensure continuity in the scaling law the cervical origin must be specified"
+      );
+
+      AnyFunTransform3DLin ScaleFunction = {
+        ScaleMat = diag({.DepthScale, .LengthScale, .WidthScale}); 
+        AnyMatrix ScaleMatInverse = diag({1/.DepthScale, 1/.LengthScale, 1/.WidthScale});
+
+        Offset = (
+          ..Thorax.ScaleFunction(.OriginUnscaled) - (.OriginUnscaled * ScaleMat')
+        ) * ScaleMatInverse;
+      };   
     };
-    
-    AnyFolder &PelvisSeg = Pelvis;    
-    AnyFolder &SkullSeg = Head;
-    AnyFolder &ThoraxSeg = Thorax;
-    
-    AnyFolder &C1Seg = Cervical;
-    AnyFolder &C2Seg = Cervical;
-    AnyFolder &C3Seg = Cervical;
-    AnyFolder &C4Seg = Cervical;
-    AnyFolder &C5Seg = Cervical;
-    AnyFolder &C6Seg = Cervical;
-    AnyFolder &C7Seg = Cervical;
-    
-    AnyFolder &L1Seg = Lumbar;
-    AnyFolder &L2Seg = Lumbar;
-    AnyFolder &L3Seg = Lumbar;
-    AnyFolder &L4Seg = Lumbar;
-    AnyFolder &L5Seg = Lumbar;
-    AnyFolder &SacrumSeg = PelvisSeg;
-    
-    AnyFolder Lumbar = {
-      AnyFloat LengthScale = ...Anthropometrics.SegmentScaleFactors.Lumbar.LengthScale;
-      AnyFloat DepthScale  = ...Anthropometrics.SegmentScaleFactors.Lumbar.DepthScale;
-      AnyFloat WidthScale  = ...Anthropometrics.SegmentScaleFactors.Lumbar.WidthScale;
-      
-      AnyFunTransform3DLin ScaleFunction = 
-      {
-          ScaleMat ={
-            {.DepthScale, 0.0,          0.0        }, 
-            {0.0,         .LengthScale, 0.0        },            
-            {0.0,         0.0,          .WidthScale}
-          }; 
-          Offset = {0, 0, 0};
-      };      
-    };
-    
   };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

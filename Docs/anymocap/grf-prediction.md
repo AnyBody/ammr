@@ -25,7 +25,7 @@ This new functionality is now part of the AnyBody Managed Model Repository
 
 ## Adding ground force prediction to a model
 
-The {ref}`GRF example model <sphx_glr_auto_examples_MoCap_plot_Plug-in-gait_Simple_FullBody_GRFPrediction.py>`
+The {ref}`GRF example model <example_mocap_grf_prediction>`
 is already preconfigured to use the GRF prediction. But
 if you need to add GRF prediction to new model the following outlines the
 procedure.

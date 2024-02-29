@@ -1,14 +1,13 @@
 (the-body-model)=
 
-# The Body Models
+# Overview of Body Models
 
 Each body part is implemented utilizing data from detailed cadaver/anatomy
 studies, thus ensuring high accuracy and anatomical fidelity.
 
 See the section below for a more detailed description of the models and the underlying anatomical data.
 
-```{rubric} Background
-```
+::::{dropdown} **Background**
 
 The body models live in the `Body/` subfolder within your AMMR directory. The folder names and organization here depend on
 the origin of the models.
@@ -39,8 +38,8 @@ mandible) are by default assembled together into a full body model.
 See {doc}`/bm_config/index` for re-configuring the model to for example, only represent the trunk, or use a different leg/muscle model.
 :::
 
-```{rubric} Models
-```
+::::
+## Models
 
 ```{toctree}
 :caption: Trunk
@@ -65,8 +64,8 @@ Regensburg-Ulm hand model <regensburg_ulm_hand_model>
 :maxdepth: 1
 
 leg_model
-leg_tlem_model
-leg_tlem2_model
+TLEM 1 (deprecated) <leg_tlem_model>
+TLEM 2 <leg_tlem2_model>
 GM Foot model <glasgow_maastricht_foot_model>
 ```
 

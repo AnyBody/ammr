@@ -35,7 +35,7 @@ instantaneous visual feedback: `Body`, `Legs`, `Arms`,
 The complete configurable list of BM statements can be found in the
 `Advanced` tab:
 
-```{image} /_static/bm_plugin_3.png
+```{image} /_static/bm_plugin_3.PNG
 :align: center
 :width: 500
 ```
@@ -54,7 +54,7 @@ This structure of for the model's files is encouraged regardless
 if the BM-Plugin is used or not. The content of the configuration
 file can be seen in the `Script File` tab of the plugin:
 
-```{image} /_static/bm_plugin_4.png
+```{image} /_static/bm_plugin_4.PNG
 :align: center
 :width: 500
 ```
