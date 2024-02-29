@@ -28,17 +28,17 @@ jobs:
           cache-write: ${{ github.event_name == 'push' && github.ref_name == 'master' }}
   
       - name: Link check
+        shell: pixi run -e docs bash {0}
         run: |
           cd Docs
-          pixi run -e docs \
-            sphinx-build -M linkcheck . _build -W --keep-going -a -q 
+          sphinx-build -M linkcheck . _build -W --keep-going -a -q 
                             
       - name: Build Documentation
+        shell: pixi run -e docs bash {0}
         run: |
           cd Docs
-          pixi run -e docs clean
-          pixi run -e docs \
-            sphinx-build -M html . _build -W --keep-going -a -t draft
+          rm -rf _build
+          sphinx-build -M html . _build -W --keep-going -a -t draft
 
       - uses: actions/upload-artifact@v4
         with:
@@ -61,31 +61,16 @@ jobs:
           git checkout $(git describe --tags `git rev-list --tags=ammr* --max-count=1`);
       
       - uses: prefix-dev/setup-pixi@v0.5.1
-        continue-on-error: true
-        id: pixisetup
         with:
             environments: docs
             cache-write: ${{ github.event_name == 'push' && github.ref_name == 'master' }}
   
       - name: Build Documentation
-        if: steps.pixisetup.outcome == 'success'
+        shell: pixi run -e docs bash {0}
         run: |
           cd Docs
-          pixi run -e docs \
-           sphinx-build -M html . _build -a
-    
-      # Fall back to mamba when buildig old versions
-      - name: Install mamba
-        if: steps.pixisetup.outcome == 'failure'
-        uses: mamba-org/setup-micromamba@v1
-        with:
-          environment-file: Docs/environment.yaml
-            
-      - name: build with mamba
-        if: steps.pixisetup.outcome == 'failure'
-        shell: bash -leo pipefail {0} {0}
-        run: sphinx-build -M html Docs Docs/_build -a
-        
+          sphinx-build -M html . _build -a
+
       - uses: actions/upload-artifact@v4
         with:
           name: tagged-version
