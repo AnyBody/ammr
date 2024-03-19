@@ -3,6 +3,17 @@
 % A rendered version of the CHANGELOG is avaible here:
 %    https://anyscript.org/ammr/beta/changelog.html
 
+(ammr-3.0.1-changelog)=
+## AMMR 3.0.1 (2024-02-13)
+
+This minor release of AMMR contains no updates to the models compared to the major AMMR 3.0.0 released the previous month. It only has a few minor changes to the documentation and new tolerances in the FDK models. 
+
+### 🔧 Changed:
+
+* Finer FDK tolerances for the {ref}`Knee Simulator example
+  <example_kneesimulator>`, to take avantage of the improved robustness of the
+  AnyBody FDK solver in version 8.0.1. 
+
 
 (ammr-3.0-changelog)=
 ## AMMR 3.0 (2024-02-13)
