@@ -3,8 +3,9 @@
 # AnyBody Managed Model Repository 4 ✨ Beta
 > The beta version of the AMMR 4 with a full thoracic model and new abdominal pressure model
 
-> [!TIP]
-> For the the latest AMMR 4 release, with full thoracic model please see [AMMR4-beta](https://github.com/anybody/ammr4-beta)
+> [!IMPORTANT]
+An AnyBody license with active maintenance (or trial license) is required to use the models from GitHub. 
+Please see the [beta program](https://forum.anyscript.org/t/become-a-beta-tester/5056/6), or request a [trial license ](https://www.anybodytech.com/contact/)
 
 The AnyBody Model Repository (AMMR), is an open library of musculoskeletal
 models and examples for the [AnyBody Modeling
@@ -29,9 +30,6 @@ institutions. The models are maintained by [AnyBody
 Technology](https://www.anybodytech.com) who ensure that various body part models
 can be used together as a full body, scalable musculoskeletal model.
 
-> [!IMPORTANT]
-An AnyBody license with active maintenance is required to use the models from GitHub. 
-Please see the [beta program](https://forum.anyscript.org/t/become-a-beta-tester/5056/6), or request a [trial license ](https://www.anybodytech.com/contact/)
 
 
 
