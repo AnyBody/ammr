@@ -3,6 +3,14 @@
 % A rendered version of the CHANGELOG is avaible here:
 %    https://anyscript.org/ammr/beta/changelog.html
 
+(ammr-3.0.2-changelog)=
+## AMMR 3.0.2 (2024-02-13)
+
+### 🩹 Fixed:
+* Fixed a penetration warnings for the pectoralis muscles when the thoracic segments is scale very non-uniformly.
+  The fix involves a small (5 deg) adjustments to the orientation of the pectoralis wrapping surface. 
+
+
 (ammr-3.0.1-changelog)=
 ## AMMR 3.0.1 (2024-02-13)
 
