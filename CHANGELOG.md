@@ -3,6 +3,14 @@
 % A rendered version of the CHANGELOG is avaible here:
 %    https://anyscript.org/ammr/beta/changelog.html
 
+(ammr-3.0.2-changelog)=
+## AMMR 3.0.2 (2024-**-**)
+
+### 🩹 Fixed:
+
+* The foot marker position in the Xsens protocol has been updated to account for the changes to the foot anatomical frame introduced with the TLEM 2.2 leg model. The R/LTOE and
+  R/LTOE2 markers have been moved upwards by 1.5 cm. 
+
 (ammr-3.0.1-changelog)=
 ## AMMR 3.0.1 (2024-02-13)
 
