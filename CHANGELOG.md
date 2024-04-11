@@ -7,7 +7,7 @@
 ## AMMR 3.0.2 (2024-02-13)
 
 ### 🩹 Fixed:
-* Fixed a penetration warnings for the pectoralis muscles when the thoracic segments is scale very non-uniformly.
+* Fixed a penetration warning for the pectoralis muscles when the thoracic segments is scaled very non-uniformly.
   The fix involves a small (5 deg) adjustments to the orientation of the pectoralis wrapping surface. 
 
 
