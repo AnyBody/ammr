@@ -7,6 +7,8 @@
 ## AMMR 3.0.2 (2024-**-**)
 
 ### 🩹 Fixed:
+* Fixed a penetration warning for the pectoralis muscles when the thoracic segments is scaled very non-uniformly.
+  The fix involves a small (5 deg) adjustments to the orientation of the pectoralis wrapping surface. 
 
 * The foot marker position in the Xsens protocol has been updated to account for the changes to the foot anatomical frame introduced with the TLEM 2.2 leg model. The R/LTOE and
   R/LTOE2 markers have been moved upwards by 1.5 cm. 
