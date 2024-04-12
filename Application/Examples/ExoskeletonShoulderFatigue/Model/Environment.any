@@ -1,0 +1,296 @@
+AnyFolder Environment = {
+  //^ Environment files are used to include objects surrounding human,
+  //^ e.g. global reference frame
+  
+  AnyFixedRefFrame GlobalRef = 
+  {
+    AnyDrawRefFrame drw={ScaleXYZ=0.3*{1,1,1};};
+    
+    AnyRefNode RightFootPrint = {
+      //^ Positioning of the right foot. 
+      //^ Ground-foot constraints can be excluded with: #define EXCLUDE_FOOT_CONSTRAINTS
+      sRel = HeelPosition; 
+      ARel = RotMat({0,0,0}, ToeDirection, {0,10,0});
+      AnyDrawRefFrame drw = {RGB = {0,0.7,0}; ScaleXYZ = 0.1*{1,1,1};};
+    };
+    
+    AnyRefNode LeftFootPrint = {
+      //^ Positioning of the right foot. 
+      //^ Ground-foot constraints can be excluded with: #define EXCLUDE_FOOT_CONSTRAINTS
+      sRel = HeelPosition;
+      ARel = RotMat({0,0,0}, ToeDirection, {0,10,0});
+      AnyDrawRefFrame drw = {RGB = {0,0.7,0}; ScaleXYZ = 0.1*{1,1,1};};
+    };    
+  };  
+  
+  
+  ///////////////////////// INCLUDE DRILL AND OPTIONAL LOAD ON DRILL /////////////////////////
+  #include "Drill\Drill_Assem.any"
+  
+  Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Hand.Carpals.PalmJoint = {
+    AnyRefNode DrillNode = {
+      sRel = {0.005,-0.02,0};
+      ARel = {{0,-1,0},{0,0,1},{-1,0,0}}';
+    };
+  };
+  AnyKinEqSimpleDriver DrillDriver = {
+    
+    AnyKinLinear lin = 
+    {
+      AnyRefFrame& base = Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Hand.Carpals.PalmJoint.DrillNode;
+      AnyRefFrame& target = Main.Model.Environment.Drill_Assem.Drill.right2;
+      Ref = 0;
+    };
+    AnyKinRotational rot = 
+    {
+      AnyRefFrame& base = Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Hand.Carpals.PalmJoint.DrillNode;
+      AnyRefFrame& target = Main.Model.Environment.Drill_Assem.Drill.right2;
+      Type = RotAxesAngles;
+    };
+    DriverPos = {-0.01,-0.03,0,0,0,0};
+    DriverVel = {0,0,0,0,0,0};
+  };
+  
+  Main.Model.Environment.Drill_Assem.Drill = {
+    AnyRefNode DrillTip = {
+      sRel = {-0.075697433,	-2.53079e-5,	0.223077};
+    };
+  };
+
+  AnyForce3D HandLoad_R = {
+    AnyRefFrame &DrillTip = Main.Model.Environment.Drill_Assem.Drill.DrillTip;
+    Flocal = {0,0,0};
+    viewForce.Visible = On;
+  };
+
+  
+  ///////////////////////// INCLUDE EXO /////////////////////////  
+  #if USE_EXO == 1
+  #include "Exo.any"
+  
+  AnyVar ExoStiffnessConst = 150;
+  AnyFloat ArmExoAttachmentOffset = 0.08;
+  
+  
+  AnyForce SpringForceR = {
+    AnyKinMeasure &band = Main.Model.Environment.RightBand;
+    F = -.ExoStiffnessConst*band.Pos;
+  };
+  AnyForce SpringForceL = {
+    AnyKinMeasure &band = Main.Model.Environment.LeftBand;
+    F = -.ExoStiffnessConst*band.Pos;
+  };
+  
+  
+  AnyKinEqSimpleDriver ExoDriver = {
+    
+    AnyKinLinear lin = 
+    {
+      AnyRefFrame& base = Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.AnatomicalFrameTrunk;
+      AnyRefFrame& target = Main.Model.Environment.Exo.Part1___1.Coordinate__System3;
+      Ref = 0;
+    };
+    AnyKinRotational rot = 
+    {
+      AnyRefFrame& base = Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.AnatomicalFrameTrunk;
+      AnyRefFrame& target = Main.Model.Environment.Exo.Part1___1.Coordinate__System3;
+      Type = RotAxesAngles;
+    };
+    DriverPos = {-0.07,0.01,0,0,0,0};
+    DriverVel = {0,0,0,0,0,0};
+  };
+  
+  
+  AnySeg ArmLinkR = {
+    Mass = 0.5;
+    Jii = {1,0.5,1}*0.001;
+    r0 = Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Humerus.r0 + {0,-0.15,0}*Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Humerus.Axes0';
+    Axes0 = Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Humerus.Axes0;
+    AnyRefNode AttPoint = {sRel = {0,0,-0.045};};
+    AnyDrawSurf drw = {
+      RGB = {1,1,0};
+      FileName = "ArmLink.stl";
+      RelPos = {0,-0.04,0};
+      RelRotMat = RotMat(-0.5*pi,x);
+    };
+  };
+  AnySeg ArmLinkL = {
+    Mass = 0.5;
+    Jii = {1,0.5,1}*0.001;
+    r0 = Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Humerus.r0 + {0,-0.15,0}*Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Humerus.Axes0';
+    Axes0 = Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Humerus.Axes0;
+    AnyRefNode AttPoint = {sRel = {0,0,-0.045};};
+    AnyDrawSurf drw = {
+      RGB = {1,1,0};
+      FileName = "ArmLink.stl";
+      RelPos = {0,-0.04,0};
+      RelRotMat = RotMat(-0.5*pi,x);
+    };
+  };
+
+  Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Humerus = {
+    AnyRefNode ExoAttPoint = {
+      sRel = {0,-0.5*Main.HumanModel.Anthropometrics.SegmentDimensions.Right.UpperArmLength + Main.Model.Environment.ArmExoAttachmentOffset, 0};
+    };
+  };
+  Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Humerus = {
+    AnyRefNode ExoAttPoint = {
+      sRel = {0,-0.5*Main.HumanModel.Anthropometrics.SegmentDimensions.Left.UpperArmLength + Main.Model.Environment.ArmExoAttachmentOffset, 0};
+    };
+  };
+    
+  AnyKinEqSimpleDriver ArmLinkR_Driver = {
+    
+    AnyKinLinear lin = 
+    {
+      AnyRefFrame& base = Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Humerus.ExoAttPoint;
+      AnyRefFrame& target = ..ArmLinkR;
+      Ref = 0;
+    };
+    AnyKinRotational rot = 
+    {
+      AnyRefFrame& base = Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Humerus.ExoAttPoint;
+      AnyRefFrame& target = ..ArmLinkR;
+      Type = RotAxesAngles;
+    };
+    DriverPos = {-0.00,0.00,0,0,0,0};
+    DriverVel = {0,0,0,0,0,0};
+  };
+  AnyKinEqSimpleDriver ArmLinkL_Driver = {
+    
+    AnyKinLinear lin = 
+    {
+      AnyRefFrame& base = Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Humerus.ExoAttPoint;
+      AnyRefFrame& target = ..ArmLinkL;
+      Ref = 0;
+    };
+    AnyKinRotational rot = 
+    {
+      AnyRefFrame& base = Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Humerus.ExoAttPoint;
+      AnyRefFrame& target = ..ArmLinkL;
+      Type = RotAxesAngles;
+    };
+    DriverPos = {-0.00,0.00,0,0,0,0};
+    DriverVel = {0,0,0,0,0,0};
+  };
+
+  Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Clavicula.trapezoid = {
+    AnySurfCylinder wrapcyl = 
+    {
+      sRel = {-0.0, 0.03, -0.00};
+      ARel = RotMat(100*pi/180,y)*RotMat(-15*pi/180,x);
+//      viewSurface.Visible = On;
+      CenterOrigin = On;
+      Radius = 0.075;
+      Length = 0.2;
+    };
+  };
+  Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Clavicula.trapezoid = {
+    AnySurfCylinder wrapcyl = 
+    {
+      sRel = {-0.0, -0.03, -0.00};
+      ARel = RotMat(100*pi/180,y)*RotMat(15*pi/180,x);
+//      viewSurface.Visible = On;
+      CenterOrigin = On;
+      Radius = 0.075;
+      Length = 0.2;
+    };
+  };
+
+  AnyKinSPLine RightBand = {
+    AnyRefFrame &Trunk = Main.Model.Environment.Exo.Part1___1.Coordinate__System1;
+    AnySurfCylinder &wrapcyl = Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Clavicula.trapezoid.wrapcyl;
+    AnyRefFrame &Arm = Main.Model.Environment.ArmLinkR.AttPoint;
+    StringMesh = 130;
+    AnyMatrix InitWrapPosVectors1a = {
+          {0.1,1.0,0},
+          {0.25,0.8,-0.10},
+          {0.25,0.8,-0.40}
+    };
+    AnyMatrix InitWrapPosVectors1b = transf3D(InitWrapPosVectors1a,&Main.Model.Environment.Exo.Part1___1);
+    
+    InitWrapPosVecArr = {
+      &InitWrapPosVectors1b
+    };
+    AnyDrawPLine linedrw = {
+      RGB = {0.3,1,0.3}*Main.Model.Environment.ExoStiffnessConst/500;
+      Thickness = Main.Model.Environment.ExoStiffnessConst * 0.00005;
+    };
+  };
+  
+  AnyKinSPLine LeftBand = {
+    AnyRefFrame &Trunk = Main.Model.Environment.Exo.Part1___1.Coordinate__System2;
+    AnySurfCylinder &wrapcyl = Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Clavicula.trapezoid.wrapcyl;
+    AnyRefFrame &Arm = Main.Model.Environment.ArmLinkL.AttPoint;
+    StringMesh = 130;
+    AnyMatrix InitWrapPosVectors1a = {
+          {-0.1,1.0,0},
+          {-0.25,0.8,-0.10},
+          {-0.25,0.8,-0.40}
+        };
+    AnyMatrix InitWrapPosVectors1b = transf3D(InitWrapPosVectors1a,&Main.Model.Environment.Exo.Part1___1);
+    
+    InitWrapPosVecArr = {
+      &InitWrapPosVectors1b
+    };
+    AnyDrawPLine linedrw = {
+      RGB = {0.3,1,0.3}*Main.Model.Environment.ExoStiffnessConst/500;
+      Thickness = Main.Model.Environment.ExoStiffnessConst * 0.00005;
+    };
+  };
+  
+  AnyFolder ExoBackContact = {
+    AnyFolder Settings = 
+    {
+      AnyVar LimitDistLow = -0.10;                 
+      AnyVar LimitDistHigh = 0.10;               
+      AnyVar LimitVelHigh = 0.8;                 
+      AnyVec3 GroundVelocity = {0.0, 0.0, 0.0};   
+      AnyVar Strength = 200;                     
+      AnyVar FrictionCoefficient = 0.5;          
+      AnyVar ScaleFactor = 1;   
+      AnyVar Radius =1000;
+      AnyVar ForceVectorDrawScaleFactor = 0.0005; 
+    };   
+    AnyInt NormalDir = 0;
+    AnyInt FrictionDir1 = 1;
+    AnyInt FrictionDir2 = 2;
+    
+    ConditionalContactDistanceAndVelocityDepClass Contact10 (
+    BaseObject = Main.Model.Environment.Exo.Part1___1.Coordinate__System1,
+    TargetObject = Main.HumanModel.BodyModel.Right.ShoulderArm.Seg.Scapula.I_levator_scapulae_1) = 
+    {
+      UserDefinedDistLimitLow = .Settings.LimitDistLow;
+      UserDefinedDistLimitHigh = .Settings.LimitDistHigh; 
+      UserDefinedRadiusLimit = .Settings.Radius;
+      UserDefinedVelLimitHigh = .Settings.LimitVelHigh; 
+      UserDefinedGroundVel = .Settings.GroundVelocity; 
+      Strength = .Settings.Strength ;  
+      StaticFrictionCoefficient = .Settings.FrictionCoefficient; 
+      NormalDirection = .NormalDir;
+      FrictionDirection1 = .FrictionDir1;
+      FrictionDirection2 = .FrictionDir2;
+    };
+    ConditionalContactDistanceAndVelocityDepClass Contact11 (
+    BaseObject = Main.Model.Environment.Exo.Part1___1.Coordinate__System2,
+    TargetObject = Main.HumanModel.BodyModel.Left.ShoulderArm.Seg.Scapula.I_levator_scapulae_1) = 
+    {
+      UserDefinedDistLimitLow = .Settings.LimitDistLow;
+      UserDefinedDistLimitHigh = .Settings.LimitDistHigh; 
+      UserDefinedRadiusLimit = .Settings.Radius;
+      UserDefinedVelLimitHigh = .Settings.LimitVelHigh; 
+      UserDefinedGroundVel = .Settings.GroundVelocity; 
+      Strength = .Settings.Strength ;  
+      StaticFrictionCoefficient = .Settings.FrictionCoefficient; 
+      NormalDirection = .NormalDir;
+      FrictionDirection1 = .FrictionDir1;
+      FrictionDirection2 = .FrictionDir2;
+    };
+    
+  };
+  
+  #endif
+};
+
+
+
