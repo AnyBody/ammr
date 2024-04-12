@@ -3,6 +3,8 @@ from itertools import product, groupby
 from collections import ChainMap
 from anypytools import AnyPyProcess, macro_commands as mc
 from anypytools.abcutils import AnyPyProcessOutputList
+from anypytools.tools import winepath, ON_WINDOWS
+
 import pytest
 
 ABS_TOL = 3 # we round off numbers from ams to 1e-3 which for masses is a 1gram precision
@@ -55,6 +57,9 @@ def model_output() -> dict:
 
     model = next(Path().rglob(MODEL_FILE)).resolve()
 
+    if not ON_WINDOWS:
+        model = winepath(model, "-w")
+
     macros = []
     for defs in DEFINES:
         macros.append(
@@ -77,14 +82,12 @@ def model_output() -> dict:
     return extract_output(results)
 
 
-
 def test_trunk_masses(model_output: AnyPyProcessOutputList):
     """ test the trunk region mass"""
     thorax_masses = model_output["trunk_mass"]
     
     thorax_masses = [round(mass, ABS_TOL) for mass in thorax_masses]
     assert all_equal(thorax_masses) 
-
 
 
 @pytest.mark.skip("Not implemented")
