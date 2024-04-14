@@ -1,11 +1,7 @@
-[![Tests](https://github.com/AnyBody/ammr-spine/actions/workflows/test.yml/badge.svg?branch=master-ammr-4.0)](https://github.com/AnyBody/ammr/actions/workflows/test.yml) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1250764.svg)](https://doi.org/10.5281/zenodo.1250764)<img src="_static/AMMR_Logo2.png" align="right" /> [![View - Documentation](https://img.shields.io/badge/View-Documentation-2ea44f)](https://anyscript.org/ammr-doc/beta/)
+[![Tests](https://github.com/AnyBody/AMMR4-Beta/actions/workflows/test.yml/badge.svg?branch=ammr4-beta)](https://github.com/AnyBody/AMMR4-Beta/actions/workflows/test.yml) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1250764.svg)](https://doi.org/10.5281/zenodo.1250764)<img src="_static/AMMR_Logo2.png" align="right" /> [![View - Documentation](https://img.shields.io/badge/View-Documentation-2ea44f)](https://anyscript.org/AMMR4-Beta/beta)
 
 # AnyBody Managed Model Repository 4 ✨ Beta
 > The beta version of the AMMR 4 with a full thoracic model and new abdominal pressure model
-
-> [!IMPORTANT]
-An AnyBody license with active maintenance (or trial license) is required to use the models from GitHub. 
-Please see the [beta program](https://forum.anyscript.org/t/become-a-beta-tester/5056/6), or request a [trial license ](https://www.anybodytech.com/contact/)
 
 The AnyBody Model Repository (AMMR), is an open library of musculoskeletal
 models and examples for the [AnyBody Modeling
@@ -17,10 +13,10 @@ System](https://www.anybodytech.com/software/ams/).
 
 The AnyBody Managed Model Repository consists of two parts:
 
-* [Body Models](https://anyscript.org/ammr/body/models.html): The human body
+* [Body Models](https://anyscript.org/AMMR4-Beta/beta/body/models.html): The human body
   models which can be customized and scaled to build a specific musculoskeletal
   model.
-* [Application examples](https://anyscript.org/ammr/auto_examples/index.html):
+* [Application examples](https://anyscript.org/AMMR4-Beta/beta/Applications/index.html):
   where body models are used in specific applications (from everyday
   activities with MoCap, othopaedics simulations, to ergonomic workcenarios).
 
@@ -29,6 +25,10 @@ The models are developed in research projects at academic institutions or by
 institutions. The models are maintained by [AnyBody
 Technology](https://www.anybodytech.com) who ensure that various body part models
 can be used together as a full body, scalable musculoskeletal model.
+
+> [!IMPORTANT]
+An AnyBody license with active maintenance (or trial license) is required to use the models from GitHub. 
+Please see the [beta program](https://forum.anyscript.org/t/become-a-beta-tester/5056), or request a [trial license ](https://www.anybodytech.com/contact/)
 
 
 
