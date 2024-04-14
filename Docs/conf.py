@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.abspath("tools"))
 current_year = os.environ.get("YEAR", datetime.now().year)
 
 
-project = "AMMR"
+project = "AMMR4-Beta"
 copyright = f"{current_year}, AnyBody Technology"
 author = "AnyBody Technology"
 # language = "fr"  # For testing language translations
@@ -174,11 +174,11 @@ no_index = """
 """
 myst_html_meta = {}
 
-if tags.has("draft"):
+if tags.has("draft") or project != "AMMR":
     rst_epilog = rst_epilog + no_index
     myst_html_meta["robots"] = "noindex"
 
-github_doc_root = "https://github.com/AnyBody/ammr/tree/master/Docs"
+github_doc_root = f"https://github.com/AnyBody/{project}/tree/master/Docs"
 
 version = f"{ammr_version_short}"
 # The full version, including alpha/beta/rc tags.
@@ -234,7 +234,7 @@ html_favicon = "_static/favicon.ico"
 
 html_theme_options = {
     "path_to_docs": "Docs",
-    "repository_url": "https://github.com/anybody/ammr",
+    "repository_url": f"https://github.com/anybody/{project}",
     "repository_branch": "master",
     "use_edit_page_button": True,
     "use_source_button": True,
