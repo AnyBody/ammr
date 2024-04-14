@@ -41,7 +41,7 @@ files for building the documentation, and testing the models. Official releases 
 with the [AnyBody Modeling System](https://www.anybodytech.com/software/anybodymodelingsystem/),
 or available with a DOI from [zendo.org/communities/anybody](https://zenodo.org/communities/anybody/). 
 
-Please see the [AMMR documentation](https://anyscript.org/ammr/beta) for more
+Please see the [AMMR documentation](https://anyscript.org/AMMR4-Beta/beta) for more
 information on getting started using the AMMR.
 
 ## Licensing
