@@ -16,10 +16,10 @@ System](https://www.anybodytech.com/software/ams/).
 
 The AnyBody Managed Model Repository consists of two parts:
 
-* [Body Models](https://anyscript.org/ammr/body/models.html): The human body
+* [Body Models](https://anyscript.org/ammr/beta/body/models.html): The human body
   models which can be customized and scaled to build a specific musculoskeletal
   model.
-* [Application examples](https://anyscript.org/ammr/auto_examples/index.html):
+* [Application examples](https://anyscript.org/ammr/beta/Applications/index.html):
   where body models are used in specific applications (from everyday
   activities with MoCap, othopaedics simulations, to ergonomic workcenarios).
 
@@ -31,7 +31,7 @@ can be used together as a full body, scalable musculoskeletal model.
 
 > [!IMPORTANT]
 An AnyBody license with active maintenance is required to use the models from GitHub. 
-Please see the [beta program](https://forum.anyscript.org/t/become-a-beta-tester/5056/6), or request a [trial license ](https://www.anybodytech.com/contact/)
+Please see the [beta program](https://forum.anyscript.org/t/become-a-beta-tester/5056), or request a [trial license ](https://www.anybodytech.com/contact/)
 
 
 
