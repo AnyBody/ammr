@@ -44,26 +44,26 @@ def git_info(context: tuple, fpath: str) -> Tuple[str, str]:
 
     try:
         subprocess.run(["git", "--version"], capture_output=True, timeout=1, check=True)
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError) as e:
         return "unknown", "unknown"
 
     basecmd = ["git", "-C", f"{gitfolder.absolute()}"]
     try:
         cmd = basecmd + ["rev-parse", "HEAD"]
         hashref = subprocess.check_output(cmd, text=True, timeout=2).strip()
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError) as e:
         hashref = "unknown"
 
     try:
         cmd = basecmd + ["symbolic-ref", "-q", "--short", "HEAD"]
         branch_name = subprocess.check_output(cmd, text=True, timeout=2).strip()
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError) as e:
         branch_name = None
 
     try:
         cmd = basecmd + ["describe", "--tags", "--always"]
         tag_name = subprocess.check_output(cmd, text=True, timeout=2).strip()
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError) as e:
         tag_name = "unknown"
 
     ref = branch_name or tag_name
