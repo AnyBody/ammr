@@ -1,7 +1,7 @@
-from pathlib import Path
-from dataclasses import dataclass
-from typing import Tuple
 import subprocess
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Tuple
 
 
 @dataclass
@@ -14,9 +14,6 @@ class AMSContext:
     call_location_file: str
 
 
-import subprocess
-from pathlib import Path
-from typing import Tuple
 
 
 def git_info(context: tuple, fpath: str) -> Tuple[str, str]:
@@ -42,28 +39,50 @@ def git_info(context: tuple, fpath: str) -> Tuple[str, str]:
     if not gitfolder.is_dir():
         return "unknown", "unknown"
 
+    options = dict(
+        creationflags=subprocess.CREATE_NO_WINDOW,
+        timeout=2,
+        text=True,
+    )
+
     try:
-        subprocess.run(["git", "--version"], capture_output=True, timeout=1, check=True)
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError) as e:
+        subprocess.run(["git", "--version"], capture_output=True, **options)
+    except (
+        subprocess.CalledProcessError,
+        subprocess.TimeoutExpired,
+        FileNotFoundError,
+    ):
         return "unknown", "unknown"
 
     basecmd = ["git", "-C", f"{gitfolder.absolute()}"]
     try:
         cmd = basecmd + ["rev-parse", "HEAD"]
-        hashref = subprocess.check_output(cmd, text=True, timeout=2).strip()
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError) as e:
+        hashref = subprocess.check_output(cmd, **options).strip()
+    except (
+        subprocess.CalledProcessError,
+        subprocess.TimeoutExpired,
+        FileNotFoundError,
+    ):
         hashref = "unknown"
 
     try:
         cmd = basecmd + ["symbolic-ref", "-q", "--short", "HEAD"]
-        branch_name = subprocess.check_output(cmd, text=True, timeout=2).strip()
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError) as e:
+        branch_name = subprocess.check_output(cmd, **options).strip()
+    except (
+        subprocess.CalledProcessError,
+        subprocess.TimeoutExpired,
+        FileNotFoundError,
+    ):
         branch_name = None
 
     try:
         cmd = basecmd + ["describe", "--tags", "--always"]
-        tag_name = subprocess.check_output(cmd, text=True, timeout=2).strip()
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError) as e:
+        tag_name = subprocess.check_output(cmd, **options).strip()
+    except (
+        subprocess.CalledProcessError,
+        subprocess.TimeoutExpired,
+        FileNotFoundError,
+    ):
         tag_name = "unknown"
 
     ref = branch_name or tag_name
