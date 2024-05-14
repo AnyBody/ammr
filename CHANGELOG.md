@@ -24,7 +24,7 @@
 ## AMMR 3.0.1 (2024-02-13)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.10803883.svg)](https://doi.org/10.5281/zenodo.10803883)
 
-[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.0.1-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
+[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.0.1-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-8-0-1-11638_x64/)
 
 
 This minor release of AMMR contains no updates to the models compared to the major AMMR 3.0.0 released the previous month. It only has a few minor changes to the documentation and new tolerances in the FDK models. 
@@ -39,7 +39,7 @@ This minor release of AMMR contains no updates to the models compared to the maj
 (ammr-3.0-changelog)=
 ## AMMR 3.0 (2024-02-13)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.10527958.svg)](https://doi.org/10.5281/zenodo.10527958)
-[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.0.0-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
+[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.0.0-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-8-0-0-11540_x64/)
 
 
 ### ✨ Highlights 
