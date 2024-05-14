@@ -3,21 +3,29 @@
 % A rendered version of the CHANGELOG is avaible here:
 %    https://anyscript.org/ammr/beta/changelog.html
 
-(ammr-3.0.2-changelog)=
-## AMMR 3.0.2 (2024-**-**)
+(ammr-3.0.3-changelog)=
+## AMMR 3.0.3 (2024-05-16)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.11191711.svg)](https://doi.org/10.5281/zenodo.11191711)
+
+[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.0.3-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
 
 ### 🩹 Fixed:
-* Fixed a penetration warning for the pectoralis muscles when the thoracic segments is scaled very non-uniformly.
-  The fix involves a small (5 deg) adjustments to the orientation of the pectoralis wrapping surface. 
+* Fixed a penetration warning for the pectoralis muscles when the thoracic
+  segments are scaled very non-uniformly. The fix involves a small (5 deg)
+  adjustment to the orientation of the pectoralis wrapping surface.
 * Fixed an issue where blinking Windows would appear when loading models stored
   in git repositories. This issue was caused by a python subprocess that queried
   the git repository for branch information.
 * Updated the foot marker position in the Xsens protocol to accommodate the
   changes made to the foot anatomical frame in the TLEM 2.2 leg model. The
-  R/LTOE and R/LTOE2 markers have been moved upwards by 1.5 cm. 
+  R/LTOE and R/LTOE2 markers have been moved upwards by 1.5 cm.
 
 (ammr-3.0.1-changelog)=
 ## AMMR 3.0.1 (2024-02-13)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.10803883.svg)](https://doi.org/10.5281/zenodo.10803883)
+
+[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.0.1-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
+
 
 This minor release of AMMR contains no updates to the models compared to the major AMMR 3.0.0 released the previous month. It only has a few minor changes to the documentation and new tolerances in the FDK models. 
 
