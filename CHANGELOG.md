@@ -13,6 +13,10 @@
 * Fixed a penetration warning for the pectoralis muscles when the thoracic
   segments are scaled very non-uniformly. The fix involves a small (5 deg)
   adjustment to the orientation of the pectoralis wrapping surface.
+* Fixed default limits in [Range of Motion limits](#Utilities.Kinematic-limits.RangeOfMotionLimits_template.any)
+  class template. The default limits for PelvisThoraxExtension, PelvisThoraxLateralBending,
+  Right/LeftWristFlexion had the upper and lower limits flipped. This is now fixed and a 
+  check is added in the class template to catch this kind of error.
 * Fixed an issue where blinking Windows would appear when loading models stored
   in git repositories. This issue was caused by a python subprocess that queried
   the git repository for branch information.
