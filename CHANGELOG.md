@@ -7,9 +7,16 @@
 ## AMMR 3.0.2 (2024-**-**)
 
 ### 🩹 Fixed:
-
-* The foot marker position in the Xsens protocol has been updated to account for the changes to the foot anatomical frame introduced with the TLEM 2.2 leg model. The R/LTOE and
-  R/LTOE2 markers have been moved upwards by 1.5 cm. 
+* Fixed default limits in [Range of Motion limits](#Utilities.Kinematic-limits.RangeOfMotionLimits_template.any) class template. The default limits for PelvisThoraxExtension, PelvisThoraxLateralBending,
+  Right/LeftWristFlexion had the upper and lower limits flipped. This is now fixed and a check is added in the class template to catch this kind of error.
+* Fixed a penetration warning for the pectoralis muscles when the thoracic segments is scaled very non-uniformly.
+  The fix involves a small (5 deg) adjustments to the orientation of the pectoralis wrapping surface. 
+* Fixed an issue where blinking Windows would appear when loading models stored
+  in git repositories. This issue was caused by a python subprocess that queried
+  the git repository for branch information.
+* Updated the foot marker position in the Xsens protocol to accommodate the
+  changes made to the foot anatomical frame in the TLEM 2.2 leg model. The
+  R/LTOE and R/LTOE2 markers have been moved upwards by 1.5 cm. 
 
 (ammr-3.0.1-changelog)=
 ## AMMR 3.0.1 (2024-02-13)
