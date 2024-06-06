@@ -69,6 +69,8 @@ The default pelvis model used in all models have changed. The pelvis morphology 
 ## AMMR 3.0.2 (2024-**-**)
 
 ### 🩹 Fixed:
+* Fixed default limits in [Range of Motion limits](#Utilities.Kinematic-limits.RangeOfMotionLimits_template.any) class template. The default limits for PelvisThoraxExtension, PelvisThoraxLateralBending,
+  Right/LeftWristFlexion had the upper and lower limits flipped. This is now fixed and a check is added in the class template to catch this kind of error.
 * Fixed a penetration warning for the pectoralis muscles when the thoracic segments is scaled very non-uniformly.
   The fix involves a small (5 deg) adjustments to the orientation of the pectoralis wrapping surface. 
 * Fixed an issue where blinking Windows would appear when loading models stored
