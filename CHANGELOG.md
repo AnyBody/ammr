@@ -4,7 +4,7 @@
 %    https://anyscript.org/ammr/beta/changelog.html
 
 (ammr-3.0.3-changelog)=
-## AMMR 3.0.3 (2024-05-16)
+## AMMR 3.0.3 (2024-06-10)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.11191711.svg)](https://doi.org/10.5281/zenodo.11191711)
 
 [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.0.3-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
