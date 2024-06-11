@@ -115,7 +115,7 @@ exclude_patterns = [
 highlight_language = "AnyScriptDoc"
 pygments_style = "AnyScript"
 
-ams_version = os.environ.get("AMS_VERSION", "8.0.0")
+ams_version = os.environ.get("AMS_VERSION", "8.0.3")
 if not re.match("^\d\.\d\.\d", ams_version):
     raise ValueError("Wrong format for AMS version, environment variable")
 ams_version_short = ams_version.rpartition(".")[0]
@@ -374,8 +374,7 @@ linkcheck_ignore = [
     "https://dx.doi.org/10.1002/jor.20255",  # wiley.com prevents the linkcheck
     "https://doi.org/10.1016/j.clinbiomech.2006.10.003",  # clinbiomech.com prevents the linkcheck
     "https://doi.org/10.1002/jor.25267", # wiley.com prevents the linkcheck
-    "https://doi.org/10.5281/zenodo.10527958",  # AMMR 3 not released yet
-    "https://www.anybodytech.com/download/anybodysetup-8-0-0-.*_x64/",  # AMMR 8 not released yet
+    "https://doi.org/10.5281/zenodo.11191711" # AMMR 3.0.3 not released yet
 ]
 
 linkcheck_allowed_redirects = {
