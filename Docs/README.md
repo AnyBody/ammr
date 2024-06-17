@@ -3,13 +3,12 @@
 # AnyBody Managed Model Repository 
 > An open library of musculoskeletal models
 
+> [!TIP]
+> For the the latest AMMR 4 release, with full thoracic model please see [AMMR4-beta](https://github.com/anybody/ammr4-beta)
+
 The AnyBody Model Repository (AMMR), is an open library of musculoskeletal
 models and examples for the [AnyBody Modeling
 System](https://www.anybodytech.com/software/ams/).
-
-> [!IMPORTANT]
-An AnyBody license with active maintenance is required to use the models from GitHub. 
-Please see the [beta program](https://forum.anyscript.org/t/become-a-beta-tester/5056/6), or request a [trial license ](https://www.anybodytech.com/contact/)
 
 <p align="center">
   <img src = "https://github.com/AnyBody/ammr/blob/master/Docs/_static/ammr_bodyparts.png" width=350>
@@ -17,10 +16,10 @@ Please see the [beta program](https://forum.anyscript.org/t/become-a-beta-tester
 
 The AnyBody Managed Model Repository consists of two parts:
 
-* [Body Models](https://anyscript.org/ammr/body/models.html): The human body
+* [Body Models](https://anyscript.org/ammr/beta/body/models.html): The human body
   models which can be customized and scaled to build a specific musculoskeletal
   model.
-* [Application examples](https://anyscript.org/ammr/auto_examples/index.html):
+* [Application examples](https://anyscript.org/ammr/beta/Applications/index.html):
   where body models are used in specific applications (from everyday
   activities with MoCap, othopaedics simulations, to ergonomic workcenarios).
 
@@ -29,6 +28,11 @@ The models are developed in research projects at academic institutions or by
 institutions. The models are maintained by [AnyBody
 Technology](https://www.anybodytech.com) who ensure that various body part models
 can be used together as a full body, scalable musculoskeletal model.
+
+> [!IMPORTANT]
+An AnyBody license with active maintenance is required to use the models from GitHub. 
+Please see the [beta program](https://forum.anyscript.org/t/become-a-beta-tester/5056), or request a [trial license ](https://www.anybodytech.com/contact/)
+
 
 
 ## Getting Started

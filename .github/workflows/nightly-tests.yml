@@ -3,7 +3,12 @@ name: Nightly Full AMMR tests
 on:
   schedule:
     - cron: 0 3 * * *
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      force-update-durations:
+          type: boolean
+          description: 'Force creation of new .test-duration files and create a PR with them. Default is false.'
+          default: false
 
 
 concurrency: 
@@ -19,7 +24,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ams_version: ["7.5_Beta"]
         test_group: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
     env:
@@ -30,28 +34,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: anybody/setup-anybody@main
-        name: Install AnyBody
+      - uses: prefix-dev/setup-pixi@v0.8.1
         with:
-          anybody-version: "7.5.0"
-          anybody-version-suffix: "Beta"
-
-      - uses: prefix-dev/setup-pixi@v0.4.1
-        with:
-          cache: true
+          environments: test
           cache-write: ${{ github.event_name == 'push' && github.ref_name == 'master' }}
+          activate-environment: test
+
         
       - name: Run full AMMR tests
-        env:
-          RLM_LICENSE_PASSWORD: ${{ secrets.LICENSE_PASSWORD }}
-          RLM_LICENSE: ${{ secrets.LICENSE_SERVER }}
         run: |
             cd Tests
-            pixi run pytest -n auto --dist worksteal `
+            pytest -n auto --dist worksteal `
               --splits 10 --group ${{ matrix.test_group }} --splitting-algorithm=least_duration `
               --durations=20 `
               --store-durations --clean-durations `
               --runslow
+
+        env:
+          RLM_LICENSE_PASSWORD: ${{ secrets.LICENSE_PASSWORD }}
+          RLM_LICENSE: ${{ secrets.LICENSE_SERVER }}
       
       - name: Upload partial durations
         uses: actions/upload-artifact@v4
@@ -65,39 +66,44 @@ jobs:
   test-linux:
     if: github.repository == 'anybody/ammr'
     runs-on: ubuntu-latest
-    container: ghcr.io/anybody/anybodycon-github-actions:${{ matrix.ams_version }}
+    container: ghcr.io/anybody/anybodycon-github-actions:8.0.2rc1
     env:
-      ANYBODY_SUPPRESS_DEPRECATION_MESSAGES: ${{ fromJSON('{"7.4":"Off","7.5_Beta":"On"}')[matrix.ams_version] }}
+      ANYBODY_SUPPRESS_DEPRECATION_MESSAGES: "Off"
 
     strategy:
       fail-fast: false
       matrix:
-        ams_version: ["7.4", "7.5_Beta"]
-        test_group: [1, 2, 3, 4, 5]
+        test_group: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ fromJSON('{"7.4":"master-ammr-2.4.x","7.5_Beta":"master"}')[matrix.ams_version] }}
       
       - name: Set debug env vars
         run: echo ${{ github.event.inputs.debug_config }} >> $GITHUB_ENV
+      
+      - uses: prefix-dev/setup-pixi@v0.8.1
+        with:
+          environments: test
+          cache-write: ${{ github.event_name == 'push' && github.ref_name == 'master' }}
+          activate-environment: test
+
 
       - name: Run tests
+        run: |
+          cd Tests
+          pytest -n auto \
+            --splits 10 --group ${{ matrix.test_group }} --splitting-algorithm=least_duration \
+            --only-load \
+            --runslow
         env:
           RLM_LICENSE_PASSWORD: ${{ secrets.LICENSE_PASSWORD }}
           RLM_LICENSE: ${{ secrets.LICENSE_SERVER }}
-        run: |
-            cd Tests
-            pytest -n auto \
-              --splits 5 --group ${{ matrix.test_group }} --splitting-algorithm=least_duration \
-              --only-load \
-              --runslow
-      
+    
 
   combine-and-upload-timings:
     runs-on: ubuntu-latest
     needs: [test-windows]
+    if: github.repository == 'anybody/ammr'
 
     steps:
       - uses: actions/checkout@v4
@@ -113,12 +119,12 @@ jobs:
               data.update(json.loads(file.read_text()))
           data = {k: v for k, v in sorted(data.items(), key=lambda x: x[1], reverse=True)}
           test_durations = pathlib.Path('Tests/.test_durations')
-          if set(data) != set(json.loads(test_durations.read_text())):
+          if set(data) != set(json.loads(test_durations.read_text())) or "${{ github.event.inputs.force-update-durations }}" == "true":
               test_durations.write_text(json.dumps(data, indent=2))
         shell: python
 
       - name: Create updated durations PR
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v6
         with:
           push-to-fork: anybody-bot/ammr
           token: ${{ secrets.DURATIONS_TOKEN }}
