@@ -19,6 +19,7 @@ penetration with the box must be avoided.
   TARGET_FRAME)
   {
     #var AnyVar PlaneBaseFrameOffset = 0.0;
+    #var AnyFloat Corners;
     AnyKinMeasure &NeutralAngleMeasure = NEUTRAL_ANGLE_MEASURE;
     AnyRefFrame &PlaneBaseFrame = PLANE_BASE_FRAME;
     PlaneBaseFrame = {
@@ -35,39 +36,327 @@ penetration with the box must be avoided.
       };
     };
 
-    AnyKinEqSimpleDriver ExpCombMesaureDriver = {
-      AnyKinMeasureExpComb ExpCombMeasure = {
-        AnyKinMeasure &Rot = ..NeutralAngleMeasure;
-        AnyKinMeasureOrg DistMeasure = {
-          AnyKinLinear Lin = {
-            AnyRefFrame &PlaneBaseFrame = PLANE_BASE_FRAME.OffsetFrame_##__NAME__;
-            AnyRefFrame &TargetFrame = TARGET_FRAME;
-            Ref = 0;
-          };
-          #if UP_DIRECTION == "X"
-          MeasureOrganizer = {0};
-          #endif
-          #if UP_DIRECTION == "Y"
-          MeasureOrganizer = {1};
-          #endif
-          #if UP_DIRECTION == "Z"
-          MeasureOrganizer = {2};
-          #endif
-          #if (UP_DIRECTION != "X") & (UP_DIRECTION != "Y") & (UP_DIRECTION != "Z")
-          AnyInt ErrorMsg = assert(0,"Incorrect selection of UP_DIRECTION. Please select "X", "Y" or "Z".");
-          #endif
-        };
-        
-        #var a = -400;
-        #var AveragingOnOff = Off;
-      };
-      
+//    AnyKinEqSimpleDriver ExpCombMesaureDriver = {
+////    AnyFolder Mes = {
+//
+//      AnyKinMeasure &Meas = .ConditionalContact.Out_C0_C1_C2_C3_Depth_NeutralAngle_ExpCombMeasure;
+////      AnyKinMeasure &Meas = .ConditionalContact.ExpCombMeasure;
+//      
+//      DriverPos = {0};
+//      DriverVel = {0};
+//      Reaction = {
+//        #var Type = {Off};
+//      };
+//      #var CType = {Soft};
+//    };
+    
+    
+    AnyKinEqSimpleDriver NeutralAngleDriver = {
+      AnyKinMeasure &Rot = .NeutralAngleMeasure;
       DriverPos = {0};
       DriverVel = {0};
       Reaction = {
         #var Type = {Off};
       };
       #var CType = {Soft};
+      WeightFun = {&WeightConst};
+      AnyFunConst WeightConst ={#var Value ={0.0001};};
     };
+    
+    AnyKinEqSimpleDriver BoxDriver = {
+      AnyKinMeasure &Meas = .ConditionalContact.C0_C1_C2_C3_BelowSurface;
+      DriverPos = {0};
+      DriverVel = {0};
+      Reaction = {
+        #var Type = {Off};
+      };
+      #var CType = {Soft};
+      WeightFun = {&WeightConst};
+      AnyFunConst WeightConst ={#var Value ={1};};
+    };
+    //////////////////////////////////////////////////////////////////////
+    
+    AnyFolder ConditionalContact ={
+      
+      AnyRefFrame &Object=TARGET_FRAME;   
+      
+      AnyRefFrame &GlobalRef = PLANE_BASE_FRAME;
+      GlobalRef ={
+        
+        
+        AnyRefNodeGroup Plane_##__NAME__ = {
+          
+          CreateMotionOutput.r=On;
+          NodeDefaults.CreateMotionOutput.r=On;
+                    
+          NodeAmount = (4); //SizesOf(...PlaneCorners)[0]; // number nodes in group
+          NodeName = "C"; // base name for
+          Node_sRels = ...Corners;
+//          Node_sRels =  {
+//                         {2.8,...PlaneBaseFrameOffset,-3},
+//                         {2.8,...PlaneBaseFrameOffset,-3.9},
+//                         {2.2,...PlaneBaseFrameOffset,-3.9},
+//                         {2.2,...PlaneBaseFrameOffset,-3},
+//                        };  //how to use ptr here...
+          
+          AnyRefNode MidNode = {
+            sRel = mean(.Node_sRels');
+            ARel = .Node_ARels[0];  //could be made more intelligent... 
+          };
+          
+          //draw outline
+          AnyDrawPointCloud DrawVector = {
+            
+            Points = .Node_sRels;
+            Points3D = On;
+            RGB={0,0,1};
+            PointStyle.Size=2.5*0.001;
+            
+            AnyIntArray bump = arrcat( iarr(1,.NodeAmount-1),0);
+            VectorFields =take(.Node_sRels,bump,0)-.Node_sRels;
+          };
+          
+
+          Node_ARels = {
+            RotMat(Node_sRels[0],Node_sRels[1],Node_sRels[2]),
+            RotMat(Node_sRels[1],Node_sRels[2],Node_sRels[3]),
+            RotMat(Node_sRels[2],Node_sRels[3],Node_sRels[0]),
+            RotMat(Node_sRels[3],Node_sRels[0],Node_sRels[1])
+          };
+        };         
+      };
+      
+      AnyKinMeasureOrg Measures ={
+        
+        AnyKinLinear BoundsMeasure0 ={
+          Ref=0;
+          AnyRefFrame &ref=..GlobalRef.Plane_##__NAME__.C0;
+          AnyRefFrame &ref2=..Object;
+        };  
+        AnyKinLinear BoundsMeasure1 ={
+          Ref=0;    
+          AnyRefFrame &ref=..GlobalRef.Plane_##__NAME__.C1;
+          AnyRefFrame &ref2=..Object;
+        };  
+        AnyKinLinear BoundsMeasure2 ={
+          Ref=0;
+          AnyRefFrame &ref=..GlobalRef.Plane_##__NAME__.C2;
+          AnyRefFrame &ref2=..Object;
+        };  
+        AnyKinLinear BoundsMeasure3 ={
+          Ref=0;
+          AnyRefFrame &ref=..GlobalRef.Plane_##__NAME__.C3;
+          AnyRefFrame &ref2=..Object;
+        };  
+        MeasureOrganizer={0,3,6,9};
+      };
+      
+      AnyFunInterpol Fun ={
+        T=farr(-10.0,0.01,20*100);
+        Data={iffun(ltfun(T,0),0,1)};
+        Type=Bspline;
+      };
+      
+      
+      AnyKinMeasureFunComb1 InSideBounds = {
+        Functions={&.Fun,&.Fun,&.Fun,&.Fun};
+        AnyKinMeasureOrg &ref=.Measures;
+      };
+      
+      AnyKinMeasureQuadComb C0_C1 = {
+        AnyKinMeasureOrg Measures ={
+          AnyKinMeasure &ref=..InSideBounds;
+          MeasureOrganizer={0,1};
+        };
+        OutDim = 1;
+        Const={0};
+        CoefQuadTensor  = {
+          { {0,1},
+            {0,0}
+          }
+        };
+      };
+      
+      
+      AnyKinMeasureQuadComb C0_C1_C2 = {
+        AnyKinMeasureQuadComb &ref1=.C0_C1; 
+        AnyKinMeasureOrg Measures ={
+          AnyKinMeasure &ref2=..InSideBounds;
+          MeasureOrganizer={2};
+        };
+        OutDim = 1;
+        Const={0};
+        CoefQuadTensor  = {
+          { {0,1},
+            {0,0}
+          }
+        };
+      };
+      
+      AnyKinMeasureQuadComb C0_C1_C2_C3 = {
+        AnyKinMeasureQuadComb &ref1=.C0_C1_C2; 
+        AnyKinMeasureOrg Measures ={
+          AnyKinMeasure &ref2=..InSideBounds;
+          MeasureOrganizer={3};
+        };
+        OutDim = 1;
+        Const={0};
+        CoefQuadTensor  = {
+          { {0,1},
+            {0,0}
+          }
+        };
+      };  
+
+/////////////////// Outside box ///////////////
+
+    AnyKinMeasureLinComb Out_C0_C1_C2_C3 = {
+      AnyKinMeasure &ref1 = .C0_C1_C2_C3;
+      OutDim = 1;
+      Coef = {{-1}};
+      Const = {1};
+    };
+////////////////////////////////
+      
+      AnyKinMeasureOrg Depth ={
+         AnyKinLinear BoundsMeasure0 ={
+          Ref=0;
+          AnyRefFrame &ref=..GlobalRef.Plane_##__NAME__.C0;
+          AnyRefFrame &ref2=..Object;
+        };  
+        MeasureOrganizer ={2};
+      }; 
+
+      AnyFunInterpol FunDepth ={
+        T=farr(-10.0,0.001,20*1000);
+        Data={iffun(ltfun(T,0),1,0)};
+        Type=Bspline;
+      };
+
+       AnyKinMeasureFunComb1 BelowSurface = {
+        Functions={&.FunDepth};
+        AnyKinMeasureOrg &ref=.Depth;
+      };
+
+   AnyKinMeasureQuadComb C0_C1_C2_C3_Depth = {
+        AnyKinMeasure &ref1=.C0_C1_C2_C3; 
+        AnyKinMeasure &ref2=.Depth;
+        OutDim = 1;
+        Const={0};
+        CoefQuadTensor  = {
+          { {0,1},
+            {0,0}
+          }
+        };
+      };  //Measures
+   AnyKinMeasureQuadComb Out_C0_C1_C2_C3_Depth = {
+        AnyKinMeasure &ref1=.Out_C0_C1_C2_C3; 
+        AnyKinMeasure &ref2=.Depth;
+        OutDim = 1;
+        Const={0};
+        CoefQuadTensor  = {
+          { {0,1},
+            {0,0}
+          }
+        };
+      };  //Measures
+   AnyKinMeasureQuadComb C0_C1_C2_C3_BelowSurface = {
+        AnyKinMeasure &ref1=.C0_C1_C2_C3; 
+        AnyKinMeasure &ref2=.BelowSurface;
+        OutDim = 1;
+        Const={0};
+        CoefQuadTensor  = {
+          { {0,1},
+            {0,0}
+          }
+        };
+      };  //Measures
+    
+    AnyKinMeasureQuadComb Out_C0_C1_C2_C3_Depth_NeutralAngle = {
+        AnyKinMeasure &ref1=.Out_C0_C1_C2_C3_Depth; 
+        AnyKinMeasure &ref2=..NeutralAngleMeasure;
+        OutDim = 1;
+        Const={0};
+        CoefQuadTensor  = {
+          { {0,1},
+            {0,0}
+          }
+        };
+    };
+    AnyKinMeasureQuadComb Out_C0_C1_C2_C3_NeutralAngle = {
+        AnyKinMeasure &ref1=.Out_C0_C1_C2_C3; 
+        AnyKinMeasure &ref2=..NeutralAngleMeasure;
+        OutDim = 1;
+        Const={0};
+        CoefQuadTensor  = {
+          { {0,1},
+            {0,0}
+          }
+        };
+    };
+
+    AnyKinMeasureQuadComb C0_C1_C2_C3_Depth_NeutralAngle = {
+        AnyKinMeasureQuadComb &ref1=.C0_C1_C2_C3_Depth; 
+        AnyKinMeasure &ref2=..NeutralAngleMeasure;
+        OutDim = 1;
+        Const={0};
+        CoefQuadTensor  = {
+          { {0,1},
+            {0,0}
+          }
+        };
+    };
+    
+      AnyKinMeasureExpComb ExpCombMeasure = {
+        AnyKinMeasure &Rot = ..NeutralAngleMeasure;
+        AnyKinMeasure &DistMeasure = .C0_C1_C2_C3_Depth;
+//        AnyKinMeasure &DistMeasure = ..ConditionalContact.C0_C1_C2_C3_BelowSurface;
+//        AnyKinMeasureOrg DistMeasure = {
+//          AnyKinLinear Lin = {
+//            AnyRefFrame &PlaneBaseFrame = PLANE_BASE_FRAME.OffsetFrame_##__NAME__;
+//            AnyRefFrame &TargetFrame = TARGET_FRAME;
+//            Ref = 0;
+//          };
+//          #if UP_DIRECTION == "X"
+//          MeasureOrganizer = {0};
+//          #endif
+//          #if UP_DIRECTION == "Y"
+//          MeasureOrganizer = {1};
+//          #endif
+//          #if UP_DIRECTION == "Z"
+//          MeasureOrganizer = {2};
+//          #endif
+//          #if (UP_DIRECTION != "X") & (UP_DIRECTION != "Y") & (UP_DIRECTION != "Z")
+//          AnyInt ErrorMsg = assert(0,"Incorrect selection of UP_DIRECTION. Please select "X", "Y" or "Z".");
+//          #endif
+//        };
+        
+        #var a = -400;
+        #var AveragingOnOff = Off;
+      };
+    
+    AnyKinMeasureLinComb Out_C0_C1_C2_C3_Depth_NeutralAngle_ExpCombMeasure = {
+//      AnyKinMeasure &ref1 = .Out_C0_C1_C2_C3_Depth_NeutralAngle;
+      AnyKinMeasure &ref1 = .Out_C0_C1_C2_C3_NeutralAngle;
+      AnyKinMeasure &ref2 = .ExpCombMeasure;
+      OutDim = 1;
+      Coef = {
+              {1,1},
+            };
+    };
+    
+//    AnyKinMeasureLinComb Out_C0_C1_C2_C3_Depth_NeutralAngle_ExpCombMeasure = {
+//      AnyKinMeasure &ref1 = .C0_C1_C2_C3_Depth_NeutralAngle;
+//      AnyKinMeasure &ref2 = .Out_C0_C1_C2_C3_NeutralAngle;
+////      AnyKinMeasure &ref2 = .ExpCombMeasure;
+//      OutDim = 1;
+//      Coef = {
+//              {1,1},
+//            };
+//    };
+    
+    
+  }; // Conditional Contact
+////////////////////////////////////////////////////////////////////////////    
 
   };
