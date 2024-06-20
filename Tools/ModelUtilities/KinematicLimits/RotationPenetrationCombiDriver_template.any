@@ -30,9 +30,13 @@ penetration with the box must be avoided.
   TARGET_FRAME)
   {
     #var AnyFloat Corners;
-    #var AnySwitchVar BoxVisibility = On;
-    #var AnyFloat WeightNeutralAngleDriver = 0.00001;
-    #var AnyFloat WeightBoxDriver = 1.0;
+    AnyFolder Settings = {
+      #var AnySwitchVar BoxVisibility = On;
+      #var AnyFloat WeightNeutralAngleDriver = 1e-5;
+      #var AnyFloat WeightBoxDriver = 1.0;
+      #var AnyFloat WeightWithinBoundsFun = 1.0;
+      #var AnyFloat WeightDepthFun = 100.0;
+    };
     
     AnyKinMeasure &NeutralAngleMeasure = NEUTRAL_ANGLE_MEASURE;
     AnyRefFrame &PlaneBaseFrame = PLANE_BASE_FRAME;
@@ -47,7 +51,7 @@ penetration with the box must be avoided.
       };
       #var CType = {Soft};
       WeightFun = {&WeightConst};
-      AnyFunConst WeightConst ={Value ={..WeightNeutralAngleDriver};};
+      AnyFunConst WeightConst ={Value ={..Settings.WeightNeutralAngleDriver};};
     };
     
     AnyKinEqSimpleDriver BoxDriver = {
@@ -59,7 +63,7 @@ penetration with the box must be avoided.
       };
       #var CType = {Soft};
       WeightFun = {&WeightConst};
-      AnyFunConst WeightConst ={Value ={..WeightBoxDriver};};
+      AnyFunConst WeightConst ={Value ={..Settings.WeightBoxDriver};};
     };
     
     AnyFolder ConditionCheck ={
@@ -86,7 +90,7 @@ penetration with the box must be avoided.
           
           //draw outline
           AnyDrawPointCloud DrawVector = {
-            Visible = ....BoxVisibility;
+            Visible = ....Settings.BoxVisibility;
             Points = .Node_sRels;
             Points3D = On;
             RGB={0,0,1};
@@ -133,7 +137,7 @@ penetration with the box must be avoided.
       
       AnyFunInterpol Fun ={
         T=farr(-10.0,0.01,20*100);
-        Data={iffun(ltfun(T,0),0,1)};
+        Data={iffun(ltfun(T,0),0.0,..Settings.WeightWithinBoundsFun)};
         Type=Bspline;
       };
       
@@ -199,7 +203,7 @@ penetration with the box must be avoided.
       
       AnyFunInterpol FunDepth ={
         T=farr(-10.0,0.001,20*1000);
-        Data={iffun(ltfun(T,0),1,0)};
+        Data={iffun(ltfun(T,0),..Settings.WeightDepthFun,0.0)};
         Type=Bspline;
       };
       
