@@ -4,7 +4,7 @@ gallery_image: "/Applications/images/BikeModel-FullBody.webp"
 ---
 
 (sphx_glr_auto_examples_Sports_plot_BikeModel.py)=
-
+(example_bikemodel)=
 # Bike Model
 
 ````{sidebar} **Example**
