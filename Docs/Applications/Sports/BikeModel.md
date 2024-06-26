@@ -8,7 +8,7 @@ gallery_image: "/Applications/images/BikeModel-FullBody.webp"
 # Bike Model
 
 ````{sidebar} **Example**
-<img src="/Applications/images/BikeModel.webp" width="70%" align="center">
+<img src="/Applications/images/BikeModel-FullBody.webp" width="70%" align="center">
 ````
 
 
