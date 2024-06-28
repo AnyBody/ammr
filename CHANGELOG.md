@@ -9,6 +9,7 @@
 ### 🩹 Fixed:
 * Fixed an issue in the {ref}`Bike Model example <example_bikemodel>` that included thoracic support
   in the full body model also.
+* Fixed an issue where the visualization of the marker coordinate system would not update when running parameter identification in the MoCap models.
 
 (ammr-3.0.3-changelog)=
 ## AMMR 3.0.3 (2024-06-10)
