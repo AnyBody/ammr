@@ -62,7 +62,6 @@ extensions = [
     "sphinx.ext.githubpages",
     "myst_parser",
     "ammr_directives",
-    "inline_highlight",
     "sphinxext.opengraph",
     "sphinx_design",
     "sphinx_togglebutton",
@@ -115,7 +114,7 @@ exclude_patterns = [
 highlight_language = "AnyScriptDoc"
 pygments_style = "AnyScript"
 
-ams_version = os.environ.get("AMS_VERSION", "8.0.3")
+ams_version = os.environ.get("AMS_VERSION", "8.0.4")
 if not re.match("^\d\.\d\.\d", ams_version):
     raise ValueError("Wrong format for AMS version, environment variable")
 ams_version_short = ams_version.rpartition(".")[0]
