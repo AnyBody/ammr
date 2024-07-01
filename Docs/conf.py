@@ -1,11 +1,10 @@
 # -- Project information -----------------------------------------------------
 import os
-import sys
-from urllib.request import urlopen
-from pathlib import Path
 import re
-from datetime import datetime
 import subprocess
+import sys
+from datetime import datetime
+from pathlib import Path
 
 sys.path.insert(0, os.path.abspath("exts"))
 sys.path.insert(0, os.path.abspath("tools"))
@@ -62,7 +61,6 @@ extensions = [
     "sphinx.ext.githubpages",
     "myst_parser",
     "ammr_directives",
-    "inline_highlight",
     "sphinxext.opengraph",
     "sphinx_design",
     "sphinx_togglebutton",
@@ -115,7 +113,7 @@ exclude_patterns = [
 highlight_language = "AnyScriptDoc"
 pygments_style = "AnyScript"
 
-ams_version = os.environ.get("AMS_VERSION", "8.0.3")
+ams_version = os.environ.get("AMS_VERSION", "8.0.4")
 if not re.match("^\d\.\d\.\d", ams_version):
     raise ValueError("Wrong format for AMS version, environment variable")
 ams_version_short = ams_version.rpartition(".")[0]
@@ -324,8 +322,8 @@ ogp_use_first_image = True  # if not found defaults to 'ogp_image'
 
 
 # Generate gallery files
-import jinja2
 import frontmatter
+import jinja2
 
 gallery = {}
 galleryfolders = [x for x in Path("Applications").iterdir() if x.is_dir()]
@@ -359,6 +357,7 @@ for folder, section in gallery.items():
 # to generate the class template documentation
 
 import generate_class_template_docs
+
 generate_class_template_docs.run_all()
 
 
@@ -373,8 +372,8 @@ linkcheck_ignore = [
     "https://doi.org/10.1080/10255842.2020.1851367",  # tandfonline.com prevents the linkcheck
     "https://dx.doi.org/10.1002/jor.20255",  # wiley.com prevents the linkcheck
     "https://doi.org/10.1016/j.clinbiomech.2006.10.003",  # clinbiomech.com prevents the linkcheck
-    "https://doi.org/10.1002/jor.25267", # wiley.com prevents the linkcheck
-    "https://doi.org/10.5281/zenodo.11191711" # AMMR 3.0.3 not released yet
+    "https://doi.org/10.1002/jor.25267",  # wiley.com prevents the linkcheck
+    "https://doi.org/10.5281/zenodo.12592455",  # AMMR 3.0.4 not released yet
 ]
 
 linkcheck_allowed_redirects = {
