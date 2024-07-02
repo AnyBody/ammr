@@ -64,6 +64,17 @@ The default pelvis model used in all models have changed. The pelvis morphology 
   In practice, this means that the morphology of the leg pelvis is moprhed to match the Trunk pelvis.
   Using `_MORPH_TRUNK_TO_LEG_` instead will revert to the old behaviour. 
 
+(ammr-3.0.4-changelog)=
+## AMMR 3.0.4 (2024-07-02)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.12592455.svg)](https://doi.org/10.5281/zenodo.12592455)
+
+[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.0.4-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
+
+### 🩹 Fixed:
+* Fixed an issue in the {ref}`Bike Model example <example_bikemodel>` that
+  included thoracic support in the full body model also.
+* Fixed an issue with the visualization of the marker coordinate system arrows. They now
+  correctly update while running running parameter identification in the MoCap models.
 
 (ammr-3.0.3-changelog)=
 ## AMMR 3.0.3 (2024-06-10)
