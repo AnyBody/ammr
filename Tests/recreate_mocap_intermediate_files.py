@@ -59,7 +59,7 @@ abc_path = None
 
 app1 = anypytools.AnyPyProcess(anybodycon_path=abc_path, num_processes=10)
 
-app1.start_macro(macros1[:2])
+app1.start_macro(macros1)
 
 app2 = anypytools.AnyPyProcess(anybodycon_path=abc_path)
 app2.start_macro(macros2)
