@@ -7,9 +7,13 @@
 ## AMMR 3.0.5 (2024-??-??)
 
 ### 🔧 Changed:
-* Changed the Human-Ground residual implmentation in the MoCap models to use rotatinal measures configured
-  for measuring angual velocities. This change should make the resiuals more robust, and the residual output
-  easier to interpret geometrically. Otherwise, this should not change results. 
+* Changed the Human-Ground residual implmentation in the MoCap models to use
+  rotatinal measures configured for measuring angual velocities. This change
+  should make the resiuals more robust, and the residual output easier to
+  interpret geometrically. Otherwise, this should not change results. 
+* The Force plates are no longer included in the parameter identification study.
+  It wasn't needed, and this change may speed up the parameter identification
+  process slightly.
 
 
 (ammr-3.0.4-changelog)=
