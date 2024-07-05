@@ -3,6 +3,19 @@
 % A rendered version of the CHANGELOG is avaible here:
 %    https://anyscript.org/ammr/beta/changelog.html
 
+(ammr-3.0.5-changelog)=
+## AMMR 3.0.5 (2024-??-??)
+
+### 🔧 Changed:
+* Changed the Human-Ground residual implmentation in the MoCap models to use
+  rotatinal measures configured for measuring angual velocities. This change
+  should make the resiuals more robust, and the residual output easier to
+  interpret geometrically. Otherwise, this should not change results. 
+* The Force plates are no longer included in the parameter identification study.
+  It wasn't needed, and this change may speed up the parameter identification
+  process slightly.
+
+
 (ammr-3.0.4-changelog)=
 ## AMMR 3.0.4 (2024-07-02)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.12592455.svg)](https://doi.org/10.5281/zenodo.12592455)
