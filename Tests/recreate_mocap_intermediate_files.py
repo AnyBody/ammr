@@ -14,27 +14,27 @@ mocap_path = pathlib.Path(__file__).parent.parent / "Application/MocapExamples"
 
 macros1 =[
     [
-        mc.Load(mocap_path / "Plug-in-gait_MultiTrial_StandingRef\Subjects\S1\S1_StandingRef\Main.any"),
-        mc.OperationRun("Main.RunParameterIdentification"),
+        mc.Load(mocap_path / r"Plug-in-gait_MultiTrial_StandingRef\Subjects\S1\S1_StandingRef\Main.any"),
+        mc.OperationRun(r"Main.RunParameterIdentification"),
     ],
     [
-        mc.Load(mocap_path / "Plug-in-gait_MultiTrial_StandingRef\Subjects\S2\S2_StandingRef\Main.any"),
-        mc.OperationRun("Main.RunParameterIdentification"),
+        mc.Load(mocap_path / r"Plug-in-gait_MultiTrial_StandingRef\Subjects\S2\S2_StandingRef\Main.any"),
+        mc.OperationRun(r"Main.RunParameterIdentification"),
     ],
     [
-        mc.Load(mocap_path / "Plug-in-gait_Simple\FullBody.main.any"),
-        mc.OperationRun("Main.RunParameterIdentification"),
-        mc.OperationRun("Main.RunAnalysis.MarkerTracking"),
+        mc.Load(mocap_path / r"Plug-in-gait_Simple\FullBody.main.any"),
+        mc.OperationRun(r"Main.RunParameterIdentification"),
+        mc.OperationRun(r"Main.RunAnalysis.MarkerTracking"),
     ],
     [
-        mc.Load(mocap_path / "Plug-in-gait_Simple\LowerExtremity.main.any"),
-        mc.OperationRun("Main.RunParameterIdentification"),
-        mc.OperationRun("Main.RunAnalysis.MarkerTracking"),
+        mc.Load(mocap_path / r"Plug-in-gait_Simple\LowerExtremity.main.any"),
+        mc.OperationRun(r"Main.RunParameterIdentification"),
+        mc.OperationRun(r"Main.RunAnalysis.MarkerTracking"),
     ],
     [
-        mc.Load(mocap_path / "Plug-in-gait_Simple\FullBody_GRFPrediction.main.any"),
-        mc.OperationRun("Main.RunParameterIdentification"),
-        mc.OperationRun("Main.RunAnalysis.MarkerTracking"),
+        mc.Load(mocap_path / r"Plug-in-gait_Simple\FullBody_GRFPrediction.main.any"),
+        mc.OperationRun(r"Main.RunParameterIdentification"),
+        mc.OperationRun(r"Main.RunAnalysis.MarkerTracking"),
     ]
 ]
 
@@ -47,9 +47,9 @@ macros1 =[
 
 macros2 = [
     [
-        mc.Load(mocap_path / "Plug-in-gait_MultiTrial_StandingRef\Subjects\S1\S1_FlywheelSquat\Main.any"),
-        mc.OperationRun("Main.RunAnalysis.LoadParameters"),
-        mc.OperationRun("Main.RunAnalysis.MarkerTracking"),
+        mc.Load(mocap_path / r"Plug-in-gait_MultiTrial_StandingRef\Subjects\S1\S1_FlywheelSquat\Main.any"),
+        mc.OperationRun(r"Main.RunAnalysis.LoadParameters"),
+        mc.OperationRun(r"Main.RunAnalysis.MarkerTracking"),
     ],
 ]
 

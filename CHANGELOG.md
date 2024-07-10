@@ -3,11 +3,72 @@
 % A rendered version of the CHANGELOG is avaible here:
 %    https://anyscript.org/ammr/beta/changelog.html
 
-## AMMR beta
+(ammr-3.0.5-changelog)=
+## AMMR 3.0.5 (2024-??-??)
+
+### 🔧 Changed:
+* Changed the Human-Ground residual implmentation in the MoCap models to use
+  rotatinal measures configured for measuring angual velocities. This change
+  should make the resiuals more robust, and the residual output easier to
+  interpret geometrically. Otherwise, this should not change results. 
+* The Force plates are no longer included in the parameter identification study.
+  It wasn't needed, and this change may speed up the parameter identification
+  process slightly.
+
+
+(ammr-3.0.4-changelog)=
+## AMMR 3.0.4 (2024-07-02)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.12592455.svg)](https://doi.org/10.5281/zenodo.12592455)
+
+[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.0.4-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
+
+### 🩹 Fixed:
+* Fixed an issue in the {ref}`Bike Model example <example_bikemodel>` that
+  included thoracic support in the full body model also.
+* Fixed an issue with the visualization of the marker coordinate system arrows. They now
+  correctly update while running running parameter identification in the MoCap models.
+
+(ammr-3.0.3-changelog)=
+## AMMR 3.0.3 (2024-06-10)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.11191711.svg)](https://doi.org/10.5281/zenodo.11191711)
+
+[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.0.3-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
+
+### 🩹 Fixed:
+* Fixed a penetration warning for the pectoralis muscles when the thoracic
+  segments are scaled very non-uniformly. The fix involves a small (5 deg)
+  adjustment to the orientation of the pectoralis wrapping surface.
+* Fixed default limits in [Range of Motion limits](#Utilities.Kinematic-limits.RangeOfMotionLimits_template.any)
+  class template. The default limits for PelvisThoraxExtension, PelvisThoraxLateralBending,
+  Right/LeftWristFlexion had the upper and lower limits flipped. This is now fixed and a 
+  check is added in the class template to catch this kind of error.
+* Fixed an issue where blinking Windows would appear when loading models stored
+  in git repositories. This issue was caused by a python subprocess that queried
+  the git repository for branch information.
+* Updated the foot marker position in the Xsens protocol to accommodate the
+  changes made to the foot anatomical frame in the TLEM 2.2 leg model. The
+  R/LTOE and R/LTOE2 markers have been moved upwards by 1.5 cm.
+
+(ammr-3.0.1-changelog)=
+## AMMR 3.0.1 (2024-02-13)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.10803883.svg)](https://doi.org/10.5281/zenodo.10803883)
+
+[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.0.1-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-8-0-1-11638_x64/)
+
+
+This minor release of AMMR contains no updates to the models compared to the major AMMR 3.0.0 released the previous month. It only has a few minor changes to the documentation and new tolerances in the FDK models. 
+
+### 🔧 Changed:
+
+* Finer FDK tolerances for the {ref}`Knee Simulator example
+  <example_kneesimulator>`, to take avantage of the improved robustness of the
+  AnyBody FDK solver in version 8.0.1. 
+
+
 (ammr-3.0-changelog)=
-## AMMR 3.0.0 (2024-02-10)
+## AMMR 3.0 (2024-02-13)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.10527958.svg)](https://doi.org/10.5281/zenodo.10527958)
-[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.0.0-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-8-0-0-????_x64/)
+[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.0.0-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-8-0-0-11540_x64/)
 
 
 ### ✨ Highlights 
@@ -171,8 +232,9 @@ achieve same marker position and joint angle output.
   are now used for both simple and 3-element muscle models.
 
 * MoCap marker protocols: Users must now explicitly specify a coordinate system
-  relative to which markers are placed on the segment using the `PlaceMarkerAt` argument
-  in the class template. Previously, this defaulted to the `AnatomicalFrame` of
+  relative to which markers are placed on the segment using the 
+  [`PlaceMarkerAt`](#MoCap.Markers.CreateMarkerDriverClass.CreateMarkerDriver:PlaceMarkerAt) 
+  argument in the class template. Previously, this defaulted to the `AnatomicalFrame` of
   the segment.
 
 * The organization of segmental scaling functions was reworked and now configured
@@ -214,9 +276,10 @@ achieve same marker position and joint angle output.
   This new structure allows for overwriting the complete set of muscle volumes with
   an alternative dataset.
 
-* The `MarkerName` argument in the `CreateMarkerDriver` template for MoCap models is no
-  longer necessary. The argument can still be used if the marker class and data
-  entry in the C3D file differ.
+* The [`MarkerName`](#MoCap.Markers.CreateMarkerDriverClass.CreateMarkerDriver:MarkerName) 
+  argument in the [`CreateMarkerDriver`](#MoCap.Markers.CreateMarkerDriverClass.CreateMarkerDriver)
+  template for MoCap models is no longer necessary. The argument can still be used 
+  if the marker class and data entry in the C3D file differ.
 
 * Updated the implementation of muscle parameters section in models to use the new
   `??=` (optional assignment) operator introduced in AnyBody 7.4.1. This allows
@@ -244,10 +307,10 @@ achieve same marker position and joint angle output.
   better clarity.
 
 * The `CameraClassTemplate.any` include file in model utilities has been renamed to
-  `VideoLookAtCamera.any` to have the same name as the class template it
+  [`VideoLookAtCamera.any`](#Video-tools.Video.VideoLookAtCamera.any) to have the same name as the class template it
   contains. 
 
-### Removed:
+### 🧹 Removed:
 
 - The template `DEFAULT_PARAMETER_FOLDER` has been removed. It is no longer needed 
   since the same functionality is now provided by the `??=` operator.

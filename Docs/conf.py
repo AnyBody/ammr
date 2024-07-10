@@ -1,11 +1,10 @@
 # -- Project information -----------------------------------------------------
 import os
-import sys
-from urllib.request import urlopen
-from pathlib import Path
 import re
-from datetime import datetime
 import subprocess
+import sys
+from datetime import datetime
+from pathlib import Path
 
 sys.path.insert(0, os.path.abspath("exts"))
 sys.path.insert(0, os.path.abspath("tools"))
@@ -62,7 +61,6 @@ extensions = [
     "sphinx.ext.githubpages",
     "myst_parser",
     "ammr_directives",
-    "inline_highlight",
     "sphinxext.opengraph",
     "sphinx_design",
     "sphinx_togglebutton",
@@ -115,7 +113,7 @@ exclude_patterns = [
 highlight_language = "AnyScriptDoc"
 pygments_style = "AnyScript"
 
-ams_version = os.environ.get("AMS_VERSION", "7.4.3")
+ams_version = os.environ.get("AMS_VERSION", "8.0.4")
 if not re.match("^\d\.\d\.\d", ams_version):
     raise ValueError("Wrong format for AMS version, environment variable")
 ams_version_short = ams_version.rpartition(".")[0]
@@ -149,8 +147,8 @@ rst_epilog = f"""
 .. |AMMR_DEMO_INST_DIR| replace:: :literal:`~/Documents/{ams_version_x}/AMMR.v{ammr_version}-Demo`
 .. |CURRENT_YEAR| replace:: {current_year}
 .. |WHAT_IS_NEW| replace:: :ref:`What's new in AMMR {ammr_version} <whats-new>`
-.. |DOI| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.1250764.svg
-                 :target: https://doi.org/10.5281/zenodo.1250764
+.. |DOI| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.10527958.svg
+                 :target: https://doi.org/10.5281/zenodo.10527958
 """
 
 myst_substitutions = {
@@ -162,7 +160,7 @@ myst_substitutions = {
     "AMMR_VERSION": ammr_version,
     "CURRENT_YEAR": current_year,
     "AMMR_DEMO_INST_DIR": f"`~/Documents/{ams_version_x}/AMMR.v{ammr_version}-Demo`",
-    "DOI": "[![DOI image](https://zenodo.org/badge/DOI/10.5281/zenodo.1250764.svg)](https://doi.org/10.5281/zenodo.1250764)",
+    "DOI": "[![DOI image](https://zenodo.org/badge/DOI/10.5281/zenodo.10527958.svg)](https://doi.org/10.5281/zenodo.10527958)",
     "WHAT_IS_NEW": f"{{ref}}`What's new in AMMR {ammr_version} <whats-new>`",
     "WHAT_IS_NEW2": f"{{material-outlined}}`update;1em` New in AMMR {ammr_version}",
 }
@@ -324,8 +322,8 @@ ogp_use_first_image = True  # if not found defaults to 'ogp_image'
 
 
 # Generate gallery files
-import jinja2
 import frontmatter
+import jinja2
 
 gallery = {}
 galleryfolders = [x for x in Path("Applications").iterdir() if x.is_dir()]
@@ -359,6 +357,7 @@ for folder, section in gallery.items():
 # to generate the class template documentation
 
 import generate_class_template_docs
+
 generate_class_template_docs.run_all()
 
 
@@ -373,9 +372,8 @@ linkcheck_ignore = [
     "https://doi.org/10.1080/10255842.2020.1851367",  # tandfonline.com prevents the linkcheck
     "https://dx.doi.org/10.1002/jor.20255",  # wiley.com prevents the linkcheck
     "https://doi.org/10.1016/j.clinbiomech.2006.10.003",  # clinbiomech.com prevents the linkcheck
-    "https://doi.org/10.1002/jor.25267", # wiley.com prevents the linkcheck
-    "https://doi.org/10.5281/zenodo.10527958",  # AMMR 3 not released yet
-    "https://www.anybodytech.com/download/anybodysetup-8-0-0-.*_x64/",  # AMMR 8 not released yet
+    "https://doi.org/10.1002/jor.25267",  # wiley.com prevents the linkcheck
+    "https://doi.org/10.5281/zenodo.12592455",  # AMMR 3.0.4 not released yet
 ]
 
 linkcheck_allowed_redirects = {
