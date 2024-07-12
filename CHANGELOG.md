@@ -6,6 +6,10 @@
 (ammr-3.0.5-changelog)=
 ## AMMR 3.0.5 (2024-??-??)
 
+### 🩹 Fixed:
+* Fixed an issue that prevented switching off drawing of marker arrows in CreateMarkerDriverClass in MoCap models. Updated the search string
+  used in `Main.ModelSetup.Views.All_MarkerArrows.Objects` to correctly pick up the arrow drawing objects.
+
 ### 🔧 Changed:
 * Changed the Human-Ground residual implmentation in the MoCap models to use
   rotatinal measures configured for measuring angual velocities. This change
