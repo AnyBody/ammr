@@ -12,7 +12,7 @@ The box space is defined specifying 4 points in counter clockwise sense. These p
 are used to define a boundary where the penetration prevention constraint is active
 and the plane formed by the four points is used to create the threshold for 
 penetration. The positive direction is identified by the right hand rule
-throught the 4 corner points, and negative direction is prevented. The penetration 
+through the 4 corner points, and negative direction is prevented. The penetration 
 check is done only on one plane. The box is, therefore, open on the other side. 
 
 Use cases of such a combi driver can be flexion of toes in combination with the 
@@ -57,22 +57,23 @@ Main = {
 
 The class supports the following settings:
 
-|----------------------------|--------------|-----------------------------------------------------------------------------------------------------------------------|
-| Variable                   | Type         |  Default                        | Desciption                                                                          |
-|----------------------------|--------------|---------------------------------|-------------------------------------------------------------------------------------|
-| PLANE_BASE_FRAME           | AnyRefFrame  | Main.EnvironmentModel.GlobalRef | The base frame on which the corners are specified                                   |
-| NEUTRAL_ANGLE_MEASURE      | AnyKinMeasure|  -                              | Kinematic measure to be driven to neutral value                                     |
-| TARGET_FRAME               | AnyRefFrame  |  -                              | Target frame that will be checked for penetration with base frame.                  |
-| Corners                    | AnyMatrix    |  -                              | Matrix with coordinates of 4 corner points                                          |
-| BoxVisibility              | AnySwitchVar | On                              | Switch to visualize lines connecting the 4 corners                                  |
-| MeasureNeutralValue        | AnyVar       | 0.0                             | Neutral value for the NEUTRAL_ANGLE_MEASURE                                         |
-| WeightNeutralAngleDriver   | AnyVar       | 1e-5                            | Weak weight to drive the kinematic measure to neutral value                         |
-| WeightBoxDriver            | AnyVar       | 1.0                             | Weight of the driver preventing the penetration of the target frame                 |
-| WeightWithinBoundsFun      | AnyVar       | 1.0                             | Weight of function checking if target frame is within bounds of the 4 corners       |
-| DepthLowerLimit            | AnyVar       | 0.0                             | Depth limit, measured from the corners, at which the penetration constraint kicks in|
-| DepthLowerLimitHard        | AnyVar       | DepthLowerLimit - 0.01;         | Hard depth limit, for ramping up the penetration penalty                            |
-| ErrorAtDepthLowerLimitHard | AnyVar       | 1.0                             | Error at the hard depth limit                                                       |
-|----------------------------|--------------|---------------------------------|-------------------------------------------------------------------------------------|
+|------------------------------|--------------|-----------------------------------------------------------------------------------------------------------------------|
+| Variable                     | Type         |  Default                        | Desciption                                                                          |
+|------------------------------|--------------|---------------------------------|-------------------------------------------------------------------------------------|
+| PLANE_BASE_FRAME             | AnyRefFrame  | Main.EnvironmentModel.GlobalRef | The base frame on which the corners are specified                                   |
+| NEUTRAL_ANGLE_MEASURE        | AnyKinMeasure|  -                              | Kinematic measure to be driven to neutral value                                     |
+| TARGET_FRAME                 | AnyRefFrame  |  -                              | Target frame that will be checked for penetration with base frame.                  |
+| Corners                      | AnyMatrix    |  -                              | Matrix with coordinates of 4 corner points                                          |
+| UsePlaneBordersForBoundsCheck| AnyVar       | 1                               | Switch use the 4 corners for detecting within bounds, or use an infinite plane      |
+| BoxVisibility                | AnySwitchVar | On                              | Switch to visualize lines connecting the 4 corners                                  |
+| MeasureNeutralValue          | AnyVar       | 0.0                             | Neutral value for the NEUTRAL_ANGLE_MEASURE                                         |
+| WeightNeutralAngleDriver     | AnyVar       | 1e-5                            | Weak weight to drive the kinematic measure to neutral value                         |
+| WeightBoxDriver              | AnyVar       | 1.0                             | Weight of the driver preventing the penetration of the target frame                 |
+| WeightWithinBoundsFun        | AnyVar       | 1.0                             | Weight of function checking if target frame is within bounds of the 4 corners       |
+| DepthLowerLimit              | AnyVar       | 0.0                             | Depth limit, measured from the corners, at which the penetration constraint kicks in|
+| DepthLowerLimitHard          | AnyVar       | DepthLowerLimit - 0.01;         | Hard depth limit, for ramping up the penetration penalty                            |
+| ErrorAtDepthLowerLimitHard   | AnyVar       | 1.0                             | Error at the hard depth limit                                                       |
+|------------------------------|--------------|---------------------------------|-------------------------------------------------------------------------------------|
 
 */
 
@@ -83,6 +84,7 @@ The class supports the following settings:
   {
     #var AnyMatrix Corners;
     AnyFolder Settings = {
+      #var AnyVar UsePlaneBordersForBoundsCheck = 1;
       #var AnySwitchVar BoxVisibility = On;
       #var AnyVar MeasureNeutralValue = 0.0;
       #var AnyVar WeightNeutralAngleDriver = 1e-5;
@@ -192,10 +194,10 @@ The class supports the following settings:
       
       AnyFunInterpol Fun ={
         T=farr(-10.0,0.01,20*100);
-        Data={iffun(ltfun(T,0),0.0,..Settings.WeightWithinBoundsFun)};
+        Data={iffun(ltfun(T,0),1.0-..Settings.UsePlaneBordersForBoundsCheck,..Settings.WeightWithinBoundsFun)};
         Type=Bspline;
       };
-      
+
       
       AnyKinMeasureFunComb1 InSideBounds = {
         Functions={&.Fun,&.Fun,&.Fun,&.Fun};
