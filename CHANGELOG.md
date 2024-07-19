@@ -6,6 +6,10 @@
 (ammr-3.0.5-changelog)=
 ## AMMR 3.0.5 (2024-??-??)
 
+### 🩹 Fixed:
+* Fixed an issue that prevented switching off drawing of marker arrows in CreateMarkerDriverClass in MoCap models. Updated the search string
+  used in `Main.ModelSetup.Views.All_MarkerArrows.Objects` to correctly pick up the arrow drawing objects.
+
 ### 🔧 Changed:
 * Changed the Human-Ground residual implmentation in the MoCap models to use
   rotatinal measures configured for measuring angual velocities. This change
@@ -1747,7 +1751,7 @@ the driver values are updated.
 - The model is versioned TLEM 2.1, to indicate the number of changes and
   correction which has been added in the process. The changes and updates to the
   TLEM2 dataset was done in the [Life Long
-  Joints](https://web.archive.org/web/20230323035759/https://lifelongjoints.eu/)
+  Joints](https://web.archive.org/web/20230108081423/https://lifelongjoints.eu/)
   EU research project (paper submitted for publication).
 
 - The most important changes to the TLEM 2 dataset include the following:

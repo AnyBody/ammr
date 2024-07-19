@@ -48,7 +48,7 @@ it easier to implement Force Dependent Kinematics on joint movements ({doc}`see
 tutorial <tutorials:ForceDependentKinematics/index>`)
 
 The model was refined during the [Life Long Joints
-project](https://web.archive.org/web/20230323035759/https://lifelongjoints.eu/) where its anatomical fidelity and joint
+project](https://web.archive.org/web/20230108081423/https://lifelongjoints.eu/) where its anatomical fidelity and joint
 force prediction accuracy were improved by De Pieri et al. [^cite_dlgr17], 
 mainly, by implementing better a wrapping surfaces for the muscles ([TLEM
 v2.1](#TLEM2-v2.1)). 
