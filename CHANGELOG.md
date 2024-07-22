@@ -3,6 +3,14 @@
 % A rendered version of the CHANGELOG is avaible here:
 %    https://anyscript.org/ammr/beta/changelog.html
 
+(ammr-3.0.4-changelog)=
+## AMMR 3.0.4 (2024-xx-xx)
+
+### 🩹 Fixed:
+* Fixed an issue in the {ref}`Bike Model example <example_bikemodel>` that included thoracic support
+  in the full body model also.
+* Fixed an issue where the visualization of the marker coordinate system would not update when running parameter identification in the MoCap models.
+
 (ammr-3.0.3-changelog)=
 ## AMMR 3.0.3 (2024-06-10)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.11191711.svg)](https://doi.org/10.5281/zenodo.11191711)
