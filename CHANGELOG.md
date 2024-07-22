@@ -3,13 +3,34 @@
 % A rendered version of the CHANGELOG is avaible here:
 %    https://anyscript.org/ammr/beta/changelog.html
 
-(ammr-3.0.4-changelog)=
-## AMMR 3.0.4 (2024-xx-xx)
+(ammr-3.0.5-changelog)=
+## AMMR 3.0.5 (2024-??-??)
 
 ### 🩹 Fixed:
-* Fixed an issue in the {ref}`Bike Model example <example_bikemodel>` that included thoracic support
-  in the full body model also.
-* Fixed an issue where the visualization of the marker coordinate system would not update when running parameter identification in the MoCap models.
+* Fixed an issue that prevented switching off drawing of marker arrows in CreateMarkerDriverClass in MoCap models. Updated the search string
+  used in `Main.ModelSetup.Views.All_MarkerArrows.Objects` to correctly pick up the arrow drawing objects.
+
+### 🔧 Changed:
+* Changed the Human-Ground residual implmentation in the MoCap models to use
+  rotatinal measures configured for measuring angual velocities. This change
+  should make the resiuals more robust, and the residual output easier to
+  interpret geometrically. Otherwise, this should not change results. 
+* The Force plates are no longer included in the parameter identification study.
+  It wasn't needed, and this change may speed up the parameter identification
+  process slightly.
+
+
+(ammr-3.0.4-changelog)=
+## AMMR 3.0.4 (2024-07-02)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.12592455.svg)](https://doi.org/10.5281/zenodo.12592455)
+
+[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.0.4-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
+
+### 🩹 Fixed:
+* Fixed an issue in the {ref}`Bike Model example <example_bikemodel>` that
+  included thoracic support in the full body model also.
+* Fixed an issue with the visualization of the marker coordinate system arrows. They now
+  correctly update while running running parameter identification in the MoCap models.
 
 (ammr-3.0.3-changelog)=
 ## AMMR 3.0.3 (2024-06-10)
@@ -1715,7 +1736,7 @@ the driver values are updated.
 - The model is versioned TLEM 2.1, to indicate the number of changes and
   correction which has been added in the process. The changes and updates to the
   TLEM2 dataset was done in the [Life Long
-  Joints](https://web.archive.org/web/20230323035759/https://lifelongjoints.eu/)
+  Joints](https://web.archive.org/web/20230108081423/https://lifelongjoints.eu/)
   EU research project (paper submitted for publication).
 
 - The most important changes to the TLEM 2 dataset include the following:

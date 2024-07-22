@@ -122,7 +122,8 @@ model.
 
 [^f1]: Gordon, C. C. et al. 1988 Anthropometric Survey of U.S. Army personnel: methods and summary statistics. (US Army Natick Research, Development and Engineering Center, 1989).
 
-:::{seealso} **Next lesson:**
+:::{admonition} **Next lesson:**
 :class: seealso
+
 {doc}`lesson3`.
 :::
