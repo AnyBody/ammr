@@ -64,6 +64,28 @@ The default pelvis model used in all models have changed. The pelvis morphology 
   In practice, this means that the morphology of the leg pelvis is moprhed to match the Trunk pelvis.
   Using `_MORPH_TRUNK_TO_LEG_` instead will revert to the old behaviour. 
 
+(ammr-3.0.5-changelog)=
+## AMMR 3.0.5 (2024-??-??)
+
+### ➕ Added:
+* Added a small class template, [`CreateCoMRefNode`](#Utilities.center-of-mass.createcomrefnode.createcomrefnode),
+  that can be used to create a reference node at the center of mass of a segment with its axes aligned with
+  the principal axes of inertia of the segment.
+
+### 🩹 Fixed:
+* Fixed an issue that prevented switching off drawing of marker arrows in CreateMarkerDriverClass in MoCap models. Updated the search string
+  used in `Main.ModelSetup.Views.All_MarkerArrows.Objects` to correctly pick up the arrow drawing objects.
+
+### 🔧 Changed:
+* Changed the Human-Ground residual implmentation in the MoCap models to use
+  rotatinal measures configured for measuring angual velocities. This change
+  should make the resiuals more robust, and the residual output easier to
+  interpret geometrically. Otherwise, this should not change results. 
+* The Force plates are no longer included in the parameter identification study.
+  It wasn't needed, and this change may speed up the parameter identification
+  process slightly.
+
+
 (ammr-3.0.4-changelog)=
 ## AMMR 3.0.4 (2024-07-02)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.12592455.svg)](https://doi.org/10.5281/zenodo.12592455)
@@ -1811,7 +1833,7 @@ the driver values are updated.
 - The model is versioned TLEM 2.1, to indicate the number of changes and
   correction which has been added in the process. The changes and updates to the
   TLEM2 dataset was done in the [Life Long
-  Joints](https://web.archive.org/web/20230323035759/https://lifelongjoints.eu/)
+  Joints](https://web.archive.org/web/20230108081423/https://lifelongjoints.eu/)
   EU research project (paper submitted for publication).
 
 - The most important changes to the TLEM 2 dataset include the following:
