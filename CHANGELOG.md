@@ -7,8 +7,8 @@
 ## AMMR 3.0.5 (2024-??-??)
 
 ### ➕ Added:
-* Added a small class template, [`CreateCoMRefNode`](#Utilities.centre-of-mass.createcomrefnode.createcomrefnode),
-  that can be used to create a reference node at the centre of mass of a segment with its axes aligned with
+* Added a small class template, [`CreateCoMRefNode`](#Utilities.center-of-mass.createcomrefnode.createcomrefnode),
+  that can be used to create a reference node at the center of mass of a segment with its axes aligned with
   the principal axes of inertia of the segment.
 
 ### 🩹 Fixed:
