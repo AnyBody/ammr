@@ -1,0 +1,58 @@
+/*
+---
+group: Utilities
+topic: Centre of mass
+descr: |
+  Class template to create a reference node at the centre of mass of a segment
+  with its axis aligned with the principal axes of inertia. 
+---
+
+To use the class template import the file:
+#include "<ANYBODY_PATH_MODELUTILS>/SegmentCoM/CreateCoMRefNode.any"
+
+*/
+
+
+// Creates a reference node at the centre of mass of the segment. The orientation of the reference
+// node is determined from the principal axes of inertia, which are determined from the Jmatrix of.
+// the segment. This class template must be used inside the scope of AnySegment.
+//
+// In the example below a reference node is created inside a segment.
+//
+// :::{rubric} Example
+// :::
+//
+// :::{code-block} AnyScriptDoc
+// AnySeg MySegment = {
+//   CreateCoMRefNode CoMNode () = {
+//     viewRefFrame.Visible = On;
+//   };
+// };
+//:::
+//
+#class_template CreateCoMRefNode (__CLASS__ = AnyRefNode,){
+  
+  AnyMat33 JMatCoM = .Jmatrix + .Mass*skewmat3d(.sCoM)*skewmat3d(.sCoM);
+  AnyMatrix JMatEV = LAPACK_syevd(JMatCoM,"V","V");
+  AnyFloat EigenVectors = {JMatEV[0],JMatEV[1],JMatEV[2]};
+  
+  // sRel
+  /// Relative position of the reference node in the segmental frame. This defaults to
+  /// segment sCoM.
+  #var sRel = .sCoM;
+  // ARel 
+  /// Relative orientation of the reference node in the segmental frame. This defaults to
+  /// be aligned with the principal axes of inertia.
+  #var ARel = {EigenVectors[0],EigenVectors[1],cross(EigenVectors[0],EigenVectors[1])}';
+  viewRefFrame = {
+    //viewRefFrame.Visible = Off;
+    /// Switch to view the reference node.
+    #var Visible = Off;
+    //viewRefFrame.ScaleXYZ = 0.5*{1,1,1};
+    /// Size of the drawing of the reference node.
+    #var ScaleXYZ = 0.5*{1,1,1};
+    // viewRefFrame.RGB = {0.8,0.2,0.2};
+    /// Color of the drawing of the reference node.
+    #var RGB = {0.8,0.2,0.2};
+  };
+};
