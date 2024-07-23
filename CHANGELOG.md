@@ -6,6 +6,11 @@
 (ammr-3.0.5-changelog)=
 ## AMMR 3.0.5 (2024-??-??)
 
+### ➕ Added:
+* Added a small class template, [`CreateCoMRefNode`](#Utilities.center-of-mass.createcomrefnode.createcomrefnode),
+  that can be used to create a reference node at the center of mass of a segment with its axes aligned with
+  the principal axes of inertia of the segment.
+
 ### 🩹 Fixed:
 * Fixed an issue that prevented switching off drawing of marker arrows in CreateMarkerDriverClass in MoCap models. Updated the search string
   used in `Main.ModelSetup.Views.All_MarkerArrows.Objects` to correctly pick up the arrow drawing objects.
