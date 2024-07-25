@@ -1,0 +1,120 @@
+#include "../libdef.any"
+#include "<ANYBODY_PATH_MODELUTILS>/SegmentCoM/CreateCoMRefNode.any"
+
+// Definitions that allow to run the demo with different parameters
+#ifndef BOXSIZES
+#define BOXSIZES {2, 5, 1}*0.1
+#endif
+#ifndef COM
+#define COM {1, 1, 1}*0.2
+#endif
+#ifndef ROTATIONS
+#define ROTATIONS {20, 10, 10}  * (pi/180.0)
+#endif
+
+
+Main = {
+  // Definitions to beused below
+  AnyVec3 BoxSizes = BOXSIZES;
+  AnyVar BoxMass = 2.0;
+  AnyVec3 CoM = COM;
+  AnyVec3 rotations = ROTATIONS;
+  AnyMat33 RotMatrix = RotMat(rotations[0],x) * RotMat(rotations[1],y) * RotMat(rotations[2],z);
+  
+  AnyFixedRefFrame GlobalRef = {
+    viewRefFrame.Visible = On;
+  };
+  
+  AnySeg seg_stl = {
+    viewInertia.Visible = On;
+    UseInertiaObjects = On;
+    
+    // Create a reference node at the center of mass with the axes aligned with the
+    // principal axes of inertia of the segment.
+    CreateCoMRefNode CoMNode() = {
+      viewRefFrame.Visible = On;
+      viewRefFrame.ScaleXYZ = 2*{1,1,1};
+    };
+    
+    AnyInertiaSolid inertia_stl = {
+      AnyVar Weight = Main.BoxMass;
+      Density = Weight / Volume;
+      sRel = Main.CoM;
+      ARel = Main.RotMatrix;
+      viewRefFrame.Visible = On;
+      viewRefFrame.ScaleXYZ = 1.9*{1,1,1};
+      AnySurfSTL box = {
+        FileName = "box";
+        viewSurface.Visible = On;
+        
+        ScaleXYZ = Main.BoxSizes / 2;
+        AnyVec3 BoxSizes = Main.BoxSizes;
+      };
+      
+    };
+
+  };
+
+  AnySeg seg_stl_symmetric2 = {
+    viewInertia.Visible = On;
+    UseInertiaObjects = On;
+    
+    // Create a reference node at the center of mass with the axes aligned with the
+    // principal axes of inertia of the segment.
+    // The moment of inertia is symmetric about two axes, and therefore, it results
+    // in 2 equal Eigen values. The two axes can't be uniquely defined. The notice is suppressed.
+    CreateCoMRefNode CoMNode(SUPPRESS_SYMMETRY_NOTICE = "On") = {
+      viewRefFrame.Visible = On;
+      viewRefFrame.ScaleXYZ = 2*{1,1,1};
+    };
+    
+    AnyInertiaSolid inertia_stl = {
+      AnyVar Weight = Main.BoxMass;
+      Density = Weight / Volume;
+      sRel = {1,1,3}*0.2;
+      ARel = Main.RotMatrix;
+      viewRefFrame.Visible = On;
+      viewRefFrame.ScaleXYZ = 1.9*{1,1,1};
+      AnySurfSTL box = {
+        FileName = "box";
+        viewSurface.Visible = On;
+        
+        ScaleXYZ = BoxSizes / 2;
+        AnyVec3 BoxSizes = {1, 2, 1}*0.1;
+      };
+      
+    };
+  };
+
+  AnySeg seg_stl_symmetric3 = {
+    viewInertia.Visible = On;
+    UseInertiaObjects = On;
+    
+    // Create a reference node at the center of mass with the axes aligned with the
+    // principal axes of inertia of the segment.
+    // The moment of inertia is symmetric about the 3 axes, and therefore, it results
+    // in 3 equal Eigen values. The three axes can't be uniquely defined. The notice is suppressed.
+    CreateCoMRefNode CoMNode(SUPPRESS_SYMMETRY_NOTICE = "On") = {
+      viewRefFrame.Visible = On;
+      viewRefFrame.ScaleXYZ = 2*{1,1,1};
+    };
+    
+    AnyInertiaSolid inertia_stl = {
+      AnyVar Weight = Main.BoxMass;
+      Density = Weight / Volume;
+      sRel = {1,1,4}*0.2;
+      ARel = Main.RotMatrix;
+      viewRefFrame.Visible = On;
+      viewRefFrame.ScaleXYZ = 1.9*{1,1,1};
+      AnySurfSTL box = {
+        FileName = "box";
+        viewSurface.Visible = On;
+        
+        ScaleXYZ = BoxSizes / 2;
+        AnyVec3 BoxSizes = {1, 1, 1}*0.1;
+      };
+      
+    };
+  };
+
+};
