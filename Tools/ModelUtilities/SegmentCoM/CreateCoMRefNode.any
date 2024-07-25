@@ -17,6 +17,11 @@ To use the class template import the file:
 // node is determined from the principal axes of inertia, which are determined from the Jmatrix of
 // the segment. This class template must be used inside the scope of AnySeg.
 //
+// This class template calculates the Jmatrix about the center of mass and its Eigen vectors and Eigen   
+// values to determine the principal axes of inertia. In cases with symmetric shape, for example a sphere, 
+// cylinder, etc., some of the Eigen value terms are duplicated. Therefore, the principal axes may not 
+// be uniquely defined in these cases.
+//
 // In the example below a reference node is created inside a segment.
 //
 // :::{rubric} Example
@@ -30,13 +35,41 @@ To use the class template import the file:
 // };
 //:::
 //
-#class_template CreateCoMRefNode (__CLASS__ = AnyRefNode){
+#class_template CreateCoMRefNode (__CLASS__ = AnyRefNode,
+  SUPPRESS_SYMMETRY_NOTICE = "Off"){
+  // Arguments
+  // -----------
+  //  CreateCoMRefNode#SUPPRESS_SYMMETRY_NOTICE
+  //   Switch to suppress the notice detecting duplicate Eigen values of the Jmatrix about the center of mass, 
+  //   indicating that two or three axes of the center of mass node may not be uniquely defined.
+
   /// Jmatrix about the center of mass
   AnyMat33 JMatrixCoM = .Jmatrix + .Mass*skewmat3d(.sCoM)*skewmat3d(.sCoM);
   /// Matrix with eigen vectors and eigen values from the Jmatrix about center of mass
   AnyMatrix JMatrixEV = LAPACK_syevd(JMatrixCoM,"V","V");
   /// Eigen vectors of the Jmatrix about the center of mass
   AnyFloat EigenVectors = {JMatrixEV[0],JMatrixEV[1],JMatrixEV[2]};
+  /// Eigen values of the Jmatrix about the center of mass
+  AnyFloat EigenValues = JMatrixEV[3];
+  
+  #if SUPPRESS_SYMMETRY_NOTICE == "Off"
+  /// Check if first and second Eigen values are same
+  AnyInt test0_1 = iffun(ltfun(abs(EigenValues[0]-EigenValues[1]),SymmetryTolerance),1,0);
+  /// Check if second and third Eigen values are same
+  AnyInt test1_2 = iffun(ltfun(abs(EigenValues[1]-EigenValues[2]),SymmetryTolerance),1,0);
+  /// Check if first and third Eigen values are same
+  AnyInt test0_2 = iffun(ltfun(abs(EigenValues[0]-EigenValues[2]),SymmetryTolerance),1,0);
+  /// Sum of the three tests.
+  AnyInt sumcheck = test0_1+test1_2+test0_2;
+  /// Notice when 2 Eigen values are same
+  AnyInt AxisNotice_2 = notice(sumcheck-1, strformat("2 of 3 Eigen values are the same. 2 axes of the Center of Mass node may not be uniquely defined due to symmetric moment of inertia about 2 axes.\n\t\t\tYou can suppress this notice by setting SUPPRESS_SYMMETRY_NOTICE = " + strquote("On")));
+  /// Notice when 3 Eigen values are same
+  AnyInt AxisNotice_3 = notice(sumcheck-3, strformat("3 of 3 Eigen values are the same. The axes of the Center of Mass node may not be uniquely defined due to symmetric moment of inertia about 3 axes. \n\t\t\tYou can suppress this notice by setting SUPPRESS_SYMMETRY_NOTICE = " + strquote("On")));
+  #endif
+  
+  //CreateCoMRefNode
+  /// Tolerance for checking duplicate Eigen values
+  #var AnyFloat SymmetryTolerance = 1e-10;
   
   // sRel
   /// Relative position of the reference node in the segmental frame. This defaults to
@@ -47,13 +80,13 @@ To use the class template import the file:
   /// be aligned with the principal axes of inertia.
   #var ARel = {EigenVectors[0],EigenVectors[1],cross(EigenVectors[0],EigenVectors[1])}';
   viewRefFrame = {
-    //viewRefFrame.Visible = Off;
+    // viewRefFrame.Visible
     /// Switch to view the reference node.
     #var Visible = Off;
-    //viewRefFrame.ScaleXYZ = 0.5*{1,1,1};
+    // viewRefFrame.ScaleXYZ
     /// Size of the drawing of the reference node.
     #var ScaleXYZ = 0.5*{1,1,1};
-    // viewRefFrame.RGB = {0.8,0.2,0.2};
+    // viewRefFrame.RGB
     /// Color of the drawing of the reference node.
     #var RGB = {0.8,0.2,0.2};
   };
