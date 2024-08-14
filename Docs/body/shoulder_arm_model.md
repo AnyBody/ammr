@@ -25,7 +25,7 @@ Report](https://paperpile.com/shared/TUqWjt).
 
 ```{raw} html
 <video width="45%" style="display:block; margin: 0 auto;" controls autoplay loop>
-    <source src="../_static/ShouderArm_rotalting_model.mp4" type="video/mp4">
+    <source src="../_static/ShoulderArm_rotating_model.mp4" type="video/mp4">
 Your browser does not support the video tag.
 </video>
 <!--<img src="../_static/ShoulderCloseupBack.jpg" alt="Smiley face" width="45%">-->
