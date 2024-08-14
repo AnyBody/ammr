@@ -114,7 +114,7 @@ highlight_language = "AnyScriptDoc"
 pygments_style = "AnyScript"
 
 ams_version = os.environ.get("AMS_VERSION", "8.0.4")
-if not re.match("^\d\.\d\.\d", ams_version):
+if not re.match(r"^\d\.\d\.\d", ams_version):
     raise ValueError("Wrong format for AMS version, environment variable")
 ams_version_short = ams_version.rpartition(".")[0]
 ams_version_x = ams_version_short + ".x"
@@ -131,7 +131,7 @@ if ammr_version is None:
             raise Exception("Could not parse AMMR version")
 
 
-if not re.match("^\d\.\d\.\d", ammr_version):
+if not re.match(r"^\d\.\d\.\d", ammr_version):
     raise ValueError("Wrong format for AMMR version, environment variable")
 
 ammr_version_short = ammr_version.rpartition(".")[0]
