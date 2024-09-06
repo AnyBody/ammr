@@ -4,7 +4,7 @@ gallery_image: "/Applications/images/FreePostureFullBodyShoulderRhythmStatic.web
 ---
 
 (sphx-glr-auto-examples-adls-and-ergonomics-plot-freeposture-py)=
-
+(example_freeposture)=
 # Free posture Models
 
 

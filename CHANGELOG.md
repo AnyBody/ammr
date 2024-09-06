@@ -14,6 +14,8 @@
 ### 🩹 Fixed:
 * Fixed an issue that prevented switching off drawing of marker arrows in CreateMarkerDriverClass in MoCap models. Updated the search string
   used in `Main.ModelSetup.Views.All_MarkerArrows.Objects` to correctly pick up the arrow drawing objects.
+* Fixed an issue in the PelvisGround rotation drivers in the {ref}`Free Posture Static example<example_freeposture>`. The X and Z rotation drivers 
+  were mixed up.
 
 ### 🔧 Changed:
 * Changed the Human-Ground residual implmentation in the MoCap models to use
