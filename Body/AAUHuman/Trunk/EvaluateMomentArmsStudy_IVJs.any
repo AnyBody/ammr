@@ -1,0 +1,144 @@
+
+AnyFolder Model = {
+  // Model parts included in the moment arm study
+  AnyFolder &PelvisRef = .TrunkHumanFolderRef.Segments.PelvisSeg; 
+  AnyFolder &TrunkRef = .TrunkHumanFolderRef; 
+  AnyFolder &SpineMusRef = .TrunkHumanFolderRef.Muscles;
+  AnyFolder &SpineMusRightRef =. TrunkHumanFolderRef.Muscles.Right;
+  AnyFolder &SpineMusLeftRef = .TrunkHumanFolderRef.Muscles.Left;
+
+  
+ AnyFixedRefFrame ground = {
+   AnyRefNode node = { 
+      ARel=..PelvisRef.Axes0;
+     sRel=..PelvisRef.r0;
+   };
+ };
+ 
+
+ 
+
+AnyFolder Drivers = {
+   AnyVar AngularVelocity = (..RangeOfMotion[1]-..RangeOfMotion[0])*pi/180;   
+ 
+ // If Leg are included then Psoas muscle are attached to the legs. 
+ // Thus, we need to driver for the hip joint
+ #if BM_LEG_RIGHT
+ AnySphericalJoint &RHipJoint = .....BodyModel.Right.Leg.Jnt.Hip;
+ AnyKinEq RHipDriver= {
+   AnyKinMeasureOrg HipMeasure = {
+      AnyKinMeasure& ref1 = .......BodyModel.Interface.Right.HipFlexion;
+      AnyKinMeasure& ref2 = .......BodyModel.Interface.Right.HipAbduction;
+      AnyKinMeasure& ref3 = .......BodyModel.Interface.Right.HipExternalRotation;
+    };
+  };
+ #endif
+ #if BM_LEG_LEFT
+ AnySphericalJoint &LHipJoint = .....BodyModel.Left.Leg.Jnt.Hip;
+ AnyKinEq LHipDriver= {
+   AnyKinMeasureOrg HipMeasure = {
+      AnyKinMeasure& ref1 = .......BodyModel.Interface.Left.HipFlexion;
+      AnyKinMeasure& ref2 = .......BodyModel.Interface.Left.HipAbduction;
+      AnyKinMeasure& ref3 = .......BodyModel.Interface.Left.HipExternalRotation;
+    };
+  };
+ #endif
+ 
+ 
+ AnyStdJoint PelvisGround={
+    AnyRefFrame &Ground = ..ground.node;
+    AnyRefFrame &Sacrum= ..PelvisRef; 
+ };
+    
+};// Drivers
+
+//AnyFolder MomentArmCalculations_AllMuscles = {
+// 
+// AnyFolder Abcissa = { 
+//   AnyVar JointAngle =  not(not(..Drivers.TrunkDriver.DriverVel))*..Drivers.TrunkDriver.TrunkMeasure.Pos'*180/pi  ;    
+// };
+// 
+// AnyObjectPtrArray trunk_muscles = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Muscles", "*", "AnyMuscle",10);
+// 
+// MomentArmPtrArrays MomentArm() = {
+//   MusclesLmtDotObj = ObjGetMember(.trunk_muscles, "LmtDot");
+//   MusclesStrengthObj = ObjGetMember(.trunk_muscles, "Strength");
+//   AngularVelocity = ..Drivers.AngularVelocity;
+// };
+// 
+//};
+
+};
+
+ 
+AnyKinStudy Study = {
+  Gravity = {0,0,0};
+  #ifdef EVALUATE_MOMENT_ARMS_NSTEP
+  nStep = EVALUATE_MOMENT_ARMS_NSTEP;
+  #else
+  nStep = 40;
+  #endif  
+
+  InitialConditions.SolverType = Kinematics.SolverType ;
+  Kinematics.SolverType = KinSolDeterminate;
+  
+  AnyFolder &Model = .Model;
+  AnyOutputFun AngularVelocity_output = {Val = ..Model.Drivers.AngularVelocity;};  
+
+  AnyFolder MomentArmCalculations = {
+ 
+ AnyFolder Abcissa = { 
+   AnyVar JointAngle =  not(not(..Model.Drivers.TrunkDriver.DriverVel))*..Model.Drivers.TrunkDriver.TrunkMeasure.Pos'*180/pi  ;    
+ };
+
+ AnyObjectPtrArray trunk_muscles = ObjSearchRecursive("Main.HumanModel.BodyModel.Trunk.Muscles", "*", "AnyMuscle",10);
+  
+          
+      
+ };
+};
+
+#if (ANYBODY_V1 >= 6) & (ANYBODY_V2 >= 1)
+AnyFolder ModelViews = { AnyFolder Views =  {}; };
+#else
+AnyProject ModelViews = {};
+#endif
+
+ModelViews = {
+  AnyDrawGroup Selection = {
+    Objects = arrcat(arrcat(arrcat(arrcat(
+                     ObjSearchRecursive(CompleteNameOf(&..Model.PelvisRef ), "*", "AnyDrawObject"), 
+                     ObjSearchRecursive(CompleteNameOf(&..Model.TrunkRef ), "*", "AnyDrawObject")),
+                     ObjSearchRecursive(CompleteNameOf(&..Model.SpineMusRef ), "*", "AnyDrawObject")),
+                     ObjSearchRecursive(CompleteNameOf(&..Model.SpineMusRightRef ), "*", "AnyDrawObject")),
+                     ObjSearchRecursive(CompleteNameOf(&..Model.SpineMusLeftRef ), "*", "AnyDrawObject"));
+  };
+  Views = {
+    AnyProjectModelViewDefinition SelectedView = {
+      DrawGroupSequence = {&..Selection};
+      Reset = {On};
+    };
+  };
+};
+
+AnyOperationSequence Run = 
+{
+    AnyOperationMacro SetView = 
+    {
+      MacroStr = { "classoperation " + CompleteNameOf(&..ModelViews.Views.SelectedView) + strquote("Set View") };
+    };
+    AnyOperation &Study = .Study.Kinematics;
+    #ifdef ANYBODY_PATH_OUTPUT
+    AnyOperationMacro Save = 
+    {
+      MacroStr = {
+        "classoperation " + CompleteNameOf(&..Study.Output) + strquote("Save data") 
+        + " --type=" + strquote("Deep") +" --file=" + strquote(
+        ANYBODY_PATH_OUTPUT + ..OutputFileName + ".anydata.h5")
+      };
+    };
+    #endif
+
+
+
+};

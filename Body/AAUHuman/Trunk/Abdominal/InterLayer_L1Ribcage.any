@@ -1,0 +1,96 @@
+AnyFolder Inter_Layer_L1Ribcage = {
+  
+  AnySeg BaseSegAnterior = {
+    r0 = ..Layer_L1.BaseSegAnterior.r0;
+    Axes0 = ..Layer_L1.BaseSegAnterior.Axes0;
+    
+    Mass = 0;
+    Jii = {0,0,0};
+    AnyFolder &Data = ...Data.unscaled.ModelParameters.Abdominal;
+    AnyFunTransform3D &Scale = ...Scaling.GeometricalScaling.Lumbar.ScaleFunction;
+    
+    AnyRefNode LayerConstraintNodes = {
+      AnyFolder LayerPoints = {
+        PointGenerator points_right(fun=SplineFun, scale_fun=...Scale)={
+          start=.....Parameters.LayerMeasureSplineStart;
+          amount = .....Parameters.LayerMeasureAmount;  
+          AnyFunInterpol &SplineFun = .....Layer_L1.Data.AbdominalCavityPoints.Right.Parametric.Fun;
+        };
+        PointGenerator points_left(fun=SplineFun, scale_fun=...Scale)={
+          start=.....Parameters.LayerMeasureSplineStart;
+          amount = .....Parameters.LayerMeasureAmount;  
+          AnyFunInterpol &SplineFun = .....Layer_L1.Data.AbdominalCavityPoints.Left.Parametric.Fun;
+        };
+      };
+      
+      AnyRefNodeGroup Nodes_Below_Layer ={
+        NodeAmount = ....Layer_L1.BaseSegAnterior.LayerConstraintNodes.Nodes_Above_Layer.NodeAmount; // number nodes in group
+        NodeName = strval(iarr(1, NodeAmount), "_node%04i");
+        Node_sRels =....Layer_L1.BaseSegAnterior.LayerConstraintNodes.Nodes_Above_Layer.Node_sRels; 
+        NodeDefaults.CreateMotionOutput.r = On;
+      };
+      AnyRefNodeGroup Nodes_Above_Layer ={
+        NodeAmount = ....Diaphragm.CavitySeg.LayerConstraintNodes.Nodes_Below_Layer.NodeAmount; // number nodes in group
+        NodeName = strval(iarr(1, NodeAmount), "_node%04i");
+        Node_sRels =....Diaphragm.CavitySeg.LayerConstraintNodes.Nodes_Below_Layer.Node_sRels; 
+        NodeDefaults.CreateMotionOutput.r = On;
+      };
+    };
+    AnyRefNode Xiphoid_Diaphragm = {sRel = ...Diaphragm.CavitySeg.Xiphoid_Diaphragm.sRel;}; 
+  };
+  
+  AnyFolder &Data =...Trunk.Data.unscaled.ModelParameters.Abdominal.Layer_L1;    
+  AnyFolder &layer_above = .Diaphragm.CavitySeg;
+  AnyFolder &layer_below = .Layer_L1.BaseSegAnterior; 
+  AnyFolder &layer_above_inertia = .Diaphragm.CavitySeg;
+  AnyFolder &layer_below_inertia = .Layer_L1.CavitySegAnterior; 
+  
+  BaseSegAnterior = {
+    AnyRefNode Origin = {};
+  };
+  
+  
+  AnyFolder LayerConstraints ={
+    AnyVar K_top =1;
+    AnyVar K_bot =10;
+    
+    AnyIntArray   MeasureOrganizer = {0}; 
+    
+    #include "LayerConstraints.any" 
+  };
+  
+  
+  // BaseSegAnterior Constraints
+  AnyKinEq BaseSegAnteriorConstraint = 
+  {
+    AnyKinMeasureOrg BaseSegAnteriorDOFMeasurs = {
+      AnyKinLinear lin = {
+        Ref = 0; 
+        AnyRefNode &ref1 = ....Diaphragm.CavitySeg.Xiphoid_Diaphragm;
+        AnyRefNode &ref2 = ...BaseSegAnterior.Xiphoid_Diaphragm; 
+      };
+      AnyKinRotational rot = {
+        Type = RotAxesAngles;
+        AnyRefNode &ref1 = ....Diaphragm.CavitySeg.Xiphoid_Diaphragm;
+        AnyRefNode &ref2 = ...BaseSegAnterior.Xiphoid_Diaphragm; 
+      };
+      MeasureOrganizer = {1,2,3,4,5};
+    };
+    Reaction.Type = repmat (nDim, Off);
+  };
+  
+  // Force connection for BaseSegAnterior 
+  AnyReacForce BaseSegAnteriorKinetic = {
+    AnyKinLinear lin = {
+      Ref = 0; 
+      AnyRefNode &ref1 = ...Diaphragm.CavitySeg.Xiphoid_Diaphragm;
+      AnyRefNode &ref2 = ..BaseSegAnterior.Xiphoid_Diaphragm; 
+    };
+    AnyKinRotational rot = {
+      Type = RotAxesAngles;
+      AnyRefNode &ref1 = ...Diaphragm.CavitySeg.Xiphoid_Diaphragm;
+      AnyRefNode &ref2 = ..BaseSegAnterior.Xiphoid_Diaphragm; 
+    };
+  };
+}; // End of Inter_Layer_L1Ribcage
+

@@ -1,0 +1,96 @@
+AnyFolder Inter_Layer_PelvisL5 = {
+  AnyFolder &Data =...Trunk.Data.unscaled.ModelParameters.Abdominal.Layer_L5;    
+  AnyFolder &layer_above = .Layer_L5.BaseSegAnterior;
+  AnyFolder &layer_below = .Layer_Pelvic1.BaseSegAnterior; 
+  AnyFolder &layer_above_inertia =  .Layer_L5.BaseSegAnterior;
+  AnyFolder &layer_below_inertia = .Layer_Pelvic1.BaseSegAnterior; 
+  
+  AnySeg BaseSegAnterior = {
+    r0 = ..Layer_L5.BaseSegAnterior.r0;
+    Axes0 = ..Layer_L5.BaseSegAnterior.Axes0;
+    Mass = 0;
+    Jii = {0,0,0};
+    AnyFunTransform3D &Scale = ...Scaling.GeometricalScaling.Lumbar.ScaleFunction;
+    
+    AnyRefNode LayerConstraintNodes = {
+      AnyFolder LayerPoints = {
+        PointGenerator points_right(fun=SplineFun, scale_fun=...Scale)={
+          start=.....Parameters.LayerMeasureSplineStart;
+          amount = .....Parameters.LayerMeasureAmount;  
+          AnyFunInterpol &SplineFun = .....Layer_L5.Data.AbdominalCavityPoints.Right.Parametric.Fun;
+        };
+        PointGenerator points_left(fun=SplineFun, scale_fun=...Scale)={
+          start=.....Parameters.LayerMeasureSplineStart;
+          amount = .....Parameters.LayerMeasureAmount;  
+          AnyFunInterpol &SplineFun = .....Layer_L5.Data.AbdominalCavityPoints.Left.Parametric.Fun;
+        };        
+      };
+      
+      AnyRefNodeGroup Nodes_Below_Layer ={
+        NodeAmount = ....Layer_Pelvic1.BaseSegAnterior.LayerConstraintNodes.Nodes_Above_Layer.NodeAmount; // number nodes in group
+        NodeName = strval(iarr(1, NodeAmount), "_node%04i");
+        Node_sRels =....Layer_Pelvic1.BaseSegAnterior.LayerConstraintNodes.Nodes_Above_Layer.Node_sRels; 
+        NodeDefaults.CreateMotionOutput.r = On;
+      };
+      AnyRefNodeGroup Nodes_Above_Layer ={
+        NodeAmount = ....Layer_L5.BaseSegAnterior.LayerConstraintNodes.Nodes_Below_Layer.NodeAmount; // number nodes in group
+        NodeName = strval(iarr(1, NodeAmount), "_node%04i");
+        Node_sRels =....Layer_L5.BaseSegAnterior.LayerConstraintNodes.Nodes_Below_Layer.Node_sRels; 
+        NodeDefaults.CreateMotionOutput.r = On;
+      };
+      
+    };
+  };
+  
+  
+  BaseSegAnterior = {
+    AnyRefNode Origin = {};
+    
+    
+  };
+  
+  AnyFolder LayerConstraints ={
+    AnyVar K_top =10;
+    AnyVar K_bot =1;
+    
+    AnyIntArray   MeasureOrganizer = {0}; 
+    
+    #include "LayerConstraints.any" 
+  };
+  
+  
+  AnyKinEq BaseSegAnterior_Constraint = 
+  {
+    AnyKinMeasureOrg Measurs = {
+      AnyKinLinear lin = {
+        Ref = 0;
+        AnyRefNode &ref1 = ....Layer_Pelvic1.BaseSegAnterior.LayerConstraintNodes.Nodes_Above_Layer;
+        AnyRefNode &ref2 = ...BaseSegAnterior.LayerConstraintNodes.Nodes_Below_Layer; 
+      };
+      AnyKinRotational rot = {
+        Type = RotAxesAngles;
+        AnyRefNode &ref1 = ....Layer_Pelvic1.BaseSegAnterior.LayerConstraintNodes.Nodes_Above_Layer;
+        AnyRefNode &ref2 = ...BaseSegAnterior.LayerConstraintNodes.Nodes_Below_Layer; 
+      };
+      MeasureOrganizer = {1,2,3,4,5};
+    };
+    Reaction.Type = repmat (nDim, Off);
+  };
+  
+  // Force connection for BaseSegAnterior 
+  AnyReacForce BaseSegAnteriorKinetic = {
+    AnyKinLinear lin = {
+      Ref = 0;
+      AnyRefNode &ant = ...Layer_Pelvic1.BaseSegAnterior.LayerConstraintNodes;
+      AnyRefNode &pos = ..BaseSegAnterior.LayerConstraintNodes; 
+    };
+    AnyKinRotational rot = {
+      Type = RotAxesAngles;
+      AnyRefNode &ant = ...Layer_Pelvic1.BaseSegAnterior.LayerConstraintNodes;
+      AnyRefNode &pos = ..BaseSegAnterior.LayerConstraintNodes; 
+    };
+  };
+};
+
+
+
