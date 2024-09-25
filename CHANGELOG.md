@@ -71,6 +71,8 @@ The default pelvis model used in all models have changed. The pelvis morphology 
 * Added a small class template, [`CreateCoMRefNode`](#Utilities.center-of-mass.createcomrefnode.createcomrefnode),
   that can be used to create a reference node at the center of mass of a segment with its axes aligned with
   the principal axes of inertia of the segment.
+* Added a `TRI(N)` helper code macros which creates a lower triangular (NxN) matrix.
+* Added a `TOTAL_POLYLINE_LENGTH(P)` helper code macro which calculates the total length of a polyline defined by a set of points.
 
 ### 🩹 Fixed:
 * Fixed an issue that prevented switching off drawing of marker arrows in CreateMarkerDriverClass in MoCap models. Updated the search string
