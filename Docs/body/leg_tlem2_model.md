@@ -50,7 +50,7 @@ tutorial <tutorials:ForceDependentKinematics/index>`)
 The model was refined during the [Life Long Joints
 project](https://web.archive.org/web/20230108081423/https://lifelongjoints.eu/) where its anatomical fidelity and joint
 force prediction accuracy were improved by De Pieri et al. [^cite_dlgr17], 
-mainly, by implementing better a wrapping surfaces for the muscles ([TLEM
+mainly, by implementing better wrapping surfaces for the muscles ([TLEM
 v2.1](#TLEM2-v2.1)). 
 
 
@@ -96,8 +96,8 @@ TLEM v2.2 (Released in AMMR 3.0.0)
   the soleus and gastrocnemius muscles. Hence, gastrocnemius is recruited less, 
   especially during downhill walking and stair descent, solving the tendency of the model 
   to overpredict the knee contact forces at toe off. 
-  This is the first of a number of improvements to the leg model by Dr. Enrico De Pieri, 
-  who is working on a publication on improvements and validation of the TLEM 2 leg model.
+  This is the first in a series of improvements to the TLEM 2 leg model by Dr. Enrico De Pieri,
+  who is currently working on a publication focused on its enhancements and validation.
 : The ankle complex has been redefined to compensate for the non-neutral position in which the 
   cadaver was scanned. The method described in Stolle et al.[^cite_slnbrmv22] was adapted to 
   identify coordinate systems at the tibia, talus, and calcaneus using their respective 
@@ -170,6 +170,29 @@ TLEM v2.1 (Released in AMMR 2.0.0)
 : Wrapping surfaces for several muscles were updated. These changes were engineered to
   result in realistic muscle coordination and hip contact forces as documented
   in the publication by De Pieri et al. [^cite_dlgr17]
+
+## Pelvis interface morphing
+
+
+When only the trunk model is included, the trunk pelvis is used. However, when both the leg and trunk models are included, the pelvis must be adjusted to fit both models as closely as possible, since they are based on different datasets. To achieve this, the leg pelvis is morphed into the trunk pelvis, resulting in a blended pelvis that preserves the anatomical integrity of the morphed structure and ensures accurate muscle insertion points.
+
+First, we apply an Affine transformation, which is a linear deformation that aligns the leg pelvis (source points) with the trunk pelvis (target points).
+
+After that, we use an RBF transformation to create a smooth, non-linear deformation from the leg pelvis to the trunk pelvis. The same morphing function is also used for the sacrum.
+
+Additionally, we’ve added extra points on the iliac crest of the pelvis to ensure a more accurate representation of the trunk pelvis and to prevent gaps between the pelvis STL and the erector spinae insertions.
+
+In the following figure, the leg pelvis after the affine transformation (transparent blue) and the trunk pelvis (pink) are superimposed along with their marker points. The blue points represent the source points, while the red points are the target points.
+
+::::{figure} _static/PelvisLeg_PelvisTrunk.jpg
+The posterior and sagittal views of the leg pelvis after the affine transformation (transparent blue) and the trunk pelvis (pink), which are superimposed together with their marker points.
+::::
+
+The next figure shows the morphed pelvis (yellow) superimposed on the trunk pelvis (transparent pink).
+
+::::{figure} _static/PelvisMorphed_PelvisTrunk.jpg
+The posterior and sagittal views of the morphed pelvis (yellow) superimposed on the trunk pelvis (transparent pink).
+::::
 
 ## Citing and references
 
