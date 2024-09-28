@@ -14,6 +14,7 @@ The default pelvis model used in all models have changed. The pelvis morphology 
 **Fixed:**
 
 * Fixed the inclusion of the buckle segmental masses in the calculation of the TotalBodyMass variable.
+* Fixed the cervical spine axial rotation rhythm coefficients. The distribution between C2C1 and the rest of cervical spine was incorrect.
 
 **Added:**
 
