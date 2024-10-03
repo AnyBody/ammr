@@ -703,8 +703,8 @@ The cervical and thoracic movements are linked so the move simultaneously. This 
 
 The lumbar and thoracic movements are linked so the move simultaneously. This switch is used to enable this link.
 
-:Default: ON
-:Example: `#define BM_TRUNK_LUMBAR_THORACIC_LINK ON`
+:Default: {any}`BM_TRUNK_RHYTHM`
+:Example: `#define BM_TRUNK_LUMBAR_THORACIC_LINK BM_TRUNK_RHYTHM`
 :Options:
   - {any}`ON` -> Switch ON
   - {any}`OFF` -> Switch OFF
