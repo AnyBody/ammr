@@ -82,6 +82,10 @@ The default pelvis model used in all models have changed. The pelvis morphology 
   were mixed up.
 
 ### 🔧 Changed:
+* Updated the Gluteus Medius insertions and origin points, to ensure the muscles
+  have correct moment arm for external rotation in certain postures. The
+  posterior gluteus medius now twist inside the anterior part and attach more
+  anteriorly on the femural trochanter.
 * Changed the Human-Ground residual implmentation in the MoCap models to use
   rotatinal measures configured for measuring angual velocities. This change
   should make the resiuals more robust, and the residual output easier to
