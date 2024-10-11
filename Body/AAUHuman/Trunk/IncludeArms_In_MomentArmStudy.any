@@ -1,0 +1,130 @@
+// Include Arms in study
+
+Model = {
+  AnyFolder &RightBodyModelRef=....BodyModel.Right;
+  AnyFolder &RightBodyInterfaceRef = ....BodyModel.Interface.Right;
+  AnyFolder &LeftBodyModelRef=....BodyModel.Left;
+  AnyFolder &LeftBodyInterfaceRef = ....BodyModel.Interface.Left;
+  
+  // Extra Model parts included in the moment arm study
+  AnyFolder &RightRef = RightBodyModelRef; 
+  AnyFolder &RightArmMusRef = RightBodyModelRef.ShoulderArm.Mus; 
+  AnyFolder &LeftRef = LeftBodyModelRef; 
+  AnyFolder &LeftArmMusRef = LeftBodyModelRef.ShoulderArm.Mus; 
+  
+  
+  Drivers = {
+    AnyFolder ArmDriver = {
+      // Change the following variables to adjust the moment arm study
+      AnyVar SCProtraction = DesignVar(-23);
+      AnyVar SCElevation = DesignVar(11.5);
+      AnyVar GHAbduction = DesignVar(10);
+      AnyVar GHFlexion = DesignVar(0);
+      AnyVar GHExternalRotation = DesignVar(0);
+      AnyVar ElbowFlexion = DesignVar(0);
+      AnyVar ElbowPronation = DesignVar(0);
+      AnyVar WristFlexion = DesignVar(0);
+      AnyVar WristAbduction = DesignVar(0);
+      AnyVar ACMedialRotation = DesignVar(-0.1745329);
+      /////////////////////////////////////////
+      
+      //      AnyFloat Mask = {0,1,0,0,0,0,0,0,0,0};
+      AnyVector DriverPos = {
+        SCProtraction, SCElevation, GHAbduction, GHFlexion,
+        GHExternalRotation ,ElbowFlexion, ElbowPronation, 
+        WristFlexion ,WristAbduction, ACMedialRotation }*pi/180;
+      
+      #if BM_ARM_RIGHT
+      AnyFolder RightArmDrivers = {
+        //    AnyVar AngularVelocity = (..RangeOfMotion[1]-..RangeOfMotion[0])*pi/180;
+        
+        AnyKinMeasureOrg ArmMeasure = {
+          #if BM_ARM_SHOULDER_RHYTHM == OFF
+          AnyKinMeasure& SCProtraction= ....RightBodyInterfaceRef.SternoClavicularProtraction;
+          AnyKinMeasure& SCElevation= ....RightBodyInterfaceRef.SternoClavicularElevation;
+          #endif
+          AnyKinMeasure& GHAbduction= ....RightBodyInterfaceRef.GlenohumeralAbduction;
+          AnyKinMeasure& GHFlexion= ....RightBodyInterfaceRef.GlenohumeralFlexion;
+          AnyKinMeasure& GHExternalRotation= ....RightBodyInterfaceRef.GlenohumeralExternalRotation;
+          AnyKinMeasure& ElbowFlexion= ....RightBodyInterfaceRef.ElbowFlexion;
+          AnyKinMeasure& ElbowPronation= ....RightBodyInterfaceRef.ElbowPronation;
+          AnyKinMeasure& WristFlexion= ....RightBodyInterfaceRef.WristFlexion;
+          AnyKinMeasure& WristAbduction= ....RightBodyInterfaceRef.WristAbduction;  
+          #if BM_ARM_CLAVICULA_ROTATION_RHYTHM == OFF
+          AnyKinMeasure& ACMedialRotation= ....RightBodyInterfaceRef.AcromioClavicular.MedialRotation;
+          #endif
+        };
+        
+        
+        
+        AnyKinEqSimpleDriver ArmDriver= {
+          AnyKinMeasure& ref = .ArmMeasure;
+          
+          #if BM_ARM_SHOULDER_RHYTHM == OFF & BM_ARM_CLAVICULA_ROTATION_RHYTHM == OFF
+          #define __MEASURE_INDEXER(X) { X[0],X[1],X[2],X[3],X[4],X[5],X[6],X[7],X[8],X[9] }
+          #endif
+          #if BM_ARM_SHOULDER_RHYTHM == OFF
+          #define __MEASURE_INDEXER(X) { X[0],X[1],X[2],X[3],X[4],X[5],X[6],X[7],X[8] }
+          #endif
+          #if BM_ARM_SHOULDER_RHYTHM == ON
+          #define __MEASURE_INDEXER(X) { X[2], X[3],X[4],X[5],X[6],X[7],X[8] }
+          #endif
+          
+          DriverPos = __MEASURE_INDEXER(..DriverPos);
+          //        AnyFloat Mask = __MEASURE_INDEXER( ...Mask);
+          
+          #undef __MEASURE_INDEXER
+          
+          DriverVel = repmat(nDim,0);//Mask* (0)*pi/180/...Study.tEnd;
+        };
+        
+      };// Right Arm Drivers
+      #endif
+      #if BM_ARM_LEFT
+      AnyFolder LeftArmDrivers = {
+        //    AnyVar AngularVelocity = (..RangeOfMotion[1]-..RangeOfMotion[0])*pi/180;
+        
+        AnyKinMeasureOrg ArmMeasure = {
+          #if BM_ARM_SHOULDER_RHYTHM == OFF
+          AnyKinMeasure& SCProtraction= ....LeftBodyInterfaceRef.SternoClavicularProtraction;
+          AnyKinMeasure& SCElevation= ....LeftBodyInterfaceRef.SternoClavicularElevation;
+          #endif
+          AnyKinMeasure& GHAbduction= ....LeftBodyInterfaceRef.GlenohumeralAbduction;
+          AnyKinMeasure& GHFlexion= ....LeftBodyInterfaceRef.GlenohumeralFlexion;
+          AnyKinMeasure& GHExternalRotation= ....LeftBodyInterfaceRef.GlenohumeralExternalRotation;
+          AnyKinMeasure& ElbowFlexion= ....LeftBodyInterfaceRef.ElbowFlexion;
+          AnyKinMeasure& ElbowPronation= ....LeftBodyInterfaceRef.ElbowPronation;
+          AnyKinMeasure& WristFlexion= ....LeftBodyInterfaceRef.WristFlexion;
+          AnyKinMeasure& WristAbduction= ....LeftBodyInterfaceRef.WristAbduction;  
+          #if BM_ARM_CLAVICULA_ROTATION_RHYTHM == OFF
+          AnyKinMeasure& ACMedialRotation= ....LeftBodyInterfaceRef.AcromioClavicular.MedialRotation;
+          #endif
+        };
+        
+        AnyKinEqSimpleDriver ArmDriver= {
+          AnyKinMeasure& ref = .ArmMeasure;
+          
+          #if BM_ARM_SHOULDER_RHYTHM == OFF & BM_ARM_CLAVICULA_ROTATION_RHYTHM == OFF
+          #define __MEASURE_INDEXER(X) { X[0],X[1],X[2],X[3],X[4],X[5],X[6],X[7],X[8],X[9] }
+          #endif
+          #if BM_ARM_SHOULDER_RHYTHM == OFF
+          #define __MEASURE_INDEXER(X) { X[0],X[1],X[2],X[3],X[4],X[5],X[6],X[7],X[8] }
+          #endif
+          #if BM_ARM_SHOULDER_RHYTHM == ON
+          #define __MEASURE_INDEXER(X) { X[2], X[3],X[4],X[5],X[6],X[7],X[8] }
+          #endif
+          
+          DriverPos = __MEASURE_INDEXER(..DriverPos);
+          //        AnyFloat Mask = __MEASURE_INDEXER( ...Mask);
+          
+          #undef __MEASURE_INDEXER
+          
+          DriverVel = repmat(nDim,0);//Mask* (0)*pi/180/...Study.tEnd;
+        };
+        
+      };// Left Arm Drivers
+      #endif
+    };
+    };
+  };
+  
