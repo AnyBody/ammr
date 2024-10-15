@@ -65,35 +65,39 @@ The default pelvis model used in all models have changed. The pelvis morphology 
   In practice, this means that the morphology of the leg pelvis is moprhed to match the Trunk pelvis.
   Using `_MORPH_TRUNK_TO_LEG_` instead will revert to the old behaviour. 
 
-(ammr-3.0.5-changelog)=
-## AMMR 3.0.5 (2024-??-??)
+(ammr-3.1.0-changelog)=
+## AMMR 3.1.0 (2024-??-??)
 
 ### ➕ Added:
-* Added a small class template, [`CreateCoMRefNode`](#Utilities.center-of-mass.createcomrefnode.createcomrefnode),
-  that can be used to create a reference node at the center of mass of a segment with its axes aligned with
-  the principal axes of inertia of the segment.
-* Added a `TRI(N)` helper code macros which creates a lower triangular (NxN) matrix.
-* Added a `TOTAL_POLYLINE_LENGTH(P)` helper code macro which calculates the total length of a polyline defined by a set of points.
+* Introduced a new class template,
+  [`CreateCoMRefNode`](#Utilities.center-of-mass.createcomrefnode.createcomrefnode),
+  for generating a reference node at the center of mass of a segment, aligned
+  with its principal axes of inertia.
+* Added the `TRI(N)` macro to create a lower triangular (NxN) matrix.
+* Added the `TOTAL_POLYLINE_LENGTH(P)` macro to compute the total length of a
+  polyline defined by a set of points.
 
 ### 🩹 Fixed:
-* Fixed an issue that prevented switching off drawing of marker arrows in CreateMarkerDriverClass in MoCap models. Updated the search string
-  used in `Main.ModelSetup.Views.All_MarkerArrows.Objects` to correctly pick up the arrow drawing objects.
-* Fixed an issue in the PelvisGround rotation drivers in the {ref}`Free Posture Static example<example_freeposture>`. The X and Z rotation drivers 
-  were mixed up.
+* Resolved an issue that prevented disabling the drawing of marker arrows in
+  `CreateMarkerDriverClass` within MoCap models. The search string in
+  `Main.ModelSetup.Views.All_MarkerArrows.Objects` has been updated to correctly
+  identify the arrow drawing objects.
+* Corrected the PelvisGround rotation drivers in the {ref}`Free Posture Static
+  example<example_freeposture>`. The X and Z rotation drivers were previously
+  mixed up and are now properly assigned.
 
 ### 🔧 Changed:
-* Updated the Gluteus Medius insertions and origin points, to ensure the muscles
-  have correct moment arm for external rotation in certain postures. The
-  posterior gluteus medius now twist inside the anterior part and attach more
-  anteriorly on the femural trochanter.
-* Changed the Human-Ground residual implmentation in the MoCap models to use
-  rotatinal measures configured for measuring angual velocities. This change
-  should make the resiuals more robust, and the residual output easier to
-  interpret geometrically. Otherwise, this should not change results. 
-* The Force plates are no longer included in the parameter identification study.
-  It wasn't needed, and this change may speed up the parameter identification
-  process slightly.
-
+* Updated the insertion and origin points of the Gluteus Medius to ensure
+  correct moment arms for external rotation in specific postures. The posterior
+  Gluteus Medius now twists inside the anterior part and attaches more
+  anteriorly on the femoral trochanter.
+* Modified the Human-Ground residual implementation in MoCap models to use
+  rotational measures configured for angular velocities. This change enhances
+  the robustness of the residuals and makes the residual output easier to
+  interpret geometrically, without affecting the results.
+* Excluded force plates from the parameter identification study, as they were
+  unnecessary. This change may slightly speed up the parameter identification
+  process.
 
 (ammr-3.0.4-changelog)=
 ## AMMR 3.0.4 (2024-07-02)
