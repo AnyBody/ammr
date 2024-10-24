@@ -62,7 +62,7 @@ full list of configuration parmaeters.
 More details can be found online:
 
 1. Dendorfer and Toerholm 2008: Report containing moment arm validation for [ESA:
-   report](https://paperpile.com/shared/WHZjrt)
+   report](https://paperpile.com/shared/sXPzwP66BRhSbb_VjMytj5Q)
 2. Horsman 2007: Klein Horsman, M. D., Koopman, H. F. J. M., van der Helm, F. C. T.,
    Prosé, L. P., and Veeger, H. E. J., 2007, “Morphological Muscle and Joint Parameters for
    Musculoskeletal Modelling of the Lower Extremity,” Clin. Biomech. , 22(2), pp. 239–247.
