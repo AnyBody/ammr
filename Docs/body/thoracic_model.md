@@ -35,6 +35,11 @@ Your browser does not support the video tag.
 </video>
 ```
 
+:::{admonition} See the [Spine rhythm](spine-rhythm)
+:class: seealso
+for more information on how the spine rhythm is implmentated, the cooeficient and how to overwrite it with your own data.
+:::
+
 ## Muscles configurations
 
 The majority of the muscle fascicles are defined for the thoracic column, ribcage region 
