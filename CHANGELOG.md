@@ -36,6 +36,10 @@
 * Excluded force plates from the parameter identification study, as they were
   unnecessary. This change may slightly speed up the parameter identification
   process.
+* The wrapping surface for muscles at the wrist has been changed to an ellipsoid
+  from a cylinder. This lowers the risk of muscle via points prenetrating the
+  wrapping surface in postures involving both flexion/extension and
+  abduction/adduction at the wrist.
 
 (ammr-3.0.4-changelog)=
 ## AMMR 3.0.4 (2024-07-02)
