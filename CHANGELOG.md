@@ -23,7 +23,7 @@
 * Corrected the PelvisGround rotation drivers in the {ref}`Free Posture Static
   example<example_freeposture>`. The X and Z rotation drivers were previously
   mixed up and are now properly assigned.
-* Fixed a spelling typo in for the disc stiffness BM control statements. The
+* Fixed a spelling typo in the disc stiffness BM control statements. The
   `BM_TRUNK_*_DISC_STIFNESS` parameters have been renamed to `BM_TRUNK_*_DISC_STIFFNESS`. 
   The mispelled parameter names have been deprecated. 
 
