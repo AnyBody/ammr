@@ -527,8 +527,9 @@ Definition of the cervical spine muscles type.
 :margin: 0 0 3 3
 
 ```{ammr:bm_statement} BM_TRUNK_DISC_STIFNESS
+:deprecated:
 
-Definition of the disc model of all spine parts.
+Renamed to BM_TRUNK_DISC_STIFFNESS, Please use the corrected name.
 
 :Default: {any}`_DISC_STIFFNESS_NONE_`
 :Example: `#define BM_TRUNK_DISC_STIFNESS _DISC_STIFFNESS_NONE_`
@@ -546,36 +547,17 @@ Definition of the disc model of all spine parts.
 :margin: 0 0 3 3
 
 ```{ammr:bm_statement} BM_TRUNK_LUMBAR_DISC_STIFNESS
+:deprecated:
 
-Definition of the lumbar spine disc model.
+Renamed to BM_TRUNK_LUMBAR_DISC_STIFFNESS, Please use the corrected name
 
-:Default: {any}`BM_TRUNK_DISC_STIFNESS`
-:Example: `#define BM_TRUNK_LUMBAR_DISC_STIFNESS BM_TRUNK_DISC_STIFNESS`
+:Default: {any}`BM_TRUNK_DISC_STIFFNESS`
+:Example: `#define BM_TRUNK_LUMBAR_DISC_STIFNESS BM_TRUNK_DISC_STIFFNESS`
 :Options:
   - {any}`_DISC_STIFFNESS_NONE_` -> Constant to switch off disc spring in the spine
   - {any}`_DISC_STIFFNESS_LINEAR_` -> Constant to switch linear disc spring on in the spine
   - {any}`_DISC_STIFFNESS_NONLINEAR_` -> Constant to switch nonlinear disc spring on in the spine
-  - {any}`BM_TRUNK_DISC_STIFNESS` -> 
-
-```
-::::
-
-
-::::{dropdown} `BM_TRUNK_THORACIC_DISC_STIFNESS`
-:animate: fade-in-slide-down
-:margin: 0 0 3 3
-
-```{ammr:bm_statement} BM_TRUNK_THORACIC_DISC_STIFNESS
-
-Definition of the thoracic spine disc model.
-
-:Default: {any}`BM_TRUNK_DISC_STIFNESS`
-:Example: `#define BM_TRUNK_THORACIC_DISC_STIFNESS BM_TRUNK_DISC_STIFNESS`
-:Options:
-  - {any}`_DISC_STIFFNESS_NONE_` -> Constant to switch off disc spring in the spine
-  - {any}`_DISC_STIFFNESS_LINEAR_` -> Constant to switch linear disc spring on in the spine
-  - {any}`_DISC_STIFFNESS_NONLINEAR_` -> Constant to switch nonlinear disc spring on in the spine
-  - {any}`BM_TRUNK_DISC_STIFNESS` -> 
+  - {any}`BM_TRUNK_DISC_STIFFNESS` -> 
 
 ```
 ::::
@@ -586,16 +568,96 @@ Definition of the thoracic spine disc model.
 :margin: 0 0 3 3
 
 ```{ammr:bm_statement} BM_TRUNK_CERVICAL_DISC_STIFNESS
+:deprecated:
 
-Definition of the cervical spine disc model.
+Renamed to BM_TRUNK_CERVICAL_DISC_STIFFNESS, Please use the corrected name
 
-:Default: {any}`BM_TRUNK_DISC_STIFNESS`
-:Example: `#define BM_TRUNK_CERVICAL_DISC_STIFNESS BM_TRUNK_DISC_STIFNESS`
+:Default: {any}`BM_TRUNK_DISC_STIFFNESS`
+:Example: `#define BM_TRUNK_CERVICAL_DISC_STIFNESS BM_TRUNK_DISC_STIFFNESS`
+:Options:
+  - {any}`_DISC_STIFFNESS_NONE_` -> Constant to switch off disc spring in the spine
+  - {any}`_DISC_STIFFNESS_LINEAR_` -> Constant to switch linear disc spring on in the spine
+  - {any}`_DISC_STIFFNESS_NONLINEAR_` -> Constant to switch nonlinear disc spring on in the spine
+  - {any}`BM_TRUNK_DISC_STIFFNESS` -> 
+
+```
+::::
+
+
+::::{dropdown} `BM_TRUNK_DISC_STIFFNESS`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_TRUNK_DISC_STIFFNESS
+
+Definition of the disc model of all spine parts.
+
+:Default: {any}`_DISC_STIFFNESS_NONE_`
+:Example: `#define BM_TRUNK_DISC_STIFFNESS _DISC_STIFFNESS_NONE_`
+:Options:
+  - {any}`_DISC_STIFFNESS_NONE_` -> Constant to switch off disc spring in the spine
+  - {any}`_DISC_STIFFNESS_LINEAR_` -> Constant to switch linear disc spring on in the spine
+  - {any}`_DISC_STIFFNESS_NONLINEAR_` -> Constant to switch nonlinear disc spring on in the spine
+
+```
+::::
+
+
+::::{dropdown} `BM_TRUNK_LUMBAR_DISC_STIFFNESS`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_TRUNK_LUMBAR_DISC_STIFFNESS
+
+Definition of the lumbar spine disc model.
+
+:Default: {any}`BM_TRUNK_DISC_STIFFNESS`
+:Example: `#define BM_TRUNK_LUMBAR_DISC_STIFFNESS BM_TRUNK_DISC_STIFFNESS`
+:Options:
+  - {any}`_DISC_STIFFNESS_NONE_` -> Constant to switch off disc spring in the spine
+  - {any}`_DISC_STIFFNESS_LINEAR_` -> Constant to switch linear disc spring on in the spine
+  - {any}`_DISC_STIFFNESS_NONLINEAR_` -> Constant to switch nonlinear disc spring on in the spine
+  - {any}`BM_TRUNK_DISC_STIFFNESS` -> 
+
+```
+::::
+
+
+::::{dropdown} `BM_TRUNK_THORACIC_DISC_STIFFNESS`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_TRUNK_THORACIC_DISC_STIFFNESS
+
+Definition of the thoracic spine disc model.
+
+:Default: {any}`BM_TRUNK_DISC_STIFFNESS`
+:Example: `#define BM_TRUNK_THORACIC_DISC_STIFFNESS BM_TRUNK_DISC_STIFFNESS`
 :Options:
   - {any}`_DISC_STIFFNESS_NONE_` -> Constant to switch off disc spring in the spine
   - {any}`_DISC_STIFFNESS_LINEAR_` -> Constant to switch linear disc spring on in the spine
   - {any}`_DISC_STIFFNESS_NONLINEAR_` -> Constant to switch nonlinear disc spring on in the spine
   - {any}`BM_TRUNK_DISC_STIFNESS` -> 
+
+```
+::::
+
+
+::::{dropdown} `BM_TRUNK_CERVICAL_DISC_STIFFNESS`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_TRUNK_CERVICAL_DISC_STIFFNESS
+
+Definition of the cervical spine disc model.
+
+:Default: {any}`BM_TRUNK_DISC_STIFFNESS`
+:Example: `#define BM_TRUNK_CERVICAL_DISC_STIFFNESS BM_TRUNK_DISC_STIFFNESS`
+:Options:
+  - {any}`_DISC_STIFFNESS_NONE_` -> Constant to switch off disc spring in the spine
+  - {any}`_DISC_STIFFNESS_LINEAR_` -> Constant to switch linear disc spring on in the spine
+  - {any}`_DISC_STIFFNESS_NONLINEAR_` -> Constant to switch nonlinear disc spring on in the spine
+  - {any}`BM_TRUNK_DISC_STIFFNESS` -> 
 
 ```
 ::::
