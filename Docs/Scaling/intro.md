@@ -22,7 +22,7 @@ individuals to be useful for product design. Scaling pertains not only to the ov
 but also muscle insertion points, muscle parameters, wrapping
 surfaces etc. AnyBody has a both generic and user-define scaling laws for models in the repository.
 
-For details on scaling theory behind please take a look at [Rasmussen 2005](https://paperpile.com/shared/4znHWd).
+For details on scaling theory behind please take a look at [Rasmussen 2005](https://paperpile.com/shared/sqkoXwnHARTiI82J2Sarhcg).
 
 Size related parameters of models in the {doc}`AMMR </index>`
 are seldom defined as constant numbers, but instead computed from global measurements
