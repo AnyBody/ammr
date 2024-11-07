@@ -50,6 +50,11 @@ The default pelvis model used in all models have changed. The pelvis morphology 
   will distribute the mass to the different segments based on whether they are
   marked as being part of the distribution.
 
+* The cervical model now has linear stiffness coefficients. These can be enabled with the switch {bm_statement}`BM_TRUNK_CERVICAL_DISC_STIFFNESS`:
+  ```
+  #define BM_TRUNK_CERVICAL_DISC_STIFFNESS _DISC_STIFFNESS_LINEAR_
+  ```
+  Only linear stiffness function is available for cervical discs currently.
 
 
 **Changed:**
