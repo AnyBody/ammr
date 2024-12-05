@@ -1,0 +1,113 @@
+#ifndef _DRAW_TRAJECTORY_TRACER_
+#define _DRAW_TRAJECTORY_TRACER_
+/*
+---
+group: Utilities
+topic: Drawing
+descr: Traces out value in the model view.
+---
+
+Add `#include "<AMMR_TOOLS>/ModelUtilities/Draw/TrajectoryTracer.any"`
+To use the class template.
+
+*/
+
+
+// Class creating a trajectory drawing in the model view based on some 3d value
+// 
+// :::{rubric} Usage
+// :::
+//
+// The class must be defined inside the coordinate system in which it draws the values. For example
+// a global reference frame.
+// 
+// Also, ensure the value to draw the trajectory of is a 3d object and that it is also 
+// part of the study specified by the template.
+//
+// 
+// ```
+//   #include "<ANYBODY_PATH_MODELUTILS>/Draw/TrajectoryTracer.any"
+// 
+//   // The trajectory must be defined in a coordinate system in which the trajectory i drawn, (e.g. global ref). 
+//   Main.EnvironmentModel.GlobalRef = {
+// 
+//     // This is an example of using template to draw the trajectory of the CoM
+//     TrajectoryTracer CoMTrajectory = 
+//     {
+//       Value = &Main.HumanModel.BodyModel.Interface.CenterOfMass.Pos;
+//       Study = &Main.Studies.InverseDynamicStudy;
+//       RGB = {1,0,1};
+//       LineWidth = 1.5;
+//      };
+//   };
+// ```
+//
+#class_template TrajectoryTracer (__CLASS__=AnyChart)
+  {
+    // TrajectoryTracer
+    /// A pointer to the AnyVec3 value to draw the trajectory of
+    #var AnyObjectPtr Value;
+    
+    // TrajectoryTracer
+    /// A pointer to the study which calculates the trajectory. Ensure that 'Value' is also part of the study
+    /// otherwise you will get an "Invalid series selection" error.
+    #var AnyObjectPtr Study;
+    
+    // TrajectoryTracer
+    /// The color of the trajectory
+    #var AnyVec3 RGB = {0,0,1};
+    
+    // TrajectoryTracer
+    /// The line width of the trajectory
+    #var AnyVar LineWidth = 3;
+    
+    AnyStringVar ValueNameInStudyOutput = CompleteNameOf(Study)+".Output._" + CompleteNameOf(Value);
+    
+    #var Visible = #default;
+    #var Opacity = #default;
+    #var Pickable = #default;
+    #var PickableZOrdering = #default;
+    
+    Series = 
+    {
+      //RGBdef = ;
+      AnyChartSerie serie = 
+      {
+        Abscissa ??= ..ValueNameInStudyOutput + "[0]";
+        Abscissa2 ??= ..ValueNameInStudyOutput + "[1]";
+        Value ??= ..ValueNameInStudyOutput + "[2]";
+        Lines.RGB ??= ..RGB;
+        Lines.Thickness ??= ..LineWidth;
+        PointMarkers = 
+        {
+          #var Visible = #default;
+          #var Style = #default;
+          #var Size = #default;
+          #var SkipPoints = #default;
+        }; 
+        Cursor = 
+        {
+          #var Visible = #default;
+          #var AbsIndex = #default;
+          #var DataIndex = #default;
+          #var PreVisualize = #default;
+          #var PostVisualize = #default;
+        };
+      };
+    };
+    AbsAxis.Visible ??= Off;
+    AbsAxis2.Visible ??= Off;
+    ValueAxis.Visible ??= Off;
+
+    Style = 
+    {
+      Style ??= CartesianChart3D;
+      Sizes ??= {1, 1, 1};
+      AutoSizes ??= On;
+      AutoPosition ??= On;
+      Axes.Style ??= Line3DStyleFull;
+      Axes.Thickness ??= 0.000001;
+    };
+
+};
+#endif
