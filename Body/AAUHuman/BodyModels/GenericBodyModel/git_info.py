@@ -31,6 +31,16 @@ def git_info(context: tuple, fpath: str) -> Tuple[str, str]:
         subprocess.CalledProcessError: If the git command fails.
         subprocess.TimeoutExpired: If the git command times out.
     """
+    
+    # import debugpy
+    # debugpy.configure({"python":"C:/Program Files/AnyBody Technology/AnyBody.8.1_Beta/Python/python.exe"})
+    # debugpy.listen(5679, in_process_debug_adapter=True)
+    # print('Waiting for debugger attach')
+    # debugpy.wait_for_client()
+    # debugpy.breakpoint()
+    # print('break on this line')
+    
+
     context = AMSContext(*context)
     gitfolder = Path(fpath)
     if not gitfolder.is_absolute():
