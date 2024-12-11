@@ -7,8 +7,18 @@
 
 ## AMMR 4.0 beta
 
-:::{warning} 
-The default pelvis model used in all models have changed. The pelvis morphology now comes from trunk pelivs. The toplogy remain unchanged as the leg model pelvis is morphed to match the Trunk. See below how to control this behaviour.
+:::{admonition} Default pelvis changed. 
+:class: warning
+The default pelvis morphology now comes from trunk pelivs. The toplogy remain unchanged as the leg model pelvis is morphed to match the Trunk. See [below how to control this behaviour](changes-to-default-pelivs-morphology).
+:::
+
+:::{admonition} Muscles locations restructured
+:class: warning
+Muscles elements are now grouped into folders representing the physiological muscles. 
+You can [enable backwards compatibility](changes-to-muscles-locations) by setting:
+```AnyScriptDoc
+#define BM_COMPATIBILITY_MUSCLE_STRUCTURE ON
+```
 :::
 
 **Fixed:**
@@ -59,6 +69,8 @@ The default pelvis model used in all models have changed. The pelvis morphology 
 
 **Changed:**
 
+(changes-to-default-pelivs-morphology)=
+
 * The default pelvis morphology is now the one from the trunk model, as oposed to the pelvis belonging
   to whatever leg model has been selected. This was done to get a consistent
   trunk model and considering all the recent improvements to the trunk. This option can be controlled with: 
@@ -68,7 +80,19 @@ The default pelvis model used in all models have changed. The pelvis morphology 
   ```
 
   In practice, this means that the morphology of the leg pelvis is moprhed to match the Trunk pelvis.
-  Using `_MORPH_TRUNK_TO_LEG_` instead will revert to the old behaviour. 
+  Using `_MORPH_TRUNK_TO_LEG_` instead will revert to the old behaviour.
+
+(changes-to-muscles-locations)=
+
+* The muscles of the arm and TLEM2 leg models have been reorganized in the body model. The
+  individual muscle elements are grouped into folders that represent the physiological
+  muscles (e.g., all Soleus Medial elements are collected in a Soleus Medial folder). This
+  change affects the path to the actual muscle elements throughout the model. The complete
+  AMMR has been updated to support this. To allow users a smooth transition to the new
+  structure, a `BM_COMPATIBILITY_MUSCLE_STRUCTURE` switch has been temporarily
+  introduced. This switch will create backward-compatible references to the muscles as
+  they are defined in AMMR 3.x. This BM switch will be deprecated in a future AMMR
+  version.
 
 (ammr-3.1.0-changelog)=
 ## AMMR 3.1.0 (2024-??-??)

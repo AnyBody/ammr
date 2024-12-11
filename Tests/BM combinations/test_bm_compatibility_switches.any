@@ -1,27 +1,46 @@
 //define = [ 
-//    {},
+//    {'BM_COMPATIBILITY_MUSCLE_STRUCTURE':'ON'},
 //    {'BM_COMPATIBILITY_24_TRUNK_SELECTED_OUTPUTS_JRF':'ON'},
 //]
 
 #include "libdef.any"
 
 #ifndef TEST_NAME
-//#define BM_COMPATIBILITY_24_TRUNK_SELECTED_OUTPUTS_JRF ON
+// #define BM_COMPATIBILITY_24_TRUNK_SELECTED_OUTPUTS_JRF ON
+ #define BM_COMPATIBILITY_MUSCLE_STRUCTURE ON
 #endif
 
 
-
-Main = 
-{
-  // #path HTML_DOC "<AMMR_PATH_DOC>/bm_config/index.html"
+Main = {
   #include "<ANYBODY_PATH_BODY>\HumanModel.any"
   
   AnyOperationDummy RunApplication = {};
   
   AnyObjectPtr trunk_24_compatibility = ObjSearch("Main.HumanModel.BodyModel.SelectedOutput.Trunk.JointReactionForce.C2C1FlexionExtensionMoment");
+  
   #if BM_COMPATIBILITY_24_TRUNK_SELECTED_OUTPUTS_JRF  
-  AnyInt ShouldNotExist = assert(eqfun(NumElemOf(trunk_24_compatibility),1));
+    AnyInt ShouldNotExist = assert(eqfun(NumElemOf(trunk_24_compatibility),1));
   #else
-  AnyInt ShouldExist = assert(eqfun(NumElemOf(trunk_24_compatibility),0));
+    AnyInt ShouldExist = assert(eqfun(NumElemOf(trunk_24_compatibility),0));
   #endif
+
+
+  // the old structure is replaced with AnyRefObjects to the new muscle locations (which is inside the same folder) 
+  // so in order to check the locations without accidentally picking up the 'real muscle objects we do:
+  // -search all members in the muscle folder
+  // -select all references with a filter
+  // -resolve the refernces into real objects
+  // -filter only muscles objects 
+  // This allows us to check if any references (that points to muscles) exist in the folder
+  
+  // NB. could have been cool if ObjSearch could resolve references when applying class filter as argument...
+  AnyObjectPtr arm_muscles_30_location = ObjFilterByClass(ObjRefResolve(ObjFilterByClass(ObjSearch("Main.HumanModel.BodyModel.Right.ShoulderArm.Mus.*"), "AnyRefObject")), "AnyMuscle");
+  AnyInt OldStructure = bool(NumElemOf(arm_muscles_30_location));
+
+  #if BM_COMPATIBILITY_MUSCLE_STRUCTURE == ON
+      AnyInt testOldStructureFound = assert(OldStructure);
+  #else
+    AnyInt testOldStructureNotFound = assert(not(OldStructure));
+  #endif
+  
 };
