@@ -110,9 +110,6 @@ maintained by AnyBody Technology who ensure that various body part models can be
 used together as a full body, scalable musculoskeletal model.
 
 
-[testlink](#MoCap.Markers.CreateMarkerDriverClass.CreateMarkerDriver.sRelOpt)
-
-
 
 [anybody modeling system]: https://www.anybodytech.com/software/anybodymodelingsystem/
 
