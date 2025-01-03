@@ -376,6 +376,25 @@ Internal swtich to enable a different implementation of the Rectus Abdominis mus
 ::::
 
 
+::::{dropdown} `BM_TRUNK_EXPERIMENTAL_INTER_LAYER_L5PELVIC`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_TRUNK_EXPERIMENTAL_INTER_LAYER_L5PELVIC
+:deprecated:
+
+Internal swtich to enable an inter-layer between L5 and pelvis. This layer allow anteroposterior movement.
+
+:Default: OFF
+:Example: `#define BM_TRUNK_EXPERIMENTAL_INTER_LAYER_L5PELVIC OFF`
+:Options:
+  - {any}`OFF` -> Switch OFF
+  - {any}`ON` -> Switch ON
+
+```
+::::
+
+
 ::::{dropdown} `BM_TRUNK_EXPERIMENTAL_FLOATINGRIBS_KINETICS`
 :animate: fade-in-slide-down
 :margin: 0 0 3 3
@@ -2443,6 +2462,23 @@ A compatability switch to include the trunk selected outputs joint reaction forc
 
 :Default: OFF
 :Example: `#define BM_COMPATIBILITY_24_TRUNK_SELECTED_OUTPUTS_JRF OFF`
+:Options: {ammr:bm_constant}`ON`/{ammr:bm_constant}`OFF`
+
+
+```
+::::
+
+
+::::{dropdown} `BM_COMPATIBILITY_MUSCLE_STRUCTURE`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_COMPATIBILITY_MUSCLE_STRUCTURE
+
+A compatability switch to add the model tree structure of the muscles from AMMR 4. Use this option to easily load older models.
+
+:Default: OFF
+:Example: `#define BM_COMPATIBILITY_MUSCLE_STRUCTURE OFF`
 :Options: {ammr:bm_constant}`ON`/{ammr:bm_constant}`OFF`
 
 
