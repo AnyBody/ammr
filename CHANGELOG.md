@@ -69,6 +69,9 @@ You can [enable backwards compatibility](changes-to-muscles-locations) by settin
 * New muscles are added in the neck region. These include iliocostalis cervicis, longus colli superior and inferior obliques, and additional fibers
   for longus colli (T2C3, T2C2, T1C3, T1C2).
 
+* New reference nodes (`TibiaFemurJointCavityCenter` and `TibiaTalusJointCavityCenter`) are added on the shank to represent the center of the
+  joint cavity at knee and ankle.
+
 **Changed:**
 
 (changes-to-default-pelivs-morphology)=
