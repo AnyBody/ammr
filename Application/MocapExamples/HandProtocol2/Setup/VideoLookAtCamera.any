@@ -1,0 +1,538 @@
+#ifndef TOOLS_MODELUTILITIES_VIDEO_VIDEOLOOKATCAMERA
+#define TOOLS_MODELUTILITIES_VIDEO_VIDEOLOOKATCAMERA
+#define TOOLS_MODELUTILITIES_VIDEO_CAMERACLASSTEMPLATE
+
+/*
+---
+group: Video tools
+topic: Video
+descr: Creates a video object for saving mp4 videos from model simulations.
+---
+
+Add `#include "<AMMR_TOOLS>/ModelUtilities/Video/VideoLookAtCamera.any"`
+To use the class template.
+
+
+*/
+
+#define _CAMERA_MAIN_FILE_DIRECTORY_ ANYBODY_PATH_MAINFILEDIR
+
+#ifndef _CAMERA_FFMPEG_DEFAULT_PATH_ 
+#define _CAMERA_FFMPEG_DEFAULT_PATH_ ANYBODY_PATH_INSTALLDIR + "\Assist\ffmpeg.exe"
+#endif
+
+#ifndef _ANYBODY_OVERLAY_LOGO_
+#define _ANYBODY_OVERLAY_LOGO_ ANYBODY_PATH_INSTALLDIR + "\Assist\video_overlay.png"
+#endif
+
+
+
+// Class creating a video camera for video recording of AnyBody simulations.
+// 
+// :::{rubric} Usage
+// :::
+//
+// Once the model is loaded run `Create_Video` operation to create the 
+// Video. The video will be saved in the same folder as the main file.
+//
+// 
+// ```
+//   #include "<ANYBODY_PATH_MODELUTILS>/Video/VideoLookAtCamera.any"
+// 
+//   // This is a simple example of using the camera class to create videos.
+//   VideoLookAtCamera MyCam (UP_DIRECTION = y) = 
+//   {
+//        // The point the camera focus on  
+//        CameraLookAtPoint = Main.MyModel.Femur.Knee.r;  
+//        
+//        // The vertical field of view in meters at the LookAtPoint
+//        CameraFieldOfView = 1;
+//        
+//        // The direction which the camera is placed
+//        // (In global coordinates with respect to the LookAtPoint)
+//        CameraDirection = {1, 1, -1};
+//        
+//        // The operations which should be included in the video.
+//        Analysis = {
+//            AnyOperation &ref = Main.MyStudy.InverseDynamics;
+//        };
+//    };
+// ```
+//
+//
+#class_template VideoLookAtCamera (
+  UP_DIRECTION = y, 
+  CREATE_GIF = 0,
+  _AUTO_PLAY_VIDEOS = 1,
+  _OVER_WRITE = 1,
+  _DEBUG = 0,
+  _CLEAN_UP_IMAGES = 1,
+  _AUTO_OPEN_PREVIEW_ = 1,
+  ENABLE_SAVE_SETTINGS=0,
+  ENABLE_OVERLAY= 1
+  ) 
+{
+  // Arguments:
+  // ---------------
+  //VideoLookAtCamera#UP_DIRECTION
+  // The direction of the up vector of the camera.
+  //
+  //VideoLookAtCamera#CREATE_GIF
+  // If set to 1, a gif will be created in addition to the video. 
+  //
+  //VideoLookAtCamera#ENABLE_OVERLAY
+  // If set to 1, the settings used to create the video will be saved in a file.
+
+
+  //VideoLookAtCamera
+  /// File name of the video that will be created
+  #var AnyString VideoName = ANYBODY_NAME_MAINFILE;
+  
+  
+  //VideoLookAtCamera
+  /// Video resolution in pixels: Defaults to FullHD
+  /// Width of the video in pixels
+  #var AnyIntArray VideoResolution = {1920,1080};
+  
+  //VideoLookAtCamera
+  /// From FFMPEG: The range of the quantizer scale is 0-51: where 0 is lossless,
+  /// and 51 is worst possible. A lower value is a higher quality.
+  #var AnyIntVar ConstantRateFactor = 30;
+  
+  //VideoLookAtCamera
+  /// The ratio between video resolution and input images saved  
+  /// from anybody. Default is to save images in same resolution as 
+  /// the output video. It is an advantage to set this to 2 or 4 when 
+  /// making videos with a low resolution
+  #var AnyFloat VideoInputScale = 1; 
+  
+  //VideoLookAtCamera
+  /// The video codec ffmepg will use to create the video. 
+  /// Choose "libxvid" for best for compatibility (eg. with PowerPoint)
+  /// or "libvpx-vp9" for best performance
+  #var AnyString VideoCodec = "libvpx-vp9";
+    
+  //VideoLookAtCamera
+  /// This is the start frame used when creating Videos. This can be used to 
+  /// for skipping some of the initial frames. 
+  #var AnyInt VideoStartFrame = 0; 
+  
+  //VideoLookAtCamera
+  /// Image used to overlay (e.g. logo) on the final video
+  #var AnyString OverlayImage = _ANYBODY_OVERLAY_LOGO_;
+  
+  //VideoLookAtCamera
+  /// Height of the overlay image in percent of the video
+  #var AnyVar OverlayImageScale = 0.08;
+
+  //VideoLookAtCamera
+  /// The path to the ffmpeg binary. 
+  #var AnyStringVar VideoPathFFMPEG = _CAMERA_FFMPEG_DEFAULT_PATH_;
+  
+  //VideoLookAtCamera
+  /// Determines the speed of the video. Setting it to 
+  /// nStep/(tEnd-tStart) make the video run in real time. 
+  #var AnyIntVar VideoInputFrameRate = 24; 
+
+  //VideoLookAtCamera
+  /// Video output framerate. 
+  #var AnyIntVar VideoOutputFrameRate = 24;
+  
+  //VideoLookAtCamera
+  /// The output path where the video is saved 
+  #var AnyStringVar VideoOutputPath = _CAMERA_MAIN_FILE_DIRECTORY_;
+  
+  //VideoLookAtCamera
+  /// The point the camera focus on
+  #var AnyVec3 CameraLookAtPoint = DesignVar({0,1,0});
+  
+  //VideoLookAtCamera
+  /// The distance from the camera to the scene. This does NOT determine the 
+  /// size of scene, since Perspective is off by default. To zoom in/out, use 
+  /// CameraFeildOfView. 
+  #var AnyVar CameraDistance = DesignVar(6);
+  
+  //VideoLookAtCamera
+  /// The vertical field of view in meters at the LookAtPoint
+  #var AnyVar CameraFieldOfView = DesignVar(2);
+  
+  /// The direction which the camera is placed
+  /// (In global coordinate with respect to the LookAtPoint)
+  #var AnyVec3 CameraDirection = DesignVar({1, 0, 0});
+  
+  // The following is AnyScript Magic ;) 
+  // Covert the x/y/z Enum from UP_DIRECTION to a {1,0,0}/{0,1,0}/{0,0,1} vector
+  /// The up direction of the camera as a vector. This is set by the UP_DIRECTION 
+  /// can be overwritten.  
+  #var AnyVec3 CameraUpDirection= DesignVar({{1,0,0},{0,1,0},{0,0,1}}[round(sum({-0.5,0,0.5}*RotMat(pi, UP_DIRECTION ))+1)]);
+  
+  //VideoLookAtCamera
+  /// The background color used for the video
+  #var AnyVec3 BackgroundColor = DesignVar({1,1,1});
+    
+  //VideoLookAtCamera
+  /// Counter for numbering the saved images. This defaults to the 
+  /// camera class builtin counter. 
+  #var AnyInt Counter = Camera.Recorder.Counter;
+    
+  //VideoLookAtCamera
+  /// The resolution used when converting the video to a gif file. 
+  /// By default it will follow video resolution up until 600x600. 
+  #var AnyIntArray GifResolution = {min({VideoResolution[0],600}),min({VideoResolution[1],600})} ;
+  
+  //VideoLookAtCamera
+  /// Video output framerate. 
+  #var AnyIntVar GifOutputFrameRate = VideoOutputFrameRate;
+  
+  /// Switch to view camera eye point.
+  #var AnySwitchVar viewCamera = Off; 
+  
+
+
+  AnyFolder CheckInputs = {
+    AnyInt VideoInputFrameRate = assert(gtfun(.VideoInputFrameRate,0), "Video Input frame rate should larger than 0");
+
+  };
+
+
+
+
+  /// Operation to show a preview of what the camera sees. 
+  AnyOperationSequence Preview =  
+  {
+    Settings = {
+      #var DisplayPriority = PriorityNormal;
+    };
+    #var AnyStringVar FileName = .VideoName + "_Preview.png";
+
+    AnyFileVar preview_file = .VideoOutputPath +"/" + FileName;  
+    
+    AnyOperation& Reset = .Operations.Reset;
+    
+    AnyOperationSetValue SetFilename= 
+    {
+      Source = {&.preview_file}; 
+      Target = {&..Camera.Recorder.FileName};
+    };
+    AnyOperation &StartTrigger = .Operations.StartTrigger;
+    AnyOperation &StopTrigger = .Operations.StopTrigger;
+    #if _AUTO_OPEN_PREVIEW_
+    AnyOperation& OpenPreview = .Operations.OpenPreview;
+    #endif
+    AnyOperationMacro ResetFilename = 
+    {
+      MacroStr = {"classoperation "+CompleteNameOf(..Camera.Recorder.F)+"ileName "+strquote("Reset Value")};
+    };
+  };
+  
+
+  
+  AnyOperationSequence Create_Video =  
+  {
+    Settings = {
+      #var DisplayPriority = PriorityHigh;
+    };
+    AnyOperationSequence &PreAnalysis = .PreAnalysis;
+    
+    AnyOperation& Reset = .Operations.Reset;
+    
+    AnyOperation &StartTrigger = .Operations.StartTrigger;
+    
+    AnyOperation &Operation = .Analysis;
+    
+    AnyOperation &StopTrigger = .Operations.StopTrigger;
+    
+    AnyOperation& ConvertVideo = .Operations.ConvertVideo;
+    
+    
+    #if  _CLEAN_UP_IMAGES == 1
+      AnyOperation& RemoveImageFiles = .Operations.RemoveImageFiles;
+    #endif
+    
+    #if CREATE_GIF == 1 
+      AnyOperation& CreateAnimatedGif = .Operations.Convert_video_to_animated_gif;
+    #endif
+    
+    #if _AUTO_PLAY_VIDEOS
+      AnyOperation& PlayVideo = .Operations.PlayVideo;
+      #if CREATE_GIF == 1 
+        AnyOperation& PlayGif = .Operations.Open_gif;
+      #endif
+    #endif
+  };
+   
+  
+  
+  
+  
+  AnyCameraLookAt Camera = {
+    
+    AnyDrawCamera drawcam = {Visible = ..viewCamera;};
+    
+    #var Perspective = DesignVar(Off);
+    #var EyePoint = .CameraLookAtPoint + .CameraDistance *.CameraDirection;
+    
+    #var LookAtPoint = .CameraLookAtPoint;
+    
+    #var UpPoint = DesignVar(EyePoint + 100*.CameraUpDirection);
+    
+    #var FocalDist = .CameraDistance;
+    #var FocalHeight = .CameraFieldOfView;
+    
+    #var RenderUserInterfaceViewState = On;
+    
+    AnyScene Scene  = 
+    {
+      BackgroundColor = ..BackgroundColor;
+    };
+
+    
+    AnyCamRecorder Recorder = {  
+      AnyStringVar F = ""; //< Dummy variable used to get the full name of Recorder.FileName. Do not delete it. 
+      #var AnyString CounterFormat = "%04d";
+      #var pxWidth = round(..VideoResolution[0] * ..VideoInputScale*1.0);
+      #var pxHeight = round(..VideoResolution[1] * ..VideoInputScale*1.0);
+      #var Trig = DesignVar(Off);
+      #var ResetTrig = DesignVar(Off);
+      #var AntiAlias = 16;
+      
+      FileName = ..VideoOutputPath+ "/"+ ..VideoName + "_" + strval(..Counter , CounterFormat)+ ".png";
+
+      
+      AnySwitchVar Offsetting = Off;  
+      AnySwitchVar OnSetting = On;  
+      
+      AnyOperationSetValue TriggerOff = 
+      {
+        Source = { &.Offsetting}; 
+        Target = {&.Trig};
+      };
+      AnyOperationSetValue TriggerOn = 
+      {
+        Source = {&.OnSetting}; 
+        Target = {&.Trig};
+      };
+      AnyOperationSetValue ResetTriggerOff = 
+      {
+        Source = { &.Offsetting}; 
+        Target = {&.ResetTrig};
+      };
+      AnyOperationSetValue ResetTriggerOn = 
+      {
+        Source = {&.OnSetting}; 
+        Target = {&.ResetTrig};
+      };
+      
+    };
+    
+#if ENABLE_SAVE_SETTINGS
+    AnyOperationSequence Save_Settings= {
+      AnyOperationSetValue TouchSettings = 
+      {
+        Source =
+        {
+          &...CameraLookAtPoint,
+          &...CameraDistance, 
+          &...CameraFieldOfView, 
+          &...CameraDirection,
+          &...CameraUpDirection, 
+          &...BackgroundColor,
+          &...CameraUpDirection
+        };
+        Target = Source;  
+      };
+      AnyOperationMacro SaveValues = 
+      {
+        MacroStr = {"classoperation Main "+strquote("Save Values")+ " --file=" + strquote(...VideoName+"_Camera_Settings.anyset") };
+      };
+    };
+    AnyOperationMacro Load_Settings  = 
+    {
+      MacroStr = {"classoperation Main "+strquote("Load Values")+ " --file=" + strquote(..VideoName+"_Camera_Settings.anyset") };
+    };  
+#endif
+    
+    
+  };
+  
+  AnyFolder Operations =
+  {
+     #if _DEBUG
+     AnyStringVar PostCmd = " &&set /p=DEBUG: Hit ENTER to continue...";
+     #else
+     AnyStringVar PostCmd = "";
+     #endif
+
+    AnyOperationSequence Convert_video_to_animated_gif =  
+    {  
+      AnyFileVar video_file = ..VideoOutputPath+ "/"+ ..VideoName + ".mp4";
+      AnyFileVar gif_file = ..VideoOutputPath+ "/"+ ..VideoName + ".gif";
+      AnyFileVar palette_file = ..VideoOutputPath+ "/"+ ..VideoName + "_pallete.png";  
+      AnyStringVar filters = "fps="+strval(..GifOutputFrameRate)+",scale=w=" + strval(..GifResolution[0]) +
+                              ":h=" + strval(..GifResolution[1]) + 
+                              ":force_original_aspect_ratio=decrease:flags=lanczos";
+       
+      /// Run through the video to calculate a color pallete to use when 
+      /// generating the gif file. This improves quality a lot.
+      AnyOperationShellExec GeneratePallete = 
+      {
+        FileName = "cmd.exe";      
+        
+        Arguments = "/C call "+strquote(...VideoPathFFMPEG) +
+        " -v warning" + 
+        " -i " + strquote(FilePathCompleteOf(.video_file)) + 
+        " -vf " + strquote(.filters + ",palettegen=stats_mode=diff") +
+        " -y " +
+        strquote(FilePathCompleteOf(.palette_file))+..PostCmd;
+        #var WorkDir = ...VideoOutputPath;
+        #var Show = _DEBUG;
+        Wait = 1;
+      };
+      
+      /// Convert video to a gif file using the color palette.
+      AnyOperationShellExec EncodeGif = 
+      {
+        FileName = "cmd.exe";      
+        //
+        Arguments = "/C call "+strquote(...VideoPathFFMPEG) +
+        " -v warning" + 
+        " -i " + strquote(FilePathCompleteOf(.video_file)) + 
+        " -i " + strquote(FilePathCompleteOf(.palette_file)) +
+        " -lavfi " + strquote(.filters + " [x]; [x][1:v] paletteuse=dither=floyd_steinberg:diff_mode=rectangle") +
+        iffun(_OVER_WRITE, " -y "," ") +
+        strquote(FilePathCompleteOf(.gif_file))+..PostCmd;
+        #var WorkDir = ...VideoOutputPath;
+        #var Show = _DEBUG;   
+        Wait = 1;
+      };
+      AnyOperationShellExec DeletePallete = 
+      {
+        FileName = "cmd.exe";      
+        Arguments = "/C del " + strquote(FilePathCompleteOf(.palette_file))+..PostCmd;
+          
+        #var WorkDir = ...VideoOutputPath;
+        #var Show = _DEBUG;
+        Wait = _DEBUG;
+      };
+    };
+    AnyOperationShellExec Open_gif = 
+    {
+      FileName = "cmd.exe"; 
+      #var Arguments = "/C call "+ strquote(FilePathCompleteOf(.Convert_video_to_animated_gif.gif_file))+.PostCmd;
+      #var Show = _DEBUG;
+      Wait = _DEBUG;
+    };      
+    
+    
+    AnyOperationShellExec OpenPreview = 
+    {
+      FileName = "cmd.exe"; 
+      #var Arguments = "/C TITLE Open Preview&&" +"call "+ strquote(FilePathCompleteOf(..Preview.preview_file))+.PostCmd;
+      #var Show = _DEBUG;
+      Wait = _DEBUG;
+    };    
+    
+    /// Resets the Camera trigger.
+    AnyOperationSequence Reset = 
+    {
+      AnyOperation &reset_on = ..Camera.Recorder.ResetTriggerOn; 
+      AnyOperation &reset_off = ..Camera.Recorder.ResetTriggerOff; 
+    };
+    
+    /// Starts the recorder
+    AnyOperation& StartTrigger = .Camera.Recorder.TriggerOn;
+    
+    /// Stops the recorder
+    AnyOperation &StopTrigger = .Camera.Recorder.TriggerOff;
+    
+    /// Convert video using FFMPEG
+    AnyOperationShellExec ConvertVideo = 
+    {
+      
+      
+      #var FileName = "cmd.exe";
+      #var AnyStringVar inputfile = ..VideoName + "_" + ..Camera.Recorder.CounterFormat +".png";
+      
+      
+      #var AnyFileVar out_file = ..VideoOutputPath+ "/"+ ..VideoName + ".mp4";
+      
+
+      #if ENABLE_OVERLAY
+      #var AnyString OverLayFilter = "[bg];[1:v]scale=-2:2*trunc("+strval(..VideoResolution[1])+"*"+strval(..OverlayImageScale)+"/2)[overlay];[bg][overlay]overlay=W-w:H-h";
+      //Option to fade out overlay: ":enable='between(t,0,2)'"
+      //Option to make transparent overlay: "format=argb,geq=r='r(X,Y)':a='1.0*alpha(X,Y)'"
+      #else
+      #var AnyString OverLayFilter = "";
+      #endif
+
+
+      AnyFloat InputOutputScale = ..VideoInputScale;
+
+      #var AnyStringVar ffmpegBaseArg = 
+      "call "+strquote(..VideoPathFFMPEG) +
+      iffun(_OVER_WRITE, " -y","") +
+      " -r " + strval(..VideoInputFrameRate) +
+      " -start_number " + strval(..VideoStartFrame,..Camera.Recorder.CounterFormat) + 
+      " -i "+strquote(inputfile) +
+      " -i " + strquote(..OverlayImage) + 
+      " -filter_complex " + strquote("[0:v]fps="+strval(..VideoOutputFrameRate)+ ",scale=trunc(iw/(2*"+strval(InputOutputScale,"%g" )+"))*2:trunc(ih/(2*"+strval(InputOutputScale,"%g" )+"))*2" + OverLayFilter + "[outv]") +
+      " -map [outv]" +
+      " -an" +
+      " -metadata comment=" + strquote("Created with the AnyBody Modeling System.") 
+      ;
+
+      #var AnyStringVar CodecArgs = "  -c:v " + ..VideoCodec + " -crf " + strval(..ConstantRateFactor)+" -level 3.0 -pix_fmt yuv420p -strict experimental -movflags +faststart ";
+      #var AnyStringVar CodecArgs_VP9 = " -c:v libvpx-vp9" + " -crf " + strval(..ConstantRateFactor)+" -pix_fmt yuv420p -row-mt 1 ";
+
+
+      #var AnyStringVar OutputArg = strquote(FilePathCompleteOf(out_file));
+      
+      #var Arguments =  iffun(_DEBUG , "/K","/C") + " TITLE Creating Video && "+iffun(neqfun(..VideoCodec,"libvpx-vp9"),
+                 ffmpegBaseArg + CodecArgs + OutputArg,
+                 ffmpegBaseArg + CodecArgs_VP9 +" -pass 1 -f null NUL && " + ffmpegBaseArg + CodecArgs_VP9 + " -pass 2 " + OutputArg
+      ) ;
+      #var WorkDir = ..VideoOutputPath;
+      #var Show = DesignVar(_DEBUG);
+    };
+    
+    
+    
+    /// 
+    AnyOperationShellExec RemoveImageFiles = 
+    {
+      #var FileName = "cmd.exe";
+      #var  Arguments = "/C TITLE Removing Images && del ffmpeg2pass-0.log && set fn=" + strquote(..VideoName+ "_" + "*.png") + " && call set fn=%fn:/=\%  && call del %fn% " + .PostCmd;
+      
+      #var WorkDir = ..VideoOutputPath;
+      #var Show = _DEBUG;
+      Wait = _DEBUG;
+    };   
+    
+    AnyOperationShellExec PlayVideo = 
+    {
+      FileName = "cmd.exe"; 
+      
+      #var Arguments = "/C TITLE Play Video&& call "+ strquote(FilePathCompleteOf(..Create_Video.ConvertVideo.out_file))+.PostCmd;
+      #var Show =  _DEBUG;
+      Wait = _DEBUG;
+    };
+    
+    
+
+  };
+  
+  /// Operations which will be executed before recording starts
+  AnyOperationSequence PreAnalysis = 
+  {
+    Settings.DisplayPriority = PriorityLow;
+    AnyOperationDummy no_op = {};
+  }; 
+  
+  /// Operations which will be recorded
+  AnyOperationSequence Analysis = 
+  {
+    AnyOperationDummy no_op = {};
+  };  
+};
+
+#endif
