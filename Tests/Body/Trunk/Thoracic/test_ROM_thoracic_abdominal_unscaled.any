@@ -1,0 +1,215 @@
+//define = (
+//  [
+//    {'BM_TRUNK_THORACIC_MODEL':'_THORACIC_MODEL_FLEXIBLE_'}, 
+//    {'BM_TRUNK_THORACIC_MODEL':'_THORACIC_MODEL_RIGID_'}, 
+//  ],
+//  [
+//    {'ROM_TEST_MODE':'KINEMATICS'}, 
+//    {'ROM_TEST_MODE':'INVERSEDYNAMICS'}, 
+//  ]
+//)
+//fatal_warnings = ["Overloaded muscle configuration"]
+
+#define ANYBODY_PATH_OUTPUT "."
+#include "../libdef.any"
+#include "<ANYBODY_PATH_MODELUTILS>/Drivers/Fourier.any"
+
+#ifndef TEST_NAME 
+#define BM_TRUNK_THORACIC_MODEL _THORACIC_MODEL_FLEXIBLE_
+#define ROM_TEST_MODE INVERSEDYNAMICS
+#endif
+
+#if ROM_TEST_MODE == KINEMATICS
+#define BM_TRUNK_MUSCLES OFF
+#else
+#define BM_TRUNK_MUSCLES ON
+#endif
+
+#define BM_LEG_MODEL OFF
+#define BM_ARM_LEFT OFF
+#define BM_ARM_RIGHT OFF
+#define BM_TRUNK_CAVITY_MODEL _CAVITY_MODEL_VOLUME_ 
+
+#define BM_MANNEQUIN_DRIVER_PELVIS_THORAX_EXTENSION OFF
+#define BM_MANNEQUIN_DRIVER_PELVIS_THORAX_ROTATION OFF
+#define BM_MANNEQUIN_DRIVER_PELVIS_THORAX_LATERAL_BENDING OFF
+
+
+Main = {
+  #include "<ANYBODY_PATH_BODY>/HumanModel.any"
+  #include "RangeOfMotion.any"
+   
+  AnyFolder Model = 
+  { 
+    AnyFolder& BodyModel = Main.HumanModel.BodyModel;
+    AnyFolder& DefaultDrivers = Main.HumanModel.DefaultMannequinDrivers;
+    
+    AnyReacForce PelvisGroundReactions = {
+      AnyKinMeasure& lin = .BodyModel.Interface.Trunk.PelvisPosX.lin;
+      AnyKinMeasure& rot = .BodyModel.Interface.Trunk.PelvisRotX.rot;
+    };
+  };
+  
+  AnyBodyStudy Study_Flexion = {
+    AnyFolder& Model = Main.Model;
+    AnyFolder& BodyModel = Main.HumanModel.BodyModel;
+    
+    SimpleFourierDriver Trunk_Extension = {
+       AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxExtension;
+       #if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_ & ROM_TEST_MODE == KINEMATICS
+       RangeOfMotion = {..RangeOfMotion.ROM_Kinematics_FlexibleThorax.MaxPelvisThoraxFlexionAngle, 0}*pi/180;
+       #endif
+       #if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_ & ROM_TEST_MODE == INVERSEDYNAMICS
+       RangeOfMotion = {..RangeOfMotion.ROM_InverseDynamics_FlexibleThorax.MaxPelvisThoraxFlexionAngle, 0}*pi/180;
+       #endif
+       #if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_RIGID_ & ROM_TEST_MODE == KINEMATICS
+       RangeOfMotion = {..RangeOfMotion.ROM_Kinematics_RigidThorax.MaxPelvisThoraxFlexionAngle, 0}*pi/180;
+       #endif
+       #if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_RIGID_ & ROM_TEST_MODE == INVERSEDYNAMICS
+       RangeOfMotion = {..RangeOfMotion.ROM_InverseDynamics_RigidThorax.MaxPelvisThoraxFlexionAngle, 0}*pi/180;
+       #endif
+
+       Freq = 0.5/(.tEnd-.tStart);
+       Phase = 0*pi/180;
+       Reaction.Type ={Off};
+    };
+    AnyKinEq Trunk_LateralBending = { AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxLateralBending; Reaction.Type ={Off}; };
+    AnyKinEq Trunk_AxialRotation  = { AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxRotation; Reaction.Type ={Off}; };
+     
+    tEnd = 10.0; Gravity = {0, -9.81, 0}; nStep = 10;
+  }; 
+  
+  AnyBodyStudy Study_Extension = {
+    AnyFolder& Model = Main.Model;
+    AnyFolder& BodyModel = Main.HumanModel.BodyModel;
+    
+    SimpleFourierDriver Trunk_Extension = {
+       AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxExtension;
+       #if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_ & ROM_TEST_MODE == KINEMATICS
+       RangeOfMotion = {..RangeOfMotion.ROM_Kinematics_FlexibleThorax.MaxPelvisThoraxExtensionAngle, 0}*pi/180;
+       #endif
+       #if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_ & ROM_TEST_MODE == INVERSEDYNAMICS
+       RangeOfMotion = {..RangeOfMotion.ROM_InverseDynamics_FlexibleThorax.MaxPelvisThoraxExtensionAngle, 0}*pi/180;
+       #endif
+       #if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_RIGID_ & ROM_TEST_MODE == KINEMATICS
+       RangeOfMotion = {..RangeOfMotion.ROM_Kinematics_RigidThorax.MaxPelvisThoraxExtensionAngle, 0}*pi/180;
+       #endif
+       #if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_RIGID_ & ROM_TEST_MODE == INVERSEDYNAMICS
+       RangeOfMotion = {..RangeOfMotion.ROM_InverseDynamics_RigidThorax.MaxPelvisThoraxExtensionAngle, 0}*pi/180;
+       #endif
+       Freq = 0.5/(.tEnd-.tStart);
+       Phase = 180*pi/180;
+       Reaction.Type ={Off};
+    };
+    AnyKinEq Trunk_LateralBending = { AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxLateralBending; Reaction.Type ={Off}; };
+    AnyKinEq Trunk_AxialRotation  = { AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxRotation; Reaction.Type ={Off}; };
+     
+    tEnd = 10.0; Gravity = {0, -9.81, 0}; nStep = 10;
+  }; 
+  
+  AnyBodyStudy Study_LateralBending = {
+    AnyFolder& Model = Main.Model;
+    AnyFolder& BodyModel = Main.HumanModel.BodyModel;
+    
+    SimpleFourierDriver Trunk_LateralBending = {
+       AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxLateralBending;
+       #if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_ & ROM_TEST_MODE == KINEMATICS
+       RangeOfMotion = {..RangeOfMotion.ROM_Kinematics_FlexibleThorax.MaxPelvisThoraxLateralBendingAngle, 0}*pi/180;
+       #endif
+       #if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_ & ROM_TEST_MODE == INVERSEDYNAMICS
+       RangeOfMotion = {..RangeOfMotion.ROM_InverseDynamics_FlexibleThorax.MaxPelvisThoraxLateralBendingAngle, 0}*pi/180;
+       #endif
+       #if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_RIGID_ & ROM_TEST_MODE == KINEMATICS
+       RangeOfMotion = {..RangeOfMotion.ROM_Kinematics_RigidThorax.MaxPelvisThoraxLateralBendingAngle, 0}*pi/180;
+       #endif
+       #if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_RIGID_ & ROM_TEST_MODE == INVERSEDYNAMICS
+       RangeOfMotion = {..RangeOfMotion.ROM_InverseDynamics_RigidThorax.MaxPelvisThoraxLateralBendingAngle, 0}*pi/180;
+       #endif
+       Freq = 0.5/(.tEnd-.tStart);
+       Phase = 180*pi/180;
+       Reaction.Type ={Off};
+    };
+    AnyKinEq Trunk_Extension = { AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxExtension; Reaction.Type ={Off}; };
+    AnyKinEq Trunk_AxialRotation  = { AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxRotation; Reaction.Type ={Off}; };
+     
+    tEnd = 10.0; Gravity = {0, -9.81, 0}; nStep = 10;
+  }; 
+
+  AnyBodyStudy Study_AxialRotation = {
+    AnyFolder& Model = Main.Model;
+    AnyFolder& BodyModel = Main.HumanModel.BodyModel;
+    
+    SimpleFourierDriver Trunk_AxialRotation = {
+       AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxRotation;
+       #if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_ & ROM_TEST_MODE == KINEMATICS
+       RangeOfMotion = {..RangeOfMotion.ROM_Kinematics_FlexibleThorax.MaxPelvisThoraxAxialRotationAngle, 0}*pi/180;
+       #endif
+       #if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_ & ROM_TEST_MODE == INVERSEDYNAMICS
+       RangeOfMotion = {..RangeOfMotion.ROM_InverseDynamics_FlexibleThorax.MaxPelvisThoraxAxialRotationAngle, 0}*pi/180;
+       #endif
+       #if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_RIGID_ & ROM_TEST_MODE == KINEMATICS
+       RangeOfMotion = {..RangeOfMotion.ROM_Kinematics_RigidThorax.MaxPelvisThoraxAxialRotationAngle, 0}*pi/180;
+       #endif
+       #if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_RIGID_ & ROM_TEST_MODE == INVERSEDYNAMICS
+       RangeOfMotion = {..RangeOfMotion.ROM_InverseDynamics_RigidThorax.MaxPelvisThoraxAxialRotationAngle, 0}*pi/180;
+       #endif
+       Freq = 0.5/(.tEnd-.tStart);
+       Phase = 180*pi/180;
+       Reaction.Type ={Off};
+    };
+    AnyKinEq Trunk_Extension = { AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxExtension; Reaction.Type ={Off}; };
+    AnyKinEq Trunk_LateralBending  = { AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxLateralBending; Reaction.Type ={Off}; };
+     
+    tEnd = 10.0; Gravity = {0, -9.81, 0}; nStep = 10;
+  };
+  
+  AnyBodyStudy Study_CoupledMotion = {
+    AnyFolder& Model = Main.Model;
+    AnyFolder& BodyModel = Main.HumanModel.BodyModel;
+    
+    #if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_
+    AnyVar DownScaleROM = 0.9; //we downscale the ROM in this study... ideally we would want to know more about coupling between DOF
+    #else
+    AnyVar DownScaleROM = 0.7; //we downscale the ROM in this study... ideally we would want to know more about coupling between DOF
+    #endif
+    
+    SimpleFourierDriver Trunk_Extension = {
+      AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxExtension;
+      RangeOfMotion = .DownScaleROM*{..RangeOfMotion.ROM_InverseDynamics_FlexibleThorax.MaxPelvisThoraxFlexionAngle, ..RangeOfMotion.ROM_InverseDynamics_FlexibleThorax.MaxPelvisThoraxExtensionAngle}*pi/180;
+      Freq = 1/(.tEnd-.tStart);
+    };
+    
+    SimpleFourierDriver Trunk_LateralBending = {
+      AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxLateralBending;
+      RangeOfMotion = .DownScaleROM*{..RangeOfMotion.ROM_InverseDynamics_FlexibleThorax.MinPelvisThoraxLateralBendingAngle, ..RangeOfMotion.ROM_InverseDynamics_FlexibleThorax.MaxPelvisThoraxLateralBendingAngle}*pi/180;
+      Freq = 4/(.tEnd-.tStart);
+      Phase = -90*pi/180;
+    };
+    
+    SimpleFourierDriver Trunk_AxialRotation = {
+      AnyKinMeasure &ref1 = .BodyModel.Interface.Trunk.PelvisThoraxRotation;
+      RangeOfMotion = .DownScaleROM*{..RangeOfMotion.ROM_InverseDynamics_FlexibleThorax.MinPelvisThoraxAxialRotationAngle, ..RangeOfMotion.ROM_InverseDynamics_FlexibleThorax.MaxPelvisThoraxAxialRotationAngle}*pi/180;
+      Freq = 2*1/(.tEnd-.tStart);
+      Phase = 90*pi/180;
+    };
+
+    tEnd = 10.0; Gravity = {0, -9.81, 0}; nStep = 50;
+  };
+  
+  AnyOperationSequence RunTest ={
+    #if ROM_TEST_MODE == KINEMATICS
+    AnyOperation &Flexion = .Study_Flexion.Kinematics; 
+    AnyOperation &Extension = .Study_Extension.Kinematics; 
+    AnyOperation &Lateral = .Study_LateralBending.Kinematics; 
+    AnyOperation &Axial = .Study_AxialRotation.Kinematics; 
+    AnyOperation &Coupled = .Study_CoupledMotion.Kinematics; 
+    #endif
+    #if ROM_TEST_MODE == INVERSEDYNAMICS
+    AnyOperation &Flexion = .Study_Flexion.InverseDynamics; 
+    AnyOperation &Extension = .Study_Extension.InverseDynamics; 
+    AnyOperation &Lateral = .Study_LateralBending.InverseDynamics; 
+    AnyOperation &Axial = .Study_AxialRotation.InverseDynamics; 
+    #endif
+  };
+
+};
