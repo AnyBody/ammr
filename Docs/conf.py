@@ -293,6 +293,11 @@ linkcheck_ignore = [
     "https://doi.org",  # These don't resolve properly and cause SSL issues
 ]
 
+linkcheck_allowed_redirects = {
+    "https://doi.org.*": ".*",
+    "https://dx.doi.org.*": ".*",
+     "https://youtu.be": ".*",
+}
 
 
 intersphinx_mapping = {}
