@@ -295,7 +295,6 @@ linkcheck_ignore = [
 
 
 
-
 intersphinx_mapping = {}
 if tags.has("offline"):
     # Todo. Find a way to link to offline html versions.

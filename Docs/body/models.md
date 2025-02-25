@@ -48,6 +48,7 @@ See {doc}`/bm_config/index` for re-configuring the model to for example, only re
 lumbar_spine_model
 cervical_spine_model
 thoracic_model
+abdominal_model
 ```
 
 ```{toctree}

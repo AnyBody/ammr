@@ -1,12 +1,12 @@
 # The Lumbar Spine Model
 
 The Lumbar spine contains **5 vertebrae** with 3 DoF spherical joints in
-between, **188 muscle fascicles** and a model of intra-abdominal pressure.
+between, **540 muscle fascicles** and a new {doc}`intra-abdominal pressure model <abdominal_model>`.
 
 ```{raw} html
 <!--<img src="../_static/LumbarSpineBack.jpg" alt="Smiley face" width="32%">
 <img src="../_static/LumbarSpineFront.jpg" alt="Smiley face" width="32%">-->
-<video width="32%" style="display:block; margin: 0 auto;" controls autoplay loop>
+<video width="100%" style="display:block; margin: 0 auto;" controls autoplay loop>
     <source src="../_static/LumbarSpine_rotating_model.mp4" type="video/mp4">
 Your browser does not support the video tag.
 </video>

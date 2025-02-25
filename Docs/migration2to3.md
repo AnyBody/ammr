@@ -18,7 +18,7 @@ warnings and how to fix them.
 
 The trunk model in AMMR 3.0 changes which posture is considered
 neutral. This was done in preparation for a new [detailed thoracic
-model](#thoracic-model) which will be available in [AMMR 4.0](https://github.com/anybody/ammr). Pelvic tilt for the model has been updated as well as the the neutral orientation of the thoracic segment.
+model](#Ribcage and thoracic spine model) which will be available in [AMMR 4.0](https://github.com/anybody/ammr). Pelvic tilt for the model has been updated as well as the the neutral orientation of the thoracic segment.
 
 ::: {warning}
 These postural changes will affect older applications. Especially, in models

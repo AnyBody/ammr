@@ -42,13 +42,13 @@ You can [enable backwards compatibility](changes-to-muscles-locations) by settin
   only use this new model if you need the added complexity. 
   :::
 
-  The model is based on the work of Ignasiak, D (2016) and Shayestehpour (2023). See the {ref}`documentaiton page <thoracic-model>` for more info. 
+  The model is based on the work of Ignasiak, D (2016) and Shayestehpour (2021 and 2024). See the {ref}`documentaiton page <Ribcage and Thoracic Spine Model>` for more info. 
 
-* A new abdmoninal model was added to replace the old 'buckle' model. 
-  I uses a new kinematic volume measure from AnyBody 7.5 to model the abdominal pressure 
+* A new abdominal model was added to replace the old 'buckle' model. 
+  It uses a new kinematic volume measure from AnyBody 7.5 to model the abdominal pressure 
   and includes new oblique, rectus and tranversus muscles. The new abdominal model is 
-  more robust and allows a bigger range of motion of the trunk. See the {ref}`documentaiton page <thoracic-model>` 
-  for the thoracic model for more info. 
+  more robust and allows a bigger range of motion of the trunk. See the {ref}`documentaiton page <Abdominal Pressure Model>` 
+  for more info about the abdominal model. 
 
   It is possible to revert ot the old buckle implmenation with switch {bm_statement}`_CAVITY_MODEL_BUCKLE_`. 
 
