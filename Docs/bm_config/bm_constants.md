@@ -707,13 +707,25 @@ Constant to use 2 parameter muscle tendon calibration
 
 
 
+::::{dropdown} `_EXPERIMENTAL_CALIBRATION_TYPE_2PAR_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _EXPERIMENTAL_CALIBRATION_TYPE_2PAR_
+:value: 3
+Constant to use the experimenrtal 2 parameter muscle tendon calibration
+:::
+::::
+
+
+
 ::::{dropdown} `_CALIBRATION_TYPE_CUSTOM_`
 :animate: fade-in-slide-down
 :margin: 0 0 2 2
 
 :::{ammr:bm_constant} _CALIBRATION_TYPE_CUSTOM_
 :value: 0
-Use custom calibration. I.e. diables calibration so the user can add their own code.
+Use custom calibration. I.e. disables calibration so the user can add their own code.
 :::
 ::::
 

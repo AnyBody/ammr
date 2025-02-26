@@ -376,25 +376,6 @@ Internal swtich to enable a different implementation of the Rectus Abdominis mus
 ::::
 
 
-::::{dropdown} `BM_TRUNK_EXPERIMENTAL_INTER_LAYER_L5PELVIC`
-:animate: fade-in-slide-down
-:margin: 0 0 3 3
-
-```{ammr:bm_statement} BM_TRUNK_EXPERIMENTAL_INTER_LAYER_L5PELVIC
-:deprecated:
-
-Internal swtich to enable an inter-layer between L5 and pelvis. This layer allow anteroposterior movement.
-
-:Default: OFF
-:Example: `#define BM_TRUNK_EXPERIMENTAL_INTER_LAYER_L5PELVIC OFF`
-:Options:
-  - {any}`OFF` -> Switch OFF
-  - {any}`ON` -> Switch ON
-
-```
-::::
-
-
 ::::{dropdown} `BM_TRUNK_EXPERIMENTAL_FLOATINGRIBS_KINETICS`
 :animate: fade-in-slide-down
 :margin: 0 0 3 3
@@ -1221,7 +1202,8 @@ Parameter to choose type of muscle tendon calibration
 :Options:
   - {any}`_CALIBRATION_TYPE_1PAR_` -> Constant to use 1 parameter muscle tendon calibration
   - {any}`_CALIBRATION_TYPE_2PAR_` -> Constant to use 2 parameter muscle tendon calibration
-  - {any}`_CALIBRATION_TYPE_CUSTOM_` -> Use custom calibration. I.e. diables calibration so the user can add their own code.
+  - {any}`_EXPERIMENTAL_CALIBRATION_TYPE_2PAR_` -> Constant to use the experimenrtal 2 parameter muscle tendon calibration
+  - {any}`_CALIBRATION_TYPE_CUSTOM_` -> Use custom calibration. I.e. disables calibration so the user can add their own code.
 
 ```
 ::::
