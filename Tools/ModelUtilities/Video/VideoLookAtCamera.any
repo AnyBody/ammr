@@ -69,7 +69,7 @@ To use the class template.
   _AUTO_OPEN_PREVIEW_ = 1,
   ENABLE_SAVE_SETTINGS=0,
   ENABLE_OVERLAY= 1,
-  VIDEO_ENCODER="vp9"
+  VIDEO_ENCODER="libvpx-vp9"
   ) 
 {
   // Arguments:
@@ -87,10 +87,12 @@ To use the class template.
   // If set to 1, the settings used to create the video will be saved in a file.
   //
   //VideoLookAtCamera#VIDEO_ENCODER
-  // Sets the codec used for encoding the video in FFMPEG. A few options have been 
-  // preconfigured. "xvid" gives mp4 videos encoded with xvid which are highly compatible. 
-  // "vp9" gives "*.webm" videos which have better quality for the size and support transparency.
-
+  // Sets the codec used for encoding the video in FFMPEG. The default "libvpx-vp9" creates
+  // good quality videos and works with the FFMPEG converter shipped with AnyBody. 
+  // Setting this to other codecs like for example "libx264", requires that you specify
+  // a version of FFMPEG you installed your self. Point the VideoPathFFMPEG member to
+  // where FFMPEG is installed on the machine. You may also need to to set 
+  // Operations.ConvertVideo.video_extension
 
   //VideoLookAtCamera
   /// File name of the video that will be created
@@ -192,6 +194,15 @@ To use the class template.
   /// Video output framerate. 
   #var AnyIntVar GifOutputFrameRate = VideoOutputFrameRate;
   
+  //VideoLookAtCamera
+  /// Extension of the output video. Defaults to .webm for VP9 encoded videos, otherwise .mp4 
+  #var AnyStringVar VideoExtension = 
+   #if VIDEO_ENCODER == "libvpx-vp9" 
+      ".webm";
+   #else
+     ".mp4";
+   #endif
+  
   /// Switch to view camera eye point.
   #var AnySwitchVar viewCamera = Off; 
   
@@ -201,9 +212,19 @@ To use the class template.
     AnyInt VideoInputFrameRate = assert(gtfun(.VideoInputFrameRate,0), "Video Input frame rate should larger than 0");
     AnyInt deprecated_codec_member = warn(orfun(eqfun(.VideoCodec, "libvpx-vp9"), eqfun(.VideoCodec, "")), strformat("\n") +"Deprecated: The VideoLookAtCamera.VideoCodec member is deprecated. Use class argument VIDEO_ENCODER instead");
 
-    #if VIDEO_ENCODER == "xvid" & TRANSPARENT_BACKGROUND
-    AnyInt warn_transparent = warn(0, strformat("\nPlease use argument VIDEO_ENCODER=" + strquote("vp9") + " to create videos that support transparency."));
+    #if VIDEO_ENCODER != "libvpx-vp9" & TRANSPARENT_BACKGROUND
+    AnyInt warn_transparent = warn(0, strformat("\nOnly few video codecs support transparent vides. Consider setting VIDEO_ENCODER=" + strquote("libvpx-vp9") + " to create videos that support transparency."));
     #endif
+    
+    #if VIDEO_ENCODER != "libvpx-vp9"
+    AnyInt unsupported_codec = expect(neqfun(.VideoPathFFMPEG,  _CAMERA_FFMPEG_DEFAULT_PATH_), 
+       strformat("\n\n"+
+       "    The FFMPEG version shipped with AnyBody only supports the 'libvpx-vp9' codec.\n"+
+       "    To use other codecs point the 'VideoPathFFMPEG' member to a different FFMPEG version." +
+       "\n")); 
+    #endif
+    
+    
   };
 
 
@@ -374,7 +395,7 @@ To use the class template.
   AnyFolder Operations =
   {
      #if _DEBUG
-     AnyStringVar PostCmd = " &&set /p=DEBUG: Hit ENTER to continue...";
+     AnyStringVar PostCmd = " && set /p=DEBUG: Hit ENTER to continue...";
      #else
      AnyStringVar PostCmd = "";
      #endif
@@ -399,9 +420,15 @@ To use the class template.
         " -i " + strquote(FilePathCompleteOf(.video_file)) + 
         " -vf " + strquote(.filters + ",palettegen=stats_mode=diff") +
         " -y " +
-        strquote(FilePathCompleteOf(.palette_file))+..PostCmd;
+        strquote(FilePathCompleteOf(.palette_file))
+        #if _DEBUG
+        + " && set /p=DEBUG: Hit ENTER to continue..";
+        #else
+        + " || set /p=Pallete generation failed: Hit ENTER to continue...";
+        #endif
+        
         #var WorkDir = ...VideoOutputPath;
-        #var Show = _DEBUG;
+        #var Show = 1;
         Wait = 1;
       };
       
@@ -416,9 +443,15 @@ To use the class template.
         " -i " + strquote(FilePathCompleteOf(.palette_file)) +
         " -lavfi " + strquote(.filters + " [x]; [x][1:v] paletteuse=dither=floyd_steinberg:diff_mode=rectangle") +
         iffun(_OVER_WRITE, " -y "," ") +
-        strquote(FilePathCompleteOf(.gif_file))+..PostCmd;
+        strquote(FilePathCompleteOf(.gif_file))
+        #if _DEBUG
+        + " && set /p=DEBUG: Hit ENTER to continue..";
+        #else
+        +" || set /p=Encode GIF failed: Hit ENTER to continue...";
+        #endif
+        
         #var WorkDir = ...VideoOutputPath;
-        #var Show = _DEBUG;   
+        #var Show = 1;   
         Wait = 1;
       };
       AnyOperationShellExec DeletePallete = 
@@ -468,16 +501,8 @@ To use the class template.
       
       #var FileName = "cmd.exe";
       #var AnyStringVar inputfile = ..VideoName + "_" + ..Camera.Recorder.CounterFormat +".png";
-      
-
-      #var AnyStringVar video_extension = 
-      #if VIDEO_ENCODER == "vp9" 
-         ".webm";
-      #else
-        ".mp4";
-      #endif
-      
-      #var AnyFileVar out_file = ..VideoOutputPath+ "/"+ ..VideoName + video_extension;
+            
+      #var AnyFileVar out_file = ..VideoOutputPath+ "/"+ ..VideoName + ..VideoExtension;
 
       #if ENABLE_OVERLAY
       #var AnyString OverLayFilter = "[bg];[1:v]scale=-2:2*trunc("+strval(..VideoResolution[1])+"*"+strval(..OverlayImageScale)+"/2)[overlay];[bg][overlay]overlay=W-w:H-h";
@@ -505,7 +530,7 @@ To use the class template.
       " -metadata comment=" + strquote("Created with the AnyBody Modeling System.") 
       ;
 
-      #var AnyStringVar CodecArgs_default = "  -c:v libxvid -crf " + strval(..ConstantRateFactor)+" -level 3.0 -pix_fmt yuv420p -strict experimental -movflags +faststart ";
+      #var AnyStringVar CodecArgs_default = "  -c:v "+ VIDEO_ENCODER +" -crf " + strval(..ConstantRateFactor)+" -level 3.0 -pix_fmt yuv420p -strict experimental -movflags +faststart ";
       #var AnyStringVar CodecArgs_vp9 = " -c:v libvpx-vp9 -an -crf " + strval(..ConstantRateFactor)+" -pix_fmt yuva420p  -row-mt 1 "; //-metadata:s:v:0 alpha_mode=" + strquote("1")
 //      #var AnyStringVar CodecArgs_VP9 = " -c:v apng" + " -crf " + strval(..ConstantRateFactor)+" -pix_fmt rgba  -row-mt 1 ";
 
@@ -513,15 +538,20 @@ To use the class template.
       #var AnyStringVar OutputArg = strquote(FilePathCompleteOf(out_file));
       
       #var Arguments =  iffun(_DEBUG , "/K","/C") + " TITLE Creating Video && " + ffmpegBaseArg 
-      #if VIDEO_ENCODER == "vp9" 
+      #if VIDEO_ENCODER == "libvpx-vp9" 
       + CodecArgs_vp9 +" -pass 1 -f null NUL && " + ffmpegBaseArg + CodecArgs_vp9 + " -pass 2 -auto-alt-ref 0 "
       #else
       + CodecArgs_default
       #endif
-      + OutputArg;
-
+      + OutputArg 
+      #if _DEBUG
+      + " && set /p=DEBUG: Hit ENTER to continue..";
+      #else
+      + " || set /p=Video Encoding failed: Hit ENTER to continue..";
+      #endif
+      
       #var WorkDir = ..VideoOutputPath;
-      #var Show = DesignVar(_DEBUG);
+      #var Show = DesignVar(1);
     };
     
     
