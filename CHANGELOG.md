@@ -4,7 +4,7 @@
 %    https://anyscript.org/ammr/beta/changelog.html
 
 (ammr-3.1.0-changelog)=
-## AMMR 3.1.0 (2024-??-??)
+## AMMR 3.1.0 Beta (2025-??-??)
 
 ### ➕ Added:
 * Introduced a new class template,
