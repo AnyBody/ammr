@@ -100,7 +100,7 @@ You can [enable backwards compatibility](changes-to-muscles-locations) by settin
   version.
 
 (ammr-3.1.0-changelog)=
-## AMMR 3.1.0 (2024-??-??)
+## AMMR 3.1.0 Beta (2025-??-??)
 
 ### ➕ Added:
 * Introduced a new class template,
