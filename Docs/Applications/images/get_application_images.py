@@ -11,7 +11,6 @@ from anypytools import AnyPyProcess, macro_commands as mc
 APP_FOLDER = Path(__file__).parent / "../../../Tests/Applications"
 MOCAP_FOLDER = Path(__file__).parent / "../../../Tests/AnyMocap"
 app_opts = {
-    "anybodycon_path": os.path.expandvars("${LocalAppData}\Programs\AnyBody Technology\AnyBody.8.0_Beta\AnyBodyCon.exe"),
     "num_processes": 2,
 }
 
@@ -58,12 +57,12 @@ image_files = [
 ]
 
 
-RE_IMAGE = re.compile('.*[tT]est_(.+?)\.any_0_InitPos.png')
+RE_IMAGE = re.compile(r'.*[tT]est_(.+?)\.any_0_InitPos.png')
 
 for fimg in image_files:
     m = RE_IMAGE.match(fimg.name)
     if m:
-        im = Image.open(fimg).convert("RGB")
+        im = Image.open(fimg).convert("RGBA")
 
         targetfile = Path(__file__).parent / (m.group(1) +'.webp')
         #print(targetfile)
