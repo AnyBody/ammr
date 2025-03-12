@@ -4,7 +4,7 @@
 %    https://anyscript.org/ammr/beta/changelog.html
 
 (ammr-3.1.0-changelog)=
-## AMMR 3.1.0 (2024-??-??)
+## AMMR 3.1.0 Beta (2025-??-??)
 
 ### ➕ Added:
 * Introduced a new class template,
@@ -43,6 +43,10 @@
   from a cylinder. This lowers the risk of muscle via points prenetrating the
   wrapping surface in postures involving both flexion/extension and
   abduction/adduction at the wrist.
+
+### Removed: 
+* Removed the python hooks to check for modified AMMR folder. This feature was
+  not used and has been removed to simplify the AMMR codebase.
 
 (ammr-3.0.4-changelog)=
 ## AMMR 3.0.4 (2024-07-02)

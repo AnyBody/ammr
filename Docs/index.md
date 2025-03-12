@@ -52,17 +52,20 @@ Community effort
 : Models are combined effort of many research groups over two decades
 
 
-The AnyBody Model Repository (AMMR), is an unique open library of
-musculoskeletal models and examples ready to be used with the [AnyBody Modeling
-System][anybody modeling system]. The AnyBody Managed Model Repository consists of two parts:
+The AnyBody Model Repository (AMMR), is an unique open library of 
+musculoskeletal models and examples ready to be used with the 
+[AnyBody Modeling System][anybody modeling system]. The AnyBody Managed 
+Model Repository consists of three parts:
 
 
 ```{admonition} **First time user?**
 :class: hint dropdown margin
 
-If you are a new user check the [AnyBody Tutorials](https://anyscript.org/tutorials/) and the getting started video on AnyBody.
+If you are a new user check the [AnyBody Tutorials](https://anyscript.org/tutorials/) and 
+the getting started video on AnyBody.
 
-The following {doc}`Getting Started section </getting_started>` on the AMMR provides insight into how AMMR is structured, how to
+The following {doc}`Getting Started section </getting_started>` on the 
+AMMR provides insight into how AMMR is structured, how to
 install it and how to use it.
 ```
 
@@ -108,9 +111,6 @@ The models are developed in research projects at academic institutions or by
 AnyBody Technology in collaboration with academic institutions. The models are
 maintained by AnyBody Technology who ensure that various body part models can be
 used together as a full body, scalable musculoskeletal model.
-
-
-[testlink](#MoCap.Markers.CreateMarkerDriverClass.CreateMarkerDriver.sRelOpt)
 
 
 
