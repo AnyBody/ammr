@@ -19,6 +19,15 @@ You can [enable backwards compatibility](changes-to-muscles-locations) by settin
 ```AnyScriptDoc
 #define BM_COMPATIBILITY_MUSCLE_STRUCTURE ON
 ```
+
+:::
+:::{admonition} Folder locations restructured
+:class: warning
+Many folders inside the Leg and Arm models have been renamed and/or moved to ensure a consistent bodymodel structure.
+You can [enable backwards compatibility](changes-to-bodymodel-folders) by setting:
+```AnyScriptDoc
+#define BM_COMPATIBILITY_BODYMODEL_STRUCTURE ON
+```
 :::
 
 **Fixed:**
@@ -98,6 +107,10 @@ You can [enable backwards compatibility](changes-to-muscles-locations) by settin
   introduced. This switch will create backward-compatible references to the muscles as
   they are defined in AMMR 3.x. This BM switch will be deprecated in a future AMMR
   version.
+
+(changes-to-bodymodel-folders)=
+
+* Many of the key folders inside the Leg and Arm models have been renamed to create a unified structure across the full bodymodel. To bring back the old structure we have temporarily included a backward compatibility switch `BM_COMPATIBILITY_BODYMODEL_STRUCTURE` To ensure a smooth transition.
 
 (ammr-3.1.0-changelog)=
 ## AMMR 3.1.0 Beta (2025-??-??)

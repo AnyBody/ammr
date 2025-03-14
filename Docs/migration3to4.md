@@ -52,6 +52,21 @@ References to their old locations may there break. You can enable backwards comp
 This add the old strucuture in addition to the new one, and should make it easier to update the model.
 
 
+### BodyModel folder restructure
+
+The folder names and structure of the whole body model has been streamlined. 
+e.g. `Main.HumanModel.BodyModel.Right.ShoulderArm.Seg -> Main.HumanModel.BodyModel.Right.ShoulderArm.Segments`
+
+This means that references to the old folder names may break. 
+You can enable the old names and locations by setting
+
+```AnyScriptDoc
+#define BM_COMPATIBILITY_BODYMODEL_STRUCTURE ON
+```
+
+This will re-create the old folders as references to the new ones and ease the transition
+to use the new structure.
+
 ### MoCap models
 
 

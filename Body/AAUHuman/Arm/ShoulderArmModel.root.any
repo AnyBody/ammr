@@ -142,7 +142,7 @@ free which is pronation/supination of the forearm
 Wrist joint: created as two revolute joints where the axis of rotations are not coincident
 
 */
-AnyDoc ArmDoc ={
+AnyDoc Documentation ={
    DocumentationLink = AMMR_PATH_DOC + "/body/shoulder_arm_model.html";
 };
 
@@ -158,7 +158,10 @@ AnyDoc ArmDoc ={
 
 AnyFolder Data = {
   AnyFolder unscaled = {
-    AnyFolder &ModelParameters = ..ModelParameters;
+    AnyFolder ModelParameters = {
+      #include "<BM_ARM_DATASET_PATH>/ArmModelParameters.any"
+      #include "<BM_ARM_DATASET_PATH>/ArmModelMuscleParameters.any"
+    };
     AnyFolder STL = {#include "<BM_ARM_DATASET_PATH>/STL/STL.any"};
     AnyFolder StandardParameters = {
       #include "..\BodyModels\Include\BodyParameters.any"
@@ -168,23 +171,22 @@ AnyFolder Data = {
   #include "rangeOfMotion.any"
 };
 
-AnyFolder ModelParameters = {
-  #include "<BM_ARM_DATASET_PATH>/ArmModelParameters.any"
-  #include "<BM_ARM_DATASET_PATH>/ArmModelMuscleParameters.any"
-};
-
-AnyFolder &STL = Data.unscaled.STL;
-
-#include "ScapulaContactElipsoid.any"
+AnyFolder Muscles = {};
 AnyFolder MuscleModels = {};
-AnyFolder Mus = {};
+
+#if BM_COMPATIBILITY_BODYMODEL_STRUCTURE == ON
+  AnyFolder &ModelParameters = Data.unscaled.ModelParameters;
+  AnyFolder &Mus = Muscles;
+  AnyFolder &Jnt = Joints;
+  AnyFolder &Seg = Segments;
+#endif
 
 #ifndef BM_ARM_DETAILED_HAND
   #define BM_ARM_DETAILED_HAND OFF
 #endif
 
 #if (!(BM_ARM_DETAILED_HAND == ON & BM_ARM_RIGHT == ON)) & (!(BM_ARM_DETAILED_HAND == ON & BM_ARM_LEFT == ON))
-  AnyRefNode &GloveInsertationNode=Seg.Hand.HandRef.PalmJoint;
+  AnyRefNode &GloveInsertationNode=Segments.Hand.HandRef.PalmJoint;
   #include "Glove.any"
   
   #if (_LEFT_RIGHT_ == "Right" & BM_ARM_RIGHT == ON & (BM_ARM_MUSCLES_RIGHT > OFF )) | (_LEFT_RIGHT_ == "Left" & BM_ARM_LEFT == ON & (BM_ARM_MUSCLES_LEFT > OFF)) 
@@ -194,7 +196,7 @@ AnyFolder Mus = {};
 
 
 ///Folder with segment for the arm
-AnyFolder Seg={
+AnyFolder Segments = {
   #include "Seg.any"
   #if (!(BM_ARM_DETAILED_HAND == ON & BM_ARM_RIGHT == ON)) & (!(BM_ARM_DETAILED_HAND == ON & BM_ARM_LEFT == ON))
 
@@ -235,7 +237,7 @@ AnyFolder Seg={
 
 
 ///Joints for the arm
-AnyFolder Jnt ={
+AnyFolder Joints ={
   #include "Jnt.any"
   
   #if (((_LEFT_RIGHT_ == "Right") & ((BM_ARM_RIGHT == ON) & (BM_ARM_MUSCLES_RIGHT == OFF ))) | ((_LEFT_RIGHT_ == "Left") & (BM_ARM_LEFT == ON & (BM_ARM_MUSCLES_LEFT == OFF))))
@@ -246,7 +248,7 @@ AnyFolder Jnt ={
 
 //Muscles for the arm
 #if (_LEFT_RIGHT_ == "Right" & BM_ARM_RIGHT == ON & (BM_ARM_MUSCLES_RIGHT > OFF )) | (_LEFT_RIGHT_ == "Left" & BM_ARM_LEFT == ON & (BM_ARM_MUSCLES_LEFT > OFF)) 
-Mus ={ 
+Muscles ={ 
     #include "Muscle.any"
 }; //End Mus
 
@@ -265,7 +267,7 @@ MuscleModels = {
 
 #endif
 
-Mus = {
+Muscles = {
   //These files contains wrapping geometries and attachement nodes for the muscles
   //This way of structuring makes it possible to have models using the same kinematics but 
   //using different muscle configurations, since all muscle nodes and geometry has been 
@@ -290,8 +292,15 @@ Mus = {
 };
 
 //Summation of masses in the arm
-AnyFolder MassSummation={
-  AnyVar Mass=.Seg.Scapula.Mass+.Seg.Clavicula.Mass+.Seg.Ulna.Mass+.Seg.Humerus.Mass+.Seg.Radius.Mass+.Seg.Hand.Mass;
+AnyFolder MassSummation = {
+  AnyVar Mass = (
+    .Segments.Scapula.Mass +
+    .Segments.Clavicula.Mass +
+    .Segments.Ulna.Mass +
+    .Segments.Humerus.Mass +
+    .Segments.Radius.Mass +
+    .Segments.Hand.Mass
+  );
 };
 
 InterfaceFolder={
@@ -312,4 +321,5 @@ MannequinValuesFolder ={
   #include "MannequinValuesFromModel.any"
 };
 
+#include "ScapulaContactElipsoid.any"
 
