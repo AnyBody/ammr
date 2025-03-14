@@ -510,6 +510,42 @@ A volume measure implementation of the pressure in the abdominal cavity and lung
 
 
 
+::::{dropdown} `_ERECTORSPINAE_VIANODES_LAYER_AND_REMOVE_L3L4_VIANODES_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _ERECTORSPINAE_VIANODES_LAYER_AND_REMOVE_L3L4_VIANODES_
+:value: 0
+Via-nodes on erector spinae placed on the layers instead of vertebrae. The via-nodes on L3 and L4 are removed.
+:::
+::::
+
+
+
+::::{dropdown} `_REMOVE_L3L4_VIANODES_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _REMOVE_L3L4_VIANODES_
+:value: 1
+The via-nodes of erector spinae on L3 and L4 are removed.
+:::
+::::
+
+
+
+::::{dropdown} `_ERECTORSPINAE_VIANODES_VERTEBRA_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _ERECTORSPINAE_VIANODES_VERTEBRA_
+:value: 2
+Via-nodes on erector spinae placed on the vertebrae.
+:::
+::::
+
+
+
 ::::{dropdown} `_RHYTHM_SOFT_`
 :animate: fade-in-slide-down
 :margin: 0 0 2 2

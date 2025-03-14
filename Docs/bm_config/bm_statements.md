@@ -489,6 +489,25 @@ The type of thoracic/ribcage model used in the model.
 ::::
 
 
+::::{dropdown} `BM_EXPERIMENTAL_ERECTORSPINAE_VIANODES`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_EXPERIMENTAL_ERECTORSPINAE_VIANODES
+
+New via-nodes of the erector spinae muscles were placed on the layers instead of the vertebrae.
+
+:Default: {any}`_ERECTORSPINAE_VIANODES_LAYER_AND_REMOVE_L3L4_VIANODES_`
+:Example: `#define BM_EXPERIMENTAL_ERECTORSPINAE_VIANODES _ERECTORSPINAE_VIANODES_LAYER_AND_REMOVE_L3L4_VIANODES_`
+:Options:
+  - {any}`_ERECTORSPINAE_VIANODES_LAYER_AND_REMOVE_L3L4_VIANODES_` -> Via-nodes on erector spinae placed on the layers instead of vertebrae. The via-nodes on L3 and L4 are removed.
+  - {any}`_REMOVE_L3L4_VIANODES_` -> The via-nodes of erector spinae on L3 and L4 are removed.
+  - {any}`_ERECTORSPINAE_VIANODES_VERTEBRA_` -> Via-nodes on erector spinae placed on the vertebrae.
+
+```
+::::
+
+
 ::::{dropdown} `BM_TRUNK_DIAGPHRAM_FIXED_POSITION`
 :animate: fade-in-slide-down
 :margin: 0 0 3 3
