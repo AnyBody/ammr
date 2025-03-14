@@ -1,0 +1,232 @@
+ AnyLigamentModelPol LigMdl =   {
+  AnyVar L0_Pretension=Pretension*L0;
+  AnyFolder Calculations ={
+    AnyVar EPS_at_1mm = 0.001/.L0;
+    AnyVar StiffLinear=.F1/(.eps1*.L0);
+    AnyVar Force_at_1mm=StiffLinear*0.001;
+  };
+};
+
+
+AnyDrawPLine DrawLig = {
+  Opacity =Main.DrawSettings.Ligament.Opacity;
+  Thickness = 0.0015;
+  RGB = Main.DrawSettings.Colors.Ligaments;
+};
+
+
+
+#ifdef FORCE_VIEW 
+AnyDrawForce DrawForceLig ={
+  ForceScale=Main.DrawSettings.ForceScale; 
+  ReactionForceColor ={0,1,0};
+  AppliedForceColor= ReactionForceColor;
+};
+#endif
+
+AnyVar LinearStiffCal=LigMdl.F1/(LigMdl.eps1*LigMdl.L0);
+
+AnyDrawPLine DrawLig_size = {
+  Opacity =Main.DrawSettings.Ligament.Opacity;
+  // Thickness =DesignVar(0.00000003*.LigMdl.F1/(.LigMdl.eps1*.LigMdl.L0));//0.0015;
+  Thickness =DesignVar(0.0000003*.LigMdl.F1/(.LigMdl.eps1));//0.0015;
+  RGB = Main.DrawSettings.Colors.Ligaments;
+};
+
+
+#ifdef LIGAMENT_DRIVER
+
+
+
+AnyFolder LigamentDriver ={
+  // Compute coefficient of the (force) polynomial function
+  //   F = C0 + C1*dL + C2*dL^2 + C3*dL^3
+  
+  AnyFloat L1 = (1.0 + .LigMdl.eps1)*.LigMdl.L0;
+  AnyFloat dL = L1 - .LigMdl.L0;
+  AnyFloat Fgrad_avg = .LigMdl.F1 / dL;
+  AnyFloat Fgrad0 = .LigMdl.a0 * Fgrad_avg;
+  AnyFloat Fgrad1 = .LigMdl.a1 * Fgrad_avg;
+  
+  
+  
+  AnyFunPolynomial LigFPoly = {
+    PolyCoef = {
+      {
+        0, 
+        .Fgrad0, 
+        ( 2*(..LigMdl.F1)/.dL - 1.5*.Fgrad0 - 0.5*.Fgrad1 ) / .dL,
+        0,
+        ( (.Fgrad1+.Fgrad0)/2.0 - (..LigMdl.F1)/.dL ) / (.dL*.dL*.dL)
+      }
+    };
+  };
+  
+  
+  
+  
+  AnyFunPolynomial IntLigFPoly= {
+    PolyCoef = {
+      {
+        0,  // coeff is 0 
+        0,
+        (1.0/2.0)*.Fgrad0, 
+        (1.0/3.0)*(2*(..LigMdl.F1)/.dL - 1.5*.Fgrad0 - 0.5*.Fgrad1 ) / .dL,
+        0,
+        (1.0/5.0)*( (.Fgrad1+.Fgrad0)/2.0 - (..LigMdl.F1)/.dL ) / (.dL*.dL*.dL)
+      }
+    };
+  };
+  
+  
+  AnyFunPolynomial LigFPolyL1 = {
+    PolyCoef = {
+      {
+        ..LigMdl.F1, 
+        .Fgrad1
+      }
+    };
+  };
+  
+  
+  AnyFunPolynomial IntLigFPolyL1 = {
+    PolyCoef = {
+      {
+        0,
+        (1.0)*..LigMdl.F1, 
+        (1.0/2.0)*.Fgrad1 
+      }
+    };
+  };
+  
+  
+  
+  
+  AnyFunInterpol fun = {
+    Type = Bspline; 
+    
+    T=linspace(-0.1, 1.0, 5001);  // does not work for ligaments stretching over 1 meters :)
+    
+    Data =     
+    {sqrt(
+      iffun(andfun(gtfun(T, ..LigMdl.L0), ltfun(T, .L1)), .IntLigFPoly(T-..LigMdl.L0), 0.0)
+      +
+      iffun(gtfun(T, .L1), (.IntLigFPolyL1(T-.L1) + .IntLigFPoly(.L1-..LigMdl.L0)[0]), 0.0)
+      )'};
+  };
+  
+  AnyKinEqSimpleDriver Driver = {
+    AnyKinMeasureFunComb1 FunComb = {
+      AnyKinMeasureOrg org = {
+        AnyKinPLine &lin = ....Line;
+      };
+      Functions = {&..fun};
+    };
+    DriverPos={0}; DriverVel={0};
+    Reaction.Type={Off};
+    CType = {Soft};
+    AnyFunConst wf ={Value =  {DesignVar(0.0001)};};
+    WeightFun = {&wf};
+  };
+  
+  //  AnyDrawVector DrawL0 =  {
+  //    AnyRefFrame &ref =..ref1;
+  //    AnyVec3 Direction = (..ref1.r-..ref2.r)/vnorm((..ref1.r-..ref2.r),2);
+  //    Vec =- ..LigMdl.L0*Direction;
+  //    Opacity=0.5;
+  //    Line.RGB = {0,0,0};
+  //    Line.Thickness=0.0035;
+  //  };
+  //  
+  //  AnyDrawVector DrawLigDriver =  {
+  //    AnyRefFrame &ref =..ref1;
+  //    AnyVec3 Direction = (..ref1.r-..ref2.r)/vnorm((..ref1.r-..ref2.r),2);
+  //    Vec =0.02*-.FunComb.Pos[0]*Direction;
+  //    Opacity=0.05;
+  //    Line.RGB = {0,1,0};
+  //    Line.Thickness=0.004;
+  //  };
+  
+  
+  
+  AnyKinMeasureFunComb1 FunComb = {
+    AnyKinMeasureOrg org = {
+      AnyKinPLine &lin = ...Line;
+    };
+    Functions = {&.fun};
+  };
+  
+  AnyFolder &DrawLig =.DrawLig;
+  DrawLig ={
+    AnyStyleDrawMaterial1 material ={
+      RGB =Main.DrawSettings.Colors.Ligaments*(1-..FunComb.Pos[0]);
+      DiffuseRGB =RGB;
+      
+    };
+  };
+  
+  
+  
+  //  AnyDrawVector DrawLigStrength =  {
+  //    AnyRefFrame &ref =..ref1;
+  //    AnyVec3 Direction = (..ref1.r-..ref2.r)/vnorm((..ref1.r-..ref2.r),2);
+  //    Vec =0.000002*..LigMdl.F1*Direction;
+  //    Opacity=0.5;
+  //    Line.RGB = {0,0,1};
+  //    Line.Thickness=0.0041;
+  //  };
+  //  
+  
+  
+  //  AnyDrawSphere DrawLigStrength =  {
+  //    AnyRefFrame &ref =..ref2;
+  //    Opacity=0.5;
+  //    ScaleXYZ={1,1,1}**..LigMdl.F1;
+  //   };
+  
+  
+  
+  
+  
+  AnyFunInterpol Force_fun = {
+    Type =  Bspline; 
+    T=linspace(-0.1, 1.0, 5001);  // does not work for ligaments stretching over 1 meters :)
+    Data =   
+    { iffun(andfun(gtfun(T, ..LigMdl.L0), ltfun(T,.L1)),  .LigFPoly(T-..LigMdl.L0), 0.0)'+iffun(gtfun(T,  .L1), (.LigFPolyL1(T- .L1))', 0.0) };
+  };
+  
+  
+  
+  
+  
+  
+};
+
+
+#endif
+
+//make color dependin on force
+//#if InverseDynamicModel 
+////AnyKinMeasureFunComb1 FunComb = {
+////    AnyKinMeasureOrg org = {
+////      AnyKinPLine &lin = ...Line;
+////    };
+////    Functions = {&.fun};
+////  };
+//  
+////  AnyFolder &DrawLig =.DrawLig;
+////  DrawLig ={
+////    AnyStyleDrawMaterial1 material ={
+////      RGB =Main.DrawSettings.Colors.Ligaments*(1-2*..FunComb.Pos[0]);
+////      DiffuseRGB =RGB;
+////      
+////    };
+////  };
+//#endif
+
+
+
+
+
+
+

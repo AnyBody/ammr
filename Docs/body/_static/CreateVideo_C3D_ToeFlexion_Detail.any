@@ -1,0 +1,82 @@
+// This file can be used to generate a video of a close-up of the foot
+// for illustrating toe bending in the c3d mocap model:
+// Application/MocapExamples/Plug-in-gait_Simple_ToeFlexion/LowerExtremity.main.any
+
+// See following file for more information on the camera class template
+// and options. 
+// #include "<ANYBODY_PATH_MODELUTILS>/Video/CameraClassTemplate.any"
+
+
+#define VIDEO_STUDY2 Main.Studies.MarkerTracking
+#define VIDEO_ANALYSIS2 Kinematics
+
+
+VIDEO_STUDY2 = {
+  VideoLookAtCamera VideoTool (UP_DIRECTION = y) = 
+  {
+     VideoName = Main.ModelSetup.TrialSpecificData.TrialFileName;
+     
+     // The resolution and aspect ratio of the video
+     VideoResolution = {1080, 720}; 
+
+     // Create frames in twice the video size and scale down when video
+     // is created. This gives much better videos. Especially with lower resolutions
+     VideoInputScale = 2; 
+
+     // Video codec used in FFMPEG video creation.
+     // The inlcuded FFMPEG only support free codecs (LGPL). You can replace the FFPEG
+     // executable in AnyBody's install directory to enable other codecs like "libx264"
+     VideoCodec = "libvpx-vp9";
+            
+     // This fixes the "Look at point" at a specific height while still following the center of mass
+//     CameraLookAtPoint = 0.75*CameraUpDirection +
+//         mult(Main.HumanModel.BodyModel.Interface.CenterOfMass.Pos, not(CameraUpDirection));
+     
+     // Camera look at point on the feet
+     CameraLookAtPoint = 0.10*CameraUpDirection + Main.EnvironmentModel.ForcePlates.Plate2.ForcePlate.ForcePlateSeg.PlateSurface.SurfaceGraphics.r;
+//         mult(Main.EnvironmentModel.ForcePlates.Plate2.ForcePlate.ForcePlateSeg.PlateSurface.SurfaceGraphics.r, not(CameraUpDirection));
+     
+     // The vertical field of view in meters at the LookAtPoint
+     CameraFieldOfView = 0.4;
+     
+     // The direction which the camera is placed
+     // (In global coordinates with respect to the LookAtPoint)
+     CameraDirection = {1, 0, 0}*Main.EnvironmentModel.ForcePlates.Plate2.ForcePlate.ForcePlateSeg.PlateSurface.SurfaceGraphics.Axes';
+     
+     // Counter used for nameing the indivual frames. 
+     Counter = VIDEO_STUDY2.iStep;
+     
+     CameraUpDirection = {0, 0, -1}*Main.EnvironmentModel.ForcePlates.Plate2.ForcePlate.ForcePlateSeg.PlateSurface.SurfaceGraphics.Axes';
+     
+      // This will run the video in half speed.
+     AnyVar VideoSpeed = 0.25;
+
+     /// Determines the speed of the video. 
+     /// Currently uses the VideoSpeed variable
+     VideoInputFrameRate = round( VideoSpeed* VIDEO_STUDY.nStep/iffun(VIDEO_STUDY.tEnd-VIDEO_STUDY.tStart, VIDEO_STUDY.tEnd-VIDEO_STUDY.tStart, 1.0*VIDEO_STUDY.nStep)); 
+   
+    
+     // Operation which run before recoding is started.
+     PreAnalysis = {
+         AnyOperation &step1 = Main.RunAnalysis.LoadParameters;
+//         AnyOperation &step2 = Main.RunAnalysis.MarkerTracking;
+     };
+     
+     // The operations which should be included in the video.
+     Analysis = {
+         AnyOperation &ref = VIDEO_STUDY2.VIDEO_ANALYSIS2;
+     };
+     
+     Create_Video.Settings.DisplayPriority = PriorityLow;
+ };
+};
+ 
+ Main.ModelSetup = {
+   AnyOperationSequence CreateVideo2 = {
+     Settings.DisplayPriority = PriorityHigh;
+     AnyOperation& CreateVideo = VIDEO_STUDY2.VideoTool.Create_Video;
+   };
+ };
+ 
+ 
+ 

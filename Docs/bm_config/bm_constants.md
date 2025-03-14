@@ -126,25 +126,49 @@ Switch to use leg model: "Leg"
 
 
 
+::::{dropdown} `_FOOT_MODEL_NONE_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _FOOT_MODEL_NONE_
+:value: 0
+Switch off foot model"
+:::
+::::
+
+
+
 ::::{dropdown} `_FOOT_MODEL_DEFAULT_`
 :animate: fade-in-slide-down
 :margin: 0 0 2 2
 
 :::{ammr:bm_constant} _FOOT_MODEL_DEFAULT_
-:value: 0
+:value: 1
 Switch for using the default foot model
 :::
 ::::
 
 
 
-::::{dropdown} `_FOOT_MODEL_NONE_`
+::::{dropdown} `_FOOT_MODEL_TOE_FLEX_GM_`
 :animate: fade-in-slide-down
 :margin: 0 0 2 2
 
-:::{ammr:bm_constant} _FOOT_MODEL_NONE_
-:value: 1
-Switch for using the GM foot model"
+:::{ammr:bm_constant} _FOOT_MODEL_TOE_FLEX_GM_
+:value: 2
+Switch for using the GM foot model with toe flexion
+:::
+::::
+
+
+
+::::{dropdown} `_FOOT_MODEL_DETAILED_GM_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _FOOT_MODEL_DETAILED_GM_
+:value: 3
+Switch for using the detailed GM foot model
 :::
 ::::
 
