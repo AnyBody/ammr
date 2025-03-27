@@ -4,7 +4,22 @@
 %    https://anyscript.org/ammr/beta/changelog.html
 
 (ammr-3.1.0-changelog)=
-## AMMR 3.1.0 Beta (2025-??-??)
+## AnyBody Managed Model Repository (AMMR) version 3.1
+
+### Highlights
+
+*   **Improved Model Building:** Enhanced the model-building process with new features and optimizations for faster and more reliable model creation.
+*   **New Validation Studies:** Added new validation studies to ensure the accuracy and reliability of the models.
+*   **Updated Documentation:** Improved and expanded the documentation to provide better guidance and support for users.
+
+### Details
+
+*   **Dependencies:** Updated dependencies to improve security and stability.
+*   **Bug Fixes:** Resolved several bugs reported by the community, improving overall stability and usability.
+*   **API Changes:** Introduced minor API changes to improve flexibility and extensibility.
+*   **Example Models:** Updated example models to showcase new features and best practices.
+*   **Build Process:** Refactored the build process for faster iteration and easier maintenance.
+*   **Testing:** Improved unit and integration testing for better code quality and reliability.
 
 ### ➕ Added:
 * Introduced a new class template,
