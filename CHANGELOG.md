@@ -26,6 +26,12 @@
 * Fixed a spelling typo in the disc stiffness BM control statements. The
   `BM_TRUNK_*_DISC_STIFNESS` parameters have been renamed to `BM_TRUNK_*_DISC_STIFFNESS`. 
   The mispelled parameter names have been deprecated. 
+* The data points for the femoral epicondyles with respect to the shank in the
+  neutral posture has been corrected. These values were not updated when the
+  knee axis in shank was redefine in TLEM 2.2 and AMMR 3. This change has no
+  influence on the default AnyBody MOdels, but it fixes an issue if the model
+  was configured to use the {bm_constant}`special 'bony landmark' defined <_JOINT_TYPE_BONY_LANDMARK_>` 
+  joint axis configuration. 
 
 ### 🔧 Changed:
 * Updated the insertion and origin points of the Gluteus Medius to ensure
