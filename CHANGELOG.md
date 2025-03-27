@@ -49,6 +49,12 @@
   from a cylinder. This lowers the risk of muscle via points prenetrating the
   wrapping surface in postures involving both flexion/extension and
   abduction/adduction at the wrist.
+* The coordinate system used when scaling the shank segment has been aligned
+  with same reference frame used when scaling the thigh segment, instead of
+  using the anatomical frame of the shank. Now both segments use the direction
+  given by the femoral epicondyles as the lateral direction. This changes
+  ensures consistant scaling across the knee joint. 
+  
 
 ### Removed: 
 * Removed the python hooks to check for modified AMMR folder. This feature was
