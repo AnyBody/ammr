@@ -4,60 +4,67 @@
 %    https://anyscript.org/ammr/beta/changelog.html
 
 (ammr-3.1.0-changelog)=
-## AMMR 3.1.0 Beta (2025-??-??)
+## AMMR 3.1.0 (2025-03-31)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.15094590.svg)](https://doi.org/10.5281/zenodo.15094590)
+[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.1.0-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
 
-### ➕ Added:
-* Introduced a new class template,
-  [`CreateCoMRefNode`](#Utilities.center-of-mass.createcomrefnode.createcomrefnode),
-  for generating a reference node at the center of mass of a segment, aligned
-  with its principal axes of inertia.
-* Added the `TRI(N)` macro to create a lower triangular (NxN) matrix.
-* Added the `TOTAL_POLYLINE_LENGTH(P)` macro to compute the total length of a
-  polyline defined by a set of points.
 
-### 🩹 Fixed:
-* Resolved an issue that prevented disabling the drawing of marker arrows in
-  `CreateMarkerDriverClass` within MoCap models. The search string in
-  `Main.ModelSetup.Views.All_MarkerArrows.Objects` has been updated to correctly
-  identify the arrow drawing objects.
-* Corrected the PelvisGround rotation drivers in the {ref}`Free Posture Static
-  example<example_freeposture>`. The X and Z rotation drivers were previously
-  mixed up and are now properly assigned.
-* Fixed a spelling typo in the disc stiffness BM control statements. The
-  `BM_TRUNK_*_DISC_STIFNESS` parameters have been renamed to `BM_TRUNK_*_DISC_STIFFNESS`. 
-  The mispelled parameter names have been deprecated. 
-* The data points for the femoral epicondyles with respect to the shank in the
-  neutral posture has been corrected. These values were not updated when the
-  knee axis in shank was redefine in TLEM 2.2 and AMMR 3. This change has no
-  influence on the default AnyBody MOdels, but it fixes an issue if the model
-  was configured to use the {bm_constant}`special 'bony landmark' defined <_JOINT_TYPE_BONY_LANDMARK_>` 
-  joint axis configuration. 
 
 ### 🔧 Changed:
-* Updated the insertion and origin points of the Gluteus Medius to ensure
-  correct moment arms for external rotation in specific postures. The posterior
-  Gluteus Medius now twists inside the anterior part and attaches more
-  anteriorly on the femoral trochanter.
-* Modified the Human-Ground residual implementation in MoCap models to use
-  rotational measures configured for angular velocities. This change enhances
-  the robustness of the residuals and makes the residual output easier to
-  interpret geometrically, without affecting the results.
-* Excluded force plates from the parameter identification study, as they were
-  unnecessary. This change may slightly speed up the parameter identification
-  process.
-* The wrapping surface for muscles at the wrist has been changed to an ellipsoid
-  from a cylinder. This lowers the risk of muscle via points prenetrating the
-  wrapping surface in postures involving both flexion/extension and
-  abduction/adduction at the wrist.
 
-### Removed: 
-* Removed the python hooks to check for modified AMMR folder. This feature was
-  not used and has been removed to simplify the AMMR codebase.
+*   Modified the Human-Ground residual implementation in MoCap models to use
+    rotational measures configured for angular velocities. This change enhances
+    the robustness of the residuals and makes the residual output easier to
+    interpret geometrically, without affecting the results.
+*   Updated the insertion and origin points of the Gluteus Medius to ensure
+    correct moment arms for external rotation in specific postures. The posterior
+    Gluteus Medius now twists inside the anterior part and attaches more
+    anteriorly on the femoral trochanter.
+*   The wrapping surface for muscles at the wrist has been changed from a cylinder
+    to an ellipsoid. This lowers the risk of muscle via points penetrating the
+    wrapping surface in postures involving both flexion/extension and
+    abduction/adduction at the wrist.
+*   Excluded force plates from the parameter identification study, as they were
+    unnecessary. This change may slightly speed up the parameter identification
+    process.
+
+### ➕ Added:
+
+*   Introduced a new class template,
+    [`CreateCoMRefNode`](#Utilities.center-of-mass.createcomrefnode.createcomrefnode),
+    for generating a reference node at the center of mass of a segment, aligned
+    with its principal axes of inertia.
+*   Added the `TRI(N)` macro to create a lower triangular (NxN) matrix.
+*   Added the `TOTAL_POLYLINE_LENGTH(P)` macro to compute the total length of a
+    polyline defined by a set of points.
+
+### 🩹 Fixed:
+
+*   Corrected the PelvisGround rotation drivers in the {ref}`Free Posture Static
+    example<example_freeposture>`. The X and Z rotation drivers were previously
+    mixed up and are now properly assigned.
+*   Resolved an issue that prevented disabling the drawing of marker arrows in
+    `CreateMarkerDriverClass` within MoCap models. The search string in
+    `Main.ModelSetup.Views.All_MarkerArrows.Objects` has been updated to correctly
+    identify the arrow drawing objects.
+*   Fixed a spelling typo in the disc stiffness BM control statements. The
+    `BM_TRUNK_*_DISC_STIFNESS` parameters have been renamed to `BM_TRUNK_*_DISC_STIFFNESS`.
+    The misspelled parameter names have been deprecated.
+*   The data points for the femoral epicondyles with respect to the shank in the
+    neutral posture have been corrected. These values were not updated when the
+    knee axis in shank was redefined in TLEM 2.2 and AMMR 3. This change has no
+    influence on the default AnyBody Models, but it fixes an issue if the model
+    was configured to use the {bm_constant}`special 'bony landmark' defined <_JOINT_TYPE_BONY_LANDMARK_>`
+    joint axis configuration.
+
+### Removed:
+
+*   Removed the python hooks to check for modified AMMR folder. This feature was
+    not used and has been removed to simplify the AMMR codebase.
 
 (ammr-3.0.4-changelog)=
 ## AMMR 3.0.4 (2024-07-02)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.12592455.svg)](https://doi.org/10.5281/zenodo.12592455)
-
 [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.0.4-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
 
 ### 🩹 Fixed:
@@ -69,7 +76,6 @@
 (ammr-3.0.3-changelog)=
 ## AMMR 3.0.3 (2024-06-10)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.11191711.svg)](https://doi.org/10.5281/zenodo.11191711)
-
 [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.0.3-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
 
 ### 🩹 Fixed:
@@ -90,7 +96,6 @@
 (ammr-3.0.1-changelog)=
 ## AMMR 3.0.1 (2024-02-13)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.10803883.svg)](https://doi.org/10.5281/zenodo.10803883)
-
 [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.0.1-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-8-0-1-11638_x64/)
 
 
@@ -1263,7 +1268,7 @@ requested body height.
   previous rake-segment/via-point approach. The new wrapping deltoid was
   developed by Marta Strzelczak from Ecole de technologie superieure, Montreal,
   CA. The new implementation is used by default but the old implementation can
-  be enabled with the {ammr:bm_statement}`BM_ARM_DELTOID_WRAPPING` switch.
+  be enabled with the {bm_statement}`BM_ARM_DELTOID_WRAPPING` switch.
   Please see the {ref}`Shoulder-Arm Documentation <DeltoidWrapping>` for more
   information.
 
@@ -2057,4 +2062,4 @@ the driver values are updated.
 - All older BodyModels which were deprecated in AMMR1.3
 
 
-[wu et al. 2005]: https://isbweb.org/images/documents/standards/Wu%20et%20al%20J%20Biomech%2038%20(2005)%20981%E2%80%93992.pdf 
+[wu et al. 2005]: https://isbweb.org/images/documents/standards/Wu%20et%20al%20J%20Biomech%2038%20(2005)%20981%E2%80%93992.pdf
