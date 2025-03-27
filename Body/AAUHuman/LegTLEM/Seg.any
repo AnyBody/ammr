@@ -602,17 +602,32 @@ AnySeg Shank =
   AnyVec3 r03 = .Thigh.r0;
   AnyVec3 r04 = KneeJoint.sRel*Axes0';
 
-  AnyFloat pUnscaled = {Data.LateralMalleolus, Data.MedialMalleolus, Data.LateralTibialEpicondyle, Data.MedialTibialEpicondyle};
+  AnyFloat pUnscaled = {Data.LateralMalleolus, Data.MedialMalleolus, Data.LateralTibialEpicondyle, Data.MedialTibialEpicondyle, Data.EpicondylusFemorisLateralis, Data.EpicondylusFemorisMedialis};
   Scale = {AnyFunTransform3D& GeomScale = ...GeoScaling.Shank.ScaleFunction;};
   AnyVar Sign = ..Sign;
   #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(p, SIGN) 0.5*(p[2]+p[3])
-  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(p, SIGN) RotMat(0.5*(p[2]+p[3]), 0.5*(p[0]+p[1]), p[2]) *RotMat(0.5*pi,y)*RotMat(-0.5*pi,x)*RotMat(0.5*(SIGN-1)*pi,y)
+  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(p, SIGN) RotMat(0.5*(p[4]+p[5]), 0.5*(p[0]+p[1]), p[4]) *RotMat(0.5*pi,y)*RotMat(-0.5*pi,x)*RotMat(0.5*(SIGN-1)*pi,y)
 
+  // Shank does not use the anatomical frame for scaling.
+  // So the name of the included shared file here is a bit misleading. 
   #include "..\Scaling\SegScaleFunWrtAnatomicalFrame.any"
+
+  AnyRefNode ScalingNode = {
+    AnyFloat pScaled = .Scale(.pUnscaled);
+    sRel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(pScaled, .Sign);
+    ARel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(pScaled, .Sign);
+    AnyVec3 sRelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(.pUnscaled, .Sign); ///< Generic unscaled position of shank ScalingNode
+    AnyMat33 ARelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(.pUnscaled, .Sign);///< Generic unscaled rotation of shank ScalingNode
+  };
 
   AnyRefNode AnatomicalFrame =
   {
-    AnyFloat pScaled = .Scale(.pUnscaled);
+    //^ The anatomical frame is separate from the scaling frame, and consistent with previous AMMR versions. 
+    // The anatomical frame uses the tibial epicondyles to define the Z axis. 
+    //^ We use different definition for scaling and anatomical frames to ensure the consistent 
+    //^ scaling between femur and shank segments.
+    AnyFloat pUnscaledAnatomicalFrame = {.Data.LateralMalleolus, .Data.MedialMalleolus, .Data.LateralTibialEpicondyle, .Data.MedialTibialEpicondyle, .Data.LateralTibialEpicondyle, .Data.MedialTibialEpicondyle};
+    AnyFloat pScaled = .Scale(pUnscaledAnatomicalFrame);
     sRel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(pScaled, .Sign);
     ARel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(pScaled, .Sign);
     AnyVec3 sRelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(.pUnscaled, .Sign); ///< Generic unscaled position of shank ScalingNode
@@ -621,7 +636,6 @@ AnySeg Shank =
   /// For backwards Compatibility with AMMR 2.4 MoCap Marker protocols
   AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame;
   
-  AnyRefNode& ScalingNode=AnatomicalFrame ;
   #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_s
   #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_A
 
