@@ -4,9 +4,8 @@
 %    https://anyscript.org/ammr/beta/changelog.html
 
 (ammr-3.1.0-changelog)=
-## AnyBody Managed Model Repository (AMMR) version 3.1 (2025-03-31)
+## AMMR 3.1.0 (2025-03-31)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.15094590.svg)](https://doi.org/10.5281/zenodo.15094590)
-
 [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.1.0-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
 
 
@@ -71,7 +70,6 @@
 (ammr-3.0.4-changelog)=
 ## AMMR 3.0.4 (2024-07-02)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.12592455.svg)](https://doi.org/10.5281/zenodo.12592455)
-
 [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.0.4-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
 
 ### 🩹 Fixed:
@@ -83,7 +81,6 @@
 (ammr-3.0.3-changelog)=
 ## AMMR 3.0.3 (2024-06-10)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.11191711.svg)](https://doi.org/10.5281/zenodo.11191711)
-
 [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.0.3-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
 
 ### 🩹 Fixed:
@@ -104,7 +101,6 @@
 (ammr-3.0.1-changelog)=
 ## AMMR 3.0.1 (2024-02-13)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.10803883.svg)](https://doi.org/10.5281/zenodo.10803883)
-
 [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.0.1-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-8-0-1-11638_x64/)
 
 
