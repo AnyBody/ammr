@@ -27,6 +27,11 @@
 *   Excluded force plates from the parameter identification study, as they were
     unnecessary. This change may slightly speed up the parameter identification
     process.
+*   The coordinate system used when scaling the shank segment has been aligned
+    with same reference frame used when scaling the thigh segment, instead of
+    using the anatomical frame of the shank. Now both segments use the direction
+    given by the femoral epicondyles as the lateral direction. This change
+    ensures consistent scaling across the knee joint. 
 
 ### ➕ Added:
 
