@@ -50,6 +50,25 @@ Main =
   #include "<ANYBODY_PATH_BODY>/HumanModel.any"  
 
   AnyOperation& RunTest = Main.HumanModel.Calibration.CalibrationSequence;
+
+  // Test to check that all muscles in the model are part of the calibration studies.
+  // the test is excluded for the calibration combinations that do not make sense / are unimplemented
+  // The pelvic floor muscles are excluded as they are not 3E muscles!
+  #if BM_CALIBRATION_TYPE != 3
+    AnyObjectPtrArray muscles_from_cal_studies = unique(flattenptr(ObjSearchRecursive(&Main.HumanModel.Calibration, "MuscleArr")));
+    AnyObjectPtrArray muscles_from_model = set_difference(
+      ObjSearchRecursive(&Main.HumanModel.BodyModel.Trunk.Muscles, "*", "AnyMuscle", 3), 
+      ObjSearch(&Main.HumanModel.BodyModel.Trunk.Muscles, "*.PelvicFloor.*")
+    );
+  
+    AnyInt test_all_mus_in_cal = expect(
+      eqfun(
+      NumElemOf(muscles_from_cal_studies),
+      NumElemOf(muscles_from_model)
+      ),
+      "The number of muscles in the calibration studies do not match the number of muscles in the model!"
+    );
+  #endif
 };
 
 
