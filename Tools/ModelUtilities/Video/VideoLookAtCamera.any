@@ -516,6 +516,7 @@ To use the class template.
       #var AnyStringVar ffmpegBaseArg = 
       "call "+strquote(..VideoPathFFMPEG) +
       iffun(_OVER_WRITE, " -y","") +
+      " -hide_banner -loglevel warning " +
       " -r " + strval(..VideoInputFrameRate) +
       " -start_number " + strval(..VideoStartFrame,..Camera.Recorder.CounterFormat) + 
       " -i "+strquote(inputfile) +
@@ -535,11 +536,19 @@ To use the class template.
 
       #var AnyStringVar OutputArg = strquote(FilePathCompleteOf(out_file));
       
-      #var Arguments =  iffun(_DEBUG , "/K","/C") + " TITLE Creating Video && " + ffmpegBaseArg 
+      #var Arguments =  "/C "
+      + " TITLE AnyBody - Encoding video  && "
+      + "echo Creating Video: "+ OutputArg +" && " 
+      + "echo ^> ffmpeg: "+ strquote(..VideoPathFFMPEG) + " && "
       #if VIDEO_ENCODER == "libvpx-vp9" 
-      + CodecArgs_vp9 +" -pass 1 -f null NUL && " + ffmpegBaseArg + CodecArgs_vp9 + " -pass 2 -auto-alt-ref 0 "
+      + "echo ^> Finding optimal bitrate and settings. Please wait. && "
+      + ffmpegBaseArg + CodecArgs_vp9 +"-v error -pass 1 -f null NUL && " 
+      + "echo Done && "
+      + "echo ^> Encoding video: && "
+      + ffmpegBaseArg + " -stats " + CodecArgs_vp9 + " -pass 2 -auto-alt-ref 0 "
       #else
-      + CodecArgs_default
+      + "echo ^> Encoding video: && "
+      + ffmpegBaseArg + " -stats " + CodecArgs_default
       #endif
       + OutputArg 
       #if _DEBUG
