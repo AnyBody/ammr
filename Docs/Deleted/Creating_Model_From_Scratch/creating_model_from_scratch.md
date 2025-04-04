@@ -1,4 +1,10 @@
+
 # Creating a Human Model from Scratch
+
+
+:::{note} 
+This guide is deleted from the previous "Guides" section and incoorporated into the "Tutorials" page.
+:::
 
 The following tutorial teaches you how to construct an AnyBody model by using
 the AMMR, when starting with a blank AnyScript file. When you work with more
@@ -31,7 +37,7 @@ Main =
 
 Link a `libdef.any` file to specify the AMMR directories that you wish to import
 the human model from. If instructions for installing the Demo AMMR in the
-{doc}`previous chapter <ammr_installation>` were exactly followed, the file path
+"Installing Latest AMMR Files" were exactly followed, the file path
 typed below should work. Otherwise, make the necessary changes.
 
 ```AnyScriptDoc
@@ -145,10 +151,10 @@ Main =
 
 When loading the model, you will now see the Human Model in the Model View. 
 
-```{image} _static/HumanModel.png
-:alt: Human Model in Model View
+```{image} static/HumanModel.png
+:alt: HumanModel
 :align: center
-:width: 65%
+:width: 60%
 ```
 
 ```{rst-class} centered
@@ -314,7 +320,7 @@ these features better.
 
 ```{raw} html
 <video width="45%" style="display:block; margin: 0 auto;" controls autoplay loop>
-    <source src="_static/Human_rotating_model.webm" type="video/mp4">
+    <source src="static\Human_rotating_model.webm" type="video/mp4">
 Your browser does not support the video tag.
 </video>
 ```
