@@ -15,7 +15,7 @@
 
 #ifndef TEST_NAME
    #define EVALUATE_JOINT_STRENGTH 1
-   #define BM_CALIBRATION_TYPE 1
+   #define BM_CALIBRATION_TYPE 2
    #define BM_LEG_MODEL _LEG_MODEL_TLEM2_
    #define TEST_NAME "GUI"
 #endif
@@ -24,8 +24,9 @@
 #define BM_SCALING _SCALING_NONE_
 //
 #define BM_LEG_TRUNK_INTERFACE _MORPH_TRUNK_TO_LEG_
-
 #define BM_LEG_MUSCLES_RIGHT _MUSCLES_3E_HILL_
+#define BM_TRUNK_MUSCLES OFF
+
 #define BM_LEG_LEFT OFF
 #define BM_ARM_RIGHT OFF
 #define BM_ARM_LEFT OFF
@@ -37,6 +38,19 @@ Main =
   #include "<ANYBODY_PATH_BODY>/HumanModel.any"  
   
   AnyOperation& RunTest = Main.HumanModel.Calibration.CalibrationSequence;
+
+  AnyObjectPtrArray muscles_from_cal_studies = unique(flattenptr(ObjSearchRecursive(&Main.HumanModel.Calibration, "MuscleArr")));
+  AnyObjectPtrArray muscles_leg = unique(flattenptr(ObjSearchRecursive(&Main.HumanModel.BodyModel.Right.Leg.Mus, "*", "AnyMuscle")));
+  AnyObjectPtrArray muscles_trunk = unique(flattenptr(ObjSearchRecursive(&Main.HumanModel.BodyModel.Trunk.MusclesSpineRight, "*", "AnyMuscle")));
+  AnyObjectPtrArray muscles_from_model = arrcat(muscles_leg, muscles_trunk);
+  
+  AnyInt test_all_mus_in_cal = expect(
+    eqfun(
+      NumElemOf(muscles_from_cal_studies),
+      NumElemOf(muscles_from_model)
+    ),
+    "The number of muscles in the calibration studies do not match the number of muscles in the model!"
+  );
 };
 
 

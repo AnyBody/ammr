@@ -2,11 +2,6 @@
 
 # Installing Latest AMMR Files
 
-:::{note} 
-This guide is deleted from the previous "Guides" section and
-incoorporated into the "Tutorials" page. 
-:::
-
 Here you can find the guide on how to install the latest AMMR files. The files will
 be located locally, in the Documents folder of each user on your computer.
 If there are multiple users using your computer, each of them will have to

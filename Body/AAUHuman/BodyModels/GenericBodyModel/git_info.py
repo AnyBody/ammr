@@ -47,33 +47,37 @@ def git_info(context: tuple, fpath: str) -> Tuple[str, str]:
         gitfolder = Path(context.call_location_file).parent.joinpath(gitfolder)
 
     if not gitfolder.is_dir():
-        return "unknown", "unknown"
+        return "unknown", "unknown", "No git folder found"
 
     options = dict(
         creationflags=subprocess.CREATE_NO_WINDOW,
         timeout=2,
         text=True,
+        stderr=subprocess.STDOUT,
     )
 
     try:
-        subprocess.run(["git", "--version"], capture_output=True, **options)
+        subprocess.check_output(["git", "--version"], **options)
+    except (subprocess.CalledProcessError) as e: 
+        return "unknown", "unknown", e.output.strip()
     except (
-        subprocess.CalledProcessError,
         subprocess.TimeoutExpired,
         FileNotFoundError,
-    ):
-        return "unknown", "unknown"
+    ) as e:
+        return "unknown", "unknown", "Git not available on Path"
+
+
 
     basecmd = ["git", "-C", f"{gitfolder.absolute()}"]
+    hashref = "unknown"
+    error = ""
     try:
         cmd = basecmd + ["rev-parse", "HEAD"]
         hashref = subprocess.check_output(cmd, **options).strip()
-    except (
-        subprocess.CalledProcessError,
-        subprocess.TimeoutExpired,
-        FileNotFoundError,
-    ):
-        hashref = "unknown"
+    except subprocess.CalledProcessError as e: 
+        error = e.output.strip()
+    except (subprocess.TimeoutExpired, FileNotFoundError) as e: 
+        error = str(e)
 
     try:
         cmd = basecmd + ["symbolic-ref", "-q", "--short", "HEAD"]
@@ -84,16 +88,15 @@ def git_info(context: tuple, fpath: str) -> Tuple[str, str]:
         FileNotFoundError,
     ):
         branch_name = None
-
+    
+    tag_name = "unknown"
     try:
         cmd = basecmd + ["describe", "--tags", "--always"]
         tag_name = subprocess.check_output(cmd, **options).strip()
-    except (
-        subprocess.CalledProcessError,
-        subprocess.TimeoutExpired,
-        FileNotFoundError,
-    ):
-        tag_name = "unknown"
+    except subprocess.CalledProcessError as e: 
+        error = e.output.strip()
+    except (subprocess.TimeoutExpired, FileNotFoundError) as e: 
+        error = str(e)
 
     ref = branch_name or tag_name
-    return ref, hashref
+    return ref, hashref, error

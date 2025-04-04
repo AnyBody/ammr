@@ -1,11 +1,4 @@
-(getting_started)=
-
 # Getting Started
-
-:::{note} 
-This guide is deleted from the previous "Guides" section and
-incoorporated into the "Tutorials" page. 
-:::
 
 The *AnyBody Managed Model Repository* (AMMR) is a comprehensive open library of
 musculoskeletal models and examples designed to use with the AnyBody Modeling
@@ -157,7 +150,7 @@ AnyBodyStudy Study =
 
 :::{seealso}
 :class: margin
-{doc}`The full tutorial on how to create a HumanModel from scratch <Creating_Model_From_Scratch/creating_model_from_scratch>`
+{doc}`The full tutorial on how to create a HumanModel from scratch </creating_model_from_scratch>`
 :::
 
 The `AnyBodyStudy` is where you configure and define your simulation. It
