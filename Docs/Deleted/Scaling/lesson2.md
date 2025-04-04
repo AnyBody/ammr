@@ -1,4 +1,4 @@
-# Lesson 2: Scaling based on External Body Measurements
+# Lesson 2: Scaling Based on External Body Measurements
 
 This tutorial presumes that you have completed {doc}`Scaling tutorial
 Lesson 1: Joint to joint scaling methods <lesson1>`. It
@@ -35,8 +35,9 @@ In order to use the plugin, you need to include it in your model:
 #include "<ANSUR_PLUGIN_ANYMAN_FILE>"
 ```
 
-We are enabling the `_SCALING_XYZ_` law. The plugin is designed to work with this scaling law only.
-We will get back to how this law works in a later lesson.
+We are enabling the `_SCALING_XYZ_` law, which the plugin is designed to only
+work with. We will get back to how this law works in the next lesson,
+{doc}`Lesson 3: Scaling Using Segmental Scaling vectors <lesson3>`.
 
 Notice also that we are including the file `AnyMan_ANSUR.any` which we need to
 create in order for the plugin to work. The plugin will write the anthropometric
@@ -88,12 +89,10 @@ After saving this file, you can load the model and the anthropometrics from the
 file will be used to scale the model.
 
 To change the scaling of the model you can start the plugin by clicking the
-**ANSUR Configuration** from the tools line:
+**ANSUR Configuration** from the tools line, which will bring up the plugin window:
 
 ```{image} _static/lesson2/ANSUR_Plugin_toolbar_icon.jpg
 ```
-
-This will bring up the plugin window:
 
 ```{image} _static/lesson2/ANSUR_plugin_window.jpg
 ```
@@ -106,8 +105,8 @@ The plugin has 4 tabs:
   dimension from a drop down list. It will display a image of the dimension
   applied to the model and allow you to enter a value for the dimension or
   select if the plugin should calculate the value based on the other dimensions.
-- **Anatomical Dimensions**: This tab allows you to select a anatomical
-  dimension based on the available dimensions of the model. It will display a
+- **Anatomical Dimensions**: This tab allows you to select an anatomical
+  dimension based on the available dimensions of the model. It will display an
   image of the dimension applied to the model and allow you to enter a value for
   the dimension or select if the plugin should calculate the value based on the
   other dimensions.
@@ -117,13 +116,13 @@ At the bottom of the window you can see the **Load to AMS** button. This button
 will write the selected dimensions to the file `AnyMan_ANSUR.any` and load the
 model.
 
-```{rubric} Footnotes
-```
-
-[^f1]: Gordon, C. C. et al. 1988 Anthropometric Survey of U.S. Army personnel: methods and summary statistics. (US Army Natick Research, Development and Engineering Center, 1989).
-
 :::{admonition} **Next lesson:**
 :class: seealso
 
 {doc}`lesson3`.
 :::
+
+```{rubric} Footnotes
+```
+
+[^f1]: Gordon, C. C. et al. 1988 Anthropometric Survey of U.S. Army personnel: methods and summary statistics. (US Army Natick Research, Development and Engineering Center, 1989).
