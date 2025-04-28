@@ -31,7 +31,7 @@ Main =
 
 Link a `libdef.any` file to specify the AMMR directories that you wish to import
 the human model from. If instructions for installing the Demo AMMR in the
-{doc}`previous chapter <ammr_installation>` were exactly followed, the file path
+[previous chapter](installing-ammr) were exactly followed, the file path
 typed below should work. Otherwise, make the necessary changes.
 
 ```AnyScriptDoc
@@ -145,7 +145,7 @@ Main =
 
 When loading the model, you will now see the Human Model in the Model View. 
 
-```{image} _static/HumanModel.png
+```{image} static/HumanModel.png
 :alt: Human Model in Model View
 :align: center
 :width: 65%

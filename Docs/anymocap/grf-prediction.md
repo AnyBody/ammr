@@ -1,4 +1,4 @@
-# Ground Reaction force prediction
+# Ground Reaction Force Prediction
 
 ## Background
 
@@ -23,14 +23,14 @@ prediction is similar to adding force plates to a model.
 This new functionality is now part of the AnyBody Managed Model Repository
 (AMMR).
 
-## Adding ground force prediction to a model
+## Adding Ground Force Prediction to a Model
 
 The {ref}`GRF example model <example_mocap_grf_prediction>`
 is already preconfigured to use the GRF prediction. But
 if you need to add GRF prediction to new model the following outlines the
 procedure.
 
-### Including the class templates
+### Including the Class Templates
 
 The class template is already included in the AnyMoCap framework, so this step
 can be skipped. However, when using GRF prediction in other models it is
@@ -40,7 +40,7 @@ necessary to include the following line at the beginning of the model:
 #include "<ANYBODY_PATH_AMMR>/Tools/GRFPrediction/FootPlateConditionalContact.any"
 ```
 
-### Adding the GRF prediction classes
+### Adding the GRF Prediction Classes
 
 In the AnyMoCap models GRF prediction is enabled by setting the following
 setting:
@@ -78,10 +78,10 @@ FootPlateConditionalContact GRF_Prediction_Right(
 
 See below for more information on the GRF prediction classes.
 
-### Setting up new residuals (Hand of God)
+### Setting Up New Residuals (Hand of God)
 
 Adding conditional contacts to the feet is not enough. The AnyMoCap model comes
-reactions forces applied to the pelvis. These are the reactions that carry any
+with reaction forces applied to the pelvis. These are the reactions that carry any
 inconsistencies between the model and force plate data, and they must be removed
 for ground reaction force prediction.
 
@@ -108,7 +108,7 @@ The file `WeakResiduals.any` does the job of removing the ‘Hand of God’ and 
 the new, weak residuals. Again this is handled automatically in the AnyMoCap
 based models.
 
-## Running the model
+## Running the Model
 
 The model is run in the same way as other models. The only difference is that it
 now uses GRF prediction instead of force plates data.
@@ -121,27 +121,27 @@ It may be necessary to adjust the parameters of the GRF prediction class to
 obtain a good prediction of the ground reactions. This is especially important
 around heel strike and toe-off, where the model can have problems.
 
-## GRF prediction trouble shooting
+## GRF Prediction Trouble Shooting
 
 Here are some things to check if a GRF prediction model fails running inverse
 dynamic:
 
 - Direction of gravity is it specified correctly?  this needs to be correct in
-  two places the Gravity property of the study in the LabSpecific.any data and in
+  two places: the Gravity property of the study in the LabSpecific.any data and in
   the definition of the force plates setting the variable `NORMAL_DIRECTION`.
-- In the file Forceplate_GRFprediction.any try to increase the property `LimitDistHigh`,
+- In the file `Forceplate_GRFprediction.any` try to increase the property `LimitDistHigh`,
   this controls when contact can occur so if the number is higher the foot do
   not need to be as close to the ground before contact can occur, see also
-  LimitVelHigh it controls speed limit.
+  `LimitVelHigh`, it controls speed limit.
 - Unrealistic accelerations of the model could be the reason if your data are
   not filtered correctly
 - The model is using a weak residual to the ground that helps holding the balance
   in the model if the feet contact are not enough, this is defined in  the file
-  "Tools/GRFPrediction/Weakresidual.any" here  you can increase the strength
-  of the artificial muscles, but this will lead to higher residuals so be
+  `Tools/GRFPrediction/Weakresidual.any` here  you can increase the strength
+  of the artificial muscles, but this will lead to higher residuals - so be
   careful.
 
-## A closer look at the GRF template
+## A Closer Look at the GRF Template
 
 Finally, we can take a closer look at the `FootPlateConditionalContact` template.
 
@@ -159,24 +159,24 @@ FootPlateConditionalContact GRF_Prediction_Right(
 ```
 
 It consists of two parts; a top level class template
-(`FootPlateConditionalContact`) that generate the conditional-contact code.
+(`FootPlateConditionalContact`) that generates the conditional-contact code.
 This code needs a few important arguments. The ground plane
 (`PLATE_BASE_FRAME`) is a reference system where the ground plane is located.
 
-Together with arguments `NORMAL_DIRECTION` this specifies the surface the
+Together with argument `NORMAL_DIRECTION` this specifies the surface the
 model is walking on. Another important argument is the `NODES_FOLDER`, which
 is a folder that contains all the contacts points.
 
 The contact points can be created manually, but to avoid this we use another
 class-template (`CreateFootContactNodes25`) to create the nodes automatically.
-As the name says it creates 25 nodes in the foot coordinate system. This part is
+As the name says, it creates 25 nodes in the foot coordinate system. This part is
 specific to the model implementation. One could also imagine class-templates
 that produce a higher number of nodes or nodes in positions that corresponds to
 particular shoes or on other body parts.
 
 Of course, there are also many options that can be tweaked and adjusted.
 
-### Class templates: FootPlateConditionalContact
+### Class Templates: FootPlateConditionalContact
 
 Obligatory members are marked with `< >` and optional values are marked with
 `[ ]`. Default values are **bold**:
@@ -215,10 +215,10 @@ FootPlateConditionalContact <Object_name>(
 : Defines the normal direction of the ground plane
   the in PLATE_BASE_FRAME coordinate system.
 
-`NODES_BASE_FOLDER` :
+`NODES_BASE_FOLDER`:
 
 : The folder where all contact nodes are located below.
-  contact nodes must be AnyRefNodes named must be named `Node#`
+  Contact nodes must be `AnyRefNodes` and must be named `Node#`
   where `#` is a number. Eg. ``` Node1` ...``Node24 ```
 
 `NUMBER_OF_NODES`:
@@ -259,4 +259,4 @@ FootPlateConditionalContact <Object_name>(
 
 `Settings.ForceVectorDrawScaleFactor`:
 
-: Scale factor for the drawing of the GRF force vector
+: Scale factor for the drawing of the GRF force vector.
