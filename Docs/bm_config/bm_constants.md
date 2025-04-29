@@ -426,66 +426,6 @@ A full model of the thorax and ribcage where drivers/rythmns are specified by th
 
 
 
-::::{dropdown} `_FLOATING_RIBEND_KINETICS_OFF_`
-:animate: fade-in-slide-down
-:margin: 0 0 2 2
-
-:::{ammr:bm_constant} _FLOATING_RIBEND_KINETICS_OFF_
-:value: 0
- No recruited actuators to rib end of Floating ribs (rib11, rib12).
-:::
-::::
-
-
-
-::::{dropdown} `_FLOATING_RIBEND_KINETICS_ENDRIBS_`
-:animate: fade-in-slide-down
-:margin: 0 0 2 2
-
-:::{ammr:bm_constant} _FLOATING_RIBEND_KINETICS_ENDRIBS_
-:value: 1
- Add recruited actuators to rib end of Floating ribs (rib11, rib12).
-:::
-::::
-
-
-
-::::{dropdown} `_RIBCAGE_CC_ACTUATORS_`
-:animate: fade-in-slide-down
-:margin: 0 0 2 2
-
-:::{ammr:bm_constant} _RIBCAGE_CC_ACTUATORS_
-:value: 0
-3-direction Recruited actuators in CC (costochondral) joints.
-:::
-::::
-
-
-
-::::{dropdown} `_RIBCAGE_CC_REACTION_`
-:animate: fade-in-slide-down
-:margin: 0 0 2 2
-
-:::{ammr:bm_constant} _RIBCAGE_CC_REACTION_
-:value: 1
-Z-direction reaction in CC (costochondral) joints, which is along the relavant rib, togehter with having the rib-sternum averaging constraints reaction ON
-:::
-::::
-
-
-
-::::{dropdown} `_RIBCAGE_CC_ZACTUATORS_STERNUMREACTION_`
-:animate: fade-in-slide-down
-:margin: 0 0 2 2
-
-:::{ammr:bm_constant} _RIBCAGE_CC_ZACTUATORS_STERNUMREACTION_
-:value: 2
-Z-direction actuators in CC (costochondral) joints, which is along the relavant rib, togehter with having the rib-sternum averaging constraints reaction ON
-:::
-::::
-
-
-
 ::::{dropdown} `_CAVITY_MODEL_BUCKLE_`
 :animate: fade-in-slide-down
 :margin: 0 0 2 2
@@ -505,42 +445,6 @@ The old buckle implementation of the abdominal pressure.
 :::{ammr:bm_constant} _CAVITY_MODEL_VOLUME_
 :value: 1
 A volume measure implementation of the pressure in the abdominal cavity and lungs.
-:::
-::::
-
-
-
-::::{dropdown} `_ERECTORSPINAE_VIANODES_LAYER_AND_REMOVE_L3L4_VIANODES_`
-:animate: fade-in-slide-down
-:margin: 0 0 2 2
-
-:::{ammr:bm_constant} _ERECTORSPINAE_VIANODES_LAYER_AND_REMOVE_L3L4_VIANODES_
-:value: 0
-Via-nodes on erector spinae placed on the layers instead of vertebrae. The via-nodes on L3 and L4 are removed.
-:::
-::::
-
-
-
-::::{dropdown} `_REMOVE_L3L4_VIANODES_`
-:animate: fade-in-slide-down
-:margin: 0 0 2 2
-
-:::{ammr:bm_constant} _REMOVE_L3L4_VIANODES_
-:value: 1
-The via-nodes of erector spinae on L3 and L4 are removed.
-:::
-::::
-
-
-
-::::{dropdown} `_ERECTORSPINAE_VIANODES_VERTEBRA_`
-:animate: fade-in-slide-down
-:margin: 0 0 2 2
-
-:::{ammr:bm_constant} _ERECTORSPINAE_VIANODES_VERTEBRA_
-:value: 2
-Via-nodes on erector spinae placed on the vertebrae.
 :::
 ::::
 
