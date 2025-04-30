@@ -426,6 +426,18 @@ A full model of the thorax and ribcage where drivers/rythmns are specified by th
 
 
 
+::::{dropdown} `_THORACIC_MODEL_FLEXIBLE_KINEMATIC_ONLY_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _THORACIC_MODEL_FLEXIBLE_KINEMATIC_ONLY_
+:value: 3
+A kinematic flexible model of the thorax and ribcage with a kinematically determinate set of drivers. No muscles in thoracic region and instead the reactions are ON in the ribcage and thoracic spine.
+:::
+::::
+
+
+
 ::::{dropdown} `_CAVITY_MODEL_BUCKLE_`
 :animate: fade-in-slide-down
 :margin: 0 0 2 2

@@ -427,6 +427,7 @@ The type of thoracic/ribcage model used in the model.
   - {any}`_THORACIC_MODEL_RIGID_` -> A completely rigid model of the thoracic spine and ribcage.
   - {any}`_THORACIC_MODEL_FLEXIBLE_` -> A full model of the thorax and ribcage with a kinematically determinate set of drivers.
   - {any}`_THORACIC_MODEL_USERDEFINED_` -> A full model of the thorax and ribcage where drivers/rythmns are specified by the users.
+  - {any}`_THORACIC_MODEL_FLEXIBLE_KINEMATIC_ONLY_` -> A kinematic flexible model of the thorax and ribcage with a kinematically determinate set of drivers. No muscles in thoracic region and instead the reactions are ON in the ribcage and thoracic spine.
 
 ```
 ::::
