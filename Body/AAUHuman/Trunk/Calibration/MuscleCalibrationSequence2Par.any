@@ -7,43 +7,47 @@ AnyFolder ThoraxMuscleCalibration={
     #if BM_TRUNK_CAVITY_MODEL == _CAVITY_MODEL_BUCKLE_
     AnyFolder &Buckle =  ...BodyModel.Trunk.Buckle;
     #endif
+    
     #if BM_TRUNK_CAVITY_MODEL == _CAVITY_MODEL_VOLUME_
     AnyFolder& Abdominal = ...BodyModel.Trunk.Abdominal;    
+    #endif
+    
+    #if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_
+    AnyFolder &ThoracicCavity = ...BodyModel.Trunk.ThoracicCavity;
     #endif
     
     
     AnyFolder& Joints =  ...BodyModel.Trunk.Joints;
     AnyFolder& Muscles =  ...BodyModel.Trunk.Muscles;
+    #if BM_LEG_MODEL & BM_LEG_RIGHT
+    AnyFolder& RightThigh = ...BodyModel.Right.Leg.Seg.Thigh;
+    AnyFolder& RightHipJoint =  ...BodyModel.Right.Leg.Jnt.Hip;
+    #endif
     #if BM_LEG_MODEL & BM_LEG_LEFT
     AnyFolder& LeftThigh = ...BodyModel.Left.Leg.Seg.Thigh;
     AnyFolder& LeftHipJoint =  ...BodyModel.Left.Leg.Jnt.Hip;
     #endif
-    #if BM_LEG_MODEL & BM_LEG_LEFT
-    AnyFolder& RightThigh = ...BodyModel.Right.Leg.Seg.Thigh;
-    AnyFolder& RightHipJoint =  ...BodyModel.Right.Leg.Jnt.Hip;
-    #endif
-
-    
-    AnyFixedRefFrame ground = {
-      AnyRefNode node = { 
-        ARel=..LumbarSegs.PelvisSeg.Axes0;
-        sRel=..LumbarSegs.PelvisSeg.r0;
-      };
-    };
-
-    AnyKinEq PelvisFix = {
-      AnyKinLinear Lin = {
-        AnyRefFrame &ground = ..ground.node;
-        AnyRefFrame &Pelvis = ..LumbarSegs.PelvisSeg;
-      };
-
-      AnyKinRotational Rot = {
-        Type = RotAxesAngles;
-        AnyRefFrame &ground = ..ground.node;
-        AnyRefFrame &Pelvis = ..LumbarSegs.PelvisSeg;
-      };
-    };
-    
+        
+     AnyFixedRefFrame ground = {
+       AnyRefNode node = { 
+         ARel=..ThoraxSegs.PelvisSeg.Axes0;
+         sRel=..ThoraxSegs.PelvisSeg.r0;
+       };
+     };
+ 
+     AnyKinEq PelvisFix = {
+       AnyKinLinear Lin = {
+         AnyRefFrame &ground = ..ground.node;
+         AnyRefFrame &Pelvis = ..ThoraxSegs.PelvisSeg;
+       };
+ 
+       AnyKinRotational Rot = {
+         Type = RotAxesAngles;
+         AnyRefFrame &ground = ..ground.node;
+         AnyRefFrame &Pelvis = ..ThoraxSegs.PelvisSeg;
+       };
+     };
+ 
     // Posture data //
     AnyFloat ThoraxNeutral  = {  0,  0,  0} * pi/180;
     AnyFloat ThoraxFlex     = {-75,  0,  0} * pi/180;
@@ -81,7 +85,12 @@ AnyFolder ThoraxMuscleCalibration={
     //   NeckRotRight
     //   }');
     
-
+    AnyKinEq SkullConstraint = {
+      AnyKinMeasure &ref1 = ....BodyModel.Interface.Trunk.SkullThoraxFlexion;
+      AnyKinMeasure &ref2 = ....BodyModel.Interface.Trunk.SkullThoraxLateralBending;
+      AnyKinMeasure &ref3 = ....BodyModel.Interface.Trunk.SkullThoraxRotation;
+    };
+    
     AnyKinEqInterPolDriver ThoraxDriver = {
       AnyKinMeasure& PelvisThoraxExtension = ....BodyModel.Interface.Trunk.PelvisThoraxExtension;
       AnyKinMeasure& PelvisThoraxLateralBending = ....BodyModel.Interface.Trunk.PelvisThoraxLateralBending;
@@ -93,22 +102,18 @@ AnyFolder ThoraxMuscleCalibration={
     };
     
     #if BM_LEG_RIGHT != OFF
-      AnyFolder &HJR = Main.HumanModel.BodyModel.Right.Leg.Jnt.Hip;
-      AnyFolder &RightThigh =  ...BodyModel.Right.Leg.Seg.Thigh;
       AnyKinEq RightHipDriver = {
-        AnyKinMeasure& PelvisThoraxExtension = ....BodyModel.Interface.Right.HipAbduction;
-        AnyKinMeasure& PelvisThoraxLateralBending = ....BodyModel.Interface.Right.HipFlexion;
-        AnyKinMeasure& PelvisThoraxRotation = ....BodyModel.Interface.Right.HipExternalRotation;    
+        AnyKinMeasure& HipAbduction = ....BodyModel.Interface.Right.HipAbduction;
+        AnyKinMeasure& HipFlexion = ....BodyModel.Interface.Right.HipFlexion;
+        AnyKinMeasure& HipExternalRotation = ....BodyModel.Interface.Right.HipExternalRotation;    
       };    
     #endif  
 
     #if BM_LEG_LEFT != OFF
-      AnyFolder &HJL = Main.HumanModel.BodyModel.Left.Leg.Jnt.Hip;
-      AnyFolder &LeftThigh =  ...BodyModel.Left.Leg.Seg.Thigh;
       AnyKinEq LeftHipDriver = {
-        AnyKinMeasure& PelvisThoraxExtension = ....BodyModel.Interface.Left.HipAbduction;
-        AnyKinMeasure& PelvisThoraxLateralBending = ....BodyModel.Interface.Left.HipFlexion;
-        AnyKinMeasure& PelvisThoraxRotation = ....BodyModel.Interface.Left.HipExternalRotation;    
+        AnyKinMeasure& HipAbduction = ....BodyModel.Interface.Left.HipAbduction;
+        AnyKinMeasure& HipFlexion = ....BodyModel.Interface.Left.HipFlexion;
+        AnyKinMeasure& HipExternalRotation = ....BodyModel.Interface.Left.HipExternalRotation;    
       };    
     #endif  
   };
@@ -116,11 +121,20 @@ AnyFolder ThoraxMuscleCalibration={
   // The study: Operations to be performed on the model
   AnyBodyCalibrationStudy CalibrationStudy = {
     AnyFolder &ref=.CalibrationSettings; 
-    nStep = 7;
+    nStep = SizesOf(ref.ThoraxPosData)[1];
     InitialConditions.SmallStepAssumptionOnOff = Off;
     Kinematics.SmallStepAssumptionOnOff = Off;
     Kinematics.PosAnalysisOnlyOnOff = On;
     InitialConditions.PosAnalysisOnlyOnOff = On;
+    FiberAndTendonLengthAdjustment.CalibrateTendonAtMaxForceOnOff = Off;
+    
+    /// Array of muscles to calibrate
+    /// The Pelvic floor muscles are excluded as they cross the Pelvis-Sacrum joint which has no movement.
+    /// This gives them zero range of motion and thereby no fiberlength [Lf0] when calibrated.
+    MuscleArr = set_difference(
+      ObjSearchRecursive(&...BodyModel.Trunk.Muscles, "*", "AnyMuscle", 3), 
+      ObjSearch(&...BodyModel.Trunk.Muscles, "*.PelvicFloor.*")
+    );
   };
 };
   

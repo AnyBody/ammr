@@ -55,3 +55,82 @@
   NodeName = strval(iarr(1, NodeAmount), "nn%02i");
   AnyObjectPtrArray NodePointers = ObjSelect("nn*");
 };
+
+
+
+
+
+
+
+
+
+
+
+#class_template PointGenerator_2ScaleFun(
+  AnyFunInterpol &fun, 
+  AnyFunTransform3D &scale_fun1,
+  AnyFunTransform3D &scale_fun2
+){
+  AnyVar start ??= 0.0;
+  AnyVar end ??= 1.0;
+  AnyIntVar amount ??= 2;
+  AnyFloat param= farr(start, (end- start) / amount, amount);
+  AnyVar min_x = min(fun(param)'[0]);
+  AnyVar max_x = max(fun(param)'[0]);
+  AnyFloat m1 = (repmat(amount,max_x)-fun(param)'[0])/(repmat(amount,max_x)-repmat(amount,min_x));
+  AnyFloat m2 = (fun(param)'[0]-repmat(amount,min_x))/(repmat(amount,max_x)-repmat(amount,min_x));
+  AnyFloat m1_matrix = {m1,m1,m1}';
+  AnyFloat m2_matrix = {m2,m2,m2}';
+  AnyFloat f_scale1 = mult(m1_matrix,scale_fun1(fun(param)));
+  AnyFloat f_scale2 = mult(m2_matrix,scale_fun2(fun(param)));
+  AnyFloat points = f_scale1 + f_scale2;  
+};
+
+#class_template PointsWithEdge_2ScaleFun(
+  __CLASS__= AnyRefNodeGroup,
+  AnyFolder &data,
+  AnyFunTransform3D &scale_fun1,
+  AnyFunTransform3D &scale_fun2
+){
+  PointGenerator_2ScaleFun points_generator(fun=SplineFun, scale_fun1=.scale_fun1, scale_fun2=.scale_fun2) = {
+    AnyFunInterpol &SplineFun = ..data.__NAME__.Parametric.Fun;
+  };
+  
+  CreateMotionOutput = {r=On;rDot=Off;rDDot=Off;Axes=Off;EulerPar=Off;omega=Off;omegaDot=Off;};
+  NodeDefaults.CreateMotionOutput = {r=On;rDot=Off;rDDot=Off;Axes=Off;EulerPar=Off;omega=Off;omegaDot=Off;};
+  NodeAmount = points_generator.amount; 
+  Node_sRels = points_generator.points; 
+  NodeName = strval(iarr(1, NodeAmount), "nn%02i");
+  AnyObjectPtrArray NodePointers = ObjSelect("nn*");
+};
+
+
+#class_template CavityPoints_2ScaleFun(
+  __CLASS__= AnyRefNode,
+  AnyFolder &data,
+  AnyFunTransform3D &scale_fun1,
+  AnyFunTransform3D &scale_fun2
+){
+  PointsWithEdge_2ScaleFun Right(data=.data.Right, scale_fun1=.scale_fun1, scale_fun2=.scale_fun2) = {};
+  PointsWithEdge_2ScaleFun Left(data=.data.Left, scale_fun1=.scale_fun1, scale_fun2=.scale_fun2) = {};
+  CreateMotionOutput = {r=On;rDot=Off;rDDot=Off;Axes=Off;EulerPar=Off;omega=Off;omegaDot=Off;};
+};
+
+
+#class_template CavityNodesThoracic_2ScaleFun(
+  __CLASS__ = AnyRefNodeGroup,
+  AnyFolder &data,
+  AnyFunTransform3D &scale_fun1,
+  AnyFunTransform3D &scale_fun2
+){
+  PointGenerator_2ScaleFun points_generator(fun=SplineFun, scale_fun1=.scale_fun1, scale_fun2=.scale_fun2) = {
+    AnyFunInterpol &SplineFun = .data.Parametric.Fun;
+  };
+
+  CreateMotionOutput = {r=On;rDot=Off;rDDot=Off;Axes=Off;EulerPar=Off;omega=Off;omegaDot=Off;};
+  NodeDefaults.CreateMotionOutput = {r=On;rDot=Off;rDDot=Off;Axes=Off;EulerPar=Off;omega=Off;omegaDot=Off;};
+  NodeAmount = points_generator.amount; 
+  Node_sRels = points_generator.points; 
+  NodeName = strval(iarr(1, NodeAmount), "nn%02i");
+  AnyObjectPtrArray NodePointers = ObjSelect("nn*");
+};

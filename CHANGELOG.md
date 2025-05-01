@@ -7,8 +7,27 @@
 
 ## AMMR 4.0 beta
 
-:::{warning} 
-The default pelvis model used in all models have changed. The pelvis morphology now comes from trunk pelivs. The toplogy remain unchanged as the leg model pelvis is morphed to match the Trunk. See below how to control this behaviour.
+:::{admonition} Default pelvis changed. 
+:class: warning
+The default pelvis morphology now comes from trunk pelivs. The toplogy remain unchanged as the leg model pelvis is morphed to match the Trunk. See [below how to control this behaviour](changes-to-default-pelivs-morphology).
+:::
+
+:::{admonition} Muscles locations restructured
+:class: warning
+Muscles elements are now grouped into folders representing the physiological muscles. 
+You can [enable backwards compatibility](changes-to-muscles-locations) by setting:
+```AnyScriptDoc
+#define BM_COMPATIBILITY_MUSCLE_STRUCTURE ON
+```
+
+:::
+:::{admonition} Folder locations restructured
+:class: warning
+Many folders inside the Leg and Arm models have been renamed and/or moved to ensure a consistent bodymodel structure.
+You can [enable backwards compatibility](changes-to-bodymodel-folders) by setting:
+```AnyScriptDoc
+#define BM_COMPATIBILITY_BODYMODEL_STRUCTURE ON
+```
 :::
 
 **Fixed:**
@@ -32,13 +51,13 @@ The default pelvis model used in all models have changed. The pelvis morphology 
   only use this new model if you need the added complexity. 
   :::
 
-  The model is based on the work of Ignasiak, D (2016) and Shayestehpour (2023). See the {ref}`documentaiton page <thoracic-model>` for more info. 
+  The model is based on the work of Ignasiak, D (2016) and Shayestehpour (2021 and 2024). See the {ref}`documentaiton page <Ribcage and Thoracic Spine Model>` for more info. 
 
-* A new abdmoninal model was added to replace the old 'buckle' model. 
-  I uses a new kinematic volume measure from AnyBody 7.5 to model the abdominal pressure 
+* A new abdominal model was added to replace the old 'buckle' model. 
+  It uses a new kinematic volume measure from AnyBody 7.5 to model the abdominal pressure 
   and includes new oblique, rectus and tranversus muscles. The new abdominal model is 
-  more robust and allows a bigger range of motion of the trunk. See the {ref}`documentaiton page <thoracic-model>` 
-  for the thoracic model for more info. 
+  more robust and allows a bigger range of motion of the trunk. See the {ref}`documentaiton page <Abdominal Pressure Model>` 
+  for more info about the abdominal model. 
 
   It is possible to revert ot the old buckle implmenation with switch {bm_statement}`_CAVITY_MODEL_BUCKLE_`. 
 
@@ -50,9 +69,21 @@ The default pelvis model used in all models have changed. The pelvis morphology 
   will distribute the mass to the different segments based on whether they are
   marked as being part of the distribution.
 
+* The cervical model now has linear stiffness coefficients. These can be enabled with the switch {bm_statement}`BM_TRUNK_CERVICAL_DISC_STIFFNESS`:
+  ```
+  #define BM_TRUNK_CERVICAL_DISC_STIFFNESS _DISC_STIFFNESS_LINEAR_
+  ```
+  Only linear stiffness function is available for cervical discs currently.
 
+* New muscles are added in the neck region. These include iliocostalis cervicis, longus colli superior and inferior obliques, and additional fibers
+  for longus colli (T2C3, T2C2, T1C3, T1C2).
+
+* New reference nodes (`TibiaFemurJointCavityCenter` and `TibiaTalusJointCavityCenter`) are added on the shank to represent the center of the
+  joint cavity at knee and ankle.
 
 **Changed:**
+
+(changes-to-default-pelivs-morphology)=
 
 * The default pelvis morphology is now the one from the trunk model, as oposed to the pelvis belonging
   to whatever leg model has been selected. This was done to get a consistent
@@ -63,46 +94,91 @@ The default pelvis model used in all models have changed. The pelvis morphology 
   ```
 
   In practice, this means that the morphology of the leg pelvis is moprhed to match the Trunk pelvis.
-  Using `_MORPH_TRUNK_TO_LEG_` instead will revert to the old behaviour. 
+  Using `_MORPH_TRUNK_TO_LEG_` instead will revert to the old behaviour.
+
+(changes-to-muscles-locations)=
+
+* The muscles of the arm and TLEM2 leg models have been reorganized in the body model. The
+  individual muscle elements are grouped into folders that represent the physiological
+  muscles (e.g., all Soleus Medial elements are collected in a Soleus Medial folder). This
+  change affects the path to the actual muscle elements throughout the model. The complete
+  AMMR has been updated to support this. To allow users a smooth transition to the new
+  structure, a `BM_COMPATIBILITY_MUSCLE_STRUCTURE` switch has been temporarily
+  introduced. This switch will create backward-compatible references to the muscles as
+  they are defined in AMMR 3.x. This BM switch will be deprecated in a future AMMR
+  version.
+
+(changes-to-bodymodel-folders)=
+
+* Many of the key folders inside the Leg and Arm models have been renamed to create a unified structure across the full bodymodel. To bring back the old structure we have temporarily included a backward compatibility switch `BM_COMPATIBILITY_BODYMODEL_STRUCTURE` To ensure a smooth transition.
 
 (ammr-3.1.0-changelog)=
-## AMMR 3.1.0 (2024-??-??)
+## AMMR 3.1.0 (2025-03-31)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.15094590.svg)](https://doi.org/10.5281/zenodo.15094590)
+[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.1.0-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
 
-### ➕ Added:
-* Introduced a new class template,
-  [`CreateCoMRefNode`](#Utilities.center-of-mass.createcomrefnode.createcomrefnode),
-  for generating a reference node at the center of mass of a segment, aligned
-  with its principal axes of inertia.
-* Added the `TRI(N)` macro to create a lower triangular (NxN) matrix.
-* Added the `TOTAL_POLYLINE_LENGTH(P)` macro to compute the total length of a
-  polyline defined by a set of points.
 
-### 🩹 Fixed:
-* Resolved an issue that prevented disabling the drawing of marker arrows in
-  `CreateMarkerDriverClass` within MoCap models. The search string in
-  `Main.ModelSetup.Views.All_MarkerArrows.Objects` has been updated to correctly
-  identify the arrow drawing objects.
-* Corrected the PelvisGround rotation drivers in the {ref}`Free Posture Static
-  example<example_freeposture>`. The X and Z rotation drivers were previously
-  mixed up and are now properly assigned.
 
 ### 🔧 Changed:
-* Updated the insertion and origin points of the Gluteus Medius to ensure
-  correct moment arms for external rotation in specific postures. The posterior
-  Gluteus Medius now twists inside the anterior part and attaches more
-  anteriorly on the femoral trochanter.
-* Modified the Human-Ground residual implementation in MoCap models to use
-  rotational measures configured for angular velocities. This change enhances
-  the robustness of the residuals and makes the residual output easier to
-  interpret geometrically, without affecting the results.
-* Excluded force plates from the parameter identification study, as they were
-  unnecessary. This change may slightly speed up the parameter identification
-  process.
+
+*   Modified the Human-Ground residual implementation in MoCap models to use
+    rotational measures configured for angular velocities. This change enhances
+    the robustness of the residuals and makes the residual output easier to
+    interpret geometrically, without affecting the results.
+*   Updated the insertion and origin points of the Gluteus Medius to ensure
+    correct moment arms for external rotation in specific postures. The posterior
+    Gluteus Medius now twists inside the anterior part and attaches more
+    anteriorly on the femoral trochanter.
+*   The wrapping surface for muscles at the wrist has been changed from a cylinder
+    to an ellipsoid. This lowers the risk of muscle via points penetrating the
+    wrapping surface in postures involving both flexion/extension and
+    abduction/adduction at the wrist.
+*   Excluded force plates from the parameter identification study, as they were
+    unnecessary. This change may slightly speed up the parameter identification
+    process.
+*   The coordinate system used when scaling the shank segment has been aligned
+    with same reference frame used when scaling the thigh segment, instead of
+    using the anatomical frame of the shank. Now both segments use the direction
+    given by the femoral epicondyles as the lateral direction. This change
+    ensures consistent scaling across the knee joint. 
+
+### ➕ Added:
+
+*   Introduced a new class template,
+    [`CreateCoMRefNode`](#Utilities.center-of-mass.createcomrefnode.createcomrefnode),
+    for generating a reference node at the center of mass of a segment, aligned
+    with its principal axes of inertia.
+*   Added the `TRI(N)` macro to create a lower triangular (NxN) matrix.
+*   Added the `TOTAL_POLYLINE_LENGTH(P)` macro to compute the total length of a
+    polyline defined by a set of points.
+
+### 🩹 Fixed:
+
+*   Corrected the PelvisGround rotation drivers in the {ref}`Free Posture Static
+    example<example_freeposture>`. The X and Z rotation drivers were previously
+    mixed up and are now properly assigned.
+*   Resolved an issue that prevented disabling the drawing of marker arrows in
+    `CreateMarkerDriverClass` within MoCap models. The search string in
+    `Main.ModelSetup.Views.All_MarkerArrows.Objects` has been updated to correctly
+    identify the arrow drawing objects.
+*   Fixed a spelling typo in the disc stiffness BM control statements. The
+    `BM_TRUNK_*_DISC_STIFNESS` parameters have been renamed to `BM_TRUNK_*_DISC_STIFFNESS`.
+    The misspelled parameter names have been deprecated.
+*   The data points for the femoral epicondyles with respect to the shank in the
+    neutral posture have been corrected. These values were not updated when the
+    knee axis in shank was redefined in TLEM 2.2 and AMMR 3. This change has no
+    influence on the default AnyBody Models, but it fixes an issue if the model
+    was configured to use the {bm_constant}`special 'bony landmark' defined <_JOINT_TYPE_BONY_LANDMARK_>`
+    joint axis configuration.
+
+### Removed:
+
+*   Removed the python hooks to check for modified AMMR folder. This feature was
+    not used and has been removed to simplify the AMMR codebase.
 
 (ammr-3.0.4-changelog)=
 ## AMMR 3.0.4 (2024-07-02)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.12592455.svg)](https://doi.org/10.5281/zenodo.12592455)
-
 [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.0.4-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
 
 ### 🩹 Fixed:
@@ -114,7 +190,6 @@ The default pelvis model used in all models have changed. The pelvis morphology 
 (ammr-3.0.3-changelog)=
 ## AMMR 3.0.3 (2024-06-10)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.11191711.svg)](https://doi.org/10.5281/zenodo.11191711)
-
 [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.0.3-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
 
 ### 🩹 Fixed:
@@ -135,7 +210,6 @@ The default pelvis model used in all models have changed. The pelvis morphology 
 (ammr-3.0.1-changelog)=
 ## AMMR 3.0.1 (2024-02-13)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.10803883.svg)](https://doi.org/10.5281/zenodo.10803883)
-
 [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.0.1-yellowgreen)](https://www.anybodytech.com/download/anybodysetup-8-0-1-11638_x64/)
 
 
@@ -1324,7 +1398,7 @@ requested body height.
   previous rake-segment/via-point approach. The new wrapping deltoid was
   developed by Marta Strzelczak from Ecole de technologie superieure, Montreal,
   CA. The new implementation is used by default but the old implementation can
-  be enabled with the {ammr:bm_statement}`BM_ARM_DELTOID_WRAPPING` switch.
+  be enabled with the {bm_statement}`BM_ARM_DELTOID_WRAPPING` switch.
   Please see the {ref}`Shoulder-Arm Documentation <DeltoidWrapping>` for more
   information.
 
@@ -2118,4 +2192,4 @@ the driver values are updated.
 - All older BodyModels which were deprecated in AMMR1.3
 
 
-[wu et al. 2005]: https://isbweb.org/images/documents/standards/Wu%20et%20al%20J%20Biomech%2038%20(2005)%20981%E2%80%93992.pdf 
+[wu et al. 2005]: https://isbweb.org/images/documents/standards/Wu%20et%20al%20J%20Biomech%2038%20(2005)%20981%E2%80%93992.pdf

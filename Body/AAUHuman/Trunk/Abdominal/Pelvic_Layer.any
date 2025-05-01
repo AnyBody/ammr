@@ -1,6 +1,16 @@
 AnyFunTransform3D &Scale = BaseSegPosterior.Scale;
 
 AnyFunTransform3DLin ScaleAndProjectToLayer = {
+  PreTransforms = {&.BaseSegPosterior.ScaleAbdominal, &ProjectToYZero};
+  ScaleMat = eye(3);
+  Offset = {0, .LayerRef.Origin.sRel[1], 0};  //< Translation to vetebra/layer level
+  
+  AnyFunTransform3DLin ProjectToYZero = {
+    ScaleMat = {{1,0,0},{0,0,0},{0,0,1}}; //< Remove Y component
+    Offset = zeros(3,1)';
+  };
+};
+AnyFunTransform3DLin ScaleAndProjectToLayer_RefSegScale = {
   PreTransforms = {&.BaseSegPosterior.Scale, &ProjectToYZero};
   ScaleMat = eye(3);
   Offset = {0, .LayerRef.Origin.sRel[1], 0};  //< Translation to vetebra/layer level
@@ -18,7 +28,7 @@ LayerRef = {
   };
   AnyFunTransform3D &Scale= .Scale; 
   
-  CavityPoints VolumePoints(data=..Data.AbdominalCavityPoints, scale_fun=..ScaleAndProjectToLayer) = {
+  CavityPoints VolumePoints(data=..Data.AbdominalCavityPoints, scale_fun=..ScaleAndProjectToLayer_RefSegScale) = {
     Right.points_generator = {
       amount = ......Data.unscaled.ModelParameters.Abdominal.DiscretizationPosterior;
       start = ..data.Right.Posterior_Spline_Start; 
@@ -38,10 +48,9 @@ AnySeg BaseSegAnterior={
   Jii = {0.0, 0.0, 0.0};
   r0 = .BaseSegPosterior.r0;
   Axes0 = .BaseSegPosterior.Axes0;
-  AnyRefNode Origin = {};
-  AnyRefNode JntNode = {sRel = ..LayerRef.sRel;};
+  AnyRefNode JntNode = {sRel=..LayerRef.Origin.sRel;};
   
-  CavityPoints VolumePoints(data=..Data.AbdominalCavityPoints, scale_fun=..ScaleAndProjectToLayer) = {
+  CavityPoints_2ScaleFun VolumePoints(data=..Data.AbdominalCavityPoints, scale_fun1=..ScaleAndProjectToLayer_RefSegScale, scale_fun2=..ScaleAndProjectToLayer) = {
     Right.points_generator = {
       amount = ......Data.unscaled.ModelParameters.Abdominal.DiscretizationAnterior;
       start = ..data.Right.Anterior_Spline_Start; 
@@ -76,12 +85,12 @@ AnySeg BaseSegAnterior={
   AnyRefNode LayerConstraintNodes = {
     sRel = ...Layer_L5.BaseSegPosterior.r0-.r0;
     AnyFolder LayerPoints = {
-      PointGenerator points_right(fun=SplineFun, scale_fun=....ScaleAndProjectToLayer)={
+      PointGenerator_2ScaleFun points_right(fun=SplineFun, scale_fun1=....ScaleAndProjectToLayer_RefSegScale, scale_fun2=....ScaleAndProjectToLayer)={
         start=.....Parameters.LayerMeasureSplineStart;
             amount = .....Parameters.LayerMeasureAmount;  
         AnyFunInterpol &SplineFun = ....Data.AbdominalCavityPoints.Right.Parametric.Fun;
       };
-      PointGenerator points_left(fun=SplineFun, scale_fun=....ScaleAndProjectToLayer)={
+      PointGenerator_2ScaleFun points_left(fun=SplineFun, scale_fun1=....ScaleAndProjectToLayer_RefSegScale, scale_fun2=....ScaleAndProjectToLayer)={
      start=.....Parameters.LayerMeasureSplineStart;
             amount = .....Parameters.LayerMeasureAmount;  
         AnyFunInterpol &SplineFun = ....Data.AbdominalCavityPoints.Left.Parametric.Fun;
@@ -126,7 +135,7 @@ flip(LayerRef.VolumePoints.Left.NodePointers)
 #ifndef PELVIC_LAYER_MOVES
 
 AnyStdJoint PelvicLayer_BaseSegAnterior = {
-  AnyRefNode &ref1 = .LayerRef;
+  AnyRefNode &ref1 = .LayerRef.Origin;
   AnyRefFrame &ref2 = .BaseSegAnterior.JntNode;  
 };
 
@@ -142,7 +151,7 @@ AnyStdJoint PelvicLayer_BaseSegAnterior = {
 #ifndef RECTUS_MUSCLE_LINE_CONTROL 
 
 AnyRevoluteJoint PelvicLayer_BaseSegAnterior = {
-  AnyRefNode &ref1 = .LayerRef;
+  AnyRefNode &ref1 = .LayerRef.Origin;
   AnyRefFrame &ref2 = .BaseSegAnterior.JntNode;  
   Axis=z;
 };
@@ -151,13 +160,13 @@ AnyRevoluteJoint PelvicLayer_BaseSegAnterior = {
 AnyKinEq PelvicLayer_BaseSegAnterior_Constraints ={
    AnyKinMeasureOrg  dof={
     AnyKinLinear lin  ={
-      AnyRefNode &ref1 = ...LayerRef;
+      AnyRefNode &ref1 = ...LayerRef.Origin;
       AnyRefFrame &ref2 = ...BaseSegAnterior.JntNode;  
       Ref=0;
     };
     
     AnyKinRotational rot  ={
-      AnyRefNode &ref1 = ...LayerRef;
+      AnyRefNode &ref1 = ...LayerRef.Origin;
       AnyRefFrame &ref2 = ...BaseSegAnterior.JntNode;  
       Type=RotAxesAngles;
     };

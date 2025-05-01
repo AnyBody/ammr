@@ -142,8 +142,45 @@ Parameter defining the foot model used.
 :Default: {any}`_FOOT_MODEL_DEFAULT_`
 :Example: `#define BM_FOOT_MODEL _FOOT_MODEL_DEFAULT_`
 :Options:
+  - {any}`_FOOT_MODEL_NONE_` -> Switch off foot model"
   - {any}`_FOOT_MODEL_DEFAULT_` -> Switch for using the default foot model
-  - {any}`_FOOT_MODEL_NONE_` -> Switch for using the GM foot model"
+  - {any}`_FOOT_MODEL_TOE_FLEX_GM_` -> Switch for using the GM foot model with toe flexion
+  - {any}`_FOOT_MODEL_DETAILED_GM_` -> Switch for using the detailed GM foot model
+
+```
+::::
+
+
+::::{dropdown} `BM_FOOT_MODEL_TOE_FLEX_GM_REACTION`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_FOOT_MODEL_TOE_FLEX_GM_REACTION
+
+Parameter defining the existing of reaction on toes when using _FOOT_MODEL_TOE_FLEX_GM_.
+
+:Default: ON
+:Example: `#define BM_FOOT_MODEL_TOE_FLEX_GM_REACTION ON`
+:Options: {ammr:bm_constant}`ON`/{ammr:bm_constant}`OFF`
+
+
+```
+::::
+
+
+::::{dropdown} `BM_FOOT_MODEL_LIGAMENTS`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_FOOT_MODEL_LIGAMENTS
+
+Parameter for switching the foot ligaments On/Off.
+
+:Default: OFF
+:Example: `#define BM_FOOT_MODEL_LIGAMENTS OFF`
+:Options:
+  - {any}`OFF` -> Switch OFF
+  - {any}`ON` -> Switch ON
 
 ```
 ::::
@@ -376,45 +413,6 @@ Internal swtich to enable a different implementation of the Rectus Abdominis mus
 ::::
 
 
-::::{dropdown} `BM_TRUNK_EXPERIMENTAL_FLOATINGRIBS_KINETICS`
-:animate: fade-in-slide-down
-:margin: 0 0 3 3
-
-```{ammr:bm_statement} BM_TRUNK_EXPERIMENTAL_FLOATINGRIBS_KINETICS
-:deprecated:
-
-Internal swtich to enable a recruited actuators on the rib end of floating ribs (rib11, rib12).
-
-:Default: {any}`_FLOATING_RIBEND_KINETICS_ENDRIBS_`
-:Example: `#define BM_TRUNK_EXPERIMENTAL_FLOATINGRIBS_KINETICS _FLOATING_RIBEND_KINETICS_ENDRIBS_`
-:Options:
-  - {any}`_FLOATING_RIBEND_KINETICS_OFF_` ->  No recruited actuators to rib end of Floating ribs (rib11, rib12).
-  - {any}`_FLOATING_RIBEND_KINETICS_ENDRIBS_` ->  Add recruited actuators to rib end of Floating ribs (rib11, rib12).
-
-```
-::::
-
-
-::::{dropdown} `BM_TRUNK_EXPERIMENTAL_RIBCAGE_REACTION`
-:animate: fade-in-slide-down
-:margin: 0 0 3 3
-
-```{ammr:bm_statement} BM_TRUNK_EXPERIMENTAL_RIBCAGE_REACTION
-:deprecated:
-
-Internal swtich to change the ribcage reaction between three versions
-
-:Default: {any}`_RIBCAGE_CC_ZACTUATORS_STERNUMREACTION_`
-:Example: `#define BM_TRUNK_EXPERIMENTAL_RIBCAGE_REACTION _RIBCAGE_CC_ZACTUATORS_STERNUMREACTION_`
-:Options:
-  - {any}`_RIBCAGE_CC_ACTUATORS_` -> 3-direction Recruited actuators in CC (costochondral) joints.
-  - {any}`_RIBCAGE_CC_REACTION_` -> Z-direction reaction in CC (costochondral) joints, which is along the relavant rib, togehter with having the rib-sternum averaging constraints reaction ON
-  - {any}`_RIBCAGE_CC_ZACTUATORS_STERNUMREACTION_` -> Z-direction actuators in CC (costochondral) joints, which is along the relavant rib, togehter with having the rib-sternum averaging constraints reaction ON
-
-```
-::::
-
-
 ::::{dropdown} `BM_TRUNK_THORACIC_MODEL`
 :animate: fade-in-slide-down
 :margin: 0 0 3 3
@@ -429,6 +427,7 @@ The type of thoracic/ribcage model used in the model.
   - {any}`_THORACIC_MODEL_RIGID_` -> A completely rigid model of the thoracic spine and ribcage.
   - {any}`_THORACIC_MODEL_FLEXIBLE_` -> A full model of the thorax and ribcage with a kinematically determinate set of drivers.
   - {any}`_THORACIC_MODEL_USERDEFINED_` -> A full model of the thorax and ribcage where drivers/rythmns are specified by the users.
+  - {any}`_THORACIC_MODEL_FLEXIBLE_KINEMATIC_ONLY_` -> A kinematic flexible model of the thorax and ribcage with a kinematically determinate set of drivers. No muscles in thoracic region and instead the reactions are ON in the ribcage and thoracic spine.
 
 ```
 ::::
@@ -527,8 +526,9 @@ Definition of the cervical spine muscles type.
 :margin: 0 0 3 3
 
 ```{ammr:bm_statement} BM_TRUNK_DISC_STIFNESS
+:deprecated:
 
-Definition of the disc model of all spine parts.
+Renamed to BM_TRUNK_DISC_STIFFNESS, Please use the corrected name.
 
 :Default: {any}`_DISC_STIFFNESS_NONE_`
 :Example: `#define BM_TRUNK_DISC_STIFNESS _DISC_STIFFNESS_NONE_`
@@ -546,36 +546,17 @@ Definition of the disc model of all spine parts.
 :margin: 0 0 3 3
 
 ```{ammr:bm_statement} BM_TRUNK_LUMBAR_DISC_STIFNESS
+:deprecated:
 
-Definition of the lumbar spine disc model.
+Renamed to BM_TRUNK_LUMBAR_DISC_STIFFNESS, Please use the corrected name
 
-:Default: {any}`BM_TRUNK_DISC_STIFNESS`
-:Example: `#define BM_TRUNK_LUMBAR_DISC_STIFNESS BM_TRUNK_DISC_STIFNESS`
+:Default: {any}`BM_TRUNK_DISC_STIFFNESS`
+:Example: `#define BM_TRUNK_LUMBAR_DISC_STIFNESS BM_TRUNK_DISC_STIFFNESS`
 :Options:
   - {any}`_DISC_STIFFNESS_NONE_` -> Constant to switch off disc spring in the spine
   - {any}`_DISC_STIFFNESS_LINEAR_` -> Constant to switch linear disc spring on in the spine
   - {any}`_DISC_STIFFNESS_NONLINEAR_` -> Constant to switch nonlinear disc spring on in the spine
-  - {any}`BM_TRUNK_DISC_STIFNESS` -> 
-
-```
-::::
-
-
-::::{dropdown} `BM_TRUNK_THORACIC_DISC_STIFNESS`
-:animate: fade-in-slide-down
-:margin: 0 0 3 3
-
-```{ammr:bm_statement} BM_TRUNK_THORACIC_DISC_STIFNESS
-
-Definition of the thoracic spine disc model.
-
-:Default: {any}`BM_TRUNK_DISC_STIFNESS`
-:Example: `#define BM_TRUNK_THORACIC_DISC_STIFNESS BM_TRUNK_DISC_STIFNESS`
-:Options:
-  - {any}`_DISC_STIFFNESS_NONE_` -> Constant to switch off disc spring in the spine
-  - {any}`_DISC_STIFFNESS_LINEAR_` -> Constant to switch linear disc spring on in the spine
-  - {any}`_DISC_STIFFNESS_NONLINEAR_` -> Constant to switch nonlinear disc spring on in the spine
-  - {any}`BM_TRUNK_DISC_STIFNESS` -> 
+  - {any}`BM_TRUNK_DISC_STIFFNESS` -> 
 
 ```
 ::::
@@ -586,16 +567,96 @@ Definition of the thoracic spine disc model.
 :margin: 0 0 3 3
 
 ```{ammr:bm_statement} BM_TRUNK_CERVICAL_DISC_STIFNESS
+:deprecated:
 
-Definition of the cervical spine disc model.
+Renamed to BM_TRUNK_CERVICAL_DISC_STIFFNESS, Please use the corrected name
 
-:Default: {any}`BM_TRUNK_DISC_STIFNESS`
-:Example: `#define BM_TRUNK_CERVICAL_DISC_STIFNESS BM_TRUNK_DISC_STIFNESS`
+:Default: {any}`BM_TRUNK_DISC_STIFFNESS`
+:Example: `#define BM_TRUNK_CERVICAL_DISC_STIFNESS BM_TRUNK_DISC_STIFFNESS`
+:Options:
+  - {any}`_DISC_STIFFNESS_NONE_` -> Constant to switch off disc spring in the spine
+  - {any}`_DISC_STIFFNESS_LINEAR_` -> Constant to switch linear disc spring on in the spine
+  - {any}`_DISC_STIFFNESS_NONLINEAR_` -> Constant to switch nonlinear disc spring on in the spine
+  - {any}`BM_TRUNK_DISC_STIFFNESS` -> 
+
+```
+::::
+
+
+::::{dropdown} `BM_TRUNK_DISC_STIFFNESS`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_TRUNK_DISC_STIFFNESS
+
+Definition of the disc model of all spine parts.
+
+:Default: {any}`_DISC_STIFFNESS_NONE_`
+:Example: `#define BM_TRUNK_DISC_STIFFNESS _DISC_STIFFNESS_NONE_`
+:Options:
+  - {any}`_DISC_STIFFNESS_NONE_` -> Constant to switch off disc spring in the spine
+  - {any}`_DISC_STIFFNESS_LINEAR_` -> Constant to switch linear disc spring on in the spine
+  - {any}`_DISC_STIFFNESS_NONLINEAR_` -> Constant to switch nonlinear disc spring on in the spine
+
+```
+::::
+
+
+::::{dropdown} `BM_TRUNK_LUMBAR_DISC_STIFFNESS`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_TRUNK_LUMBAR_DISC_STIFFNESS
+
+Definition of the lumbar spine disc model.
+
+:Default: {any}`BM_TRUNK_DISC_STIFFNESS`
+:Example: `#define BM_TRUNK_LUMBAR_DISC_STIFFNESS BM_TRUNK_DISC_STIFFNESS`
+:Options:
+  - {any}`_DISC_STIFFNESS_NONE_` -> Constant to switch off disc spring in the spine
+  - {any}`_DISC_STIFFNESS_LINEAR_` -> Constant to switch linear disc spring on in the spine
+  - {any}`_DISC_STIFFNESS_NONLINEAR_` -> Constant to switch nonlinear disc spring on in the spine
+  - {any}`BM_TRUNK_DISC_STIFFNESS` -> 
+
+```
+::::
+
+
+::::{dropdown} `BM_TRUNK_THORACIC_DISC_STIFFNESS`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_TRUNK_THORACIC_DISC_STIFFNESS
+
+Definition of the thoracic spine disc model.
+
+:Default: {any}`BM_TRUNK_DISC_STIFFNESS`
+:Example: `#define BM_TRUNK_THORACIC_DISC_STIFFNESS BM_TRUNK_DISC_STIFFNESS`
 :Options:
   - {any}`_DISC_STIFFNESS_NONE_` -> Constant to switch off disc spring in the spine
   - {any}`_DISC_STIFFNESS_LINEAR_` -> Constant to switch linear disc spring on in the spine
   - {any}`_DISC_STIFFNESS_NONLINEAR_` -> Constant to switch nonlinear disc spring on in the spine
   - {any}`BM_TRUNK_DISC_STIFNESS` -> 
+
+```
+::::
+
+
+::::{dropdown} `BM_TRUNK_CERVICAL_DISC_STIFFNESS`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_TRUNK_CERVICAL_DISC_STIFFNESS
+
+Definition of the cervical spine disc model.
+
+:Default: {any}`BM_TRUNK_DISC_STIFFNESS`
+:Example: `#define BM_TRUNK_CERVICAL_DISC_STIFFNESS BM_TRUNK_DISC_STIFFNESS`
+:Options:
+  - {any}`_DISC_STIFFNESS_NONE_` -> Constant to switch off disc spring in the spine
+  - {any}`_DISC_STIFFNESS_LINEAR_` -> Constant to switch linear disc spring on in the spine
+  - {any}`_DISC_STIFFNESS_NONLINEAR_` -> Constant to switch nonlinear disc spring on in the spine
+  - {any}`BM_TRUNK_DISC_STIFFNESS` -> 
 
 ```
 ::::
@@ -1140,7 +1201,8 @@ Parameter to choose type of muscle tendon calibration
 :Options:
   - {any}`_CALIBRATION_TYPE_1PAR_` -> Constant to use 1 parameter muscle tendon calibration
   - {any}`_CALIBRATION_TYPE_2PAR_` -> Constant to use 2 parameter muscle tendon calibration
-  - {any}`_CALIBRATION_TYPE_CUSTOM_` -> Use custom calibration. I.e. diables calibration so the user can add their own code.
+  - {any}`_EXPERIMENTAL_CALIBRATION_TYPE_2PAR_` -> Constant to use the experimenrtal 2 parameter muscle tendon calibration
+  - {any}`_CALIBRATION_TYPE_CUSTOM_` -> Use custom calibration. I.e. disables calibration so the user can add their own code.
 
 ```
 ::::
@@ -1979,6 +2041,25 @@ Switch for the mannequin driver being active or not
 ::::
 
 
+::::{dropdown} `BM_MANNEQUIN_DRIVER_TOES_FLEXION_RIGHT`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_MANNEQUIN_DRIVER_TOES_FLEXION_RIGHT
+
+Switch for the mannequin driver being active or not
+
+:Default: {any}`BM_MANNEQUIN_DRIVER_DEFAULT`
+:Example: `#define BM_MANNEQUIN_DRIVER_TOES_FLEXION_RIGHT BM_MANNEQUIN_DRIVER_DEFAULT`
+:Options:
+  - {any}`ON` -> Switch ON
+  - {any}`OFF` -> Switch OFF
+  - {any}`BM_MANNEQUIN_DRIVER_DEFAULT` -> 
+
+```
+::::
+
+
 ::::{dropdown} `BM_MANNEQUIN_DRIVER_HIP_FLEXION_LEFT`
 :animate: fade-in-slide-down
 :margin: 0 0 3 3
@@ -2104,6 +2185,25 @@ Switch for the mannequin driver being active or not
 
 :Default: {any}`BM_MANNEQUIN_DRIVER_DEFAULT`
 :Example: `#define BM_MANNEQUIN_DRIVER_ANKLE_SUBTALAR_EVERSION_LEFT BM_MANNEQUIN_DRIVER_DEFAULT`
+:Options:
+  - {any}`ON` -> Switch ON
+  - {any}`OFF` -> Switch OFF
+  - {any}`BM_MANNEQUIN_DRIVER_DEFAULT` -> 
+
+```
+::::
+
+
+::::{dropdown} `BM_MANNEQUIN_DRIVER_TOES_FLEXION_LEFT`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_MANNEQUIN_DRIVER_TOES_FLEXION_LEFT
+
+Switch for the mannequin driver being active or not
+
+:Default: {any}`BM_MANNEQUIN_DRIVER_DEFAULT`
+:Example: `#define BM_MANNEQUIN_DRIVER_TOES_FLEXION_LEFT BM_MANNEQUIN_DRIVER_DEFAULT`
 :Options:
   - {any}`ON` -> Switch ON
   - {any}`OFF` -> Switch OFF
@@ -2381,6 +2481,40 @@ A compatability switch to include the trunk selected outputs joint reaction forc
 
 :Default: OFF
 :Example: `#define BM_COMPATIBILITY_24_TRUNK_SELECTED_OUTPUTS_JRF OFF`
+:Options: {ammr:bm_constant}`ON`/{ammr:bm_constant}`OFF`
+
+
+```
+::::
+
+
+::::{dropdown} `BM_COMPATIBILITY_MUSCLE_STRUCTURE`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_COMPATIBILITY_MUSCLE_STRUCTURE
+
+A compatability switch to add the model tree structure of the muscles from AMMR 4. Use this option to easily load older models.
+
+:Default: OFF
+:Example: `#define BM_COMPATIBILITY_MUSCLE_STRUCTURE OFF`
+:Options: {ammr:bm_constant}`ON`/{ammr:bm_constant}`OFF`
+
+
+```
+::::
+
+
+::::{dropdown} `BM_COMPATIBILITY_BODYMODEL_STRUCTURE`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_COMPATIBILITY_BODYMODEL_STRUCTURE
+
+A compatability switch to add the model tree structure of the BodyModel folders from AMMR <4. Use this option to easily load older models.
+
+:Default: OFF
+:Example: `#define BM_COMPATIBILITY_BODYMODEL_STRUCTURE OFF`
 :Options: {ammr:bm_constant}`ON`/{ammr:bm_constant}`OFF`
 
 

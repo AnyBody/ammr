@@ -29,7 +29,7 @@
 
 #ifndef BM_ARM_THORAX_SCAPULA_CONTACT
 #ifdef BM_TRUNK_THORACIC_MODEL 
-#if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_
+#if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_ | BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_KINEMATIC_ONLY_
 #define BM_ARM_THORAX_SCAPULA_CONTACT _MULTIPLE_POINT_CONTACT_
 #else
 #define BM_ARM_THORAX_SCAPULA_CONTACT _ELLIPSOID_CONTACT_
@@ -38,7 +38,7 @@
 #endif
 
 #ifdef BM_TRUNK_THORACIC_MODEL
-#if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_
+#if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_ | BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_KINEMATIC_ONLY_
 #ifdef BM_ARM_THORAX_SCAPULA_CONTACT
 #if BM_ARM_THORAX_SCAPULA_CONTACT == _ELLIPSOID_CONTACT_
    AnyInt incompatible_BM_ARM_THORAX_SCAPULA_CONTACT= assert(0, strformat("\n"+
@@ -162,6 +162,7 @@
 // Trigger check for read-only AMMR if we think user is running 
 // the AMMR version in the install directory. 
 #ifpathexists "<ANYBODY_PATH_AMMR>/../AnyBody.exe"
+#if ANYBODY_PYTHON_AVAILABLE 
 
  #ifndef ANYBODY_DISMISS_READONLY_NOTICE
 
@@ -189,56 +190,83 @@
 
  #endif
 #endif
-
-
-
- AnyFunEx EndsWith = 
-  {
-    AnyIntVar Return = 0;
-    AnyFunExMonoPy endswith =
-    {
-     ModuleFile = "ammr-checks.py";
-     ArgList = {
-       AnyStringVar string = "";
-       AnyStringVar argument = "";
-     };
-    };
-  };
-  
- #ifdef ANYBODY_ENABLE_MODIFIED_AMMR_NOTICE
- 
- AnyFunEx DirectoryHash = 
-  {
-    AnyStringVar Return = "";
-    AnyFunExMonoPy hash_directory =
-    {
-     ModuleFile = "ammr-checks.py";
-     ArgList = {
-       AnyStringVar Directory = ANYBODY_PATH_BODY;
-     };
-    };
-  };
- 
- AnyStringVar HashBodyModel = DirectoryHash(ANYBODY_PATH_BODY);
- 
- AnyInt ModifiedAMMRChecks = {
-     not(HashBodyModel), // Don't trigger on missing hash value
-     eqfun( ANYBODY_HASH_BODY, HashBodyModel), // Don't trigger if hash value matches
-     EndsWith(AMMR_VERSION, "beta") // Don't trigger if we are using the beta version
-   }; 
- 
- AnyInt BodyModelIsModifiedNotice= notice(sum(ModifiedAMMRChecks), strformat("\n"+
-   "\n------------------------------------------------------------------------------------------------------\n"+
-   "                 Note: You appear to be using a modified version of the Body Model. \n"+
-   "\n"+
-   "  Some files in the folder 'AMMR/Body/AAUHuman' have been modified.\n"+
-   "  You may disable this notice by removing the switch ``#define ANYBODY_ENABLE_MODIFIED_AMMR_NOTICE``                     \n"+
-   "-------------------------------------------------------------------------------------------------------\n"));
-
 #endif
 
 
 
+
+
+#ifdef BM_TRUNK_DISC_STIFNESS
+#ifndef BM_TRUNK_DISC_STIFFNESS
+#define BM_TRUNK_DISC_STIFFNESS BM_TRUNK_DISC_STIFNESS
+#endif
+   AnyInt deprecated_BM_TRUNK_DISC_STIFNESS = warn(0, strformat("\n"+
+      "------------------------------------------------------------------------------------------------------------------------ \n"+
+      "    `BM_TRUNK_DISC_STIFNESS` has been renamed to BM_TRUNK_DISC_STIFFNESS.\n"+
+      "    Please use the corrected name instead.\n"+
+      "------------------------------------------------------------------------------------------------------------------------ "));
+#endif
+
+#ifdef BM_TRUNK_LUMBAR_DISC_STIFNESS
+#ifndef BM_TRUNK_LUMBAR_DISC_STIFFNESS
+#define BM_TRUNK_LUMBAR_DISC_STIFFNESS BM_TRUNK_LUMBAR_DISC_STIFNESS
+#endif
+   AnyInt deprecated_BM_TRUNK_LUMBAR_DISC_STIFNESS = warn(0, strformat("\n"+
+      "------------------------------------------------------------------------------------------------------------------------ \n"+
+      "    `BM_TRUNK_LUMBAR_DISC_STIFNESS` has been renamed to BM_TRUNK_LUMBAR_DISC_STIFFNESS.\n"+
+      "    Please use the corrected name instead.\n"+
+      "------------------------------------------------------------------------------------------------------------------------ "));
+#endif
+
+#ifdef BM_TRUNK_CERVICAL_DISC_STIFNESS
+#ifndef BM_TRUNK_CERVICAL_DISC_STIFFNESS
+#define BM_TRUNK_CERVICAL_DISC_STIFFNESS BM_TRUNK_CERVICAL_DISC_STIFNESS
+#endif
+   AnyInt deprecated_BM_TRUNK_CERVICAL_DISC_STIFNESS = warn(0, strformat("\n"+
+      "------------------------------------------------------------------------------------------------------------------------ \n"+
+      "    `BM_TRUNK_CERVICAL_DISC_STIFNESS` has been renamed to BM_TRUNK_CERVICAL_DISC_STIFFNESS.\n"+
+      "    Please use the corrected name instead.\n"+
+      "------------------------------------------------------------------------------------------------------------------------ "));
+#endif
+
+
+#ifdef BM_CALIBRATION_TYPE
+#if BM_CALIBRATION_TYPE == _EXPERIMENTAL_CALIBRATION_TYPE_2PAR_
+#ifdef BM_LEG_MODEL
+#if BM_LEG_MODEL == _LEG_MODEL_TLEM1_ 
+   AnyInt not_implemented_calibration_for_TLEM1 = warn(0, strformat("\n"+
+      "------------------------------------------------------------------------------------------------------\n"+
+      "    The Experimental 2-parameter calibration routine (BM_CALIBRATION_TYPE == _EXPERIMENTAL_CALIBRATION_TYPE_2PAR_ \n"+
+      "    is not compatible with The Twente Lower Extremity Model v.1 (TLEM1). \n"+
+      "    Please use the TLEM 2 (which is default or set: #define BM_LEG_MODEL _LEG_MODEL_TLEM2_) \n"+
+      "-------------------------------------------------------------------------------------------------------"));
+#endif
+#endif
+#endif
+#endif
+
+#ifndef ANYBODY_PYTHON_SUPPRESS_NOTICE
+#if ANYBODY_PYTHON_AVAILABLE == 0
+  AnyMessage PythonMissing = 
+  {
+    Type = MSG_Message;
+    TriggerPreProcess = On;
+    Message = strformat("\n"+
+      "-----------------------------------------------------------------------\n"+
+      "     Python is not availble. Some features may be unavailable.\n"+
+      "   \n"+
+      "     To fix this:\n"+
+      "   \n"+
+      "     1. Reinstall AnyBody and choose to install Python.\n"+
+      "     2. (Advanced) Set ANYBODY_PATH_PYTHONHOME to your\n"+
+      "        existing Python installation folder.\n"+
+      "   \n"+
+      "     Hide this message: Add #define ANYBODY_PYTHON_SUPPRESS_NOTICE\n"+
+      "     to your model.\n"+
+      "-----------------------------------------------------------------------\n");
+}; 
+#endif
+#endif
 
 
 #ifpathexists "ammr-beta.any"

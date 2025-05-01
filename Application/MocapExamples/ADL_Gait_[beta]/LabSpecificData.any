@@ -35,7 +35,7 @@ Main.ModelSetup.LabSpecificData = {
   };
 
   Main.Studies.ParameterIdentification.KinematicStudyForParameterIdentification= {
-    Kinematics.KinematicTol = 1e-4;
+    Kinematics.KinematicTol = 1e-6;
   };
   Main.ModelSetup.TrialSpecificData.ParameterOptimizationConvergenceTol = 1e-2;
   
@@ -84,8 +84,8 @@ Main.ModelSetup.LabSpecificData = {
     LEFT_UPPERARM_LENGTH = ON,
     RIGHT_LOWERARM_LENGTH= ON, 
     LEFT_LOWERARM_LENGTH = ON,
-    RIGHT_HAND_LENGTH= ON, 
-    LEFT_HAND_LENGTH = ON,
+    RIGHT_HAND_LENGTH= OFF, 
+    LEFT_HAND_LENGTH = OFF,
     RIGHT_HAND_BREADTH= OFF, 
     LEFT_HAND_BREADTH = OFF,
     RIGHT_TIBIAL_TORSION = ON,
@@ -101,12 +101,46 @@ Main.ModelSetup.LabSpecificData = {
      Head.LengthScale = Thorax.LengthScale;
      Head.DepthScale = Head.LengthScale;
      Head.WidthScale = Head.LengthScale;
+     Right.Hand.LengthScale = BodyScale;
+     Left.Hand.LengthScale = BodyScale;
+     Right.Hand.WidthScale = BodyScale;
+     Left.Hand.WidthScale = BodyScale;
      
   };
 
  #else
   OptimizeAnthropometricsOnOff OptimizeAntropometricsOnOff ={}; 
  #endif
+ 
+ 
+ // Initial guess of arm segment length based on markers. 
+ Main.HumanModel.Anthropometrics.SegmentDimensions = {
+ 
+ 
+   #ifdef _c3dmarker
+   #undef _c3dmarker
+   #endif
+   
+   #define _c3dmarker(NAME) Main.ModelSetup.C3DFileData.Points.Markers.NAME.Pos[Main.ModelSetup.TrialSpecificData.AutoPos.start_idx]
+   
+   Right.LowerArmLength = 0.91*vnorm(_c3dmarker(R_HLE)- _c3dmarker(R_RSP));
+   #ifndef EXCLUDE_R_SAA
+   Right.UpperArmLength = 0.83*vnorm(_c3dmarker(R_HLE)- _c3dmarker(R_SAA));
+   #else
+   Right.UpperArmLength = 0.83*vnorm(_c3dmarker(R_HLE)- _c3dmarker(R_SAE));
+   #endif
+
+   Left.LowerArmLength = 0.91*vnorm(_c3dmarker(L_HLE)- _c3dmarker(L_RSP));
+   #ifndef EXCLUDE_L_SAA
+   Left.UpperArmLength = 0.83*vnorm(_c3dmarker(L_HLE)- _c3dmarker(L_SAA));
+   #else
+   Left.UpperArmLength = 0.83*vnorm(_c3dmarker(L_HLE)- _c3dmarker(L_SAE));
+   #endif
+ 
+ 
+ };
+ 
+ 
   
  #ifndef REFERENCE_TRIAL 
  #define MOCAP_CREATE_PARAMETER_ID_SHORTCUT OFF

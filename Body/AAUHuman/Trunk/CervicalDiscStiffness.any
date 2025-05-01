@@ -1,0 +1,229 @@
+  AnyFolder CervicalDiscStiffness = {
+    
+    #if (BM_TRUNK_CERVICAL_LIGAMENTS == ON)
+     AnyFloat coef = 0.0; 
+    #else
+     AnyFloat coef = 1.0;  
+    #endif
+    
+    // Cervical coefficients (Nm/deg)
+    /*
+    Moroney SP, Schultz AB, Miller JA, Andersson GB. 
+    Load-displacement properties of lower cervical spine motion segments. 
+    J Biomech. 1988;21(9):769-79. doi: 10.1016/0021-9290(88)90285-0.
+    */
+    
+    // Stiffness (Nm/degree) for disc segments (IVD) including longitudinal ligaments
+    AnyFloat StiffnessScaleFactor ??= 1.0;
+    AnyFloat AxialRot ??= 0.42*StiffnessScaleFactor; 
+    AnyFloat Flex     ??= 0.21*StiffnessScaleFactor;
+    AnyFloat Ext      ??= 0.32*StiffnessScaleFactor;
+    AnyFloat Latbend  ??= 0.33*StiffnessScaleFactor;
+    
+    // Stiffness contribution (Nm/degree) of the posterior arches and ligaments to the cumulative IVD stiffness
+    // difference of intact segment and disc segment from Moroney et al.
+    AnyFloat ligAxialRot ??= coef*0.74*StiffnessScaleFactor;
+    AnyFloat ligFlex     ??= coef*0.22*StiffnessScaleFactor;
+    AnyFloat ligExt      ??= coef*0.41*StiffnessScaleFactor;
+    AnyFloat ligLatbend  ??= coef*0.35*StiffnessScaleFactor;
+
+    #if BM_TRUNK_CERVICAL_DISC_STIFFNESS == _DISC_STIFFNESS_NONE_
+     AnyFunPolynomial Flexfun = {
+       PolyCoef={{0, 0}};    
+     };
+     AnyFunPolynomial &Extfun = Flexfun;
+     AnyFunPolynomial &ARfun = Flexfun;
+     AnyFunPolynomial &LBfun = Flexfun;    
+     AnyFunPolynomial &LBfun_R = Flexfun;    
+     AnyFunPolynomial &LBfun_L = Flexfun;    
+    #endif
+    
+    #if BM_TRUNK_CERVICAL_DISC_STIFFNESS == _DISC_STIFFNESS_LINEAR_
+    
+     AnyFunPolynomial Flexfun = {
+       PolyCoef??=-1*{{0, .Flex+.ligFlex}};    
+     };
+     AnyFunPolynomial Extfun = {
+       PolyCoef??=-1*{{0, .Ext+.ligExt}};    
+     };
+     AnyFunPolynomial ARfun = {
+       PolyCoef??=-1*{{0, .AxialRot+.ligAxialRot}};
+     };
+     AnyFunPolynomial LBfun = {
+       PolyCoef??=-1*{{0, .Latbend+.ligLatbend}}; //linear behavior, 0-centered, symmetric with opposite sign for R/L
+     };
+     AnyFunPolynomial &LBfun_R = LBfun;    
+     AnyFunPolynomial &LBfun_L = LBfun;    
+
+    #endif    
+
+    #if BM_TRUNK_CERVICAL_DISC_STIFFNESS == _DISC_STIFFNESS_NONLINEAR_
+
+     AnyInt CervicalStiffnessNonLinearWarning = warn(0,strformat("\n"+
+      "------------------------------------------------------------------------------------------------------------------------ \n"+
+      "    `BM_TRUNK_CERVICAL_DISC_STIFFNESS` is set to `_DISC_STIFFNESS_NONLINEAR_`\n"+
+      "    Nonlinear function is not available currently and linear function is used instead.\n"+
+      "------------------------------------------------------------------------------------------------------------------------ "));
+     
+     AnyFunPolynomial Flexfun = {
+       PolyCoef??=-1*{{0, .Flex+.ligFlex}};    
+     };
+     AnyFunPolynomial Extfun = {
+       PolyCoef??=-1*{{0, .Ext+.ligExt}};    
+     };
+     AnyFunPolynomial ARfun = {
+       PolyCoef??=-1*{{0, .AxialRot+.ligAxialRot}};
+     };
+     AnyFunPolynomial LBfun = {
+       PolyCoef??=-1*{{0, .Latbend+.ligLatbend}}; //linear behavior, 0-centered, symmetric with opposite sign for R/L
+     };
+     AnyFunPolynomial &LBfun_R = LBfun;    
+     AnyFunPolynomial &LBfun_L = LBfun;    
+
+    #endif    
+      
+    //T1C7
+    AnyForce T1C7DiscMoment = {         
+      // find out where it is flexion or extension
+      AnyFloat A = iffun(gtfun(rot.Pos[0],0), 0, 1);
+      AnyFloat B = iffun(gtfun(rot.Pos[1],0), 0, 1);
+      F = { 
+        (A*.Flexfun(Angle[0])[0] + (1-A)*.Extfun(Angle[0])[0]), 
+           .ARfun(  Angle[1])[0], 
+        (B*.LBfun_L(Angle[2])[0] + (1-B)*.LBfun_R(Angle[2])[0])
+      };
+      AnyFloat Angle = rot.Pos*180/pi;  // Z,Y,X (FlexExt,AxRot,LatBend)
+      AnyKinRotational rot = {
+        AnyRefNode &rf0 = ....Segments.T1Seg.T1C7JntNode;
+        AnyRefNode &rf1 = ....Segments.C7Seg.T1C7JntNode;
+        Type=RotAxesAngles;
+      };  
+    };
+    
+    //C7C6
+    AnyForce C7C6DiscMoment = {         
+      // find out where it is flexion or extension
+      AnyFloat A = iffun(gtfun(rot.Pos[0],0), 0, 1);
+      AnyFloat B = iffun(gtfun(rot.Pos[1],0), 0, 1);
+      F = { 
+        (A*.Flexfun(Angle[0])[0] + (1-A)*.Extfun(Angle[0])[0]), 
+           .ARfun(  Angle[1])[0], 
+        (B*.LBfun_L(Angle[2])[0] + (1-B)*.LBfun_R(Angle[2])[0])
+      };
+      AnyFloat Angle = rot.Pos*180/pi;  // Z,Y,X (FlexExt,AxRot,LatBend)
+      AnyKinRotational rot = {
+        AnyRefNode &rf0 = ....Segments.C7Seg.C7C6JntNode;
+        AnyRefNode &rf1 = ....Segments.C6Seg.C7C6JntNode;
+        Type=RotAxesAngles;
+      };  
+    };
+    
+    //C6C5
+    AnyForce C6C5DiscMoment = {         
+      // find out where it is flexion or extension
+      AnyFloat A = iffun(gtfun(rot.Pos[0],0), 0, 1);
+      AnyFloat B = iffun(gtfun(rot.Pos[1],0), 0, 1);
+      F = { 
+        (A*.Flexfun(Angle[0])[0] + (1-A)*.Extfun(Angle[0])[0]), 
+           .ARfun(  Angle[1])[0], 
+        (B*.LBfun_L(Angle[2])[0] + (1-B)*.LBfun_R(Angle[2])[0])
+      };
+      AnyFloat Angle = rot.Pos*180/pi;  // Z,Y,X (FlexExt,AxRot,LatBend)
+      AnyKinRotational rot = {
+        AnyRefNode &rf0 = ....Segments.C6Seg.C6C5JntNode;
+        AnyRefNode &rf1 = ....Segments.C5Seg.C6C5JntNode;
+        Type=RotAxesAngles;
+      };  
+    };
+  
+    //C5C4
+    AnyForce C5C4DiscMoment = {         
+      // find out where it is flexion or extension
+      AnyFloat A = iffun(gtfun(rot.Pos[0],0), 0, 1);
+      AnyFloat B = iffun(gtfun(rot.Pos[1],0), 0, 1);
+      F = { 
+        (A*.Flexfun(Angle[0])[0] + (1-A)*.Extfun(Angle[0])[0]), 
+           .ARfun(  Angle[1])[0], 
+        (B*.LBfun_L(Angle[2])[0] + (1-B)*.LBfun_R(Angle[2])[0])
+      };
+      AnyFloat Angle = rot.Pos*180/pi;  // Z,Y,X (FlexExt,AxRot,LatBend)
+      AnyKinRotational rot = {
+        AnyRefNode &rf0 = ....Segments.C5Seg.C5C4JntNode;
+        AnyRefNode &rf1 = ....Segments.C4Seg.C5C4JntNode;
+        Type=RotAxesAngles;
+      };  
+    };
+    
+    //C4C3
+    AnyForce C4C3DiscMoment = {         
+      // find out where it is flexion or extension
+      AnyFloat A = iffun(gtfun(rot.Pos[0],0), 0, 1);
+      AnyFloat B = iffun(gtfun(rot.Pos[1],0), 0, 1);
+      F = { 
+        (A*.Flexfun(Angle[0])[0] + (1-A)*.Extfun(Angle[0])[0]), 
+           .ARfun(  Angle[1])[0], 
+        (B*.LBfun_L(Angle[2])[0] + (1-B)*.LBfun_R(Angle[2])[0])
+      };
+      AnyFloat Angle = rot.Pos*180/pi;  // Z,Y,X (FlexExt,AxRot,LatBend)
+      AnyKinRotational rot = {
+        AnyRefNode &rf0 = ....Segments.C4Seg.C4C3JntNode;
+        AnyRefNode &rf1 = ....Segments.C3Seg.C4C3JntNode;
+        Type=RotAxesAngles;
+      };  
+    };
+    
+    //C3C2
+    AnyForce C3C2DiscMoment = {         
+      // find out where it is flexion or extension
+      AnyFloat A = iffun(gtfun(rot.Pos[0],0), 0, 1);
+      AnyFloat B = iffun(gtfun(rot.Pos[1],0), 0, 1);
+      F = { 
+        (A*.Flexfun(Angle[0])[0] + (1-A)*.Extfun(Angle[0])[0]), 
+           .ARfun(  Angle[1])[0], 
+        (B*.LBfun_L(Angle[2])[0] + (1-B)*.LBfun_R(Angle[2])[0])
+      };
+      AnyFloat Angle = rot.Pos*180/pi;  // Z,Y,X (FlexExt,AxRot,LatBend)
+      AnyKinRotational rot = {
+        AnyRefNode &rf0 = ....Segments.C3Seg.C3C2JntNode;
+        AnyRefNode &rf1 = ....Segments.C2Seg.C3C2JntNode;
+        Type=RotAxesAngles;
+      };  
+    };
+    
+    //C2C1 - The specimens in Moroney et al. did not contain C2-C1. Therefore, it is excluded.
+//    AnyForce C2C1DiscMoment = {         
+//      // find out where it is flexion or extension
+//      AnyFloat A = iffun(gtfun(rot.Pos[0],0), 0, 1);
+//      AnyFloat B = iffun(gtfun(rot.Pos[1],0), 0, 1);
+//      F = { 
+//        (A*.Flexfun(Angle[0])[0] + (1-A)*.Extfun(Angle[0])[0]), 
+//           .ARfun(  Angle[1])[0], 
+//        (B*.LBfun_L(Angle[2])[0] + (1-B)*.LBfun_R(Angle[2])[0])
+//      };
+//      AnyFloat Angle = rot.Pos*180/pi;  // Z,Y,X (FlexExt,AxRot,LatBend)
+//      AnyKinRotational rot = {
+//        AnyRefNode &rf0 = ....Segments.C2Seg.C2C1JntNode;
+//        AnyRefNode &rf1 = ....Segments.C1Seg.C2C1JntNode;
+//        Type=RotAxesAngles;
+//      };  
+//    };
+    
+    //C1C0 - The specimens in Moroney et al. did not contain C1-C0. Therefore, it is excluded.
+//    AnyForce C1C0DiscMoment = {         
+//      // find out where it is flexion or extension
+//      AnyFloat A = iffun(gtfun(rot.Pos[0],0), 0, 1);
+//      AnyFloat B = iffun(gtfun(rot.Pos[1],0), 0, 1);
+//      F = { 
+//        (A*.Flexfun(Angle[0])[0] + (1-A)*.Extfun(Angle[0])[0]), 
+//           .ARfun(  Angle[1])[0], 
+//        (B*.LBfun_L(Angle[2])[0] + (1-B)*.LBfun_R(Angle[2])[0])
+//      };
+//      AnyFloat Angle = rot.Pos*180/pi;  // Z,Y,X (FlexExt,AxRot,LatBend)
+//      AnyKinRotational rot = {
+//        AnyRefNode &rf0 = ....Segments.C1Seg.C1C0JntNode;
+//        AnyRefNode &rf1 = ....Segments.SkullSeg.C1C0JntNode;
+//        Type=RotAxesAngles;
+//      };  
+//    };
+
+  };

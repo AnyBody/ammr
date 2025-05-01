@@ -1,0 +1,67 @@
+// This file contains a set of auxillary drivers. They are usefull/necessary
+// in some cases where the marker protocol doesn't provide enough information
+// to specify all degrees of freedom. Hence, these drivers complement a
+// specific driver protocol. Many of these drivers are soft, and an only serve
+// to stabalize the solver in postures where the markers doesn't provide unique
+// kinematic solution. 
+
+AnyFolder ExtraDrivers = {
+
+  
+  // --------------------------------------------------------------------------
+  // The BM_MANNEQUIN drivers are used to support the degrees of freedom where
+  // the markers do not provide enough information. 
+  // See this file for options: #path HTML_DOC "<AMMR_PATH_DOC>/bm_config/index.html"
+  // --------------------------------------------------------------------------
+  
+  #define BM_MANNEQUIN_DRIVER_WEAK_SWITCH ON
+  
+  // Add drivers for extension of toe drivers: Only for Right side.
+  // Left foot toes are driven by the toe tip marker!
+  #if BM_FOOT_MODEL == _FOOT_MODEL_TOE_FLEX_GM_
+  // RotationPenetrationCombiDriver class template creates soft drivers that drive rotational 
+  // and linear measures to ensure that the rotational measure (toe flexion) is normally at zero  
+  // unless it deviates to prevent penetration of a target frame (toe tip) in a box shaped space. 
+  // The flexion extension of the toes is linked in the toe flex GM foot model.
+  // This class template is used to drive the flexion extension of right toes. They normally 
+  // stay at the neutral angle, but extend to prevent penetration with the ground during toe-off.
+  
+  // You can make multiple of these to simulate variation in the floor by adjusting the corners.
+  // You can simulate, for example, stairs or inclined floor.
+  #ifndef _RTTIP
+  RotationPenetrationCombiDriver ToeDriverRight (
+      TARGET_FRAME = Main.HumanModel.BodyModel.Right.Leg.Seg.Foot.Toe1.DistalPhalange1.ToeTip,
+      NEUTRAL_ANGLE_MEASURE = Main.HumanModel.BodyModel.Interface.Right.MetatarsoPhalangeal1DorsiFlexion
+      ) = {
+            Corners = {
+                        {2.8,0.035,-2.5},
+                        {2.8,0.035,-5.5},
+                        {2.0,0.035,-5.5},
+                        {2.0,0.035,-2.5},
+                      };
+          };
+  #endif
+  #ifndef _LTTIP
+  RotationPenetrationCombiDriver ToeDriverLeft (
+      TARGET_FRAME = Main.HumanModel.BodyModel.Left.Leg.Seg.Foot.Toe1.DistalPhalange1.ToeTip,
+      NEUTRAL_ANGLE_MEASURE = Main.HumanModel.BodyModel.Interface.Left.MetatarsoPhalangeal1DorsiFlexion
+      ) = {
+            Corners = {
+                        {2.8,0.035,-2.5},
+                        {2.8,0.035,-5.5},
+                        {2.0,0.035,-5.5},
+                        {2.0,0.035,-2.5},
+                      };
+          };
+  #endif
+  #endif
+  
+  
+  #define BM_MANNEQUIN_DRIVER_NECK OFF
+  
+  
+  
+  // This link to the mannequin drivers ensures they are picked up by the study.
+  AnyFolder& MannequinDrivers = Main.HumanModel.DefaultMannequinDrivers;
+
+};

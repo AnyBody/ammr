@@ -126,25 +126,49 @@ Switch to use leg model: "Leg"
 
 
 
+::::{dropdown} `_FOOT_MODEL_NONE_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _FOOT_MODEL_NONE_
+:value: 0
+Switch off foot model"
+:::
+::::
+
+
+
 ::::{dropdown} `_FOOT_MODEL_DEFAULT_`
 :animate: fade-in-slide-down
 :margin: 0 0 2 2
 
 :::{ammr:bm_constant} _FOOT_MODEL_DEFAULT_
-:value: 0
+:value: 1
 Switch for using the default foot model
 :::
 ::::
 
 
 
-::::{dropdown} `_FOOT_MODEL_NONE_`
+::::{dropdown} `_FOOT_MODEL_TOE_FLEX_GM_`
 :animate: fade-in-slide-down
 :margin: 0 0 2 2
 
-:::{ammr:bm_constant} _FOOT_MODEL_NONE_
-:value: 1
-Switch for using the GM foot model"
+:::{ammr:bm_constant} _FOOT_MODEL_TOE_FLEX_GM_
+:value: 2
+Switch for using the GM foot model with toe flexion
+:::
+::::
+
+
+
+::::{dropdown} `_FOOT_MODEL_DETAILED_GM_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _FOOT_MODEL_DETAILED_GM_
+:value: 3
+Switch for using the detailed GM foot model
 :::
 ::::
 
@@ -402,61 +426,13 @@ A full model of the thorax and ribcage where drivers/rythmns are specified by th
 
 
 
-::::{dropdown} `_FLOATING_RIBEND_KINETICS_OFF_`
+::::{dropdown} `_THORACIC_MODEL_FLEXIBLE_KINEMATIC_ONLY_`
 :animate: fade-in-slide-down
 :margin: 0 0 2 2
 
-:::{ammr:bm_constant} _FLOATING_RIBEND_KINETICS_OFF_
-:value: 0
- No recruited actuators to rib end of Floating ribs (rib11, rib12).
-:::
-::::
-
-
-
-::::{dropdown} `_FLOATING_RIBEND_KINETICS_ENDRIBS_`
-:animate: fade-in-slide-down
-:margin: 0 0 2 2
-
-:::{ammr:bm_constant} _FLOATING_RIBEND_KINETICS_ENDRIBS_
-:value: 1
- Add recruited actuators to rib end of Floating ribs (rib11, rib12).
-:::
-::::
-
-
-
-::::{dropdown} `_RIBCAGE_CC_ACTUATORS_`
-:animate: fade-in-slide-down
-:margin: 0 0 2 2
-
-:::{ammr:bm_constant} _RIBCAGE_CC_ACTUATORS_
-:value: 0
-3-direction Recruited actuators in CC (costochondral) joints.
-:::
-::::
-
-
-
-::::{dropdown} `_RIBCAGE_CC_REACTION_`
-:animate: fade-in-slide-down
-:margin: 0 0 2 2
-
-:::{ammr:bm_constant} _RIBCAGE_CC_REACTION_
-:value: 1
-Z-direction reaction in CC (costochondral) joints, which is along the relavant rib, togehter with having the rib-sternum averaging constraints reaction ON
-:::
-::::
-
-
-
-::::{dropdown} `_RIBCAGE_CC_ZACTUATORS_STERNUMREACTION_`
-:animate: fade-in-slide-down
-:margin: 0 0 2 2
-
-:::{ammr:bm_constant} _RIBCAGE_CC_ZACTUATORS_STERNUMREACTION_
-:value: 2
-Z-direction actuators in CC (costochondral) joints, which is along the relavant rib, togehter with having the rib-sternum averaging constraints reaction ON
+:::{ammr:bm_constant} _THORACIC_MODEL_FLEXIBLE_KINEMATIC_ONLY_
+:value: 3
+A kinematic flexible model of the thorax and ribcage with a kinematically determinate set of drivers. No muscles in thoracic region and instead the reactions are ON in the ribcage and thoracic spine.
 :::
 ::::
 
@@ -707,13 +683,25 @@ Constant to use 2 parameter muscle tendon calibration
 
 
 
+::::{dropdown} `_EXPERIMENTAL_CALIBRATION_TYPE_2PAR_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _EXPERIMENTAL_CALIBRATION_TYPE_2PAR_
+:value: 3
+Constant to use the experimenrtal 2 parameter muscle tendon calibration
+:::
+::::
+
+
+
 ::::{dropdown} `_CALIBRATION_TYPE_CUSTOM_`
 :animate: fade-in-slide-down
 :margin: 0 0 2 2
 
 :::{ammr:bm_constant} _CALIBRATION_TYPE_CUSTOM_
 :value: 0
-Use custom calibration. I.e. diables calibration so the user can add their own code.
+Use custom calibration. I.e. disables calibration so the user can add their own code.
 :::
 ::::
 

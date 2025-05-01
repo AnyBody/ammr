@@ -14,9 +14,10 @@ AnyFolder Data = {
   AnyFolder unscaled = {
     #include "<BM_TRUNK_DATASET_PATH>/ModelParameters.any"
     #include "<BM_TRUNK_DATASET_PATH>/STL/STL.any"
-    AnyFolder StandardParameters = { #include "..\Trunk\StandardParameters.any" };
+    AnyFolder StandardParameters = { #include "StandardParameters.any" };
   };
-   #include "TrunkMassDistribution.any"
+  #include "rangeOfMotion.any"
+  #include "TrunkMassDistribution.any"
 };
 
 
@@ -44,29 +45,29 @@ AnyFolder Segments = {
 
 
 /* Joint muscle section */
-AnyFolder JointMuscles = {
-  AnyFolder Cervical = {};
-  AnyFolder Thorax = {};
-  AnyFolder CostoSternal = {};
-  AnyFolder Lumbar = {};
-
-  #if (BM_TRUNK_MUSCLES == _MUSCLES_NONE_) & (BM_TRUNK_THORACIC_MODEL != _THORACIC_MODEL_RIGID_) & (BM_TRUNK_THORACIC_MODEL != _THORACIC_MODEL_USERDEFINED_)
-    // TODO get jnt muscles working.
-    //Thorax = {#include "JointMusclesThoracic.any"} //Adds muscles to the joints in the thoracic spine  
-  #endif
-
-
-  #if (BM_TRUNK_THORACIC_MODEL != _THORACIC_MODEL_FLEXIBLE_)
-  // TODO get working.
-  // for now costosternal joint muscles are always on to account for residual
-  //CostoSternal = {#include "JointMusclesRibCage.any"}; //Adds muscles to the joints for the ribs
-  #endif
-
-  #if BM_TRUNK_MUSCLES == OFF
+#if BM_TRUNK_MUSCLES == OFF
+  AnyFolder JointMuscles = {
+    AnyFolder Cervical = {};
+    AnyFolder Thorax = {};
+    AnyFolder CostoSternal = {};
+    AnyFolder Lumbar = {};
+  
+    #if (BM_TRUNK_MUSCLES == _MUSCLES_NONE_) & (BM_TRUNK_THORACIC_MODEL != _THORACIC_MODEL_RIGID_) & (BM_TRUNK_THORACIC_MODEL != _THORACIC_MODEL_USERDEFINED_)
+      // TODO get jnt muscles working.
+      //Thorax = {#include "JointMusclesThoracic.any"} //Adds muscles to the joints in the thoracic spine  
+    #endif
+  
+  
+    #if (BM_TRUNK_THORACIC_MODEL != _THORACIC_MODEL_FLEXIBLE_)
+    // TODO get working.
+    // for now costosternal joint muscles are always on to account for residual
+    //CostoSternal = {#include "JointMusclesRibCage.any"}; //Adds muscles to the joints for the ribs
+    #endif
+  
     Lumbar = {#include "JointMusclesLumbar.any"}; //Adds muscles to the joints in the lumbar spine
     Cervical = {#include "JointMusclesCervical.any"}; //Adds muscles to the joints in the cervical spine
-  #endif
-};
+  };
+#endif
 
 
 AnyFolder Joints = {
@@ -75,11 +76,11 @@ AnyFolder Joints = {
   AnyFolder RibCage = {};
   AnyFolder Lumbar = {#include "JointsLumbar.any"};
 
-  #if (BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_ )
+  #if (BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_ | BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_KINEMATIC_ONLY_)
     Thorax = {#include "JointsThorax.any"};
     RibCage = {#include "JointsRibCage.any"};
   #endif
-  #if (BM_TRUNK_MUSCLES == _MUSCLES_NONE_) & (BM_TRUNK_THORACIC_MODEL != _THORACIC_MODEL_RIGID_) & (BM_TRUNK_THORACIC_MODEL != _THORACIC_MODEL_USERDEFINED_) 
+  #if ((BM_TRUNK_MUSCLES == _MUSCLES_NONE_) & (BM_TRUNK_THORACIC_MODEL != _THORACIC_MODEL_RIGID_) & (BM_TRUNK_THORACIC_MODEL != _THORACIC_MODEL_USERDEFINED_)) | (BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_KINEMATIC_ONLY_)  
     #include "RibcagePassiveReactions.any"
   #endif
 
@@ -89,39 +90,39 @@ AnyFolder Joints = {
 
 
 /* Muscle definition section */
-
-#if BM_TRUNK_MUSCLES
-#if BM_TRUNK_CAVITY_MODEL == _CAVITY_MODEL_VOLUME_
-   #include "MeshForWrapping.any"
-#endif
-#endif
-
 AnyFolder Muscles = {
-    #include "MusclesMid.any"
-    AnyFolder Right = {
-      #include "MusclesRight.any"
-    };
-    AnyFolder Left = {
-      #include "MusclesLeft.any"
-    };
+  #include "MusclesMid.any"
+  AnyFolder Right = {
+    #include "MusclesRight.any"
   };
+  AnyFolder Left = {
+    #include "MusclesLeft.any"
+  };
+};
 
-  #if (BM_TRUNK_MUSCLES == _MUSCLES_NONE_) & (BM_TRUNK_CAVITY_MODEL == _CAVITY_MODEL_VOLUME_)
-  #include "AbdomenPassiveReactions.any"
+
+#if BM_TRUNK_CAVITY_MODEL == _CAVITY_MODEL_VOLUME_
+  #include "Abdominal/AbdominalPressureModel.any"
+  
+  #if BM_TRUNK_MUSCLES
+    Abdominal = {#include "MeshForWrapping.any"};
   #endif
   
-
-  #if BM_TRUNK_CAVITY_MODEL == _CAVITY_MODEL_VOLUME_
-  #include "Abdominal/AbdominalPressureModel.any"
+  #if BM_TRUNK_MUSCLES == _MUSCLES_NONE_
+    Abdominal = {#include "AbdomenPassiveReactions.any"};
   #endif
-  #if (BM_TRUNK_CAVITY_MODEL != _CAVITY_MODEL_VOLUME_) & BM_TRUNK_MUSCLES
+#endif
+  
+
+#if (BM_TRUNK_CAVITY_MODEL != _CAVITY_MODEL_VOLUME_) & BM_TRUNK_MUSCLES
   #include "Buckle.any"
-  #endif
+#endif
 
-#if BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_
+#if (BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_ | BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_KINEMATIC_ONLY_)
   #include "ThoracicCavity.any"
 #endif
   
+
 #if BM_TRUNK_MUSCLES | ( BM_LEG_MODEL & ((BM_LEG_MUSCLES_LEFT & BM_LEG_LEFT) | (BM_LEG_MUSCLES_RIGHT & BM_LEG_RIGHT))) 
   AnyFolder MuscleModels = {
     #if BM_TRUNK_MUSCLES == _MUSCLES_3E_HILL_
@@ -156,6 +157,7 @@ AnyFolder ElasticElements = {
 
     
   #include "DiscStiffness.any"
+  #include "CervicalDiscStiffness.any"
 
 };
 /* Other sections */

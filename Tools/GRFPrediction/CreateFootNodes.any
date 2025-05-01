@@ -2,12 +2,17 @@
 #undef __CREATE_CC_NODE__
 #endif
 
-#define __CREATE_CC_NODE__(IDX) NodesBaseFrame = { AnyRefNode Node##IDX = {sRel = ..Targets[IDX]; AnyDrawNode Drw = { Visible=...NodesVisible; RGB = ...NodesRGB; ScaleXYZ= ...NodesScale; Opacity = ...NodesOpacity; }; };}; AnyRefNode &Node##IDX = NodesBaseFrame.Node##IDX
+#define __CREATE_CC_NODE__(REF,IDX,NAME) AnyRefNode &Node##IDX = foot_ref.REF.Node##IDX##NAME; \
+                                        foot_ref.REF = {\
+                                          AnyRefNode Node##IDX##NAME = {sRel = ...Targets[IDX]*...NewCoordSys_ARel' +...NewCoordSys_sRel; ARel = ...NewCoordSys_ARel;  \
+                                            AnyDrawNode Drw = { Visible= ....NodesVisible; RGB = ....NodesRGB; ScaleXYZ= ....NodesScale; Opacity = ....NodesOpacity; }; };\
+                                        };\
+                                        foot_ref.ConditionalContact_Nodes##NAME = {AnyRefNode &Node##IDX = .REF.Node##IDX##NAME;};
 
 
 
 
-#class_template CreateFootContactNodes25 (AnySeg &foot_ref, 
+#class_template CreateFootContactNodes25 (AnyFolder &foot_ref, 
                                         NAME = "",
                                         CONTACT_POINT_OFFSET_DIST = 0)
 {
@@ -16,10 +21,10 @@
     #var AnyVec3 NodesScale =  0.005*{1, 1, 1};
     #var AnyVar NodesOpacity = 1;
   
-    AnyVec3 NewCoordSys_sRel = foot_ref.HeelContactNodeLow.sRel;
-    AnyMat33 NewCoordSys_ARel = RotMat(foot_ref.HeelContactNodeLow.sRel,
-                                       foot_ref.ToeMedialContactNode.sRel,
-                                       foot_ref.ToeLateralContactNode.sRel)
+    AnyVec3 NewCoordSys_sRel = foot_ref.Calcaneus.HeelContactNodeLow.sRel;
+    AnyMat33 NewCoordSys_ARel = RotMat(foot_ref.Calcaneus.HeelContactNodeLow.sRel,
+                                       foot_ref.ProximalPhalange1.ToeMedialContactNode.sRel,
+                                       foot_ref.ProximalPhalange5.ToeLateralContactNode.sRel)
                                 * RotMat(-pi/2*foot_ref.Sign, x);
     AnyMat33 ProjectionMat = {{1, 0, 0}, {0, 0, 0}, {0, 0, 1}}; // Projection to XZ plane!
     AnyVar Offset_Dist = CONTACT_POINT_OFFSET_DIST;
@@ -27,31 +32,31 @@
   
     AnyFloat Sources = 
     {
-      foot_ref.HeelContactNodeLow.sRel, 
-      foot_ref.ToeMedialContactNode.sRel, 
-      foot_ref.ToeLateralContactNode.sRel, 
-      foot_ref.BigToeNode.sRel,
-      foot_ref.MedialMalleolus.sRel, 
-      foot_ref.LateralMalleolus.sRel,
-      foot_ref.SubTalarJoint.sRel, 
-      foot_ref.MetatarsalJoint1Node.sRel, 
-      foot_ref.MetatarsalJoint2Node.sRel, 
-      foot_ref.MetatarsalJoint3Node.sRel, 
-      foot_ref.MetatarsalJoint4Node.sRel, 
-      foot_ref.MetatarsalJoint5Node.sRel, 
-      foot_ref.Scale((5*foot_ref.Data.ToeMedialContactNode+5*foot_ref.Data.BigToeNode)/10), 
-      foot_ref.Scale((5*foot_ref.Data.ToeLateralContactNode+5*foot_ref.Data.BigToeNode)/10),
-      foot_ref.Scale((5*foot_ref.Data.HeelContactNodeLow+5*foot_ref.Data.ToeMedialContactNode)/10), 
-      foot_ref.Scale((2.5*foot_ref.Data.HeelContactNodeLow+7.5*foot_ref.Data.ToeMedialContactNode)/10), 
-      foot_ref.Scale((5*foot_ref.Data.HeelContactNodeLow+5*foot_ref.Data.ToeLateralContactNode)/10), 
-      foot_ref.Scale((2.5*foot_ref.Data.HeelContactNodeLow+7.5*foot_ref.Data.ToeLateralContactNode)/10), 
-      foot_ref.Scale((7.5*foot_ref.Data.HeelContactNodeLow+2.5*foot_ref.Data.ToeLateralContactNode)/10), 
-      foot_ref.Scale((8.5*foot_ref.Data.HeelContactNodeLow+1.5*foot_ref.Data.ToeLateralContactNode)/10), 
-      foot_ref.Scale((-1.5*foot_ref.Data.HeelContactNodeLow+11.5*foot_ref.Data.ToeLateralContactNode)/10), 
-      foot_ref.Scale((4*foot_ref.Data.HeelContactNodeLow+6*foot_ref.Data.BigToeNode)/10),
-      foot_ref.FlexorHallucisLongusViaNode7.sRel, 
-      foot_ref.FlexorDigitorumLongusViaNode8.sRel, 
-      foot_ref.ExtensorDigitorumLongus1Node.sRel    
+      foot_ref.Calcaneus.HeelContactNodeLow.sRel, 
+      foot_ref.ProximalPhalange1.ToeMedialContactNode.sRel, 
+      foot_ref.ProximalPhalange5.ToeLateralContactNode.sRel, 
+      foot_ref.DistalPhalange1.BigToeNode.sRel,
+      foot_ref.Talus.MedialMalleolus.sRel, 
+      foot_ref.Talus.LateralMalleolus.sRel,
+      foot_ref.Talus.SubTalarJoint.sRel, 
+      foot_ref.Metatarsal1.MetatarsalJoint1Node.sRel, 
+      foot_ref.Metatarsal2.MetatarsalJoint2Node.sRel, 
+      foot_ref.Metatarsal3.MetatarsalJoint3Node.sRel, 
+      foot_ref.Metatarsal4.MetatarsalJoint4Node.sRel, 
+      foot_ref.Metatarsal5.MetatarsalJoint5Node.sRel, 
+      foot_ref.Scale((5*foot_ref.ProximalPhalange1.Data.ToeMedialContactNode+5*foot_ref.DistalPhalange1.Data.BigToeNode)/10), 
+      foot_ref.Scale((5*foot_ref.ProximalPhalange5.Data.ToeLateralContactNode+5*foot_ref.DistalPhalange1.Data.BigToeNode)/10),
+      foot_ref.Scale((5*foot_ref.Calcaneus.Data.HeelContactNodeLow+5*foot_ref.ProximalPhalange1.Data.ToeMedialContactNode)/10), 
+      foot_ref.Scale((2.5*foot_ref.Calcaneus.Data.HeelContactNodeLow+7.5*foot_ref.ProximalPhalange1.Data.ToeMedialContactNode)/10), 
+      foot_ref.Scale((5*foot_ref.Calcaneus.Data.HeelContactNodeLow+5*foot_ref.ProximalPhalange5.Data.ToeLateralContactNode)/10), 
+      foot_ref.Scale((2.5*foot_ref.Calcaneus.Data.HeelContactNodeLow+7.5*foot_ref.ProximalPhalange5.Data.ToeLateralContactNode)/10), 
+      foot_ref.Scale((7.5*foot_ref.Calcaneus.Data.HeelContactNodeLow+2.5*foot_ref.ProximalPhalange5.Data.ToeLateralContactNode)/10), 
+      foot_ref.Scale((8.5*foot_ref.Calcaneus.Data.HeelContactNodeLow+1.5*foot_ref.ProximalPhalange5.Data.ToeLateralContactNode)/10), 
+      foot_ref.Scale((-1.5*foot_ref.Calcaneus.Data.HeelContactNodeLow+11.5*foot_ref.ProximalPhalange5.Data.ToeLateralContactNode)/10), 
+      foot_ref.Scale((4*foot_ref.Calcaneus.Data.HeelContactNodeLow+6*foot_ref.DistalPhalange1.Data.BigToeNode)/10),
+      foot_ref.Calcaneus.FlexorHallucisLongusViaNode7.sRel, 
+      foot_ref.Calcaneus.FlexorDigitorumLongusViaNode7.sRel, 
+      foot_ref.DistalPhalange2.ExtensorDigitorumLongus1Node.sRel    
     };
     AnyInt Sources_Sizes = SizesOf(Sources);
     AnyFloat Unit_Array = iarr(1, Sources_Sizes[0])*0 + 1 ;
@@ -60,49 +65,34 @@
     ( Sources - (NewCoordSys_sRel'*{Unit_Array})')* NewCoordSys_ARel * ProjectionMat 
     + (Offset_Dist*Offset_Vec'*{Unit_Array})';
   
-  foot_ref = {
-    AnyRefNode ConditionalContact_Nodes##NAME =
-    {
-      sRel = ..NewCoordSys_sRel ;
-      ARel = ..NewCoordSys_ARel ;  
+    foot_ref = {
+      AnyFolder ConditionalContact_Nodes##NAME = {};
     };
-  };
-  
-  
-  
-  AnyFolder &NodesBaseFrame = foot_ref.ConditionalContact_Nodes##NAME;
-  
-      __CREATE_CC_NODE__(0 );
-      __CREATE_CC_NODE__(1 );
-      __CREATE_CC_NODE__(2 );
-      __CREATE_CC_NODE__(3 );
-      __CREATE_CC_NODE__(4 );
-      __CREATE_CC_NODE__(5 );
-      __CREATE_CC_NODE__(6 );
-      __CREATE_CC_NODE__(7 );
-      __CREATE_CC_NODE__(8 );
-      __CREATE_CC_NODE__(9 );
-      __CREATE_CC_NODE__(10);
-      __CREATE_CC_NODE__(11);
-      __CREATE_CC_NODE__(12);
-      __CREATE_CC_NODE__(13);
-      __CREATE_CC_NODE__(14);
-      __CREATE_CC_NODE__(15);
-      __CREATE_CC_NODE__(16);
-      __CREATE_CC_NODE__(17);
-      __CREATE_CC_NODE__(18);
-      __CREATE_CC_NODE__(19);
-      __CREATE_CC_NODE__(20);
-      __CREATE_CC_NODE__(21);
-      __CREATE_CC_NODE__(22);
-      __CREATE_CC_NODE__(23);
-      __CREATE_CC_NODE__(24);
-  
-  
+
+    __CREATE_CC_NODE__(Calcaneus         ,0,NAME)
+    __CREATE_CC_NODE__(ProximalPhalange1 ,1,NAME)
+    __CREATE_CC_NODE__(ProximalPhalange5 ,2,NAME)
+    __CREATE_CC_NODE__(DistalPhalange1   ,3,NAME)
+    __CREATE_CC_NODE__(Calcaneus         ,4,NAME)
+    __CREATE_CC_NODE__(Calcaneus         ,5,NAME)
+    __CREATE_CC_NODE__(Calcaneus         ,6,NAME)
+    __CREATE_CC_NODE__(Metatarsal1       ,7,NAME)
+    __CREATE_CC_NODE__(Metatarsal2       ,8,NAME)
+    __CREATE_CC_NODE__(Metatarsal3       ,9,NAME)
+    __CREATE_CC_NODE__(Metatarsal4       ,10,NAME)
+    __CREATE_CC_NODE__(Metatarsal5       ,11,NAME)
+    __CREATE_CC_NODE__(DistalPhalange1   ,12,NAME)
+    __CREATE_CC_NODE__(MiddlePhalange3   ,13,NAME)
+    __CREATE_CC_NODE__(Metatarsal1       ,14,NAME)
+    __CREATE_CC_NODE__(Metatarsal1       ,15,NAME)
+    __CREATE_CC_NODE__(Metatarsal5       ,16,NAME)
+    __CREATE_CC_NODE__(Metatarsal5       ,17,NAME)
+    __CREATE_CC_NODE__(Calcaneus         ,18,NAME)
+    __CREATE_CC_NODE__(Calcaneus         ,19,NAME)
+    __CREATE_CC_NODE__(DistalPhalange5   ,20,NAME)
+    __CREATE_CC_NODE__(Metatarsal3       ,21,NAME)
+    __CREATE_CC_NODE__(Calcaneus         ,22,NAME)
+    __CREATE_CC_NODE__(Calcaneus         ,23,NAME)
+    __CREATE_CC_NODE__(DistalPhalange1   ,24,NAME)
+    
 };
-
-
-
-
-
-  
