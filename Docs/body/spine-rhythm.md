@@ -14,7 +14,9 @@ default coefficients with your own data.
 
 The model repository comes with two class templates which makes it easy to
 create kinematic rhytms between joints. The two class templates are
-`RhythmDriverLinear` and `RhythmDriverBiLinear` which can be used to create
+[`RhythmDriverLinear`](Rhythms.Linear.SimpleRhythms.RhythmDriverLinear) and
+[`RhythmDriverBiLinear`](Rhythms.Linear.SimpleRhythms.RhythmDriverLinear.DocsValidationTarget)
+which can be used to create
 linear and rhythms with different coefficients for the positive and negative
 direction.
 
@@ -29,6 +31,7 @@ RhythmDriverLinear Rhythm = {
    };
  };
 ```
+
 In the example the rhythm constrains two DOFs of the arm to move in a 1:4 ratio.
 The use of `RhythmDriverBiLinear` is quite similar, and the use of both class
 templates are [documented here](Rhythms.Linear.SimpleRhythms.any).
@@ -39,29 +42,109 @@ kinematic measures into a single kinematic measure. It is easy to see the
 underlying code by right-clicking the class template in the AnyScript editor and
 select `Go to definition`.
 
-## Spine rhythm coefficients
-
-The rhythm coefficients were
-derived from a review of spine literature. The values for spine and vertebra
-range-of-motion vary significantly in published studies, and no single complete
-dataset was found. Consequently, the rhythm presented here is a composite,
-designed to provide the most consistent and average set of rhythm coefficients.
-The papers used to derive the coefficients are listed at the bottom of the page.
+In model the spine rhytm is is comprised of many different rhythms which are
+linked together with other rhythms. This done so ryhtms can be activated as needed
+depending on what data is available for driving model. 
 
 :::{figure-md} 
-:align: center
 
-<img src="_static/spine-rhythm-axial-rotation.svg" width="50%">
-<img src="_static/spine-rhythm-lateral-bending.svg" width="50%">
-<img src="/_static/spine-rhythm-flexsion-extension.svg" width="50%">
+![spine-rhythm-coefficients](_static/rhythm-overview.png)
 
-Coeffients for axial rotation, lateral bending and flexion/extension.
+The figure shows how the different rhythms are linked together. The `SpineRhythmDrvFlexion` is the main driver of the
+flexion rhythm for the lumbar spine.
+
 :::
 
-spine-rhythm-axial-rotation.svg
+
+## Spine rhythm coefficients
+
+The rhythm coefficients were derived from a review of spine literature. The
+values for spine and vertebra range-of-motion vary significantly in published
+studies, and no single complete dataset was found. Consequently, the rhythm
+presented here is a composite, designed to provide the most consistent and
+average set of rhythm coefficients. The two curves for the thoracic flexion
+rhythm is because this rhythm is defined as a bilinear rhythm with different
+coefficients for the positive and negative direction. The papers used to derive
+the coefficients are listed at the bottom of the page.
+
+:::{figure-md} 
+
+![spine-rhythm-coefficients](_static/spine-rhythm-coefficients.svg)
+
+Coefficients for different sub rhythms of the spine. The two curves for the thoracic flexion rhythm is because 
+this rhythm is defined as a bilinear rhythm with different coefficients for the positive and negative direction.
+:::
+
+:::{figure-md} 
+
+![lateral-bending](_static/spine-link-coefficients.svg)
+
+Coefficients for linking sub rhythms together. This is essensially rhythms betwee the rhythms.
+
+:::
+
 
 
 ## Overwriting the spine rhythm coefficients
+
+The spine rhythm coefficients are defined in such a way that they can be directly 
+overwritten by the user define a custom spine rhythm. The rhythm drivers 
+exist in the following places in the model:
+
+```AnyScript
+Main.HumanModel.BodyModel.Trunk.Joints.Cervical = 
+{
+  Flexion.rhythmC2C7 = { };
+  Flexion.rhythmC1C0SkullThoraxFlexion = { };
+  LateralBending.rhythmC2C7 = { };
+  Rotation.rhythmC2C7 = { };
+  Rotation.rhythmC2C1SkullThoraxRotation = { };
+
+  CervicalThroacicRotationLinkDriver = { };
+  CervicalThroacicLatBendingLinkDriver = { };
+  CervicalThroacicExtensionLinkDriver = { };
+}; 
+
+Main.HumanModel.BodyModel.Trunk.Joints.Thorax = 
+{
+    LateralBendingRhythmDriver = { };
+    AxialRotationRhythmDriver = { };
+    FlexionExtensionRhythmDriver = { };
+    LumbarThroacicExtensionLinkDriver = { };
+    LumbarThroacicLatBendingLinkDriver = { };
+    LumbarThroacicRotationLinkDriver = { };
+};
+
+Main.HumanModel.BodyModel.Trunk.Joints.Lumbar = 
+{
+   SpineRhythmDrvFlexion = {};
+   SpineRhythmDrvRotation = {};
+   SpineRhythmDrvLatBending = {};
+};
+
+```
+
+Here is an example of how to overwrite the `RhythmCoefficients` in the
+`LateralBendingRhythmDriver` of the thoracic spine:
+
+```AnyScript
+Main.HumanModel.BodyModel.Trunk.JointsThorax = 
+{
+  LateralBendingRhythmDriver = 
+  {
+    RhythmCoefficients = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1};
+  };
+};
+```
+
+In the example above, the `RhythmCoefficients` variable is redefined with a new
+set of values. This will overwrite the default coefficients defined in the
+`JointsThorax.any` file.
+
+It is important to note that the number of coefficients in the
+`RhythmCoefficients` vector must match the number of kinematic measures used in
+the rhythm. In the case of the `LateralBendingRhythmDriver`, there are 11
+kinematic measures, so the `RhythmCoefficients` vector must have 11 elements.
 
 
 
@@ -87,7 +170,7 @@ The rhythm coefficients were derived from the following papers:
 - Fujimori, T., Iwasaki, M., Nagamoto, Y., Matsuo, Y., Ishii, T., Sugiura, T., Kashii, M., Murase, T., Sugamoto, K., & Yoshikawa, H. (2014). https://doi.org/10.1016/j.spinee.2013.11.054
 - Narimani, M., & Arjmand, N. (2018). https://doi.org/10.1016/j.jbiomech.2018.01.017
 - Alqhtani, R. S., Jones, M. D., Theobald, P. S., & Williams, J. M. (2015). https://doi.org/10.1016/j.jmpt.2014.12.007
-
+
 
 ### Lumbar region:
 
