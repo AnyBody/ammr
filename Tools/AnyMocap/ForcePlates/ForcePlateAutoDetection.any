@@ -534,14 +534,7 @@ See below for more details
 #if (FORCEPLATE_TYPE == 4) | (FORCEPLATE_TYPE == 2)
 
  AnyFolder CopCalculations = {
-   
-   AnyFunInterpol GlobalCopFun = 
-   {
-     Type = Bspline;
-     T = ..Time;
-     Data = ((1+0*farr(0.0,1.0,..NoAnalogData))'*{..ForcePlate.ForcePlateSeg.r0}+ (..ForcePlate.ForcePlateSeg.Axes0*.GRF_start.Data)')';
-   };    
-   
+      
    AnyVector T =  .Time;
    AnyVector fx = .ForcePlate.load.Data[0]; 
    AnyVector fy = .ForcePlate.load.Data[1]; 
@@ -552,18 +545,28 @@ See below for more details
    
    AnyVector norm = vnorm({fx,fy,fz}');
    
-   // Values used when dividing. To avoid dividing by zero. 
-   AnyVar force_thresshold = 0.05*max(abs(fz));
-   AnyVector _fz = iffun(gtfun(abs(fz),force_thresshold ),fz, fz+10^10);
-   AnyVector _norm = iffun(gtfun(abs(norm),force_thresshold ),norm, norm+10^10) ;
+   // Force threshold prevents division by zero in the calculation 
+   // of COP. It can also be increase to much higher value (0.05) for example
+   // to prevent unleliable COP calculations when Fz is small. 
+   #var AnyVar force_threshold_ratio = 10e-8;
+   #var AnyVar threshold = force_threshold_ratio*max(abs(fz));
+   AnyVector _fz = iffun(gtfun(abs(fz),threshold ),fz, fz+10^10);
+   AnyVector _norm = iffun(gtfun(abs(norm),threshold ),norm, norm+10^10) ;
 
    
    AnyVar originz = -1*.ForcePlate.ForcePlateSeg.TransducerLocation.zdist;
    
-   
    AnyVector Vx= (originz*fx-my)/( _fz ) ;
    AnyVector Vy= (mx+originz*fy)/( _fz );
    AnyVector Vz= 0*Vy;
+   
+   
+   AnyFunInterpol GlobalCopFun = 
+   {
+     Type = Bspline;
+     T = ..Time;
+     Data = ((1+0*farr(0.0,1.0,..NoAnalogData))'*{..ForcePlate.ForcePlateSeg.r0}+ (..ForcePlate.ForcePlateSeg.Axes0*.GRF_start.Data)')';
+   };   
    
    AnyFunInterpol GRF_normalized = 
    {
