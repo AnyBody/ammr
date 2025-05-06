@@ -1,0 +1,51 @@
+/* This file defines a subject-specific morphing law
+It uses the same set of points that are used in the interface morphing
+of GM foot to TLEM foot for the detailed foot in AMMR, but in the inverted
+sequence now.
+
+Please note that the Transform function also includes the GeometricalScaling 
+function for the foot to ensure the geometrical scaling from the mocap model
+is captured. 
+
+*/
+
+AnyFolder MyScalingFunction = {
+  
+  AnyFunTransform3DLin Transform = {
+    ScaleMat = {{1,0,0},{0,1,0},{0,0,1}};
+    Offset = {0,0,0};
+    PreTransforms = {&.RBFTransform, &.ReverseTransform,&......ScalingLaw.GeometricalScaling.Right.Foot.ScaleFunction};
+  };
+  
+  AnyFunTransform3DLin2 AffineTransform = 
+  {
+    Points0 = ..TSeg2ScaleFrame(......BodyModel.Right.Leg.Seg.Foot.InterfaceMorphingDef.IM_Foot_GM_To_TLEM_Affine.Points1);
+    Points1 = ......BodyModel.Right.Leg.Seg.Foot.InterfaceMorphingDef.IM_Foot_GM_To_TLEM_Affine.Points0;
+    Mode = VTK_LANDMARK_AFFINE;    
+  };
+  
+  AnyFunTransform3DLin2 ReverseTransform = {
+    Points0 = .AffineTransform.Points1;
+    Points1 = .AffineTransform.Points0;
+    Mode = VTK_LANDMARK_RIGIDBODY;
+  };
+  
+  AnyFunTransform3DRBF RBFTransform = 
+  {
+    PreTransforms = {&.AffineTransform};
+    PolynomDegree = 1;
+    RBFDef.Type = RBF_Triharmonic;
+
+    Points0 = ..TSeg2ScaleFrame(......BodyModel.Right.Leg.Seg.Foot.InterfaceMorphingDef.IM_FootAffine_GM_To_TLEM_RBF.Points1);
+    Points1 = ......BodyModel.Right.Leg.Seg.Foot.InterfaceMorphingDef.IM_FootAffine_GM_To_TLEM_RBF.Points0;  
+    BoundingBox = 
+    {
+      Type = BB_Cartesian;
+      ScaleXYZ = {2, 2, 2};
+      DivisionFactorXYZ = 5*{1, 1, 1};
+    };
+    BoundingBoxOnOff = On;
+  };
+  
+};  // MyScalingFunction
+

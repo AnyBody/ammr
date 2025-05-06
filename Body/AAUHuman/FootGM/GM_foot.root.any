@@ -2,10 +2,14 @@
   {
     AnyFolder Foot = {
       #include "Scaling.any"
+      #if BM_FOOT_MODEL == _FOOT_MODEL_RIGID_GM_
+        #include "SegRigid.any"
+      #endif
       #if BM_FOOT_MODEL == _FOOT_MODEL_TOE_FLEX_GM_
-      #include "SegRigidToeFlex.any"
-      #else
-      #include "Seg.any"
+        #include "SegRigidToeFlex.any"
+      #endif
+      #if BM_FOOT_MODEL == _FOOT_MODEL_DETAILED_GM_
+        #include "Seg.any"
       #endif
       #include "MassProperties.any"
       #include "BoneDrawings.any"
@@ -27,9 +31,10 @@
   
   Jnt = {
     #if BM_FOOT_MODEL == _FOOT_MODEL_TOE_FLEX_GM_
-    #include "JntRigidToeFlex.any"
-    #else
-    #include "Jnt.any"
+      #include "JntRigidToeFlex.any"
+    #endif
+    #if BM_FOOT_MODEL == _FOOT_MODEL_DETAILED_GM_ 
+      #include "Jnt.any"
     #endif
   };
   
@@ -38,38 +43,67 @@
   #else
   Mus = 
   {
-    #include "Mus.any"
+    #include "Mus.any" // this file includes muscles across the ankle joint
+  };
+
+  #if ((_LEFT_RIGHT_ == "Right") & !BM_FOOT_MUSCLES_RIGHT) | ((_LEFT_RIGHT_ == "Left") & !BM_FOOT_MUSCLES_LEFT)
+  #else  
+  Mus = 
+  {
+    #if (BM_FOOT_MODEL == _FOOT_MODEL_TOE_FLEX_GM_) | (BM_FOOT_MODEL == _FOOT_MODEL_DETAILED_GM_)
     AnyFolder Foot = {
-      #include "Foot_Mus.any"
+      #include "Foot_Mus.any" // this file includes intrinsic muscles of the foot
     };
+    #endif
   };  
 
   #endif
+  #endif
       
-  #if BM_FOOT_MODEL_LIGAMENTS == ON
-  AnyFolder Ligaments = {
-    #include "LigamentsNew.any"
-    #if BM_FOOT_MODEL == _FOOT_MODEL_DETAILED_GM_
-    #include "LigamentsPhalangeal.any"
-    #endif
-    #include "LigamentsTarsal.any"
-  };
-  #else
-  AnyFolder JointMusclesFoot = {
-    #include "JointMusclesFoot.any"
-  };  
+  #if BM_FOOT_MODEL == _FOOT_MODEL_DETAILED_GM_
+    AnyFolder Ligaments = {
+      #include "LigamentsNew.any"
+      #include "LigamentsPhalangeal.any"
+      #include "LigamentsTarsal.any"
+    };
+    Main.HumanModel.Calibration = {
+      #if _LEFT_RIGHT_ == "Right"
+        AnyFolder RightFootLigamentCalibration = {
+          #include "cal\FootCalibrationStudies.any"
+        };
+        CalibrationSequence = {
+          AnyOperation &LigCalFootRight = .RightFootLigamentCalibration.FootCalibrationSequence;
+        };
+      #endif
+      #if _LEFT_RIGHT_ == "Left"
+        AnyFolder LeftFootLigamentCalibration = {
+          #include "cal\FootCalibrationStudies.any"
+        };
+        CalibrationSequence = {
+          AnyOperation &LigCalFootLeft = .LeftFootLigamentCalibration.FootCalibrationSequence;
+        };
+      #endif
+    };
   #endif
   
+  #if BM_FOOT_MODEL == _FOOT_MODEL_TOE_FLEX_GM_
+    AnyFolder JointMusclesFoot = {
+      #include "JointMusclesFoot.any"
+    };
+  #endif
+  
+  #if (BM_FOOT_MODEL == _FOOT_MODEL_TOE_FLEX_GM_) | (BM_FOOT_MODEL == _FOOT_MODEL_DETAILED_GM_)
   InterfaceFolder ={
     #include "Interface.any"
   };
-  #if BM_FOOT_MODEL == _FOOT_MODEL_TOE_FLEX_GM_
-  #include "InitialPositionsRigidToeFlex.any" 
-  #else
-  #include "InitialPositions.any"
   #endif
-
-
+  
+  #if BM_FOOT_MODEL == _FOOT_MODEL_RIGID_GM_
+    #include "InitialPositionsRigid.any"
+  #endif
+  #if BM_FOOT_MODEL == _FOOT_MODEL_TOE_FLEX_GM_
+    #include "InitialPositionsRigidToeFlex.any" 
+  #endif
   #if BM_FOOT_MODEL == _FOOT_MODEL_DETAILED_GM_
-  AnyInt DetailedGMFoot_ExpWarn = warn(0,"The detailed GM foot model with 26 segments is in an experimental state and needs more work to be finished.");
+    #include "InitialPositions.any"
   #endif
