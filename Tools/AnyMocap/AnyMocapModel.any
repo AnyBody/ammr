@@ -1,67 +1,67 @@
 #include "../libdef.any"
 
 // This is the AnyMOCAP base model.
-// There should be no reason to change this file directly. 
+// There should be no reason to change this file directly.
 //
-// All user defined options can be configured in the application, by 
+// All user defined options can be configured in the application, by
 // changing the files TrialSpcificData.any, SubjectSpecificData.any, LabSpecificData.any
 #include "PathDefinitions.any"
 #include "ClassTemplates.any"
 
 
-Main = 
+Main =
 {
   // AnyMoCap related setup
   #include "ModelSetup.any"
-  
-  // Configure and include the human model. The configuration 
+
+  // Configure and include the human model. The configuration
   // is controlled by the file (#include "<BODY_MODEL_CONFIG_FILE>")
   #include "<ANYBODY_PATH_BODY>/HumanModel.any"
-  #include "BodyModelWithoutMuscles.any" 
-  
+  #include "BodyModelWithoutMuscles.any"
+
   // Include environment model
   // e.g. global reference, forceplates etc.
   #include "EnvironmentModel.any"
-  
+
   // Joint limits constraints for non-physiological postures
   #include "DefaultJointLimits.any"
-  
 
-  AnyFolder Studies = 
+
+  AnyFolder Studies =
   {
     // PreProcess functionality for Inertial MoCap (BVH) studies.
     #if MOCAP_INPUT_DATA_TYPE == "BVH"
     #include "BVH_ModelPreprocess.any"
     #endif
-    
-    /// Study for parameter identification of segment length and marker positions. 
-    AnyOptKinStudy ParameterIdentification = 
-    {    
-      #include "KinematicStudyForParameterIdentification.any"  
+
+    /// Study for parameter identification of segment length and marker positions.
+    AnyOptKinStudy ParameterIdentification =
+    {
+      #include "KinematicStudyForParameterIdentification.any"
     };
-    
-    /// Overdeterminate kinematic study to generate joint angles for inv. dyn. study. 
-    AnyKinStudy MarkerTracking = 
-    {       
+
+    /// Overdeterminate kinematic study to generate joint angles for inv. dyn. study.
+    AnyKinStudy MarkerTracking =
+    {
       AnyComponentDefinition obj = {};
       AnyFolder& C3DData= Main.ModelSetup.C3DFileData;
-      AnyFolder& BodyModel = Main.HumanModel.BodyModelWithoutMuscles; 
+      AnyFolder& BodyModel = Main.HumanModel.BodyModelWithoutMuscles;
       AnyFolder& EnvironmentModel = Main.EnvironmentModel;
       AnyFolder ModelEnvironmentConnection =
       {
         AnyFolder &MarkerDrivers = Main.ModelSetup.MocapDrivers;
         AnyFolder &ExtraDrivers = Main.ModelSetup.MocapExtraDrivers;
-      }; 
-      
+      };
+
       #include "JointAngleOutputs.any"
-      
-      #include "MarkerTrackingSettings.any"      
+
+      #include "MarkerTrackingSettings.any"
     };
-    
-    
+
+
     /// Study for running the inverse dynamic simulation
-    AnyBodyStudy InverseDynamicStudy = 
-    { 
+    AnyBodyStudy InverseDynamicStudy =
+    {
       AnyComponentDefinition obj = {};
       Gravity = Main.ModelSetup.LabSpecificData.Gravity;
       AnyFolder& C3DData= Main.ModelSetup.C3DFileData ;
@@ -71,22 +71,20 @@ Main =
       {
         #include "HumanGroundResiduals.any"
         #include "JointsAndDriversOptimized.any"
-      }; 
-      
-      // Include markers for visualization, but exclude the driver part 
+      };
+
+      // Include markers for visualization, but exclude the driver part
       AnyFolder &Markers= Main.ModelSetup.MocapDrivers;
-      
+
       // Exclude marker drivers and soft rhythms
       #include "ExcludeSoftDrivers.any"
 
       #include "InverseDynamicSettings.any"
     };
-    
-  };  
-  
+
+  };
+
   // Macros to excute the model
-  #include "RunApplication.any"  
+  #include "RunApplication.any"
 
 };//End Main
-
-

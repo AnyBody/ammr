@@ -1,70 +1,70 @@
 
 AnyFolder Femur = {
-  
+
   AnyVar LengthFemur = Main.RatModel.Seg.Femur.v_Knee[0]-Main.RatModel.Seg.Femur.v_Hip[0];
-  
+
   AnyVar LengthDistal = Main.RatModel.FracturRatio*LengthFemur;  //Length of distal segment
   AnyVar LengthProximal = LengthFemur - LengthDistal;    //Length of proximal segment
-  
+
   AnyVar Ld = LengthDistal;  //Length of distal segment
   AnyVar Lp = LengthProximal;  //Length of proximal segment
-  
+
   //Local position vectors in CS F (old local CS of Femur), CS A (new local CS of new distal Femur Segment) or CS B (new local CS of new proximal Femur Segment)
   AnyVector f_r_H = {-0.00865241480000,   0.00498824800000,  0.00246587170000};  //Hipjoint in CS F
   AnyVector f_r_K = {0.02010306200000,  0.00010467243000,   -0.00096203734000}; //Anklejoint in CS F
-  
+
   AnyVector a_r_K = {Ld/2, f_r_K[1], f_r_K[2]};  //Kneejoint in CS A
   AnyVector a_r_S = {-Ld/2, 0.0, 0.0}; //Cuttingplane in CS A
   AnyVector a_r_f = -f_r_K+a_r_K;	    //old CoM of Femursegment in CS A
-  
-  AnyVector b_r_H = {-Lp/2, f_r_H[1], f_r_H[2]}; //Hipjoint in CS B		
+
+  AnyVector b_r_H = {-Lp/2, f_r_H[1], f_r_H[2]}; //Hipjoint in CS B
   AnyVector b_r_S = {Lp/2, 0.0, 0.0};  //Cuttingplane in CS B
   AnyVector b_r_f = -f_r_H+b_r_H;	    //old CoM of Femursegment in CS B
-  
+
   AnyVar betr_a_r_f= (a_r_f[0]^2+a_r_f[1]^2+a_r_f[2]^2)^0.5; //length of position vector a_r_t
   AnyVar betr_b_r_f= (b_r_f[0]^2+b_r_f[1]^2+b_r_f[2]^2)^0.5; //length of position vector b_r_t
-  
+
   //      //Kinetic parameters of old femur segment
   AnyVar MassS = 0.009238579;
   AnyVector inertia =   {1.1245034e+003,1.2166950e+003,4.0551146e+002,5.5697794e+001,-1.5093965e+002,-3.1721455e+001}; //ohne rot
   AnyVar Ixx = inertia[2]/1000000000;
   AnyVar Iyy = inertia[0]/1000000000;
-  AnyVar Izz = inertia[1]/1000000000; 
-  //      
+  AnyVar Izz = inertia[1]/1000000000;
+  //
   AnyVar MassS_d = MassS*betr_b_r_f/(betr_a_r_f+betr_b_r_f); // Mass of segment
   AnyVar MassS_p = MassS*betr_a_r_f/(betr_a_r_f+betr_b_r_f); // Mass of segment
-  //      
-  //      WICHTIG: AENDERUNG DER AUSRICHTUNG DER KS:  
+  //
+  //      WICHTIG: AENDERUNG DER AUSRICHTUNG DER KS:
   //      Originalumrechnung aus Wehner et al., 2009:
   //      AnyMat33 Jred = {{Ixx-MassS_p*betr_b_r_f^2-MassS_d*betr_a_r_f^2,0,0},{0,Iyy,0},{0,0,Izz-MassS_p*betr_b_r_f^2-MassS_d*betr_a_r_f^2}};
   //      AnyMat33 J_p = {{MassS_p*Lp^2/(MassS_d*Ld^2+MassS_p*Lp^2),0,0},{0,MassS_p^2*Ld/(MassS_d^2*Lp+MassS_p^2*Ld),0},{0,0,MassS_p*Lp^2/(MassS_d*Ld^2+MassS_p*Lp^2)}}*Jred;
   //      AnyMat33 J_d = {{MassS_d*Ld^2/(MassS_d*Ld^2+MassS_p*Lp^2),0,0},{0,MassS_d^2*Lp/(MassS_d^2*Lp+MassS_p^2*Ld),0},{0,0,MassS_d*Ld^2/(MassS_d*Ld^2+MassS_p*Lp^2)}}*Jred;
-  
+
   //neue Umrechnung mit x-achse als longitudinalachse
   AnyMat33 Jred = {{Ixx,0,0},{0,Iyy-MassS_p*betr_b_r_f^2-MassS_d*betr_a_r_f^2,0},{0,0,Izz-MassS_p*betr_b_r_f^2-MassS_d*betr_a_r_f^2}};
   AnyMat33 J_p = {{MassS_p^2*Ld/(MassS_d^2*Lp+MassS_p^2*Ld),0,0},{0,MassS_p*Lp^2/(MassS_d*Ld^2+MassS_p*Lp^2),0},{0,0,MassS_p*Lp^2/(MassS_d*Ld^2+MassS_p*Lp^2)}}*Jred;
   AnyMat33 J_d = {{MassS_d^2*Lp/(MassS_d^2*Lp+MassS_p^2*Ld),0,0},{0,MassS_d*Ld^2/(MassS_d*Ld^2+MassS_p*Lp^2),0},{0,0,MassS_d*Ld^2/(MassS_d*Ld^2+MassS_p*Lp^2)}}*Jred;
-  //                                                                                           
-  
+  //
+
   #include "AttachmentLocation.any"
-  
+
 };
 
 
-#if FRACTUREMODEL 
+#if FRACTUREMODEL
 
 AnySeg Femur_d = {
-  
+
   AnyVector a_r_S = .Femur.a_r_S;
   AnyVector a_r_f = .Femur.a_r_f;
-  
-  r0 = {-0.05, -0.05, -0.05};  
+
+  r0 = {-0.05, -0.05, -0.05};
   Axes0 = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
-  
-  
+
+
   Mass=.Femur.MassS_d;
   Jii = {.Femur.J_d[0][0],.Femur.J_d[1][1],.Femur.J_d[2][2]};
-  
+
   AnyRefNode PalmNode = {
     sRel = .Hip.sRel - {-0.00865241480000,   0.00498824800000,  0.00246587170000
     };
@@ -76,18 +76,18 @@ AnySeg Femur_d = {
       RGB = .....DrawSettings.Colors.Segments;
     };
   };
-  
+
   AnyDrawSeg DrwBeam =      {
     RGB = {1, 0, 0};
     Opacity = 1;
     InertiaScale = 0.25*0.3;
   };
-  
+
   AnyString loc = "dist";
-  
+
   //Vectors of RefNodes of new distal Femur segment
   AnyVector d_Hip 		   = .Femur.v_Hip 			 	+ a_r_f;
-  AnyVector d_Knee 		   = .Femur.v_Knee 	      	+ a_r_f;	
+  AnyVector d_Knee 		   = .Femur.v_Knee 	      	+ a_r_f;
   AnyVector d_Pat 		   = .Femur.v_Pat 			 	+ a_r_f;
   AnyVector d_Femur_mus_extensor_digitorum_longus_1Node0  = .Femur.v_Femur_mus_extensor_digitorum_longus_1Node0 	+ a_r_f;
   AnyVector d_Femur_mus_extensor_digitorum_longus_2Node0  = .Femur.v_Femur_mus_extensor_digitorum_longus_2Node0 	+ a_r_f;
@@ -232,9 +232,9 @@ AnySeg Femur_d = {
   AnyVector d_Femur_mus_adductor_magnusNode4 = .Femur.v_Femur_mus_adductor_magnusNode4	+ a_r_f;
   AnyVector d_Femur_mus_adductor_magnusNode5 = .Femur.v_Femur_mus_adductor_magnusNode5	+ a_r_f;
   AnyVector d_Cut_Node = a_r_S;
-  
-  
-  
+
+
+
   AnyRefNode Hip 			  = {
     sRel = .d_Hip 	 	   ;
     //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
@@ -245,7 +245,7 @@ AnySeg Femur_d = {
     //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
   #include "DrawNodeDistProx.any"
 };
-	
+
   AnyRefNode Pat 			  = {
     sRel = .d_Pat 		   ;
     //AnyString loc2 = iffun(gtfun(sRel[0] - .a_r_f[0],..Femur.LengthProximal/2),"dist","prox");
@@ -1106,22 +1106,22 @@ AnySeg Femur_d = {
 
   AnyRefNode Cut_Node           = {
     sRel = .d_Cut_Node;
-        AnyDrawRefFrame drw = 
+        AnyDrawRefFrame drw =
     {
       RGB = {1,0,0};
       ScaleXYZ = 0.01*{1, 1, 1};
     };
     AnyRefNode surfnode = {
       ARel = RotMat(pi/2, y);
-      AnySurfCylinder cuttingplane = 
+      AnySurfCylinder cuttingplane =
       {
         Radius = 0.01;
         Length = 0.00001;
         CapRatio = 0.001;
-        AnyDrawParamSurf drw = 
+        AnyDrawParamSurf drw =
         {
         };
-        
+
       };
     };
   };
@@ -1130,29 +1130,29 @@ AnySeg Femur_d = {
 
 
 AnySeg Femur_p = {
-  
+
   AnyVector b_r_S = .Femur.b_r_S;
   AnyVector b_r_f = .Femur.b_r_f;
-  
-  r0 = {-0.05, -0.05, -0.05};  
+
+  r0 = {-0.05, -0.05, -0.05};
   Axes0 = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
-  
-  
-  
+
+
+
   Mass=.Femur.MassS_p;
   Jii = {.Femur.J_p[0][0],.Femur.J_p[1][1],.Femur.J_p[2][2]};
-  
+
   AnyDrawSeg DrwBeam =      {
     RGB = {0, 1, 0};
     Opacity = 1;
     InertiaScale = 0.25 * 0.3;
   };
-  
+
   AnyString loc = "dist";
-  
-  //Vectors of RefNodes of new proximal Femur segment      
+
+  //Vectors of RefNodes of new proximal Femur segment
   AnyVector p_Hip 		   = .Femur.v_Hip 			 	+ b_r_f;
-  AnyVector p_Knee 		   = .Femur.v_Knee 			+ b_r_f;	
+  AnyVector p_Knee 		   = .Femur.v_Knee 			+ b_r_f;
   AnyVector p_Pat 		   = .Femur.v_Pat 			 	+ b_r_f;
   AnyVector p_Femur_mus_extensor_digitorum_longus_1Node0  = .Femur.v_Femur_mus_extensor_digitorum_longus_1Node0 	+ b_r_f;
   AnyVector p_Femur_mus_extensor_digitorum_longus_2Node0  = .Femur.v_Femur_mus_extensor_digitorum_longus_2Node0 	+ b_r_f;
@@ -1297,8 +1297,8 @@ AnySeg Femur_p = {
   AnyVector p_Femur_mus_adductor_magnusNode4 = .Femur.v_Femur_mus_adductor_magnusNode4	+ b_r_f;
   AnyVector p_Femur_mus_adductor_magnusNode5 = .Femur.v_Femur_mus_adductor_magnusNode5	+ b_r_f;
   AnyVector p_Cut_Node = b_r_S;
-  
-  
+
+
   AnyRefNode Hip 			  = {
     sRel = .p_Hip 	 	   ;
     //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
@@ -1310,7 +1310,7 @@ AnySeg Femur_p = {
     //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
   #include "DrawNodeDistProx.any"
 };
-	
+
   AnyRefNode Pat 			  = {
     sRel = .p_Pat 		   ;
     //AnyString loc2 = iffun(gtfun(sRel[0] - .b_r_f[0],..Femur.LengthProximal/2),"dist","prox");
@@ -2173,7 +2173,7 @@ AnySeg Femur_p = {
 
   AnyRefNode Cut_Node           = {
     sRel = .p_Cut_Node;
-    AnyDrawRefFrame drw = 
+    AnyDrawRefFrame drw =
     {
       RGB = {0,1,0};
       ScaleXYZ = 0.01*{1, 1, 1};

@@ -13,14 +13,14 @@ See below for more details
 
 // This template is used by all the MoCap models to link the model to the C3D file data.
 // It creates a marker driver on the specified segment on the model and creates the
-// necessary drivers to link the marker position to the C3D file data. 
-// 
-// The class template has special options to add optimizations of the marker positions 
+// necessary drivers to link the marker position to the C3D file data.
+//
+// The class template has special options to add optimizations of the marker positions
 // and to add filters to the marker positions.
-// 
+//
 // :::{rubric} For example
 // :::
-// 
+//
 // :::{code-block} AnyScript
 // CreateMarkerDriver RPSI (
 //   MarkerPlacement=Trunk.Segments.PelvisSeg,
@@ -31,7 +31,7 @@ See below for more details
 //     sRelOpt = {-0.025,0,0.0};
 // };
 // :::
-// 
+//
 #class_template CreateMarkerDriver (
   MarkerName=_NOT_DEFINED_,
   MarkerPlacement,
@@ -111,11 +111,11 @@ See below for more details
 //     Specifies the scale of the marker in the model view. This is only used for
 //     visualization purposes.
 // CreateMarkerDriver#SKIP_MARKER_EXIST_CHECK
-//     Disable the check if the marker exists in the C3D file. This switch must be 
+//     Disable the check if the marker exists in the C3D file. This switch must be
 //     enabled if you model is structured so markers are created
 //     before the AnyInputC3D file have been defined. (Defaults to 0)
 
-                                
+
 //  #if  MarkerName != _NOT_DEFINED_
 //  AnyInt Deprecated_MarkerName_argument = warn(0, strformat("\n"+
 //       "------------------------------------------------------------------------------------------------------\n"+
@@ -123,7 +123,7 @@ See below for more details
 //       "    name as the marker. \n"+
 //       "-------------------------------------------------------------------------------------------------------\n")
 //    );
-//  
+//
 //  #endif
 
 #if  USE_BVH_INPUT
@@ -150,7 +150,7 @@ AnyMessage TestMarkerExist ={
   AnyString MarkerLabel = #__NAME__;
   #else
   AnyString MarkerLabel = #MarkerName;
-#endif 
+#endif
   // Note: if you get a ERROR: " 'PointLabels'  :  Identifier cannot be resolved "
   //       This is because you create a marker earlier than the C3D file objects
   //       is created. For example by creating the marker directly in the "TrialSpecificData.any" file
@@ -161,14 +161,14 @@ AnyMessage TestMarkerExist ={
 };
 #endif
 #endif
-                                      
-                                      
-  #var AnyVar ConstMarkerWeightX = WeightX;  
+
+
+  #var AnyVar ConstMarkerWeightX = WeightX;
   #var AnyVar ConstMarkerWeightY = WeightY;
   #var AnyVar ConstMarkerWeightZ = WeightZ;
-  
+
   #if (UseC3DWeightResiduals == 1) & (USE_BVH_INPUT == 0)
-    AnyFunSquareWaveThreshold MarkerWeightsFun = 
+    AnyFunSquareWaveThreshold MarkerWeightsFun =
     {
       #var dT = {C3D_OBJECT.WeightTransitionTime};
       #if MarkerName == _NOT_DEFINED_
@@ -178,7 +178,7 @@ AnyMessage TestMarkerExist ={
       T = C3D_OBJECT.Points.Markers.MarkerName.PosInterpol.T;
       #var Data = C3D_OBJECT.Points.Markers.MarkerName.Residual;
       #endif
-      OutputValues = 
+      OutputValues =
             {{0, .ConstMarkerWeightX },
              {0, .ConstMarkerWeightY },
              {0, .ConstMarkerWeightZ}};
@@ -187,19 +187,19 @@ AnyMessage TestMarkerExist ={
     };
   #else
     AnyFunConst MarkerWeightsFun =
-    { 
+    {
       Value = {.ConstMarkerWeightX , .ConstMarkerWeightY , .ConstMarkerWeightZ };
     };
   #endif
-  
+
   #var AnyObjectPtrVar MarkerWeightsPtr = &MarkerWeightsFun;
-    
+
 
 
   // CreateMarkerDriver
   /// Position of the marker within its local reference frame
-  #var AnyVec3 sRelOpt; 
-  
+  #var AnyVec3 sRelOpt;
+
   #if USE_BVH_INPUT
   // CreateMarkerDriver
   /// Position of the marker on the BVH stick figure model. This is only
@@ -208,42 +208,42 @@ AnyMessage TestMarkerExist ={
   #endif
 
   #var AnyVec3 sRelOptDelta = {0, 0, 0};
-  
+
   #if OptX ==0 & OptY == 0 & OptZ == 0
         AnyVec3 sRelOptEdit = DesignVar(sRelOptDelta); //make it a design var ! because it will not be otherwise
   #else
-        AnyVec3 sRelOptEdit = sRelOptDelta; 
+        AnyVec3 sRelOptEdit = sRelOptDelta;
   #endif
 
 
 
-  
-  
-  Main.ModelSetup.Macros={ 
+
+
+  Main.ModelSetup.Macros={
      AnyStringVar Set##__NAME__ = ("classoperation "+  CompleteNameOf(...sRelOptEdit) + " " + strquote("Set Value") +  strformat ("\n")+ "classoperation Main " + strquote("Update Values") + strformat ("\n"));
   };
 
-  
+
   Main.ModelSetup.ParameterIdentification = {
-      AnyDesVar __NAME__##_X = {   Val = ....sRelOptEdit[0];    
+      AnyDesVar __NAME__##_X = {   Val = ....sRelOptEdit[0];
         #var Min=-100;
-        #var Max=100;      
+        #var Max=100;
       };
-      
+
       AnyDesVar __NAME__##_Y = {
-        Val = ....sRelOptEdit[1];   
+        Val = ....sRelOptEdit[1];
         #var Min=-100;
-        #var Max=100;      
+        #var Max=100;
       };
-      
+
       AnyDesVar __NAME__##_Z = {
-        Val = ....sRelOptEdit[2];   
+        Val = ....sRelOptEdit[2];
         #var Min=-100;
-        #var Max=100;      
+        #var Max=100;
       };
   };
-  
- 
+
+
 
   AnyFolder &MarkerPlacementSegment = BODY_MODEL_FOLDER.MarkerPlacement;
   MarkerPlacementSegment = {
@@ -256,7 +256,7 @@ AnyMessage TestMarkerExist ={
         sRel = .PlaceMarkerAt.sRel + (..sRelOpt + ..sRelOptEdit )*.PlaceMarkerAt.ARel';
         ARel= .PlaceMarkerAt.ARel;
       #endif
-      
+
 //      This was an attempt to allow PlaceMarkerAt to be anywhere and not only
 //      a RefNode on the segments.
 //      AnyFunTransform3DLinRef Transform2SegmentFrame = {
@@ -265,15 +265,15 @@ AnyMessage TestMarkerExist ={
 //            Ref = &..PlaceMarkerAt;
 //      };
 //      sRel = Transform2SegmentFrame({0.0,0,0}) + MarkerOffset;
-      
-      
-      AnyFolder Arrows = {  
+
+
+      AnyFolder Arrows = {
           // This folder is left for backwards compotability
           #var AnyVar size = DRAW_SCALE*0.05;
       };
       AnyDrawVector Arrow_X =   {
         AnyInt is_optimized = eqfun(OptX,1);
-        Vec = {size,0, 0};            
+        Vec = {size,0, 0};
         #include "DrawVector.any"
         #var Text="X";
       };
@@ -289,10 +289,10 @@ AnyMessage TestMarkerExist ={
         #include "DrawVector.any"
         #var Text="Z";
       };
-    }; //MarkerName 
+    }; //MarkerName
   };// InsertionNode
-  
-      
+
+
       AnyKinDriverMarker Driver = {
         AnyDrawKinMeasure Draw = {
           #if UseC3DWeightResiduals
@@ -320,10 +320,10 @@ AnyMessage TestMarkerExist ={
         };
         #endif
         Linear.Ref=0;
-        
-        
+
+
         AnyRefFrame &MarkerRef = BODY_MODEL_FOLDER.MarkerPlacement.__NAME__##_Marker;
-        
+
         #if USE_BVH_INPUT
           AnyFolder &MarkerDataRef = BVH_OBJECT.Markers.__NAME__;
         #else
@@ -333,10 +333,10 @@ AnyMessage TestMarkerExist ={
           AnyFolder &MarkerDataRef = C3D_OBJECT.Points.Markers.MarkerName;
           #endif
         #endif
-        
+
         #if FilterCutOffFrequency > 0
    	  /// A lowpass butterworth filter
-   	    AnyFunButterworthFilter LowPassFilter = 
+   	    AnyFunButterworthFilter LowPassFilter =
    	    {
    	     	#var FilterForwardBackwardOnOff = On;
    	     	#var AutomaticInitialConditionOnOff = On;
@@ -344,9 +344,9 @@ AnyMessage TestMarkerExist ={
               W = {1/(C3D_OBJECT.Header.VideoFrameRate*0.5)*FilterCutOffFrequency };
    	      Type = LowPass;
    	    };
-  	  
+
           /// Interpolation function of the lowpass filtered data
-          AnyFunInterpol FilteredPosInterpol = 
+          AnyFunInterpol FilteredPosInterpol =
           {
             #var Type = Bspline;
             BsplineOrder =4;
@@ -354,13 +354,13 @@ AnyMessage TestMarkerExist ={
             T = .MarkerDataRef.PosInterpol.T;
             Data = .LowPassFilter(.MarkerDataRef.Pos');
           };
-          
-        #else        
-        
+
+        #else
+
         AnyParamFun &InterpolRef = MarkerDataRef.PosInterpol;
 
         #endif
-        
+
         WeightFun={.MarkerWeightsPtr};
       };
 
@@ -369,17 +369,17 @@ AnyMessage TestMarkerExist ={
     #if OptX ==1
       AnyDesVar &__NAME__##_X =  Main.ModelSetup.ParameterIdentification.__NAME__##_X;
     #endif
-    
+
     #if OptY ==1
       AnyDesVar &__NAME__##_Y =  Main.ModelSetup.ParameterIdentification.__NAME__##_Y;
     #endif
-    
+
     #if OptZ ==1
       AnyDesVar &__NAME__##_Z =  Main.ModelSetup.ParameterIdentification.__NAME__##_Z;
-    #endif        
-    
+    #endif
+
   };
-  
+
 #if USE_BVH_INPUT
 
    BVH_OBJECT.Markers = {
@@ -388,9 +388,9 @@ AnyMessage TestMarkerExist ={
       };
    };
 
-  
-  //AnyFolder &MarkerInsertionNodeBVH = MarkerPlacementBVH;  
-  MarkerPlacementBVH = 
+
+  //AnyFolder &MarkerInsertionNodeBVH = MarkerPlacementBVH;
+  MarkerPlacementBVH =
   {
     AnyRefNode __NAME__ = {
       //sRel = ..sRelOnBVH;
@@ -399,29 +399,27 @@ AnyMessage TestMarkerExist ={
       #else
       sRel = Main.ModelSetup.MocapDrivers.MarkerName.sRelOnBVH ;
       #endif
-      AnyDrawNode drw_node = 
+      AnyDrawNode drw_node =
       {
         #var RGB = {0, 1, 0};
-        #var ScaleXYZ = 0.015*{1, 1, 1};     
+        #var ScaleXYZ = 0.015*{1, 1, 1};
         Visible = BVH_OBJECT.ModelDrawOnOff;
       };
     };
   };//
-  
+
   //Main.ModelSetup.BVHFileData.Markers.MarkerName.
 
-  
+
 
 #endif
-  
-  
-  
-  
+
+
+
+
 }; // End of InsertSegmentClass
 
 
 
 
 #endif
-
-

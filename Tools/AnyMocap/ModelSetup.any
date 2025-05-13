@@ -14,43 +14,43 @@ ModelSetup = {
    #include "LabSpecificData_Defaults.any"
    #include "<MOCAP_LAB_SPECIFIC_DATA>"
  };
- 
- // This file checks if all the defines statements 
+
+ // This file checks if all the defines statements
  // are made correctly.
  #include "CheckAnyMoCapConfiguration.any"
- 
- 
+
+
  Main = {
     #include "<BODY_MODEL_CONFIG_FILE>"
  };
- 
+
  #if MOCAP_INPUT_DATA_TYPE == "C3D"
  AnyInputC3D C3DFileData =  {
     AnyComponentDefinition obj = {};
  };
  #include "<MOCAP_C3DSETTINGS>"
  #endif
- 
+
  #if MOCAP_INPUT_DATA_TYPE == "BVH"
- 
+
  /// Redirects to BVHFileData, so models expecting C3D emulation still work.
  AnyFolder C3DFileData = {AnyFolder& Header = .BVHFileData.Header;};
- 
- AnyInputBVH BVHFileData = { 
+
+ AnyInputBVH BVHFileData = {
     AnyComponentDefinition obj = {
       SubGroupRegexSearch = ".*\.([_[:alnum:]]+?)\.([_[:alnum:]]+?)";
       SubGroupRegexReplace = "$1";
     };
- }; 
- #include "<MOCAP_BVHSETTINGS>" 
+ };
+ #include "<MOCAP_BVHSETTINGS>"
  #endif
- 
- 
+
+
  AnyFolder MocapExtraDrivers = {
    AnyComponentDefinition obj = {};
    #include "<MOCAP_EXTRA_DRIVERS_FILE>"
  };
- 
+
  AnyFolder MocapDrivers = {
     AnyComponentDefinition obj = {
       // regex pattern starts at the component level
@@ -61,18 +61,18 @@ ModelSetup = {
  };
 
  AnyFolder ParameterIdentification = { };
- 
+
  #if MOCAP_FILTER_JOINT_ANGLES == ON
    /// Filter for Joint Angles (Output of the marker tracking step).
-   AnyFolder JointAngleFilter = 
+   AnyFolder JointAngleFilter =
    {
       AnyInt N ??= 1;
       AnyVar Fs ??= (Main.Studies.MarkerTracking.nStep-1)
           /(Main.Studies.MarkerTracking.tEnd-Main.Studies.MarkerTracking.tStart);
       AnyVar Fc ??= 10;
       AnySwitchVar FilterForwardBackwardOnOff ??= On;
- 
-     AnyFunButterworthFilter FilterFun = 
+
+     AnyFunButterworthFilter FilterFun =
      {
         AutomaticInitialConditionOnOff = On;
         FilterForwardBackwardOnOff = .FilterForwardBackwardOnOff;
@@ -81,22 +81,22 @@ ModelSetup = {
         Fc = {.Fc};
         Type = LowPass;
      };
-  }; 
+  };
 
-  #endif   
+  #endif
 
- // Study for saving a loading the parameters from calibration trials 
+ // Study for saving a loading the parameters from calibration trials
  //(dynamic or standing refereces)
  #include "SaveLoadParameters.any"
- 
- #include "ModelViews.any"  
-  
-  
+
+ #include "ModelViews.any"
+
+
  //markers adds macros automatically into this folder
- AnyFolder Macros =  
+ AnyFolder Macros =
  {
 
-    AnyOperationMacro SaveOutputToHDF = 
+    AnyOperationMacro SaveOutputToHDF =
     {
        OPERATION_DISPLAY_PRIORITY(PriorityLow);
        MacroStr = {
@@ -104,35 +104,35 @@ ModelSetup = {
          + "--type= " + strquote("Deep")
          + "--file= " + strquote(ANYBODY_PATH_OUTPUT + "/" + MOCAP_TEST_FILENAME_PREFIX +  MOCAP_OUTPUT_FILENAME_PREFIX
          + Main.ModelSetup.TrialSpecificData.TrialFileName + "_MarkerTracking.anydata.h5"),
-                    
+
          "classoperation Main.Studies.InverseDynamicStudy.Output" + strquote("Save data")
          + "--type= " + strquote("Deep")
          + "--file= " + strquote(ANYBODY_PATH_OUTPUT + "/" + MOCAP_TEST_FILENAME_PREFIX  +  MOCAP_OUTPUT_FILENAME_PREFIX
          + Main.ModelSetup.TrialSpecificData.TrialFileName + "_InverseDynamicStudy.anydata.h5")
       };
     };
-    AnyOperationMacro LoadOutputFromHDF = 
+    AnyOperationMacro LoadOutputFromHDF =
     {
        OPERATION_DISPLAY_PRIORITY(PriorityLow);
        MacroStr = {
          "classoperation Main.Studies.MarkerTracking.Output" + strquote("Load data")
          + "--file= " + strquote(ANYBODY_PATH_OUTPUT + "/" + MOCAP_TEST_FILENAME_PREFIX +  MOCAP_OUTPUT_FILENAME_PREFIX
          + Main.ModelSetup.TrialSpecificData.TrialFileName + "_MarkerTracking.anydata.h5"),
-                    
+
          "classoperation Main.Studies.InverseDynamicStudy.Output" + strquote("Load data")
          + "--file= " + strquote(ANYBODY_PATH_OUTPUT + "/" + MOCAP_TEST_FILENAME_PREFIX +  MOCAP_OUTPUT_FILENAME_PREFIX
          + Main.ModelSetup.TrialSpecificData.TrialFileName + "_InverseDynamicStudy.anydata.h5")
        };
     };
  }; // Macros
- 
- 
+
+
 };
 
 
 AnyFolder ModelSetup = {};
 
-ModelSetup = 
+ModelSetup =
 {
   //DocumentationLink = AMMR_PATH_DOC + "/anymocap.html";
   AnyFolder Views = {};
@@ -140,12 +140,11 @@ ModelSetup =
 
 
 #ifdef BM_DRAWSETTINGS_FILE
-// Ensure that HumanModel does not 
-// include DrawSettings as well. 
+// Ensure that HumanModel does not
+// include DrawSettings as well.
 #define BM_DRAWSETTINGS_SKIP ON
 #include "<BM_DRAWSETTINGS_FILE>"
 #endif
 
 
 #include "CheckAnyMoCapPostConfiguration.any"
-

@@ -65,5 +65,6 @@ for target, template, data in targets:
     template = tmplpath / template
     with open(template) as fh:
         tmpl = Template(fh.read())
-    with open(target, "w") as fh:
-        fh.write(tmpl.render(data=data))
+    with open(target, "w", encoding="utf-8") as fh:
+        nl = "\r\n" if target.suffix == ".any" else "\n"
+        fh.write(tmpl.render(data=data), newline=nl)

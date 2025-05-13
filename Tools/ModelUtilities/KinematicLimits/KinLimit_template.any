@@ -1,11 +1,11 @@
-/* 
+/*
 HOW TO USE:
 
 Add `#include "../path/to/KinLimitsDriver_template.any"` in the beginning
 of your main file. Then create the `KinLimitsDriver` class inside Main.
 
-In the following example we add a limit driver to `MyKinematicMeasure`, which limits the 
-measures between -1 and 1. 
+In the following example we add a limit driver to `MyKinematicMeasure`, which limits the
+measures between -1 and 1.
 
 ```
 #include "../path/to/KinLimits_template.any"
@@ -17,8 +17,8 @@ Main = {
    ) = {
      LowerLimit = -1;
      HighLimit = 1;
-   }; 
-      
+   };
+
 ```
 
 The class supports the following settings:
@@ -35,17 +35,17 @@ The class supports the following settings:
 | ErrorAtLowerHardLimit | AnyFloat     |  ErrorAtHardLimit           | The kinematic error at the lower hard limit    |
 | ErrorAtLowerHardLimit | AnyFloat     |  ErrorAtHardLimit           | The kinematic error at the high hard limit     |
 | MeasureConversion     | AnyFloat     |  1                          | Constant factor applied to the measure         |
-|-----------------------|--------------|------------------------------------------------------------------------------| 
+|-----------------------|--------------|------------------------------------------------------------------------------|
 
 
 */
 
 
 /*
-The class uses the builtin smoothramp function, to create a AnyFunInterpol function 
-which is used by the AnyKinFunComb1 class. 
+The class uses the builtin smoothramp function, to create a AnyFunInterpol function
+which is used by the AnyKinFunComb1 class.
 
-The smoothramp function is essentially this c++ function. 
+The smoothramp function is essentially this c++ function.
 This is just half a smoother step function which continues liniearly when it
 reaches it steepest value. See https://en.wikipedia.org/wiki/Smoothstep
 
@@ -66,7 +66,7 @@ float smoothramp(float edge0, float edge1, float x)
 #define KINLIMIT_TEMPLATE_ANY
 
 
-// The smoothramp function is not available in AMS 6 and below. 
+// The smoothramp function is not available in AMS 6 and below.
 // This just defines an equallent implementation directly in AnyScript.
 #define KIN_LIMIT_SMOOTHRAMP_ANYSCRIPT(edge0, edge1, val) iffun(gtfun(((val)-(edge0))/(2*((edge1)-(edge0))), 0.5), -0.5+2*(((val)-(edge0))/(2*((edge1)-(edge0)))),\
                                                 mult(iffun(ltfun(((val)-(edge0))/(2*((edge1)-(edge0))),0.0), 0*(val), iffun(gtfun(((val)-(edge0))/(2*((edge1)-(edge0))),0.5),0*(val)+0.5, ((val)-(edge0))/(2*((edge1)-(edge0)))))\
@@ -76,25 +76,25 @@ float smoothramp(float edge0, float edge1, float x)
                                                ,(iffun(ltfun(((val)-(edge0))/(2*((edge1)-(edge0))),0.0), 0*(val), iffun(gtfun(((val)-(edge0))/(2*((edge1)-(edge0))),0.5),0*(val)+0.5, ((val)-(edge0))/(2*((edge1)-(edge0)))))\
                                                 *6 - 15)) + 10) )))\
                                                )
-                                               
+
 #if ANYBODY_V1 >= 7
 #define KIN_LIMIT_SMOOTHRAMP smoothramp
 #else
 #define KIN_LIMIT_SMOOTHRAMP KIN_LIMIT_SMOOTHRAMP_ANYSCRIPT
 #endif
-                                               
+
 
 
 
 
 #class_template KinLimitsDriver(AnyKinMeasure& KinMeasure, _DEBUG=0) {
 
-  
-#var AnyVar LowerLimit; 
+
+#var AnyVar LowerLimit;
 #var AnyVar HighLimit;
 
 AnyInt LowerHighCheck = assert(gteqfun(HighLimit, LowerLimit), "HighLimit must be greater than LowLimit: " + CompleteNameOf(ObjGetParent(1)));
-  
+
 #var AnyVar DriverPhaseIn = 0.01*(HighLimit - LowerLimit) ;
 #var AnyVar LowerLimitHard= LowerLimit - DriverPhaseIn ;
 #var AnyVar HighLimitHard= HighLimit + DriverPhaseIn ;
@@ -105,9 +105,9 @@ AnyInt LowerHighCheck = assert(gteqfun(HighLimit, LowerLimit), "HighLimit must b
 
 #var AnyVar MeasureConversion = 1;
 
-/// Generates an non-equisample abscissa axis for the data. 
+/// Generates an non-equisample abscissa axis for the data.
 /// Most points are clustered around the transition zones.
-AnyFunInterpol AbscissaFunction = 
+AnyFunInterpol AbscissaFunction =
 {
   AnyFloat LowPhaseIn = abs(.LowerLimit-.LowerLimitHard);
   AnyFloat HighPhaseIn = abs(.HighLimit-.HighLimitHard);
@@ -115,7 +115,7 @@ AnyFunInterpol AbscissaFunction =
 
   #var Type = Bspline;
   #var BsplineOrder = 8;
-       
+
   #var AnyMatrix M = {
                       {0, .LowerLimitHard-1e1*LowPhaseIn-1e1*TotalRange},
                       {80, .LowerLimitHard-1e1*LowPhaseIn},
@@ -124,27 +124,27 @@ AnyFunInterpol AbscissaFunction =
                       {510, .HighLimit},
                       {840, .HighLimitHard},
                       {920, .HighLimitHard+1e1*HighPhaseIn},
-                      {999, .HighLimitHard+1e1*HighPhaseIn+1e1*TotalRange}                    
-                    };  
+                      {999, .HighLimitHard+1e1*HighPhaseIn+1e1*TotalRange}
+                    };
 
-                    
+
   T    = M'[0];
   Data = {M'[1]};
 };
 
 
 
-AnyFunInterpol JointLimitErrorFunction= 
-{  
+AnyFunInterpol JointLimitErrorFunction=
+{
   Type = Bspline;
   T = .AbscissaFunction(1.0*iarr(0,999))' ;
-  Data = {.ErrorAtLowerHardLimit*KIN_LIMIT_SMOOTHRAMP(.LowerLimit, .LowerLimitHard, T) + 
+  Data = {.ErrorAtLowerHardLimit*KIN_LIMIT_SMOOTHRAMP(.LowerLimit, .LowerLimitHard, T) +
           .ErrorAtHighHardLimit*KIN_LIMIT_SMOOTHRAMP(.HighLimit, .HighLimitHard, T)} ;
 };
 
 #if _DEBUG
 AnyFunInterpol &FT = JointLimitErrorFunction;
-AnyFloat Test = {FT (-10.0), FT( -5.0), FT (0.0), FT (5.0), FT (10.0)}; 
+AnyFloat Test = {FT (-10.0), FT( -5.0), FT (0.0), FT (5.0), FT (10.0)};
 AnyFloat test_fullrange = JointLimitErrorFunction(1.0*iarr(ceil(min(AbscissaFunction.M'[1])),floor(max(AbscissaFunction.M'[1]))))';
 AnyFloat range = iarr(0, 1000-1)*(HighLimitHard-LowerLimitHard)/(1000-1)+LowerLimitHard
 AnyFloat test_range = JointLimitErrorFunction(range)';
@@ -160,18 +160,18 @@ AnyKinMeasureFunComb1 JointLimitMeasure = {
   Functions = {&.JointLimitErrorFunction};
 };
 
-AnyKinEqSimpleDriver JointLimitDriver = 
+AnyKinEqSimpleDriver JointLimitDriver =
 {
   AnyKinMeasureFunComb1 & ref = .JointLimitMeasure;
   #var DriverPos = {0};
   #var DriverVel = {0};
   Reaction.Type = {Off};
   CType = {Soft};
-  AnyFunConst ConstFun = 
-  { 
+  AnyFunConst ConstFun =
+  {
     #var Value = {1};
   };
-  #var WeightFun = {&ConstFun};      
+  #var WeightFun = {&ConstFun};
 };
 
 
@@ -182,7 +182,7 @@ AnyKinEqSimpleDriver JointLimitDriver =
 #if ANYBODY_NAME_MAINFILE  == "KinLimit_template"
 
 
-Main = 
+Main =
 {
 
 AnyStringVar test = ANYBODY_NAME_MAINFILE;
@@ -195,24 +195,24 @@ AnyKinStudy Test_study =
   AnyFloat Smoothramp_buitin = smoothramp(40, 60,t);
   AnyFloat Smoothramp_anyscript = KIN_LIMIT_SMOOTHRAMP_ANYSCRIPT(40, 60,t);
   AnyFloat diff = Smoothramp_buitin- Smoothramp_anyscript;
-  
-  
-  AnyFolder test = 
+
+
+  AnyFolder test =
   {
     #define DIFFMAT(N) arrcat(zeros(1,N-1), eye(N-1)')' - arrcat(eye(N-1)', zeros(1,N-1))'
     AnyMatrix diffmat = DIFFMAT(101);
-    
+
     AnyFloat Vec = .tArray;
-    
+
     AnyFloat smoothramp_builtin = smoothramp(40, 60, Vec);
     AnyFloat smoothramp_anyscript = KIN_LIMIT_SMOOTHRAMP_ANYSCRIPT(40, 60,Vec);
 
     AnyFloat smoothramp_builtin_diff = diffmat*smoothramp_builtin';
     AnyFloat smoothramp_anyscript_diff = diffmat*smoothramp_anyscript';
-  
-  
-  
-  
+
+
+
+
   };
 };
 
@@ -220,4 +220,3 @@ AnyKinStudy Test_study =
 
 #endif
 #endif
-

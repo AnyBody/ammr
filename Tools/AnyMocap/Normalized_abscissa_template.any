@@ -14,31 +14,31 @@
 
   #var AnyVar StartEvent = Study.tStart;
   #var AnyVar StartEventPercent = 0;
-  
+
   #var AnyVar MiddleEvent = StartEvent + (EndEvent-StartEvent)*MiddleEventPercent/100;
   #var AnyVar MiddleEventPercent= 50;
-  
+
   #var AnyVar EndEvent = Study.tEnd;
   #var AnyVar EndEventPercent = 100;
-  
-  
+
+
   AnyFolder Calculations = {
     AnyInt check = gtfun(.EndEvent,.StartEvent) * gteqfun(.StartEvent,0) *
                    gtfun(.MiddleEvent, .StartEvent) * ltfun(.MiddleEvent, .EndEvent) *
                    gtfun(.EndEventPercent,.StartEventPercent )*gtfun(.MiddleEventPercent, .StartEventPercent)*
                    ltfun(.MiddleEventPercent, .EndEventPercent);
-    
+
     AnyInt NormalizedAbscissaWarning1 = warn(check, "The events are invalid, and no normalized abscissa could be calculated. "+
         "Falling back to use tStart/tEnd for normalization."+
         "(This error could for example occur if StartEvent occurs later than EndEvent.)");
-          
+
     AnyVar SE = iffun(check, .StartEvent, Study.tStart);
     AnyVar SEP = iffun(check, .StartEventPercent*1.0, 0.0);
     AnyVar EE = iffun(check, .EndEvent, Study.tEnd);
     AnyVar EEP = iffun(check, .EndEventPercent*1.0, 100.0);
     AnyVar ME = iffun(check, .MiddleEvent , SE + (EE-SE)*MEP/100.0);
     AnyVar MEP = iffun(check, .MiddleEventPercent*1.0, 50.0);
-                                 
+
     CALC_START_STEP_VAL Start2Mid(y2 = .MEP,
                              x2 = .ME,
                              y1 = .SEP,
@@ -53,14 +53,14 @@
                               tstart = Study.tStart,
                               tend = Study.tEnd,
                               nstep = Study.nStep) = {};
-                              
-    AnyFloat Abscissa_Start2Mid = 0*Study.t + farr( Start2Mid.startval, Start2Mid.stepval , Study.nStep )[Study.iStep];  
-    AnyFloat Abscissa_Mid2End = 0*Study.t + farr( Mid2End.startval, Mid2End.stepval , Study.nStep )[Study.iStep];  
+
+    AnyFloat Abscissa_Start2Mid = 0*Study.t + farr( Start2Mid.startval, Start2Mid.stepval , Study.nStep )[Study.iStep];
+    AnyFloat Abscissa_Mid2End = 0*Study.t + farr( Mid2End.startval, Mid2End.stepval , Study.nStep )[Study.iStep];
   };
-  
-  
-  
-  // The (0*t) term is hack to make AMS include the expression in the output folder. 
+
+
+
+  // The (0*t) term is hack to make AMS include the expression in the output folder.
   AnyFloat Abscissa = iffun(ltfun(Study.t,Calculations.ME ),Calculations.Abscissa_Start2Mid, Calculations.Abscissa_Mid2End );
 };
 
