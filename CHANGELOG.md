@@ -120,6 +120,15 @@ You can [enable backwards compatibility](changes-to-bodymodel-folders) by settin
 
 * Many of the key folders inside the Leg and Arm models have been renamed to create a unified structure across the full bodymodel. To bring back the old structure we have temporarily included a backward compatibility switch `BM_COMPATIBILITY_BODYMODEL_STRUCTURE` To ensure a smooth transition.
 
+
+### Removed:
+
+* The deprecated TLEM 1 model has been removed from the AMMR. The TLEM 2.2 model is now the only TLEM based model 
+  available in the AMMR. It is activated by default or by setting: 
+  ``` AnyScriptDoc
+  #define BM_LEG_MODEL _LEG_MODEL_TLEM_
+  ```
+
 (ammr-3.1.0-changelog)=
 ## AMMR 3.1.0 (2025-03-31)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.15094590.svg)](https://doi.org/10.5281/zenodo.15094590)
@@ -1923,7 +1932,7 @@ the driver values are updated.
   dataset](https://dx.doi.org/10.1016/j.jbiomech.2014.12.034), developed in the
   TLEM*safe* EU project was implemented in the AMMR repository. The model is not
   the default model, but can be enabled with the {ref}`BM parameter <bm-config>`
-  `#define BM_LEG_MODEL _LEG_MODEL_TLEM2_`
+  `#define BM_LEG_MODEL _LEG_MODEL_TLEM_`
 
 - The model is versioned TLEM 2.1, to indicate the number of changes and
   correction which has been added in the process. The changes and updates to the
