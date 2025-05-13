@@ -150,12 +150,24 @@ Switch for using the default foot model
 
 
 
+::::{dropdown} `_FOOT_MODEL_RIGID_GM_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _FOOT_MODEL_RIGID_GM_
+:value: 2
+Switch for using the GM foot model in the rigid configuration
+:::
+::::
+
+
+
 ::::{dropdown} `_FOOT_MODEL_TOE_FLEX_GM_`
 :animate: fade-in-slide-down
 :margin: 0 0 2 2
 
 :::{ammr:bm_constant} _FOOT_MODEL_TOE_FLEX_GM_
-:value: 2
+:value: 3
 Switch for using the GM foot model with toe flexion
 :::
 ::::
@@ -167,7 +179,7 @@ Switch for using the GM foot model with toe flexion
 :margin: 0 0 2 2
 
 :::{ammr:bm_constant} _FOOT_MODEL_DETAILED_GM_
-:value: 3
+:value: 4
 Switch for using the detailed GM foot model
 :::
 ::::

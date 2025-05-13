@@ -57,8 +57,8 @@ See below for more details
     CONTACT_NODE1 = HeelContactNodeLow,
     CONTACT_NODE2 = ToeLateralContactNode,
     CREATE_KIN_GRF = 0,
-    KIN_GRF_LIMB1_FUN = GlobalCopFun,
-    KIN_GRF_LIMB2_FUN = GlobalCopFun,
+    KIN_GRF_LIMB1_FUN = .CopCalculations.GlobalCopFun,
+    KIN_GRF_LIMB2_FUN = .CopCalculations.GlobalCopFun,
     DRAW_RAW_FORCES = 1,
     C3D_OBJECT = Main.ModelSetup.C3DFileData,
 )
@@ -466,23 +466,24 @@ See below for more details
           andfun(.ContactDetectionLimb2.NodeWithInBox.WithinBoxAndVelBelowThreshold,
                  ltfun(.ContactDetectionLimb2.P1Vel, P1Vel));
    
-    AnyVar InContactStrength = NodeWithInBox.WithinBoxAndVelBelowThreshold *10000*not(UseOppositeLimb);
+    #var AnyVar DefaultContactStrength = 10000;
+    AnyVar InContactStrength = NodeWithInBox.WithinBoxAndVelBelowThreshold *DefaultContactStrength*not(UseOppositeLimb);
     
     AnyVar Limb2NoContact=iffun(eqfun(.ContactDetectionLimb2.NodeWithInBox.WithinBoxAndVelBelowThreshold ,1.0),0.0,1.0); //equal 0 if limb2 in contact
-    AnyVar NoContactStrength =Limb2NoContact*NodeWithInBox.OutsideBoxOrVelHigherThanThreshold*10000;
+    AnyVar NoContactStrength =Limb2NoContact*NodeWithInBox.OutsideBoxOrVelHigherThanThreshold*DefaultContactStrength;
     
     
     AnyFolder PlateFootReactions = {
       AnyRefFrame& ref1=..ForcePlate.ForcePlateSeg;
       AnyRefFrame&ref2=..Limb1;
-      AnyVar Strength =.InContactStrength;
+      #var AnyVar Strength =.InContactStrength;
       #include "<ANYBODY_PATH_TOOLBOX>/Mocap/ArtificialMuscleConnection.any"
     };
     
     AnyFolder PlateGroundReactions={
       AnyRefFrame& ref1=..Corners.PlateCenter;
       AnyRefFrame& ref2=..ForcePlate.ForcePlateSeg;
-      AnyVar Strength =.NoContactStrength;
+      #var AnyVar Strength =.NoContactStrength;
       #include "<ANYBODY_PATH_TOOLBOX>/Mocap/ArtificialMuscleConnection.any"
     };
   };
@@ -507,17 +508,19 @@ See below for more details
             andfun(.ContactDetectionLimb1.NodeWithInBox.WithinBoxAndVelBelowThreshold,
                    ltfun(.ContactDetectionLimb1.P1Vel, P1Vel));
      
-    AnyVar InContactStrength = NodeWithInBox.WithinBoxAndVelBelowThreshold *10000*not(UseOppositeLimb);
+
+    #var AnyVar DefaultContactStrength = 10000;
+    AnyVar InContactStrength = NodeWithInBox.WithinBoxAndVelBelowThreshold *DefaultContactStrength*not(UseOppositeLimb);
 
     
     AnyVar Limb1NoContact=iffun(eqfun(.ContactDetectionLimb1.NodeWithInBox.WithinBoxAndVelBelowThreshold ,1.0),0.0,1.0); //equal 0 if limb1 in contact
-    AnyVar NoContactStrength =Limb1NoContact*NodeWithInBox.OutsideBoxOrVelHigherThanThreshold*10000;
+    AnyVar NoContactStrength =Limb1NoContact*NodeWithInBox.OutsideBoxOrVelHigherThanThreshold*DefaultContactStrength;
     
     
     AnyFolder PlateFootReactions={
       AnyRefFrame& ref1=..ForcePlate.ForcePlateSeg;
       AnyRefFrame& ref2=..Limb2;
-      AnyVar Strength=.InContactStrength;
+      #var AnyVar Strength=.InContactStrength;
       #include "<ANYBODY_PATH_TOOLBOX>/Mocap/ArtificialMuscleConnection.any"
     };
     
@@ -525,12 +528,75 @@ See below for more details
     AnyFolder PlateGroundReactions={
       AnyRefFrame &ref1=..Corners.PlateCenter;
       AnyRefFrame& ref2=..ForcePlate.ForcePlateSeg;
-      AnyVar Strength =.NoContactStrength;
+      #var AnyVar Strength =.NoContactStrength;
       #include "<ANYBODY_PATH_TOOLBOX>/Mocap/ArtificialMuscleConnection.any"
     };
   };
   
-#if (CREATE_KIN_GRF == 1) & ((FORCEPLATE_TYPE == 4) | (FORCEPLATE_TYPE == 2))
+  
+#if (FORCEPLATE_TYPE == 4) | (FORCEPLATE_TYPE == 2)
+
+ AnyFolder CopCalculations = {
+      
+   AnyVector T =  .Time;
+   AnyVector fx = .ForcePlate.load.Data[0]; 
+   AnyVector fy = .ForcePlate.load.Data[1]; 
+   AnyVector fz = .ForcePlate.load.Data[2];
+   AnyVector mx =  (1/1000)*.ForcePlate.load.Data[3]; 
+   AnyVector my =  (1/1000)*.ForcePlate.load.Data[4]; 
+   AnyVector mz =  (1/1000)*.ForcePlate.load.Data[5]; 
+   
+   AnyVector norm = vnorm({fx,fy,fz}');
+   
+   // Force threshold prevents division by zero in the calculation 
+   // of COP. It can also be increase to much higher value (0.05) for example
+   // to prevent unleliable COP calculations when Fz is small. 
+   #var AnyVar force_threshold_ratio = 10e-8;
+   #var AnyVar threshold = force_threshold_ratio*max(abs(fz));
+   AnyVector _fz = iffun(gtfun(abs(fz),threshold ),fz, fz+10^10);
+   AnyVector _norm = iffun(gtfun(abs(norm),threshold ),norm, norm+10^10) ;
+
+   
+   AnyVar originz = -1*.ForcePlate.ForcePlateSeg.TransducerLocation.zdist;
+   
+   AnyVector Vx= (originz*fx-my)/( _fz ) ;
+   AnyVector Vy= (mx+originz*fy)/( _fz );
+   AnyVector Vz= 0*Vy;
+   
+   
+   AnyFunInterpol GlobalCopFun = 
+   {
+     Type = Bspline;
+     T = ..Time;
+     Data = ((1+0*farr(0.0,1.0,..NoAnalogData))'*{..ForcePlate.ForcePlateSeg.r0}+ (..ForcePlate.ForcePlateSeg.Axes0*.GRF_start.Data)')';
+   };   
+   
+   AnyFunInterpol GRF_normalized = 
+   {
+     Type = PiecewiseLinear;
+     T = .T;
+     Data = {.norm/( iffun(gtfun(max(.norm),0),max(.norm), 10^10) )};
+   };
+   
+   AnyFunInterpol GRF_start = 
+   { 
+     Type = PiecewiseLinear;
+     T = .T;
+     Data = {.Vx, .Vy, .Vz};
+   };    
+   AnyFunInterpol GRF_end = 
+   { 
+     Type = PiecewiseLinear;
+     T = .T;
+     
+     Data = {.Vx + .fx/(._norm),
+       .Vy + .fy/(._norm)
+       //.COP_cal.Vz + .COP_cal.fz/ (.COP_cal.norm)
+     };      
+   };
+ }; 
+  
+#if (CREATE_KIN_GRF == 1)
   
   ForcePlate.ForcePlateSeg =
   {
@@ -540,7 +606,7 @@ See below for more details
   AnyFolder Kinematic_GRF = 
   {
     
-    AnyFloat weightdata = sqrt(Calculations.norm);
+    AnyFloat weightdata = sqrt(.CopCalculations.norm);
     AnyVar max_val = max({ max(weightdata),0.000001});
     AnyVar Th = 0.05*max_val;
     
@@ -549,14 +615,6 @@ See below for more details
                              (weightdata-Th )/(max_val-Th),
                              0*farr(0.0,1.0,NumElemOf(weightdata)));
 
-    AnyFunInterpol GlobalCopFun = 
-    {
-      Type = Bspline;
-      T = ..Time;
-      Data = ((1+0*farr(0.0,1.0,..NoAnalogData))'*{..ForcePlate.ForcePlateSeg.r0}+ (..ForcePlate.ForcePlateSeg.Axes0*.Calculations.GRF_start.Data)')';
-    };    
-
-    
     
     // Alternative Time array which starts from tStart and ends at tEnd  
     AnyInt NoAnalogData2= max({C3D_OBJECT.Header.NoAnalogSamplesPer3DFrame,
@@ -566,9 +624,9 @@ See below for more details
     AnyFloat Time2 = farr( tStart2, (tEnd2-tStart2)/( max({1,NoAnalogData2 - 1})) ,  NoAnalogData2);
 
     AnyFloat limb1_COP_dist = vnorm(KIN_GRF_LIMB1_FUN(Time2) - 
-                                    GlobalCopFun(Time2));
+                                    .CopCalculations.GlobalCopFun(Time2));
     AnyFloat limb2_COP_dist = vnorm(KIN_GRF_LIMB2_FUN(Time2)- 
-                                    GlobalCopFun(Time2));
+                                    .CopCalculations.GlobalCopFun(Time2));
 
     AnyFunInterpol Weight_limb1 = 
     {
@@ -591,8 +649,8 @@ See below for more details
     {
       Mass = 0.0;
       Jii = {0.0, 0.0, 0.0};
-      AnyDrawVector arrow = {Vec ={0,0,..Calculations.GRF_normalized(.t)[0]};GlobalCoord = Off;Line.Thickness = 0.01;};
-      AnyDrawRefFrame drw = { ScaleXYZ = 0.2*{1,1,1};};
+      AnyDrawVector arrow = {Vec ={0,0,...CopCalculations.GRF_normalized(.t)[0]};GlobalCoord = Off;Line.Thickness = 0.01;#var Visible=On;};
+      AnyDrawRefFrame drw = { ScaleXYZ = 0.2*{1,1,1};#var Visible=On;};
       AnyRefNode vector= {sRel = {0,0,1};};
     };
     
@@ -607,57 +665,6 @@ See below for more details
       };
     };
     
-    AnyFolder Calculations = {
-      
-      AnyVector T =  ..Time;
-      AnyVector fx = ..ForcePlate.load.Data[0]; 
-      AnyVector fy = ..ForcePlate.load.Data[1]; 
-      AnyVector fz = ..ForcePlate.load.Data[2];
-      AnyVector mx =  (1/1000)*..ForcePlate.load.Data[3]; 
-      AnyVector my =  (1/1000)*..ForcePlate.load.Data[4]; 
-      AnyVector mz =  (1/1000)*..ForcePlate.load.Data[5]; 
-      
-      AnyVector norm = vnorm({fx,fy,fz}');
-      
-      // Values used when dividing. To avoid dividing by zero. 
-      AnyVar force_thresshold = 0.05*max(abs(fz));
-      AnyVector _fz = iffun(gtfun(abs(fz),force_thresshold ),fz, fz+10^10);
-      AnyVector _norm = iffun(gtfun(abs(norm),force_thresshold ),norm, norm+10^10) ;
-
-      
-      AnyVar originz = -1*..ForcePlate.ForcePlateSeg.TransducerLocation.zdist;
-      
-      
-      AnyVector Vx= (originz*fx-my)/( _fz ) ;
-      AnyVector Vy= (mx+originz*fy)/( _fz );
-      AnyVector Vz= 0*Vy;
-      
-      AnyFunInterpol GRF_normalized = 
-      {
-        Type = PiecewiseLinear;
-        T = .T;
-        Data = {.norm/( iffun(gtfun(max(.norm),0),max(.norm), 10^10) )};
-      };
-      
-      AnyFunInterpol GRF_start = 
-      { 
-        Type = PiecewiseLinear;
-        T = .T;
-        Data = {.Vx, .Vy, .Vz};
-      };    
-      AnyFunInterpol GRF_end = 
-      { 
-        Type = PiecewiseLinear;
-        T = .T;
-        
-        Data = {.Vx + .fx/(._norm),
-          .Vy + .fy/(._norm)
-          //.COP_cal.Vz + .COP_cal.fz/ (.COP_cal.norm)
-        };      
-      };
-      
-      
-    };//KinGRF_Calculations 
     
     
     AnyKinDriver COPDriver = {
@@ -666,7 +673,7 @@ See below for more details
         AnyRefFrame &ref1 = ..Frame;
         Ref = 0;
       };
-      AnyParamFun &fun = .Calculations.GRF_start;
+      AnyParamFun &fun = ..CopCalculations.GRF_start;
       CType = {Hard,Hard,Hard};
     };
     
@@ -680,11 +687,12 @@ See below for more details
         };
         MeasureOrganizer = {0,1};
       };
-      AnyParamFun &fun = .Calculations.GRF_end ;
+      AnyParamFun &fun = ..CopCalculations.GRF_end ;
       CType = {Hard, Hard};
     };  
   } ;
   #endif  
+  #endif
   
   
   
@@ -692,5 +700,4 @@ See below for more details
   
   
 };
-
 #endif

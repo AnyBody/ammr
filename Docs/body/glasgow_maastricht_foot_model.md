@@ -1,9 +1,10 @@
+(GM Foot Model)=
+
 # The Glasgow-Maastricht Foot Model (GM Foot)
 
-:::{admonition} **External model:** 
+:::{admonition} **Beta model:** 
 :class: caution 
-The model is under development and not yet included in the managed model repository.
-You can find this model in a public [repository on GitHub](https://github.com/AnyBody/gm-foot).
+The model is currently in a beta state. It may lack some functionality.
 :::
 
 AnyBody Technology developed in corporation with Glasgow Caledonian
@@ -16,11 +17,47 @@ The model can be used with the
 anatomy and recorded motion from different subjects. It has been through
 a validation process comparing it with other experimental and computational studies.
 
-:::{admonition} **Complex model:**
-:class: warning
-The GM Foot model is very complex and not recommended for
-beginners in musculoskeletal modeling and AnyBody.
-:::
+
+The GM foot model that has previously been available in a public [repository on GitHub](https://github.com/AnyBody/gm-foot), 
+is now integrated into the AMMR. The process of this integration has involved morphing the 
+GM foot to the TLEM foot, and the process has been significantly eased by the updates to the 
+foot and talus models in {ref}`TLEM 2.2<TLEM2-v2.2>`. This means that the GM foot model will come with the same 
+segmental frames, and ankle and subtalar joint as the TLEM foot. On the other hand, the muscle 
+nodes on the foot, intrinsic muscles, joints, and ligaments of the foot come in from the GM 
+foot model. The extrinsic muscles come from the TLEM leg model of the AMMR, however their via-points 
+and insertion on the foot come from the GM foot model.
+
+
+The GM foot model can be used in one of the following configurations:
+-	Rigid: ```#define BM_FOOT_MODEL _FOOT_MODEL_RIGID_GM_```: This is the equivalent of the current default foot model with ankle 
+  and subtalar joint. The foot consists of two segments, talus and the rigid part consisting of the intrinsic bones of the 
+  foot. The intrinsic muscles of the foot are not included in this model 
+  
+  (IMAGE).
+
+-	Toe flexion: ```#define BM_FOOT_MODEL _FOOT_MODEL_TOE_FLEX_GM_```: This model adds flexion-extension degree of freedom at all 
+  the toes, that is, the Metatarsophalangeal joints. So, there are 7 segments in this model (talus, rigid part, and 5 toes). 
+  Furthermore, the motion of the 5 toes is constrained to have the same joint angle, thereby, adding just one degree of freedom 
+  for toe flexion when comparing to the rigid foot. This model can improve kinematics in applications such as gait by allowing 
+  bending of toes. The motion of the toes can be driven by motion capture data, for example, by using a toe tip marker, or 
+  automatically through a new class template that prevents penetration of the toes with the ground. Each metatarsophalangeal 
+  joint carries joint actuators and reaction force to compensate for the lack of ligaments in this model. The reactions can be
+  optionally switched off by setting ```#define BM_FOOT_MODEL_TOE_FLEX_GM_REACTION OFF```
+  
+  (IMAGE + GIF)
+
+-	Detailed foot model: ```#define BM_FOOT_MODEL _FOOT_MODEL_DETAILED_GM_```: This is the full-blown detailed foot model with 26 
+  segments, all the intrinsic muscles and ligaments. This is a highly complex model and is present as a beta configuration. 
+  The model is intended for studying the foot in detail and users must be prepared to understand and solve some of the 
+  challenges that come with driving such a detailed model. 
+  
+  (IMAGE)
+
+  :::{admonition} **Complex model:**
+  :class: warning
+  The detailed GM Foot model is very complex and not recommended for
+  beginners in musculoskeletal modeling and AnyBody.
+  :::
 
 ```{raw} html
 <video width="45%" style="display:block; margin: 0 auto;" controls autoplay loop>
@@ -28,28 +65,32 @@ beginners in musculoskeletal modeling and AnyBody.
 Your browser does not support the video tag.
 </video>
 ```
+```Update Video Above```
 
+## Muscle Switch:
 
+The muscle behavior in the GM foot model can be controlled by switches for the foot muscle, for example, ```#define BM_FOOT_MUSCLES_BOTH _MUSCLES_SIMPLE_```.
+Currently, the GM foot model can work with simple muscle model. The switch allows the foot muscles to be set to 3 element Hill muscle model, 
+however the user must provide a calibration routine for the Hill muscle models in the foot.
+This switch allows the user to control the foot muscles independently of the leg muscles. Please note that the foot muscles can only be included 
+if leg muscles are also enabled.
 
 
 ## Usage:
 
-The model can added to the TLEM 2.0 leg model and requires AMMR 2.0.1 or later.
+The model can added to the TLEM 2.2 leg model and requires AMMR 4.0 or later.
 
-To use the GM foot model the file GM_Foot_libdef.any must be included before the first Main statement.
+To use the GM foot model, you can simply add a BM statement in your model.
 
 ```AnyScriptDoc
-// Include before the first Main
-#include "path/to/GM_Foot/GM_Foot_libdef.any"
-
 Main = {
 
    // Add body model configuration. E.g.
-   #define BM_ARM_RIGHT OFF
-   #define BM_ARM_LEFT OFF
-
-   // Include the GM foot model. It handles inlcuding the human model as well.
-   #include "<GM_FOOT_PATH>/GM_foot_model.any"
+   #define BM_FOOT_MODEL _FOOT_MODEL_TOE_FLEX_GM_
+   // possible options:
+   // #define BM_FOOT_MODEL _FOOT_MODEL_RIGID_GM_
+   // #define BM_FOOT_MODEL _FOOT_MODEL_DETAILED_GM_
+  
 ```
 
 ## Model structure
@@ -184,6 +225,9 @@ References used as input:
 - Picard, M et al., orthopedic physical assessment 3rd edition (1997)
   wb saunders company,philadelphia 805 pp. 49.95. Journal of Hand
   Therapy, 11(4):286 –, 1998.
+- Saeki, J, et al., Force Generation on the Hallux Is More Affected by 
+  the Ankle Joint Angle than the Lesser Toes: An In Vivo Human Study.
+  Biology, 10(1), 2021.
 - Siegler, S, et al., Mechanics of the ankle and subtalar joints
   revealed through a 3d quasi-static stress mri technique. J Biomech,
   38(3):567–578, Mar 2005.

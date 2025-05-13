@@ -144,6 +144,7 @@ Parameter defining the foot model used.
 :Options:
   - {any}`_FOOT_MODEL_NONE_` -> Switch off foot model"
   - {any}`_FOOT_MODEL_DEFAULT_` -> Switch for using the default foot model
+  - {any}`_FOOT_MODEL_RIGID_GM_` -> Switch for using the GM foot model in the rigid configuration
   - {any}`_FOOT_MODEL_TOE_FLEX_GM_` -> Switch for using the GM foot model with toe flexion
   - {any}`_FOOT_MODEL_DETAILED_GM_` -> Switch for using the detailed GM foot model
 
@@ -163,24 +164,6 @@ Parameter defining the existing of reaction on toes when using _FOOT_MODEL_TOE_F
 :Example: `#define BM_FOOT_MODEL_TOE_FLEX_GM_REACTION ON`
 :Options: {ammr:bm_constant}`ON`/{ammr:bm_constant}`OFF`
 
-
-```
-::::
-
-
-::::{dropdown} `BM_FOOT_MODEL_LIGAMENTS`
-:animate: fade-in-slide-down
-:margin: 0 0 3 3
-
-```{ammr:bm_statement} BM_FOOT_MODEL_LIGAMENTS
-
-Parameter for switching the foot ligaments On/Off.
-
-:Default: OFF
-:Example: `#define BM_FOOT_MODEL_LIGAMENTS OFF`
-:Options:
-  - {any}`OFF` -> Switch OFF
-  - {any}`ON` -> Switch ON
 
 ```
 ::::
@@ -346,6 +329,65 @@ Parameter to define muscle behavior of the right leg
   - {any}`_MUSCLES_SIMPLE_` -> Constant to use simple muscles
   - {any}`_MUSCLES_3E_HILL_` -> Constant to use 3 element Hill-type muscle
   - {any}`BM_LEG_MUSCLES_BOTH` -> 
+
+```
+::::
+
+
+::::{dropdown} `BM_FOOT_MUSCLES_BOTH`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_FOOT_MUSCLES_BOTH
+
+Parameter to define muscle behavior of both right and left foot
+
+:Default: {any}`BM_LEG_MUSCLES_BOTH`
+:Example: `#define BM_FOOT_MUSCLES_BOTH BM_LEG_MUSCLES_BOTH`
+:Options:
+  - {any}`OFF` -> Switch OFF
+  - {any}`_MUSCLES_SIMPLE_` -> Constant to use simple muscles
+  - {any}`_MUSCLES_3E_HILL_` -> Constant to use 3 element Hill-type muscle
+
+```
+::::
+
+
+::::{dropdown} `BM_FOOT_MUSCLES_LEFT`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_FOOT_MUSCLES_LEFT
+
+Parameter to define muscle behavior of the left foot
+
+:Default: {any}`BM_FOOT_MUSCLES_BOTH`
+:Example: `#define BM_FOOT_MUSCLES_LEFT BM_FOOT_MUSCLES_BOTH`
+:Options:
+  - {any}`OFF` -> Switch OFF
+  - {any}`_MUSCLES_SIMPLE_` -> Constant to use simple muscles
+  - {any}`_MUSCLES_3E_HILL_` -> Constant to use 3 element Hill-type muscle
+  - {any}`BM_FOOT_MUSCLES_BOTH` -> 
+
+```
+::::
+
+
+::::{dropdown} `BM_FOOT_MUSCLES_RIGHT`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_FOOT_MUSCLES_RIGHT
+
+Parameter to define muscle behavior of the right foot
+
+:Default: {any}`BM_FOOT_MUSCLES_BOTH`
+:Example: `#define BM_FOOT_MUSCLES_RIGHT BM_FOOT_MUSCLES_BOTH`
+:Options:
+  - {any}`OFF` -> Switch OFF
+  - {any}`_MUSCLES_SIMPLE_` -> Constant to use simple muscles
+  - {any}`_MUSCLES_3E_HILL_` -> Constant to use 3 element Hill-type muscle
+  - {any}`BM_FOOT_MUSCLES_BOTH` -> 
 
 ```
 ::::
