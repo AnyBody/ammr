@@ -52,6 +52,7 @@ See the following links for details on BM parameters related to different body p
 :maxdepth: 1
 
 leg
+foot
 arm
 trunk
 mannequin

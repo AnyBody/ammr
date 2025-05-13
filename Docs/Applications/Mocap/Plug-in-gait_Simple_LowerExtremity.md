@@ -13,7 +13,7 @@ gallery_image: "/Applications/images/LowerExtremity-Plug-in-gait.webp"
 ````
 
 Example of lower body MoCap model using the Plug-in-Gait marker protocol,
-and walking on three typ4 force platforms. The model is fairly simple and a
+and walking on three type4 force platforms. The model is fairly simple and a
 good starting point for new users. If you plan to have many trials/subjects,
 take a look at the example which better support multiple trails.
 

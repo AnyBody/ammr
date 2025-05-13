@@ -1706,8 +1706,8 @@ hosted at CERN).
 
 **Added:**
 
-  model. This RefNode was also present in the TLEM1 model and was used by few
 - Added a `Leg.Seg.Foot.GroundJoint` RefNode to the foot segment of the TLEM2
+  model. This RefNode was also present in the TLEM1 model and was used by few
   applications.
 - New `GroundVelocity` setting added to the `ForcePlateAutoDetection`
   class_template, which makes class usable with instrumented treadmills.
