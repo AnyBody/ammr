@@ -77,8 +77,9 @@ Switch for automatic display of all configuration values
 
 :Default: OFF
 :Example: `#define BM_CONFIG_MESSAGES OFF`
-:Options: {ammr:bm_constant}`ON`/{ammr:bm_constant}`OFF`
-
+:Options:
+  - {any}`ON` -> Switch ON
+  - {any}`OFF` -> Switch OFF
 
 ```
 ::::
@@ -94,8 +95,9 @@ Switch for enabling configuration value information in the model tree
 
 :Default: OFF
 :Example: `#define BM_CONFIG_VALUES OFF`
-:Options: {ammr:bm_constant}`ON`/{ammr:bm_constant}`OFF`
-
+:Options:
+  - {any}`ON` -> Switch ON
+  - {any}`OFF` -> Switch OFF
 
 ```
 ::::
@@ -124,8 +126,9 @@ A flag to switch on/off inclusion of the draw settings (may be needed in case of
 
 :Default: OFF
 :Example: `#define BM_DRAWSETTINGS_SKIP OFF`
-:Options: {ammr:bm_constant}`ON`/{ammr:bm_constant}`OFF`
-
+:Options:
+  - {any}`ON` -> Switch ON
+  - {any}`OFF` -> Switch OFF
 
 ```
 ::::
@@ -162,8 +165,9 @@ Parameter defining the existing of reaction on toes when using _FOOT_MODEL_TOE_F
 
 :Default: ON
 :Example: `#define BM_FOOT_MODEL_TOE_FLEX_GM_REACTION ON`
-:Options: {ammr:bm_constant}`ON`/{ammr:bm_constant}`OFF`
-
+:Options:
+  - {any}`ON` -> Switch ON
+  - {any}`OFF` -> Switch OFF
 
 ```
 ::::
@@ -501,8 +505,9 @@ Switch to control a fix on the diaphragm position. To simulate breathing this ne
 
 :Default: ON
 :Example: `#define BM_TRUNK_DIAGPHRAM_FIXED_POSITION ON`
-:Options: {ammr:bm_constant}`ON`/{ammr:bm_constant}`OFF`
-
+:Options:
+  - {any}`ON` -> Switch ON
+  - {any}`OFF` -> Switch OFF
 
 ```
 ::::
@@ -518,6 +523,9 @@ The topology of the sternum segment, i.e. number of segments into which sternum 
 
 :Default: 2
 :Example: `#define BM_TRUNK_THORACIC_STERNUM_TOPOLOGY 2`
+:Options:
+  - {any}`_STERNUM_2_SEG_` -> The topology of the sternum segment, This specifies that the sternum is devided in 2 segments.
+  - {any}`_STERNUM_4_SEG_` -> The topology of the sternum segment, This specifies that the sternum is devided in 4 segments.
 
 ```
 ::::
@@ -914,8 +922,9 @@ Switch for the left arm model being present or not.
 
 :Default: ON
 :Example: `#define BM_ARM_LEFT ON`
-:Options: {ammr:bm_constant}`ON`/{ammr:bm_constant}`OFF`
-
+:Options:
+  - {any}`ON` -> Switch ON
+  - {any}`OFF` -> Switch OFF
 
 ```
 ::::
@@ -967,8 +976,9 @@ Switch for the right arm model being present or not.
 
 :Default: ON
 :Example: `#define BM_ARM_RIGHT ON`
-:Options: {ammr:bm_constant}`ON`/{ammr:bm_constant}`OFF`
-
+:Options:
+  - {any}`ON` -> Switch ON
+  - {any}`OFF` -> Switch OFF
 
 ```
 ::::
@@ -1058,8 +1068,9 @@ Switch for enabling the detailed hand.
 
 :Default: OFF
 :Example: `#define BM_ARM_DETAILED_HAND OFF`
-:Options: {ammr:bm_constant}`ON`/{ammr:bm_constant}`OFF`
-
+:Options:
+  - {any}`ON` -> Switch ON
+  - {any}`OFF` -> Switch OFF
 
 ```
 ::::
@@ -1185,8 +1196,9 @@ Setting of the default value for all mannequin drivers.
 
 :Default: ON
 :Example: `#define BM_MANNEQUIN_DRIVER_DEFAULT ON`
-:Options: {ammr:bm_constant}`ON`/{ammr:bm_constant}`OFF`
-
+:Options:
+  - {any}`ON` -> Switch ON
+  - {any}`OFF` -> Switch OFF
 
 ```
 ::::
@@ -1202,8 +1214,9 @@ By default constraint type of mannequin drivers will be soft.
 
 :Default: ON
 :Example: `#define BM_MANNEQUIN_DRIVER_WEAK_SWITCH ON`
-:Options: {ammr:bm_constant}`ON`/{ammr:bm_constant}`OFF`
-
+:Options:
+  - {any}`ON` -> Switch ON
+  - {any}`OFF` -> Switch OFF
 
 ```
 ::::
@@ -2489,8 +2502,9 @@ A switch to use different ref. frame than the default global reference frame
 
 :Default: OFF
 :Example: `#define BM_GLOBAL_REFERENCE_FRAME_SWITCH OFF`
-:Options: {ammr:bm_constant}`ON`/{ammr:bm_constant}`OFF`
-
+:Options:
+  - {any}`ON` -> Switch ON
+  - {any}`OFF` -> Switch OFF
 
 ```
 ::::
@@ -2521,8 +2535,9 @@ A compatability switch to include the trunk selected outputs joint reaction forc
 
 :Default: OFF
 :Example: `#define BM_COMPATIBILITY_24_TRUNK_SELECTED_OUTPUTS_JRF OFF`
-:Options: {ammr:bm_constant}`ON`/{ammr:bm_constant}`OFF`
-
+:Options:
+  - {any}`ON` -> Switch ON
+  - {any}`OFF` -> Switch OFF
 
 ```
 ::::
@@ -2538,8 +2553,9 @@ A compatability switch to add the model tree structure of the muscles from AMMR 
 
 :Default: OFF
 :Example: `#define BM_COMPATIBILITY_MUSCLE_STRUCTURE OFF`
-:Options: {ammr:bm_constant}`ON`/{ammr:bm_constant}`OFF`
-
+:Options:
+  - {any}`ON` -> Switch ON
+  - {any}`OFF` -> Switch OFF
 
 ```
 ::::
@@ -2555,8 +2571,9 @@ A compatability switch to add the model tree structure of the BodyModel folders 
 
 :Default: OFF
 :Example: `#define BM_COMPATIBILITY_BODYMODEL_STRUCTURE OFF`
-:Options: {ammr:bm_constant}`ON`/{ammr:bm_constant}`OFF`
-
+:Options:
+  - {any}`ON` -> Switch ON
+  - {any}`OFF` -> Switch OFF
 
 ```
 ::::
