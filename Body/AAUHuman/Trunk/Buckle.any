@@ -2,56 +2,56 @@
 This is the main file which is used to simulate the mechanical effect of intra-abdominal pressure.
 The model automatically finds the optimal abdominal pressure that will reduce the muscle activities.
 
-The abdominal volume is measure using a number of cylinders. The abdominal model can generate forces to 
+The abdominal volume is measure using a number of cylinders. The abdominal model can generate forces to
 the rest of the model according to the way the volume is measured. This means that all measures in
 the volume may generate a force, since we have an abdominal muscle working on the volume.
-  
-The abdominal muscles wraps an abdominal-like shape which means that the effective area they have on 
+
+The abdominal muscles wraps an abdominal-like shape which means that the effective area they have on
 the abdominal volume comes automatically. This would otherwise be very difficult to determine.
 
 We have compared the model with other models in the litterature and it seems to be the only model
-where the forces that arise from the pressure between the abdominal volume and the frontal side of 
-the vertebrae is taken into account.  We are working on validating the model towards experiments found 
+where the forces that arise from the pressure between the abdominal volume and the frontal side of
+the vertebrae is taken into account.  We are working on validating the model towards experiments found
 in the litterature.
 */
 AnyFolder Buckle={
-  
+
   /// Scaling function used by buckle segment and disc segments
   /// The function uses the same scalemat as the lumbar region but without offsets
   AnyFunTransform3DLin Scale = {
-    ScaleMat = ....Scaling.GeometricalScaling.Lumbar.ScaleFunction.ScaleMat; 
+    ScaleMat = ....Scaling.GeometricalScaling.Lumbar.ScaleFunction.ScaleMat;
     Offset = {0,0,0};
   };
   AnyVar Xfactor = Scale.ScaleMat[0][0];
   AnyVar Yfactor = Scale.ScaleMat[1][1];
   AnyVar Zfactor = Scale.ScaleMat[2][2];
-  
+
   //Settings which is used to control the geometry of the abdominal volume
   AnyVar  B=0.08*Zfactor;//0.07; //frontal distance between cylinders
-  AnyVar  R=0.04*(Zfactor + Xfactor)/2; //radius of circles  
+  AnyVar  R=0.04*(Zfactor + Xfactor)/2; //radius of circles
   AnyVar  Delta=0.015*Xfactor;//saggital plane distance between cylinders
   AnyVar  CylLength =0.35*Yfactor ; //Lenght of cylinders
   AnyVar  A=0.05*Xfactor; //Backwardss offset of cylinders in the saggital plane
   AnyVec3 CylRGB={0.6,0.6,0.6};
   AnyVar  CylOpacity =0;
   AnyVar  CylCapRatio=0.4;
-  
+
   //References
   AnyFolder &PelvisRef=.SegmentsLumbar.PelvisSeg;
   AnyFolder &ThoraxRef=.SegmentsRibCage.SternalBodySeg;
-  
-  AnyFolder Segments ={
-    
-    AnySeg BuckleSeg ={
-      
 
-      
+  AnyFolder Segments ={
+
+    AnySeg BuckleSeg ={
+
+
+
       Mass=0.1;
       Jii={0,0,0};
       //Set the inital position to be the midpoint between the control point on pelvis and thorax
       r0=0.5*(...SegmentsRibCage.SternalBodySeg.BuckleNodeTopCenter.sRel*...SegmentsRibCage.SternalBodySeg.Axes0'+...SegmentsRibCage.SternalBodySeg.r0+
       ...SegmentsLumbar.PelvisSeg.BuckleNodeBottomCenter.sRel*...SegmentsLumbar.PelvisSeg.Axes0'+...SegmentsLumbar.PelvisSeg.r0);
-      
+
       // The buckle scales together with the lumbar spine
       AnyFunTransform3D& Scale = ..Scale;
       AnyRefNode& ScalingNode = AnatomicalFrameTrunk;
@@ -62,169 +62,169 @@ AnyFolder Buckle={
       //Set the Axes to the average of the orientation of pelvis and thorax. This is a crude estimation
       //it does not ensure orthogonality of the axes matrix..
       AnyMat33 Am=0.5*(...SegmentsRibCage.SternumSeg.Axes0+...SegmentsLumbar.PelvisSeg.Axes0);
-      
+
       //Normalizing Am
       AnyVar L0 = ((Am[0][0])^2+(Am[1][0])^2+(Am[2][0])^2)^0.5;
       AnyVar L1 = ((Am[0][1])^2+(Am[1][1])^2+(Am[2][1])^2)^0.5;
       AnyVar L2 = ((Am[0][2])^2+(Am[1][2])^2+(Am[2][2])^2)^0.5;
-      
+
       Axes0={
         {Am[0][0]/L0,Am[0][1]/L1,Am[0][2]/L2},
         {Am[1][0]/L0,Am[1][1]/L1,Am[1][2]/L2},
         {Am[2][0]/L0,Am[2][1]/L1,Am[2][2]/L2}
       };
-      
+
       AnyRefNode Node0={  //top center
-        sRel= .Scale({0,0.07,0.0});   
+        sRel= .Scale({0,0.07,0.0});
       };
       AnyRefNode Node1={ //top right
-        sRel= .Scale({0,0.09,0.05});   
+        sRel= .Scale({0,0.09,0.05});
       };
-      
+
       AnyRefNode Node2={//top left
-        sRel= .Scale({0,0.09,-0.05});   
+        sRel= .Scale({0,0.09,-0.05});
       };
-      
+
       AnyRefNode Node3={ //bottom right
-        sRel= .Scale({0,-0.09,0.05});   
+        sRel= .Scale({0,-0.09,0.05});
       };
       AnyRefNode Node4={ //bottom left
-        sRel= .Scale({0,-0.09,-0.05});   
+        sRel= .Scale({0,-0.09,-0.05});
       };
       AnyRefNode Node5={ //bottom center
-        sRel= .Scale({0,-0.09,0});   
+        sRel= .Scale({0,-0.09,0});
       };
-      
+
       AnyKinPLine line ={
-        AnyRefNode &ref1=.Node1;     
-        AnyRefNode &ref2=.Node2;   
+        AnyRefNode &ref1=.Node1;
+        AnyRefNode &ref2=.Node2;
         AnyRefNode &ref3=.Node4;
         AnyRefNode &ref4=.Node3;
         AnyRefNode &ref5=.Node1;
       };
-      
-    
+
+
         AnyRefNode RA_1_R ={
-        sRel= .Scale({0.01,0.0,0.005});   
+        sRel= .Scale({0.01,0.0,0.005});
       };
 
-      
+
       AnyRefNode RA_2_R ={
-        sRel= .Scale({0.007,0,0.015});   
+        sRel= .Scale({0.007,0,0.015});
       };
-      
+
       AnyRefNode RA_3_R={
-        sRel= .Scale({0.004,0,0.03});   
-      };   
+        sRel= .Scale({0.004,0,0.03});
+      };
 
       AnyRefNode RA_4_R ={
-        sRel= .Scale({0,0.0,0.045});   
+        sRel= .Scale({0,0.0,0.045});
       };
 
 
-      
+
             AnyRefNode RA_1_L ={
-        sRel= .Scale({0.01,0.0,-0.005});   
+        sRel= .Scale({0.01,0.0,-0.005});
       };
 
-      
+
       AnyRefNode RA_2_L ={
-        sRel= .Scale({0.007,0,-0.015});   
+        sRel= .Scale({0.007,0,-0.015});
       };
-      
+
       AnyRefNode RA_3_L={
-        sRel= .Scale({0.004,0,-0.03});   
-      };   
+        sRel= .Scale({0.004,0,-0.03});
+      };
 
       AnyRefNode RA_4_L ={
-        sRel= .Scale({0,0.0,-0.045});   
+        sRel= .Scale({0,0.0,-0.045});
       };
 
       AnyVar h=0.07;
       AnyVar w=0.05;
       AnyRefNode SupportNodeRight={  //disc1 right
-        sRel= .Scale({0,.h,.w});   
-      };      
+        sRel= .Scale({0,.h,.w});
+      };
       AnyRefNode SupportNodeLeft={  //disc1 left
-        sRel= .Scale({0,.h,-.w});   
-      };      
-      
+        sRel= .Scale({0,.h,-.w});
+      };
+
       AnyRefNode SupportNode2Right={  //disc2 right
-        sRel= .Scale({0,.5*.h,.w});   
-      };      
+        sRel= .Scale({0,.5*.h,.w});
+      };
       AnyRefNode SupportNode2Left={  //disc2 left
-        sRel= .Scale({0,.5*.h,-.w});   
-      };      
-      
+        sRel= .Scale({0,.5*.h,-.w});
+      };
+
       AnyRefNode SupportNode3Right={  //disc3 right
-        sRel= .Scale({0,0,.w});   
-      };      
+        sRel= .Scale({0,0,.w});
+      };
       AnyRefNode SupportNode3Left={  //disc3 left
-        sRel= .Scale({0,0,-.w});   
-      };  
-      
+        sRel= .Scale({0,0,-.w});
+      };
+
       AnyRefNode SupportNode4Right={  //disc4 right
-        sRel= .Scale({0,-0.5*.h,.w});   
-      };      
+        sRel= .Scale({0,-0.5*.h,.w});
+      };
       AnyRefNode SupportNode4Left={  //disc4 left
-        sRel= .Scale({0,-0.5*.h,-.w});   
-      };  
-      
+        sRel= .Scale({0,-0.5*.h,-.w});
+      };
+
       AnyRefNode SupportNode5Right={  //disc5 right
-        sRel= .Scale({0,-.h,.w});   
-      };      
+        sRel= .Scale({0,-.h,.w});
+      };
       AnyRefNode SupportNode5Left={  //disc5 left
-        sRel= .Scale({0,-.h,-.w});   
-      };  
-      
-      AnyRefNode SupportNode1={  //disc1 
-        sRel= .Scale({0,.h,0});   
-      };      
-      
-      AnyRefNode SupportNode2={  //disc2 
-        sRel= .Scale({0,.5*.h,0});   
-      };      
-      
-      AnyRefNode SupportNode3={  //disc3 
-        sRel= .Scale({0.0, 0.0, 0.0});   
-      };      
-      
-      AnyRefNode SupportNode4={  //disc4 
-        sRel= .Scale({0,-0.5*.h,0});   
-      };      
-      
-      AnyRefNode SupportNode5={  //disc5 
-        sRel= .Scale({0,-.h,0});   
-      };      
-      
-      //Attachment points for muscles 
+        sRel= .Scale({0,-.h,-.w});
+      };
+
+      AnyRefNode SupportNode1={  //disc1
+        sRel= .Scale({0,.h,0});
+      };
+
+      AnyRefNode SupportNode2={  //disc2
+        sRel= .Scale({0,.5*.h,0});
+      };
+
+      AnyRefNode SupportNode3={  //disc3
+        sRel= .Scale({0.0, 0.0, 0.0});
+      };
+
+      AnyRefNode SupportNode4={  //disc4
+        sRel= .Scale({0,-0.5*.h,0});
+      };
+
+      AnyRefNode SupportNode5={  //disc5
+        sRel= .Scale({0,-.h,0});
+      };
+
+      //Attachment points for muscles
       AnyVar T1 =0.02;
       AnyVar T2=-0.04;
-      
+
       //obliquusexternusleft
-      
+
       AnyRefNode OEC6_RSNodeL= {        sRel= .Scale({-0.0000, 0.09, -0.02});      };
       AnyRefNode OEC7_RSNodeL= {        sRel= .Scale({-0.0000, 0.04, -0.02});      };
       AnyRefNode OEC8_RSNodeL= {        sRel= .Scale({-0.0000, -0.01, -0.0225});   };
       AnyRefNode OEC9_RSNodeL= {        sRel= .Scale({-0.0000, -0.05, -0.025});    };
       AnyRefNode OEC10_RSNodeL={        sRel= .Scale({-0.0000, -0.08, -0.03});     };
-      
+
       //obliquusexternusright
       AnyRefNode OEC6_RSNodeR= {        sRel= .Scale({-0.0000, 0.09, 0.02});       };
       AnyRefNode OEC7_RSNodeR= {        sRel= .Scale({-0.0000, 0.04, 0.02});       };
       AnyRefNode OEC8_RSNodeR= {        sRel= .Scale({-0.0000, -0.01, 0.0225});    };
       AnyRefNode OEC9_RSNodeR= {        sRel= .Scale({-0.0000, -0.05,0.025});      };
       AnyRefNode OEC10_RSNodeR={        sRel= .Scale({-0.0000, -0.08, 0.03});      };
-      
-      
-     
+
+
+
       //obliquusinternusleft
       AnyRefNode OICI_RS1NodeL={        sRel= .Scale({.0000, 0.09, -0.03});        };
       AnyRefNode OICI_RS2NodeL={        sRel= .Scale({.0000, 0.04, -0.03});        };
       AnyRefNode OICI_RS3NodeL={        sRel= .Scale({.0000, -0.01, -0.03});       };
       AnyRefNode OICI_RS4NodeL={        sRel= .Scale({0.0000, -0.05, -0.025});     };
       AnyRefNode OICI_RS5NodeL={        sRel= .Scale({0.0000, -0.08, -0.02});      };
-      
+
       //obliquusinternusright
       AnyRefNode OICI_RS1NodeR={        sRel= .Scale({.0000, 0.09, 0.03});        };
       AnyRefNode OICI_RS2NodeR={        sRel= .Scale({.0000, 0.04, 0.03});        };
@@ -236,71 +236,71 @@ AnyFolder Buckle={
       AnyRefNode RACP_CO5NodeL ={        sRel= .Scale({-0.0000, 0.0, 0.02});      };
       AnyRefNode RACP_CO6NodeL={        sRel= .Scale({-0.0000, 0.0, 0.02});      };
       AnyRefNode RACP_CO7NodeL={        sRel= .Scale({-0.0000, 0.0, 0.02});      };
-      
+
       //Rectus abdominis Right side
       AnyRefNode RACP_CO5NodeR ={        sRel= .Scale({-0.0000, 0.0, -0.02});      };
       AnyRefNode RACP_CO6NodeR={        sRel= .Scale({-0.0000, 0.0, -0.02});      };
       AnyRefNode RACP_CO7NodeR={        sRel= .Scale({-0.0000, 0.0, -0.02});      };
-      
-      
+
+
       AnySurfEllipsoid elipsoid={
         AnyDrawParamSurf drw={Opacity=0.5;};
         Radius= .Scale({0.008,0.09,0.05});
       };
-    };//buckle  
+    };//buckle
   }; //segments
-  
-  
-  
+
+
+
   //Adding sliders for applying force to buckle
-  
+
   AnyFolder Slider1={
-    AnyVec3  r_vec=.Disc1.Disc.DiscSeg.node4.sRel*.Disc1.Disc.DiscSeg.Axes0'+...Trunk.SegmentsLumbar.L1Seg.MidPoint.sRel*...Trunk.SegmentsLumbar.PelvisSeg.Axes0'+...Trunk.SegmentsLumbar.PelvisSeg.r0;  
+    AnyVec3  r_vec=.Disc1.Disc.DiscSeg.node4.sRel*.Disc1.Disc.DiscSeg.Axes0'+...Trunk.SegmentsLumbar.L1Seg.MidPoint.sRel*...Trunk.SegmentsLumbar.PelvisSeg.Axes0'+...Trunk.SegmentsLumbar.PelvisSeg.r0;
     AnySeg &StartNode = .Segments.BuckleSeg; //node on buckle
     AnyRefNode &DiscNode =.Disc1.Disc.DiscSeg.node4;
     AnyMat33 Axes= .Segments.BuckleSeg.Axes0;
     #include "Slider.any"
-    
+
   };
-  
+
   AnyFolder Slider2={
-    AnyVec3  r_vec=.Disc2.Disc.DiscSeg.node4.sRel*.Disc2.Disc.DiscSeg.Axes0'+...Trunk.SegmentsLumbar.L2Seg.MidPoint.sRel*...Trunk.SegmentsLumbar.PelvisSeg.Axes0'+...Trunk.SegmentsLumbar.PelvisSeg.r0;  
+    AnyVec3  r_vec=.Disc2.Disc.DiscSeg.node4.sRel*.Disc2.Disc.DiscSeg.Axes0'+...Trunk.SegmentsLumbar.L2Seg.MidPoint.sRel*...Trunk.SegmentsLumbar.PelvisSeg.Axes0'+...Trunk.SegmentsLumbar.PelvisSeg.r0;
     AnySeg &StartNode = .Segments.BuckleSeg; //node on buckle
     AnyRefNode &DiscNode =.Disc2.Disc.DiscSeg.node4;
     AnyMat33 Axes= .Segments.BuckleSeg.Axes0;
     #include "Slider.any"
   };
-  
+
   AnyFolder Slider3={
-    AnyVec3  r_vec=.Disc3.Disc.DiscSeg.node4.sRel*.Disc3.Disc.DiscSeg.Axes0'+...Trunk.SegmentsLumbar.L3Seg.MidPoint.sRel*...Trunk.SegmentsLumbar.PelvisSeg.Axes0'+...Trunk.SegmentsLumbar.PelvisSeg.r0;  
+    AnyVec3  r_vec=.Disc3.Disc.DiscSeg.node4.sRel*.Disc3.Disc.DiscSeg.Axes0'+...Trunk.SegmentsLumbar.L3Seg.MidPoint.sRel*...Trunk.SegmentsLumbar.PelvisSeg.Axes0'+...Trunk.SegmentsLumbar.PelvisSeg.r0;
     AnySeg &StartNode = .Segments.BuckleSeg; //node on buckle
     AnyRefNode &DiscNode =.Disc3.Disc.DiscSeg.node4;
     AnyMat33 Axes= .Segments.BuckleSeg.Axes0;
     #include "Slider.any"
   };
-  
+
   AnyFolder Slider4={
-    AnyVec3  r_vec=.Disc4.Disc.DiscSeg.node4.sRel*.Disc4.Disc.DiscSeg.Axes0+...Trunk.SegmentsLumbar.L4Seg.MidPoint.sRel*...Trunk.SegmentsLumbar.PelvisSeg.Axes0'+...Trunk.SegmentsLumbar.PelvisSeg.r0;  
+    AnyVec3  r_vec=.Disc4.Disc.DiscSeg.node4.sRel*.Disc4.Disc.DiscSeg.Axes0+...Trunk.SegmentsLumbar.L4Seg.MidPoint.sRel*...Trunk.SegmentsLumbar.PelvisSeg.Axes0'+...Trunk.SegmentsLumbar.PelvisSeg.r0;
     AnySeg &StartNode = .Segments.BuckleSeg; //node on buckle
     AnyRefNode &DiscNode =.Disc4.Disc.DiscSeg.node4;
     AnyMat33 Axes= .Segments.BuckleSeg.Axes0;
     #include "Slider.any"
   };
   AnyFolder Slider5={
-    AnyVec3  r_vec=.Disc5.Disc.DiscSeg.node4.sRel*.Disc5.Disc.DiscSeg.Axes0'+...Trunk.SegmentsLumbar.L5Seg.MidPoint.sRel*...Trunk.SegmentsLumbar.PelvisSeg.Axes0'+...Trunk.SegmentsLumbar.PelvisSeg.r0;  
+    AnyVec3  r_vec=.Disc5.Disc.DiscSeg.node4.sRel*.Disc5.Disc.DiscSeg.Axes0'+...Trunk.SegmentsLumbar.L5Seg.MidPoint.sRel*...Trunk.SegmentsLumbar.PelvisSeg.Axes0'+...Trunk.SegmentsLumbar.PelvisSeg.r0;
     AnySeg &StartNode = .Segments.BuckleSeg; //node on buckle
     AnyRefNode &DiscNode =.Disc5.Disc.DiscSeg.node4;
     AnyMat33 Axes= .Segments.BuckleSeg.Axes0;
     #include "Slider.any"
   };
-    
-  
+
+
   AnyFolder AddOnNodes={
-    
+
     AnyFolder &PelvisRef=..SegmentsLumbar.PelvisSeg;
     //AnyFolder &T12Ref=..SegmentsThorax.T12Seg;
     AnyFolder &Sternum=..SegmentsRibCage.SternalBodySeg;
-    
+
     PelvisRef={
       //this the node where the force from the abdominal pressure is applied to
       AnyRefNode PressureNode           ={ sRel = .Scale(.StdPar.PressureNode_pos);};
@@ -308,7 +308,7 @@ AnyFolder Buckle={
       AnyRefNode BuckleNodeRight        ={ sRel = .Scale(.StdPar.Right.BuckleNode_pos);};
       AnyRefNode BuckleNodeLeft         ={ sRel = .Scale(.StdPar.Left.BuckleNode_pos);};
     };
-    
+
     Sternum ={
       //this the node where the force from the abdominal pressure is applied to
       AnyRefNode PressureNode           ={ sRel = .Scale(.StdPar.Thorax.PressureNode_pos);};
@@ -318,11 +318,11 @@ AnyFolder Buckle={
     };
 
   };
-  
+
   AnyFolder Disc1 ={
     AnyRefNode &ref1 =...Trunk.SegmentsLumbar.L1Seg.MidPoint;
 
-    AnySphericalJoint Jnt ={ 
+    AnySphericalJoint Jnt ={
       AnyRefNode &ref1 =....Trunk.SegmentsLumbar.L1Seg.MidPoint;
       AnyRefNode &ref2=.Disc.DiscSeg.node0;
     };
@@ -330,10 +330,10 @@ AnyFolder Buckle={
     AnyReacForce reaction ={
       AnySphericalJoint &ref=.Jnt;
     };
-    
+
     AnyVec3  r_vec= (...Trunk.SegmentsLumbar.L1Seg.MidPoint.sRel * ...Trunk.SegmentsLumbar.L1Seg.Axes0') + ...Trunk.SegmentsLumbar.L1Seg.r0 ;
     AnyMat33 Axes_mat = ...Trunk.SegmentsLumbar.PelvisSeg.Axes0;
-    
+
     AnyVar Ratio=5/6+0.08;
     AnyVar L0 = 0.220;     //half width sideways
     AnyVar L1 = 0.085+0.0; //depth of disc
@@ -342,15 +342,15 @@ AnyFolder Buckle={
     AnyKinPLine &LinRight=.JointsAndDrivers.PLineMeasureRight;
     AnyKinPLine &LinLeft=.JointsAndDrivers.PLineMeasureLeft;
     AnyKinLinear &LinMid=.JointsAndDrivers.LinMeasure;
-    
+
     #include "Disc.any"
   };
-  
-  
+
+
   AnyFolder Disc2 ={
     AnyRefNode &ref1 =...Trunk.SegmentsLumbar.L2Seg.MidPoint;
 
-    AnySphericalJoint Jnt ={ 
+    AnySphericalJoint Jnt ={
       AnyRefNode &ref1 =....Trunk.SegmentsLumbar.L2Seg.MidPoint;
       AnyRefNode &ref2=.Disc.DiscSeg.node0;
     };
@@ -358,10 +358,10 @@ AnyFolder Buckle={
     AnyReacForce reaction ={
       AnySphericalJoint &ref=.Jnt;
     };
-    
+
     AnyVec3  r_vec= (...Trunk.SegmentsLumbar.L2Seg.MidPoint.sRel * ...Trunk.SegmentsLumbar.L2Seg.Axes0') + ...Trunk.SegmentsLumbar.L2Seg.r0 ;
     AnyMat33 Axes_mat = ...Trunk.SegmentsLumbar.PelvisSeg.Axes0;
-    
+
     AnyVar Ratio=4/6+0.08;
     AnyVar L0 = 0.220;
     AnyVar L1 = 0.07+0.0;
@@ -370,15 +370,15 @@ AnyFolder Buckle={
     AnyKinPLine &LinRight=.JointsAndDrivers.PLineMeasureRight;
     AnyKinPLine &LinLeft=.JointsAndDrivers.PLineMeasureLeft;
     AnyKinLinear &LinMid=.JointsAndDrivers.LinMeasure;
-    
+
     #include "Disc.any"
-    
+
   };
-   
+
   AnyFolder Disc3 ={
     AnyRefNode &ref1 =...Trunk.SegmentsLumbar.L3Seg.MidPoint;
 
-    AnySphericalJoint Jnt ={ 
+    AnySphericalJoint Jnt ={
       AnyRefNode &ref1 =....Trunk.SegmentsLumbar.L3Seg.MidPoint;
       AnyRefNode &ref2=.Disc.DiscSeg.node0;
     };
@@ -386,11 +386,11 @@ AnyFolder Buckle={
     AnyReacForce reaction ={
       AnySphericalJoint &ref=.Jnt;
     };
-        
+
     AnyVec3  r_vec= (...Trunk.SegmentsLumbar.L3Seg.MidPoint.sRel * ...Trunk.SegmentsLumbar.L3Seg.Axes0') + ...Trunk.SegmentsLumbar.L3Seg.r0 ;
-    
+
     AnyMat33 Axes_mat = ...Trunk.SegmentsLumbar.PelvisSeg.Axes0;
-    
+
     AnyVar Ratio=3/6+0.05;
     AnyVar L0 = 0.220;
     AnyVar L1 = 0.06+0.0;
@@ -401,23 +401,23 @@ AnyFolder Buckle={
     AnyKinLinear &LinMid=.JointsAndDrivers.LinMeasure;
     #include "Disc.any"
   };
-  
+
   AnyFolder Disc4 ={
      AnyRefNode &ref1 =...Trunk.SegmentsLumbar.L4Seg.MidPoint;
 
-    AnySphericalJoint Jnt ={ 
+    AnySphericalJoint Jnt ={
       AnyRefNode &ref1 =....Trunk.SegmentsLumbar.L4Seg.MidPoint;
       AnyRefNode &ref2=.Disc.DiscSeg.node0;
     };
-      
+
     AnyReacForce reaction ={
       AnySphericalJoint &ref=.Jnt;
     };
-    
+
     AnyVec3  r_vec= (...Trunk.SegmentsLumbar.L4Seg.MidPoint.sRel * ...Trunk.SegmentsLumbar.L4Seg.Axes0') + ...Trunk.SegmentsLumbar.L4Seg.r0 ;
-    
+
     AnyMat33 Axes_mat = ...Trunk.SegmentsLumbar.PelvisSeg.Axes0;
-    
+
     AnyVar Ratio=2/6+0.075;
     AnyVar L0 = 0.220;
     AnyVar L1 = 0.045;//0.0475;
@@ -426,27 +426,27 @@ AnyFolder Buckle={
     AnyKinPLine &LinRight=.JointsAndDrivers.PLineMeasureRight;
     AnyKinPLine &LinLeft=.JointsAndDrivers.PLineMeasureLeft;
     AnyKinLinear &LinMid=.JointsAndDrivers.LinMeasure;
-    
+
     #include "Disc.any"
-    
+
   };
-  
+
   AnyFolder Disc5 ={
      AnyRefNode &ref1 =...Trunk.SegmentsLumbar.L5Seg.MidPoint;
 
-    AnySphericalJoint Jnt ={ 
+    AnySphericalJoint Jnt ={
       AnyRefNode &ref1 =....Trunk.SegmentsLumbar.L5Seg.MidPoint;
       AnyRefNode &ref2=.Disc.DiscSeg.node0;
     };
-    
+
     AnyReacForce reaction ={
       AnySphericalJoint &ref=.Jnt;
     };
-    
+
     AnyVec3  r_vec= (...Trunk.SegmentsLumbar.L5Seg.MidPoint.sRel * ...Trunk.SegmentsLumbar.L5Seg.Axes0') + ...Trunk.SegmentsLumbar.L5Seg.r0 ;
-    
+
     AnyMat33 Axes_mat = ...Trunk.SegmentsLumbar.PelvisSeg.Axes0;
-    
+
     AnyVar Ratio=1/6+0.1;
     AnyVar L0 = 0.220;
     AnyVar L1 = 0.035;//0.0425;
@@ -455,47 +455,47 @@ AnyFolder Buckle={
     AnyKinPLine &LinRight=.JointsAndDrivers.PLineMeasureRight;
     AnyKinPLine &LinLeft=.JointsAndDrivers.PLineMeasureLeft;
     AnyKinLinear &LinMid=.JointsAndDrivers.LinMeasure;
-    
+
     #include "Disc.any"
   };
-  
+
   #include "BuckleSupport.any"
-  
+
   AnyFolder JointsAndDrivers={
-    
+
     AnyKinLinear LinMeasure ={
-      Ref=0; 
+      Ref=0;
       AnyRefNode &ref1=..PelvisRef.BuckleNodeBottomCenter;
       AnyRefNode &ref2=..ThoraxRef.BuckleNodeTopCenter;
     };
-    
+
     AnyKinRotational RotMeasure ={
-      
+
       AnyRefNode &ref1=..PelvisRef.BuckleNodeBottomCenter;
       AnyRefNode &ref2=..ThoraxRef.BuckleNodeTopCenter;
-      Type=RotVector; 
+      Type=RotVector;
     };
 
     AnyKinLinear Disc3BuckleTopLin ={
-      Ref=0; 
+      Ref=0;
       AnyRefNode &ref1=..Disc3.Disc.DiscSeg.node4;
       AnyRefFrame &ref2=..Segments.BuckleSeg;
     };
-    
+
     AnyKinRotational Disc3BuckleTopRot ={
-      
+
       AnyRefNode &ref1=..Disc3.Disc.DiscSeg.node4;
       AnyRefFrame &ref2=..Segments.BuckleSeg;
-      Type=RotVector; 
+      Type=RotVector;
     };
-    
+
     AnyKinEqSimpleDriver LinTopDrv={
       AnyKinLinear &ref=.Disc3BuckleTopLin;
       DriverPos={0,0,0};
       DriverVel={0,0,0};
       Reaction.Type={Off,Off,Off};
     };
-    
+
     AnyKinEqSimpleDriver RotTopDrv={
       AnyKinRotational &ref1=.Disc3BuckleTopRot;
       MeasureOrganizer={1};
@@ -503,14 +503,14 @@ AnyFolder Buckle={
       DriverVel={0};
       Reaction.Type={Off};
     };
-    
+
     AnyKinLinear Disc4BuckleBottomLin ={
-      Ref=0; 
+      Ref=0;
       AnyRefNode &ref1=..Disc4.Disc.DiscSeg.node4;
       AnyRefFrame &ref2=..Segments.BuckleSeg.Node5;
     };
-    
-    
+
+
     AnyKinEqSimpleDriver LinBottomDrv={
       AnyKinLinear &ref=.Disc4BuckleBottomLin;
       DriverPos={0,0};
@@ -518,67 +518,67 @@ AnyFolder Buckle={
       Reaction.Type={Off,Off};
       MeasureOrganizer={0,2};
     };
-    
+
     AnyKinLinear LinMeasureRight ={
-      Ref=0; 
+      Ref=0;
       AnyRefNode &ref1=..PelvisRef.BuckleNodeRight;
       AnyRefNode &ref2=..ThoraxRef.BuckleNodeRight;
       //AnyDrawPLine drw={Thickness=0.00375;RGB=Main.DrawSettings.Colors.AnyBodyRed;};
-      
+
     };
-    
+
     ///This is the linear measure between pelvis and thorax
     AnyKinLinear LinMeasureLeft ={
-      Ref=0; 
+      Ref=0;
       AnyRefNode &ref1=..PelvisRef.BuckleNodeLeft;
       AnyRefNode &ref2=..ThoraxRef.BuckleNodeLeft;
       //AnyDrawPLine drw={Thickness=0.00375;RGB=Main.DrawSettings.Colors.AnyBodyRed;};
     };
-    
-    
-    
+
+
+
     //Disc drivers
     ///This is the linear measure between pelvis and thorax
     AnyKinPLine PLineMeasureRight ={
-      
+
       AnyRefNode &ref1=..PelvisRef.BuckleNodeRight;
       AnyRefNode &ref2=..ThoraxRef.BuckleNodeRight;
       //AnyDrawPLine drw={Thickness=0.00375;RGB=Main.DrawSettings.Colors.AnyBodyRed;};
-      
+
     };
-    
+
     ///This is the linear measure between pelvis and thorax
     AnyKinPLine PLineMeasureLeft ={
       AnyRefNode &ref1=..PelvisRef.BuckleNodeLeft;
       AnyRefNode &ref2=..ThoraxRef.BuckleNodeLeft;
       //AnyDrawPLine drw={Thickness=0.00375;RGB=Main.DrawSettings.Colors.AnyBodyRed;};
     };
-    
-    
+
+
     ///This is a PLine  between pelvis and thorax
     AnyKinPLine H ={
       AnyRefNode &ref1=..PelvisRef.PressureNode;//BuckleNodeRight;
       AnyRefNode &ref2=..ThoraxRef.PressureNode;//BuckleNodeRight;
       // AnyDrawPLine drw={Thickness=0.00375;RGB=Main.DrawSettings.Colors.AnyBodyRed;};
-    };    
-    
-    //Definition of a segment which points from pelvis towards the thorax its 
-    //origin is in the BuckleNodeRight and the segment always have its y axis points 
+    };
+
+    //Definition of a segment which points from pelvis towards the thorax its
+    //origin is in the BuckleNodeRight and the segment always have its y axis points
     //towards the thorax node BuckleNodeRight
     //The segment is used only for measuring purposes used in for driving the distances
     //between the disc's
     AnyFolder MeasuringSegmentRight={
-      
+
       //create artifical segment
       //the segment is used for measuing purposes only
       AnySeg Seg={
-        r0=.....Trunk.SegmentsLumbar.PelvisSeg.BuckleNodeRight.sRel*.....Trunk.SegmentsLumbar.PelvisSeg.Axes0'+.....Trunk.SegmentsLumbar.PelvisSeg.r0;   
+        r0=.....Trunk.SegmentsLumbar.PelvisSeg.BuckleNodeRight.sRel*.....Trunk.SegmentsLumbar.PelvisSeg.Axes0'+.....Trunk.SegmentsLumbar.PelvisSeg.r0;
         Axes0=.....Trunk.SegmentsLumbar.PelvisSeg.Axes0;
         Mass=1e-5;
         Jii={0,0,0};
         //AnyDrawRefFrame Drw={ScaleXYZ={0.1,0.1,0.1}; RGB={1,0,0};};
       };
-      
+
       //Lock all lin dof to the bucklenoderight
       AnyKinEq LinCon ={
         AnyKinLinear Lin={
@@ -586,7 +586,7 @@ AnyFolder Buckle={
           AnySeg &ref2=..Seg;
         };
       };
-      
+
       AnyReacForce RotReac={
         AnyKinRotational Rot={
           Type=RotAxesAngles;
@@ -594,7 +594,7 @@ AnyFolder Buckle={
           AnySeg &ref2=..Seg;
         };
       };
-      
+
       //drive the x and z dof measured in the localcoordinate system of the new segment
       //to match the thorax.bucklenoderigth
       //This means that the segment will alway points with it z axis from pelvis.bucklenoderigth
@@ -610,38 +610,38 @@ AnyFolder Buckle={
         MeasureOrganizer={0,2};
         Reaction.Type={Off,Off};
       };
-      
-      
-      //drive one rot dof 
+
+
+      //drive one rot dof
       AnyKinEqSimpleDriver Drv2={
         AnyKinRotational Rot={
           Type=RotAxesAngles;
           AnyRefNode &ref1=....PelvisRef.BuckleNodeRight;
           AnySeg &ref2=..Seg;
-        };      
+        };
         DriverPos={0};
         DriverVel={0};
         MeasureOrganizer={1};
         Reaction.Type={Off};
-        
+
       };
-      
-      
+
+
     };
-    
+
     //Used in the same way as the right side measurering segment
     AnyFolder MeasuringSegmentLeft={
-      
+
       //create artifical segment
       //the segment is used for measuing purposes only
       AnySeg Seg={
-        r0=.....Trunk.SegmentsLumbar.PelvisSeg.BuckleNodeLeft.sRel*.....Trunk.SegmentsLumbar.PelvisSeg.Axes0'+.....Trunk.SegmentsLumbar.PelvisSeg.r0;           
+        r0=.....Trunk.SegmentsLumbar.PelvisSeg.BuckleNodeLeft.sRel*.....Trunk.SegmentsLumbar.PelvisSeg.Axes0'+.....Trunk.SegmentsLumbar.PelvisSeg.r0;
         Axes0=.....Trunk.SegmentsLumbar.PelvisSeg.Axes0;
         Mass=1e-5;
         Jii={0,0,0};
         //AnyDrawRefFrame Drw={ScaleXYZ={0.1,0.1,0.1}; RGB={1,0,0};};
       };
-      
+
       //Lock all lin dof to the bucklenoderight
       AnyKinEq LinCon ={
         AnyKinLinear Lin={
@@ -649,7 +649,7 @@ AnyFolder Buckle={
           AnySeg &ref2=..Seg;
         };
       };
-      
+
       AnyReacForce RotReac={
         AnyKinRotational Rot={
           Type=RotAxesAngles;
@@ -657,85 +657,85 @@ AnyFolder Buckle={
           AnySeg &ref2=..Seg;
         };
       };
-      
+
       //drive the x and z dof measured in the localcoordinate system of the new segment
       //to match the thorax.bucklenoderight
       //This means that the segment will alway points with it z axis from pelvis.bucklenoderigth
       //towards thorax.bucklenoderight
-      
+
       AnyKinEqSimpleDriver Drv1={
         AnyKinLinear Lin={
           Ref=0;
           AnySeg &ref2=..Seg;
           AnyRefNode &ref1=....ThoraxRef.BuckleNodeLeft;
         };
-        
+
         DriverPos={0,0};
         DriverVel={0,0};
         MeasureOrganizer={0,2};
         Reaction.Type={Off,Off};
       };
-      
-      //drive one rot dof 
+
+      //drive one rot dof
       AnyKinEqSimpleDriver Drv2={
         AnyKinRotational Rot={
           Type=RotAxesAngles;
           AnyRefNode &ref1=....PelvisRef.BuckleNodeLeft;
           AnySeg &ref2=..Seg;
-        };      
+        };
         DriverPos={0};
         DriverVel={0};
         MeasureOrganizer={1};
         Reaction.Type={Off};
       };
     };
-    
-    
+
+
   };
 
-  //  The abdominal model can generate forces to the rest of the model according to the way the volume 
-  //  is measured. This means that all measures in the volume may generate a force, since we have an 
+  //  The abdominal model can generate forces to the rest of the model according to the way the volume
+  //  is measured. This means that all measures in the volume may generate a force, since we have an
   //  abdominal muscle working on the volume.
-  //  //  
+  //  //
   AnyKinMeasureLinComb  AbdominalVol= {
-    
+
     AnyKinMeasure& L1=.Disc1.Disc.VirtuelSegDiscJnt;
     AnyKinMeasure& L2=.Disc2.Disc.VirtuelSegDiscJnt;
     AnyKinMeasure& L3=.Disc3.Disc.VirtuelSegDiscJnt;
     AnyKinMeasure& L4=.Disc4.Disc.VirtuelSegDiscJnt;
-    AnyKinMeasure& L5=.Disc5.Disc.VirtuelSegDiscJnt;  
-    
-    AnyKinPLine &ref7=.JointsAndDrivers.H;    
-    
+    AnyKinMeasure& L5=.Disc5.Disc.VirtuelSegDiscJnt;
+
+    AnyKinPLine &ref7=.JointsAndDrivers.H;
+
     AnyVar Disc1Coef =  2*pi*R*H0*1/5;
     AnyVar Disc2Coef =  2*pi*R*H0*1/5;
     AnyVar Disc3Coef =  2*pi*R*H0*1/5;
     AnyVar Disc4Coef =  2*pi*R*H0*1/5;
     AnyVar Disc5Coef =  2*pi*R*H0*1/5;
-    
+
     AnyVar R = 0.12; //equivalent radius
     AnyVar Area=pi*R^2;
     AnyVar H0=0.28; //initial height
-    
+
     AnyVar dvdh=Area;
     AnyVar F=1;
-    
+
     OutDim = 1;
-    Coef={{F*Disc1Coef,F*Disc2Coef,F*Disc3Coef,F*Disc4Coef,F*Disc5Coef,F*dvdh}};   
+    Coef={{F*Disc1Coef,F*Disc2Coef,F*Disc3Coef,F*Disc4Coef,F*Disc5Coef,F*dvdh}};
   }; // Measure
-  
+
   //1 mmHg = 0.133 kPa  Pa=N/m^2
   //A maximum pressure of 200mmHg was found in Morten Essendrup Ph.D. report
   //SIGNIFICANCE OF INTRA-ABDOMINAL PRESSURE
   //IN WORK RELATED TRUNK-LOADING
   //200mmHg=26.6KPa = 26.6*10^3 N/m^2
-  
+
   //In the AnyBody Modeling System, if a force is applied to this volume it becomes an abdominal pressure!
   //A muscle with a strength equivalent to the maximal abdominal pressure is working on the volume.
-  
+
   AnyVar StrengthScaleSpine = ...Scaling.StrengthScaling.Spine.StrengthScale;
-  
- 
+
+
   AnyRecruitedActuator AbdominalPressureMuscle1={
     AnyKinMeasureLinComb  &ref=.AbdominalVol;
     Strength = 26600*. StrengthScaleSpine;

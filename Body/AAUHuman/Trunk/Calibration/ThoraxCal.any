@@ -1,8 +1,8 @@
-// This is the first calibration file. It will calibrate all the ligaments in the 
+// This is the first calibration file. It will calibrate all the ligaments in the
 // lumbar spine, further sequences will overwrite some values
 
 AnyFolder ThoraxCal ={
-  AnyComponentDefinition obj = {};  
+  AnyComponentDefinition obj = {};
   AnyFolder &ThoraxSegs =  ...BodyModel.Trunk.SegmentsThorax;
   AnyFolder &LumbarSegs =  ...BodyModel.Trunk.SegmentsLumbar;
   AnyFolder &CervialSegs = ...BodyModel.Trunk.SegmentsCervicalSpine;
@@ -10,46 +10,46 @@ AnyFolder ThoraxCal ={
   AnyFolder &LeftArmSegs = ...BodyModel.Left.ShoulderArm.Seg;
   AnyFolder &RightArmSegs = ...BodyModel.Right.ShoulderArm.Seg;
   AnyFolder &LeftArmSegs = ...BodyModel.Left.ShoulderArm.Seg;
-  
+
   AnyFolder &CervicalJoints =  ...BodyModel.Trunk.JointsCervicalSpine;
   AnyFolder &LumbarJoints =  ...BodyModel.Trunk.JointsLumbar;
   AnyFolder &CervicalJoints =  ...BodyModel.Trunk.JointsCervicalSpine;
   AnyFolder &RightArmJoints = ...BodyModel.Right.ShoulderArm.Jnt;
   AnyFolder &LeftArmJoints = ...BodyModel.Left.ShoulderArm.Jnt;
-  
+
   AnyFolder &Buckle =  ...BodyModel.Trunk.Buckle;
-  
+
   AnyFolder &MusclesSpineRight =  ...BodyModel.Trunk.MusclesSpineRight;
   AnyFolder &MusclesSpineLeft =  ...BodyModel.Trunk.MusclesSpineLeft;
   AnyFolder &MusclesSpine =  ...BodyModel.Trunk.MusclesSpine;
-  
+
   AnyFolder &LumbarSpineLigaments =  ...BodyModel.Trunk.LumbarSpineLigaments;
   //AnyFolder &ThoracicSpineLigaments =  ...BodyModel.Trunk.ThoracicSpineLigaments; //< placeholder
-  
-  AnyFixedRefFrame ground = 
+
+  AnyFixedRefFrame ground =
   {
-    AnyRefNode node = 
-    { 
+    AnyRefNode node =
+    {
       ARel=..LumbarSegs.PelvisSeg.Axes0;
       sRel=..LumbarSegs.PelvisSeg.r0;
     };
   };
 
-  AnyKinEq PelvisFix = 
+  AnyKinEq PelvisFix =
   {
-    AnyKinLinear Lin = 
+    AnyKinLinear Lin =
     {
       AnyRefFrame &ground = ..ground.node;
       AnyRefFrame &Pelvis = .....BodyModel.Trunk.SegmentsLumbar.PelvisSeg;
     };
-    AnyKinRotational Rot = 
+    AnyKinRotational Rot =
     {
       Type = RotAxesAngles;
       AnyRefFrame &ground = ..ground.node;
       AnyRefFrame &Pelvis = .....BodyModel.Trunk.SegmentsLumbar.PelvisSeg;
     };
   };
-  
+
   // Posture data //
   AnyFloat ThoraxNeutral  = {  0,  0,  0} * pi/180;
   AnyFloat ThoraxFlex     = {-75,  0,  0} * pi/180;
@@ -58,7 +58,7 @@ AnyFolder ThoraxCal ={
   AnyFloat ThoraxLatLeft  = {  0, 30,  0} * pi/180;
   AnyFloat ThoraxRotLeft  = {  0,  0, 30} * pi/180;
   AnyFloat ThoraxRotRight = {  0,  0, -30} * pi/180;
-  
+
   AnyFloat NeckNeutral  = {  0,  0,  0} * pi/180;
   AnyFloat NeckFlex     = {  0,  0,-45} * pi/180;
   AnyFloat NeckLatRight = { 45,  0,  0} * pi/180;
@@ -66,7 +66,7 @@ AnyFolder ThoraxCal ={
   AnyFloat NeckLatLeft  = {-45,  0,  0} * pi/180;
   AnyFloat NeckRotLeft  = {  0, 75,  0} * pi/180;
   AnyFloat NeckRotRight = {  0,-75,  0} * pi/180;
-  
+
   AnyFloat ThoraxPosData = repmat(1,{
       ThoraxNeutral,
       ThoraxFlex,
@@ -76,7 +76,7 @@ AnyFolder ThoraxCal ={
       ThoraxRotLeft,
       ThoraxRotRight
     }');
-    
+
     AnyFloat NeckPosData = repmat(1,{
         NeckNeutral,
         NeckFlex,
@@ -86,9 +86,9 @@ AnyFolder ThoraxCal ={
         NeckRotLeft,
         NeckRotRight
       }');
-  
-  
-  
+
+
+
   // BM_TRUNK_LUMBAR_RHYTHM & BM_TRUNK_CERVICAL_RHYTHM must be turned ON //
   AnyKinEqInterPolDriver NeckJntDriver = {
     AnyKinMeasure& lb = ....BodyModel.Interface.Trunk.SkullThoraxLateralBending;
@@ -99,17 +99,17 @@ AnyFolder ThoraxCal ={
     Data = .NeckPosData;
     Reaction.Type = {Off, Off, Off};
   };
-  
+
   AnyKinEqInterPolDriver ThoraxDriver = {
     AnyKinMeasure& PelvisThoraxExtension = ....BodyModel.Interface.Trunk.PelvisThoraxExtension;
     AnyKinMeasure& PelvisThoraxLateralBending = ....BodyModel.Interface.Trunk.PelvisThoraxLateralBending;
-    AnyKinMeasure& PelvisThoraxRotation = ....BodyModel.Interface.Trunk.PelvisThoraxRotation;    
+    AnyKinMeasure& PelvisThoraxRotation = ....BodyModel.Interface.Trunk.PelvisThoraxRotation;
     Type = PiecewiseLinear;
     T = linspace(0,1,SizesOf(Data)[1]);
     Data = .ThoraxPosData;
     Reaction.Type = {On,On,On};
   };
-  
+
   #if !BM_ARM_SHOULDER_RHYTHM
   AnyKinEqSimpleDriver SCDriver ={
     AnyKinRotational &SCR =  ....BodyModel.Interface.Right.SternoClavicularProtraction.SCRot;
@@ -119,7 +119,7 @@ AnyFolder ThoraxCal ={
     Reaction.Type={Off,Off,Off, Off,Off,Off};
   };
   #endif
-  
+
   AnyKinEqSimpleDriver WristDriver ={
     AnyKinMeasure& WFR = ....BodyModel.Interface.Right.WristFlexion;
     AnyKinMeasure& WFL = ....BodyModel.Interface.Left.WristFlexion;
@@ -129,13 +129,13 @@ AnyFolder ThoraxCal ={
     DriverVel = {0,0,0,0};
     Reaction.Type={On,On,On,On};
   };
-    
+
   AnyKinEqSimpleDriver FEDriver ={
     AnyKinMeasure& FER = ....BodyModel.Interface.Right.ElbowFlexion;
     AnyKinMeasure& FEL = ....BodyModel.Interface.Left.ElbowFlexion;
     DriverPos = {0,0};
     DriverVel = {0,0};
-    Reaction.Type = {Off, Off};  
+    Reaction.Type = {Off, Off};
   };
 
   AnyKinEqSimpleDriver PSDriver ={
@@ -143,29 +143,26 @@ AnyFolder ThoraxCal ={
     AnyKinMeasure& PSL = ....BodyModel.Interface.Left.ElbowPronation;
     DriverPos = {0,0};
     DriverVel = {0,0};
-    Reaction.Type = {Off, Off};  
+    Reaction.Type = {Off, Off};
   };
- 
+
   AnyKinEqSimpleDriver GHDriver ={
     AnyKinRotational &GHRotR = ....BodyModel.Interface.Right.GlenohumeralFlexion.GHMeasure;
     AnyKinRotational &GHRotL = ....BodyModel.Interface.Left.GlenohumeralFlexion.GHMeasure;
-    DriverPos = pi/180*{10.0,0,0.0, 10.0,0,0.0};  
+    DriverPos = pi/180*{10.0,0,0.0, 10.0,0,0.0};
     DriverVel = {0,0,0,0,0,0};
-    Reaction.Type = {Off,Off,Off, Off,Off,Off};  
+    Reaction.Type = {Off,Off,Off, Off,Off,Off};
   };
 
- 
+
 };
 
 // The study: Operations to be performed on the model
 AnyBodyCalibrationStudy ThoraxCalibrationStudy = {
-  AnyFolder &ref=.ThoraxCal; 
+  AnyFolder &ref=.ThoraxCal;
   nStep = 7;
   InitialConditions.SmallStepAssumptionOnOff = Off;
   Kinematics.SmallStepAssumptionOnOff = Off;
   Kinematics.PosAnalysisOnlyOnOff = On;
   InitialConditions.PosAnalysisOnlyOnOff = On;
 };
-
-
-
