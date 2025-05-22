@@ -13,7 +13,7 @@ with AMMR. This section examines its role. You can find it in the root
 folder of the AMMR, for example {{AMMR_DEMO_INST_DIR}}.
 
 ```{image} _static/best-practices-libdef.png
-:alt: Step1
+:alt: Location of libdef.any in the AMMR root folder
 :class: bg-primary
 :align: center
 :width: 20%
