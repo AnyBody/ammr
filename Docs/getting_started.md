@@ -17,6 +17,7 @@ lesson {ref}`Installing Latest AMMR Files <installing-ammr>`.
 :maxdepth: 1
 
 ammr_installation
+ammr_best_practices
 ```
 
 % 1.. rubric:: Before using AMMR
