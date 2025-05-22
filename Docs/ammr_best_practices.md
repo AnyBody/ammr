@@ -36,7 +36,7 @@ statement such as
 ```
 Once the `#path` statements are correctly defined through the libdef.any file,
 it doesn't matter where in your model you use it to `#include` a file, as long 
-as it's defined after the path statement. AnyBody Modeling System will know the 
+as the #include statement appears after the corresponding #path definition. AnyBody Modeling System will know the 
 complete path of the file. Please note that sequence matters for statements 
 beginning with `#`, such as `#path`, `#include`, `#if`, `#define`, etc. 
 
