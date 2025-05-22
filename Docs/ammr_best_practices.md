@@ -8,8 +8,8 @@ AMMR. This page is especially relevant if you are new to AMMR.
 
 # The libdef file
 
-The libdef.any is an often overlooked but a critical file when you are working 
-with the AMMR. So, let's have a look at it together. You can find it in the root 
+The libdef.any is an often-overlooked yet critical file when working
+with AMMR. This section examines its role. You can find it in the root
 folder of the AMMR, for example {{AMMR_DEMO_INST_DIR}}.
 
 ```{image} _static/best-practices-libdef.png
