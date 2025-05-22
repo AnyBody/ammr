@@ -25,4 +25,5 @@ StandingModelScalingDisplay.Main.any`
 The model can be scaled either regarding to measures between joint center,
 or exteranal measures of bony tips, or by representation of a certain percentile of the population.
 
-For further details see {doc}`the tutorial about scaling </Scaling/intro>`
+For further details read {ref}`this information about scaling <Scaling_>` or see
+[the Scaling tutorials](https://anyscript.org/tutorials/Scaling/index.html).

@@ -64,9 +64,8 @@ Model Repository consists of three parts:
 If you are a new user check the [AnyBody Tutorials](https://anyscript.org/tutorials/) and 
 the getting started video on AnyBody.
 
-The following {doc}`Getting Started section </getting_started>` on the 
-AMMR provides insight into how AMMR is structured, how to
-install it and how to use it.
+The [Getting Started tutorial](https://anyscript.org/tutorials/A_Getting_started/index.html) 
+guides you through setting up the AMMR, understanding its structure, and learning how to use it.
 ```
 
 <span class="material-symbols-outlined">
@@ -117,18 +116,6 @@ used together as a full body, scalable musculoskeletal model.
 [anybody modeling system]: https://www.anybodytech.com/software/anybodymodelingsystem/
 
 
-
-```{toctree}
-:caption: Examples and applications
-:includehidden: true
-:hidden:
-
-getting_started
-Gallery of examples <Applications/index>
-migration
-```
-
-
 ```{toctree}
 :caption: Body Models
 :includehidden: true
@@ -136,6 +123,19 @@ migration
 
 Overview <body/models>
 bm_config/index
+Scaling_
+migration
+```
+
+
+
+```{toctree}
+:caption: Examples and applications
+:includehidden: true
+:hidden:
+
+Gallery of examples <Applications/index>
+anymocap/index
 ```
 
 
@@ -152,20 +152,6 @@ tools/class-templates
 
 
 ```{toctree}
-:caption: Guides
-:includehidden: true
-:hidden:
-:maxdepth: 2
-:titlesonly:
-
-creating_model_from_scratch
-Scaling/intro
-anymocap/index
-
-```
-
-
-```{toctree}
 :caption: About
 :includehidden: true
 :hidden: true
@@ -179,3 +165,15 @@ legal
 
 ```
 
+
+```{toctree}
+:caption: Deleted
+:includehidden: true
+:hidden: true
+:maxdepth: 2
+
+
+Deleted/Scaling/intro
+Deleted/Creating_Model_From_Scratch/creating_model_from_scratch
+Deleted/getting_started
+```
