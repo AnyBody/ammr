@@ -76,7 +76,7 @@ configurations through the {doc}`body model (BM) statements<bm_config/index>`.
 For example, you can define your own joint for the knee by setting
 `#define BM_JOINT_TYPE_KNEE_RIGHT _JOINT_TYPE_USERDEFINED_`. This statement
 will exclude the default knee joint from the body model and all the objects that
-depends on it. Then, you can simply define a new knee joint without needing to
+depend on it. Then, you can simply define a new knee joint without needing to
 modify any of the body model files in the AMMR. It is possible to add objects 
 to the human model without modifying the body model files. You can open the
 scope to the corresponding body model folder through one of your model specific 
