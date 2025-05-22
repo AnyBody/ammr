@@ -6,9 +6,9 @@ Once you have installed the demo repository, you are free to work with it as you
 please. However, this page describes the best practices to make the most out of
 AMMR. This page is especially relevant if you are new to AMMR.
 
-# The libdef file
+# The `libdef.any` file
 
-The libdef.any is an often-overlooked yet critical file when working
+The `libdef.any` file is an often-overlooked yet critical file when working
 with AMMR. This section examines its role. You can find it in the root
 folder of the AMMR, for example {{AMMR_DEMO_INST_DIR}}.
 
@@ -28,21 +28,23 @@ If you open this file, you will see several `#path` statements, for example:
 #path AMMR_TOOLS "Tools/"
 ```
 
-These statements define shortcuts that let AnyBody Modeling System know where 
+These statements define shortcuts that tell the AnyBody Modeling System where 
 exactly to look for a file when the identifier is used in an `#include` 
-statement such as
+statement, such as:
+
 ```AnyScriptDoc
 #include "<ANYBODY_PATH_BODY>/HumanModel.any"
 ```
-Once the `#path` statements are correctly defined through the libdef.any file,
-it doesn't matter where in your model you use it to `#include` a file, as long 
-as the #include statement appears after the corresponding #path definition. AnyBody Modeling System will know the 
-complete path of the file. Please note that sequence matters for statements 
-beginning with `#`, such as `#path`, `#include`, `#if`, `#define`, etc. 
+Once the `#path` statements are correctly defined in the `libdef.any` file,
+the AnyBody Modeling System can locate the included file regardless of where the `#include` 
+statement appears in your model, as long as it's after the corresponding `#path` definition.
+AnyBody Modeling System will know the complete path of the file. Please note
+that sequence matters for statements beginning with `#`, such as `#path`,
+`#include`, `#if`, `#define`, etc.
 
 :::{note}
-In the demo AMMR, you can find several files that are named libdef.any. They only
-exist to create a chain up to the libdef.any file in the root folder of the AMMR.
+In the AMMR, you can find several files that are named `libdef.any`. They only
+exist to create a chain up to the `libdef.any` file in the root folder of the AMMR.
 This can be confusing but is convenient as the main files can be several levels
 deep into the AMMR.
 :::
@@ -54,12 +56,16 @@ use one of the {ref}`application examples<example-gallery>` from the AMMR as a
 starting point. In either case, the advice is to keep your demo AMMR as clean as 
 possible. Please select another working directory on your machine where you can 
 start a new model or copy the folder of the application example that serves you 
-the most, and then write all your code over here.
+the most, and then write all your code in this new location.
 
-In the main file of your model, write or update the line including the libdef file 
+In the main file of your model, write or update the line including the `libdef.any` file 
 to include the libdef file from the root folder of your demo AMMR. You can copy 
 the path of the libdef file from the AMMR and paste the path in the main file 
 of your model.
+
+```AnyScriptDoc
+#include "C:\Users\mel\Documents\AnyBody.8.1.x\AMMR.v3.1.0-Demo/libdef.any"
+```
 
 :::{tip}
 If you have multiple models in your working directory, you can have a libdef file 
@@ -117,22 +123,22 @@ model. This is possible, and there can be two ways to do it:
 # Version Control
 
 If you are not familiar with version control, then the best advice is perhaps to 
-familiarize yourself with version control before you embark on your journey
+familiarize yourself with it before you embark on your journey
 of making amazing AnyBody models. Building such models takes a lot of time and
 version control will make your life easier when you want to look back at the 
 changes you have made, whether you want to document your model or debug your 
 model. Moreover, version control tools can also make collaborative development
-of the model systematic and robust. Since AnyScript is text based, it can be
+of the model systematic and robust. Since AnyScript is text-based, it can be
 easily version controlled.
 
-This page can't describe version control in detail. There are several
-online resources that explain it better than it can possibly be explained here.
-You are encouraged to look for these resources. Meanwhile, here are a couple
-of links to help you get started.
-[Git](https://git-scm.com/) is a commonly used tool for version control. It is
-a command line-based tool, however, there are also several 
-[GUI clients](https://git-scm.com/downloads/guis?os=windows) that can make 
-version control easier.
+While this guide introduces the importance of version control, comprehensive
+tutorials and detailed explanations are widely available through dedicated
+online resources. You are encouraged to look for these resources. Meanwhile,
+here are a couple of links to help you get started. [Git](https://git-scm.com/)
+is a commonly used tool for version control. It is a command line-based tool,
+however, there are also several [GUI
+clients](https://git-scm.com/downloads/guis?os=windows) that can make version
+control easier.
 
 # Benefits of best practices
 
