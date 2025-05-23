@@ -122,6 +122,49 @@ Main = {
 };
 ```
 
+## Application examples using the GM foot model
+
+::::{grid} 2 2 2 3
+:gutter: 3
+
+:::{grid-item-card} BVH driven model with Toe Flexion
+:link: /Applications/Beta/BVH_ToeFlex
+:link-type: doc
+:text-align: center
+
+![BVH driven model with Toe Flexion](/Applications/images/BVH_ToeFlex_GM.webp)
+^^^
+:::
+
+:::{grid-item-card} GM Foot MoCap Model
+:link: /Applications/Beta/Plug-in-gait_Simple_DetailedFootGM
+:link-type: doc
+:text-align: center
+
+![GM Foot MoCap Model](/Applications/images/Plug-in-gait_simple_lowerbody_DetailedFoot_GM.webp)
+^^^
+:::
+
+:::{grid-item-card} C3D driven models with Toe Flexion
+:link: /Applications/Beta/Plug-in-gait_Simple_ToeFlexion
+:link-type: doc
+:text-align: center
+
+![C3D driven models with Toe Flexion](/Applications/images/Plug-in-gait_simple_lowerbody_ToeFlex_GM.webp)
+^^^
+:::
+
+:::{grid-item-card} Free posture with GM Foot
+:link: /Applications/Beta/FreePosture_GMFoot
+:link-type: doc
+:text-align: center
+
+![Free posture with GM Foot](/Applications/images/FreePostureFullBodyStatic_GMFoot.webp)
+^^^
+:::
+
+::::
+
 ## Model structure
 
 The foot model includes 26 rigid segments representing all the bones of

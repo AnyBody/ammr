@@ -65,6 +65,7 @@ extensions = [
     "sphinx_design",
     "sphinx_togglebutton",
     "sphinx_copybutton",
+    "sphinxcontrib.video",
 
     # "sphinxcontrib.youtube",
     # "sphinx_copybutton",

@@ -19,12 +19,17 @@ template can be used to bend toes even without measured data. This class templat
 ensures that toes bend to prevent penetration with the ground at toe-off, while they
 stay in the neutral posture otherwise.
 
-```{raw} html
-<video width="45%" style="display:block; margin: 0 auto;" controls autoplay loop>
-  <source src="../../../../body/_static/FootGaitNormal_1_ToeFlex_GM.webm" type="video/webm">
-Your browser does not support the video tag.
-</video>
-```
+<!-- See https://sphinxcontrib-video.readthedocs.io/en/latest/quickstart.html -->
+:::{video} ../../body/_static/FootGaitNormal_1_ToeFlex_GM.webm
+:autoplay:
+:loop:
+:muted:
+:width: 45%
+:align: center
+:nocontrols:
+:controlslist: nofullscreen
+
+:::
 
 :::{seealso}
 **Main file location in AMMR:**
