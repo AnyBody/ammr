@@ -1,5 +1,5 @@
 ---
-gallery_title: "Simpel Knee force estimation"
+gallery_title: "Simple Knee force estimation"
 gallery_image: "/Applications/images/KneeForceExample.webp"
 ---
 
