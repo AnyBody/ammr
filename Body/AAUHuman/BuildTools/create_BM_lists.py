@@ -31,5 +31,5 @@ anyscript_highlighters = f"""
 
 """
 
-with open("anyscript_highlighters.txt", "w", encoding="utf-8") as fp:
+with open("anyscript_highlighters.txt", "w") as fp:
     fp.write(anyscript_highlighters)
