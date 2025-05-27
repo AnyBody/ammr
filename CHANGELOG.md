@@ -11,7 +11,7 @@
   method for applying joint angles from marker tracking could sometimes
   struggle with complex rotations (gimbal lock situations). The updated
   implementation enhances the stability of the kinematic solver, particularly
-  for pelvis positioning, leading to more reliable motion analysis.
+  for numerically large pelvis rotations, leading to more reliable motion analysis.
   
   TL;DR: The implementation was previously using `AnyKinMeasureLinComb` to
   enable adding a pelvis offset. This had the side effect that the kinematic
