@@ -3,6 +3,25 @@
 % A rendered version of the CHANGELOG is avaible here:
 %    https://anyscript.org/ammr/beta/changelog.html
 
+(ammr-3.1.2-changelog)=
+## AMMR 3.1.2 (2025-??-??)
+
+
+* Improved how kinematics calculated in marker tracking is applied 
+  to inverse dynamics MoCap models. The previous
+  method for applying joint angles from marker tracking could sometimes
+  struggle with complex rotations (gimbal lock situations). The updated
+  implementation enhances the stability of the kinematic solver, particularly
+  for pelvis positioning, leading to more reliable motion analysis.
+  
+  TL;DR: The implentation was previously using `AnyKinMeasureLinComb` to
+  allow for adding a pelvis offset. This had the side effect that the kinematic
+  solver had a diffculties handing solution close to gimbal locks (+/- pi
+  radians). The new implementation only includes the 3 pelvis positions in the
+  `AnyKinMeasureComb` instead of all trunk angles. This makes the kinematic
+  solver more robust and it is now able to handle gimbal locks better.
+
+
 (ammr-3.1.0-changelog)=
 ## AMMR 3.1.0 (2025-03-31)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.15094590.svg)](https://doi.org/10.5281/zenodo.15094590)
