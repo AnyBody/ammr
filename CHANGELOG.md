@@ -14,11 +14,13 @@
   for pelvis positioning, leading to more reliable motion analysis.
   
   TL;DR: The implementation was previously using `AnyKinMeasureLinComb` to
-  allow for adding a pelvis offset. This had the side effect that the kinematic
-  solver had a difficulties handling solutions close to gimbal locks (+/- pi
-  radians). The new implementation only includes the 3 pelvis positions in the
+  enable adding a pelvis offset. This had the side effect that the kinematic
+  engine had to assume small angles, and thus, had difficulties handling 
+  large rotational quantities (e.g. +/- pi, 2pi) for pelvis rotations.  
+  The new implementation only includes the 3 pelvis positions in the
   `AnyKinMeasureLinComb` instead of all trunk angles. This makes the kinematic
-  solver more robust and it is now able to handle gimbal locks better.
+  solution more robust for large rotational quantities, which typically may arise
+  for pelvic's global orientation.
 
 
 (ammr-3.1.0-changelog)=
