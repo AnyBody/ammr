@@ -9,7 +9,7 @@
 [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.1.2-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
 
 This release of AMMR contains an important fix to the robustness of the MoCap models. 
-If you experienced problems with kinematics MoCap models when running inverse dynamics then
+If you experienced problems with kinematic errors when running inverse dynamics then
 please update to this version.
 
 ### 🩹 Fixed:
