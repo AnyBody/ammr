@@ -4,7 +4,15 @@
 %    https://anyscript.org/ammr/beta/changelog.html
 
 (ammr-3.1.2-changelog)=
-## AMMR 3.1.2 (2025-??-??)
+## AMMR 3.1.2 (2025-06-02)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.15534589.svg)](https://doi.org/10.5281/zenodo.15534589)
+[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.1.2-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
+
+This release of AMMR contains an important fix to the robustness of the MoCap models. 
+If you experienced problems with kinematic errors when running inverse dynamics then
+please update to this version.
+
+### 🩹 Fixed:
 
 * Improved how kinematics calculated in marker tracking is applied 
   to inverse dynamics MoCap models. The previous
