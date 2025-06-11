@@ -3,6 +3,15 @@
 % A rendered version of the CHANGELOG is avaible here:
 %    https://anyscript.org/ammr/beta/changelog.html
 
+(ammr-3.1.3-changelog)=
+## AMMR 3.1.3 (2025-06-02)
+[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.1.3-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
+
+### 🩹 Fixed:
+* Fixed an regression with the VideoTool `VideoLookAtCamera`, which prevented it
+  from creating animated gifs if the underlying video was not an `.mp4` file. It
+  now works by default with any video format supported by the `ffmpeg` library.
+
 (ammr-3.1.2-changelog)=
 ## AMMR 3.1.2 (2025-06-02)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.15534589.svg)](https://doi.org/10.5281/zenodo.15534589)
