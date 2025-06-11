@@ -8,9 +8,9 @@
 [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.1.3-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
 
 ### 🩹 Fixed:
-* Fixed a regression with the VideoTool `VideoLookAtCamera`, which prevented it
-  from creating animated gifs if the underlying video was not an `.mp4` file. It
-  now works by default with any video format supported by the `ffmpeg` library.
+* Fixed a regression in the VideoLookAtCamera VideoTool that prevented animated
+  GIFs from being created when the video source was not an .mp4 file. It now
+  supports any video format compatible with the ffmpeg library.
 
 (ammr-3.1.2-changelog)=
 ## AMMR 3.1.2 (2025-06-02)
