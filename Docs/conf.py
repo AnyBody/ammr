@@ -375,7 +375,7 @@ linkcheck_ignore = [
     "https://doi.org/10.1016/j.clinbiomech.2006.10.003",  # clinbiomech.com prevents the linkcheck
     "https://doi.org/10.1002/jor.25267",  # wiley.com prevents the linkcheck
     "https://web.archive.org*",  # web.archive.org is currently down due to hacking atacks
-    "https://doi.org/10.5281/zenodo.15094590", # version not released yet
+    "https://doi.org/10.5281/zenodo.15534589", # version not released yet
 ]
 
 linkcheck_allowed_redirects = {
