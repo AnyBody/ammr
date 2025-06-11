@@ -2,33 +2,33 @@
 {
 ///^ Create the code specific for forceplate type 1
 
-  AnyComponentDefinition obj = {};  
+  AnyComponentDefinition obj = {};
   // Interface inputs
   #var AnyFloat Time;
 
-  
+
   /*
-     The ForcePlate class that uses this class expects the following variables are 
+     The ForcePlate class that uses this class expects the following variables are
      available:
 
-   AnyVar LoadRatio: 
-      A ratio with which the force plate is loaded. This is used only used to color the force plate  
-   
-   AnyInt OnOff: 
+   AnyVar LoadRatio:
+      A ratio with which the force plate is loaded. This is used only used to color the force plate
+
+   AnyInt OnOff:
       A tresshold variable that specifies when the there is force on the force plate
-   
+
    AnyForceMomentMeasure2 NetEffectMeasure:
-      Moment measures that sums all the forces on the force plate. 
-   
-   AnySeg ForcePlateSeg: 
-      A segment with all force plate force aplied to it.  
+      Moment measures that sums all the forces on the force plate.
+
+   AnySeg ForcePlateSeg:
+      A segment with all force plate force aplied to it.
   */
-    
+
   #var AnyFloat CalMatrix = eye(6);
-  
+
 
   // These can be overridden to specify a special channel to read the data from
-  // Must be given as a pointer to the data 
+  // Must be given as a pointer to the data
   // Fx = &Main.ModelSetup.C3DFileData.Analog.Data.Fx;
   #var AnyObjectPtrVar Fx = AutoLocateChannels.Fx;
   #var AnyObjectPtrVar Fy = AutoLocateChannels.Fy;
@@ -36,9 +36,9 @@
   #var AnyObjectPtrVar Px = AutoLocateChannels.Px;
   #var AnyObjectPtrVar Py = AutoLocateChannels.Py;
   #var AnyObjectPtrVar Mz = AutoLocateChannels.Mz;
-   
-   
-  /// Contains the logic to find the correct analog channels from the C3D file   
+
+
+  /// Contains the logic to find the correct analog channels from the C3D file
   AnyFolder AutoLocateChannels = {
     AnyInt ChIdxs = ..ForcePlateInfo.CHANNEL[PLATEIDX]-1;
     /// Hack to ensure that the pointers get a later evalution moment.
@@ -47,34 +47,34 @@
     AnyObjectPtrVar Fz = ObjSearch(CompleteNameOf(&C3D_OBJECT.Analog.DataFiltered)+ "." + C3D_OBJECT.AnalogLabels[ChIdxs[2]])[0];
     AnyObjectPtrVar Px = ObjSearch(CompleteNameOf(&C3D_OBJECT.Analog.DataFiltered)+ "." + C3D_OBJECT.AnalogLabels[ChIdxs[3]])[0];
     AnyObjectPtrVar Py = ObjSearch(CompleteNameOf(&C3D_OBJECT.Analog.DataFiltered)+ "." + C3D_OBJECT.AnalogLabels[ChIdxs[4]])[0];
-    AnyObjectPtrVar Mz = ObjSearch(CompleteNameOf(&C3D_OBJECT.Analog.DataFiltered)+ "." + C3D_OBJECT.AnalogLabels[ChIdxs[5]])[0];    
+    AnyObjectPtrVar Mz = ObjSearch(CompleteNameOf(&C3D_OBJECT.Analog.DataFiltered)+ "." + C3D_OBJECT.AnalogLabels[ChIdxs[5]])[0];
   };
-  
+
   AnyVar MaxLoad = max( vnorm({Obj2Num(Fx),Obj2Num(Fy),Obj2Num(Fz)}') );
   AnyVar FzTotal = input_data(NetEffectMeasure.t)[2];
   AnyVar LoadRatio = vnorm(Force.Flocal)/(MaxLoad+0.0001);
   AnyVar OnOff=iffun(gtfun(-FzTotal,10.0),1.0,0.0);
-  
+
   AnySeg ForcePlateSeg = {
     Mass=0.0;
     Jii={0,0,0};
     r0=..Corners.PlateCenter.sRel;
 
-    //Rotational tranformation matrix for a coordinate system defined by three points. The first point is the origin of the system; the second gives the direction of the first (x) axis. Together all three points must span a plane which will be the plane of the first (x) and the second (y) axes, having the third (z) axis as normal. 
+    //Rotational tranformation matrix for a coordinate system defined by three points. The first point is the origin of the system; the second gives the direction of the first (x) axis. Together all three points must span a plane which will be the plane of the first (x) and the second (y) axes, having the third (z) axis as normal.
     AnyVec3 p1=..Corners.PlateCenter.sRel;
     AnyVec3 p2=0.5*(..Corners.c01.sRel+..Corners.c04.sRel);
     AnyVec3 p3=0.5*(..Corners.c01.sRel+..Corners.c02.sRel);
     Axes0 =RotMat(p1,p2,p3);
-    
+
     #var AnyFloat Origins= ..ForcePlateInfo.ORIGIN;
     AnyVar z_check = iffun(gtfun(Origins[PLATEIDX][2], 0), 1, -1);
-    AnyMessage Origin_Z_value_message= 
+    AnyMessage Origin_Z_value_message=
     {
       TriggerConst = iffun(gteqfun(.z_check,0), 1, 0);
       Type = MSG_Message ;
       Message = "The Origin of this force plate is written as positive. So this value will be converted as negative automatically. Please refer to www.c3d.org/HTML/type41.htm ";
-    };    
-    //Transducer location      
+    };
+    //Transducer location
     AnyRefNode TransducerLocation ={
       AnyVar xdist=.z_check*.Origins[PLATEIDX][0]*C3D_OBJECT.PointsScaleFactor;//distance from x axis on transducer to x axis of center of plate
       AnyVar ydist=.z_check*.Origins[PLATEIDX][1]*C3D_OBJECT.PointsScaleFactor; //distance from y axis on transducer to y axis of center of plate
@@ -82,91 +82,91 @@
       sRel={xdist,ydist,zdist};
       AnyDrawRefFrame drw={ScaleXYZ=0.2*{1,1,1};RGB={1,0,0}; Visible=Off;};
     };
-  };  
-  
+  };
+
   AnyFunInterpol input_data =
   {
     Type=PiecewiseLinear;
     T=.Time;
     Data= .CalMatrix'
-         * {Obj2Num(.Fx),Obj2Num(.Fy), Obj2Num(.Fz), 
+         * {Obj2Num(.Fx),Obj2Num(.Fy), Obj2Num(.Fz),
             Obj2Num(.Mz),Obj2Num(.Px), Obj2Num(.Py)};
-  };    
-  
+  };
+
   AnyForce3D Force ={
-    
+
     AnyRefFrame  &ref = .COP_Seg ;
     Flocal=.OnOff*{.input_data(.NetEffectMeasure.t)[0],.input_data(.NetEffectMeasure.t)[1],.input_data(.NetEffectMeasure.t)[2]};
-    AnyDrawVector DrawForce = 
+    AnyDrawVector DrawForce =
     {
       Visible = DRAW_RAW_FORCES;
       AnyRefFrame &ref=.ref;
       Vec=.Flocal*1/1000;
       PointAway = Off;
       DrawCoord = Off;
-      
+
       Line.RGB ={0,0,1};
       Line.Thickness = 0.01;
       Line.End.Thickness = 2*0.01;
       Line.End.Length = 4*0.01;
       GlobalCoord=Off;
     };
-  };  
-  
-  AnyMoment3D Moment = 
+  };
+
+  AnyMoment3D Moment =
   {
     AnyRefFrame  &ref = .COP_Seg ;
     Mlocal=.OnOff*{ 0.0, 0.0, .input_data(.NetEffectMeasure.t)[3]}*C3D_OBJECT.PointsScaleFactor;
-    AnyDrawVector DrawMoment =     
+    AnyDrawVector DrawMoment =
     {
       AnyRefFrame &ref=.ref;
       Vec=.Mlocal*C3D_OBJECT.PointsScaleFactor;
       PointAway = Off;
       DrawCoord = Off;
-      
+
       Line.RGB ={0,1,1};
       Line.Thickness = 0.01;
       Line.End.Thickness = 2*0.01;
       Line.End.Length = 4*0.01;
       GlobalCoord=Off;
-    };      
-  };    
-  
+    };
+  };
+
   AnySeg COP_Seg =
   {
     Mass = 0;
     Jii = {0, 0, 0};
     r0 = .ForcePlateSeg.r0 ;
     Axes0 = .ForcePlateSeg.Axes0;
-    AnyDrawSphere Drw = 
+    AnyDrawSphere Drw =
     {
       Opacity = ..OnOff ;
       RGB = {0,1,0};
       ScaleXYZ = 0.015 *{1,1,1};
     };
   };
-  
-  AnyKinEq COP_On_ForcePlate = 
+
+  AnyKinEq COP_On_ForcePlate =
   {
-    AnyKinLinear lin = 
+    AnyKinLinear lin =
     {
       AnyRefFrame& ref0 = ..ForcePlateSeg;
       AnyRefFrame& ref1 = ..COP_Seg;
       Ref = 0;
     };
-    AnyKinRotational rot = 
+    AnyKinRotational rot =
     {
       AnyRefFrame& ref0 = ..ForcePlateSeg;
       AnyRefFrame& ref1 = ..COP_Seg;
-      Type = PlanarAngles;      
+      Type = PlanarAngles;
     };
     MeasureOrganizer = {2, 3, 4, 5};
     Reaction.Type = {On, On, On, On};
   };
-  
+
   AnyKinEqInterPolDriver COP_Driver =
   {
-    AnyKinLinear lin = 
+    AnyKinLinear lin =
     {
       AnyRefFrame& ref0 = ..ForcePlateSeg;
       AnyRefFrame& ref1 = ..COP_Seg;
@@ -177,10 +177,10 @@
     T=.Time;
     Data={.input_data.Data[4], .input_data.Data[5]} * C3D_OBJECT.PointsScaleFactor;
     Reaction.Type = {On, On};
-  };    
-  
-  
-  AnyForceMomentMeasure2 NetEffectMeasure = 
+  };
+
+
+  AnyForceMomentMeasure2 NetEffectMeasure =
   {
     AnyRefFrame& ref = .ForcePlateSeg.PlateSurface;
     AnySeg& refseg = .ForcePlateSeg;
@@ -191,8 +191,8 @@
 
     AnyVec3 Flocal = F*ref.Axes;
     AnyVec3 Mlocal = M*ref.Axes;
-  };  
-    
+  };
+
 
 };
 
@@ -202,37 +202,37 @@
 {
 ///^ Create the code specific for forceplate type 2 or 4
 
-  AnyComponentDefinition obj = {};  
+  AnyComponentDefinition obj = {};
 
   // Interface inputs
   #var AnyFloat Time;
-  
+
   /*
-     The ForcePlate class that uses this class expects the following variables are 
+     The ForcePlate class that uses this class expects the following variables are
      available:
 
-   AnyVar LoadRatio: 
-      A ratio with which the force plate is loaded. This is used only used to color the force plate  
-   
-   AnyInt OnOff: 
+   AnyVar LoadRatio:
+      A ratio with which the force plate is loaded. This is used only used to color the force plate
+
+   AnyInt OnOff:
       A tresshold variable that specifies when the there is force on the force plate
-   
+
    AnyForceMomentMeasure2 NetEffectMeasure:
-      Moment measures that sums all the forces on the force plate. 
-   
-   AnySeg ForcePlateSeg: 
-      A segment with all force plate force aplied to it.  
+      Moment measures that sums all the forces on the force plate.
+
+   AnySeg ForcePlateSeg:
+      A segment with all force plate force aplied to it.
   */
-  
-    
+
+
   #if FORCEPLATE_TYPE == 4
-  #var AnyFloat CalMatrix = C3D_OBJECT.Groups.FORCE_PLATFORM.CAL_MATRIX.Data[PLATEIDX];  
+  #var AnyFloat CalMatrix = C3D_OBJECT.Groups.FORCE_PLATFORM.CAL_MATRIX.Data[PLATEIDX];
   #else
   #var AnyFloat CalMatrix = eye(6);
   #endif
-  
+
   // These can be overridden to specify a special channel to read the data from
-  // Must be given as a pointer to the data 
+  // Must be given as a pointer to the data
   // Fx = &Main.ModelSetup.C3DFileData.Analog.Data.Fx;
   #var AnyObjectPtrVar Fx = AutoLocateChannels.Fx;
   #var AnyObjectPtrVar Fy = AutoLocateChannels.Fy;
@@ -240,9 +240,9 @@
   #var AnyObjectPtrVar Mx = AutoLocateChannels.Mx;
   #var AnyObjectPtrVar My = AutoLocateChannels.My;
   #var AnyObjectPtrVar Mz = AutoLocateChannels.Mz;
-   
-   
-  /// Contains the logic to find the correct analog channels from the C3D file   
+
+
+  /// Contains the logic to find the correct analog channels from the C3D file
   AnyFolder AutoLocateChannels = {
     AnyInt ChIdxs = ..ForcePlateInfo.CHANNEL[PLATEIDX]-1;
     /// Hack to ensure that the pointers get a later evalution moment.
@@ -252,34 +252,34 @@
     AnyObjectPtrVar Fz = ObjSearch(CompleteNameOf(&C3D_OBJECT.Analog.DataFiltered)+ dot + C3D_OBJECT.AnalogLabels[ChIdxs[2]])[0];
     AnyObjectPtrVar Mx = ObjSearch(CompleteNameOf(&C3D_OBJECT.Analog.DataFiltered)+ dot + C3D_OBJECT.AnalogLabels[ChIdxs[3]])[0];
     AnyObjectPtrVar My = ObjSearch(CompleteNameOf(&C3D_OBJECT.Analog.DataFiltered)+ dot + C3D_OBJECT.AnalogLabels[ChIdxs[4]])[0];
-    AnyObjectPtrVar Mz = ObjSearch(CompleteNameOf(&C3D_OBJECT.Analog.DataFiltered)+ dot + C3D_OBJECT.AnalogLabels[ChIdxs[5]])[0];    
+    AnyObjectPtrVar Mz = ObjSearch(CompleteNameOf(&C3D_OBJECT.Analog.DataFiltered)+ dot + C3D_OBJECT.AnalogLabels[ChIdxs[5]])[0];
   };
-  
+
   AnyVar MaxLoad = max( vnorm({Obj2Num(Fx),Obj2Num(Fy),Obj2Num(Fz)}') );
   AnyVar FzTotal = load(NetEffectMeasure.t)[2];
   AnyVar LoadRatio = vnorm(Force.Flocal)/(MaxLoad+0.0001);
   AnyVar OnOff=iffun(gtfun(-FzTotal,10.0),1.0,0.0);
-  
+
   AnySeg ForcePlateSeg = {
     Mass=0.0;
     Jii={0,0,0};
     r0=..Corners.PlateCenter.sRel;
-    
-    //Rotational tranformation matrix for a coordinate system defined by three points. The first point is the origin of the system; the second gives the direction of the first (x) axis. Together all three points must span a plane which will be the plane of the first (x) and the second (y) axes, having the third (z) axis as normal. 
+
+    //Rotational tranformation matrix for a coordinate system defined by three points. The first point is the origin of the system; the second gives the direction of the first (x) axis. Together all three points must span a plane which will be the plane of the first (x) and the second (y) axes, having the third (z) axis as normal.
     AnyVec3 p1=..Corners.PlateCenter.sRel;
     AnyVec3 p2=0.5*(..Corners.c01.sRel+..Corners.c04.sRel);
     AnyVec3 p3=0.5*(..Corners.c01.sRel+..Corners.c02.sRel);
     Axes0 =RotMat(p1,p2,p3);
-    
+
     #var AnyFloat Origins= ..ForcePlateInfo.ORIGIN;
     AnyVar z_check = iffun(gtfun(Origins[PLATEIDX][2], 0), 1, -1);
-    AnyMessage Origin_Z_value_message= 
+    AnyMessage Origin_Z_value_message=
     {
       TriggerConst = iffun(gteqfun(.z_check,0), 1, 0);
       Type = MSG_Message ;
       Message = "The Origin of this force plate is written as positive. So this value will be converted as negative automatically. Please refer to www.c3d.org/HTML/type41.htm ";
-    };    
-    //Transducer location      
+    };
+    //Transducer location
     AnyRefNode TransducerLocation ={
       AnyVar xdist=.z_check*.Origins[PLATEIDX][0]*C3D_OBJECT.PointsScaleFactor;//distance from x axis on transducer to x axis of center of plate
       AnyVar ydist=.z_check*.Origins[PLATEIDX][1]*C3D_OBJECT.PointsScaleFactor; //distance from y axis on transducer to y axis of center of plate
@@ -287,40 +287,40 @@
       sRel={xdist,ydist,zdist};
       AnyDrawRefFrame drw={ScaleXYZ=0.2*{1,1,1};RGB={1,0,0};Visible=Off;};
     };
-  };  
-  
+  };
+
   AnyFunInterpol load ={
     Type=PiecewiseLinear;
     T= .Time;
     Data= .CalMatrix'*
       {Obj2Num(.Fx),Obj2Num(.Fy), Obj2Num(.Fz), Obj2Num(.Mx), Obj2Num(.My), Obj2Num(.Mz)};
-  }; 
-  
+  };
+
   AnyForce3D Force ={
-    
+
     AnyRefFrame  &ref=.ForcePlateSeg.TransducerLocation ;
     Flocal=.OnOff*{.load(.NetEffectMeasure.t)[0],.load(.NetEffectMeasure.t)[1],.load(.NetEffectMeasure.t)[2]};
-    AnyDrawVector DrawForce = 
+    AnyDrawVector DrawForce =
     {
       Visible = DRAW_RAW_FORCES;
       AnyRefFrame &ref=.ref;
       Vec=.Flocal*1/1000;
       PointAway = Off;
       DrawCoord = Off;
-      
+
       Line.RGB ={0,0,1};
       Line.Thickness = 0.01;
       Line.End.Thickness = 2*0.01;
       Line.End.Length = 4*0.01;
       GlobalCoord=Off;
     };
-  };  
-  
-  AnyMoment3D Moment = 
+  };
+
+  AnyMoment3D Moment =
   {
     AnyRefFrame  &ref=.ForcePlateSeg.TransducerLocation ;
     Mlocal=.OnOff*{.load(.NetEffectMeasure.t)[3],.load(.NetEffectMeasure.t)[4],.load(.NetEffectMeasure.t)[5]}*C3D_OBJECT.PointsScaleFactor;
-    AnyDrawVector DrawMoment = 
+    AnyDrawVector DrawMoment =
     {
       AnyRefFrame &ref=.ref;
       Vec=.Mlocal*1/1000;
@@ -332,10 +332,10 @@
       Line.End.Length = 4*0.01;
       GlobalCoord=Off;
     };
-  };    
-  
-  
-  AnyForceMomentMeasure2 NetEffectMeasure = 
+  };
+
+
+  AnyForceMomentMeasure2 NetEffectMeasure =
   {
     AnyRefFrame& ref = .ForcePlateSeg.PlateSurface;
     AnySeg& refseg = .ForcePlateSeg;
@@ -344,8 +344,8 @@
 
     AnyVec3 Flocal = F*ref.Axes;
     AnyVec3 Mlocal = M*ref.Axes;
-  };  
-    
+  };
+
 
 };
 
@@ -354,34 +354,34 @@
 {
 ///^ Create the code specific for forceplate type 3
 
-  AnyComponentDefinition obj = {};  
-  
+  AnyComponentDefinition obj = {};
+
   // Interface inputs
   #var AnyFloat Time;
-  
-  
+
+
   /*
-     The ForcePlate class that uses this class expects the following variables are 
+     The ForcePlate class that uses this class expects the following variables are
      available:
 
-   AnyVar LoadRatio: 
-      A ratio with which the force plate is loaded. This is used only used to color the force plate  
-   
-   AnyInt OnOff: 
+   AnyVar LoadRatio:
+      A ratio with which the force plate is loaded. This is used only used to color the force plate
+
+   AnyInt OnOff:
       A tresshold variable that specifies when the there is force on the force plate
-   
+
    AnyForceMomentMeasure2 NetEffectMeasure:
-      Moment measures that sums all the forces on the force plate. 
-   
-   AnySeg ForcePlateSeg: 
-      A segment with all force plate force aplied to it.  
+      Moment measures that sums all the forces on the force plate.
+
+   AnySeg ForcePlateSeg:
+      A segment with all force plate force aplied to it.
   */
-  
+
   #var AnyFloat CalMatrix = eye(8);
-  
-  
+
+
   // These can be overridden to specify a special channel to read the data from
-  // Must be given as a pointer to the data 
+  // Must be given as a pointer to the data
   // Fx = &Main.ModelSetup.C3DFileData.Analog.Data.Fx12;
   #var AnyObjectPtrVar Fx_12 = AutoLocateChannels.Fx12;
   #var AnyObjectPtrVar Fx_34 = AutoLocateChannels.Fx34;
@@ -391,9 +391,9 @@
   #var AnyObjectPtrVar Fz_2 = AutoLocateChannels.Fz2;
   #var AnyObjectPtrVar Fz_3 = AutoLocateChannels.Fz3;
   #var AnyObjectPtrVar Fz_4 = AutoLocateChannels.Fz4;
-   
-   
-  /// Contains the logic to find the correct analog channels from the C3D file   
+
+
+  /// Contains the logic to find the correct analog channels from the C3D file
   AnyFolder AutoLocateChannels = {
     AnyInt ChIdxs = ..ForcePlateInfo.CHANNEL[PLATEIDX]-1;
     /// Hack to ensure that the pointers get a later evalution moment.
@@ -407,39 +407,39 @@
     AnyObjectPtrVar Fz3 = ObjSearch(CompleteNameOf(&C3D_OBJECT.Analog.DataFiltered)+ dot + C3D_OBJECT.AnalogLabels[ChIdxs[6]])[0];
     AnyObjectPtrVar Fz4 = ObjSearch(CompleteNameOf(&C3D_OBJECT.Analog.DataFiltered)+ dot + C3D_OBJECT.AnalogLabels[ChIdxs[7]])[0];
   };
-  
-  
-  
+
+
+
   AnyVar MaxLoad = max( abs(forces.Data[4]+ forces.Data[5] + forces.Data[6] + forces.Data[7]));
   AnyVar FzTotal=forces(NetEffectMeasure.t)[4]+forces(NetEffectMeasure.t)[5]+forces(NetEffectMeasure.t)[6]+forces(NetEffectMeasure.t)[7];
   AnyVar LoadRatio =abs(FzTotal)/(MaxLoad+0.0001);
   AnyVar OnOff=iffun(gtfun(-FzTotal,10.0),1.0,0.0);
-  
-  
-  
+
+
+
   AnySeg ForcePlateSeg = {
     Mass=0.0;
     Jii={0,0,0};
     r0=..Corners.PlateCenter.sRel;
-    
-    //Rotational tranformation matrix for a coordinate system defined by three points. The first point is the origin of the system; the second gives the direction of the first (x) axis. Together all three points must span a plane which will be the plane of the first (x) and the second (y) axes, having the third (z) axis as normal. 
+
+    //Rotational tranformation matrix for a coordinate system defined by three points. The first point is the origin of the system; the second gives the direction of the first (x) axis. Together all three points must span a plane which will be the plane of the first (x) and the second (y) axes, having the third (z) axis as normal.
     AnyVec3 p1=..Corners.PlateCenter.sRel;
     AnyVec3 p2=0.5*(..Corners.c01.sRel+..Corners.c04.sRel);
     AnyVec3 p3=0.5*(..Corners.c01.sRel+..Corners.c02.sRel);
     Axes0 =RotMat(p1,p2,p3);
-    
+
     AnyVar z_check = iffun(gtfun(Origins[PLATEIDX][2], 0), 1, -1);
-    AnyMessage Origin_Z_value_message= 
+    AnyMessage Origin_Z_value_message=
     {
       TriggerConst = iffun(gteqfun(.z_check,0), 1, 0);
       Type = MSG_Message ;
       Message = "The Origin of this force plate is written as positive. So this value will be converted as negative automatically. Please refer to www.c3d.org/HTML/type31.htm ";
-    };    
+    };
     #var AnyFloat Origins= ..ForcePlateInfo.ORIGIN;
     AnyVar xdist=Origins[PLATEIDX][0];//distance from x axis on transducer to x axis of center of plate
     AnyVar ydist=Origins[PLATEIDX][1]; //distance from y axis on transducer to y axis of center of plate
     AnyVar zdist=z_check*Origins[PLATEIDX][2];//distance from z axis on transducer to z surface of plate
-    
+
     AnyRefNode P1={
       sRel=C3D_OBJECT.PointsScaleFactor*{.xdist,.ydist,.zdist};
       AnyDrawNode drw={ScaleXYZ = 0.02*{1,1,0.1}; RGB={1,0,0};};
@@ -474,9 +474,9 @@
     };
 
 
-  };  
-  
-  AnyFunInterpol forces = 
+  };
+
+  AnyFunInterpol forces =
   {
     Type=PiecewiseLinear;
     T= .Time;
@@ -488,37 +488,37 @@
   AnyForce3D Fx12 =
   {
     AnyRefNode &ref1=.ForcePlateSeg.P1P2;
-    Flocal=.OnOff*{.forces(.NetEffectMeasure.t )[0],0,0};  
-    
-    AnyDrawVector DrawForce = 
+    Flocal=.OnOff*{.forces(.NetEffectMeasure.t )[0],0,0};
+
+    AnyDrawVector DrawForce =
     {
      AnyRefFrame &ref=.ref1;
      Visible = DRAW_RAW_FORCES;
      Vec=.Flocal*C3D_OBJECT.PointsScaleFactor;
      PointAway = Off;
      DrawCoord = Off;
-     
+
      Line.RGB ={0,0,1};
      Line.Thickness = 0.01;
      Line.End.Thickness = 2*0.01;
      Line.End.Length = 4*0.01;
      GlobalCoord=Off;
-   };    
+   };
   };
-  
+
   AnyForce3D Fx34 =
   {
     AnyRefNode &ref1=.ForcePlateSeg.P3P4;
-    Flocal=.OnOff*{.forces(.NetEffectMeasure.t )[1],0,0};      
-   
-    AnyDrawVector DrawForce =     
+    Flocal=.OnOff*{.forces(.NetEffectMeasure.t )[1],0,0};
+
+    AnyDrawVector DrawForce =
     {
      Visible = DRAW_RAW_FORCES;
      AnyRefFrame &ref=.ref1;
      Vec=.Flocal*C3D_OBJECT.PointsScaleFactor;
      PointAway = Off;
      DrawCoord = Off;
-     
+
      Line.RGB ={0,0,1};
      Line.Thickness = 0.01;
      Line.End.Thickness = 2*0.01;
@@ -526,21 +526,21 @@
      GlobalCoord=Off;
    };
  };
-  
-  
+
+
   AnyForce3D Fy14 =
   {
     AnyRefNode &ref1=.ForcePlateSeg.P1P4;
-    Flocal=.OnOff*{0,.forces(.NetEffectMeasure.t)[2],0};  
-    
-    AnyDrawVector DrawForce = 
+    Flocal=.OnOff*{0,.forces(.NetEffectMeasure.t)[2],0};
+
+    AnyDrawVector DrawForce =
     {
      AnyRefFrame &ref=.ref1;
      Visible = DRAW_RAW_FORCES;
      Vec=.Flocal*C3D_OBJECT.PointsScaleFactor;
      PointAway = Off;
      DrawCoord = Off;
-     
+
      Line.RGB ={0,0,1};
      Line.Thickness = 0.01;
      Line.End.Thickness = 2*0.01;
@@ -548,20 +548,20 @@
      GlobalCoord=Off;
    };
  };
-  
-  
+
+
   AnyForce3D Fy23 =
   {
     AnyRefNode &ref1=.ForcePlateSeg.P2P3;
-    Flocal=.OnOff*{0,.forces(.NetEffectMeasure.t)[3],0};  
-  
+    Flocal=.OnOff*{0,.forces(.NetEffectMeasure.t)[3],0};
+
     AnyDrawVector DrawForce =     {
      AnyRefFrame &ref=.ref1;
      Visible = DRAW_RAW_FORCES;
      Vec=.Flocal*C3D_OBJECT.PointsScaleFactor;
      PointAway = Off;
      DrawCoord = Off;
-     
+
      Line.RGB ={0,0,1};
      Line.Thickness = 0.01;
      Line.End.Thickness = 2*0.01;
@@ -569,22 +569,22 @@
      GlobalCoord=Off;
    };
  };
-  
-  
-  
+
+
+
   AnyForce3D Fz1 =
   {
     AnyRefNode &ref1=.ForcePlateSeg.P1;
-    Flocal=.OnOff*{0,0,.forces(.NetEffectMeasure.t)[4]};  
-    
-    AnyDrawVector DrawForce = 
+    Flocal=.OnOff*{0,0,.forces(.NetEffectMeasure.t)[4]};
+
+    AnyDrawVector DrawForce =
     {
      AnyRefFrame &ref=.ref1;
      Visible = DRAW_RAW_FORCES;
      Vec=.Flocal*C3D_OBJECT.PointsScaleFactor;
      PointAway = Off;
      DrawCoord = Off;
-     
+
      Line.RGB ={0,0,1};
      Line.Thickness = 0.01;
      Line.End.Thickness = 2*0.01;
@@ -592,22 +592,22 @@
      GlobalCoord=Off;
    };
  };
-  
-  
-  
+
+
+
   AnyForce3D Fz2 =
-  {    
+  {
     AnyRefNode &ref1=.ForcePlateSeg.P2;
-    Flocal=.OnOff*{0,0,.forces(.NetEffectMeasure.t)[5]};  
-   
-    AnyDrawVector DrawForce = 
+    Flocal=.OnOff*{0,0,.forces(.NetEffectMeasure.t)[5]};
+
+    AnyDrawVector DrawForce =
     {
      AnyRefFrame &ref=.ref1;
      Visible = DRAW_RAW_FORCES;
      Vec=.Flocal*C3D_OBJECT.PointsScaleFactor;
      PointAway = Off;
      DrawCoord = Off;
-     
+
      Line.RGB ={0,0,1};
      Line.Thickness = 0.01;
      Line.End.Thickness = 2*0.01;
@@ -615,21 +615,21 @@
      GlobalCoord=Off;
    };
  };
-  
+
   AnyForce3D Fz3 =
-  {    
+  {
     AnyRefNode &ref1=.ForcePlateSeg.P3;
-    Flocal=.OnOff*{0,0,.forces(.NetEffectMeasure.t)[6]};  
-    
-  
-    AnyDrawVector DrawForce = 
+    Flocal=.OnOff*{0,0,.forces(.NetEffectMeasure.t)[6]};
+
+
+    AnyDrawVector DrawForce =
     {
      AnyRefFrame &ref=.ref1;
      Visible = DRAW_RAW_FORCES;
      Vec=.Flocal*C3D_OBJECT.PointsScaleFactor;
      PointAway = Off;
      DrawCoord = Off;
-     
+
      Line.RGB ={0,0,1};
      Line.Thickness = 0.01;
      Line.End.Thickness = 2*0.01;
@@ -637,14 +637,14 @@
      GlobalCoord=Off;
     };
   };
-  
-  
+
+
   AnyForce3D Fz4 =
-  {    
+  {
     AnyRefNode &ref1=.ForcePlateSeg.P4;
-    Flocal=.OnOff*{0,0,.forces(.NetEffectMeasure.t)[7]};  
-  
-    AnyDrawVector DrawForce = 
+    Flocal=.OnOff*{0,0,.forces(.NetEffectMeasure.t)[7]};
+
+    AnyDrawVector DrawForce =
     {
       AnyRefFrame &ref=.ref1;
       Visible = DRAW_RAW_FORCES;
@@ -659,8 +659,8 @@
       GlobalCoord=Off;
     };
   };
-  
-  AnyForceMomentMeasure2 NetEffectMeasure = 
+
+  AnyForceMomentMeasure2 NetEffectMeasure =
   {
      AnyRefFrame& ref = .ForcePlateSeg;
      AnyForceBase& Fx12 = .Fx12;
@@ -668,12 +668,11 @@
      AnyForceBase& Fy14 = .Fy14;
      AnyForceBase& Fy23 = .Fy23;
      AnyForceBase& Fz1 = .Fz1;
-     AnyForceBase& Fz2 = .Fz2; 
+     AnyForceBase& Fz2 = .Fz2;
      AnyForceBase& Fz3 = .Fz3;
      AnyForceBase& Fz4 = .Fz4;
-     
+
      AnyVec3 Flocal = F*ref.Axes;
      AnyVec3 Mlocal = M*ref.Axes;
-  };  
+  };
 };
-

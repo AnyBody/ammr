@@ -10,24 +10,24 @@ AnyFolder Model = {
   AnyFolder &ArmSegSideRef = .SideBodyModelRef.ShoulderArm.Segments;
   AnyFolder &ArmJntsRef =  .SideBodyModelRef.ShoulderArm.Joints;
   AnyFolder &MusRef = .SideBodyModelRef.ShoulderArm.Muscles;
-  
-  
+
+
   AnyFixedRefFrame ground = {
-    AnyRefNode node = { 
+    AnyRefNode node = {
       ARel=..ThoraxRef.Axes0;
       sRel=..ThoraxRef.r0;
     };
   };
-  
-  AnyKinEq FixSkullThoraxPelvis = 
+
+  AnyKinEq FixSkullThoraxPelvis =
   {
     AnyKinMeasure& SkullThorax = ......BodyModel.Trunk.Joints.Cervical.SkullThoraxRotMeasure;
     AnyKinMeasure& PelvisThorax = ......BodyModel.Trunk.Joints.Lumbar.PelvisThoraxRotMeasure;
   };
-  
+
   AnyFolder Drivers = {
     AnyVar AngularVelocity = (..RangeOfMotion[1]-..RangeOfMotion[0])*pi/180;
-    
+
     AnyKinMeasureOrg ArmMeasure = {
       #if BM_ARM_SHOULDER_RHYTHM == OFF
       AnyKinMeasure& SCProtraction= ...SideBodyInterfaceRef.SternoClavicularProtraction;
@@ -39,35 +39,35 @@ AnyFolder Model = {
       AnyKinMeasure& ElbowFlexion= ...SideBodyInterfaceRef.ElbowFlexion;
       AnyKinMeasure& ElbowPronation= ...SideBodyInterfaceRef.ElbowPronation;
       AnyKinMeasure& WristFlexion= ...SideBodyInterfaceRef.WristFlexion;
-      AnyKinMeasure& WristAbduction= ...SideBodyInterfaceRef.WristAbduction;  
+      AnyKinMeasure& WristAbduction= ...SideBodyInterfaceRef.WristAbduction;
       #if BM_ARM_CLAVICULA_ROTATION_RHYTHM == OFF
       AnyKinMeasure& ACMedialRotation= ...SideBodyInterfaceRef.AcromioClavicular.MedialRotation;
       #endif
     };
-    
+
     AnyKinEqSimpleDriver ArmDriver= {
       AnyKinMeasure& ref = .ArmMeasure;
-      
+
       #if BM_ARM_SHOULDER_RHYTHM == OFF
       #define __MEASURE_INDEXER(X) { X[0],X[1],X[2],X[3],X[4],X[5],X[6],X[7],X[8],X[9] }
       #else
       #define __MEASURE_INDEXER(X) { X[2], X[3],X[4],X[5],X[6],X[7],X[8] }
       #endif
-      
+
       DriverPos = __MEASURE_INDEXER(...DriverPos);
       AnyFloat Mask = __MEASURE_INDEXER( ...Mask);
-      
+
       #undef __MEASURE_INDEXER
-      
+
       DriverVel = Mask* (...RangeOfMotion[1]-...RangeOfMotion[0])*pi/180/...Study.tEnd;
     };
-    
-    
+
+
     AnyStdJoint TrunkGround={
       AnyRefFrame &Ground = ..ground.node;
-      AnyRefFrame &Thorax= ..ThoraxRef; 
+      AnyRefFrame &Thorax= ..ThoraxRef;
     };
-    
+
   };// Drivers
 };// Model
 
@@ -78,36 +78,36 @@ AnyKinStudy Study = {
   nStep = EVALUATE_MOMENT_ARMS_NSTEP;
   #else
   nStep = 40;
-  #endif  
+  #endif
   Kinematics.SmallStepAssumptionOnOff = Off;
   InitialConditions.SmallStepAssumptionOnOff = Off;
-  
+
   AnyFolder &Model = .Model;
-  AnyOutputFun AngularVelocity_output = {Val = ..Model.Drivers.AngularVelocity;};  
-  
+  AnyOutputFun AngularVelocity_output = {Val = ..Model.Drivers.AngularVelocity;};
+
   AnyFolder MuscleStrengthCalculations = {
-    AnyFolder Abscissa = { 
-      AnyVar JointAngle =  not(not(..Model.Drivers.ArmDriver.DriverVel))*..Model.Drivers.ArmMeasure.Pos'*180/pi  ;    
+    AnyFolder Abscissa = {
+      AnyVar JointAngle =  not(not(..Model.Drivers.ArmDriver.DriverVel))*..Model.Drivers.ArmMeasure.Pos'*180/pi  ;
     };
-    #define _CODE_MACRO_(muscle, branch) AnyVar branch = ( ..Model.MusRef.muscle.branch.Strength); 
+    #define _CODE_MACRO_(muscle, branch) AnyVar branch = ( ..Model.MusRef.muscle.branch.Strength);
     #include "armmuscles_for_output.any"
     #undef _CODE_MACRO_
   };
-  
+
   AnyFolder PennationAngleCalculations = {
-    AnyFolder Abscissa = { 
-      AnyVar JointAngle =  not(not(..Model.Drivers.ArmDriver.DriverVel))*..Model.Drivers.ArmMeasure.Pos'*180/pi  ;    
+    AnyFolder Abscissa = {
+      AnyVar JointAngle =  not(not(..Model.Drivers.ArmDriver.DriverVel))*..Model.Drivers.ArmMeasure.Pos'*180/pi  ;
     };
-    #define _CODE_MACRO_(muscle, branch) AnyVar branch = ( ..Model.MusRef.muscle.branch.PennationAngle * 180/pi);    
+    #define _CODE_MACRO_(muscle, branch) AnyVar branch = ( ..Model.MusRef.muscle.branch.PennationAngle * 180/pi);
     #include "armmuscles_for_output.any"
     #undef _CODE_MACRO_
   };
-  
+
   AnyFolder MomentArmCalculations = {
-    AnyFolder Abscissa = { 
-      AnyVar JointAngle =  not(not(..Model.Drivers.ArmDriver.DriverVel))*..Model.Drivers.ArmMeasure.Pos'*180/pi  ;    
+    AnyFolder Abscissa = {
+      AnyVar JointAngle =  not(not(..Model.Drivers.ArmDriver.DriverVel))*..Model.Drivers.ArmMeasure.Pos'*180/pi  ;
     };
-    #define _CODE_MACRO_(muscle, branch) AnyVar branch = ( -1*..Model.MusRef.muscle.branch.LmtDot/..Model.Drivers.AngularVelocity);    
+    #define _CODE_MACRO_(muscle, branch) AnyVar branch = ( -1*..Model.MusRef.muscle.branch.LmtDot/..Model.Drivers.AngularVelocity);
     #include "armmuscles_for_output.any"
     #undef _CODE_MACRO_
   };
@@ -123,9 +123,9 @@ AnyProject ModelViews = {};
 ModelViews = {
   AnyDrawGroup Selection = {
     Objects = arrcat(
-    ObjSearchRecursive(CompleteNameOf(&..Model.ThoraxRef), "*", "AnyDrawObject"), 
-    ObjSearchRecursive(CompleteNameOf(&..Model.CervicalSpineSegRef), "*", "AnyDrawObject"), 
-    ObjSearchRecursive(CompleteNameOf(&..Model.SkullRef), "*", "AnyDrawObject"), 
+    ObjSearchRecursive(CompleteNameOf(&..Model.ThoraxRef), "*", "AnyDrawObject"),
+    ObjSearchRecursive(CompleteNameOf(&..Model.CervicalSpineSegRef), "*", "AnyDrawObject"),
+    ObjSearchRecursive(CompleteNameOf(&..Model.SkullRef), "*", "AnyDrawObject"),
     ObjSearchRecursive(CompleteNameOf(&..Model.ArmSegSideRef), "*", "AnyDrawObject"),
     ObjSearchRecursive(CompleteNameOf(&..Model.MusRef ), "*", "AnyDrawObject"));
   };
@@ -137,9 +137,9 @@ ModelViews = {
   };
 };
 
-AnyOperationSequence Run = 
+AnyOperationSequence Run =
 {
-    AnyOperationMacro SetView = 
+    AnyOperationMacro SetView =
     {
       MacroStr = { "classoperation " + CompleteNameOf(&..ModelViews.Views.SelectedView) + strquote("Set View") };
     };
@@ -148,10 +148,10 @@ AnyOperationSequence Run =
 };
 
 #ifdef ANYBODY_PATH_OUTPUT
-AnyOperationMacro Save = 
+AnyOperationMacro Save =
 {
   MacroStr = {
-    "classoperation " + CompleteNameOf(&.Study.Output) + strquote("Save data") 
+    "classoperation " + CompleteNameOf(&.Study.Output) + strquote("Save data")
     + " --type=" + strquote("Deep") +" --file=" + strquote(
     ANYBODY_PATH_OUTPUT + .OutputFileName + ".anydata.h5")
   };

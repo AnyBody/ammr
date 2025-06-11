@@ -1,44 +1,44 @@
 /// This folder contains the joints between the model and the environment.
 AnyFolder Joints = {
   // Aliases for convenient referencing
-  AnyFolder &JntPos=..Mannequin.Posture;  
-  AnyFolder &JntVel=..Mannequin.PostureVel;  
-  
+  AnyFolder &JntPos=..Mannequin.Posture;
+  AnyFolder &JntVel=..Mannequin.PostureVel;
+
   AnyKinLinear FootPedalLin={
     Ref=0;
     AnyRefNode &Pedal = ...MyPedal.EnvironmentModel.Pedal.FootNode;
     AnyRefNode &Foot = ...BodyModel.Right.Leg.Seg.Foot.FootBall;
   };
-  
+
   AnyKinEqInterPolDriver FootPedalXDriver ={
     AnyKinMeasureOrg FootPedalX={
       AnyKinLinear &ref=..FootPedalLin;
       MeasureOrganizer={0};
     };
-    
+
     Type = PiecewiseLinear;
     T = {0,0.2,0.4,0.6,0.8,1.01}*Main.Study.tEnd;
     Data = {{0.1,0.0,0,0,0.0,0.1}};
-    
-    Reaction.Type={Off};    
+
+    Reaction.Type={Off};
   };
-  
+
   AnyKinEqSimpleDriver FootPedalYZDriver = {
     AnyKinMeasureOrg FootPedalZ={
       AnyKinLinear &ref=..FootPedalLin;
       MeasureOrganizer={1,2};
     };
-    
+
     DriverPos={0,0};
-    DriverVel={0,0};    
+    DriverVel={0,0};
     Reaction.Type={Off,Off};
   };
-  
+
   AnySphericalJoint FootFloor = {
     AnyRefNode &Floor = ...MyPedal.EnvironmentModel.GlobalRef.LeftFoot;
     AnyRefFrame &Foot = ...BodyModel.Left.Leg.Seg.Foot.FootBall;
   };
-  
+
   AnyKinEq LatSupport = {
     AnyKinLinear KneePos = {
       AnyFixedRefFrame &Ground = ....MyPedal.EnvironmentModel.GlobalRef;
@@ -46,30 +46,30 @@ AnyFolder Joints = {
     };
     MeasureOrganizer = {2};  // Only the z direction
     Reaction.Type={Off};
-  };  
+  };
 };
 
 /// Drivers between the human body and the environment.
-AnyFolder Drivers = { 
-  
-  AnyFolder &JntPos=..Mannequin.Posture;  
-  AnyFolder &JntVel=..Mannequin.PostureVel;  
+AnyFolder Drivers = {
+
+  AnyFolder &JntPos=..Mannequin.Posture;
+  AnyFolder &JntVel=..Mannequin.PostureVel;
   AnyKinEqInterPolDriver Pedal ={
     AnyRevoluteJoint &Hinge = ...MyPedal.EnvironmentModel.HingeJoint;
-    
+
     Type = PiecewiseLinear;
     T = {0,0.2,0.4,0.6,0.8,1.01}*Main.Study.tEnd;
     Data = {1.3*{90.0,90.0,105,110,90.0,90}}*pi/180;
-    
-    Reaction.Type={Off};    
+
+    Reaction.Type={Off};
   };
-  
+
   //we need a muscle to hold the pedal while the foot is not in contact
-  
+
   AnyIntVar RightFootOnPedal= gtfun(.ConditionalContact.FootBallMidSupport.Push.UserDefinedStrengthFunction,0);
-  
+
   AnyVar Strength= iffun(RightFootOnPedal,0.0,1000.0);
-  
+
   AnyRecruitedActuator PedalMuscle={
     Strength = .Strength;
     SET_DEFAULT_ACTUATOR_VOLUME;
@@ -77,7 +77,7 @@ AnyFolder Drivers = {
     AnyRevoluteJoint &Hinge = ...MyPedal.EnvironmentModel.HingeJoint;
     Type = NonNegative;
   };
-  
+
   //Ankle driver
   AnyKinEqSimpleDriver AnkleDriverRight={
     AnyKinMeasure& ref1=...BodyModel.Interface.Right.AnklePlantarFlexion;
@@ -85,10 +85,10 @@ AnyFolder Drivers = {
       AnyKinMeasure& ref2=...BodyModel.Interface.Right.AnkleEversion;
     #else
       AnyKinMeasure& ref2=...BodyModel.Interface.Right.SubTalarEversion;
-    #endif    
-    DriverPos = pi/180*{.JntPos.Right.AnklePlantarFlexion,.JntPos.Right.SubTalarEversion};  
-    DriverVel=pi/180*{.JntVel.Right.AnklePlantarFlexion,.JntVel.Right.SubTalarEversion};  
-    
+    #endif
+    DriverPos = pi/180*{.JntPos.Right.AnklePlantarFlexion,.JntPos.Right.SubTalarEversion};
+    DriverVel=pi/180*{.JntVel.Right.AnklePlantarFlexion,.JntVel.Right.SubTalarEversion};
+
     Reaction.Type={Off,Off};
   };
   //Ankle driver
@@ -98,12 +98,12 @@ AnyFolder Drivers = {
       AnyKinMeasure& ref2=...BodyModel.Interface.Left.AnkleEversion;
     #else
       AnyKinMeasure& ref2=...BodyModel.Interface.Left.SubTalarEversion;
-    #endif    DriverPos = pi/180*{.JntPos.Left.AnklePlantarFlexion,.JntPos.Left.SubTalarEversion};  
-    DriverVel=pi/180*{.JntVel.Left.AnklePlantarFlexion,.JntVel.Left.SubTalarEversion};  
-    
+    #endif    DriverPos = pi/180*{.JntPos.Left.AnklePlantarFlexion,.JntPos.Left.SubTalarEversion};
+    DriverVel=pi/180*{.JntVel.Left.AnklePlantarFlexion,.JntVel.Left.SubTalarEversion};
+
     Reaction.Type={Off,Off};
   };
-  
+
   AnyKinEqSimpleDriver LeftLatSupport = {
     AnyKinLinear KneePos = {
       AnyFixedRefFrame &Ground = ....MyPedal.EnvironmentModel.GlobalRef;
@@ -114,8 +114,8 @@ AnyFolder Drivers = {
     DriverPos = {-0.30};
     DriverVel = {0};
   };
-  
-  /// Driver controlling and fixing the pelvis position wrt GlobalRef  
+
+  /// Driver controlling and fixing the pelvis position wrt GlobalRef
   AnyKinEqSimpleDriver PelvisGroundDriver ={
     AnyKinLinear lin ={
       AnyFixedRefFrame &ref1 =....MyPedal.EnvironmentModel.GlobalRef;
@@ -144,8 +144,8 @@ AnyFolder Drivers = {
     };
     Reaction.Type={On,On,On,On,On,On};
   };
-  
-  //Neck driver 
+
+  //Neck driver
   AnyKinEqSimpleDriver NeckJntDriver = {
     AnyKinMeasure& lb = ...BodyModel.Interface.Trunk.SkullThoraxLateralBending;
     AnyKinMeasure& ar = ...BodyModel.Interface.Trunk.SkullThoraxRotation;
@@ -154,13 +154,13 @@ AnyFolder Drivers = {
     DriverVel = pi/180*{.JntVel.NeckLateralBending, .JntVel.NeckRotation, -1*.JntVel.NeckExtension};
     Reaction.Type = {Off, Off, Off};
   };
-  
+
   //Thorax pelvis rotation driver
   AnyKinEqSimpleDriver PostureDriver ={
-    AnyKinMeasure& Ref2 = ...BodyModel.Interface.Trunk.PelvisThoraxLateralBending;        
-    AnyKinMeasure& Ref3 = ...BodyModel.Interface.Trunk.PelvisThoraxRotation;   
+    AnyKinMeasure& Ref2 = ...BodyModel.Interface.Trunk.PelvisThoraxLateralBending;
+    AnyKinMeasure& Ref3 = ...BodyModel.Interface.Trunk.PelvisThoraxRotation;
     AnyKinMeasure& Ref1 = ...BodyModel.Interface.Trunk.PelvisThoraxExtension;
-   
+
     DriverPos = pi/180*{
           .JntPos.PelvisThoraxLateralBending,
       .JntPos.PelvisThoraxRotation,
@@ -171,17 +171,17 @@ AnyFolder Drivers = {
       .JntVel.PelvisThoraxRotation,
       .JntVel.PelvisThoraxExtension
     };
-    Reaction.Type = {Off,Off,Off};  
-  };  
-  
+    Reaction.Type = {Off,Off,Off};
+  };
+
 };
 
 /** This folder uses an element from the repository toolbox to create a contact
 condition between the foot and the pedal. The contact element detects proximity
-between the two elements and has zero strength when they are not close to each 
+between the two elements and has zero strength when they are not close to each
 other. */
 AnyFolder ConditionalContact = {
-  
+
   /*
   ConditionalContactClass (
   BaseObject = //Object which delivers the forces
@@ -199,7 +199,7 @@ AnyFolder ConditionalContact = {
     FrictionDirection2 = //The axis (X, Y or Z) corresponding to the second friction direction
   };
   */
-  
+
   ConditionalContactClass FootBallMidSupport (
   BaseObject = ...MyPedal.EnvironmentModel.Pedal.FootNode,
   TargetObject = ...BodyModel.Right.Leg.Seg.Foot.FootBall,
@@ -215,5 +215,5 @@ AnyFolder ConditionalContact = {
     FrictionDirection1 = Y;
     FrictionDirection2 = Z;
   };
-  
+
 };

@@ -2,7 +2,7 @@
 AnyFolder Model = {
   // Model parts included in the moment arm study
   AnyFolder SegmentsRef = {
-    AnyFolder &Pelvis = ......BodyModel.Trunk.Segments.PelvisSeg; 
+    AnyFolder &Pelvis = ......BodyModel.Trunk.Segments.PelvisSeg;
     AnyFolder &Thorax = ......BodyModel.Trunk.Segments.ThoraxSeg;
     AnyFolder &Sacrum = ......BodyModel.Trunk.Segments.SacrumSeg;
     AnyFolder &L5Seg = ......BodyModel.Trunk.Segments.L5Seg;
@@ -10,23 +10,23 @@ AnyFolder Model = {
     AnyFolder &L3Seg = ......BodyModel.Trunk.Segments.L3Seg;
     AnyFolder &L2Seg = ......BodyModel.Trunk.Segments.L2Seg;
     AnyFolder &L1Seg = ......BodyModel.Trunk.Segments.L1Seg;
-  };  
-  
-  
-  AnyFolder &JointsLumberRef = .....BodyModel.Trunk.Joints.Lumbar;   
-  
-  AnyFolder &LegSegSideRef = .SideHumanFolderRef.Leg.Seg; 
+  };
+
+
+  AnyFolder &JointsLumberRef = .....BodyModel.Trunk.Joints.Lumbar;
+
+  AnyFolder &LegSegSideRef = .SideHumanFolderRef.Leg.Seg;
   AnyFolder &LegJntsRef =  .SideHumanFolderRef.Leg.Jnt;
   AnyFolder &LegMusRef = .SideHumanFolderRef.Leg.Mus;
   AnyFolder &SpineMusRef = .SideTrunkMusRef;
-  
+
   AnyFixedRefFrame ground = {
-    AnyRefNode node = { 
+    AnyRefNode node = {
       ARel=..SegmentsRef.Pelvis.Axes0;
       sRel=..SegmentsRef.Pelvis.r0;
     };
   };
-  
+
   AnyFolder Drivers = {
     AnyVar AngularVelocity = (..RangeOfMotion[1]-..RangeOfMotion[0])*pi/180;
     AnyKinMeasureOrg LegMeasure = {
@@ -35,74 +35,74 @@ AnyFolder Model = {
       AnyKinMeasure& HipExternalRotation= ...SideHumanInterfaceRef.HipExternalRotation;
       AnyKinMeasure& KneeFlexion= ...SideHumanInterfaceRef.KneeFlexion;
       AnyKinMeasure& AnklePlantarFlexion= ...SideHumanInterfaceRef.AnklePlantarFlexion;
-      AnyKinMeasure& AnkleEversion= ...SideHumanInterfaceRef.AnkleEversion;  
+      AnyKinMeasure& AnkleEversion= ...SideHumanInterfaceRef.AnkleEversion;
     };
     AnyStdJoint PelvisGround={
       AnyRefFrame &Ground = ..ground.node;
-      AnyRefFrame &Pelvis= ..SegmentsRef.Pelvis; 
+      AnyRefFrame &Pelvis= ..SegmentsRef.Pelvis;
     };
-    AnyReacForce SpineReacForce = 
+    AnyReacForce SpineReacForce =
     {
-      
+
       AnyKinMeasure& ref1 =  .......BodyModel.Interface.Trunk.IntervertebralAngles.L5Sacrum.Jnt;
       AnyKinMeasure& ref2 =  .......BodyModel.Interface.Trunk.IntervertebralAngles.L4L5.Jnt;
       AnyKinMeasure& ref3 =  .......BodyModel.Interface.Trunk.IntervertebralAngles.L3L4.Jnt;
       AnyKinMeasure& ref4 =  .......BodyModel.Interface.Trunk.IntervertebralAngles.L2L3.Jnt;
       AnyKinMeasure& ref5 =  .......BodyModel.Interface.Trunk.IntervertebralAngles.L1L2.Jnt;
     };
-    AnyKinEq ThoraxFix = 
+    AnyKinEq ThoraxFix =
     {
       AnyKinMeasure& PelvisThoraxExtension= .......BodyModel.Interface.Trunk.PelvisThoraxExtension;
       AnyKinMeasure& PelvisThoraxLateralBending= .......BodyModel.Interface.Trunk.PelvisThoraxLateralBending;
       AnyKinMeasure& PelvisThoraxRotation= .......BodyModel.Interface.Trunk.PelvisThoraxRotation;
       Reaction.Type = repmat(nDim, On);
-    };         
-    
-    
+    };
+
+
   };// Drivers
 };// Model
 
- 
+
 AnyKinStudy Study = {
   Gravity = {0,0,0};
   #ifdef EVALUATE_MOMENT_ARMS_NSTEP
   nStep = EVALUATE_MOMENT_ARMS_NSTEP;
   #else
   nStep = 40;
-  #endif 
-  
-  
+  #endif
+
+
   AnyFolder &Model = .Model;
     AnyFolder MuscleStrengthCalculations = {
-    AnyFolder Abscissa = { 
-      AnyVar JointAngle =  not(not(..Model.Drivers.LegDriver.DriverVel))*..Model.Drivers.LegMeasure.Pos'*180/pi  ;    
+    AnyFolder Abscissa = {
+      AnyVar JointAngle =  not(not(..Model.Drivers.LegDriver.DriverVel))*..Model.Drivers.LegMeasure.Pos'*180/pi  ;
     };
-#define _CODE_MACRO_(name) AnyVar name = ( .Model.LegMusRef.name.Strength);    
+#define _CODE_MACRO_(name) AnyVar name = ( .Model.LegMusRef.name.Strength);
         #include "legmuscles_for_output.any"
 #undef _CODE_MACRO_
   };
-    
+
   AnyFolder PennationAngleCalculations = {
-    AnyFolder Abscissa = { 
-      AnyVar JointAngle =  not(not(..Model.Drivers.LegDriver.DriverVel))*..Model.Drivers.LegMeasure.Pos'*180/pi  ;    
+    AnyFolder Abscissa = {
+      AnyVar JointAngle =  not(not(..Model.Drivers.LegDriver.DriverVel))*..Model.Drivers.LegMeasure.Pos'*180/pi  ;
     };
-#define _CODE_MACRO_(name) AnyVar name = ( .Model.LegMusRef.name.PennationAngle * 180 / pi);    
+#define _CODE_MACRO_(name) AnyVar name = ( .Model.LegMusRef.name.PennationAngle * 180 / pi);
         #include "legmuscles_for_output.any"
 #undef _CODE_MACRO_
   };
-  
-      
+
+
   AnyFolder MuscleReferences = {
-#define _CODE_MACRO_(name) AnyMuscle& name = .Model.LegMusRef.name;    
+#define _CODE_MACRO_(name) AnyMuscle& name = .Model.LegMusRef.name;
        #include "legmuscles_for_output.any"
 #undef _CODE_MACRO_
   };
-  
+
   AnyFolder MomentArmCalculations = {
-    AnyFolder Abscissa = { 
-      AnyVar JointAngle =  not(not(..Model.Drivers.LegDriver.DriverVel))*..Model.Drivers.LegMeasure.Pos'*180/pi  ;    
+    AnyFolder Abscissa = {
+      AnyVar JointAngle =  not(not(..Model.Drivers.LegDriver.DriverVel))*..Model.Drivers.LegMeasure.Pos'*180/pi  ;
     };
-#define _CODE_MACRO_(name) AnyVar name = ( -1*.Model.LegMusRef.name.LmtDot/.Model.Drivers.AngularVelocity);    
+#define _CODE_MACRO_(name) AnyVar name = ( -1*.Model.LegMusRef.name.LmtDot/.Model.Drivers.AngularVelocity);
         #include "legmuscles_for_output.any"
 #undef _CODE_MACRO_
   };
@@ -118,7 +118,7 @@ AnyProject ModelViews = {};
 ModelViews = {
   AnyDrawGroup Selection = {
     Objects = arrcat(
-      ObjSearchRecursive(CompleteNameOf(&..Model.SegmentsRef), "*", "AnyDrawObject"), 
+      ObjSearchRecursive(CompleteNameOf(&..Model.SegmentsRef), "*", "AnyDrawObject"),
       ObjSearchRecursive(CompleteNameOf(&..Model.LegSegSideRef ), "*", "AnyDrawObject"),
       ObjSearchRecursive(CompleteNameOf(&..Model.LegMusRef ), "*", "AnyDrawObject"),
       ObjSearchRecursive(CompleteNameOf(&..Model.SpineMusRef )+".PsoasMajor", "*", "AnyDrawObject")
@@ -132,18 +132,18 @@ ModelViews = {
   };
 };
 
-AnyOperationSequence Run = 
+AnyOperationSequence Run =
 {
-    AnyOperationMacro SetView = 
+    AnyOperationMacro SetView =
     {
       MacroStr = { "classoperation " + CompleteNameOf(&..ModelViews.Views.SelectedView) + strquote("Set View") };
     };
     AnyOperation &Study = .Study.Kinematics;
 //    #ifdef ANYBODY_PATH_OUTPUT
-//    AnyOperationMacro Save = 
+//    AnyOperationMacro Save =
 //    {
 //      MacroStr = {
-//           "classoperation " + CompleteNameOf(&.Study.Output) + strquote("Save data") 
+//           "classoperation " + CompleteNameOf(&.Study.Output) + strquote("Save data")
 //           + " --type=" + strquote("Deep") +" --file=" + strquote(
 //           ANYBODY_PATH_OUTPUT + .OutputFileName + ".anydata.h5")
 //      };

@@ -1,29 +1,29 @@
 #include "../libdef.any"
 
 /**
-This application is an example of how to use force-dependent kinematics solver applied 
-to a model with muscles and ligaments being switched on. This model also demonstrates 
+This application is an example of how to use force-dependent kinematics solver applied
+to a model with muscles and ligaments being switched on. This model also demonstrates
 how to model the following objects/anatomical features:
 1. Facet joints
 2. Spine fixation device using clamps, screws and titanium rods.
 */
 Main = {
-  
+
   // All relevant input parameters, motion/time/etc.
   #include "Model/InputParameters.any"
-  
-  // this file controls default view and project (Projects Tab) settings 
+
+  // this file controls default view and project (Projects Tab) settings
   // and switches off visualization of the muscles in the model
   #include "Model/SpineDeviceProject.any"
-  
+
   // ----------------------------------------------------------
   // Path to draw settings
   // ----------------------------------------------------------
   #include "Model/DrawSettings.any"
-  
+
   // ----------------------------------------------------------
   // Model configuration:
-  // For more info on body model configuration options please load the model and double click on: 
+  // For more info on body model configuration options please load the model and double click on:
   // #path HTML_DOC "<AMMR_PATH_DOC>/bm_config/index.html"
   // ----------------------------------------------------------
 
@@ -32,31 +32,31 @@ Main = {
   #define BM_LEG_LEFT OFF
   #define BM_ARM_RIGHT OFF
   #define BM_ARM_LEFT OFF
-  
-  // Configure spine 
+
+  // Configure spine
   #define BM_TRUNK_LUMBAR_LIGAMENTS ON
   #define BM_TRUNK_LUMBAR_RHYTHM OFF
-  
+
   // Define scaling law as ScalingLengthMassFat and provide anthropometric measurements
   #define BM_SCALING _SCALING_LENGTHMASSFAT_
   #path BM_SCALING_ANTHRO_FILE "Model/AnyManUniform.any"
-  
+
   // The Mannequin file specifies load-time positions for all the segments
   // in the HumanModel. This is important for the model's ablity to resolve
   // all the kinematic constraints when the model is analyzed.
-  // The mannequin file also drives those degrees of freedom of the human 
-  // model that are not governed by problem-specific drivers at run time.    
-  #include "Model/Mannequin.any" 
+  // The mannequin file also drives those degrees of freedom of the human
+  // model that are not governed by problem-specific drivers at run time.
+  #include "Model/Mannequin.any"
 
-  // Model of the human body to be used for the analysis  
+  // Model of the human body to be used for the analysis
   #include "<ANYBODY_PATH_BODY>/HumanModel.any"
 
-  /// The actual model where all components are assembled  
+  /// The actual model where all components are assembled
   AnyFolder Model ={
     /// Body model without default drivers
     AnyFolder &BodyModel=.HumanModel.BodyModel;
     /// Reference to the mannequin folder (used by drivers)
-    AnyFolder &Mannequin =.HumanModel.Mannequin;  
+    AnyFolder &Mannequin =.HumanModel.Mannequin;
 
     //----------------------------------------
     // ADD FACET JOINTS
@@ -64,15 +64,15 @@ Main = {
     BodyModel.Trunk = {
       #include "Model/FacetJoints.new/FacetJointsLumbar.any"
     };
-    
+
     #include "Model/Environment.any"
 
     AnyFolder ModelEnvironmentConnection = {
       //--------------------------------------------------------------------------------
       // DEFINE MOTION OF THE MODEL:
-      // this section uses the variables from MODEL SETUP section to prescribe motion to 
-      // the model. The posture is given by initial and final angles between thorax and 
-      // pelvis. All joint angles of the lumbar spine are computed using force-dependent 
+      // this section uses the variables from MODEL SETUP section to prescribe motion to
+      // the model. The posture is given by initial and final angles between thorax and
+      // pelvis. All joint angles of the lumbar spine are computed using force-dependent
       // kinematics solver.
       //--------------------------------------------------------------------------------
       #include "Model/Drivers.any"
@@ -81,9 +81,9 @@ Main = {
     // ADD SPINE FIXATION DEVICE
     //--------------------------------------------------------------------------------
     #include "Model/SpineFixation.any"
-  };  
-  
-  
+  };
+
+
   // The study: Operations to be performed on the model
   AnyBodyStudy Study = {
     AnyFolder &Model = .Model;
@@ -91,25 +91,25 @@ Main = {
     tStart = 0.0;
     tEnd = Main.SimTime;
     nStep =20;
-    
+
     InverseDynamics.Criterion.Power=2.0;
     Kinematics.KinematicTol=1e-7;
     //--------------------------------------------------------------------------------
     // SWITCH ON FORCE-DEPENDENT KINEMATICS SOLVER
-    //--------------------------------------------------------------------------------   
+    //--------------------------------------------------------------------------------
     InverseDynamics.ForceDepKinOnOff=On;
     InverseDynamics.Criterion.UpperBoundOnOff = Off;
     //InverseDynamics.Criterion.Type = MR_MinMaxStrict;
-    
+
     //--------------------------------------------------------------------------------
     // DEFINE OUTPUT VARIABLES:
-    // These variables show how the force-dependent kinematics solver automatically 
-    // determines angles of the spherical joints that are used to provide the lumbar 
+    // These variables show how the force-dependent kinematics solver automatically
+    // determines angles of the spherical joints that are used to provide the lumbar
     // spine curvature. By changing parameters of the model one can understand how
-    // the facets joints, the spine fixation device or other mechanisms affect the 
+    // the facets joints, the spine fixation device or other mechanisms affect the
     // "natural" (depending on external and muscle forces) shape of the lumbar spine
-    //--------------------------------------------------------------------------------  
-    AnyOutputFile f_flexext = 
+    //--------------------------------------------------------------------------------
+    AnyOutputFile f_flexext =
     {  // flexion/extension angles of all joints in the lumbar spine
       FileName = ANYBODY_PATH_OUTPUT+"/LumbarSpineFlexExt.txt";
       AnyVar FE_t12l1 = Main.HumanModel.BodyModel.Trunk.Joints.Lumbar.T12L1.Pos[0]*180/pi;
@@ -119,7 +119,7 @@ Main = {
       AnyVar FE_l4l5 = Main.HumanModel.BodyModel.Trunk.Joints.Lumbar.L4L5.Pos[0]*180/pi;
       AnyVar FE_l5sacrum = Main.HumanModel.BodyModel.Trunk.Joints.Lumbar.L5Sacrum.Pos[0]*180/pi;
     };
-    AnyOutputFile f_torsion = 
+    AnyOutputFile f_torsion =
     { // axial torsion angles of all joints in the lumbar spine
       FileName = ANYBODY_PATH_OUTPUT+"/LumbarSpineAxialTorsion.txt";
       AnyVar AT_t12l1 = Main.HumanModel.BodyModel.Trunk.Joints.Lumbar.T12L1.Pos[1]*180/pi;
@@ -129,7 +129,7 @@ Main = {
       AnyVar AT_l4l5 = Main.HumanModel.BodyModel.Trunk.Joints.Lumbar.L4L5.Pos[1]*180/pi;
       AnyVar AT_l5sacrum = Main.HumanModel.BodyModel.Trunk.Joints.Lumbar.L5Sacrum.Pos[1]*180/pi;
     };
-    AnyOutputFile f_latbend = 
+    AnyOutputFile f_latbend =
     { // lateral bending angles of all joints in the lumbar spine
       FileName = ANYBODY_PATH_OUTPUT+"/LumbarSpineLatBend.txt";
       AnyVar LB_t12l1 = Main.HumanModel.BodyModel.Trunk.Joints.Lumbar.T12L1.Pos[2]*180/pi;
@@ -148,8 +148,8 @@ Main = {
       AnyVar FE_thpelvis = Main.HumanModel.BodyModel.Trunk.Joints.Lumbar.PelvisThoraxRotMeasure.Pos[2]*180/pi;
     };
   };
-  
+
   // Include an operation sequence to run all required steps of your application (see Operations tab)
-    #include "<ANYBODY_PATH_MODELUTILS>\Operations\RunAppSequence.any"    
-  
+    #include "<ANYBODY_PATH_MODELUTILS>\Operations\RunAppSequence.any"
+
 };  // Main

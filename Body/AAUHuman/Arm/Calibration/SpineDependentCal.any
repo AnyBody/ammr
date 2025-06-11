@@ -1,76 +1,76 @@
 AnyFolder SpineDependentCal ={
-  AnyComponentDefinition obj = {};  
+  AnyComponentDefinition obj = {};
   AnyFolder &ThoraxSegs =  ...BodyModel.Trunk.Segments;
   AnyFolder &CervicalSegs =  ...BodyModel.Trunk.Segments;
   AnyFolder &LumbarSegs =  ...BodyModel.Trunk.Segments;
   AnyFolder &LumbarSpineJoints =  ...BodyModel.Trunk.Joints.Lumbar;
   AnyFolder &LumbarCervicalJoints =  ...BodyModel.Trunk.Joints.Cervical;
-  
+
   AnyFolder &SegSideCal = .SideHumanFolderRef.ShoulderArm.Segments;
   AnyFolder &JointsSideCal = .SideHumanFolderRef.ShoulderArm.Joints;
 
   AnyFolder &MusCalSide =  .SideHumanFolderRef.ShoulderArm.Muscles;
   AnyFolder &MusParCalSide =  .SideHumanFolderRef.ShoulderArm.MuscleModels;
-  
-  AnyFixedRefFrame ground = 
+
+  AnyFixedRefFrame ground =
   {
-    AnyRefNode node = 
-    { 
+    AnyRefNode node =
+    {
       ARel=..LumbarSegs.PelvisSeg.Axes0;
       sRel=..LumbarSegs.PelvisSeg.r0;
     };
   };
-  
-  AnyKinEq PelvisFix = 
+
+  AnyKinEq PelvisFix =
   {
-    AnyKinLinear Lin = 
+    AnyKinLinear Lin =
     {
       AnyRefFrame &ground = ..ground.node;
       AnyRefFrame &Pelvis = .....BodyModel.Trunk.Segments.PelvisSeg;
     };
-    AnyKinRotational Rot = 
+    AnyKinRotational Rot =
     {
       Type = RotAxesAngles;
       AnyRefFrame &ground = ..ground.node;
       AnyRefFrame &Pelvis = .....BodyModel.Trunk.Segments.PelvisSeg;
     };
   };
- 
+
   #if BM_ARM_SHOULDER_RHYTHM == ON
   #include "ExcludeShoulderRhythm.any"
-  #endif  
-  
+  #endif
+
   // Posture data
   AnyFloat NeckFlexion          = { 45,  0,         0} * pi/180;
   AnyFloat NeckLateralFlexRight = {  0,  0, .Sign* 45} * pi/180;
   AnyFloat NeckExtension        = {-45,  0,         0} * pi/180;
   AnyFloat NeckLateralFlexLeft  = {  0,  0, .Sign*-45} * pi/180;
-  
+
   AnyFloat ThoraxLateralRight    = {  0,.Sign* 30,  0} * pi/180;
   AnyFloat ThoraxLateralLeft     = {  0,.Sign*-30,  0} * pi/180;
-  
+
   AnyFloat GlenohumeralAbd      = {140,  0,  0, -40,  30} * pi/180;
   AnyFloat GlenohumeralAdd      = {-10,-20,  0,  10,   0} * pi/180;
-  
+
   AnyFloat NeckPosData = repmat(1,2,{
       NeckFlexion,
       NeckLateralFlexRight,
       NeckExtension,
       NeckLateralFlexLeft
   }'); // columns repeated twice
-  
+
   AnyFloat ThoraxPosData = arrcat(
       repmat(1,4,ThoraxLateralRight)',
       repmat(1,4,ThoraxLateralLeft)'
   )'; // Four right lat positions followed by 4 left
-  
+
   AnyFloat GlenohumeralPosData = arrcat(
       repmat(1,4,GlenohumeralAdd)',
       repmat(1,4,GlenohumeralAbd)'
   )'; // Four right Add positions followed by 4 Abd
-  
-  
-  
+
+
+
   AnyKinEqInterPolDriver NeckJntDriver = {
     AnyKinMeasure& fe = ....BodyModel.Interface.Trunk.SkullThoraxFlexion;
     AnyKinMeasure& ar = ....BodyModel.Interface.Trunk.SkullThoraxRotation;
@@ -80,18 +80,18 @@ AnyFolder SpineDependentCal ={
     Data = .NeckPosData;
     Reaction.Type = {Off, Off, Off};
   };
-  
-  
+
+
   AnyKinEqInterPolDriver ThoraxDriver = {
     AnyKinMeasure& PelvisThoraxExtension = ....BodyModel.Interface.Trunk.PelvisThoraxExtension;
     AnyKinMeasure& PelvisThoraxLateralBending = ....BodyModel.Interface.Trunk.PelvisThoraxLateralBending;
-    AnyKinMeasure& PelvisThoraxRotation = ....BodyModel.Interface.Trunk.PelvisThoraxRotation;    
+    AnyKinMeasure& PelvisThoraxRotation = ....BodyModel.Interface.Trunk.PelvisThoraxRotation;
     Type = PiecewiseLinear;
     T    = linspace(0,1,SizesOf(Data)[1]);
     Data = .ThoraxPosData;
     Reaction.Type = {On,On,On};
   };
-  
+
   AnyKinEqInterPolDriver WristFlexionDriver ={
       AnyKinMeasure& WF = ..SideInterfaceFolderRef.WristFlexion;
       Type = PiecewiseLinear;
@@ -99,7 +99,7 @@ AnyFolder SpineDependentCal ={
       Data = {{0,0}}*pi/180;
       Reaction.Type={On};
     };
-    
+
     AnyKinEqInterPolDriver WristAbductionDriver ={
       AnyKinMeasure& WA = ..SideInterfaceFolderRef.WristAbduction;
       Type = PiecewiseLinear;
@@ -107,7 +107,7 @@ AnyFolder SpineDependentCal ={
       Data = {{0,0}}*pi/180;
       Reaction.Type={On};
     };
-    
+
   AnyKinEqInterPolDriver FEDriver ={
     AnyKinMeasure& FE = ..SideInterfaceFolderRef.ElbowFlexion;
     Type = PiecewiseLinear;
@@ -123,7 +123,7 @@ AnyFolder SpineDependentCal ={
     Data = {{0,0}}*pi/180;
     Reaction.Type = {Off};
   };
- 
+
   AnyKinEqInterPolDriver GHDriver ={
     AnyKinMeasure& GHAbduction = ..SideInterfaceFolderRef.GlenohumeralAbduction;
     AnyKinMeasure& GHFlexion = ..SideInterfaceFolderRef.GlenohumeralFlexion;
@@ -135,7 +135,7 @@ AnyFolder SpineDependentCal ={
     Data = .GlenohumeralPosData;
     Reaction.Type = repmat(nDim,{Off});
   };
-  
+
   //---------------------------------------------------------------------
   //Finger drivers
   #if BM_ARM_DETAILED_HAND
@@ -145,17 +145,17 @@ AnyFolder SpineDependentCal ={
     DriverPos={0}*pi/180;
     DriverVel={0};
   };
-  
+
   AnyKinEqSimpleDriver CMC1Abduction={
     AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Segments.Hand.Finger1.Jnt.CMCAbduction;
     DriverPos={0}*pi/180;
     DriverVel={0};
   };
-  
 
-  
+
+
   AnyKinEqSimpleDriver MCP1Flexion=
-  {  
+  {
     AnyRevoluteJoint &ref=..SideHumanFolderRef.ShoulderArm.Segments.Hand.Finger1.Jnt.MCPFlexion;
     DriverPos={0}*pi/180;
     DriverVel={0};
@@ -166,14 +166,14 @@ AnyFolder SpineDependentCal ={
     DriverPos={0}*pi/180;
     DriverVel={0};
   };
-  
+
   AnyKinEqSimpleDriver DIP1={
     AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Segments.Hand.Finger1.Jnt.DIP;
     DriverPos={0}*pi/180;
     DriverVel={0};
   };
-  
-  
+
+
  // finger2
 //    AnyKinEqSimpleDriver CMC2={
 //      AnyUniversalJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Segments.Hand.Finger2.Jnt.CMC;
@@ -195,9 +195,9 @@ AnyFolder SpineDependentCal ={
       DriverPos={0};
       DriverVel={0};
     };
-  
-  
-  
+
+
+
  // finger3
 //    AnyKinEqSimpleDriver CMC3={
 //      AnyUniversalJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Segments.Hand.Finger3.Jnt.CMC;
@@ -219,8 +219,8 @@ AnyFolder SpineDependentCal ={
       DriverPos={0};
       DriverVel={0};
     };
-  
-  
+
+
   //finger4
 //    AnyKinEqSimpleDriver CMC4={
 //      AnyUniversalJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Segments.Hand.Finger4.Jnt.CMC;
@@ -242,8 +242,8 @@ AnyFolder SpineDependentCal ={
       DriverPos={0}*pi/180;
       DriverVel={0};
     };
-  
-  
+
+
  // finger5
 //    AnyKinEqSimpleDriver CMC5={
 //      AnyUniversalJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Segments.Hand.Finger5.Jnt.CMC;
@@ -266,9 +266,9 @@ AnyFolder SpineDependentCal ={
       DriverVel={0};
     };
   #endif
-  
+
   AnyString MusPrefix = CompleteNameOf(&.SideHumanFolderRef.ShoulderArm.Muscles);
-  
+
   AnyObjectPtrArray levator_scapulaeMuscles = ObjSearch(MusPrefix+".*.levator_scapulae*", "AnyMuscle");
   AnyFloat  levator_scapulaeRmin = repmat(NumElemOf(levator_scapulaeMuscles), ..RMin);
   AnyFloat  levator_scapulaeRmax = repmat(NumElemOf(levator_scapulaeMuscles), ..RMax);
@@ -284,18 +284,18 @@ AnyFolder SpineDependentCal ={
   AnyObjectPtrArray latissimus_dorsiMuscles = ObjSearch(MusPrefix+".*.latissimus_dorsi*", "AnyMuscle");
   AnyFloat  latissimus_dorsiRmin = repmat(NumElemOf(latissimus_dorsiMuscles), ..RMin);
   AnyFloat  latissimus_dorsiRmax = repmat(NumElemOf(latissimus_dorsiMuscles), ..RMax);
-  
+
 };
 
 // The study: Operations to be performed on the model
 AnyBodyCalibrationStudy ArmCalibrationStudySpineDependent = {
   AnyFolder &ref=.SpineDependentCal;
   nStep = 8;
-  
+
   Kinematics.SmallStepAssumptionOnOff = On;
   Kinematics.PosAnalysisOnlyOnOff = On;
   InitialConditions.PosAnalysisOnlyOnOff = On;
-    
+
   MuscleArr = arrcat(
       ref.levator_scapulaeMuscles,
       ref.trapezius_clavicularMuscles,
@@ -314,8 +314,8 @@ AnyBodyCalibrationStudy ArmCalibrationStudySpineDependent = {
       ref.SternocleidomastoidRmax,
       ref.latissimus_dorsiRmax
   );
-  
-  
+
+
 };
 
-  
+

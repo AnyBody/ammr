@@ -1,8 +1,8 @@
 #include "../libdef.any"
 
 /* ----------------------------------------------------------------------------
-This is a posture prediction problem based on the standing model. It 
-simulates a person carrying a bag on the shoulder and tries to predict 
+This is a posture prediction problem based on the standing model. It
+simulates a person carrying a bag on the shoulder and tries to predict
 the postural changes due to this.
 ---------------------------------------------------------------------------- */
 Main = {
@@ -11,19 +11,19 @@ Main = {
   // Path to draw settings
   // ----------------------------------------------------------
   #include "Model/DrawSettings.any"
-  
+
   // ----------------------------------------------------------
   // Body Model Configuration
   // ----------------------------------------------------------
   #include "Model/BodyModelConfiguration.any"
-  
+
   // The Mannequin file specifies load-time positions for all the segments
   // in the HumanModel. This is important for the model's ablity to resolve
   // all the kinematic constraints when the model is analyzed.
-  // The mannequin file also drives those degrees of freedom of the human 
-  // model that are not governed by problem-specific drivers at run time.    
-  #include "Model/Mannequin.any" 
-  
+  // The mannequin file also drives those degrees of freedom of the human
+  // model that are not governed by problem-specific drivers at run time.
+  #include "Model/Mannequin.any"
+
   // Model of the human body to be used for the analysis
   #include "<ANYBODY_PATH_BODY>/HumanModel.any"
 
@@ -33,32 +33,32 @@ Main = {
     AnyFolder &BodyModel=.HumanModel.BodyModel;
     /// Reference to the mannequin folder (used by drivers)
     AnyFolder &Mannequin =.HumanModel.Mannequin;
-    
-    #include "Model/Environment.any"   
-    
+
+    #include "Model/Environment.any"
+
     AnyFolder ModelEnvironmentConnection = {
       // This file converts values in the "Mannequin.any" file to Axes matrices
       #include "Model/JointsAndDrivers.any"
     };
-    
+
   };
-  
+
 
  AnyBodyStudy Study = {
     AnyFolder &Model = .Model;
-    
-    
+
+
     tEnd = 1.0;
     Gravity = {0.0, -9.81, 0.0};
     nStep = 1;
-    
+
     AnyOutputFun MaxAct = {
       Val = .MaxMuscleActivity;
     };
   }; // End of study
 
-  
-  
+
+
   /// This optimization study demonstrates the use of posture prediction.
   /// The underlying assumption is that a person will attain the posture that
   /// minimizes the muscular effort. Thus, the study defines a number of postural
@@ -71,39 +71,38 @@ Main = {
       Min = Val - 10;
       Max = Val + 10;
     };
-        
+
     AnyDesVar PelvisThoraxExt = {
       Val = Main.Model.Mannequin.Posture.PelvisThoraxExtension;
       Min = Val - 10;
       Max = Val + 10;
     };
-    
+
     AnyDesVar PelvisThoraxLat = {
       Val = Main.Model.Mannequin.Posture.PelvisThoraxLateralBending;
       Min = Val - 10;
       Max = Val + 10;
     };
-    
+
     AnyDesVar CoMx = {
       Val = Main.Model.ModelEnvironmentConnection.Drivers.CoMDriver.DriverPos[0];
       Min = Val - 0.05;
       Max = Val + 0.05;
     };
-    
+
     /// Objective function: MaxMuscleActivity = Muscular effort.
     AnyDesMeasure MaxMuscleAct = {
       Val = max(..Study.MaxAct());  /// Max of muscle activity
       Type = ObjectiveFun;
     };
-    
+
     /// Definition of the Analysis
     Analysis = {
       AnyOperation &Analysis = ..Study.InverseDynamics;
     };
   };
-  
+
   // Include an operation sequence to run all required steps of your application (see Operations tab)
     #include "<ANYBODY_PATH_MODELUTILS>\Operations\RunAppSequence.any"
-  
-}; //Main
 
+}; //Main

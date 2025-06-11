@@ -1,12 +1,12 @@
 //This force plate has dynamic detection of which foot is touching the plate
 #class_template ForcePlateType2AutoDetection (PlateName, Folder,AnySeg &Limb1,AnySeg &Limb2, No,VerticalDirection,HeightTolerance,VelThreshold, Fx, Fy, Fz, Mx,My,Mz,FootPresent){
-  AnyComponentDefinition obj = {};  
-  
+  AnyComponentDefinition obj = {};
+
   #var AnySwitch Switch_DrawForceVectorFromCOP = On;
 
   AnyFixedRefFrame Corners ={
     AnyVar CoordinateSystemSize= 0.1;
-    
+
     AnyRefNode c01={
       AnyInt i=0;
       AnyInt plnr=No;
@@ -19,7 +19,7 @@
         Line.RGB={1,0,0};//make reference to color
       };
     };
-    
+
     AnyRefNode c02={
       AnyInt i=1;
       AnyInt plnr=No;
@@ -32,13 +32,13 @@
         Line.RGB={1,0,0};//make reference to color
       };
     };
-    
+
     AnyRefNode c03={
       AnyInt i=2;
       AnyInt plnr=No;
       sRel=Folder.PointsScaleFactor*{Folder.Groups.FORCE_PLATFORM.CORNERS.Data[plnr][i][0],Folder.Groups.FORCE_PLATFORM.CORNERS.Data[No][i][1],Folder.Groups.FORCE_PLATFORM.CORNERS.Data[No][i][2]};
       AnyDrawNode drw={ScaleXYZ=0.01*{1,1,1};RGB={1,0,0};};
-      
+
       AnyDrawVector  DrawName = {
         Vec = {0.0,0,0};  //use zero length
         Line.Thickness = 0.025; //arbitary value
@@ -46,7 +46,7 @@
         Line.RGB={1,0,0};//make reference to color
       };
     };
-    
+
     AnyRefNode c04={
       AnyInt i=3;
       AnyInt plnr=No;
@@ -58,63 +58,63 @@
         Text = "4"; //make reference to name
         Line.RGB={1,0,0};//make reference to color
       };
-      
+
     };
-    
-    
+
+
     AnyRefNode PlateCenter={
       sRel=0.25*(.c01.sRel+.c02.sRel+.c03.sRel+.c04.sRel);
       AnyVec3 p1=sRel;
       AnyVec3 p2=0.5*(.c01.sRel+.c04.sRel);
       AnyVec3 p3=0.5*(.c01.sRel+.c02.sRel);
       ARel =RotMat(p1,p2,p3);
-      
+
       //      AnyDrawRefFrame drw={ScaleXYZ=..CoordinateSystemSize*{1,1,1};RGB={0,1,0};};
-      
+
     };
-    
+
   };
-  
-  
-  
-  
+
+
+
+
   AnySeg ForcePlate={
     Mass=0.0;
     Jii={0,0,0};
     r0=.Corners.PlateCenter.sRel;
-    
-    //Rotational tranformation matrix for a coordinate system defined by three points. The first point is the origin of the system; the second gives the direction of the first (x) axis. Together all three points must span a plane which will be the plane of the first (x) and the second (y) axes, having the third (z) axis as normal. 
+
+    //Rotational tranformation matrix for a coordinate system defined by three points. The first point is the origin of the system; the second gives the direction of the first (x) axis. Together all three points must span a plane which will be the plane of the first (x) and the second (y) axes, having the third (z) axis as normal.
     AnyVec3 p1=.Corners.PlateCenter.sRel;
     AnyVec3 p2=0.5*(.Corners.c01.sRel+.Corners.c04.sRel);
     AnyVec3 p3=0.5*(.Corners.c01.sRel+.Corners.c02.sRel);
     Axes0 =RotMat(p1,p2,p3);
-    
+
     AnyInt plnr=No;
     AnyVar z_check = iffun(gtfun(Origins[plnr][2], 0), 1, -1);
     AnyFloat Origins= Folder.Groups.FORCE_PLATFORM.ORIGIN.Data;
-    AnyMessage Origin_Z_value_message= 
+    AnyMessage Origin_Z_value_message=
     {
       TriggerConst = iffun(gteqfun(.z_check,0), 1, 0);
       Type = MSG_Message ;
       Message = "The older AMTI origin has its Z value as positive. So this value is converted automatically. Please refer to www.c3d.org/HTML/type21.htm.";
     };
-    //Transducer location      
+    //Transducer location
     AnyRefNode TransducerLocation =
     {
       AnyFloat Origins= Folder.Groups.FORCE_PLATFORM.ORIGIN.Data;
       AnyVar xdist=.z_check*Origins[.plnr][0]*Folder.PointsScaleFactor;//distance from x axis on transducer to x axis of center of plate
       AnyVar ydist=.z_check*Origins[.plnr][1]*Folder.PointsScaleFactor; //distance from y axis on transducer to y axis of center of plate
       AnyVar zdist=.z_check*Origins[.plnr][2]*Folder.PointsScaleFactor;//distance from z axis on transducer to z surface of plate
-      
+
       sRel={xdist,ydist,zdist};
       AnyDrawRefFrame drw={ScaleXYZ=0.4*{1,1,1};RGB={1,0,0};};
     };
-    
+
     AnyRefNode PlateGraphics =
     {
       sRel={0,0,0.05};
       AnyVec3 Size={vnorm(..Corners.c01.sRel-..Corners.c02.sRel,2),vnorm(..Corners.c02.sRel-..Corners.c03.sRel,2),0.1};
-      AnyDrawSurf DrwBox = 
+      AnyDrawSurf DrwBox =
       {
         FileName = "box";
         RGB = 0.45*{1,1,1};
@@ -123,37 +123,37 @@
         Face=-1;
       };
     };
-    
-    
-  };  
-  
+
+
+  };
+
   AnyKinEqSimpleDriver ForcePlateDriver ={
     AnyKinLinear ForcePlateLin={
       AnyRefNode &ref1=..Corners.PlateCenter;
       AnySeg &ref2=..ForcePlate;
       Ref=0;
     };
-    
+
     AnyKinRotational ForcePlateRot={
       AnyRefNode &ref1=..Corners.PlateCenter;
       AnySeg &ref2=..ForcePlate;
       Type=RotAxesAngles;
     };
-    DriverPos={0,0,0,0,0,0}; 
+    DriverPos={0,0,0,0,0,0};
     DriverVel={0,0,0,0,0,0};
     Reaction.Type = {Off,Off,Off,Off,Off,Off};
   };
-  
-  
-  
+
+
+
   AnyFloatVar tStart = Folder.Header.FirstFrameNo/Folder.Header.VideoFrameRate;
   AnyFloatVar tEnd =  (Folder.Header.LastFrameNo+1)/Folder.Header.VideoFrameRate;
   AnyInt NoAnalogData= (Folder.Header.LastFrameNo - Folder.Header.FirstFrameNo +1)*Folder.Header.NoAnalogSamplesPer3DFrame;
   AnyFloat Time= farr( tStart, (tEnd-tStart)/NoAnalogData,  NoAnalogData);
-  
-  
+
+
   /// A lowpass butterworth filter
-  AnyFunButterworthFilter LowPassFilter = 
+  AnyFunButterworthFilter LowPassFilter =
   {
     FilterForwardBackwardOnOff = On;
     AutomaticInitialConditionOnOff = On;
@@ -163,23 +163,23 @@
     W = {1/(SampleFreq*0.5)*CutOffFrequency};
     Type = LowPass;
   };
-  
-  
-  
+
+
+
   AnyFunInterpol load ={
     Type=PiecewiseLinear;
     T=.Time;
     Data={Fx,Fy,Fz,Mx,My,Mz};
     //  Data=.Cal'*{.LowPassFilter(Fx),.LowPassFilter(Fy),.LowPassFilter(Fz),.LowPassFilter(Mx),.LowPassFilter(My),.LowPassFilter(Mz)};
-    
-  }; 
-  
-  
+
+  };
+
+
   AnyVar FzTotal=load(ForcePlateDriver.t)[2];
   AnyVar OnOff=iffun(gtfun(-FzTotal,10.0),1.0,0.0);
-  
+
   AnyForce3D Force ={
-    
+
     AnyRefFrame  &ref=.ForcePlate.TransducerLocation ;
     Flocal=.OnOff*{.load(.ForcePlateDriver.t)[0],.load(.ForcePlateDriver.t)[1],.load(.ForcePlateDriver.t)[2]};
     AnyDrawVector DrawForce =     {
@@ -187,20 +187,20 @@
       Vec=.Flocal*Folder.PointsScaleFactor;
       PointAway = Off;
       DrawCoord = Off;
-      
+
       Line.RGB ={0,0,1};
       Line.Thickness = 0.01;
       Line.End.Thickness = 2*0.01;
       Line.End.Length = 4*0.01;
       GlobalCoord=Off;
     };
-    
-    
-  };  
-  
-  
+
+
+  };
+
+
   AnyMoment3D Moment ={
-    
+
     AnyRefFrame  &ref=.ForcePlate.TransducerLocation ;
     Mlocal=.OnOff*{.load(.ForcePlateDriver.t)[3],.load(.ForcePlateDriver.t)[4],.load(.ForcePlateDriver.t)[5]}*Folder.PointsScaleFactor;
     AnyDrawVector DrawMoment =     {
@@ -208,105 +208,105 @@
       Vec=.Mlocal*Folder.PointsScaleFactor;
       PointAway = Off;
       DrawCoord = Off;
-      
+
       Line.RGB ={0,1,1};
       Line.Thickness = 0.01;
       Line.End.Thickness = 2*0.01;
       Line.End.Length = 4*0.01;
       GlobalCoord=Off;
     };
-  };  
-  
+  };
+
   AnyFolder CenterOfPressure =
   {
-     AnyForceMomentMeasure2 NetEffectMeasure = 
+     AnyForceMomentMeasure2 NetEffectMeasure =
      {
        AnyRefFrame& ref = ..ForcePlate;
        AnyForceBase& Forces = ..Force;
        AnyForceBase& Moments = ..Moment;
-       
+
        AnyVec3 Flocal = F*ref.Axes;
        AnyVec3 Mlocal = M*ref.Axes;
      };
-     
-     AnyVar fx = NetEffectMeasure.Flocal[0]; 
-     AnyVar fy = NetEffectMeasure.Flocal[1]; 
+
+     AnyVar fx = NetEffectMeasure.Flocal[0];
+     AnyVar fy = NetEffectMeasure.Flocal[1];
      AnyVar fz = NetEffectMeasure.Flocal[2];
-     AnyVar mx = NetEffectMeasure.Mlocal[0]; 
-     AnyVar my = NetEffectMeasure.Mlocal[1]; 
-     AnyVar mz = NetEffectMeasure.Mlocal[2]; 
+     AnyVar mx = NetEffectMeasure.Mlocal[0];
+     AnyVar my = NetEffectMeasure.Mlocal[1];
+     AnyVar mz = NetEffectMeasure.Mlocal[2];
 
      AnyVar fzz =iffun(gtfun(  (fz^2)^0.5,0),fz,fz+1000000);
-     
+
      AnyVar Vx= -my/fzz;
      AnyVar Vy= mx/fzz;
-     AnyVar Vz= 0;     
-     
+     AnyVar Vz= 0;
+
      AnyVar OnOff=.OnOff;
 
      AnyRefFrame& ref_ForcePlate = .ForcePlate;
-     ref_ForcePlate  = 
+     ref_ForcePlate  =
      {
-       AnyDrawSphere COP_ball = 
+       AnyDrawSphere COP_ball =
        {
          RGB = {0,1,0};
          ScaleXYZ = 0.015 *{1,1,1};
          //Opacity = iffun(gtfun(..fz, -10.0), 0.0, 1.0);
          Opacity = ..OnOff;
          Position = {..Vx, ..Vy, ..Vz};
-       };       
+       };
      };
-     
-     AnyDrawLine Line = 
+
+     AnyDrawLine Line =
      {
        p0 = {.Vx, .Vy, .Vz};
        p1 = p0+0.004*.OnOff*{.fx, .fy, .fz};
        Visible = ..Switch_DrawForceVectorFromCOP ;
        AnyRefFrame &ref = ..ForcePlate;
-       
+
        Line.RGB ={0,0,1};
        Line.Thickness = 0.01;
        Line.End.Thickness = 2*0.01;
        Line.End.Length = 4*0.01;
        GlobalCoord=Off;
      };
-     
-  };  
-  
+
+  };
+
   #if VerticalDirection=="X"
   AnyIntArray Index={1,2,0};
   #endif
-  
-  #if VerticalDirection=="Y" 
+
+  #if VerticalDirection=="Y"
   AnyIntArray Index={0,2,1};
   #endif
-  
-  #if VerticalDirection=="Z" 
+
+  #if VerticalDirection=="Z"
   AnyIntArray Index={0,1,2};
   #endif
-  
+
   AnyFolder ContactDetectionLimb1 ={
     AnyVec3 P1= .Limb1.HeelContactNodeLow.r;
     AnyVar P1Vel= vnorm(.Limb1.HeelContactNodeLow.rDot,2);
-    
+
     AnyVec3 P2= .Limb1.ToeLateralContactNode.r;
     AnyVar P2Vel= vnorm(.Limb1.HeelContactNodeLow.rDot,2);
-    
+
     #include "ContactDetection.any"
-    
+
     AnyMuscleModelUsr1 InContactMuscle = {
       F0 = 0;
       S = .NodeWithInBox.WithinBoxAndVelBelowThreshold *10000;
     };
-    
+
     AnyMuscleModelUsr1 NoContactMuscle = {
       AnyVar Limb2Contact=iffun(eqfun(..ContactDetectionLimb2.NodeWithInBox.WithinBoxAndVelBelowThreshold ,1.0),0.0,1.0); //equal 0 if limb2 in contact
       S =Limb2Contact*.NodeWithInBox.OutsideBoxOrVelHigherThanThreshold*10000;
       F0 = 0;
     };
-    
+
     #if FootPresent
-    
+
     AnyFolder PlateFootReactions = {
       AnySeg &ref1=..ForcePlate;
       AnySeg &ref2=..Limb1;
@@ -314,7 +314,7 @@
       #include "ArtificialMuscleConnection.any"
     };
     #endif
-    
+
     AnyFolder PlateGroundReactions={
       AnyRefFrame &ref1=..Corners.PlateCenter;
       AnySeg &ref2=..ForcePlate;
@@ -322,38 +322,38 @@
       #include "ArtificialMuscleConnection.any"
     };
   };
- 
+
   AnyFolder ContactDetectionLimb2 = {
     AnyVec3 P1= .Limb2.HeelContactNodeLow.r;
     AnyVar P1Vel= vnorm(.Limb2.HeelContactNodeLow.rDot,2);
-    
+
     AnyVec3 P2= .Limb2.ToeLateralContactNode.r;
     AnyVar P2Vel= vnorm(.Limb2.HeelContactNodeLow.rDot,2);
-    
+
     #include "ContactDetection.any"
-    
+
     AnyMuscleModelUsr1 InContactMuscle = {
       F0 = 0;
       S = .NodeWithInBox.WithinBoxAndVelBelowThreshold *10000;
     };
-    
+
     AnyMuscleModelUsr1 NoContactMuscle = {
       AnyVar Limb1Contact=iffun(eqfun(..ContactDetectionLimb1.NodeWithInBox.WithinBoxAndVelBelowThreshold ,1.0),0.0,1.0); //equal 0 if limb1 in contact
       S =Limb1Contact*.NodeWithInBox.OutsideBoxOrVelHigherThanThreshold*10000;
       F0 = 0;
     };
-    
+
     #if FootPresent
-    
+
     AnyFolder PlateFootReactions={
       AnySeg &ref1=..ForcePlate;
       AnySeg &ref2=..Limb2;
       AnyMuscleModel &MusMdl=.InContactMuscle;
       #include "ArtificialMuscleConnection.any"
     };
-    
+
     #endif
-    
+
     AnyFolder PlateGroundReactions={
       AnyRefFrame &ref1=..Corners.PlateCenter;
       AnySeg &ref2=..ForcePlate;
@@ -362,12 +362,10 @@
     };
   };
 
-  
-  
-  
-  
-  
-  
+
+
+
+
+
+
 };
-
-
