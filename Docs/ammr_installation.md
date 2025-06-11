@@ -43,7 +43,7 @@ which you can version you models, keep a backup or share them easily with the
 community.
 
 :::{warning} 
-As written before, AnyBody Modelling System comes with a version of
+As written before, AnyBody Modeling System comes with a version of
 AMMR (not necessarily the latest) which you can find in the installation folder
 of the software. Do not directly use these files for your actual work unless you
 copy them somewhere else. There is a risk to lose your changes in case AnyBody
