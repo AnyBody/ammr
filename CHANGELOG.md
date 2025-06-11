@@ -8,7 +8,7 @@
 [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.1.3-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
 
 ### 🩹 Fixed:
-* Fixed an regression with the VideoTool `VideoLookAtCamera`, which prevented it
+* Fixed a regression with the VideoTool `VideoLookAtCamera`, which prevented it
   from creating animated gifs if the underlying video was not an `.mp4` file. It
   now works by default with any video format supported by the `ffmpeg` library.
 
