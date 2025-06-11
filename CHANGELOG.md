@@ -12,6 +12,13 @@
   GIFs from being created when the video source was not an .mp4 file. It now
   supports any video format compatible with the ffmpeg library.
 
+### 🔧 Changed:
+* The intermediate joint angle files used in MoCap models now has headers which
+  reflects the original output measure. This is usefull if the files are used
+  for anything else that transfering the joint angles from marker trakcing to
+  inverse dynamics. 
+
+
 (ammr-3.1.2-changelog)=
 ## AMMR 3.1.2 (2025-06-02)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.15534589.svg)](https://doi.org/10.5281/zenodo.15534589)
