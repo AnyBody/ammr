@@ -1,8 +1,8 @@
 
 AnyFolder Model = {
   // Model parts included in the moment arm study
-  AnyFolder &PelvisRef = .TrunkHumanFolderRef.SegmentsLumbar.PelvisSeg; 
-  AnyFolder &TrunkRef = .TrunkHumanFolderRef; 
+  AnyFolder &PelvisRef = .TrunkHumanFolderRef.SegmentsLumbar.PelvisSeg;
+  AnyFolder &TrunkRef = .TrunkHumanFolderRef;
   #if BM_TRUNK_MUSCLES
   AnyFolder &SpineMusRef = .TrunkHumanFolderRef.MusclesSpine;
   AnyFolder &SpineMusRightRef =. TrunkHumanFolderRef.MusclesSpineRight;
@@ -12,38 +12,38 @@ AnyFolder Model = {
   AnyFolder SpineMusRightRef = {};
   AnyFolder SpineMusLeftRef = {};
   #endif
-  
+
   AnyFolder &ArmSegLeftRef = ....BodyModel.Left.ShoulderArm.Seg;
   AnyFolder &ArmSegRightRef = ....BodyModel.Right.ShoulderArm.Seg;
-  
+
   AnyFolder &ArmJntsRightRef = ....BodyModel.Right.ShoulderArm.Jnt;
   AnyFolder &ArmJntsLeftRef = ....BodyModel.Left.ShoulderArm.Jnt;
-  
+
   AnyFolder &MusRightRef = ....BodyModel.Right.ShoulderArm.Mus;
   AnyFolder &MusLeftRef = ....BodyModel.Left.ShoulderArm.Mus;
 
 
-  
-  
-  
-  
+
+
+
+
  AnyFixedRefFrame ground = {
-   AnyRefNode node = { 
+   AnyRefNode node = {
 //      ARel=..PelvisRef.Axes0;
 //      sRel=..PelvisRef.r0;
    };
  };
- 
+
 // AnyFolder& RightArmRef = ....BodyModel.Right.ShoulderArm;
 //  AnyKinEq RHipDriver= {
 //  };
-// 
-// 
- 
+//
+//
+
 
 AnyFolder Drivers = {
    AnyVar AngularVelocity = (..RangeOfMotion[1]-..RangeOfMotion[0])*pi/180;
- 
+
  AnyKinMeasureOrg TrunkMeasure = {
   AnyKinMeasure &PelvisThoraxExtension= ...HumanInterfaceRef.Trunk.PelvisThoraxExtension;
   AnyKinMeasure &PelvisThoraxLateralBending= ...HumanInterfaceRef.Trunk.PelvisThoraxLateralBending;
@@ -52,9 +52,9 @@ AnyFolder Drivers = {
   AnyKinMeasure &SkullThoraxLateralBending= ...HumanInterfaceRef.Trunk.SkullThoraxLateralBending;
   AnyKinMeasure &SkullThoraxRotation= ...HumanInterfaceRef.Trunk.SkullThoraxRotation;
  };
-   
- 
- 
+
+
+
  AnyKinMeasureOrg ArmMeasureRight = {
    #if BM_ARM_SHOULDER_RHYTHM == OFF
    AnyKinMeasure& SCProtraction= ...HumanInterfaceRef.Right.SternoClavicularProtraction;
@@ -80,8 +80,8 @@ AnyFolder Drivers = {
    AnyKinMeasure& ElbowPronation = ...HumanInterfaceRef.Left.ElbowPronation;
    AnyKinMeasure& WristFlexion = ...HumanInterfaceRef.Left.WristFlexion;
    AnyKinMeasure& WristAbduction = ...HumanInterfaceRef.Left.WristAbduction;
- };   
- 
+ };
+
   AnyKinEqSimpleDriver ArmDriver= {
     AnyKinMeasure& refR = .ArmMeasureRight;
     AnyKinMeasure& refL = .ArmMeasureLeft;
@@ -113,12 +113,12 @@ AnyFolder Drivers = {
      };
      DriverVel = 0*DriverPos;
      Reaction.Type = repmat(nDim, On);
-  };    
- 
- 
- 
- 
- // If Leg are included then Psoas muscle are attached to the legs. 
+  };
+
+
+
+
+ // If Leg are included then Psoas muscle are attached to the legs.
  // Thus, we need to driver for the hip joint
  #if BM_LEG_RIGHT
  AnySphericalJoint &RHipJoint = .....BodyModel.Right.Leg.Jnt.Hip;
@@ -140,24 +140,24 @@ AnyFolder Drivers = {
     };
   };
  #endif
- 
- 
+
+
  AnyStdJoint PelvisGround={
     AnyRefFrame &Ground = ..ground.node;
-    AnyRefFrame &Sacrum= ..PelvisRef; 
+    AnyRefFrame &Sacrum= ..PelvisRef;
  };
-    
+
    };// Drivers
-   
+
   AnyForce JointLoad = {
       AnyKinMeasure &ref = .Drivers.TrunkMeasure;
       AnyInt Sign = -round(.Drivers.AngularVelocity/abs(.Drivers.AngularVelocity));
       F = 10*Sign*not(not(.Drivers.TrunkDriver.DriverVel));
-  };   
- 
+  };
+
 };
- 
- 
+
+
 AnyBodyStudy Study = {
   Gravity = {0,0,0};
 //  tStart = 0;
@@ -167,16 +167,16 @@ AnyBodyStudy Study = {
   #else
   nStep = 40;
   #endif
-    
+
 //  InitialConditions.KinematicTol = 1e-5;
 //  InitialConditions.MaxIteration = 5000;
 //  InitialConditions.SolverType = KinSolDeterminate2;
-//  
+//
 //  Kinematics.KinematicTol = 1e-3;
 //  Kinematics.MaxIteration = 5000;
 //  Kinematics.SolverType = KinSolDeterminate2;
 
-  
+
   Kinematics.UseStartGuessOnOff = On;
   Kinematics.PosAnalysisOnlyOnOff = Off;
   InitialConditions.PosAnalysisOnlyOnOff = Off;
@@ -184,22 +184,22 @@ AnyBodyStudy Study = {
   InverseDynamics.Criterion.Type = MR_MinMaxStrict;
   InverseDynamics.Criterion.UpperBoundOnOff = Off;
   InverseDynamics.Criterion.SolverTolerance = 1e-4;
-  
+
   AnyFolder &Model = .Model;
-    
+
   AnyFolder JointStrength = {
      AnyFolder Abscissa  ={
-        AnyVar JointAngle = not(not(..Model.Drivers.TrunkDriver.DriverVel))*..Model.Drivers.TrunkMeasure.Pos'*180/pi;     
+        AnyVar JointAngle = not(not(..Model.Drivers.TrunkDriver.DriverVel))*..Model.Drivers.TrunkMeasure.Pos'*180/pi;
      };
      AnyVar JointStrength = max(abs(.Model.JointLoad.F))/(.MaxMuscleActivity+0.00000001);
-     
+
      //AnyVar PsoasMajorT12I = -1*.Model.SpineMusRef.PsoasMajor.PMT12I_TM.LmtDot/.Model.Drivers.AngularVelocity;
   };
-  
-  
-  
-  
-  
+
+
+
+
+
 
 };
 
@@ -212,7 +212,7 @@ AnyProject ModelViews = {};
 ModelViews = {
   AnyDrawGroup Selection = {
     Objects = arrcat(arrcat(
-       ObjSearchRecursive(CompleteNameOf(&..Model.PelvisRef ), "*", "AnyDrawObject"), 
+       ObjSearchRecursive(CompleteNameOf(&..Model.PelvisRef ), "*", "AnyDrawObject"),
        ObjSearchRecursive(CompleteNameOf(&..Model.TrunkRef ), "*", "AnyDrawObject"),
        ObjSearchRecursive(CompleteNameOf(&..Model.SpineMusRef ), "*", "AnyDrawObject"),
        ObjSearchRecursive(CompleteNameOf(&..Model.SpineMusRightRef ), "*", "AnyDrawObject"),
@@ -233,18 +233,18 @@ ModelViews = {
   };
 };
 
-AnyOperationSequence Run = 
+AnyOperationSequence Run =
 {
-    AnyOperationMacro SetView = 
+    AnyOperationMacro SetView =
     {
       MacroStr = { "classoperation " + CompleteNameOf(&..ModelViews.Views.SelectedView) + strquote("Set View") };
     };
     AnyOperation &Study = .Study.InverseDynamics;
 //    #ifdef ANYBODY_PATH_OUTPUT
-//    AnyOperationMacro Save = 
+//    AnyOperationMacro Save =
 //    {
 //      MacroStr = {
-//           "classoperation " + CompleteNameOf(&.Study.Output) + strquote("Save data") 
+//           "classoperation " + CompleteNameOf(&.Study.Output) + strquote("Save data")
 //           + " --type=" + strquote("Deep") +" --file=" + strquote(
 //           ANYBODY_PATH_OUTPUT + .OutputFileName + ".anydata.h5")
 //      };
