@@ -1,22 +1,22 @@
 AnyFolder HamstringCal ={
-  AnyComponentDefinition obj = {};  
+  AnyComponentDefinition obj = {};
 
   AnyFolder &Pelvis = ...HumanFolderRef.Trunk.SegmentsLumbar.PelvisSeg;
   AnyFolder &Sacrum = ...HumanFolderRef.Trunk.SegmentsLumbar.SacrumSeg;
-  
+
   AnyFolder &LegSegSide = .SideHumanFolderRef.Leg.Seg;
-  
+
   AnyFolder &LegJointsSide = .SideHumanFolderRef.Leg.Jnt;
   AnyFolder &SacrumPelvisJnt = ...HumanFolderRef.Trunk.JointsLumbar.SacrumPelvisJnt;
-  
-  
+
+
   AnyFixedRefFrame ground = {
     AnyRefNode node = {
       ARel=..Pelvis.Axes0;
       sRel=..Pelvis.r0;
     };
   };
-  
+
   AnyKinEq PelvisFix = {
     AnyKinLinear PelvisSacrumLinFix = {
       AnyRefFrame &ground = ..ground.node;
@@ -28,14 +28,14 @@ AnyFolder HamstringCal ={
       AnyRefFrame &Pelvis = .....HumanFolderRef.Trunk.SegmentsLumbar.PelvisSeg;
     };
   };
-  
+
   AnyKinEqSimpleDriver PelvisSacrumFix = {
     AnyKinMeasure& Jnt = .SacrumPelvisJnt;
     DriverPos = {0,0,0};
     DriverVel = {0,0,0};
     Reaction.Type = {Off,Off,Off};
   };
-  
+
   AnyKinEqInterPolDriver Hip = {
     AnyKinRotational &Spherical = ..SideInterfaceFolderRef.HipFlexion.HipMeasure;
     Type = PiecewiseLinear;
@@ -43,11 +43,11 @@ AnyFolder HamstringCal ={
     Data = { {-20,  110},
              {0,  0},
              {0,  0}
-    }*pi/180; // Flexion - Abduction - internal rotation 
-    
+    }*pi/180; // Flexion - Abduction - internal rotation
+
     Reaction.Type = {Off, Off, Off};
   };
-  
+
   AnyKinEqInterPolDriver Knee = {
     AnyKinMeasure& Hinge = ..SideInterfaceFolderRef.KneeFlexion;
     Type = PiecewiseLinear;
@@ -55,8 +55,8 @@ AnyFolder HamstringCal ={
     Data = {{150,0}}*pi/180; // ? degrees knee flexion
     Reaction.Type = {Off};
   };
-  
-  
+
+
   AnyKinEqInterPolDriver Ankle = {
     AnyKinMeasure& Hinge = ..SideInterfaceFolderRef.AnklePlantarFlexion;
     Type = PiecewiseLinear;
@@ -64,7 +64,7 @@ AnyFolder HamstringCal ={
     Data = {{40,40}}*pi/180;
     Reaction.Type = {Off};
   };
-  
+
   AnyKinEqInterPolDriver SubTalar = {
     AnyKinMeasure& Hinge = ..SideInterfaceFolderRef.SubTalarEversion;
     Type = PiecewiseLinear;
@@ -72,27 +72,27 @@ AnyFolder HamstringCal ={
     Data = {{0,0}}*pi/180;
     Reaction.Type = {Off};
   };
-  
+
   AnyString MusPrefix = CompleteNameOf(&.SideHumanFolderRef.Leg.Mus);
-  
+
   AnyObjectPtrArray BicepsFemorisMuscles = ObjSearch(MusPrefix+".BicepsFemoris*", "AnyMuscle");
   AnyFloat  BicepsFemorisRmin = repmat(NumElemOf(BicepsFemorisMuscles), 0.5);
   AnyFloat  BicepsFemorisRmax = repmat(NumElemOf(BicepsFemorisMuscles), 1.2);
-  
+
   AnyObjectPtrArray SemimembranosusMuscles = ObjSearch(MusPrefix+".Semimembranosus*", "AnyMuscle");
   AnyFloat  SemimembranosusRmin = repmat(NumElemOf(SemimembranosusMuscles), 0.5);
   AnyFloat  SemimembranosusRmax = repmat(NumElemOf(SemimembranosusMuscles), 1.2);
-  
+
   AnyObjectPtrArray SemitendinosusMuscles = ObjSearch(MusPrefix+".Semitendinosus*", "AnyMuscle");
   AnyFloat  SemitendinosusRmin = repmat(NumElemOf(SemitendinosusMuscles), 0.5);
   AnyFloat  SemitendinosusRmax = repmat(NumElemOf(SemitendinosusMuscles), 1.2);
-  
-  
+
+
 };
 
 // The study: Operations to be performed on the model
 AnyBodyCalibrationStudy LegCalibrationStudyHamstring = {
-  AnyFolder &ref=.HamstringCal; 
+  AnyFolder &ref=.HamstringCal;
   nStep = 2;
   MuscleArr = arrcat(
       ref.BicepsFemorisMuscles,
@@ -111,4 +111,3 @@ AnyBodyCalibrationStudy LegCalibrationStudyHamstring = {
   );
   InitialConditions.SolverType = KinSolOverDeterminate;
 };
-
