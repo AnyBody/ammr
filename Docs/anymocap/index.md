@@ -2,6 +2,10 @@
 
 # The AnyMoCap Framework
 
+:::{note} 
+This guide is moved from the previous "Guides" section to this "Examples and applications" section.
+:::
+
 The AnyMoCap model is an effort to create a simple and unified framework for
 doing any kind of MoCap analysis with the [AnyBody Modeling
 System](https://www.anybodytech.com).
@@ -16,44 +20,45 @@ Making MoCap models the easier
 
 ## Features
 
-- Adapts to any Mocap protocol
+- Adapts to any MoCap protocol
 - Optimization of marker locations and anthropometrics.
 - Support Marker based (C3D) and inertial based (BVH) input.
-- Support for standard force plates: (Types 1-4) plus more.
+- Support for standard force plates: Types 1-4 plus more.
 - {doc}`Prediction of ground reaction forces <grf-prediction>`
 - Easy setup with multiple trials and subjects
 
 
-## Over determinate kinematic analysis
+## Over-Determinate Kinematic Analysis
 
 :::{seealso}
 :class: margin
-The AnyBody tutorials, and the lesson on using the
+[The AnyBody Tutorials](https://anyscript.org/tutorials/Scaling/index.html) 
+and the lesson on using the
 {doc}`AnyMoCap model <tutorials:Making_things_move/lesson5>`
 :::
 
 
 Musculoskeletal models that use Motion capture data are different from other
-types of models found the AMMR.  Most importantly, MoCap models usually require
+types of models found in the AMMR.  Most importantly, MoCap models usually require
 an over-determinate kinematic solver to handle the excess in information that
 the optical markers provide.
 
 The over-determinate solver in AMS works great, but
 it can only find velocities and accelerations numerically. That has some
 performance issue when running inverse dynamics analysis. To overcome the
-problem, the MoCap analysis is split into a two-step procedure, as illustrated on
+problem, the MoCap analysis is split into a three-step procedure, as illustrated on
 the figure below:
 
 (anymocap-flow-figure)=
 
-:::{figure} /Applications/Mocap/anymocap_flow.png
-Figure 1: The framework of the AnyMoCap model. Analysis is split into three
+```{figure} /Applications/Mocap/anymocap_flow.png
+The framework of the AnyMoCap model. Analysis is split into three
 steps. *Parameter identification*, *Marker tracking*, *Inverse dynamic
 analysis*.
-:::
+```
 
-The over determinate kinematic analysis solves the model for positions, and
-writes joint angles to a a set of files. These joint angles can then be used
+The over-determinate kinematic analysis solves the model for positions, and
+writes joint angles to a set of files. These joint angles can then be used
 with the determinate kinematic solver in the inverse dynamic analysis.
 
 ## AnyMoCap examples
@@ -79,7 +84,7 @@ It is recommended *not* to place working models inside the AMMR folder.
 Copy the example elsewhere before using.
 :::
 
-The easiest way to get started, is to adapt one the example application above.
+The easiest way to get started, is to adapt one of the example applications above.
 
 A typical application using the AnyMoCap framework will look something like this:
 
@@ -97,7 +102,7 @@ A typical application using the AnyMoCap framework will look something like this
 ```
 
 You can place this main file anywhere on your computer as long the
-`libdef.any` file points to model repository (AMMR) you want to use.
+`libdef.any` file points to the model repository (AMMR) you want to use.
 
 
 
@@ -120,15 +125,15 @@ When loading the AnyMoCap model the following layout shows up in the model tree:
     ======================================= ==============================================================================================
     Folder name                             Description
     ======================================= ==============================================================================================
-    ``ModelSetup``                          Contains contains all the machinery of the AnyMoCap Frame.
-    ``HumanModel``                          Contain the Human model used. This is constructed automatically by the AnyMoCap framework.
+    ``ModelSetup``                          Contains all the machinery of the AnyMoCap Frame.
+    ``HumanModel``                          Contains the Human model used. This is constructed automatically by the AnyMoCap framework.
     ``Main.EnvironmentModel``               Contains the model parts which are not part of the Human model. (e.g.  force plate and environment)
     ``Studies``                             Contains the three studies ``ParameterIdentification``, ``MarkerTracking``, and
-                                            ``InverseDynamicStudy``. See :ref:`figure 1 <AnyMoCap-flow-figure>`.
+                                            ``InverseDynamicStudy``. See :ref:`figure 10 <AnyMoCap-flow-figure>`.
     ``DrawSettings``                        Contains visual and color settings for the model.
     ``RunParameterIdentification``          Operation to run the Parameter Identification study and save the results.
     ``RunAnalysis``                         Operation to 1. load the optimized parameters (scaling and marker positions), 2. run marker
-                                            tracking and finally 3. run inverse dynamics analysis, 4. save results to and HDF5 file for later replay.
+                                            tracking, 3. run inverse dynamics analysis, 4. save results to and HDF5 file for later replay.
     ``LoadAndReplay``                       This loads any previously saved data and starts the replay operation.
     ======================================= ==============================================================================================
 
@@ -167,12 +172,12 @@ they are specific to the AnyMoCap framework.
     ======================================= ============================================================================================== ========================================
     Settings                                Description                                                                                    Default
     ======================================= ============================================================================================== ========================================
-    ``MOCAP_TRIAL_SPECIFIC_DATA``           Path to a file with trial specific data. This file is include within the                       None
+    ``MOCAP_TRIAL_SPECIFIC_DATA``           Path to a file with trial specific data. This file is included within the                      None
                                             ``Main.ModelSetup.TrialSpecificData`` folder.
-    ``MOCAP_SUBJECT_SPECIFIC_DATA``         Path to a file with subject/session specific data. This file is include within the             None
+    ``MOCAP_SUBJECT_SPECIFIC_DATA``         Path to a file with subject/session specific data. This file is included within the            None
                                             ``Main.ModelSetup.SubjectSpecificData`` folder.
     ``MOCAP_LAB_SPECIFIC_DATA``             Path to a file with laboratory specific data (i.e. data common for the whole model or          None
-                                            experimental setup. This file is include within the ``Main.ModelSetup.LabSpecificData``
+                                            experimental setup. This file is included within the ``Main.ModelSetup.LabSpecificData``
                                             folder.
     ``MOCAP_C3DSETTINGS``                   A file with setting for the C3D file.                                                          None
 
@@ -208,13 +213,13 @@ they are specific to the AnyMoCap framework.
     Setting                                        Description                                                                                    Default value
     ============================================== ============================================================================================== ========================================
     ``MOCAP_INPUT_DATA_TYPE``                      Data type ("C3D", "BVH") used by the AnyMoCap application.                                     "C3D"
-    ``MOCAP_CREATE_PARAMETER_ID_SHORTCUT``         Setting for creating the ``Main.RunParameterIdentification`` shortcut operation  .             ON
+    ``MOCAP_CREATE_PARAMETER_ID_SHORTCUT``         Setting for creating the ``Main.RunParameterIdentification`` shortcut operation.               ON
     ``MOCAP_OUTPUT_FILENAME_PREFIX``               Prefix added to all output files from the model.                                               ""
     ``MOCAP_PARAMETER_FILE_PREFIX``                Prefix for the parameter identfication files. Can be usefull to set explicitly                 ""
                                                    in special cases where subjects share a common parameter file.
     ``MOCAP_USE_GRF_PREDICTION``                   Switch to indicate that the model uses Ground Reaction Force (GRF) prediction. It will ensure  OFF
                                                    that the AnyMoCap framework uses the appropriate settings. (e.g. recruited actuators as weak
-                                                   residuals on the pelvis.
+                                                   residuals on the pelvis)
     ``MOCAP_FILTER_JOINT_ANGLES``                  Switch to enable extra low pass filtering of the output from the Marker tracking. Useful in    OFF
                                                    some cases where other drivers (e.g. joint limits) cause high accelerations in the output
                                                    from Marker tracking.
