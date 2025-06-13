@@ -1,34 +1,34 @@
 Main.Studies.InverseDynamicStudy = {
-  
+
  InitialConditions.KinematicTol ??= 1e-2;
  InitialConditions.SolverType ??= KinSolOverDeterminate;
  InitialConditions.UseStartGuessOnOff ??= On;
- 
- Kinematics.UseStartGuessOnOff ??= Off;
- Kinematics.KinematicTol ??= 1e-5; 
- 
- Kinematics.OPERATION_DISPLAY_PRIORITY(PriorityLow);
- 
- #if MOCAP_USE_GRF_PREDICTION == ON
-  // GRF prediction needs UpperBound = Off, because this 
-  // prevents solver change when residual "muscles" gets overloaded.
-  InverseDynamics.Criterion.UpperBoundOnOff = Off; 
- #endif
- 
 
-InitialConditions.PreOperation = 
+ Kinematics.UseStartGuessOnOff ??= Off;
+ Kinematics.KinematicTol ??= 1e-5;
+
+ Kinematics.OPERATION_DISPLAY_PRIORITY(PriorityLow);
+
+ #if MOCAP_USE_GRF_PREDICTION == ON
+  // GRF prediction needs UpperBound = Off, because this
+  // prevents solver change when residual "muscles" gets overloaded.
+  InverseDynamics.Criterion.UpperBoundOnOff = Off;
+ #endif
+
+
+InitialConditions.PreOperation =
 {
   AnyOperation &SetView = Main.ModelSetup.Views.SetViewMacros.InverseDynamicView;
 };
- 
+
 
 // Add the Analysis to the Main.RunAnalysis sequence
-Main.RunAnalysis.InverseDynamics.SubOperations = 
+Main.RunAnalysis.InverseDynamics.SubOperations =
 {
-  #if (BM_LEG_MUSCLES_RIGHT == _MUSCLES_3E_HILL_) | (BM_LEG_MUSCLES_LEFT == _MUSCLES_3E_HILL_) | (BM_ARM_MUSCLES_RIGHT == _MUSCLES_3E_HILL_) | (BM_ARM_MUSCLES_LEFT == _MUSCLES_3E_HILL_) 
+  #if (BM_LEG_MUSCLES_RIGHT == _MUSCLES_3E_HILL_) | (BM_LEG_MUSCLES_LEFT == _MUSCLES_3E_HILL_) | (BM_ARM_MUSCLES_RIGHT == _MUSCLES_3E_HILL_) | (BM_ARM_MUSCLES_LEFT == _MUSCLES_3E_HILL_)
     AnyOperationSequence &MuscleCalibration = Main.HumanModel.Calibration.CalibrationSequence;
-  #endif      
-  
+  #endif
+
   AnyOperation &RunInverseDynamics = ....InverseDynamics;
 };
 
@@ -36,23 +36,23 @@ Main.RunAnalysis.InverseDynamics.SubOperations =
  #ifndef N_STEP
  #define N_STEP Main.ModelSetup.TrialSpecificData.nStep
  #endif
- 
+
  #ifndef T_END
  #define T_END Main.ModelSetup.TrialSpecificData.tEnd
  #endif
- 
+
  #ifndef T_START
  #define T_START Main.ModelSetup.TrialSpecificData.tStart
  #endif
- 
+
  AnyVar tFrame = iffun(gtfun(Main.ModelSetup.TrialSpecificData.nStep, 1), (T_END-T_START)/max({Main.ModelSetup.TrialSpecificData.nStep-1,1}), 0.01);
- 
- 
+
+
  Kinematics.ApproxVelAccPerturb = min({1.0/C3DData.Header.VideoFrameRate, tFrame});
  InitialConditions.ApproxVelAccPerturb = Kinematics.ApproxVelAccPerturb ;
- 
- tStart = min({T_START+3*tFrame, T_END}); 
+
+ tStart = min({T_START+3*tFrame, T_END});
  tEnd = max({T_END-3*tFrame, tStart});
- nStep= max({N_STEP-6, 1});  
- 
+ nStep= max({N_STEP-6, 1});
+
 };

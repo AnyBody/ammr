@@ -1,46 +1,46 @@
 AnyFolder ShoulderCal ={
-  AnyComponentDefinition obj = {};  
+  AnyComponentDefinition obj = {};
   AnyFolder &ThoraxSegs =  ...BodyModel.Trunk.Segments;
   AnyFolder &CervicalSegs =  ...BodyModel.Trunk.Segments;
   AnyFolder &LumbarSegs =  ...BodyModel.Trunk.Segments;
   AnyFolder &LumbarSpineJoints =  ...BodyModel.Trunk.Joints.Lumbar;
   AnyFolder &LumbarCervicalJoints =  ...BodyModel.Trunk.Joints.Cervical;
-  
+
   AnyFolder &SegSideCal = .SideHumanFolderRef.ShoulderArm.Segments;
   AnyFolder &JointsSideCal = .SideHumanFolderRef.ShoulderArm.Joints;
 
   AnyFolder &MusCalSide =  .SideHumanFolderRef.ShoulderArm.Muscles;
   AnyFolder &MusParCalSide =  .SideHumanFolderRef.ShoulderArm.MuscleModels;
-  
+
   AnyFixedRefFrame ground = {
-    AnyRefNode node = { 
-      ARel=.....BodyModel.Trunk.Segments.ThoraxSeg.Axes0; 
+    AnyRefNode node = {
+      ARel=.....BodyModel.Trunk.Segments.ThoraxSeg.Axes0;
       sRel=.....BodyModel.Trunk.Segments.ThoraxSeg.r0;
     };
   };
-  
 
-  
+
+
   AnySphericalJoint ThoraxGround={
     AnyRefFrame &Ground = .ground.node;
     AnyRefFrame &Sacrum= ....BodyModel.Trunk.Segments.ThoraxSeg;
   };
-  
+
   AnyKinEqSimpleDriver  ThoraxGroundDriver = {
     AnySphericalJoint &Jnt = .ThoraxGround;
     DriverPos = {0,0,0};
     DriverVel = {0,0,0};
     Reaction.Type = {Off,Off,Off};
   };
-  
-  
+
+
   #if BM_ARM_SHOULDER_RHYTHM == ON
   #include "ExcludeShoulderRhythm.any"
   #endif
-  
+
   AnyFloat Neutral = {  0,  0,   0,  -23,  12} * pi/180;
-  
-  //                               GH Abd   GH Flex      GH ext       SC Pro    SC Elev 
+
+  //                               GH Abd   GH Flex      GH ext       SC Pro    SC Elev
   AnyFloat Abduction         = {       178,       0,          0,         -35,         40} * pi/180;
   AnyFloat ExternalRotation   ={        89,       0,         89,         -36,         15} * pi/180;
   AnyFloat InternalRotation  = {        89,       0,        -70,         -23,         15} * pi/180;
@@ -48,9 +48,9 @@ AnyFolder ShoulderCal ={
   AnyFloat Adduction         = {       -44,      25,        -25,          15,         -5} * pi/180;
   AnyFloat VertivalExtension = {         0,     -50,          0,         -28,          0} * pi/180;
   AnyFloat VerticalFlexion   = {         0,     160,        -15,         -10,         35} * pi/180;
-     
+
   AnyFloat ElbowFlexPosData  = {0,90,90,0,0,0,0} * pi/180;
-  
+
   AnyFloat GHPosData         = repmat(1,{
       Abduction,
       ExternalRotation,
@@ -61,8 +61,8 @@ AnyFolder ShoulderCal ={
       VertivalExtension,
       VerticalFlexion
   }');
-    
-  
+
+
   //Neck driver
   AnyKinEqSimpleDriver NeckJntDriver = {
     AnyKinMeasure& fe = ....BodyModel.Interface.Trunk.SkullThoraxFlexion;
@@ -72,7 +72,7 @@ AnyFolder ShoulderCal ={
     DriverVel = pi/180*{0,0,0};
     Reaction.Type = {Off, Off, Off};
   };
-  
+
   AnyKinEqSimpleDriver ThoraxDriver ={
     AnyKinMeasure& Ref3 = ....BodyModel.Interface.Trunk.PelvisThoraxRotation;
     AnyKinMeasure& Ref1 = ....BodyModel.Interface.Trunk.PelvisThoraxExtension;
@@ -81,21 +81,21 @@ AnyFolder ShoulderCal ={
     DriverVel = pi/180*{0,0,0};
     Reaction.Type = {On,On,On};
   };
-  
+
   AnyKinEqSimpleDriver WristFlexionDriver ={
       AnyKinMeasure& WF = ..SideInterfaceFolderRef.WristFlexion;
       DriverPos = {0}*pi/180;
       DriverVel = {0};
       Reaction.Type={On};
     };
-    
+
     AnyKinEqSimpleDriver WristAbductionDriver ={
       AnyKinMeasure& WA = ..SideInterfaceFolderRef.WristAbduction;
       DriverPos = {0}*pi/180;
       DriverVel = {0};
       Reaction.Type={On};
     };
-    
+
   AnyKinEqInterPolDriver FEDriver ={
     AnyKinMeasure& FE = ..SideInterfaceFolderRef.ElbowFlexion;
     Type = PiecewiseLinear;
@@ -111,7 +111,7 @@ AnyFolder ShoulderCal ={
     Data = {{30,30}}*pi/180;
     Reaction.Type = {Off};
   };
- 
+
   AnyKinEqInterPolDriver GHDriver ={
     AnyKinMeasure& GHAbduction = ..SideInterfaceFolderRef.GlenohumeralAbduction;
     AnyKinMeasure& GHFlexion = ..SideInterfaceFolderRef.GlenohumeralFlexion;
@@ -123,7 +123,7 @@ AnyFolder ShoulderCal ={
     Data = .GHPosData;
     Reaction.Type = repmat(nDim,{Off});
   };
-  
+
   //---------------------------------------------------------------------
   //Finger drivers
   #if BM_ARM_DETAILED_HAND
@@ -133,17 +133,17 @@ AnyFolder ShoulderCal ={
     DriverPos={0}*pi/180;
     DriverVel={0};
   };
-  
+
   AnyKinEqSimpleDriver CMC1Abduction={
     AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Segments.Hand.Finger1.Jnt.CMCAbduction;
     DriverPos={0}*pi/180;
     DriverVel={0};
   };
-  
 
-  
+
+
   AnyKinEqSimpleDriver MCP1Flexion=
-  {  
+  {
     AnyRevoluteJoint &ref=..SideHumanFolderRef.ShoulderArm.Segments.Hand.Finger1.Jnt.MCPFlexion;
     DriverPos={0}*pi/180;
     DriverVel={0};
@@ -154,14 +154,14 @@ AnyFolder ShoulderCal ={
     DriverPos={0}*pi/180;
     DriverVel={0};
   };
-  
+
   AnyKinEqSimpleDriver DIP1={
     AnyRevoluteJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Segments.Hand.Finger1.Jnt.DIP;
     DriverPos={0}*pi/180;
     DriverVel={0};
   };
-  
-  
+
+
  // finger2
 //    AnyKinEqSimpleDriver CMC2={
 //      AnyUniversalJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Segments.Hand.Finger2.Jnt.CMC;
@@ -183,9 +183,9 @@ AnyFolder ShoulderCal ={
       DriverPos={0};
       DriverVel={0};
     };
-  
-  
-  
+
+
+
  // finger3
 //    AnyKinEqSimpleDriver CMC3={
 //      AnyUniversalJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Segments.Hand.Finger3.Jnt.CMC;
@@ -207,8 +207,8 @@ AnyFolder ShoulderCal ={
       DriverPos={0};
       DriverVel={0};
     };
-  
-  
+
+
   //finger4
 //    AnyKinEqSimpleDriver CMC4={
 //      AnyUniversalJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Segments.Hand.Finger4.Jnt.CMC;
@@ -230,8 +230,8 @@ AnyFolder ShoulderCal ={
       DriverPos={0}*pi/180;
       DriverVel={0};
     };
-  
-  
+
+
  // finger5
 //    AnyKinEqSimpleDriver CMC5={
 //      AnyUniversalJoint &ref=  ..SideHumanFolderRef.ShoulderArm.Segments.Hand.Finger5.Jnt.CMC;
@@ -254,13 +254,13 @@ AnyFolder ShoulderCal ={
       DriverVel={0};
     };
   #endif
-  
+
   AnyString MusPrefix = CompleteNameOf(&.SideHumanFolderRef.ShoulderArm.Muscles);
-  
+
   AnyObjectPtrArray coracobrachialisMuscles = ObjSearch(MusPrefix+".*.coracobrachialis*", "AnyMuscle");
   AnyFloat  coracobrachialisRmin = repmat(NumElemOf(coracobrachialisMuscles), ..RMin);
   AnyFloat  coracobrachialisRmax = repmat(NumElemOf(coracobrachialisMuscles), ..RMax);
-  
+
   #if BM_ARM_DELTOID_WRAPPING == _DELTOID_WRAPPING_RAKE_
   AnyObjectPtrArray deltoideus_scapularMuscles = ObjSearch(MusPrefix+".*.deltoideus_scapular*", "AnyMuscle");
   #else
@@ -271,7 +271,7 @@ AnyFolder ShoulderCal ={
   #endif
   AnyFloat  deltoideus_scapularRmin = repmat(NumElemOf(deltoideus_scapularMuscles), ..RMin);
   AnyFloat  deltoideus_scapularRmax = repmat(NumElemOf(deltoideus_scapularMuscles), ..RMax);
-  
+
   #if BM_ARM_DELTOID_WRAPPING == _DELTOID_WRAPPING_RAKE_
   AnyObjectPtrArray deltoideus_clavicularMuscles = ObjSearch(MusPrefix+".*.deltoideus_clavicular*", "AnyMuscle");
   #else
@@ -279,52 +279,52 @@ AnyFolder ShoulderCal ={
   #endif
   AnyFloat  deltoideus_clavicularRmin = repmat(NumElemOf(deltoideus_clavicularMuscles), ..RMin);
   AnyFloat  deltoideus_clavicularRmax = repmat(NumElemOf(deltoideus_clavicularMuscles), ..RMax);
-  
+
   AnyObjectPtrArray infraspinatusMuscles = ObjSearch(MusPrefix+".*.infraspinatus*", "AnyMuscle");
   AnyFloat  infraspinatusRmin = repmat(NumElemOf(infraspinatusMuscles), ..RMin);
   AnyFloat  infraspinatusRmax = repmat(NumElemOf(infraspinatusMuscles), ..RMax);
-  
+
   AnyObjectPtrArray pectoralis_major_thoracicMuscles = ObjSearch(MusPrefix+".*.pectoralis_major_thoracic*", "AnyMuscle");
   AnyFloat  pectoralis_major_thoracicRmin = repmat(NumElemOf(pectoralis_major_thoracicMuscles), ..RMin);
   AnyFloat  pectoralis_major_thoracicRmax = repmat(NumElemOf(pectoralis_major_thoracicMuscles), ..RMax);
-  
+
   AnyObjectPtrArray pectoralis_major_clavicularMuscles = ObjSearch(MusPrefix+".*.pectoralis_major_clavicular*", "AnyMuscle");
   AnyFloat  pectoralis_major_clavicularRmin = repmat(NumElemOf(pectoralis_major_clavicularMuscles), ..RMin);
   AnyFloat  pectoralis_major_clavicularRmax = repmat(NumElemOf(pectoralis_major_clavicularMuscles), ..RMax);
-  
+
   AnyObjectPtrArray pectoralis_minorMuscles = ObjSearch(MusPrefix+".*.pectoralis_minor*", "AnyMuscle");
   AnyFloat  pectoralis_minorRmin = repmat(NumElemOf(pectoralis_minorMuscles), ..RMin);
   AnyFloat  pectoralis_minorRmax = repmat(NumElemOf(pectoralis_minorMuscles), ..RMax);
-  
+
   AnyObjectPtrArray rhomboideusMuscles = ObjSearch(MusPrefix+".*.rhomboideus*", "AnyMuscle");
   AnyFloat  rhomboideusRmin = repmat(NumElemOf(rhomboideusMuscles), ..RMin);
   AnyFloat  rhomboideusRmax = repmat(NumElemOf(rhomboideusMuscles), ..RMax);
-  
+
   AnyObjectPtrArray serratus_anteriorMuscles = ObjSearch(MusPrefix+".*.serratus_anterior*", "AnyMuscle");
   AnyFloat  serratus_anteriorRmin = repmat(NumElemOf(serratus_anteriorMuscles), ..RMin);
   AnyFloat  serratus_anteriorRmax = repmat(NumElemOf(serratus_anteriorMuscles), ..RMax);
-  
+
   AnyObjectPtrArray subscapularisMuscles = ObjSearch(MusPrefix+".*.subscapularis*", "AnyMuscle");
   AnyFloat  subscapularisRmin = repmat(NumElemOf(subscapularisMuscles), ..RMin);
   AnyFloat  subscapularisRmax = repmat(NumElemOf(subscapularisMuscles), ..RMax);
-  
+
   AnyObjectPtrArray supraspinatusMuscles = ObjSearch(MusPrefix+".*.supraspinatus*", "AnyMuscle");
   AnyFloat  supraspinatusRmin = repmat(NumElemOf(supraspinatusMuscles), ..RMin);
   AnyFloat  supraspinatusRmax = repmat(NumElemOf(supraspinatusMuscles), ..RMax);
-  
+
   AnyObjectPtrArray teres_majorMuscles = ObjSearch(MusPrefix+".*.teres_major*", "AnyMuscle");
   AnyFloat  teres_majorRmin = repmat(NumElemOf(teres_majorMuscles), ..RMin);
   AnyFloat  teres_majorRmax = repmat(NumElemOf(teres_majorMuscles), ..RMax);
-  
+
   AnyObjectPtrArray teres_minorMuscles = ObjSearch(MusPrefix+".*.teres_minor*", "AnyMuscle");
   AnyFloat  teres_minorRmin = repmat(NumElemOf(teres_minorMuscles), ..RMin);
   AnyFloat  teres_minorRmax = repmat(NumElemOf(teres_minorMuscles), ..RMax);
-  
+
   AnyObjectPtrArray trapezius_scapularMuscles = ObjSearch(MusPrefix+".*.trapezius_scapular*", "AnyMuscle");
   AnyFloat  trapezius_scapularRmin = repmat(NumElemOf(trapezius_scapularMuscles), ..RMin);
   AnyFloat  trapezius_scapularRmax = repmat(NumElemOf(trapezius_scapularMuscles), ..RMax);
-  
-  
+
+
 };
 
 // The study: Operations to be performed on the model
@@ -335,7 +335,7 @@ AnyBodyCalibrationStudy ArmCalibrationStudyShoulder = {
   Kinematics.SmallStepAssumptionOnOff = On;
   Kinematics.PosAnalysisOnlyOnOff = On;
   InitialConditions.PosAnalysisOnlyOnOff = On;
-  
+
   MuscleArr = arrcat(arrcat(
       ref.coracobrachialisMuscles,
       ref.deltoideus_scapularMuscles,
@@ -384,9 +384,9 @@ AnyBodyCalibrationStudy ArmCalibrationStudyShoulder = {
       ref.teres_minorRmax,
       ref.trapezius_scapularRmax
   );
-  
-  
-  
+
+
+
 };
 
-  
+
