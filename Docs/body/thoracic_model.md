@@ -36,7 +36,7 @@ Your browser does not support the video tag.
 
 :::{admonition} See the [Spine rhythm](spine-rhythm)
 :class: seealso
-for more information on how the spine rhythm is implmentated, the cooeficient and how to overwrite it with your own data.
+for more information on how the spine rhythm is implemented, the coefficient and how to overwrite it with your own data.
 :::
 
 ## Example of the model

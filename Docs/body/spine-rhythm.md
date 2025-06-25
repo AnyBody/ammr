@@ -36,14 +36,14 @@ In the example the rhythm constrains two DOFs of the arm to move in a 1:4 ratio.
 The use of `RhythmDriverBiLinear` is quite similar, and the use of both class
 templates are [documented here](Rhythms.Linear.SimpleRhythms.any).
 
-The class templates encapsulates the complex rhytnm implementation which uses
+The class templates encapsulate the complex rhythm implementation which uses
 classes `AnyKinFunComb` and `AnyKinMeasureFunComb1` to combine and transform
 kinematic measures into a single kinematic measure. It is easy to see the
 underlying code by right-clicking the class template in the AnyScript editor and
 select `Go to definition`.
 
-In model the spine rhytm is is comprised of many different rhythms which are
-linked together with other rhythms. This done so ryhtms can be activated as needed
+In the model the spine rhythm is comprised of many different rhythms which are
+linked together with other rhythms. This is done so rhythms can be activated as needed
 depending on what data is available for driving model. 
 
 :::{figure-md} 
@@ -79,7 +79,7 @@ this rhythm is defined as a bilinear rhythm with different coefficients for the 
 
 ![lateral-bending](_static/spine-link-coefficients.svg)
 
-Coefficients for linking sub rhythms together. This is essensially rhythms betwee the rhythms.
+Coefficients for linking sub rhythms together. This is essentially rhythms between the rhythms.
 
 :::
 
