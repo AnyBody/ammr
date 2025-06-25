@@ -65,7 +65,6 @@ Regensburg-Ulm hand model <regensburg_ulm_hand_model>
 :maxdepth: 1
 
 leg_model
-TLEM 1 (deprecated) <leg_tlem_model>
 TLEM 2 <leg_tlem2_model>
 GM Foot model <glasgow_maastricht_foot_model>
 ```

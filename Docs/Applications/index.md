@@ -87,3 +87,17 @@ Validation/index
 
 :::{include} Validation/gallery.txt
 :::
+
+(beta_examples)=
+
+## Beta
+
+
+:::{toctree}
+:hidden: true
+
+Beta/index
+:::
+
+:::{include} Beta/gallery.txt
+:::

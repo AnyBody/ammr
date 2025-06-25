@@ -33,13 +33,14 @@ def filterp(match):
 
 bm_all = filterp(".*")
 bm_leg = filterp('^BM_LEG')
+bm_foot = filterp('^BM_FOOT')
 bm_trunk = filterp('^BM_TRUNK')
 bm_arm = filterp('^BM_ARM')
 bm_scaling = filterp('^BM_SCALING')
 bm_mannequin = filterp('^BM_MANNEQUIN_DRIVER')
 bm_jointtype = filterp('^BM_JOINT_TYPE')
 
-used_param = set().union(*[bm_leg, bm_trunk, bm_arm, bm_scaling, bm_mannequin, bm_jointtype])
+used_param = set().union(*[bm_leg, bm_foot, bm_trunk, bm_arm, bm_scaling, bm_mannequin, bm_jointtype])
 
 bm_other ={k: bm_all[k] for k in sorted(set(bm_all) - used_param)}
 
@@ -48,6 +49,7 @@ targets = [
     ("Docs/bm_config/bm_constants.md", None, data),
     ("Docs/bm_config/bm_statements.md", None, data),
     ("Docs/bm_config/LegTable.csv", "bmtable.csv.jinja", bm_leg),
+    ("Docs/bm_config/FootTable.csv", "bmtable.csv.jinja", bm_foot),
     ("Docs/bm_config/TrunkTable.csv", "bmtable.csv.jinja", bm_trunk),
     ("Docs/bm_config/ArmTable.csv", "bmtable.csv.jinja", bm_arm),
     ("Docs/bm_config/ScalingTable.csv", "bmtable.csv.jinja", bm_scaling),

@@ -3,7 +3,7 @@ gallery_title: "Free posture"
 gallery_image: "/Applications/images/FreePostureFullBodyShoulderRhythmStatic.webp"
 ---
 
-(sphx-glr-auto-examples-adls-and-ergonomics-plot-freeposture-py)=
+(sphx-glr-auto-examples-adls-and-ergonomics-plot-freeposture.py)=
 (example_freeposture)=
 # Free posture Models
 

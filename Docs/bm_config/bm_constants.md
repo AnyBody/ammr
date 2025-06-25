@@ -82,7 +82,7 @@ Switch off a leg
 :margin: 0 0 2 2
 
 :::{ammr:bm_constant} _LEG_MODEL_TLEM_
-:value: 2
+:value: 1
 Switch to use leg model: "TLEM 2"
 :::
 ::::
@@ -94,7 +94,7 @@ Switch to use leg model: "TLEM 2"
 :margin: 0 0 2 2
 
 :::{ammr:bm_constant} _LEG_MODEL_TLEM2_
-:value: 2
+:value: 1
 Switch to use leg model: "TLEM 2"
 :::
 ::::
@@ -106,7 +106,7 @@ Switch to use leg model: "TLEM 2"
 :margin: 0 0 2 2
 
 :::{ammr:bm_constant} _LEG_MODEL_TLEM1_
-:value: 1
+:value: 4
 :deprecated:
 Switch to use leg model: "TLEM 1"
 :::
@@ -445,6 +445,30 @@ A full model of the thorax and ribcage where drivers/rythmns are specified by th
 :::{ammr:bm_constant} _THORACIC_MODEL_FLEXIBLE_KINEMATIC_ONLY_
 :value: 3
 A kinematic flexible model of the thorax and ribcage with a kinematically determinate set of drivers. No muscles in thoracic region and instead the reactions are ON in the ribcage and thoracic spine.
+:::
+::::
+
+
+
+::::{dropdown} `_STERNUM_2_SEG_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _STERNUM_2_SEG_
+:value: 2
+The topology of the sternum segment, This specifies that the sternum is devided in 2 segments.
+:::
+::::
+
+
+
+::::{dropdown} `_STERNUM_4_SEG_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _STERNUM_4_SEG_
+:value: 4
+The topology of the sternum segment, This specifies that the sternum is devided in 4 segments.
 :::
 ::::
 
@@ -940,11 +964,11 @@ Constant to switch linear disc spring on in the spine
 
 
 
-::::{dropdown} `CONST_DISC_STIFFNESS_NONLINEAR `
+::::{dropdown} `CONST_DISC_STIFFNESS_NONLINEAR`
 :animate: fade-in-slide-down
 :margin: 0 0 2 2
 
-:::{ammr:bm_constant} CONST_DISC_STIFFNESS_NONLINEAR 
+:::{ammr:bm_constant} CONST_DISC_STIFFNESS_NONLINEAR
 :value: 2
 :deprecated:
 Constant to switch nonlinear disc spring on in the spine

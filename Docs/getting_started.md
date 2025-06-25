@@ -17,6 +17,7 @@ lesson {ref}`Installing Latest AMMR Files <installing-ammr>`.
 :maxdepth: 1
 
 ammr_installation
+ammr_best_practices
 ```
 
 % 1.. rubric:: Before using AMMR
@@ -49,7 +50,7 @@ The models will typically look like this:
 Main =
 {
   // Configure and include the Human Model
-  #define BM_LEG_MODEL _LEG_MODEL_TLEM2_
+  #define BM_LEG_MODEL _LEG_MODEL_TLEM_
   #define BM_ARM_LEFT OFF
   #define BM_ARM_RIGHT OFF
   #include "<ANYBODY_PATH_BODY>/HumanModel.any"
@@ -99,7 +100,7 @@ instructing AnyBody which AMMR to use, should be at the very beginning of your
 Main =
 {
   // Configure and include the Human Model
-  #define BM_LEG_MODEL _LEG_MODEL_TLEM2_
+  #define BM_LEG_MODEL _LEG_MODEL_TLEM_
   #define BM_ARM_LEFT OFF
   #define BM_ARM_RIGHT OFF
 ```
