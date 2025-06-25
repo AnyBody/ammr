@@ -3,6 +3,17 @@
 % A rendered version of the CHANGELOG is avaible here:
 %    https://anyscript.org/ammr/beta/changelog.html
 
+(ammr-3.1.4-changelog)=
+## AMMR 3.1.4 (2025-??-??)
+[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.1.4-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
+
+### 🩹 Fixed:
+*  Refactored the referneces in the hand model, so the BVH MoCap models can
+   share the same marker protocol irrespectively of if the detailed or simple
+   hand is enabled. 
+
+
+
 (ammr-3.1.3-changelog)=
 ## AMMR 3.1.3 (2025-06-16)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.15672003.svg)](https://doi.org/10.5281/zenodo.15672003)
