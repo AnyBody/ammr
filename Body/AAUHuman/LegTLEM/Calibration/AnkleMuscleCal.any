@@ -4,11 +4,11 @@
 //obtained in this study
 
 AnyFolder LegCalAnkle =
-{  
-  AnyComponentDefinition obj = {};  
+{
+  AnyComponentDefinition obj = {};
   AnyFolder &Pelvis = ...BodyModel.Trunk.Segments.PelvisSeg;
   AnyFolder &Sacrum = ...BodyModel.Trunk.Segments.SacrumSeg;
-  
+
   // Segments needed for the Psoas Major muscles
   AnySeg &L1 = ...BodyModel.Trunk.Segments.L1Seg;
   AnySeg &L2 = ...BodyModel.Trunk.Segments.L2Seg;
@@ -17,23 +17,23 @@ AnyFolder LegCalAnkle =
   AnySeg &L5 = ...BodyModel.Trunk.Segments.L5Seg;
 
   AnyFolder &Thorax = ...BodyModel.Trunk.Segments.ThoraxSeg;
-  
+
   AnyFolder &LegSegSide = .SideHumanFolderRef.Leg.Seg;
-  
+
   AnyFolder &LegJointsSide = .SideHumanFolderRef.Leg.Jnt;
   AnyFolder &TrunkJoints = ...BodyModel.Trunk.Joints.Lumbar;
-  
+
   AnyFolder &MusCalSide =  .SideHumanFolderRef.Leg.Mus;
-  
+
   // Ankle position variables // PlantarFlexion - SubtalarEversion
   AnyFloat PlantarFlexion      = {  45,   0} * pi/180;
   AnyFloat SubtalarEversion    = {   0,  20} * pi/180;
   AnyFloat DorsiFlexion        = { -20,   0} * pi/180;
   AnyFloat SubtalarInversion   = {   0, -30} * pi/180;
-  
+
   AnyFloat KneeFlexed      = { 155} * pi/180;
   AnyFloat KneeExtended    = {  -3} * pi/180;
-  
+
   AnyFloat AnklePositions = flatten(repmat(2,{
       PlantarFlexion[0],
       SubtalarEversion[0],
@@ -47,40 +47,40 @@ AnyFolder LegCalAnkle =
       SubtalarInversion[1]
   }'));
   AnyFloat KneePositions = flatten({repmat(4,KneeFlexed),repmat(4,KneeExtended)});
-  
-  
-  AnyFixedRefFrame ground = 
+
+
+  AnyFixedRefFrame ground =
   {
-    AnyRefNode node = 
+    AnyRefNode node =
     {
       ARel=..Pelvis.Axes0;
       sRel=..Pelvis.r0;
     };
   };
 
-  AnyKinEq ThoraxFix = 
+  AnyKinEq ThoraxFix =
   {
     AnyKinMeasure& PelvisThoraxExtension = ....BodyModel.Interface.Trunk.PelvisThoraxExtension;
     AnyKinMeasure& PelvisThoraxLateralBending = ....BodyModel.Interface.Trunk.PelvisThoraxLateralBending;
     AnyKinMeasure& PelvisThoraxRotation = ....BodyModel.Interface.Trunk.PelvisThoraxRotation;
   };
-  
-  AnyKinEq PelvisFix = 
+
+  AnyKinEq PelvisFix =
   {
-    AnyKinLinear Lin = 
+    AnyKinLinear Lin =
     {
       AnyRefFrame &ground = ..ground.node;
       AnyRefFrame &Pelvis = .....BodyModel.Trunk.Segments.PelvisSeg;
     };
-    AnyKinRotational Rot = 
+    AnyKinRotational Rot =
     {
       Type = RotAxesAngles;
       AnyRefFrame &ground = ..ground.node;
       AnyRefFrame &Pelvis = .....BodyModel.Trunk.Segments.PelvisSeg;
     };
   };
-  
-  AnyKinEqInterPolDriver Hip = 
+
+  AnyKinEqInterPolDriver Hip =
   {
     AnyKinRotational &Spherical = ..SideInterfaceFolderRef.HipFlexion.HipMeasure;
     Type = PiecewiseLinear;
@@ -90,8 +90,8 @@ AnyFolder LegCalAnkle =
             {0,  0}}*pi/180;
     Reaction.Type = {Off, Off, Off};
   };
-  
-  AnyKinEqInterPolDriver Knee = 
+
+  AnyKinEqInterPolDriver Knee =
   {
     AnyKinMeasure& Hinge = ..SideInterfaceFolderRef.KneeFlexion;
     Type = PiecewiseLinear;
@@ -99,9 +99,9 @@ AnyFolder LegCalAnkle =
     Data = {.KneePositions}; // ? degrees knee flexion
     Reaction.Type = {Off};
   };
-  
+
   #if BM_FOOT_MODEL == _FOOT_MODEL_DEFAULT_
-  AnyKinEqInterPolDriver Ankle = 
+  AnyKinEqInterPolDriver Ankle =
   {
     AnyKinMeasure& Hinge = ..SideInterfaceFolderRef.AnklePlantarFlexion;
     Type = PiecewiseLinear;
@@ -109,8 +109,8 @@ AnyFolder LegCalAnkle =
     Data = {.AnklePositions};
     Reaction.Type = {Off};
   };
-  
-  AnyKinEqInterPolDriver SubTalar = 
+
+  AnyKinEqInterPolDriver SubTalar =
   {
     AnyKinMeasure& Hinge = ..SideInterfaceFolderRef.SubTalarEversion;
     Type = PiecewiseLinear;
@@ -119,17 +119,17 @@ AnyFolder LegCalAnkle =
     Reaction.Type = {Off};
   };
   #endif
-  
+
   AnyString MusPrefix = CompleteNameOf(&.SideHumanFolderRef.Leg.Mus);
-  
+
   AnyObjectPtrArray TibialisAnteriorMuscles = ObjSearch(MusPrefix+".*.TibialisAnterior*", "AnyMuscle");
   AnyFloat  TibialisAnteriorRmin = repmat(NumElemOf(TibialisAnteriorMuscles), ..RMin);
   AnyFloat  TibialisAnteriorRmax = repmat(NumElemOf(TibialisAnteriorMuscles), ..RMax);
-  
+
   AnyObjectPtrArray ExtensorDigitorumLongusMuscles = ObjSearch(MusPrefix+".*.ExtensorDigitorumLongus*", "AnyMuscle");
   AnyFloat  ExtensorDigitorumLongusRmin = repmat(NumElemOf(ExtensorDigitorumLongusMuscles), ..RMin);
   AnyFloat  ExtensorDigitorumLongusRmax = repmat(NumElemOf(ExtensorDigitorumLongusMuscles), ..RMax);
-  
+
   AnyObjectPtrArray ExtensorHallucisLongusMuscles = ObjSearch(MusPrefix+".*.ExtensorHallucisLongus*", "AnyMuscle");
   AnyFloat  ExtensorHallucisLongusRmin = repmat(NumElemOf(ExtensorHallucisLongusMuscles), ..RMin);
   AnyFloat  ExtensorHallucisLongusRmax = repmat(NumElemOf(ExtensorHallucisLongusMuscles), ..RMax);
@@ -137,11 +137,11 @@ AnyFolder LegCalAnkle =
   AnyObjectPtrArray SoleusMuscles = ObjSearch(MusPrefix+".*.Soleus*", "AnyMuscle");
   AnyFloat  SoleusRmin = repmat(NumElemOf(SoleusMuscles), ..RMin);
   AnyFloat  SoleusRmax = repmat(NumElemOf(SoleusMuscles), ..RMax);
-  
+
   AnyObjectPtrArray TibialisPosteriorMuscles = ObjSearch(MusPrefix+".*.TibialisPosterior*", "AnyMuscle");
   AnyFloat  TibialisPosteriorRmin = repmat(NumElemOf(TibialisPosteriorMuscles), ..RMin);
   AnyFloat  TibialisPosteriorRmax = repmat(NumElemOf(TibialisPosteriorMuscles), ..RMax);
-  
+
   AnyObjectPtrArray FlexorDigitorumLongusMuscles = ObjSearch(MusPrefix+".*.FlexorDigitorumLongus*", "AnyMuscle");
   AnyFloat  FlexorDigitorumLongusRmin = repmat(NumElemOf(FlexorDigitorumLongusMuscles), ..RMin);
   AnyFloat  FlexorDigitorumLongusRmax = repmat(NumElemOf(FlexorDigitorumLongusMuscles), ..RMax);
@@ -149,36 +149,36 @@ AnyFolder LegCalAnkle =
   AnyObjectPtrArray FlexorHallucisLongusMuscles = ObjSearch(MusPrefix+".*.FlexorHallucisLongus*", "AnyMuscle");
   AnyFloat  FlexorHallucisLongusRmin = repmat(NumElemOf(FlexorHallucisLongusMuscles), ..RMin);
   AnyFloat  FlexorHallucisLongusRmax = repmat(NumElemOf(FlexorHallucisLongusMuscles), ..RMax);
-  
+
   AnyObjectPtrArray PeroneusBrevisMuscles = ObjSearch(MusPrefix+".*.PeroneusBrevis*", "AnyMuscle");
   AnyFloat  PeroneusBrevisRmin = repmat(NumElemOf(PeroneusBrevisMuscles), ..RMin);
   AnyFloat  PeroneusBrevisRmax = repmat(NumElemOf(PeroneusBrevisMuscles), ..RMax);
-  
+
   AnyObjectPtrArray PeroneusLongusMuscles = ObjSearch(MusPrefix+".*.PeroneusLongus*", "AnyMuscle");
   AnyFloat  PeroneusLongusRmin = repmat(NumElemOf(PeroneusLongusMuscles), ..RMin);
   AnyFloat  PeroneusLongusRmax = repmat(NumElemOf(PeroneusLongusMuscles), ..RMax);
-  
+
   AnyObjectPtrArray PeroneusTertiusMuscles = ObjSearch(MusPrefix+".*.PeroneusTertius*", "AnyMuscle");
   AnyFloat  PeroneusTertiusRmin = repmat(NumElemOf(PeroneusTertiusMuscles), ..RMin);
   AnyFloat  PeroneusTertiusRmax = repmat(NumElemOf(PeroneusTertiusMuscles), ..RMax);
-  
+
   // Two-joint muscles
   AnyObjectPtrArray GastrocnemiusMuscles = ObjSearch(MusPrefix+".*.Gastrocnemius*", "AnyMuscle");
   AnyFloat  GastrocnemiusRmin = repmat(NumElemOf(GastrocnemiusMuscles), ..RMin);
   AnyFloat  GastrocnemiusRmax = repmat(NumElemOf(GastrocnemiusMuscles), ..RMax);
-  
+
   AnyObjectPtrArray PlantarisMuscles = ObjSearch(MusPrefix+".*.Plantaris*", "AnyMuscle");
   AnyFloat  PlantarisRmin = repmat(NumElemOf(PlantarisMuscles), ..RMin);
   AnyFloat  PlantarisRmax = repmat(NumElemOf(PlantarisMuscles), ..RMax);
 
-  
+
 };
 
 // The study: Operations to be performed on the model
-AnyBodyCalibrationStudy LegCalibrationStudyAnkle = 
+AnyBodyCalibrationStudy LegCalibrationStudyAnkle =
 {
-  AnyFolder &ref=.LegCalAnkle; 
-  nStep = 8; 
+  AnyFolder &ref=.LegCalAnkle;
+  nStep = 8;
   FiberAndTendonLengthAdjustment.CalibrateTendonAtMaxForceOnOff = On;
   Kinematics.SmallStepAssumptionOnOff = Off;
   InitialConditions.SmallStepAssumptionOnOff = Off;
@@ -198,7 +198,7 @@ AnyBodyCalibrationStudy LegCalibrationStudyAnkle =
       ref.PeroneusTertiusMuscles),
       ref.GastrocnemiusMuscles,
       ref.PlantarisMuscles
-      
+
 
   );
   RminMuscleFiber = arrcat(arrcat(
@@ -229,7 +229,7 @@ AnyBodyCalibrationStudy LegCalibrationStudyAnkle =
       ref.PeroneusTertiusRmax),
       ref.GastrocnemiusRmax,
       ref.PlantarisRmax
-  );               
-  
+  );
+
 };
 

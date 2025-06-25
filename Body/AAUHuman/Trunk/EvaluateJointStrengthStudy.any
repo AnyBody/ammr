@@ -12,38 +12,38 @@ AnyFolder Model = {
   AnyFolder SpineMusRightRef = {};
   AnyFolder SpineMusLeftRef = {};
   #endif
-  
+
   AnyFolder &ArmSegLeftRef = ....BodyModel.Left.ShoulderArm.Segments;
   AnyFolder &ArmSegRightRef = ....BodyModel.Right.ShoulderArm.Segments;
-  
+
   AnyFolder &ArmJntsRightRef = ....BodyModel.Right.ShoulderArm.Joints;
   AnyFolder &ArmJntsLeftRef = ....BodyModel.Left.ShoulderArm.Joints;
-  
+
   AnyFolder &MusRightRef = ....BodyModel.Right.ShoulderArm.Muscles;
   AnyFolder &MusLeftRef = ....BodyModel.Left.ShoulderArm.Muscles;
-  
-  
-  
-  
-  
-  
+
+
+
+
+
+
   AnyFixedRefFrame ground = {
     AnyRefNode node = {
       //      ARel=..PelvisRef.Axes0;
       //      sRel=..PelvisRef.r0;
     };
   };
-  
+
   // AnyFolder& RightArmRef = ....BodyModel.Right.ShoulderArm;
   //  AnyKinEq RHipDriver= {
   //  };
   //
   //
-  
-  
+
+
   AnyFolder Drivers = {
     AnyVar AngularVelocity = (..RangeOfMotion[1]-..RangeOfMotion[0])*pi/180;
-    
+
     AnyKinMeasureOrg TrunkMeasure = {
       AnyKinMeasure &PelvisThoraxExtension= ...HumanInterfaceRef.Trunk.PelvisThoraxExtension;
       AnyKinMeasure &PelvisThoraxLateralBending= ...HumanInterfaceRef.Trunk.PelvisThoraxLateralBending;
@@ -52,9 +52,9 @@ AnyFolder Model = {
       AnyKinMeasure &SkullThoraxLateralBending= ...HumanInterfaceRef.Trunk.SkullThoraxLateralBending;
       AnyKinMeasure &SkullThoraxRotation= ...HumanInterfaceRef.Trunk.SkullThoraxRotation;
     };
-    
-    
-    
+
+
+
     AnyKinMeasureOrg ArmMeasureRight = {
       #if BM_ARM_SHOULDER_RHYTHM == OFF
       AnyKinMeasure& SCProtraction= ...HumanInterfaceRef.Right.SternoClavicularProtraction;
@@ -81,12 +81,12 @@ AnyFolder Model = {
       AnyKinMeasure& WristFlexion = ...HumanInterfaceRef.Left.WristFlexion;
       AnyKinMeasure& WristAbduction = ...HumanInterfaceRef.Left.WristAbduction;
     };
-    
+
     AnyKinEqSimpleDriver ArmDriver= {
       AnyKinMeasure& refR = .ArmMeasureRight;
       AnyKinMeasure& refL = .ArmMeasureLeft;
       AnyFolder& JntPos = ......Mannequin.Posture;
-      
+
       DriverPos = pi/180*{
         #if BM_ARM_SHOULDER_RHYTHM == OFF
         JntPos.Right.SternoClavicularProtraction,
@@ -114,10 +114,10 @@ AnyFolder Model = {
       DriverVel = 0*DriverPos;
       Reaction.Type = repmat(nDim, On);
     };
-    
-    
-    
-    
+
+
+
+
     // If Leg are included then Psoas muscle are attached to the legs.
     // Thus, we need to driver for the hip joint
     #if BM_LEG_RIGHT
@@ -140,21 +140,21 @@ AnyFolder Model = {
       };
     };
     #endif
-    
-    
+
+
     AnyStdJoint PelvisGround={
       AnyRefFrame &Ground = ..ground.node;
       AnyRefFrame &Sacrum= ..PelvisRef;
     };
-    
+
   };// Drivers
-  
+
   AnyForce JointLoad = {
     AnyKinMeasure &ref = .Drivers.TrunkMeasure;
     AnyInt Sign = -round(.Drivers.AngularVelocity/abs(.Drivers.AngularVelocity));
     F = 10*Sign*not(not(.Drivers.TrunkDriver.DriverVel));
   };
-  
+
 };
 
 
@@ -167,7 +167,7 @@ AnyBodyStudy Study = {
   #else
   nStep = 40;
   #endif
-  
+
   //  InitialConditions.KinematicTol = 1e-5;
   //  InitialConditions.MaxIteration = 5000;
   //  InitialConditions.SolverType = KinSolDeterminate2;
@@ -175,32 +175,32 @@ AnyBodyStudy Study = {
   //  Kinematics.KinematicTol = 1e-3;
   //  Kinematics.MaxIteration = 5000;
   //  Kinematics.SolverType = KinSolDeterminate2;
-  
-  
+
+
   Kinematics.UseStartGuessOnOff = On;
   Kinematics.PosAnalysisOnlyOnOff = Off;
   InitialConditions.PosAnalysisOnlyOnOff = Off;
-  
+
   InverseDynamics.Criterion.Type = MR_MinMaxStrict;
   InverseDynamics.Criterion.UpperBoundOnOff = Off;
   InverseDynamics.Criterion.SolverTolerance = 1e-4;
-  
+
   AnyFolder &Model = .Model;
-  
+
   AnyFolder JointStrength = {
     AnyFolder Abscissa  ={
       AnyVar JointAngle = not(not(..Model.Drivers.TrunkDriver.DriverVel))*..Model.Drivers.TrunkMeasure.Pos'*180/pi;
     };
     AnyVar JointStrength = max(abs(.Model.JointLoad.F))/(.MaxMuscleActivity+0.00000001);
-    
+
     //AnyVar PsoasMajorT12I = -1*.Model.SpineMusRef.PsoasMajor.PMT12I_TM.LmtDot/.Model.Drivers.AngularVelocity;
   };
-  
-  
-  
-  
-  
-  
+
+
+
+
+
+
 };
 
 #if (ANYBODY_V1 >= 6) & (ANYBODY_V2 >= 1)

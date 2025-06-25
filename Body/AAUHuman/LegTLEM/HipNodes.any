@@ -1,22 +1,22 @@
 
 AnyRefNode HipJoint = {
   AnyVec3 sRel0 = .LegAttachmentNodes.sRel0+(.LegAttachmentNodes.ARel*.LegAttachmentNodes.Data.HipJoint')';
-  // The Hip Joint is positioned based on the data in the cadaver data set 
+  // The Hip Joint is positioned based on the data in the cadaver data set
   sRel = .Scale( sRel0 );
 };
 
 
 /// All muscle attachment nodes from the leg is placed inside
 /// their own node (coordinate system). The reason for using
-/// this procedure instead of putting the nodes directly on the 
+/// this procedure instead of putting the nodes directly on the
 /// pelvis segment, is that it makes it possible to have the
 /// leg as a selfcontained block. The nodes in this folder is
 /// used by the LegTLEM model for muscle attachements on pelvis.
 AnyRefNode LegAttachmentNodes= {
-  
-  /// Folder with cadaver parameters for pelvis in the LegTLEM model 
+
+  /// Folder with cadaver parameters for pelvis in the LegTLEM model
   AnyFolder &Data = ..CadaverParameters.Pelvis;
-  
+
   /// Rotation of the Pelvis Anatomical Frame relative to lab frame of the Cadaver dataset
   AnyMat33 CadaverPelvisAnatomicalFrame_ARel = RotMat(0.5*(Data.PsisIpsilateral+Data.PsisColateral),
                           0.5*(Data.AsisIpsilateral+Data.AsisColateral) ,
@@ -27,13 +27,13 @@ AnyRefNode LegAttachmentNodes= {
   AnyMat33 PelvisAnatomicalFrame_ARel = ..Trunk.Segments.PelvisSeg.PelvisAnatomicalFrame.ARelUnscaled;
   /// Position of the Pelvis Anatomical Coordinate system relative to the Pelvis Segment coordinate system
   AnyVec3 PelvisAnatomicalFramePos =  ..Trunk.Segments.PelvisSeg.PelvisAnatomicalFrame.sRelUnscaled;
-  
-  
-  /// The ARel rotates the LegTLEM dataset to match the generic pelvis in the AnyBody repository. 
+
+
+  /// The ARel rotates the LegTLEM dataset to match the generic pelvis in the AnyBody repository.
   /// This is done by alligning the anatomically defined coordinate systems
   ARel = PelvisAnatomicalFrame_ARel *CadaverPelvisAnatomicalFrame_ARel';
-  /// The sRel aligns the LegTLEM dataset to match the generic pelvis in the AnyBody repository. 
-  /// This is done by alligning the anatomically defined coordinate systems 
+  /// The sRel aligns the LegTLEM dataset to match the generic pelvis in the AnyBody repository.
+  /// This is done by alligning the anatomically defined coordinate systems
   AnyVec3 sRel0 = PelvisAnatomicalFramePos - CadaverPelvisAnatomicalFrame_sRel*ARel';
   sRel = .Scale(sRel0);
 
@@ -42,11 +42,11 @@ AnyRefNode LegAttachmentNodes= {
 AnyFunTransform3DLin Scale = {
   AnyFunTransform3DLin Transform_HipNode = {
     // The -24 degree rotation is added to allign the muscles origins from the LegTLEM data set
-    // with the generic AnyBody pelvic bone. 
+    // with the generic AnyBody pelvic bone.
     ScaleMat = ..ARel;
     Offset = ..sRel0*..ARel;
   };
-  
+
   PreTransforms = {
     &Transform_HipNode,
     &...Scaling.GeometricalScaling.PelvisSeg.ScaleFunction
@@ -61,7 +61,7 @@ AnyVec3 HipOffset = {0.035, -0.117, .Sign*0.088};//{0.03, -0.10, 0.08*.Sign};
 AnyVec3 v1 = {0.068+0.01,-0.1201+0.01,(0.056+0.015)*.Sign}-HipOffset;
 //
 AnyRefNode IliopubicEminenceEndNode = {
-  sRel = .Scale(.v1+.HipOffset) - .Scale(.HipOffset); 
+  sRel = .Scale(.v1+.HipOffset) - .Scale(.HipOffset);
 }; //Via point for Psoas Major, will first be used as end point.
 
 
@@ -73,11 +73,11 @@ AnyRefNode P1 ={
   //    AnyDrawRefFrame drw={RGB={1,0,0};};
 };
 
-//unscaled second point on cyl axis 
+//unscaled second point on cyl axis
 AnyRefNode P2 ={
   sRel= (0.1*{0.21,	-0.14	,..Sign*-0.79})+.P1.sRel;
   //    AnyDrawRefFrame drw={RGB={1,0,0};};
-};  
+};
 
 //unscaled point on cyl surf
 AnyRefNode P3={
@@ -92,11 +92,11 @@ AnyRefNode P1_scaled ={
   //    AnyDrawRefFrame drw={RGB={1,0,1};};
 };
 
-//unscaled second point on cyl axis 
+//unscaled second point on cyl axis
 AnyRefNode P2_scaled ={
   sRel= .Scale(.P2.sRel);
   //    AnyDrawRefFrame drw={RGB={1,0,1};};
-};  
+};
 
 
 //unscaled point on cyl surf
@@ -112,7 +112,7 @@ AnyRefNode IliacusWrapSurf = {
   AnyFloat radiusscalefactor = 1;
 
   AnyInt Sign = ..Sign;
- 
+
   AnyVar Z_rotation =0;
 
   #include "<ANYBODY_PATH_MODELUTILS>/WrappingSurfaces/WrappingCylinder5PointFit.any"
@@ -122,13 +122,13 @@ AnyRefNode IliacusWrapSurf = {
 };
 
 AnyRefNode pecent_ossis_pubis={
-  sRel=.P1_scaled.sRel; 
+  sRel=.P1_scaled.sRel;
   ARel=.P1_scaled.ARel;
-  
-  
+
+
   AnyRefNode Translate ={
     sRel=..Scale({0,0,-0.05});
-    AnySurfCylinder cyl2 = { 
+    AnySurfCylinder cyl2 = {
       Radius=((..sRel[0]-...P3_scaled.sRel[0])^2+(..sRel[1]-...P3_scaled.sRel[1])^2+(..sRel[2]-...P3_scaled.sRel[2])^2)^0.5;
       //This radius is a little more accurate but causes an error, to be fixed.
       //Radius= ...HipJointRightTD.pecent_ossis_pubis.cyl.Radius;
@@ -136,7 +136,7 @@ AnyRefNode pecent_ossis_pubis={
       Length= 1.5*((..sRel[0]-...P2_scaled.sRel[0])^2+(..sRel[1]-...P2_scaled.sRel[1])^2+(..sRel[2]-...P2_scaled.sRel[2])^2)^0.5;
 //      AnyDrawParamSurf drw={RGB={0,1,0};};
     };
-    
+
 //    AnyRefNode Q1 = {
 //      AnyVar h = .cyl2.Length*0.22;
 //      AnyVar theta = .Q2.theta;
@@ -144,7 +144,7 @@ AnyRefNode pecent_ossis_pubis={
 //      AnyDrawNode drw ={ScaleXYZ = 0.005*{1,1,1};};
 //      AnyFloat rglob = ( sRel*.ARel'+.sRel )*..ARel'+..sRel;
 //    };
-//    
+//
 //    AnyRefNode Q2 = {
 //      AnyVar h = .cyl2.Length;
 //      AnyVar theta = pi*0.12;
@@ -152,7 +152,7 @@ AnyRefNode pecent_ossis_pubis={
 //      AnyDrawNode drw ={ScaleXYZ = 0.005*{1,1,1};};
 //      AnyFloat rglob = ( sRel*.ARel'-.sRel )*..ARel'-..sRel;
 //    };
-//    
+//
 //    AnyRefNode Q3 = {
 //      AnyVar h = .cyl2.Length*0.4;
 //      AnyVar theta = pi*-0.03;
@@ -160,7 +160,7 @@ AnyRefNode pecent_ossis_pubis={
 //      AnyDrawNode drw ={ScaleXYZ = 0.005*{1,1,1};};
 //      AnyFloat rglob = ( sRel*.ARel'+.sRel )*..ARel'+..sRel;
 //    };
-//    
+//
 //    AnyRefNode Q4 = {
 //      AnyVar h = .cyl2.Length*0.37;
 //      AnyVar theta = pi*0.15;
@@ -168,7 +168,7 @@ AnyRefNode pecent_ossis_pubis={
 //      AnyDrawNode drw ={ScaleXYZ = 0.005*{1,1,1};};
 //      AnyFloat rglob = ( sRel*.ARel'+.sRel )*..ARel'+..sRel;
 //    };
-//    
+//
 //    AnyRefNode Q5 = {
 //      AnyVar h = .cyl2.Length*0.34;
 //      AnyVar theta = pi*0.32;
@@ -177,8 +177,8 @@ AnyRefNode pecent_ossis_pubis={
 //      AnyFloat rglob = ( sRel*.ARel'+.sRel )*..ARel'+..sRel;
 //    };
   };
-  
-  
+
+
 };
 
 
@@ -270,7 +270,7 @@ AnyRefNode IliacusMidViaNode1 = {sRel = .Scale( .Data.IliacusMidViaNode1 );};
 
 AnyRefNode IliacusMedialis1Node = {sRel =.Scale( .Data.IliacusMedialis1Node );};
 AnyRefNode IliacusMedialis2Node = {sRel = .Scale( .Data.IliacusMedialis2Node );};
-AnyRefNode IliacusMedialis3Node = {sRel = .Scale( .Data.IliacusMedialis3Node );}; 
+AnyRefNode IliacusMedialis3Node = {sRel = .Scale( .Data.IliacusMedialis3Node );};
 AnyRefNode IliacusMedialisViaNode1 = {sRel = .Scale( .Data.IliacusMedialisViaNode1 );};
 
 AnyRefNode ObturatorExternusInferior1Node = {sRel = .Scale( .Data.ObturatorExternusInferior1Node );};
@@ -297,7 +297,7 @@ AnyRefNode PsoasMinor1Node = {sRel = .Scale( .Data.PsoasMinor1Node );};
 AnyRefNode PsoasMinorViaNode1 = {sRel = .Scale( .Data.PsoasMinorViaNode1 );};
 // The PsoasMinor does not have a viapoint according to the Klein Horsman dataset. However, since it uses the
 // Psoas Major insertion point (see comments in Thigh segment) it needs this via point in order to wrap around
-// the cylinder in the right direction. 
+// the cylinder in the right direction.
 
 AnyRefNode PsoasMajor1Node = {sRel = .Scale( .Data.PsoasMajor1Node );};
 AnyRefNode PsoasMajor2Node = {sRel = .Scale( .Data.PsoasMajor2Node );};
@@ -326,7 +326,7 @@ AnyRefNode TensorFasciaeLatae2Node = {sRel = .Scale( .Data.TensorFasciaeLatae2No
 
 //Ligament origin nodes from Klein-Horseman
 AnyRefNode IlioFemAntOrig = {sRel = .Scale( .Data.IlioFemAntOrig );};
-AnyRefNode IlioFemLatOrig = {sRel = .Scale( .Data.IlioFemLatOrig );}; 
+AnyRefNode IlioFemLatOrig = {sRel = .Scale( .Data.IlioFemLatOrig );};
 AnyRefNode PuboFemOrig = {sRel = .Scale( .Data.PuboFemOrig );}; //updated coordinates
 AnyRefNode IschioFemOrig = {sRel = .Scale( .Data.IschioFemOrig );};
 //end ligament origin nodes
@@ -341,30 +341,30 @@ AnyRefNode IschioFemOrig = {sRel = .Scale( .Data.IschioFemOrig );};
 
 //  Unscaled original cylinder for matrix p
 
-//  AnyRefNode GluteusCylSuperior = { 
-//    sRel = .Scale({-0.05, -0.06, ..Sign*-0.10}); 
+//  AnyRefNode GluteusCylSuperior = {
+//    sRel = .Scale({-0.05, -0.06, ..Sign*-0.10});
 //    AnyDrawRefFrame drws = {};
 //    ARel = RotMat(..Sign*-25*pi/180,x)*RotMat(..Sign*20*pi/180,y);
-//        
+//
 //    AnySurfCylinder cyl = {
 //      Radius = 0.065;//ScaledRadius[1];
-//      Length = ...Sign*0.3; 
+//      Length = ...Sign*0.3;
 //      AnyDrawParamSurf drv = {
 //        Opacity = 0.1;
-//      }; 
+//      };
 //    };
-//  }; 
-  
+//  };
+
 //  AnyRefNode Q1 = { sRel = .Scale({-0.05, -0.06, 0.10}); AnyDrawRefFrame drws = {}; };
 //  AnyRefNode Q2 = { sRel = .Q1.sRel + {0, 0, -0.3}*.GluteusCylSuperior.ARel'; AnyDrawRefFrame drws = {}; };
 //  AnyRefNode Q3 = { sRel = .Q1.sRel + {0, 0.065, -0.3}*.GluteusCylSuperior.ARel'; AnyDrawRefFrame drws = {}; };
 //  AnyRefNode Q4 = { sRel = .Q1.sRel + {0.065, 0, -0.3}*.GluteusCylSuperior.ARel'; AnyDrawRefFrame drws = {}; };
 //  AnyRefNode Q5 = { sRel = .Q1.sRel + {0, -0.065, -0.15}*.GluteusCylSuperior.ARel'; AnyDrawRefFrame drws = {}; };
-  
-  
-  
+
+
+
   AnyRefNode GluteusCylSuperior = {
-    
+
 //    AnyMatrix p = {{-0.0491935, -0.05903219, ..Sign*-0.09090909},
 //                  {0.05341255, 0.06010718, ..Sign*0.1645861},
 //                  {0.05341255, 0.1190172, ..Sign*0.1371159},
@@ -374,7 +374,7 @@ AnyRefNode IschioFemOrig = {sRel = .Scale( .Data.IschioFemOrig );};
     AnyFloat lengthscalefactor = 1;
     AnyFloat radiusscalefactor = 1;
 
-  
+
     AnyVar Z_rotation =0;
 
     #include "<ANYBODY_PATH_MODELUTILS>/WrappingSurfaces/WrappingCylinder5PointFit.any"
@@ -382,36 +382,36 @@ AnyRefNode IschioFemOrig = {sRel = .Scale( .Data.IschioFemOrig );};
       //AnyDrawParamSurf draw={Opacity = 0.1;};
     };
   };
-  
-  
-  
-  
+
+
+
+
 //  Unscaled original cylinder for matrix p
 
-//    AnyRefNode GluteusCylInferior = { 
-//    sRel = .Scale({-0.01, -0.06, ..Sign*-0.10}); 
+//    AnyRefNode GluteusCylInferior = {
+//    sRel = .Scale({-0.01, -0.06, ..Sign*-0.10});
 //    AnyDrawRefFrame drws = {};
 //    ARel = RotMat(..Sign*-20*pi/180,x);
-//        
+//
 //    AnySurfCylinder cyl = {
 //      Radius = 0.065;//ScaledRadius[1];
-//      Length = ...Sign*0.3; 
+//      Length = ...Sign*0.3;
 //      AnyDrawParamSurf drv = {
 //        Opacity = 0.1;
-//      }; 
+//      };
 //    };
-//  }; 
-  
+//  };
+
 //  AnyRefNode Q1 = { sRel = .Scale({-0.01, -0.06, 0.10}); AnyDrawRefFrame drws = {}; };
 //  AnyRefNode Q2 = { sRel = .Q1.sRel + {0, 0, -0.3}*.GluteusCylInferior.ARel'; AnyDrawRefFrame drws = {}; };
 //  AnyRefNode Q3 = { sRel = .Q1.sRel + {0, 0.065, -0.3}*.GluteusCylInferior.ARel'; AnyDrawRefFrame drws = {}; };
 //  AnyRefNode Q4 = { sRel = .Q1.sRel + {0.065, 0, -0.3}*.GluteusCylInferior.ARel'; AnyDrawRefFrame drws = {}; };
 //  AnyRefNode Q5 = { sRel = .Q1.sRel + {0, -0.065, -0.15}*.GluteusCylInferior.ARel'; AnyDrawRefFrame drws = {}; };
-  
-  
-  
+
+
+
   AnyRefNode GluteusCylInferior = {
-    
+
 //    AnyMatrix p = {{-0.009838699, -0.05903219, ..Sign*-0.09090909},
 //                  {-0.009838699, 0.04357385, ..Sign*0.1909987},
 //                  {-0.009838699, 0.1046539, ..Sign*0.1687674},
@@ -420,8 +420,8 @@ AnyRefNode IschioFemOrig = {sRel = .Scale( .Data.IschioFemOrig );};
     AnyMatrix p = .Scale(.Data.GluteusInferiorWrapLandmarks);
     AnyFloat lengthscalefactor = 1;
     AnyFloat radiusscalefactor = 1;
-   
-  
+
+
     AnyVar Z_rotation =0;
 
     #include "<ANYBODY_PATH_MODELUTILS>/WrappingSurfaces/WrappingCylinder5PointFit.any"
