@@ -8,7 +8,7 @@
 [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.1.4-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
 
 ### 🩹 Fixed:
-*  Refactored the referneces in the hand model, so the BVH MoCap models can
+*  Refactored the references in the hand model, so the BVH MoCap models can
    share the same marker protocol irrespectively of if the detailed or simple
    hand is enabled. 
 
