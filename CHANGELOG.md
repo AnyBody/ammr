@@ -12,7 +12,7 @@
 *  Refactored the references in the hand model, so the BVH MoCap models can
    share the same marker protocol irrespectively of if the detailed or simple
    hand is enabled. 
-*   Fixed arm rest asymmetry in various sitting model application examples. 
+*  Fixed arm rest asymmetry in various sitting model application examples. 
 
 
 
