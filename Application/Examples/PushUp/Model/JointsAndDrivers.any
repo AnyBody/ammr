@@ -1,26 +1,26 @@
 ///This is the joint and driver file
 AnyFolder JointsAndDrivers={
-  
+
   AnyFolder &RefHM = Main.Model.BodyModel;
   AnyFolder &JntPos=.Mannequin.Posture;
   AnyFolder &JntVel=.Mannequin.PostureVel;
-  
-  
-  
+
+
+
   //-------------------------------------------------------
   //  Drivers - spine
   //-------------------------------------------------------
   AnyKinRotational PelvisThoraxRotMeasure = {
-    AnyRefFrame &Pelvis = .RefHM.Trunk.Segments.PelvisSeg;     
-    AnyRefFrame &Thorax = .RefHM.Trunk.Segments.ThoraxSeg;  
+    AnyRefFrame &Pelvis = .RefHM.Trunk.Segments.PelvisSeg;
+    AnyRefFrame &Thorax = .RefHM.Trunk.Segments.ThoraxSeg;
     Type=RotAxesAngles;
-  };  
-  
+  };
+
   // ************************************
   // Drivers for the spine
   // ************************************
-  
-  //Neck driver 
+
+  //Neck driver
   AnyKinEqSimpleDriver NeckJntDriver = {
     AnyKinMeasure& lb = ..BodyModel.Interface.Trunk.SkullThoraxLateralBending;
     AnyKinMeasure& ar = ..BodyModel.Interface.Trunk.SkullThoraxRotation;
@@ -29,13 +29,13 @@ AnyFolder JointsAndDrivers={
     DriverVel=pi/180*{.JntVel.NeckLateralBending,.JntVel.NeckRotation,-1*.JntVel.NeckExtension};
     Reaction.Type={Off,Off,Off};
   };
-  
+
   //Thorax pelvis rotation driver
   AnyKinEqSimpleDriver PostureDriver ={
-    AnyKinMeasure& Ref2 = ..BodyModel.Interface.Trunk.PelvisThoraxLateralBending;        
-    AnyKinMeasure& Ref3 = ..BodyModel.Interface.Trunk.PelvisThoraxRotation;   
+    AnyKinMeasure& Ref2 = ..BodyModel.Interface.Trunk.PelvisThoraxLateralBending;
+    AnyKinMeasure& Ref3 = ..BodyModel.Interface.Trunk.PelvisThoraxRotation;
     AnyKinMeasure& Ref1 = ..BodyModel.Interface.Trunk.PelvisThoraxExtension;
-    
+
     DriverPos = pi/180*{
       .JntPos.PelvisThoraxLateralBending,
       .JntPos.PelvisThoraxRotation,
@@ -46,24 +46,24 @@ AnyFolder JointsAndDrivers={
       .JntVel.PelvisThoraxRotation,
       .JntVel.PelvisThoraxExtension
     };
-    Reaction.Type = {Off,Off,Off};  
-  };  
-  
-  
-  
-  
-  
+    Reaction.Type = {Off,Off,Off};
+  };
+
+
+
+
+
   AnyKinLinear SideWayLin = {
     AnySeg &ThoraxSegRef =.RefHM.Trunk.Segments.ThoraxSeg;
     AnyFixedRefFrame &groundfootr= Main.Model.Environment.GlobalRef;
   }; //Foot to ground
-  
-  
+
+
   AnyKinMeasureOrg SideWayLinOrg={
     AnyKinLinear &ref=.SideWayLin;
     MeasureOrganizer ={2};
-  }; 
-  
+  };
+
   AnyKinEqSimpleDriver SideWayLinDrv = {
     AnyKinMeasure& Jnt = .SideWayLinOrg;
     MeasureOrganizer = {0};
@@ -71,24 +71,24 @@ AnyFolder JointsAndDrivers={
     DriverVel = {0};
     Reaction.Type ={Off};
   };
-  
-  
+
+
   AnyKinLinear ChestHeight = {
     AnyFixedRefFrame &handground= Main.Model.Environment.GlobalRef;
     AnyRefNode &thorax = .RefHM.Trunk.Segments.SternumSeg.ij;
     //AnyDrawPLine test={Thickness=0.005;RGB={0,0,1};};
-    
-  }; 
-  
+
+  };
+
   AnyKinMeasureOrg ChestHeightOrg = {
     AnyKinLinear &chestheight =.ChestHeight;
-    MeasureOrganizer={1}; 
+    MeasureOrganizer={1};
   };
-  
+
   AnyKinEqFourierDriver ChestHeightDrv = {
 
    AnyKinMeasure& Jnt = .ChestHeightOrg;
-   
+
    AnyFloat RangeOfMotion = DesignVar({0.07,0.48});
    AnyVar Phase = 180;
    Freq = 0.5;
@@ -98,12 +98,12 @@ AnyFolder JointsAndDrivers={
    Reaction.Type = {Off};
 };
 
-  
 
-  
-  
-  AnyFolder Right ={   
-    
+
+
+
+  AnyFolder Right ={
+
     //------------------------------------------------------
     //These definitions locks the hand to the ground
     //-------------------------------------------------------
@@ -112,43 +112,43 @@ AnyFolder JointsAndDrivers={
       AnyRefNode HandBall={
         sRel={0.0,0,0};
         ARel={{-1,0,0},{0,0,1},{0,1,0}};
-        
+
       };
-    };      
-     
+    };
+
     AnyKinLinear HandToGroundLinMover = {
       AnySeg &GroundNode = Main.Model.Environment.Right.Handle;
       //AnyRefNode &HandNode = ..RefHM.Right.ShoulderArm.Segments.Ulna.us;
       AnyRefNode &glove = ..RefHM.Right.ShoulderArm.Segments.Hand.HandBall;
     };
-    
+
     AnyKinEq HandToGroundConstraintsMover={
       AnyKinLinear &handtoground =.HandToGroundLinMover;
     };
-    
-    
+
+
     AnyKinRotational HandToGroundRotMover = {
       AnySeg &GroundNode = Main.Model.Environment.Right.Handle;
       AnyRefNode &glove = ..RefHM.Right.ShoulderArm.Segments.Hand.HandBall;
       Type=RotAxesAngles;
     };
-    
-    
+
+
     AnyKinEqSimpleDriver HandToGroundRotMoverZYX={
       AnyKinRotational &ref=.HandToGroundRotMover;
-      MeasureOrganizer={0,1,2};  
+      MeasureOrganizer={0,1,2};
       DriverPos={0,pi,0};
       DriverVel={0,0,0};
       Reaction.Type={On,On,On};
     };
-    
+
     /*
     AnyKinLinear XYZmeasureElbowMover = {
     Ref=0;
     AnyFixedRefFrame &ground = Main.Model.Environment.Right.Handle;
     AnyRefNode &elbow =..RefHM.Right.ShoulderArm.Segments.Humerus.em;
     };
-    
+
     AnyKinEqSimpleDriver ElbowMotionZ = {
     AnyKinLinear &Jnt = .XYZmeasureElbowMover;
     MeasureOrganizer = {0};
@@ -157,8 +157,8 @@ AnyFolder JointsAndDrivers={
     Reaction.Type={0};
     };
     */
-    
-    
+
+
     //Sterno clavicular joint driver
     AnyKinEqSimpleDriver SCDriverRight ={
       AnyKinMeasure& ref1 =...BodyModel.Interface.Right.SternoClavicularProtraction;
@@ -173,7 +173,7 @@ AnyFolder JointsAndDrivers={
       };
       Reaction.Type={Off,Off};
     };
-    
+
     //Arm position driver
     AnyKinEqSimpleDriver ArmPosture ={
        AnyKinLinear ShoulderElbowDist = {
@@ -186,19 +186,19 @@ AnyFolder JointsAndDrivers={
       DriverVel = {0.0};
       Reaction.Type={Off};
     };
-      
-    
 
-    
+
+
+
     //-------------------------------------------------------
     //  Drivers for the leg, from hipjoint and downwards
     //-------------------------------------------------------
-    
+
     // ************************************
     // Drivers for the right leg
     // ************************************
-    
-    //Hip driver 
+
+    //Hip driver
     AnyKinEqSimpleDriver HipDriverRight={
       AnyKinMeasure& ref1 =...BodyModel.Interface.Right.HipFlexion;
       AnyKinMeasure& ref2 =...BodyModel.Interface.Right.HipExternalRotation;
@@ -207,24 +207,24 @@ AnyFolder JointsAndDrivers={
         ..JntPos.Right.HipFlexion,
         ..JntPos.Right.HipExternalRotation,
         ..JntPos.Right.HipAbduction
-      };    
+      };
       DriverVel = pi/180*{
         ..JntVel.Right.HipFlexion,
         ..JntVel.Right.HipExternalRotation,
         ..JntVel.Right.HipAbduction
-      };    
+      };
       Reaction.Type={Off,Off,Off};
-      
+
     };
-    
+
     //Knee driver
     AnyKinEqSimpleDriver KneeDriverRight={
       AnyKinMeasureOrg  &Knee = ...BodyModel.Interface.Right.KneeFlexion;
-      DriverPos=pi/180*{..JntPos.Right.KneeFlexion};  
-      DriverVel = pi/180*{..JntVel.Right.KneeFlexion};  
+      DriverPos=pi/180*{..JntPos.Right.KneeFlexion};
+      DriverVel = pi/180*{..JntVel.Right.KneeFlexion};
       Reaction.Type={Off};
     };
-    
+
     //Ankle driver
     AnyKinEqSimpleDriver AnkleDriverRight={
       AnyKinMeasure& ref1=...BodyModel.Interface.Right.AnklePlantarFlexion;
@@ -233,53 +233,53 @@ AnyFolder JointsAndDrivers={
       #else
         AnyKinMeasure& ref2=...BodyModel.Interface.Right.SubTalarEversion;
       #endif
-      DriverPos = pi/180*{..JntPos.Right.AnklePlantarFlexion,..JntPos.Right.SubTalarEversion};  
-      DriverVel=pi/180*{..JntVel.Right.AnklePlantarFlexion,..JntVel.Right.SubTalarEversion};  
-      
+      DriverPos = pi/180*{..JntPos.Right.AnklePlantarFlexion,..JntPos.Right.SubTalarEversion};
+      DriverVel=pi/180*{..JntVel.Right.AnklePlantarFlexion,..JntVel.Right.SubTalarEversion};
+
       Reaction.Type={Off,Off};
     };
-    
-    
+
+
     //------------------------------------------------------
     //These definitions locks the Foot to the ground
     //-------------------------------------------------------
-    
-    
+
+
     AnyKinLinear FootToGroundLin = {
       AnyRefNode &groundfootr= Main.Model.Environment.GlobalRef.FootGroundR;
       AnyRefNode &Foot = ..RefHM.Right.Leg.Seg.Foot.Metatarsal1.Metatarsal1Plantar;
     }; //Foot to ground
-    
+
     AnyKinMeasureOrg FootToGroundLinOrgY={
       AnyKinLinear &ref=.FootToGroundLin;
       MeasureOrganizer ={1};
     };
-    
-    
-    //Recruited actuator that can only push 
+
+
+    //Recruited actuator that can only push
     AnyRecruitedActuator FootToGroundLinConstraintsReaction = {
       AnyKinMeasure& foottoground =.FootToGroundLinOrgY;
       Strength = 3000;
-      SET_DEFAULT_ACTUATOR_VOLUME; 
+      SET_DEFAULT_ACTUATOR_VOLUME;
       Type = NonNegative;  //This changes the actuator's force direction and means that it will only push
-    };  
-    
+    };
+
     AnyKinMeasureOrg FootToGroundLinOrgXY={
       AnyKinLinear &ref=.FootToGroundLin;
       MeasureOrganizer ={0,1};
     };
-    
+
     AnyKinEqSimpleDriver FootToGroundLinConstraintsXY = {
       AnyKinMeasure& foottoground =.FootToGroundLinOrgXY;
       DriverPos = {0,0};
       DriverVel = {0,0};
       Reaction.Type={On,On};
     };
-    
+
     AnyKinMotion ToesLevelWithGround = {
       AnyKinMeasureOrg ToeMeasure = {
          AnyKinLinear Lin = {
-           AnyRefNode& toetip = Main.HumanModel.BodyModel.Right.Leg.Seg.Foot.Toe1.DistalPhalange1.ToeTip; 
+           AnyRefNode& toetip = Main.HumanModel.BodyModel.Right.Leg.Seg.Foot.Toe1.DistalPhalange1.ToeTip;
            AnyRefNode &Foot = Main.HumanModel.BodyModel.Right.Leg.Seg.Foot.Metatarsal1.Metatarsal1Plantar;
          };
         MeasureOrganizer ={1};
@@ -287,22 +287,22 @@ AnyFolder JointsAndDrivers={
       DriverPos0 = {0};
       DriverVel0 = {0};
     };
-    
-    
+
+
     AnyKinMeasureOrg FootToGroundLinOrgZ={
       AnyKinLinear &ref=.FootToGroundLin;
       MeasureOrganizer ={2};
     };
-    
+
     AnyReacForce FootToGroundLinOrgZReaction={
       AnyKinMeasure& ref=.FootToGroundLinOrgZ;
     };
-    
+
   };//Right
-  
-  
+
+
   AnyFolder Left ={
-    
+
     //------------------------------------------------------
     //These definitions locks the hand to the ground
     //-------------------------------------------------------
@@ -313,42 +313,42 @@ AnyFolder JointsAndDrivers={
     }; //Hand to ground
     */
     AnyFolder &hand = .RefHM.Left.ShoulderArm.Segments.Hand;
-    
+
     hand ={
       AnyRefNode HandBall={
         sRel={0.0,0,0};
         ARel={{-1,0,0},{0,0,-1},{0,-1,0}};
       };
-    };      
-    
+    };
+
 
     AnyKinLinear HandToGroundLinMover = {
       AnySeg &GroundNode = Main.Model.Environment.Left.Handle;
       //AnyRefNode &HandNode = ..RefHM.Right.ShoulderArm.Segments.Ulna.us;
       AnyRefNode &glove = ..RefHM.Left.ShoulderArm.Segments.Hand.HandBall;
     };
-    
-    
+
+
     AnyKinEq HandToGroundConstraintsMover={
       AnyKinLinear &handtoground =.HandToGroundLinMover;
     };
-    
+
     AnyKinRotational HandToGroundRotMover = {
       //AnyRefNode &GroundNode = Main.Model.Environment.GlobalRef;//Main.Model.Environment.Left.Handle;
       AnySeg &GroundNode = Main.Model.Environment.Left.Handle;
       AnyRefNode &glove = ..RefHM.Left.ShoulderArm.Segments.Hand.HandBall;
       Type=RotAxesAngles;
     };
-    
+
     AnyKinEqSimpleDriver HandToGroundRotMoverZYX={
       AnyKinRotational &ref=.HandToGroundRotMover;
-      MeasureOrganizer={0,1,2};  
+      MeasureOrganizer={0,1,2};
       DriverPos={0,pi,0};
       DriverVel={0,0,0};
       Reaction.Type={On,On,On};
     };
-    
-    
+
+
     //-------------------------------------------------------
     //This joint and driver controls the elbow pos in the frontal plane
     //-------------------------------------------------------
@@ -356,20 +356,20 @@ AnyFolder JointsAndDrivers={
     AnyKinEqSimpleDriver SCDriverLeft ={
       AnyKinMeasure& ref1 =...BodyModel.Interface.Left.SternoClavicularProtraction;
       AnyKinMeasure& ref2 =...BodyModel.Interface.Left.SternoClavicularElevation;
-      
+
       DriverPos = pi/180*{
         ..JntPos.Left.SternoClavicularProtraction,
         ..JntPos.Left.SternoClavicularElevation
       };
-      
+
       DriverVel = pi/180*{
         ..JntVel.Left.SternoClavicularProtraction,
         ..JntVel.Left.SternoClavicularElevation
       };
       Reaction.Type={Off,Off};
     };
-    
-    
+
+
     //Arm position driver
     AnyKinEqSimpleDriver ArmPosture ={
        AnyKinLinear ShoulderElbowDist = {
@@ -383,15 +383,15 @@ AnyFolder JointsAndDrivers={
       Reaction.Type={Off};
     };
 
-    
+
     //-------------------------------------------------------
     //  Drivers for the leg, from hipjoint and downwards
     //-------------------------------------------------------
-    
+
     // ************************************
     // Drivers for the Left leg
     // ************************************
-    
+
     //Left hip driver
     AnyKinEqSimpleDriver HipDriverLeft={
       AnyKinMeasure& ref1 =...BodyModel.Interface.Left.HipFlexion;
@@ -401,26 +401,26 @@ AnyFolder JointsAndDrivers={
         ..JntPos.Left.HipFlexion,
         ..JntPos.Left.HipExternalRotation,
         ..JntPos.Left.HipAbduction
-      };    
+      };
       DriverVel = pi/180*{
         ..JntVel.Left.HipFlexion,
         ..JntVel.Left.HipExternalRotation,
         ..JntVel.Left.HipAbduction
-      };    
+      };
       Reaction.Type={Off,Off,Off};
     };
-    
+
     //Knee driver
     AnyKinEqSimpleDriver KneeDriverLeft={
       AnyKinMeasure& Knee =...BodyModel.Interface.Left.KneeFlexion;
-      DriverPos=pi/180*{      ..JntPos.Left.KneeFlexion   };  
-      DriverVel = pi/180*{      ..JntVel.Left.KneeFlexion   };  
+      DriverPos=pi/180*{      ..JntPos.Left.KneeFlexion   };
+      DriverVel = pi/180*{      ..JntVel.Left.KneeFlexion   };
       Reaction.Type={Off};
     };
-    
-    
-    
-    
+
+
+
+
     //Ankle driver
     AnyKinEqSimpleDriver AnkleDriverLeft={
       AnyKinMeasure& ref1=...BodyModel.Interface.Left.AnklePlantarFlexion;
@@ -429,55 +429,55 @@ AnyFolder JointsAndDrivers={
       #else
         AnyKinMeasure& ref2=...BodyModel.Interface.Left.SubTalarEversion;
       #endif
-      DriverPos = pi/180*{..JntPos.Left.AnklePlantarFlexion,..JntPos.Left.SubTalarEversion};  
-      DriverVel=pi/180*{..JntVel.Left.AnklePlantarFlexion,..JntVel.Left.SubTalarEversion};  
+      DriverPos = pi/180*{..JntPos.Left.AnklePlantarFlexion,..JntPos.Left.SubTalarEversion};
+      DriverVel=pi/180*{..JntVel.Left.AnklePlantarFlexion,..JntVel.Left.SubTalarEversion};
       Reaction.Type={Off,Off};
     };
-    
-    
+
+
     //------------------------------------------------------
     //These definitions locks the Foot to the ground
     //-------------------------------------------------------
-    
+
     AnyKinLinear FootToGroundLin = {
       AnyRefNode &groundfootr= Main.Model.Environment.GlobalRef.FootGroundL;
       AnyRefNode &Foot = ..RefHM.Left.Leg.Seg.Foot.Metatarsal1.Metatarsal1Plantar;
     }; //Foot to ground
-    
+
     AnyKinMeasureOrg FootToGroundLinOrgY={
       AnyKinLinear &ref=.FootToGroundLin;
       MeasureOrganizer ={1};
     };
-    
-    //Recruited actuator that can only push 
+
+    //Recruited actuator that can only push
     AnyRecruitedActuator FootToGroundLinConstraintsReaction = {
       AnyKinMeasure& foottoground =.FootToGroundLinOrgY;
-      Strength = 3000; 
+      Strength = 3000;
       Type = NonNegative;  //This changes the actuator's force direction and means that it will only push
       SET_DEFAULT_ACTUATOR_VOLUME;
-    };  
-    
+    };
+
     /*
     AnyReacForce FootToGroundLinConstraintsY = {
     AnyKinMeasure& foottoground =.FootToGroundLinOrgY;
     };*/
-    
+
     AnyKinMeasureOrg FootToGroundLinOrgXY={
       AnyKinLinear &ref=.FootToGroundLin;
       MeasureOrganizer ={0,1};
     };
-    
+
     AnyKinEqSimpleDriver FootToGroundLinConstraintsXY = {
       AnyKinMeasure& foottoground =.FootToGroundLinOrgXY;
       DriverPos = {0,0};
       DriverVel = {0,0};
       Reaction.Type={On,Off};
     };
-    
+
     AnyKinMotion ToesLevelWithGround = {
       AnyKinMeasureOrg ToeMeasure = {
          AnyKinLinear Lin = {
-           AnyRefNode& toetip = Main.HumanModel.BodyModel.Left.Leg.Seg.Foot.Toe1.DistalPhalange1.ToeTip; 
+           AnyRefNode& toetip = Main.HumanModel.BodyModel.Left.Leg.Seg.Foot.Toe1.DistalPhalange1.ToeTip;
            AnyRefNode &Foot = Main.HumanModel.BodyModel.Left.Leg.Seg.Foot.Metatarsal1.Metatarsal1Plantar;
          };
         MeasureOrganizer ={1};
@@ -485,16 +485,16 @@ AnyFolder JointsAndDrivers={
       DriverPos0 = {0};
       DriverVel0 = {0};
     };
-    
+
     AnyKinMeasureOrg FootToGroundLinOrgZ={
       AnyKinLinear &ref=.FootToGroundLin;
       MeasureOrganizer ={2};
     };
-    
+
     AnyReacForce FootToGroundLinOrgZReaction={
       AnyKinMeasure& ref=.FootToGroundLinOrgZ;
     };
-    
+
   };//left
-  
+
 };

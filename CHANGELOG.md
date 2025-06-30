@@ -128,9 +128,48 @@ You can [enable backwards compatibility](changes-to-bodymodel-folders) by settin
   ``` AnyScriptDoc
   #define BM_LEG_MODEL _LEG_MODEL_TLEM_
   ```
+(ammr-3.1.3-changelog)=
+## AMMR 3.1.3 (2025-06-16)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.15672003.svg)](https://doi.org/10.5281/zenodo.15672003)
+[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.1.3-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
+
+### 🩹 Fixed:
+
+*   Fixed a regression in the `VideoLookAtCamera` VideoTool that prevented
+    animated GIFs from being created when the video source was not an `.mp4`
+    file. It now supports any video format compatible with the ffmpeg library.
+
+### 🔧 Changed:
+
+*   The intermediate joint angle files used in MoCap models now have headers
+    which reflect the original output measure instead of the variable name in
+    the output class. This is useful if the files are used for anything other
+    than transferring the joint angles from marker tracking to inverse dynamics.
+
+### ➕ Added:
+
+*   Two new outputs have been added to the `JointAngleOutputs` folder in the
+    MarkerTracking study in MoCap models:
+
+    *   `JointAngleOutputs.AllDoFs.Values`
+    *   `JointAngleOutputs.AllDoFs.Names`
+
+    These variables contain the values and names of all joint angle variables
+    saved during marker tracking. They provide an alternative way to access the
+    same intermediate joint angle values that AnyBody writes to files when
+    running marker tracking.
+
 
 (ammr-3.1.2-changelog)=
-## AMMR 3.1.2 (2025-??-??)
+## AMMR 3.1.2 (2025-06-02)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.15534589.svg)](https://doi.org/10.5281/zenodo.15534589)
+[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.1.2-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
+
+This release of AMMR contains an important fix to the robustness of the MoCap models. 
+If you experienced problems with kinematic errors when running inverse dynamics then
+please update to this version.
+
+### 🩹 Fixed:
 
 * Improved how kinematics calculated in marker tracking is applied 
   to inverse dynamics MoCap models. The previous
@@ -2211,7 +2250,7 @@ the driver values are updated.
 - Fixed an issue preventing
   {ref}`sphx_glr_auto_examples_ADLs_and_ergonomics_plot_StandingModel.py` from
   working with one leg.
-- Fixed a problem with the drawings of the bones in the Arm model which were not
+- Fixed a problem with the visualization of the bones in the Arm model which were not
   always symmetrical.
 - Fixed symmetry issues in scaling laws for scapula and clavicula, and humerus.
 - Fixed a bug where a the Pectoralis wrapping cylinder was not a included in the

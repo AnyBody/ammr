@@ -1,22 +1,22 @@
 AnyFolder LegCal3={
-  AnyComponentDefinition obj = {};  
-  
+  AnyComponentDefinition obj = {};
+
   AnyFolder &Pelvis = ...BodyModel.Trunk.Segments.PelvisSeg;
   AnyFolder &Sacrum = ...BodyModel.Trunk.Segments.SacrumSeg;
-  
+
   AnyFolder &LegSegSide = .SideHumanFolderRef.Leg.Seg;
-  
+
   AnyFolder &LegJointsSide = .SideHumanFolderRef.Leg.Jnt;
   AnyFolder &SacrumPelvisJnt = ...BodyModel.Trunk.Joints.Lumbar.SacrumPelvis;
-  
-    
+
+
   AnyFixedRefFrame ground = {
-    AnyRefNode node = { 
+    AnyRefNode node = {
       ARel=..Pelvis.Axes0;
       sRel=..Pelvis.r0;
     };
   };
-  
+
   AnyKinEq PelvisFix = {
     AnyKinLinear PelvisSacrumLinFix = {
       AnyRefFrame &ground = ..ground.node;
@@ -28,49 +28,49 @@ AnyFolder LegCal3={
       AnyRefFrame &Pelvis = .....BodyModel.Trunk.Segments.PelvisSeg;
     };
   };
-  
+
   AnyKinEqSimpleDriver PelvisSacrumFix = {
     AnyKinMeasure& Jnt = .SacrumPelvisJnt;
     DriverPos = {0,0,0};
     DriverVel = {0,0,0};
-    Reaction.Type = {Off,Off,Off}; 
-  }; 
+    Reaction.Type = {Off,Off,Off};
+  };
 
   AnyKinEqSimpleDriver Hip = {
     AnyKinRotational &Spherical = ..SideInterfaceFolderRef.HipFlexion.HipMeasure;
-    DriverPos = {0,0,0}*pi/180; // Flexion - Abduction - external rotation 
+    DriverPos = {0,0,0}*pi/180; // Flexion - Abduction - external rotation
     DriverVel = {0,0,0}*pi/180;
     Reaction.Type = {Off,Off,Off};
-  };  
-  
+  };
+
   AnyKinEqSimpleDriver Knee = {
     AnyKinMeasure& Hinge = ..SideInterfaceFolderRef.KneeFlexion;
     DriverPos = {70*pi/180}; // 70 degrees knee flexion
     DriverVel = {0*pi/180};
     Reaction.Type = {Off};
-  };  
-  
+  };
+
   #if ((BM_FOOT_MODEL == _FOOT_MODEL_DEFAULT_) | (BM_FOOT_MODEL == _FOOT_MODEL_RIGID_GM_) | (BM_FOOT_MODEL == _FOOT_MODEL_TOE_FLEX_GM_) | (BM_FOOT_MODEL == _FOOT_MODEL_DETAILED_GM_))
   AnyKinEqSimpleDriver Ankle = {
     AnyKinMeasure& Hinge = ..SideInterfaceFolderRef.AnklePlantarFlexion;
     DriverPos = {20*pi/180}; //20 degrees plantar flexion
-    DriverVel = {0*pi/180}; 
+    DriverVel = {0*pi/180};
     Reaction.Type = {Off};
   };
-  
+
   AnyKinEqSimpleDriver SubTalar = {
     AnyKinMeasure& Hinge = ..SideInterfaceFolderRef.SubTalarEversion;
     DriverPos = {0*pi/180};
-    DriverVel = {0*pi/180}; 
+    DriverVel = {0*pi/180};
     Reaction.Type = {Off};
-  };  
+  };
     #if (BM_FOOT_MODEL == _FOOT_MODEL_TOE_FLEX_GM_) | (BM_FOOT_MODEL == _FOOT_MODEL_DETAILED_GM_)
       #include "LegCalFootDrivers.any"
     #endif
   #endif
 
   AnyString MusPrefix = CompleteNameOf(&.SideHumanFolderRef.Leg.Mus);
-  
+
   AnyObjectPtrArray TibialisAnteriorMuscles = ObjSearch(MusPrefix+".*.TibialisAnterior*", "AnyMuscle");
   AnyObjectPtrArray PeroneusTertiusMuscles = ObjSearch(MusPrefix+".*.PeroneusTertius*", "AnyMuscle");
   AnyObjectPtrArray ExtensorDigitorumLongusMuscles = ObjSearch(MusPrefix+".*.ExtensorDigitorumLongus*", "AnyMuscle");
@@ -79,15 +79,15 @@ AnyFolder LegCal3={
 
 // The study: Operations to be performed on the model
 AnyBodyCalibrationStudy LegCalibrationStudy3 = {
-  AnyFolder &ref=.LegCal3; 
+  AnyFolder &ref=.LegCal3;
   nStep = 1;
   MuscleArr = arrcat(
                 ref.TibialisAnteriorMuscles,
                 ref.PeroneusTertiusMuscles,
                 ref.ExtensorDigitorumLongusMuscles,
                 ref.ExtensorHallucisLongusMuscles
-             );              
-             
+             );
+
   InitialConditions.SmallStepAssumptionOnOff = Off;
   Kinematics.SmallStepAssumptionOnOff = Off;
   Kinematics.PosAnalysisOnlyOnOff = On;

@@ -1,5 +1,5 @@
 AnyFolder BodyModel = {
-  
+
   #if (ANYBODY_V1 > 7)|(ANYBODY_V1 == 7 & ANYBODY_V2 > 1)
     #if (ANYBODY_V1 > 8)|(ANYBODY_V1 == 8 & ANYBODY_V2 >= 2)
       // Use newest component definitions
@@ -9,35 +9,35 @@ AnyFolder BodyModel = {
       #include "<ANYBODY_PATH_BODY_GENERICBODYMODEL>\ComponentTreeConfig.any"
     #endif
   #endif
-  
+
   // The folder containing the selected human model output.
   AnyFolder SelectedOutput = {
     AnyFolder Trunk = {};
   };
-  
- 
+
+
   // Check for non-allowed combinations
   // **********************************
-    
+
   #ifdef ERROR_UNALLOWED_COMBINATION
   #undef ERROR_UNALLOWED_COMBINATION
   #endif
   #define ERROR_UNALLOWED_COMBINATION (ErrorMessage) AnyMessage UnallowedCombination = { TriggerPreProcess = On; Type = MSG_ErrorFatal; Message = ErrorMessage; };
-  
+
 //  #if (BM_TRUNK_CAVITY_MODEL == _CAVITY_MODEL_VOLUME_) & (BM_TRUNK_MUSCLES == OFF) & (BM_TRUNK_THORACIC_MODEL == _THORACIC_MODEL_FLEXIBLE_)
 //    #ifndef FORBIDDEN_COMBINATION
 //      ERROR_UNALLOWED_COMBINATION ("BM_TRUNK_CAVITY_MODEL can only be set to _CAVITY_MODEL_VOLUME_ when BM_TRUNK_MUSCLES is set to ON")
 //      #define FORBIDDEN_COMBINATION
 //    #endif
 //  #endif
-  
+
   #if (BM_LEG_RIGHT > 1) | (BM_LEG_LEFT > 1)
     #ifndef FORBIDDEN_COMBINATION
     ERROR_UNALLOWED_COMBINATION ("BM_LEG_RIGHT/LEFT are only used switch Legs ON/OFF. Please use BM_LEG_MODEL to set the model type.")
     #define FORBIDDEN_COMBINATION
     #endif
-  #endif  
-    
+  #endif
+
 
   #ifdef _FOOT_MODEL_GMFOOT_
   #if (BM_FOOT_MODEL == _FOOT_MODEL_GMFOOT_) | (BM_FOOT_MODEL == _FOOT_MODEL_RIGID_GM_) | (BM_FOOT_MODEL == _FOOT_MODEL_TOE_FLEX_GM_) | (BM_FOOT_MODEL == _FOOT_MODEL_DETAILED_GM_)
@@ -50,8 +50,8 @@ AnyFolder BodyModel = {
     #endif
   #endif
   #endif
-    
-  
+
+
 //  #if BM_FOOT_MODEL == _FOOT_MODEL_NONE_
 //    #if (BM_LEG_RIGHT | BM_LEG_LEFT) & (BM_LEG_MODEL != _LEG_MODEL_TLEM_ )
 //    #ifdef FORBIDDEN_COMBINATION
@@ -62,130 +62,130 @@ AnyFolder BodyModel = {
 //    #endif
 //  #endif
 
-  
+
   // Include the selected body parts
   // *******************************
-  
+
   // The body parts are included only if there is no unallowed combination detected
   #ifdef FORBIDDEN_COMBINATION
   #else
-  
+
   #include "TrunkModel.any"
   IndividualMasses = {AnyVar TrunkMass = .Trunk.MassSummation.Mass;};
-  
-  
+
+
   #if BM_ARM_RIGHT == ON
-  
+
     #include "RightArmModel.any"
-    
+
     IndividualMasses = {AnyVar RightArmMass = .Right.ShoulderArm.MassSummation.Mass;};
-  
+
   #else
   IndividualMasses = {AnyVar RightArmMass = 0;};
   #endif
-  
-  
-  
-  
+
+
+
+
   #if BM_ARM_LEFT == ON
-  
-    #include "LeftArmModel.any"    
+
+    #include "LeftArmModel.any"
 
     IndividualMasses = {AnyVar LeftArmMass = .Left.ShoulderArm.MassSummation.Mass;};
-  
+
   #else
   IndividualMasses = {AnyVar LeftArmMass = 0;};
   #endif
-  
-  
+
+
   #if BM_LEG_RIGHT & (BM_LEG_MODEL == _LEG_MODEL_LEG_)
-  
+
     #include "RightLegModel.any"
-    
+
     IndividualMasses = {
       AnyVar RightLegMass = .Right.Leg.MassSummation.Mass;
     };
-  
+
   #else
     IndividualMasses = {AnyVar RightLegMass = 0;};
-  
+
   #endif
-  
-  
+
+
   #if BM_LEG_LEFT & (BM_LEG_MODEL == _LEG_MODEL_LEG_)
-  
+
     #include "LeftLegModel.any"
-    
+
     IndividualMasses = {
       AnyVar LeftLegMass = .Left.Leg.MassSummation.Mass;
     };
-  
+
   #else
     IndividualMasses = {AnyVar LeftLegMass = 0;};
-  
+
   #endif
-  
-  
+
+
   #if BM_LEG_RIGHT & BM_LEG_MODEL_IS_TLEM
-      
+
     #include "RightLegTDModel.any"
-    
+
     IndividualMasses = {AnyVar RightLegTDMass = .Right.Leg.MassSummation.Mass;};
 
   #else
     IndividualMasses = {AnyVar RightLegTDMass = 0;};
   #endif
-  
-  
-  
+
+
+
   #if BM_LEG_LEFT & BM_LEG_MODEL_IS_TLEM
-      
+
     #include "LeftLegTDModel.any"
-    
+
     IndividualMasses = {AnyVar LeftLegTDMass = .Left.Leg.MassSummation.Mass;};
-      
+
   #else
     IndividualMasses = {AnyVar LeftLegTDMass = 0;};
   #endif
-  
-      
+
+
   // Create the needed folders
   // *************************
-  
-  #if ((BM_ARM_RIGHT != OFF) | (BM_LEG_RIGHT != OFF)) 
+
+  #if ((BM_ARM_RIGHT != OFF) | (BM_LEG_RIGHT != OFF))
   #include "RightFolder.any"
   #endif
-  
-  #if ((BM_ARM_LEFT != OFF) | (BM_LEG_LEFT != OFF)) 
+
+  #if ((BM_ARM_LEFT != OFF) | (BM_LEG_LEFT != OFF))
   #include "LeftFolder.any"
   #endif
-  
-  
+
+
   AnyFolder MannequinValuesFromModel = {
-    AnyFolder AnyFolder_Posture = {  
+    AnyFolder AnyFolder_Posture = {
     };
   };
-  
-  
+
+
   AnyFolder Interface = {
     AnyKinCoM CenterOfMass = {
       RefFrames = ObjSearchRecursive( &...BodyModel, "*", "AnySeg");
-    };  
+    };
   };
-  
+
   AnyFolder IndividualMasses = {};
-  
+
   // Total mass of the human model
-  AnyVar TotalBodyMass = IndividualMasses.RightLegMass 
-  + IndividualMasses.LeftLegMass 
-  + IndividualMasses.RightLegTDMass 
-  + IndividualMasses.LeftLegTDMass 
-  + IndividualMasses.RightArmMass 
-  + IndividualMasses.LeftArmMass 
-  + IndividualMasses.TrunkMass; 
+  AnyVar TotalBodyMass = IndividualMasses.RightLegMass
+  + IndividualMasses.LeftLegMass
+  + IndividualMasses.RightLegTDMass
+  + IndividualMasses.LeftLegTDMass
+  + IndividualMasses.RightArmMass
+  + IndividualMasses.LeftArmMass
+  + IndividualMasses.TrunkMass;
   //+ IndividualMasses.TrunkNeckMass;
 //  + IndividualMasses.PelvisWithoutTrunkMass;
-    
+
 #endif
 
 }; // end BodyModel
