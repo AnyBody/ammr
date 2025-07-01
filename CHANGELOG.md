@@ -9,8 +9,10 @@
 [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.1.4-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
 
 ### 🩹 Fixed:
-
-*   Fixed arm rest asymmetry in various sitting model application examples. 
+*  Refactored the references in the hand model, so the BVH MoCap models can
+   share the same marker protocol irrespectively of if the detailed or simple
+   hand is enabled. 
+*  Fixed arm rest asymmetry in various sitting model application examples. 
 
 
 
