@@ -18,17 +18,24 @@ AnyFolder BikeModel = {
        sRel = {Main.BikeParameters.SaddlePos,Main.BikeParameters.SaddleHeight,0};
     };
     AnyRefNode Crank = { sRel = {0,0,0}; };
-    AnyRefNode RearWheel = { sRel = {-0.45,0.01,0}; };
+    AnyRefNode RearWheel = { sRel = {-0.545,0.009,0}; };
 
-    AnyRefNode FrontWheel = { sRel = {0.71,0.01,0}; };
+    AnyRefNode FrontWheel = { sRel = {0.868,-0.003,-0.007}; };
 
+    AnyRefNode SaddlePin = {
+      sRel = {-tan(24.5*pi/180)*Main.BikeParameters.SaddleHeight+0.077,Main.BikeParameters.SaddleHeight-0.260,0};
+    };
+
+    AnyRefNode SaddleOnPin = {
+       sRel = {Main.BikeParameters.SaddlePos-0.05,Main.BikeParameters.SaddleHeight-0.092,0};
+    };
 
     AnyRefNode RightHand={
-      sRel={0.65,0.72,0.15};
+      sRel={0.58,0.756,0.25};
     };
 
     AnyRefNode LeftHand={
-      sRel={0.65,0.72,-0.15};
+      sRel={0.58,0.756,-0.25};
     };
 
     AnyRefNode ElbowPosRight={
@@ -39,10 +46,18 @@ AnyFolder BikeModel = {
     };
 
     AnyDrawSurf BikeFrameSurf ={
-      FileName = "../Input/bikeframe2";
-      ScaleXYZ={0.9,0.9,0.9};
+      FileName = "../Input/MFrame";
+      ScaleXYZ={1.2,1.2,1.2};
       RGB=Main.DrawSettings.Colors.AnyBodyBlue;
     };
+
+//    AnyDrawRefFrame drw_frame =
+//    {
+//      RGB = {0.2980392157, 0.2980392157, 0.2980392157};
+//      Opacity = 1;
+//      ScaleXYZ = {0.05762648458, 0.05762648458, 0.05762648458};
+//      Visible = On;
+//    };
 
   };  // BikeFrame
 
@@ -53,8 +68,8 @@ AnyFolder BikeModel = {
     AnyRefNode RPedal = { sRel = {0,....BikeParameters.PedalArmLength,....BikeParameters.PedalArmWidth}; };
     AnyRefNode LPedal = { sRel = {0,-....BikeParameters.PedalArmLength,-....BikeParameters.PedalArmWidth}; };
     AnyDrawSurf CrankSurf ={
-      FileName = "../Input/crank";
-      ScaleXYZ={0.9,0.9,0.9};
+      FileName = "../Input/MSprocket";
+      ScaleXYZ={1.2,1.2,1.2};
       RGB=Main.DrawSettings.Colors.AnyBodyGreen;
     };
   };//Crank
@@ -86,8 +101,8 @@ AnyFolder BikeModel = {
 //    r0 ={0.550000, 0.010000, 0.000000};
 
     AnyDrawSurf Crank ={
-      FileName = "../Input/wheel";
-      ScaleXYZ={0.9,0.9,0.9};
+      FileName = "../Input/MBackWheel";
+      ScaleXYZ={1.2,1.2,1.2};
       RGB=Main.DrawSettings.Colors.AnyBodyGreen;
     };
   };
@@ -111,8 +126,8 @@ AnyFolder BikeModel = {
     Jii = {0.00,0.00,0.00};
     AnyRefNode Wheel = { sRel = {0,0,0}; };
     AnyDrawSurf Crank ={
-      FileName = "../Input/wheel";
-      ScaleXYZ={0.9,0.9,0.9};
+      FileName = "../Input/MFrontWheel";
+      ScaleXYZ={1.2,1.2,1.2};
       RGB=Main.DrawSettings.Colors.AnyBodyGreen;
     };
   };
@@ -129,5 +144,57 @@ AnyFolder BikeModel = {
     DriverVel = -{0.9*(...BikeParameters.Cadence/60)*pi*2};
     Reaction.Type = {On}; //Setting Reaction.Type=1 means the joint should provide the needed moment to turn the wheel
   };
+
+  //This is the definition of the saddle pin its pure graphics!
+  AnySeg SaddlePin = {
+    Mass=0.0;
+    Jii = {0.00,0.00,0.00};
+    AnyRefNode Pin = { sRel = {0,0,0}; };
+    AnyDrawSurf SaddlePin ={
+      FileName = "../Input/MSaddlePin";
+      ScaleXYZ={1.2,1.2,1.2};
+      RGB=Main.DrawSettings.Colors.AnyBodyGreen;
+    };
+  };
+
+  AnyPrismaticJoint SaddlePinJoint ={
+    Axis = y;
+    AnyRefNode &Ground = .BikeFrame.SaddlePin;
+    AnyRefNode &SaddlePin = .SaddlePin.Pin;
+  };
+
+  AnyKinEqSimpleDriver PinHeight = {
+    AnyPrismaticJoint &Jnt = .SaddlePinJoint;
+    DriverPos = {0};
+    DriverVel = {0};
+    Reaction.Type = {On}; //Setting Reaction.Type=1 means the joint should provide the needed moment to turn the wheel
+  };
+
+  //This is the definition of the saddle its pure graphics!
+  AnySeg Saddle = {
+    Mass=0.0;
+    Jii = {0.00,0.00,0.00};
+    AnyRefNode SaddleNode = { sRel = {0,0,0}; };
+    AnyDrawSurf SaddleDrw ={
+      FileName = "../Input/MSaddle";
+      ScaleXYZ={1.2,1.2,1.2};
+      RGB=Main.DrawSettings.Colors.AnyBodyGreen;
+    };
+  };
+
+  AnyPrismaticJoint SaddleJoint ={
+    Axis = x;
+    AnyRefNode &Ground = .BikeFrame.SaddleOnPin;
+    AnyRefNode &SaddlePin = .Saddle.SaddleNode;
+  };
+
+  AnyKinEqSimpleDriver SaddleHeightDrv = {
+    AnyPrismaticJoint &Jnt = .SaddleJoint;
+    DriverPos = {0};
+    DriverVel = {0};
+    Reaction.Type = {On}; //Setting Reaction.Type=1 means the joint should provide the needed moment to turn the wheel
+  };
+
+
 
 }; //Bikemodel
