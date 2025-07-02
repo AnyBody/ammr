@@ -168,7 +168,7 @@ def parse_expected_member_docs(filecontent: str, classname: str) -> list[MemberI
     re_docs = re.compile(
         rf"""
         ^\s*//\s*{classname}\.(?P<group>[\w\.]+)\s*?\n #Match start of member
-        (?P<docs>\s*//.*?)   #Match documentation string
+        (?P<docs>\s*//[^/]*?)   #Match documentation string
         ^\s*?(//)?\s*?   # match start line
         (?P<type>\w+)\s+?
         (?P<name>[^=\s]+)
@@ -289,6 +289,8 @@ def run(ams_path_def, base_path):
     files = list(base_path.glob("**/*.any"))
 
     for file in tqdm(files, desc="Looking for class templates"):
+        # if "FootPlateConditionalContact" not in file.name:
+        #     continue
         include_str = f"<{ams_path_def}>\\{file.relative_to(base_path)}"
         class_templates = find_class_templates(file)
         if not class_templates:
