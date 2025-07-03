@@ -9,7 +9,7 @@
 
 :::{admonition} Default pelvis changed. 
 :class: warning
-The default pelvis morphology now comes from trunk pelivs. The toplogy remain unchanged as the leg model pelvis is morphed to match the Trunk. See [below how to control this behaviour](changes-to-default-pelivs-morphology).
+The default pelvis morphology now comes from trunk pelvis. The topology remain unchanged as the leg model pelvis is morphed to match the Trunk. See [below how to control this behaviour](changes-to-default-pelvis-morphology).
 :::
 
 :::{admonition} Muscles locations restructured
@@ -23,7 +23,7 @@ You can [enable backwards compatibility](changes-to-muscles-locations) by settin
 :::
 :::{admonition} Folder locations restructured
 :class: warning
-Many folders inside the Leg and Arm models have been renamed and/or moved to ensure a consistent bodymodel structure.
+Many folders inside the Leg and Arm models have been renamed and/or moved to ensure a consistent BodyModel structure.
 You can [enable backwards compatibility](changes-to-bodymodel-folders) by setting:
 ```AnyScriptDoc
 #define BM_COMPATIBILITY_BODYMODEL_STRUCTURE ON
@@ -37,8 +37,8 @@ You can [enable backwards compatibility](changes-to-bodymodel-folders) by settin
 
 **Added:**
 
-* A new detailed thoracic model was addded. This model consists of the thoracic vertebral column and the
-  ribcage, including individual ribs and a two part sternum. The many segments interconnected by joints
+* A new detailed thoracic model was added. This model consists of the thoracic vertebral column and the
+  ribcage, including individual ribs and a two-part sternum. The many segments interconnected by joints
   replicates the physiological connection and load transfer mechanisms.
 
   The detailed thoracic model can be enabled with the switch {bm_statement}`BM_TRUNK_THORACIC_MODEL`: 
@@ -55,11 +55,11 @@ You can [enable backwards compatibility](changes-to-bodymodel-folders) by settin
 
 * A new abdominal model was added to replace the old 'buckle' model. 
   It uses a new kinematic volume measure from AnyBody 7.5 to model the abdominal pressure 
-  and includes new oblique, rectus and tranversus muscles. The new abdominal model is 
+  and includes new oblique, rectus and transversus muscles. The new abdominal model is 
   more robust and allows a bigger range of motion of the trunk. See the {ref}`documentation page <Abdominal Pressure Model>` 
   for more info about the abdominal model. 
 
-  It is possible to revert ot the old buckle implmenation with switch {bm_statement}`_CAVITY_MODEL_BUCKLE_`. 
+  It is possible to revert to the old buckle implementation with switch {bm_statement}`_CAVITY_MODEL_BUCKLE_`. 
 
 * The Glasgow-Maastricht (GM) foot model is now integrated into the AMMR in a beta state currently. 
   The GM foot has been morphed to the TLEM foot and uses the same reference system and ankle and subtalar joint 
@@ -71,7 +71,7 @@ You can [enable backwards compatibility](changes-to-bodymodel-folders) by settin
 
 * A new system for handling mass and inertia calculation for segments in the
   Trunk. Now we utilize the new inertia classes derived from `AnyInertia`. The
-  new Abdominal and Thoracic model uses geometry based inertia. The old models
+  new Abdominal and Thoracic model uses geometry-based inertia. The old models
   keep the standard mass and inertia properties. The system also controls how
   mass is scaled when setting `Main.HumanModel.Anthropometrics.BodyMass`. It
   will distribute the mass to the different segments based on whether they are
@@ -91,9 +91,9 @@ You can [enable backwards compatibility](changes-to-bodymodel-folders) by settin
 
 **Changed:**
 
-(changes-to-default-pelivs-morphology)=
+(changes-to-default-pelvis-morphology)=
 
-* The default pelvis morphology is now the one from the trunk model, as oposed to the pelvis belonging
+* The default pelvis morphology is now the one from the trunk model, as opposed to the pelvis belonging
   to whatever leg model has been selected. This was done to get a consistent
   trunk model and considering all the recent improvements to the trunk. This option can be controlled with: 
 
@@ -101,7 +101,7 @@ You can [enable backwards compatibility](changes-to-bodymodel-folders) by settin
   #define BM_LEG_TRUNK_INTERFACE _MORPH_LEG_TO_TRUNK_
   ```
 
-  In practice, this means that the morphology of the leg pelvis is moprhed to match the Trunk pelvis.
+  In practice, this means that the morphology of the leg pelvis is morphed to match the Trunk pelvis.
   Using `_MORPH_TRUNK_TO_LEG_` instead will revert to the old behaviour.
 
 (changes-to-muscles-locations)=
@@ -118,8 +118,10 @@ You can [enable backwards compatibility](changes-to-bodymodel-folders) by settin
 
 (changes-to-bodymodel-folders)=
 
-* Many of the key folders inside the Leg and Arm models have been renamed to create a unified structure across the full bodymodel. To bring back the old structure we have temporarily included a backward compatibility switch `BM_COMPATIBILITY_BODYMODEL_STRUCTURE` To ensure a smooth transition.
+* Many of the key folders inside the Leg and Arm models have been renamed to create a unified structure across the full BodyModel. To bring back the old structure we have temporarily included a backward compatibility switch `BM_COMPATIBILITY_BODYMODEL_STRUCTURE` To ensure a smooth transition.
 
+* The color of force plates in C3D-based MoCap models has been adjusted to better distinguish between 
+  when the foot is in contact with the force plate and when it is not.
 
 ### Removed:
 

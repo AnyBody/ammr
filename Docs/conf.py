@@ -351,7 +351,7 @@ for folder, section in gallery.items():
     with open(gallery_txt, encoding="utf8") as fh:
         previous_content = fh.read()
     if content != previous_content:
-        with open(gallery_txt, "w", encoding="utf8") as fh:
+        with open(gallery_txt, "w", encoding="utf8", newline="\n") as fh:
             fh.write(content)
 
 # Run the python file "tools/generate_class_template_docs.py"

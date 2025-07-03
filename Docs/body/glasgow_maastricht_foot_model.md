@@ -9,7 +9,7 @@ The model is currently in a beta state. It may lack some functionality.
 
 AnyBody Technology, in corporation with Glasgow Caledonian
 University and University of Maastricht inside the [AFootprint EU project](https://web.archive.org/web/20190502001603/https://www.afootprint.eu/),
-developed a detailed multisegmental foot model, which is fully dynamic and
+developed a detailed multisegmented foot model, which is fully dynamic and
 contains 26 segments representing all the foot bones, muscles,
 ligaments, and joints connecting them.
 
@@ -46,14 +46,22 @@ The GM foot model can be used in one of the following configurations:
   ::::
 
 -	Toe flexion: ```#define BM_FOOT_MODEL _FOOT_MODEL_TOE_FLEX_GM_```: This model adds flexion-extension degree of freedom at all 
-  the toes, that is, the Metatarsophalangeal joints. Each toe is included as a rigid segment. So, there are 7 segments in this
-  model (talus, rigid part, and 5 toes). Furthermore, the motion of the 5 toes
+  the toes, that is, the Metatarsophalangeal joints. Each toe is included as a rigid segment, lumping the constituent phalanges. 
+  So, there are 7 segments in this model (talus, rigid part, and 5 toes). Furthermore, the motion of the 5 toes
   is constrained to have the same joint angle, thereby, adding just one degree of freedom 
   for toe flexion when comparing to the rigid foot model. This model can improve kinematics in applications such as gait by allowing 
   bending of toes. The motion of the toes can be driven by motion capture data, for example, by using a toe tip marker, or 
-  automatically through a new class template that prevents penetration of the toes with the ground. Each metatarsophalangeal 
-  joint carries joint actuators and reaction force to compensate for the lack of ligaments in this model. The reactions can be
-  optionally switched off by setting ```#define BM_FOOT_MODEL_TOE_FLEX_GM_REACTION OFF```
+  automatically through a new class template that prevents penetration of the toes with the ground. 
+  
+
+    :::{admonition} **Kinematic improvement only**
+    :class: warning
+    The Toe Flexion configuration is intended for kinematic improvements only. Please don't use it to evaluate
+    intrinsic loads in the foot!
+    :::
+
+    Each metatarsophalangeal joint carries joint actuators and reaction force to compensate for the lack of ligaments in this 
+    model. The reactions can be optionally switched off by setting ```#define BM_FOOT_MODEL_TOE_FLEX_GM_REACTION OFF```.
   
   ::::{figure} _static/FootToeFlexGM_closeup.png
   :width: 80%
@@ -95,16 +103,16 @@ Your browser does not support the video tag.
 ```
 
 
-## Muscle Switch:
+## Muscle Switch
 
 The muscle behavior in the GM foot model can be controlled by switches for the foot muscle, for example, ```#define BM_FOOT_MUSCLES_BOTH _MUSCLES_SIMPLE_```.
-Currently, the GM foot model can work with simple muscle model. The switch allows the foot muscles to be set to 3 element Hill muscle model, 
-however the user must provide a calibration routine for the Hill muscle models in the foot.
+The switch defaults to ```BM_LEG_MUSCLES_BOTH```. Currently, the GM foot model can work with simple muscle model. The switch allows the foot 
+muscles to be set to 3 element Hill muscle model, however the user must provide a calibration routine for the Hill muscle models in the foot.
 This switch allows the user to control the foot muscles independently of the leg muscles. Please note that the foot muscles can only be included 
 if leg muscles are also enabled.
 
 
-## Usage:
+## Usage
 
 The model can be added to the TLEM 2.2 leg model and requires AMMR 4.0 or later.
 
@@ -121,6 +129,63 @@ Main = {
   
 };
 ```
+
+The model tree is structured to conveniently switch between the different foot configurations
+with minimal input from the user. Intrinsic foot segments are collected inside the Foot folder,
+```Main.HumanModel.BodyModel.Right.Leg.Segments.Foot```. In the rigid and toe flexion 
+configuration that don't have all the intrinsic segments, reference nodes for all the intrinsic 
+segments are created on the corresponding lumped segment, for example, 
+```Main.HumanModel.BodyModel.Right.Leg.Segments.Foot.RigidPart.Calcaneus```. 
+Such reference nodes are accompanied by reference pointers under ```Segments.Foot``` folder.
+That is, ```Main.HumanModel.BodyModel.Right.Leg.Segments.Foot.Calcaneus``` is the calcaneus segment
+in the detailed foot configuration, whereas it is a pointer to the reference node 
+```Main.HumanModel.BodyModel.Right.Leg.Segments.Foot.RigidPart.Calcaneus``` in the
+rigid and toe flexion configuration.
+
+The user is advised to avoid using the name of the rigid or lumped part when creating reference 
+pointers in their models. That is, it is recommended to work with the foot model in 
+the following manner: 
+
+```AnyScriptDoc
+AnyRefNode &MyNode = Main.HumanModel.BodyModel.Right.Leg.Seg.Foot.Calcaneus.HeelNode;
+// Or
+Main.HumanModel.BodyModel.Right.Leg.Seg.Foot.Calcaneus.HeelNode = {
+  AnyRefNode MyNode = {};
+};
+```
+The above code will work in all the foot model configurations.
+
+Furthermore, if the foot model configuration is switched from the TLEM foot model to one of
+the GM foot model configuration, there may be errors concerning unresolved object in the foot
+model. These should be fixed by updating the path to include the intrinsic foot segment as shown
+above.
+
+### Ground reaction force and moments
+
+The class templates for applying/predicting ground reaction force and moments (GRF&M) have been 
+updated to facilitate switching between the different foot model configurations. C3D-based mocap 
+models with force plate data apply the measured GRF&M to calcaneus and the 5 distal phalanges through
+recruited actuators. Depending on the configuration of the foot model, these may point to the
+same rigid segment or to individual segments. Such a configuration is acceptable for the 
+analysis of the leg, but it's not adequate to study the intrinsic loads in the foot model, 
+for example, with the detailed foot model or the toe flexion model as the foot model is effectively
+treated as a rigid foot during inverse dynamics analysis.
+
+Likewise, the class template for creating foot contact nodes, which is used in the GRF prediction 
+class template, has also been updated. The contact nodes on the foot are created on the 
+corresponding foot segments, which may be individual segments or pointers to the same segment 
+depending on the configuration of the foot model.
+
+:::{admonition} **Caution:**
+:class: caution
+The current set up of force plates in C3D mocap models and the foot model configurations doesn't 
+allow studying the intrinsic joint and muscle forces of the model.
+:::
+
+If you are interested in studying the intrinsic load in the foot model, GRF prediction presents
+a more suitable approach to distribute the GRF among the foot segments. Ideally, you would like
+to use measured force plate data and apply GRF prediction between the foot and the force plate.
+This is planned for the future.
 
 ## Application examples using the GM foot model
 
