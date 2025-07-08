@@ -89,6 +89,15 @@ You can [enable backwards compatibility](changes-to-bodymodel-folders) by settin
 * New reference nodes (`TibiaFemurJointCavityCenter` and `TibiaTalusJointCavityCenter`) are added on the shank to represent the center of the
   joint cavity at knee and ankle.
 
+* The force plates now support slopped surface offsets.  This enables the force
+  plate class template to calculate the COP on sloped offset surface. Like if
+  you added a sloped wedge on top of the force plate. 
+
+* Type 4 and type 2 now has the option to set a baseline offset to the measured
+  force channels
+  (`Plate.ForcePlate.BaselineOffset.Fx`/`Fy`/`Fz`/`Mx`/`My`/`Mz`). This can be
+  usefull if baseline correction needs to be done. 
+
 **Changed:**
 
 (changes-to-default-pelvis-morphology)=

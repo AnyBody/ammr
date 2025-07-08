@@ -116,6 +116,7 @@ See below for more details
     #var AnyFloat ORIGIN = reshape(C3D_OBJECT.Groups.FORCE_PLATFORM.ORIGIN.Data, {USED, 3});
     #var AnyIntVar MaxChannels = iffun(sum(eqfun(3, TYPE)), 8, 6);
     #var AnyInt CHANNEL = reshape(C3D_OBJECT.Groups.FORCE_PLATFORM.CHANNEL.Data, {USED, MaxChannels});
+    #var AnyInt ZERO = reshape(C3D_OBJECT.Groups.FORCE_PLATFORM.ZERO.Data, {2});
   };
 
   AnyInt ForcePlateType = ForcePlateInfo.TYPE[PLATE_NO-1];
@@ -311,12 +312,13 @@ See below for more details
 
   ForcePlate.ForcePlateSeg = {
     AnyRefNode PlateSurface = {
-      sRel = ( 0.25*(
-               ...SurfaceCorner_c01 +
-               ...SurfaceCorner_c02 +
-               ...SurfaceCorner_c03 +
-               ...SurfaceCorner_c04 ) - .r0)*.Axes0;
+      AnyVec3 c1 =  (...SurfaceCorner_c01 - .r0)*.Axes0;
+      AnyVec3 c2 =  (...SurfaceCorner_c02 - .r0)*.Axes0;
+      AnyVec3 c3 =  (...SurfaceCorner_c03 - .r0)*.Axes0;
+      AnyVec3 c4 =  (...SurfaceCorner_c04 - .r0)*.Axes0;
 
+      sRel = 0.25*(c1+c2+c3+c4);
+      ARel =RotMat(sRel, 0.5*(c1+c4), 0.5*(c1+c2));
 
       AnyRefNode SurfaceGraphics = {
         #var AnyVar VisualPlateHeight = max({0.00001, C3D_OBJECT.PointsScaleFactor*abs(....ForcePlateInfo.ORIGIN[PLATE_NO-1][2])});
@@ -542,9 +544,9 @@ See below for more details
    AnyVector fx = .ForcePlate.load.Data[0];
    AnyVector fy = .ForcePlate.load.Data[1];
    AnyVector fz = .ForcePlate.load.Data[2];
-   AnyVector mx =  (1/1000)*.ForcePlate.load.Data[3];
-   AnyVector my =  (1/1000)*.ForcePlate.load.Data[4];
-   AnyVector mz =  (1/1000)*.ForcePlate.load.Data[5];
+   AnyVector mx =  C3D_OBJECT.PointsScaleFactor*.ForcePlate.load.Data[3];
+   AnyVector my =  C3D_OBJECT.PointsScaleFactor*.ForcePlate.load.Data[4];
+   AnyVector mz =  C3D_OBJECT.PointsScaleFactor*.ForcePlate.load.Data[5];
 
    AnyVector norm = vnorm({fx,fy,fz}');
 
@@ -559,9 +561,29 @@ See below for more details
 
    AnyVar originz = -1*.ForcePlate.ForcePlateSeg.TransducerLocation.zdist;
 
-   AnyVector Vx= (originz*fx-my)/( _fz ) ;
-   AnyVector Vy= (mx+originz*fy)/( _fz );
-   AnyVector Vz= 0*Vy;
+   AnyVector Vx = (originz*fx-my)/( _fz ) ;
+   AnyVector Vy = (mx+originz*fy)/( _fz );
+   AnyVector Vz = 0*Vy;
+
+   /*
+   AnyDrawSphere Draw_Calculated_COP =
+   {
+     RGB = {1,1,0};
+     Opacity = 0.2;
+     ScaleXYZ = 0.02 *{1,1,1};
+     GlobalCoord = On;
+     Position = .GlobalCopFun(
+        iffun(
+            orfun(
+               gtfun(..ForcePlate.ForcePlateSeg.t, max(.GlobalCopFun.T)),
+               ltfun(..ForcePlate.ForcePlateSeg.t, min(.GlobalCopFun.T))
+             ),
+             mean(.GlobalCopFun.T),
+             ..ForcePlate.ForcePlateSeg.t
+        )
+     );
+   };
+   */
 
 
    AnyFunInterpol GlobalCopFun =
