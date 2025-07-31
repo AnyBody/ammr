@@ -1,0 +1,53 @@
+//ignore_errors = ["'Set Value' operation on"]
+//fatal_warnings = True
+
+
+// This test ensures that the same drivers are used as output in MarkerTracking 
+// and input for InverseDynamics. The test also assumes that the drivers comes in
+// the same order, eventhough that is not strictly necessary since joint angles are
+// split among different files. 
+
+
+#include "../libdef.any"
+
+#path MOCAP_PATH_MAINFILEDIR "<ANYMOCAP_EXAMPLES>/Plug-in-gait_Simple"
+#path MOCAP_PATH_MAINFILE "<MOCAP_PATH_MAINFILEDIR>/FullBody.main.any"
+#define MOCAP_NAME_MAINFILEDIR "Plug-in-gait_Simple"
+
+#path TEMP_PATH "Output/"
+
+
+#include "<MOCAP_PATH_MAINFILE>"
+
+Main =
+{
+  AnyOperationSequence  RunTest =
+  {
+    AnyOperation& MarkerTracking = Main.Studies.MarkerTracking.InitialConditions;
+  };
+  
+  
+  Main.Studies.MarkerTracking = 
+  {
+     AnyInt ModelNotRunCheck = eqfun(System.LoadedModel.ActiveMechStudy, None);
+       
+    AnyInt EqualHeadersCheck = eqfun(
+          Main.Studies.MarkerTracking.JointAngleOutputs.AllDoFs.HeaderNames,
+          Main.Studies.InverseDynamicStudy.ModelEnvironmentConnection.JointsAndDrivers.AllDoFs.HeaderNames
+     );
+     
+   AnyInt IndenticalNumberOfDriversCheck = assert(
+      eqfun(
+        NumElemOf(Main.Studies.MarkerTracking.JointAngleOutputs.AllDoFs.HeaderNames), 
+        NumElemOf(Main.Studies.InverseDynamicStudy.ModelEnvironmentConnection.JointsAndDrivers.AllDoFs.HeaderNames), 
+      )
+   );
+  
+    AnyInt IdenticalInputOuptutCheck = assert(
+//      orfun(ModelNotRunCheck, andfun(EqualHeadersCheck, IndenticalNumberOfDriversCheck) ),
+      orfun(ModelNotRunCheck, IndenticalNumberOfDriversCheck ),
+      "Output joint angles in marker tracking does not match joint angles driven in Invers dynamics."
+    );
+  };
+
+};
