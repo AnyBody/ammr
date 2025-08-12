@@ -26,17 +26,25 @@ AnyKinDriver JntDriverTrunkFull = {
            },repmat(nDim-6,0.0)
     )
   );
-  AnyVector PelvisPosOffset ??= {0,0,0};
-  AnyKinMeasureLinComb PelvisPos = {
-    AnyKinMeasureOrg Input = {
-      AnyKinMeasure& PelvisPosX = .....BodyModel.Interface.Trunk.PelvisPosX;
-      AnyKinMeasure& PelvisPosY = .....BodyModel.Interface.Trunk.PelvisPosY;
-      AnyKinMeasure& PelvisPosZ = .....BodyModel.Interface.Trunk.PelvisPosZ;
+  #ifdef ANYMOCAP_PELVIS_DRIVER_OFFSET
+    // Special feature for overriding the pelvis position.
+    // This is not enable by default
+    AnyVector PelvisPosOffset ??= {0,0,0};
+    AnyKinMeasureLinComb PelvisPos = {
+      AnyKinMeasureOrg Input = {
+        AnyKinMeasure& PelvisPosX = .....BodyModel.Interface.Trunk.PelvisPosX;
+        AnyKinMeasure& PelvisPosY = .....BodyModel.Interface.Trunk.PelvisPosY;
+        AnyKinMeasure& PelvisPosZ = .....BodyModel.Interface.Trunk.PelvisPosZ;
+      };
+      OutDim=3;
+      Coef = eye(3);
+      Const ??= .PelvisPosOffset;
     };
-    OutDim=3;
-    Coef = eye(3);
-    Const ??= .PelvisPosOffset;
-  };
+  #else
+  AnyKinMeasure& PelvisPosX = ...BodyModel.Interface.Trunk.PelvisPosX;
+  AnyKinMeasure& PelvisPosY = ...BodyModel.Interface.Trunk.PelvisPosY;
+  AnyKinMeasure& PelvisPosZ = ...BodyModel.Interface.Trunk.PelvisPosZ;
+  #endif
   AnyKinMeasure& PelvisRotVec = ...BodyModel.Interface.Trunk.PelvisRotVec;
 
   AnyKinMeasureOrg& SacrumPelvis = ...BodyModel.Interface.Trunk.IntervertebralAngles.SacrumPelvis.Jnt;
@@ -255,6 +263,9 @@ AnyKinDriver JntDriverTrunkFull = {
 
   #endif
 
+  // Collect all the driver values and names in single variables which can
+  // more easily be saved or exported.
+  CollectDriverValues AllDoFs(HEADER_PREFIX="DOF:") = { };
 
 
 };
