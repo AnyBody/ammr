@@ -255,7 +255,20 @@
     AnyObjectPtrVar Mz = ObjSearch(CompleteNameOf(&C3D_OBJECT.Analog.DataFiltered)+ dot + C3D_OBJECT.AnalogLabels[ChIdxs[5]])[0];
   };
 
-  AnyVar MaxLoad = max( vnorm({Obj2Num(Fx),Obj2Num(Fy),Obj2Num(Fz)}') );
+  AnyFolder BaselineOffset = {
+    #var AnyVar Fx = 0;
+    #var AnyVar Fy = 0;
+    #var AnyVar Fz = 0;
+    #var AnyVar Mx = 0;
+    #var AnyVar My = 0;
+    #var AnyVar Mz = 0;
+  };
+
+
+
+  AnyVar MaxLoad = max( vnorm(
+    {Obj2Num(Fx) + BaselineOffset.Fx, Obj2Num(Fy) + BaselineOffset.Fy, Obj2Num(Fz) + BaselineOffset.Fz}
+    ) );
   AnyVar FzTotal = load(NetEffectMeasure.t)[2];
   AnyVar LoadRatio = vnorm(Force.Flocal)/(MaxLoad+0.0001);
   AnyVar OnOff=iffun(gtfun(-FzTotal,10.0),1.0,0.0);
@@ -292,8 +305,14 @@
   AnyFunInterpol load ={
     Type=PiecewiseLinear;
     T= .Time;
-    Data= .CalMatrix'*
-      {Obj2Num(.Fx),Obj2Num(.Fy), Obj2Num(.Fz), Obj2Num(.Mx), Obj2Num(.My), Obj2Num(.Mz)};
+    Data= .CalMatrix'* {
+       Obj2Num(.Fx) + .BaselineOffset.Fx,
+       Obj2Num(.Fy) + .BaselineOffset.Fy,
+       Obj2Num(.Fz) + .BaselineOffset.Fz,
+       Obj2Num(.Mx) + .BaselineOffset.Mx,
+       Obj2Num(.My) + .BaselineOffset.My,
+       Obj2Num(.Mz) + .BaselineOffset.Mz,
+     };
   };
 
   AnyForce3D Force ={
