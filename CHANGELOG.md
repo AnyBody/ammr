@@ -150,7 +150,8 @@ You can [enable backwards compatibility](changes-to-bodymodel-folders) by settin
    hand is enabled. 
 *  Fixed arm rest asymmetry in various sitting model application examples. 
 
-
+### ➕ Added:
+* The implemenation of the pelvis rotation vector measure in the interface folder has been refactored to allow overwritting the global reference frame.
 
 (ammr-3.1.3-changelog)=
 ## AMMR 3.1.3 (2025-06-16)
