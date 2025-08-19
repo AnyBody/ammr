@@ -57,13 +57,13 @@ AnyFolder ThoraxMuscleCalibration={
     AnyFloat ThoraxRotLeft  = {  0,  0,-30} * pi/180;
     AnyFloat ThoraxRotRight = {  0,  0, 30} * pi/180;
     
-    // AnyFloat NeckNeutral  = {  0,  0,  0} * pi/180;
-    // AnyFloat NeckFlex     = {  0,  0, 45} * pi/180;
-    // AnyFloat NeckLatRight = { 45,  0,  0} * pi/180;
-    // AnyFloat NeckExtend   = {  0,  0,-45} * pi/180;
-    // AnyFloat NeckLatLeft  = {-45,  0,  0} * pi/180;
-    // AnyFloat NeckRotLeft  = {  0, 75,  0} * pi/180;
-    // AnyFloat NeckRotRight = {  0,-75,  0} * pi/180;
+     AnyFloat NeckNeutral  = {  0,  0,  0} * pi/180;
+     AnyFloat NeckFlex     = {  0,  0, 45} * pi/180;
+     AnyFloat NeckLatRight = { 45,  0,  0} * pi/180;
+     AnyFloat NeckExtend   = {  0,  0,-45} * pi/180;
+     AnyFloat NeckLatLeft  = {-45,  0,  0} * pi/180;
+     AnyFloat NeckRotLeft  = {  0, 75,  0} * pi/180;
+     AnyFloat NeckRotRight = {  0,-75,  0} * pi/180;
     
     AnyFloat ThoraxPosData = repmat(1,{
       ThoraxNeutral,
@@ -75,20 +75,30 @@ AnyFolder ThoraxMuscleCalibration={
       ThoraxRotRight
       }');
       
-    // AnyFloat NeckPosData = repmat(1,{
-    //   NeckNeutral,
-    //   NeckFlex,
-    //   NeckLatRight,
-    //   NeckExtend,
-    //   NeckLatLeft,
-    //   NeckRotLeft,
-    //   NeckRotRight
-    //   }');
+     AnyFloat NeckPosData = repmat(1,{
+       NeckNeutral,
+       NeckFlex,
+       NeckLatRight,
+       NeckExtend,
+       NeckLatLeft,
+       NeckRotLeft,
+       NeckRotRight
+       }');
     
-    AnyKinEq SkullConstraint = {
+//    AnyKinEq SkullConstraint = {
+//      AnyKinMeasure &ref1 = ....BodyModel.Interface.Trunk.SkullThoraxFlexion;
+//      AnyKinMeasure &ref2 = ....BodyModel.Interface.Trunk.SkullThoraxLateralBending;
+//      AnyKinMeasure &ref3 = ....BodyModel.Interface.Trunk.SkullThoraxRotation;
+//    };
+
+    AnyKinEqInterPolDriver SkullConstraint = {
       AnyKinMeasure &ref1 = ....BodyModel.Interface.Trunk.SkullThoraxFlexion;
       AnyKinMeasure &ref2 = ....BodyModel.Interface.Trunk.SkullThoraxLateralBending;
       AnyKinMeasure &ref3 = ....BodyModel.Interface.Trunk.SkullThoraxRotation;
+      Type = PiecewiseLinear;
+      T = linspace(0,1,SizesOf(Data)[1]);
+      Data = .NeckPosData;
+      Reaction.Type = {On,On,On};
     };
     
     AnyKinEqInterPolDriver ThoraxDriver = {
@@ -133,7 +143,8 @@ AnyFolder ThoraxMuscleCalibration={
     /// This gives them zero range of motion and thereby no fiberlength [Lf0] when calibrated.
     MuscleArr = set_difference(
       ObjSearchRecursive(&...BodyModel.Trunk.Muscles, "*", "AnyMuscle", 3), 
-      ObjSearch(&...BodyModel.Trunk.Muscles, "*.PelvicFloor.*")
+      ObjSearch(&...BodyModel.Trunk.Muscles, "*.Pubococcygeus.*"),
+      ObjSearch(&...BodyModel.Trunk.Muscles, "*.Puborectalis.*")
     );
   };
 };
