@@ -9,8 +9,11 @@ gallery_image: "/Applications/images/GRFPrediction-Plug-in-gait.jpg"
 # Simple GRF prediction model
 
 
-````{sidebar} **Example**
-<img src="/Applications/images/GRFPrediction-Plug-in-gait.jpg" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/GRFPrediction-Plug-in-gait.jpg" width="100%" align="center">
+
+{anylink-button}`Application/MocapExamples/Plug-in-gait_Simple/FullBody_GRFPrediction.main.any`
+
 ````
 
 Example of full body MoCap model using the Plug-in-Gait marker protocol but
@@ -19,11 +22,10 @@ algorithms.
 
 
 
-:::{seealso}
-**Main file location in AMMR:**
+:::{admonition} In Model Repository:
+:class: seealso
 
-{menuselection}`Application --> MocapExamples --> Plug-in-gait_Simple -->
-FullBody_GRFPrediction.main.any`
+{anylink-file}`Application/MocapExamples/Plug-in-gait_Simple/FullBody_GRFPrediction.main.any`
 :::
 
 Motion capture data is often recorded without force plates. In traditional

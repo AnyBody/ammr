@@ -7,8 +7,10 @@ gallery_image: "/Applications/images/UlmRatHindLimbModel.jpg"
 
 # Rat Hindlimb model
 
-````{sidebar} **Example**
-<img src="/Applications/images/UlmRatHindLimbModel.jpg" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/UlmRatHindLimbModel.jpg" width="100%" align="center">
+
+{anylink-button}`Application/Beta/UlmRatHindLimbModel/UlmRatHindLimbModel.Main.any`
 ````
 
 The Ulm Rat hindlimb model is a simlation of the internal forces and moments in
@@ -18,11 +20,12 @@ of the lower extremity of 15 rats. Kinematics was created from x-ray movies in
 two different planes. This model is good example of small stand alone model to answer a specific
 research question.
 
-The main file of the model is located at:
+:::{admonition} In Model Repository:
+:class: seealso
 
-{menuselection}`Application --> Beta --> UlmRatHindLimbModel -->
-UlmRatHindLimbModel.Main.any`
+{anylink-file}`Application/Beta/UlmRatHindLimbModel/UlmRatHindLimbModel.Main.any`
 
+:::
 % .. figure:: _static/DetailedHandCloseUp.jpg ..    :width: 50%
 
 %

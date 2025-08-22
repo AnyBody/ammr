@@ -7,8 +7,10 @@ gallery_image: "/Applications/images/PedalDemoConditional.webp"
 
 # Pedel demo
 
-````{sidebar} **Example**
-<img src="/Applications/images/PedalDemoConditional.webp" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/PedalDemoConditional.webp" width="100%" align="center">
+
+{anylink-button}`Application/Examples/PedalDemoConditional/PedalDemoConditional.main.any`
 
 ````
 
@@ -17,11 +19,10 @@ demonstrates conditional contact between the foot and the
 pedal.
 
 
-:::{seealso}
-**Main file location in AMMR:**
+:::{admonition} In Model Repository:
+:class: seealso
 
-{menuselection}`Application --> Examples --> PedalDemoConditional -->
-PedalDemoConditional.Main.any`
+{anylink-file}`Application/Examples/PedalDemoConditional/PedalDemoConditional.main.any`
 :::
 
 This model is for design of a pedal that is comfortable to use

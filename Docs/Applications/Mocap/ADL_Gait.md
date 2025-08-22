@@ -7,17 +7,26 @@ gallery_image: "/Applications/images/ADL_Gait.webp"
 (example_adlgait)=
 # ADL Gait (beta)
 
-````{sidebar} **Example**
-<img src="/Applications/images/ADL_Gait.webp" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/ADL_Gait.webp" width="100%" align="center">
+
+{anylink-button}`Application/MocapExamples/ADL_Gait_[beta]/Subjects/2014001/2014001_C1_01/Main.any"`
 ````
+
+
 
 Fullbody MoCap model with multiple subjects and trials based on the 
 "Rehazenter Adult Walking Dataset" by [Schreiber and Moissenet (2019)](https://doi.org/10.1038/s41597-019-0124-4).
 
-:::{admonition} **Main file location in AMMR:**
-:class: see-also
+:::{admonition} In Model Repository:
+:class: seealso
 
-  {menuselection}`Application --> MocapExamples --> ADL_Gait_[beta]`
+The model is located at: `Application/MocapExamples/ADL_Gait_[beta]`
+
+Dynamic trial: {anylink-file}`Subjects/2014001/2014001_C1_01/Main.any <Application/MocapExamples/ADL_Gait_[beta]/Subjects/2014001/2014001_C1_01/Main.any>`
+
+Standing reference: {anylink-file}`Subjects/2014001/2014001_ST/Main.any <Application/MocapExamples/ADL_Gait_[beta]/Subjects/2014001/2014001_ST/Main.any>`
+
 :::
 
 
@@ -123,11 +132,7 @@ The model also contains a batch processing Python script for running all models.
 To use the scirpt install the [Anaconda Python Distribution](https://www.anaconda.com/download). 
 
 The script uses the [AnyPyTools](https://github.com/AnyBody-Research-Group/AnyPyTools) library for working with the
-AnyBody Model System ( [Lund 2019](https://doi.org/10.21105/joss.01108) ). The library can be installed with:
-
-```bash
-conda install -c conda-forge anypytools
-```
+AnyBody Model System ( [Lund 2019](https://doi.org/10.21105/joss.01108) ). 
 
 Then run the following command in the model folder:
 

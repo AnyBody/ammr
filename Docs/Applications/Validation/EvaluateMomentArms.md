@@ -7,8 +7,10 @@ gallery_image: "/Applications/images/EvaluateMomentArms.webp"
 (example_evaluate_momentarms)=
 # Evaluate moment arms
 
-````{sidebar} **Example**
-<img src="/Applications/images/EvaluateMomentArms.webp" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/EvaluateMomentArms.webp" width="100%" align="center">
+
+{anylink-button}`Application/Validation/EvaluateMomentArms/EvaluateMomentArms.main.any`
 ````
 
 This model shows how to enable the built-in moment arm evaluation studies.
@@ -29,10 +31,9 @@ This  will include a lot of studies (one per DOF) so they will
 affect performance when loading and switching between tabs/operations.
 :::
 
+:::{admonition} In Model Repository:
+:class: seealso
 
+{anylink-file}`Application/Validation/EvaluateMomentArms/EvaluateMomentArms.main.any`
 
-:::{seealso}
-**Main file location in AMMR:**
-
-{menuselection}`Application --> Validation --> EvaluateMomentArms --> EvaluateMomentArms.main.any`
 :::

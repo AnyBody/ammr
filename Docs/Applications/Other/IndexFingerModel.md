@@ -8,8 +8,10 @@ gallery_image: "/Applications/images/IndexFingerModel.jpg"
 # Index finger model
 
 
-````{sidebar} **Example**
-<img src="/Applications/images/IndexFingerModel.jpg" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/IndexFingerModel.jpg" width="100%" align="center">
+
+{anylink-button}`Application/Beta/IndexFinger_JohnWu/IndexFinger_JohnWu.Main.any`
 ````
 
 The Index finger model is developed by John Z. Wu (NIOSH, Morgantwon, WV 26505, USA) in 2008.
@@ -19,12 +21,10 @@ The model contains seven muscles/tendons which connects the metacarpal with the 
 This model is good example of small stand alone model to answer specific research questions.
 
 
+:::{admonition} In Model Repository:
+:class: seealso
 
-:::{seealso}
-**Main file location in AMMR:**
-
-{menuselection}`Application --> Beta --> IndexFinger_JohnWu -->
-IndexFinger_JohnWu.Main.any`
+{anylink-file}`Application/Beta/IndexFinger_JohnWu/IndexFinger_JohnWu.Main.any`
 :::
 
 % .. figure:: _static/DetailedHandCloseUp.jpg ..    :width: 50%

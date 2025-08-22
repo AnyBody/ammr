@@ -7,12 +7,30 @@ gallery_image: "/Applications/images/SpinePressureStanding.webp"
 (example_wilkespinepressure)=
 # Wilke Spine Disc Pressure Model
 
-````{sidebar} **Example**
-<img src="/Applications/images/SpinePressureStanding.webp" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/SpinePressureStanding.webp" width="100%" align="center">
+
+{anylink-button}`Application/Validation/WilkeSpinalDiscPressure/SpinePressureSeatingRelaxed/SpinePressureSeatingRelaxed.main.any`
+
 ````
 
 The Wilke Spine Pressure models are eight models that compare intradiscal pressure measured between L4 and L5 discs in different postures.
 
+
+:::{admonition} In Model Repository:
+:class: seealso
+{menuselection}`Application --> Validation --> WilkeSpinalDiscPressure`
+
+* {anylink-file}`SpinePressureSeatingRelaxed.main.any <Application/Validation/WilkeSpinalDiscPressure/SpinePressureSeatingRelaxed/SpinePressureSeatingRelaxed.main.any>`
+* {anylink-file}`SpinePressureLyingOnBack.main.any <Application/Validation/WilkeSpinalDiscPressure/SpinePressureLyingOnBack/SpinePressureLyingOnBack.main.any>`
+* {anylink-file}`SpinePressureSeatingStraitNoSupport.main.any <Application/Validation/WilkeSpinalDiscPressure/SpinePressureSeatingStraitNoSupport/SpinePressureSeatingStraitNoSupport.main.any>`
+* {anylink-file}`SpinePressureStanding.main.any <Application/Validation/WilkeSpinalDiscPressure/SpinePressureStanding/SpinePressureStanding.main.any>`
+* {anylink-file}`SpinePressureStandingFlexed.main.any <Application/Validation/WilkeSpinalDiscPressure/SpinePressureStandingFlexed/SpinePressureStandingFlexed.main.any>`
+* {anylink-file}`SpinePressureStandingLiftClose.main.any <Application/Validation/WilkeSpinalDiscPressure/SpinePressureStandingLiftClose/SpinePressureStandingLiftClose.main.any>`
+* {anylink-file}`SpinePressureStandingLiftFlexed.main.any <Application/Validation/WilkeSpinalDiscPressure/SpinePressureStandingLiftFlexed/SpinePressureStandingLiftFlexed.main.any>`
+* {anylink-file}`SpinePressureStandingLiftStretchedArms.main.any <Application/Validation/SpinePressureStandingLiftStretchedArms/SpinePressureStandingLiftStretchedArms/SpinePressureSeatingRelaxed.main.any>`
+
+:::
 :::{seealso}
 **Main file location in AMMR:**
 

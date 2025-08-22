@@ -8,14 +8,22 @@ gallery_image: "/Applications/images/WheelChairRancho.webp"
 # Wheel Chair model
 
 
-````{sidebar} **Example**
-<img src="/Applications/images/WheelChairRancho.webp" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/WheelChairRancho.webp" width="100%" align="center">
+
+{anylink-button}`Application/Examples/WheelChairRancho/WheelChairRancho.main.any`
+
+
 ````
 
 A model of a person sitting in a wheelchair, the model is driven by motion
 capture data.
 
-**Main file:** `Application/Examples/WheelChairRancho/WheelChairRancho.main.any`
+:::{admonition} In Model Repository:
+:class: seealso
+
+{anylink-file}`Application/Examples/WheelChairRancho/WheelChairRancho.main.any`
+:::
 
 This is a model of a person sitting in a wheelchair. The model only comprises
 the upper right arm.

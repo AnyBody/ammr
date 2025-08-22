@@ -8,13 +8,21 @@ gallery_image: "/Applications/images/FacetJointModel.webp"
 # Facet Joint Model
 
 
-````{sidebar} **Example**
-<img src="/Applications/images/FacetJointModel.webp" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/FacetJointModel.webp" width="100%" align="center">
+
+{anylink-button}`Application/Examples/FacetJointModel/FacetJointModel.main.any`
+
 ````
 
 A spine model with facet joints.
 
-**Main file:** `Application/Examples/FacetJointModel/FacetJointModel.main.any`
+
+:::{admonition} In Model Repository:
+:class: seealso
+
+{anylink-file}`Application/Examples/FacetJointModel/FacetJointModel.main.any`
+:::
 
 This model presents a methodology for implementation of facet joints in the
 lumbar spine model developed by De Zee et al. (2007: J Biomech. 40, 1219-1227).

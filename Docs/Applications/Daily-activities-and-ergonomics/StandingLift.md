@@ -7,20 +7,20 @@ gallery_image: "/Applications/images/StandingLift.webp"
 (example_standinglift)=
 # Lifting Model
 
-````{sidebar} **Example**
-<img src="/Applications/images/StandingLift.webp" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/StandingLift.webp" width="100%" align="center">
 
+{anylink-button}`Application/Examples/StandingLift/StandingLift.main.any`
 ````
 
 Standing body model lifting a box.
 
-:::{seealso}
-**Main files location in AMMR:**
+:::{admonition} In Model Repository:
+:class: seealso
 
-{menuselection}`Application --> Examples --> StandingLift -->`
+{anylink-button}`Application/Examples/StandingLift/StandingLift.main.any`
+{anylink-button}`Application/Examples/StandingLift/StandingLiftFEA.main.any`
 
-{menuselection}`StandingLift.Main.any` /
-{menuselection}`StandingLiftFEA.Main.any`
 :::
 
 This application can be a good starting point for new applications involving

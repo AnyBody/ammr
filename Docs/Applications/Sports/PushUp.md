@@ -7,19 +7,20 @@ gallery_image: "/Applications/images/PushUp.webp"
 
 # Push Up
 
-````{sidebar} **Example**
-<img src="/Applications/images/PushUp.webp" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/PushUp.webp" width="100%" align="center">
+
+{anylink-button}`Application/Examples/PushUp/PushUp.main.any`
 ````
 
 
 A full-body model doing push-ups with assumed drivers.
 
+:::{admonition} In Model Repository:
+:class: seealso
 
+{anylink-file}`Application/Examples/PushUp/PushUp.main.any`
 
-:::{seealso}
-**Main file location in AMMR:**
-
-{menuselection}`Application --> Examples --> PushUp --> PushUp.main.any`
 :::
 
 The model displays several topics

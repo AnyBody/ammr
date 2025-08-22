@@ -7,17 +7,19 @@ gallery_image: "/Applications/images/Squat.webp"
 (example_squat)=
 # Squat
 
-````{sidebar} **Example**
-<img src="/Applications/images/Squat.webp" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/Squat.webp" width="100%" align="center">
+
+{anylink-button}`Application/Examples/Squat/Squat.main.any`
 
 ````
 
 This model demonstrates parameterized squating motion.
 
-:::{admonition} **Main file location in AMMR:**
-:class: see-also
+:::{admonition} In Model Repository:
+:class: seealso
 
-  {menuselection}`Application --> Examples --> Squat --> Squat.main.any`
+{anylink-file}`Application/Examples/Squat/Squat.main.any`
 :::
 
 

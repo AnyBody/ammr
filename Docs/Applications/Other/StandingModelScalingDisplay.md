@@ -8,18 +8,20 @@ gallery_image: "/Applications/images/StandingModelScalingDisplay.webp"
 # Standing Model Scaling Display
 
 
-````{sidebar} **Example**
-<img src="/Applications/images/StandingModelScalingDisplay.webp" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/StandingModelScalingDisplay.webp" width="100%" align="center">
+
+{anylink-button}`Application/Examples/StandingModelScalingDisplay/StandingModelScalingDisplay.Main.any`
+
 ````
 
 This application shows all the scaling laws available.
 
 
-:::{seealso}
-**Main file location in AMMR:**
+:::{admonition} In Model Repository:
+:class: seealso
 
-{menuselection}`Application --> Examples --> StandingModelScalingDisplay -->
-StandingModelScalingDisplay.Main.any`
+{anylink-file}`Application/Examples/StandingModelScalingDisplay/StandingModelScalingDisplay.Main.any`
 :::
 
 The model can be scaled either regarding to measures between joint center,

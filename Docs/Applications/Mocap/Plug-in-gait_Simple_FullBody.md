@@ -8,8 +8,11 @@ gallery_image: "/Applications/images/Plug-in-gait_simple_fullbody.webp"
 # Simple Full body model
 
 
-````{sidebar} **Example**
-<img src="/Applications/images/Plug-in-gait_simple_fullbody.webp" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/Plug-in-gait_simple_fullbody.webp" width="100%" align="center">
+
+{anylink-button}`Application/MocapExamples/Plug-in-gait_Simple/FullBody.main.any`
+
 ````
 
 
@@ -19,11 +22,9 @@ starting point for new users. If you plan to have many trials/subjects, take
 a look at the example which better support multiple trails.
 
 
+:::{admonition} In Model Repository:
+:class: seealso
 
-:::{seealso}
-**Main file location in AMMR:**
-
-{menuselection}`Application --> MocapExamples --> Plug-in-gait_Simple -->
-FullBody.main.any`
+{anylink-file}`Application/MocapExamples/Plug-in-gait_Simple/FullBody.main.any`
 :::
 

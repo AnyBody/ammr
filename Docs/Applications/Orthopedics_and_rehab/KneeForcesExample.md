@@ -8,9 +8,17 @@ gallery_image: "/Applications/images/KneeForceExample.webp"
 # Knee forces example
 
 
-````{sidebar} **Example**
-<img src="/Applications/images/KneeForceExample.webp" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/KneeForceExample.webp" width="100%" align="center">
+
+{anylink-button}`Application/Examples/KneeForcesExample/Knee_force_example.main.any`
 ````
+
+:::{admonition} In Model Repository:
+:class: seealso
+
+{anylink-file}`Application/Examples/KneeForcesExample/Knee_force_example.main.any`
+:::
 
 Example of calculating the medial/lateral knee force from the total force and moment.
 

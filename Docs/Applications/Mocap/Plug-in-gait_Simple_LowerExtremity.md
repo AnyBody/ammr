@@ -8,8 +8,11 @@ gallery_image: "/Applications/images/LowerExtremity-Plug-in-gait.webp"
 # Simple Lower extremity model
 
 
-````{sidebar} **Example**
-<img src="/Applications/images/LowerExtremity-Plug-in-gait.webp" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/LowerExtremity-Plug-in-gait.webp" width="100%" align="center">
+
+{anylink-button}`Application/MocapExamples/Plug-in-gait_Simple/LowerExtremity.main.any`
+
 ````
 
 Example of lower body MoCap model using the Plug-in-Gait marker protocol,
@@ -22,6 +25,6 @@ take a look at the example which better support multiple trails.
 :::{seealso}
 **Main file location in AMMR:**
 
-{menuselection}`Application --> MocapExamples --> Plug-in-gait_Simple -->
-LowerExtremity.main.any`
+{anylink-file}`Application/MocapExamples/Plug-in-gait_Simple/LowerExtremity.main.any`
+
 :::

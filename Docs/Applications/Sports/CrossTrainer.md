@@ -7,8 +7,11 @@ gallery_image: "/Applications/images/CrossTrainer.webp"
 (example_crosstrainer)=
 # Cross Trainer
 
-````{sidebar} **Example**
-<img src="/Applications/images/CrossTrainer.webp" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/CrossTrainer.webp" width="100%" align="center">
+
+{anylink-button}`Application/Examples/CrossTrainer/CrossTrainer.main.any`
+
 ````
 
 
@@ -17,10 +20,11 @@ extended with the human.
 
 
 
-:::{seealso}
-**Main file location in AMMR:**
+:::{admonition} In Model Repository:
+:class: seealso
 
-{menuselection}`Application --> Examples --> CrossTrainer --> CrossTrainer.main.any`
+{anylink-file}`Application/Examples/CrossTrainer/CrossTrainer.main.any`
+
 :::
 
 The model is also the subject of the AnyBody Tutorial

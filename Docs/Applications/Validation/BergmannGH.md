@@ -7,8 +7,10 @@ gallery_image: "/Applications/images/BergmannGH.webp"
 
 # Bergmann GH
 
-````{sidebar} **Example**
-<img src="/Applications/images/BergmannGH.webp" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/BergmannGH.webp" width="100%" align="center">
+
+{anylink-button}`Application/Validation/BergmannGH/BergmannGH.Main.any`
 ````
 
 
@@ -19,8 +21,9 @@ study.
 
 
 
-:::{seealso}
-**Main file location in AMMR:**
+:::{admonition} In Model Repository:
+:class: seealso
 
-{menuselection}`Application --> Validation --> BergmannGH --> BergmannGH.Main.any`
+{anylink-file}`Application/Validation/BergmannGH/BergmannGH.Main.any`
+
 :::

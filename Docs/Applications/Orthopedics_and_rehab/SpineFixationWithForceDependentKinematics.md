@@ -8,14 +8,19 @@ gallery_image: "/Applications/images/SpineFixationWithForceDependentKinematics.w
 # Spine Fixation Model using Force Dependent Kinematics
 
 
-````{sidebar} **Example**
-<img src="/Applications/images/SpineFixationWithForceDependentKinematics.webp" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/SpineFixationWithForceDependentKinematics.webp" width="100%" align="center">
+
+{anylink-button}`Application/Examples/SpineFixationWithForceDepKinematics/SpineFixationWithForceDependentKinematics.main.any`
 ````
 
 This application is an example of how to use the new force-dependent
 kinematics. The force dependent kinematics allows the kinematic spine
 rhythm which normally drives the vertebras to be switched entirely off.
 
-**Example folder:**
+:::{admonition} In Model Repository:
+:class: seealso
 
-`Application/Examples/SpineFixationWithForceDepKinematics/`
+{anylink-file}`Application/Examples/SpineFixationWithForceDepKinematics/SpineFixationWithForceDependentKinematics.main.any`
+
+:::

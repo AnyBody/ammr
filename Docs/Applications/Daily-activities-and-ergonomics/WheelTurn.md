@@ -7,17 +7,19 @@ gallery_image: "/Applications/images/WheelTurn.webp"
 
 # Hand crank model
 
-````{sidebar} **Example**
-<img src="/Applications/images/WheelTurn.webp" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/WheelTurn.webp" width="100%" align="center">
+
+{anylink-button}`Application/Examples/WheelTurn/WheelTurn.main.any`
 ````
 
 This is a model of a person turning a horizontal wheel by means of a handle.
 The purpose of the model is shoulder validation.
 
-:::{admonition}  **Main file location in AMMR:**
-:class: see-also
+:::{admonition} In Model Repository:
+:class: seealso
 
-  {menuselection}`Application --> Examples --> WheelTurn --> WheelTurn.Main.any`
+{anylink-file}`Application/Examples/WheelTurn/WheelTurn.main.any`
 
 :::
 

@@ -7,8 +7,10 @@ gallery_image: "/Applications/images/StatisticalScalingPlugin.jpg"
 
 # Statistical Scaling Plugin
 
-````{sidebar} **Example**
-<img src="/Applications/images/StatisticalScalingPlugin.jpg" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/StatisticalScalingPlugin.jpg" width="100%" align="center">
+
+{anylink-button}`Application/Examples/StatisticalScalingPlugin/Main.any`
 ````
 
 Plugin for scaling subjects based on an anthropometric database.
@@ -19,11 +21,10 @@ parameters when scaling the model. The plugin calculates the remaining (free)
 anthropometric variables based on the ANSUR [^f1] anthropometrical database.
 
 
+:::{admonition} In Model Repository:
+:class: seealso
 
-:::{seealso}
-**Main file location in AMMR:**
-
-{menuselection}`Application --> Examples --> StatisticalScalingPlugin --> Main.any`
+{anylink-file}`Application/Examples/StatisticalScalingPlugin/Main.any`
 :::
 
 The big advantage is that the correlation between variables are maintained, so

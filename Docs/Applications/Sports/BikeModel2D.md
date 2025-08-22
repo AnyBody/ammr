@@ -7,8 +7,11 @@ gallery_image: "/Applications/images/BikeModel2D.webp"
 
 # Bike Model 2D
 
-````{sidebar} **Example**
-<img src="/Applications/images/BikeModel2D.webp" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/BikeModel2D.webp" width="100%" align="center">
+
+{anylink-button}`Application/Examples/BikeModel2D/BikeModel2D.main.any`
+
 ````
 
 
@@ -17,10 +20,11 @@ leg model.
 
 
 
-:::{seealso}
-**Main file location in AMMR:**
+:::{admonition} In Model Repository:
+:class: seealso
 
-{menuselection}`Application --> Examples --> BikeModel2D --> BikeModel2D.main.any`
+{anylink-file}`Application/Examples/BikeModel2D/BikeModel2D.main.any`
+
 :::
 
 Although this model can be rotated in 3-D space it really is just a saggital

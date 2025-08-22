@@ -9,8 +9,10 @@ gallery_image: "/Applications/images/StandingPosturePredictionModel.webp"
 # Posture Prediction Model
 
 
-````{sidebar} **Example**
-<img src="/Applications/images/StandingPosturePredictionModel.webp" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/StandingPosturePredictionModel.webp" width="100%" align="center">
+
+{anylink-button}`Application/Examples/StandingPosturePredictionWithLoad/StandingPosturePrediction.main.any`
 
 ````
 
@@ -19,11 +21,10 @@ It does this by minimizing joint torques and applying balance drivers which acco
 applied loads.
 
 
-:::{seealso}
-**Main file location in AMMR:**
+:::{admonition} In Model Repository:
+:class: seealso
 
-{menuselection}`Application --> Examples --> StandingPosturePredictionWithLoad -->
-StandingPosturePrediction.main.any`
+{anylink-file}`Application/Examples/StandingPosturePredictionWithLoad/StandingPosturePrediction.main.any`
 :::
 
 

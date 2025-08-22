@@ -7,8 +7,10 @@ gallery_image: "/Applications/images/StandingModel.webp"
 (example_standingmodel)=
 # Standing Model
 
-````{sidebar} **Example**
-<img src="/Applications/images/StandingModel.webp" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/StandingModel.webp" width="100%" align="center">
+
+{anylink-button}`Application/Examples/StandingModel/StandingModel.main.any`
 ````
 
 A full-body model that which uses a center of mass drivers to keep balance and Ground Reaction Force prediction for contact with the ground.
@@ -26,9 +28,9 @@ The model has the following features which makes it a good starting point for cr
 The model is identical to the standing model created with the  template generator in the AnyBody Modeling System.
 
 
-:::{seealso}
-**Main file location in AMMR:**
+:::{admonition} In Model Repository:
+:class: seealso
 
-{menuselection}`Application --> Examples --> StandingModel --> StandingModel.Main.any`
+{anylink-file}`Application/Examples/StandingModel/StandingModel.main.any`
 :::
 

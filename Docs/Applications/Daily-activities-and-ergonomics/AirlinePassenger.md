@@ -7,8 +7,11 @@ gallery_image: "/Applications/images/AirlinePassenger.webp"
 
 # Airline passenger
 
-````{sidebar} **Example**
-<img src="/Applications/images/AirlinePassenger.webp" align="center" width="70%" align="center">
+
+````{div} margin sd-text-center
+<img src="/Applications/images/AirlinePassenger.webp" align="center" width="100%" align="center">
+
+{anylink-button}`Application/Examples/AirlinePassenger/AirlinePassenger.main.any`
 
 ````
 The airline passenger example. This is a model of a coach class airline passenger seat
@@ -18,12 +21,12 @@ characterized by the following:
 - Horizontal seat pan
 - Limited ability to incline the backrest due to the lack of clearance to the person behind
 
-```{admonition} **Main file location in AMMR:**
+:::{admonition} In Model Repository:
 :class: seealso
-{menuselection}`Application --> Examples --> AirlinePassenger -->
-AirlinePassenger.main.any`
-```
 
+{anylink-file}`Application/Examples/AirlinePassenger/AirlinePassenger.main.any`
+
+:::
 
 The model assesses the comfort of the passenger in terms of
 the following:

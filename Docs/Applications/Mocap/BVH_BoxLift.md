@@ -8,8 +8,10 @@ gallery_image: "/Applications/images/BVH_BoxLift.webp"
 # BVH driven box lift example
 
 
-````{sidebar} **Example**
-<img src="/Applications/images/BVH_BoxLift.webp" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/BVH_BoxLift.webp" width="100%" align="center">
+
+{anylink-button}`Application/MocapExamples/BVH_BoxLift/Subjects/S01/S01_T01/Main.any`
 ````
 
 
@@ -18,11 +20,11 @@ The model uses a BVH file with data from an Xsens suit. The ground reaction forc
 predicted using the GRF prediction algorithm.
 
 
-```{admonition} **Main file Example:**
+:::{admonition} In Model Repository:
 :class: seealso
-{menuselection}`Application --> MocapExamples --> BVH_BoxLift --> Subjects --> S01 -->
-S01_T01 --> Main.any`
-```
+
+{anylink-file}`Application/MocapExamples/BVH_BoxLift/Subjects/S01/S01_T01/Main.any`
+:::
 
 The model works using virtual markers placed on the BVH rig (i.e. the stick-figure model
 specified by the BVH file). The virtual markers are used to make the Musculoskeletal model

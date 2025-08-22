@@ -8,17 +8,17 @@ gallery_image: "/Applications/images/JumpingJack.webp"
 # Jumping Jack
 
 
-````{sidebar} **Example**
-<img src="/Applications/images/JumpingJack.webp" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/JumpingJack.webp" width="100%" align="center">
+
+{anylink-button}`Application/Examples/JumpingJack/JumpingJack.main.any`
 ````
 
 A simple jumping jack model, illustrating some kinematic modeling concepts for a very simple model.
 
+:::{admonition} In Model Repository:
+:class: seealso
 
+{anylink-file}`Application/Examples/JumpingJack/JumpingJack.main.any`
 
-:::{seealso}
-**Main file location in AMMR:**
-
-{menuselection}`Application --> Examples --> JumpingJack -->
-JumpingJack.main.any`
 :::

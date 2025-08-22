@@ -8,8 +8,10 @@ gallery_image: "/Applications/images/FemoralTorsion.webp"
 # Femoral Torsion tool
 
 
-````{sidebar} **Example**
-<img src="/Applications/images/FemoralTorsion.webp" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/FemoralTorsion.webp" width="100%" align="center">
+
+{anylink-button}`Application/Examples/FemoralTorsion/StandingModel.Main.any`
 ````
 
 This is an example of modifying the femoral torsion of the default leg
@@ -19,11 +21,11 @@ torsion has been altered to 20 degrees. The model is also a good example on how
 a similar morphing approach can be used to personalize different body segments.
 
 
-:::{seealso}
-**Model location in AMMR:**
+:::{admonition} In Model Repository:
+:class: seealso
 
-{menuselection}`Application --> Examples --> FemoralTorsion -->
-StandingModel.Main.any`
+{anylink-file}`Application/Examples/FemoralTorsion/StandingModel.Main.any`
+
 :::
 
 The tool was developed by Enrico De Pieri, from the University of Basel

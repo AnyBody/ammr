@@ -7,8 +7,10 @@ gallery_image: "/Applications/images/LegPressMachine.webp"
 
 # Leg Press Machine
 
-````{sidebar} **Example**
-<img src="/Applications/images/LegPressMachine.webp" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/LegPressMachine.webp" width="100%" align="center">
+
+{anylink-button}`Application/Examples/LegPressMachine/LegPressMachine.main.any`
 ````
 
 
@@ -17,8 +19,9 @@ SolidModeling Class Template in the ToolBox of AMMR.
 
 
 
-:::{seealso}
-**Main file location in AMMR:**
+:::{admonition} In Model Repository:
+:class: seealso
 
-{menuselection}`Application --> Examples --> LegPressMachine --> LegPressMachine.main.any`
+{anylink-file}`Application/Examples/LegPressMachine/LegPressMachine.main.any`
+
 :::

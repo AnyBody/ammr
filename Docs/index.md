@@ -34,10 +34,18 @@ The AnyBody Managed Model Repository
 :class: sd-px-4 sd-fs-5
 
 {material-outlined}`timeline;1.5em` New in AMMR {{AMMR_VERSION}}
+```
 :::
 ::::
 
 ::::::
+
+
+{anylink-button}`Application/Examples/Squat/Squat.main.any`
+
+
+
+
 
 Open body models
 : All models are open and editable with the AnyScript model language

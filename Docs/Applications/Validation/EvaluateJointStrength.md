@@ -7,8 +7,10 @@ gallery_image: "/Applications/images/EvaluateJointStrength.webp"
 (example_evaluate_joint_strength)=
 # Evaluate joint strength
 
-````{sidebar} **Example**
-<img src="/Applications/images/EvaluateJointStrength.webp" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/EvaluateJointStrength.webp" width="100%" align="center">
+
+{anylink-button}`Application/Validation/EvaluateJointStrength/EvaluateJointStrength.main.any`
 ````
 
 
@@ -31,8 +33,11 @@ affect perfomance when loading and switching between tabs/operations.
 
 
 
-:::{seealso}
-**Main file location in AMMR:**
 
-{menuselection}`Application --> Validation --> EvaluateJointStrength --> EvaluateJointStrength.main.any`
+:::{admonition} In Model Repository:
+:class: seealso
+
+{anylink-file}`Application/Validation/EvaluateJointStrength/EvaluateJointStrength.main.any`
+
 :::
+

@@ -7,8 +7,10 @@ gallery_image: "/Applications/images/AalborgMandibleValidation.webp"
 (example_aalborgmandible)=
 # The Aalborg Mandible model
 
-````{sidebar} **Example**
-<img src="/Applications/images/AalborgMandibleValidation.webp" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/AalborgMandibleValidation.webp" width="100%" align="center">
+
+{anylink-button}`Application/Validation/AalborgMandibleValidation/Trials/ChewingClockwisePref0001/AnalysisFreeMovement.any`
 ````
 
 
@@ -32,12 +34,15 @@ Independent Research under grant number: DFF-4184-00018.
 
 
 
-:::{seealso}
-**Model location in AMMR:**
+:::{admonition} In Model Repository:
+:class: seealso
+{file}`Application/Validation/AalborgMandibleValidation`
 
-{menuselection}`Application --> Validation --> AalborgMandibleValidation`
+* {anylink-file}`ChewingClockwisePref0001/AnalysisFDK.main.any <Application/Validation/AalborgMandibleValidation/Trials/ChewingClockwisePref0001/AnalysisFDK.main.any>`
+* {anylink-file}`ChewingClockwisePref0001/AnalysisFreeMovement.any <Application/Validation/AalborgMandibleValidation/Trials/ChewingClockwisePref0001/AnalysisFreeMovement.any>`
+* {anylink-file}`ChewingClockwisePref0001/AnalysisPlanar.main.any <Application/Validation/AalborgMandibleValidation/Trials/ChewingClockwisePref0001/AnalysisPlanar.main.any>`
+
 :::
-
 ## How to run the model
 
 Under the Trials folder, there are six folders with the recorded trials. One of

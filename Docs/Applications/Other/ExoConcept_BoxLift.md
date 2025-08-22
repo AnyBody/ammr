@@ -8,18 +8,21 @@ gallery_image: "/Applications/images/ExoConcept_BoxLift.webp"
 # Exoskeleton concept model
 
 
-````{sidebar} **Example**
-<img src="/Applications/images/ExoConcept_BoxLift.webp" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/ExoConcept_BoxLift.webp" width="100%" align="center">
+
+{anylink-button}`Application/Examples/ExoskeletonConcept/ExoConcept_BoxLift.Main.any`
+
 ````
 
 
 Exoskeleton concept model.
 
 
-:::{seealso}
-**Main file location in AMMR:**
+:::{admonition} In Model Repository:
+:class: seealso
 
-{menuselection}`Application --> Examples --> ExoskeletonConcept --> ExoConcept_BoxLift.Main.any`
+{anylink-file}`Application/Examples/ExoskeletonConcept/ExoConcept_BoxLift.Main.any`
 :::
 
 This example shows how to study different exoskeleton concepts on an activity. The model is

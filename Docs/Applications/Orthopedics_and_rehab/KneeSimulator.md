@@ -8,15 +8,21 @@ gallery_image: "/Applications/images/KneeSimulator.webp"
 # Knee Simulator Model
 
 
-````{sidebar} **Example**
-<img src="/Applications/images/KneeSimulator.webp" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/KneeSimulator.webp" width="100%" align="center">
+
+{anylink-button}`Application/Examples/KneeSimulator/Main.any`
 ````
 
 Model of a Knee Simulator using a knee implant model and force-dependent kinematics (FDK).
 For an indepth description of the mathematics and mechanics behind FDK please see [^cite_azdn17].
 
-**Main file:** `Application/Examples/KneeSimulator/AnyKneeSimulator.Main.any`
+:::{admonition} In Model Repository:
+:class: seealso
 
+{anylink-file}`Application/Examples/KneeSimulator/Main.any`
+
+:::
 
 This is stand alone demo model of a knee simulator device resembling the principles of the Kansas Knee simulator [^cite_hcmt10].
 The model is contructed as a stand-alone model and doesn't use any elements and body parts from the model repository (AMMR).

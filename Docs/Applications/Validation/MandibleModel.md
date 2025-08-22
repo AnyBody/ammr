@@ -7,8 +7,10 @@ gallery_image: "/Applications/images/MandibleChewingAndClenching.jpg"
 (example_mandiblemodel)=
 # Symmetric Mandible example
 
-````{sidebar} **Example**
-<img src="/Applications/images/MandibleChewingAndClenching.jpg" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/MandibleChewingAndClenching.jpg" width="100%" align="center">
+
+{anylink-button}`Application/Validation/MandibleChewingAndClenching/MandibleChewingAndClenching.main.any`
 ````
 
 
@@ -16,10 +18,11 @@ Mandible model example.
 
 
 
-:::{seealso}
-**Main file location in AMMR:**
+:::{admonition} In Model Repository:
+:class: seealso
 
-{menuselection}`Application --> Validation --> MandibleChewingAndClenching --> MandibleChewingAndClenching.main.any`
+{anylink-file}`Application/Validation/MandibleChewingAndClenching/MandibleChewingAndClenching.main.any`
+
 :::
 
 Model simulating chewing and comparing values to measurements from de Zee et al., J. of Biomechanics 2007.

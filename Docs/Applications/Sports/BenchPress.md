@@ -7,8 +7,10 @@ gallery_image: "/Applications/images/BenchPress.webp"
 (example_benchpress)=
 # Bench Press
 
-````{sidebar} **Example**
-<img src="/Applications/images/BenchPress.webp" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/BenchPress.webp" width="100%" align="center">
+
+{anylink-button}`Application/Examples/BenchPress/BenchPress.Main.any`
 ````
 
 
@@ -16,10 +18,11 @@ A full-body model doing push-ups with assumed drivers.
 
 
 
-:::{seealso}
-**Main file location in AMMR:**
+:::{admonition} In Model Repository:
+:class: seealso
 
-{menuselection}`Application --> Examples --> BenchPress --> BenchPress.Main.any`
+{anylink-file}`Application/Examples/BenchPress/BenchPress.Main.any`
+
 :::
 
 The model of a bench press exercise is developed from the free posture model.

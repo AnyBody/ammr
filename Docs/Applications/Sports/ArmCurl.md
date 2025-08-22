@@ -7,20 +7,22 @@ gallery_image: "/Applications/images/ArmCurl.webp"
 
 # Arm curl
 
-````{sidebar} **Example**
-<img src="/Applications/images/ArmCurl.webp" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/ArmCurl.webp" width="100%" align="center">
+
+{anylink-button}`Application/Examples/ArmCurl/ArmCurl.main.any`
+
 ````
 
 Example of an Arm Curl fitness machine.
 
 
+:::{admonition} In Model Repository:
+:class: seealso
 
-:::{seealso}
-**Main file location in AMMR:**
+{anylink-file}`Application/Examples/ArmCurl/ArmCurl.main.any`
 
-{menuselection}`Application --> Examples --> ArmCurl --> ArmCurl.main.any`
 :::
-
 The objective of this example is to adjust the eccentricity of the cable wheel
 such that the arm muscles experience a constant effort throughout the elbow
 flexion taking the change of moment arms of the muscles into account.

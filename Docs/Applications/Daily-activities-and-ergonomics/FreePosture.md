@@ -7,9 +7,10 @@ gallery_image: "/Applications/images/FreePostureFullBodyShoulderRhythmStatic.web
 (example_freeposture)=
 # Free posture Models
 
+````{div} margin sd-text-center
+<img src="/Applications/images/FreePostureFullBodyShoulderRhythmStatic.webp" width="100%" align="center">
 
-````{sidebar} **Example**
-<img src="/Applications/images/FreePostureFullBodyShoulderRhythmStatic.webp" width="70%" align="center">
+{anylink-button}`Application/Examples/FreePosture/FreePostureFullBodyMove.main.any`
 
 ````
 
@@ -21,23 +22,19 @@ in the AAUHuman part of the Body directory. The model is grounded at the
 pelvis and the posture if the model is controlled through a `mannequin.any`
 file by means of joint angles.
 
-```{admonition} **Main file location in AMMR:**
+:::{admonition} In Model Repository:
 :class: seealso
-{menuselection}`Application --> Examples --> FreePosture -->`
 
-{menuselection}`FreePostureFullBodyMove.Main.any`
+{anylink-file}`Application/Examples/FreePosture/FreePostureFullBodyMove.Main.any`
 
-{menuselection}`FreePostureFullBodyShoulderRhythmMove.Main.any`
+{anylink-file}`Application/Examples/FreePosture/FreePostureFullBodyShoulderRhythmMove.Main.any`
 
-{menuselection}`FreePostureFullBodyShoulderRhythmStatic.Main.any`
+{anylink-file}`Application/Examples/FreePosture/FreePostureFullBodyShoulderRhythmStatic.Main.any`
 
-{menuselection}`FreePostureFullBodyShoulderRhythmStatic.Main.any`
-```
+{anylink-file}`Application/Examples/FreePosture/FreePostureFullBodyShoulderRhythmStatic.Main.any`
+:::
 
-This application is a really good starting point for new applications
-involving the entire body.
-
-The model do not contain muscles and is only intended for running kinematic analysis
+This application is a starting point for new applications involving the entire body.The model do not contain muscles and is only intended for running kinematic analysis
 
 The model has several configurations which can be changed in the file `Config.any`
 

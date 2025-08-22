@@ -8,20 +8,20 @@ gallery_image: "/Applications/images/SeatedHuman.webp"
 # Seated Human
 
 
-````{sidebar} **Example**
-<img src="/Applications/images/SeatedHuman.webp" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/SeatedHuman.webp" width="100%" align="center">
 
+{anylink-button}`Application/Examples/SeatedHuman/SeatedHuman.main.any`
 ````
 
 A model of a seated human consisting of the full body model, a chair, and an
 interface between the two.
 
 
-:::{seealso}
-**Main file location in AMMR:**
+:::{admonition} In Model Repository:
+:class: seealso
 
-{menuselection}`Application --> Examples --> SeatedHuman -->
-SeatedHuman.Main.any`
+{anylink-file}`Application/Examples/SeatedHuman/SeatedHuman.main.any`
 :::
 
 The Seated Human is a family of models resulting from a

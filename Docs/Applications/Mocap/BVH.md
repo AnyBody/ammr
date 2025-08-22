@@ -7,8 +7,10 @@ gallery_image: "/Applications/images/BVH.webp"
 (example_mocap_bvh)=
 # Inertial MoCap example
 
-````{sidebar} **Example**
-<img src="/Applications/images/BVH.webp" width="70%" align="center">
+````{div} margin sd-text-center
+<img src="/Applications/images/BVH.webp" width="100%" align="center">
+
+{anylink-button}`Application/MocapExamples/BVH_Xsens/Subjects/S1/S01_Trial01/Main.any"`
 ````
 
 Example of a MoCap model using data from an inertial motion capture suit.
@@ -16,11 +18,10 @@ The model uses a BVH file with data from an Xsens suit. The ground reaction
 forces are predicted using the GRF prediction algorithm.
 
 
+:::{admonition} In Model Repository:
+:class: seealso
 
-:::{seealso}
-**Main file Example:**
-
-{menuselection}`Application --> MocapExamples --> BVH_Xsens --> Subjects --> S1 --> S01_Trial01 --> Main.any`
+{anylink-file}`Application/MocapExamples/BVH_Xsens/Subjects/S1/S01_Trial01/Main.any"`
 :::
 
 The model works using virtual markers placed on the BVH rig (i.e. the stick-figure
