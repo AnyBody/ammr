@@ -65,6 +65,7 @@ extensions = [
     "sphinx_design",
     "sphinx_togglebutton",
     "sphinx_copybutton",
+    "anylink",
 
     # "sphinxcontrib.youtube",
     # "sphinx_copybutton",
@@ -108,6 +109,9 @@ exclude_patterns = [
     "auto_examples",
     ".pixi",
 ]
+
+
+
 
 # The name of the Pygments (syntax highlighting) style to use.
 highlight_language = "AnyScriptDoc"
@@ -186,6 +190,16 @@ if tags.has("draft") and not release.endswith("beta"):
     release = release + "-beta"
 
 
+# -- Options for AnyLink extensions -----------------------------------
+
+anylink_ams_version = ams_version_short
+anylink_open_text = "Open in AnyBody"
+anylink_open_tooltip = f"Opens model in AnyBody {ams_version_short} (Must be installed) "
+
+# This will cause the extensin to add an argument to anylink:// urls ("repo_path=") with the path
+# to the local repository when serving html locally. (defaults to True)
+anylink_link_local_repo = True
+
 
 
 
@@ -243,8 +257,8 @@ html_theme_options = {
     "home_page_in_toc": False,
     "show_toc_level": 1,
 
-    "pygment_light_style": "AnyScript",
-    "pygment_dark_style": "stata-dark",
+    "pygments_light_style": "AnyScript",
+    "pygments_dark_style": "stata-dark",
 
 
     # "use_sidenotes": True,
