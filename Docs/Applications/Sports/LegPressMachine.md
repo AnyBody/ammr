@@ -4,7 +4,7 @@ gallery_image: "/Applications/images/LegPressMachine.webp"
 ---
 
 (sphx_glr_auto_examples_Sports_plot_LegPressMachine.py)=
-
+(example_legpressmachinemodel)=
 # Leg Press Machine
 
 ````{sidebar} **Example**
