@@ -1321,11 +1321,11 @@ requested body height.
   the Inverse Dynamics simulations.
 - Fixed a problem with the Body Model configurator plugin showing reporting: "No
   Human Model" when a configuration file already exists.
-- Corrected the location of via points of Flexor_Digitorum_Superficialis_Digit2
+- Corrected the location of via points of FlexorDigitorumSuperficialisDigit2
   to avoid wrapping surface collisions in certain hand positions.
-- Corrected the location of via points of Flexor_Digitorum_Superficialis_Digit3
-  and 4, Palmaris_Longus, Extensor_Carpi_Radialis_Brevis and
-  Extensor_Digitorum_Digit2 to avoid wrapping surface collisions in certain hand
+- Corrected the location of via points of FlexorDigitorumSuperficialisDigit3
+  and 4, PalmarisLongus, ExtensorCarpiRadialisBrevis and
+  ExtensorDigitorumDigit2 to avoid wrapping surface collisions in certain hand
   positions.
 - The muscle via point representing the bicipital groove have been adjusted to
   ensure the Biceps Caput Longum wraps the humeral head correctly in
@@ -1738,7 +1738,7 @@ requested body height.
   rhythm is enabled.
 - Fixed the initial wrapping guess for Teres Minor to prevent incorrect wrapping
   when starting model in postures which are close to range of motion.
-- Fixed typo in `Flexor_Digitorum_Profundus_Digit5` name.
+- Fixed typo in `FlexorDigitorumProfundusDigit5` name.
 - Fixed an interpolation issue with BVH based AnyMoCap models when the models
   were using all frames in a BVH file.
 - Added missing hand length/breadth values needed by Detailed Hand to the
@@ -1964,7 +1964,7 @@ the driver values are updated.
     is enabled.
   - Fixed problems with via points of the wrist extensor muscles colliding with
     the wrist wrapping surface in normal range of motion. The via point of
-    Extensor indicis `Via_Extensor_Indicis_pos` has been slightly adjusted and
+    Extensor indicis `Via_ExtensorIndicis_pos` has been slightly adjusted and
     the location of the wrist wrapping cylinder `MedialExtensorCyl` has been
     improved.
 

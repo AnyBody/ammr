@@ -103,7 +103,7 @@ model. This is possible, and there can be two ways to do it:
   shoulder-arm group. You can simply overwrite the default value by writing 
   the following line in your Main file or one of the other files of your model:
   ```AnyScriptDoc
-  Main.HumanModel.BodyModel.Right.ShoulderArm.MuscleModels.biceps_brachii_caput_longum.F0 = 200;
+  Main.HumanModel.BodyModel.Right.ShoulderArm.MuscleModels.BicepsBrachiiLongum.F0 = 200;
   ```
   In this way, you can modify the body model parameters without modifying the 
   body model files. This is important so that the modifications only affect
