@@ -1,15 +1,15 @@
 ---
 gallery_title: "AnyMoCap Features"
 gallery_image: "/Applications/images/force_plate_offset.webp"
+anylink: Application/MocapExamples/SpecialFeatures/ForcePlateSurfaceOffset.main.any
 ---
 
 (sphx_glr_auto_examples_MoCap_plot_AnyMoCapFeatures.py)=
 
 # AnyMoCap Features
 
-````{div} margin sd-text-center
-<img src="/Applications/images/force_plate_offset.webp" width="100%" align="center">
-````
+:::{anylink-gallery} 
+:::
 
 A collection of small models that show-off special features of the
 *AnyMoCap* framework.

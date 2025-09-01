@@ -1,6 +1,7 @@
 ---
 gallery_title: "GRF prediction model"
 gallery_image: "/Applications/images/GRFPrediction-Plug-in-gait.jpg"
+anylink: Application/MocapExamples/Plug-in-gait_Simple/FullBody_GRFPrediction.main.any
 ---
 
 (sphx_glr_auto_examples_Mocap_plot_Plug-in-gait_Simple_FullBody_GRFPrediction.py)=
@@ -8,13 +9,9 @@ gallery_image: "/Applications/images/GRFPrediction-Plug-in-gait.jpg"
 
 # Simple GRF prediction model
 
+:::{anylink-gallery} 
+:::
 
-````{div} margin sd-text-center
-<img src="/Applications/images/GRFPrediction-Plug-in-gait.jpg" width="100%" align="center">
-
-{anylink-button}`Application/MocapExamples/Plug-in-gait_Simple/FullBody_GRFPrediction.main.any`
-
-````
 
 Example of full body MoCap model using the Plug-in-Gait marker protocol but
 without force plates. The external forces are instead predicted using the GRF
@@ -25,7 +22,7 @@ algorithms.
 :::{admonition} In Model Repository:
 :class: seealso
 
-{anylink-file}`Application/MocapExamples/Plug-in-gait_Simple/FullBody_GRFPrediction.main.any`
+{anylink-file}` `
 :::
 
 Motion capture data is often recorded without force plates. In traditional

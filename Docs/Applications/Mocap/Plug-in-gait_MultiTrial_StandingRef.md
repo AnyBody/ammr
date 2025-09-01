@@ -1,6 +1,7 @@
 ---
 gallery_title: "Multi trial MoCap model"
 gallery_image: "/Applications/images/Plug-in-gait_Squat_Flywheel.webp"
+anylink: Application/MocapExamples/Plug-in-gait_MultiTrial_StandingRef/Subjects/S1/S1_FlywheelSquat/Main.any
 ---
 
 (sphx_glr_auto_examples_Mocap_plot_Plug-in-gait_MultiTrial_StandingRef.py)=
@@ -8,13 +9,8 @@ gallery_image: "/Applications/images/Plug-in-gait_Squat_Flywheel.webp"
 
 # Multi trial MoCap model
 
-
-````{div} margin sd-text-center
-<img src="/Applications/images/Plug-in-gait_Squat_Flywheel.webp" width="100%" align="center">
-
-{anylink-button}`Application/MocapExamples/Plug-in-gait_MultiTrial_StandingRef/Subjects/S1/S1_FlywheelSquat/Main.any`
-
-````
+:::{anylink-gallery} 
+:::
 
 Example of a MoCap model structured for analyzing data from multiple subjects
 and trials. This special structure makes it much easier to work with large

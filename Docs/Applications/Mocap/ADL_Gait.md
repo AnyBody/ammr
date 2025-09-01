@@ -1,17 +1,16 @@
 ---
 gallery_title: "ADL Gait (beta)"
 gallery_image: "/Applications/images/ADL_Gait.webp"
+anylink: Application/MocapExamples/ADL_Gait_[beta]/Subjects/2014001/2014001_C1_01/Main.any
 ---
 
 (sphx_glr_auto_examples_MoCap_plot_ADL_Gait.py)=
 (example_adlgait)=
 # ADL Gait (beta)
 
-````{div} margin sd-text-center
-<img src="/Applications/images/ADL_Gait.webp" width="100%" align="center">
 
-{anylink-button}`Application/MocapExamples/ADL_Gait_[beta]/Subjects/2014001/2014001_C1_01/Main.any"`
-````
+:::{anylink-gallery} 
+:::
 
 
 

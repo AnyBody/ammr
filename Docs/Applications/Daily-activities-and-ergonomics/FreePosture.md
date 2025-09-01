@@ -1,18 +1,17 @@
 ---
 gallery_title: "Free posture"
 gallery_image: "/Applications/images/FreePostureFullBodyShoulderRhythmStatic.webp"
+anylink: Application/Examples/FreePosture/FreePostureFullBodyMove.main.any
 ---
 
 (sphx-glr-auto-examples-adls-and-ergonomics-plot-freeposture-py)=
 (example_freeposture)=
 # Free posture Models
 
-````{div} margin sd-text-center
-<img src="/Applications/images/FreePostureFullBodyShoulderRhythmStatic.webp" width="100%" align="center">
 
-{anylink-button}`Application/Examples/FreePosture/FreePostureFullBodyMove.main.any`
+:::{anylink-gallery} 
+:::
 
-````
 
 A basic static full-body model standing on a floor.
 

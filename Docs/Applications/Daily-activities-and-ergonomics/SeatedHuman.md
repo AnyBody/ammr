@@ -1,18 +1,15 @@
 ---
 gallery_title: "Seated Human"
 gallery_image: "/Applications/images/SeatedHuman.webp"
+anylink: Application/Examples/SeatedHuman/SeatedHuman.main.any
 ---
 
 (sphx-glr-auto-examples-adls-and-ergonomics-plot-seatedhuman-py)=
 (example_seatedhuman)=
 # Seated Human
 
-
-````{div} margin sd-text-center
-<img src="/Applications/images/SeatedHuman.webp" width="100%" align="center">
-
-{anylink-button}`Application/Examples/SeatedHuman/SeatedHuman.main.any`
-````
+:::{anylink-gallery} 
+:::
 
 A model of a seated human consisting of the full body model, a chair, and an
 interface between the two.
@@ -21,7 +18,7 @@ interface between the two.
 :::{admonition} In Model Repository:
 :class: seealso
 
-{anylink-file}`Application/Examples/SeatedHuman/SeatedHuman.main.any`
+{anylink-file}` `
 :::
 
 The Seated Human is a family of models resulting from a

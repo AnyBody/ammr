@@ -1,19 +1,15 @@
 ---
 gallery_title: "Pedal demo simple"
 gallery_image: "/Applications/images/PedalDemo.webp"
+anylink: Application/Examples/PedalDemo/PedalDemo.main.any
 ---
 
 (sphx-glr-auto-examples-adls-and-ergonomics-plot-pedaldemo-py)=
 
 # Pedel demo simple
 
-
-````{div} margin sd-text-center
-<img src="/Applications/images/PedalDemo.webp" width="100%" align="center">
-
-{anylink-button}`Application/Examples/PedalDemo/PedalDemo.main.any`
-
-````
+:::{anylink-gallery} 
+:::
 
 This model demonstrates the construction
 of a foot pedal example.
@@ -22,7 +18,7 @@ of a foot pedal example.
 :::{admonition} In Model Repository:
 :class: seealso
 
-{anylink-file}`Application/Examples/PedalDemo/PedalDemo.main.any`
+{anylink-file}` `
 :::
 
 This model is for design of a pedal that is comfortable to use

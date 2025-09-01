@@ -1,18 +1,15 @@
 ---
 gallery_title: "Pedel demo"
 gallery_image: "/Applications/images/PedalDemoConditional.webp"
+anylink: Application/Examples/PedalDemoConditional/PedalDemoConditional.main.any
 ---
 
 (sphx-glr-auto-examples-adls-and-ergonomics-plot-pedaldemoconditional-py)=
 
 # Pedel demo
 
-````{div} margin sd-text-center
-<img src="/Applications/images/PedalDemoConditional.webp" width="100%" align="center">
-
-{anylink-button}`Application/Examples/PedalDemoConditional/PedalDemoConditional.main.any`
-
-````
+:::{anylink-gallery} 
+:::
 
 A leg pressing down a pedal. This
 demonstrates conditional contact between the foot and the
@@ -22,7 +19,7 @@ pedal.
 :::{admonition} In Model Repository:
 :class: seealso
 
-{anylink-file}`Application/Examples/PedalDemoConditional/PedalDemoConditional.main.any`
+{anylink-file}` `
 :::
 
 This model is for design of a pedal that is comfortable to use

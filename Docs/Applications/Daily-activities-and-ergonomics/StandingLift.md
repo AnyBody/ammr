@@ -1,17 +1,15 @@
 ---
 gallery_title: "Standing Model"
 gallery_image: "/Applications/images/StandingLift.webp"
+anylink: Application/Examples/StandingLift/StandingLift.main.any
 ---
 
 (sphx_glr_auto_examples_ADLs_and_ergonomics_plot_StandingLift.py)=
 (example_standinglift)=
 # Lifting Model
 
-````{div} margin sd-text-center
-<img src="/Applications/images/StandingLift.webp" width="100%" align="center">
-
-{anylink-button}`Application/Examples/StandingLift/StandingLift.main.any`
-````
+:::{anylink-gallery} 
+:::
 
 Standing body model lifting a box.
 

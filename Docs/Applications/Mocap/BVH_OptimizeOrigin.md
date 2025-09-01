@@ -1,6 +1,7 @@
 ---
 gallery_title: "Optimize BVH Origin"
 gallery_image: "/Applications/images/BVH_OptimizeOrigin_Merged.jpg"
+anylink: Application/MocapExamples/BVH_Xsens_OptimizeOrigin/Subjects/S1/S01_Trial01/Main.any
 ---
 
 (sphx_glr_auto_examples_Mocap_plot_BVH_OptimizeOrigin.py)=
@@ -10,11 +11,9 @@ gallery_image: "/Applications/images/BVH_OptimizeOrigin_Merged.jpg"
 # Optimize BVH Origin example
 
 
-````{div} margin sd-text-center
-<img src="/Applications/images/BVH_OptimizeOrigin_Merged.jpg" width="100%" align="center">
+:::{anylink-gallery} 
+:::
 
-{anylink-button}`Application/MocapExamples/BVH_Xsens_OptimizeOrigin/Subjects/S1/S01_Trial01/Main.any"`
-````
 
 Example of a MoCap model using data from an inertial motion capture suit.
 The model uses a BVH file with data from an Xsens suit. The ground reaction

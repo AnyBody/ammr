@@ -1,19 +1,17 @@
 ---
 gallery_title: "Airline passenger"
 gallery_image: "/Applications/images/AirlinePassenger.webp"
+anylink: "Application/Examples/AirlinePassenger/AirlinePassenger.main.any"
 ---
 
 (sphx-glr-auto-examples-adls-and-ergonomics-plot-airlinepassenger-py)=
 
 # Airline passenger
 
+:::{anylink-gallery} 
+:::
 
-````{div} margin sd-text-center
-<img src="/Applications/images/AirlinePassenger.webp" align="center" width="100%" align="center">
 
-{anylink-button}`Application/Examples/AirlinePassenger/AirlinePassenger.main.any`
-
-````
 The airline passenger example. This is a model of a coach class airline passenger seat
 characterized by the following:
 
@@ -24,7 +22,7 @@ characterized by the following:
 :::{admonition} In Model Repository:
 :class: seealso
 
-{anylink-file}`Application/Examples/AirlinePassenger/AirlinePassenger.main.any`
+{anylink-file}` `
 
 :::
 

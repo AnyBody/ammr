@@ -1,6 +1,7 @@
 ---
 gallery_title: "Posture Prediction Model"
 gallery_image: "/Applications/images/StandingPosturePredictionModel.webp"
+anylink: Application/Examples/StandingPosturePredictionWithLoad/StandingPosturePrediction.main.any
 ---
 
 
@@ -8,13 +9,8 @@ gallery_image: "/Applications/images/StandingPosturePredictionModel.webp"
 (example_posture_prediction)=
 # Posture Prediction Model
 
-
-````{div} margin sd-text-center
-<img src="/Applications/images/StandingPosturePredictionModel.webp" width="100%" align="center">
-
-{anylink-button}`Application/Examples/StandingPosturePredictionWithLoad/StandingPosturePrediction.main.any`
-
-````
+:::{anylink-gallery} 
+:::
 
 This is a model which can predict the posture as a consequence of applied loads in hands.
 It does this by minimizing joint torques and applying balance drivers which account for external
@@ -24,7 +20,7 @@ applied loads.
 :::{admonition} In Model Repository:
 :class: seealso
 
-{anylink-file}`Application/Examples/StandingPosturePredictionWithLoad/StandingPosturePrediction.main.any`
+{anylink-file}` `
 :::
 
 

@@ -1,28 +1,24 @@
 ---
 gallery_title: "Squat"
 gallery_image: "/Applications/images/Squat.webp"
+anylink: Application/Examples/Squat/Squat.main.any
 ---
 
 (sphx_glr_auto_examples_ADLs_and_ergonomics_plot_Squat.py)=
 (example_squat)=
 # Squat
 
-````{div} margin sd-text-center
-<img src="/Applications/images/Squat.webp" width="100%" align="center">
+:::{anylink-gallery} 
+:::
 
-{anylink-button}`Application/Examples/Squat/Squat.main.any`
-
-````
 
 This model demonstrates parameterized squating motion.
 
 :::{admonition} In Model Repository:
 :class: seealso
 
-{anylink-file}`Application/Examples/Squat/Squat.main.any`
+{anylink-file}` `
 :::
-
-
 
 Users can try to change different parameters of this model in the 'Input\Parameters.any' file including:
 
