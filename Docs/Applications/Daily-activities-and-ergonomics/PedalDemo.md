@@ -15,12 +15,14 @@ This model demonstrates the construction
 of a foot pedal example.
 
 
+This model is for design of a pedal that is comfortable to use
+for a seated operator depending on the stiffness of the embedded
+spring and the distance of the seat from the pedal.
+
+
+
 :::{admonition} In Model Repository:
 :class: seealso
 
 {anylink-file}` `
 :::
-
-This model is for design of a pedal that is comfortable to use
-for a seated operator depending on the stiffness of the embedded
-spring and the distance of the seat from the pedal.

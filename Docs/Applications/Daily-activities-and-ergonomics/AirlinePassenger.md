@@ -19,12 +19,6 @@ characterized by the following:
 - Horizontal seat pan
 - Limited ability to incline the backrest due to the lack of clearance to the person behind
 
-:::{admonition} In Model Repository:
-:class: seealso
-
-{anylink-file}` `
-
-:::
 
 The model assesses the comfort of the passenger in terms of
 the following:
@@ -48,3 +42,10 @@ backrest backwards from an initial 10 degree forward
 inclination to a 30 degree backward inclination, which
 is on the very upper limit of coach class passenger seats.
 
+
+:::{admonition} In Model Repository:
+:class: seealso
+
+{anylink-file}` `
+
+:::

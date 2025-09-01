@@ -17,13 +17,6 @@ It does this by minimizing joint torques and applying balance drivers which acco
 applied loads.
 
 
-:::{admonition} In Model Repository:
-:class: seealso
-
-{anylink-file}` `
-:::
-
-
 The model is driven by a combination of the following drivers:
 : - Drivers which minimize the joint moments (arising from gravity and applied loads in hands) in elbow, shoulder, L4L5 and knee
   - Driver which tries to keep the CoP inside the foot stance area.
@@ -37,6 +30,13 @@ The model is driven by a combination of the following drivers:
 
 
 Two type of loads can be applied, either a fixed weight of the object and/or a force vector.
+
+:::{admonition} In Model Repository:
+:class: seealso
+
+{anylink-file}` `
+:::
+
 
 ## Usage
 
@@ -95,4 +95,5 @@ Your browser does not support the video tag.
 ```
 
 **Please note the speed of the video was increased for viewing purposes.**
+
 

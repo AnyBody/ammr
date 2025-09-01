@@ -39,6 +39,7 @@ The C3D files are placed together in a separate folder.
 
 :::
 
+## Model structure
 
 The model is structured as outlined below:
 

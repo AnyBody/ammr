@@ -18,13 +18,6 @@ without force plates. The external forces are instead predicted using the GRF
 algorithms.
 
 
-
-:::{admonition} In Model Repository:
-:class: seealso
-
-{anylink-file}` `
-:::
-
 Motion capture data is often recorded without force plates. In traditional
 inverse dynamics, this would make it impossible to perform a dynamic analysis.
 However, AnyBody has the possibility to predict ground reaction forces (GRF), so
@@ -32,3 +25,9 @@ you can make inverse dynamics models based on recorded motion without GRF force
 measurement (Fluit et al., 2014; Jung et al., 2014).
 
 More information is available in the {doc}`documentation for the GRF prediction </anymocap/grf-prediction>`.
+
+:::{admonition} In Model Repository:
+:class: seealso
+
+{anylink-file}` `
+:::

@@ -1,6 +1,7 @@
 ---
 gallery_title: "Total Hip Arthroplasty"
 gallery_image: "/Applications/images/THA-KneeBendDemo.webp"
+anylink: Application/Examples/THA-KneeBendDemo/THA-KneeBendDemo.main.any
 ---
 
 (sphx_glr_auto_examples_Orthopedics_and_rehab_plot_THA-KneeBendDemo.py)=
@@ -8,20 +9,11 @@ gallery_image: "/Applications/images/THA-KneeBendDemo.webp"
 # Total Hip Arthroplasty (THA) Model
 
 
-````{div} margin sd-text-center
-<img src="/Applications/images/THA-KneeBendDemo.webp" width="100%" align="center">
-
-{anylink-button}`Application/Examples/THA-KneeBendDemo/THA-KneeBendDemo.main.any`
-````
+:::{anylink-gallery} 
+:::
 
 Model of a total hip replacement using a contact implant model and
 force-dependent kinematics (FDK).
-
-:::{admonition} In Model Repository:
-:class: seealso
-
-{anylink-file}`Application/Examples/THA-KneeBendDemo/THA-KneeBendDemo.main.any`
-:::
 
 
 This is a demo model for the simulation of a knee bend for a body model
@@ -41,6 +33,15 @@ implant is not based on any anatomical data. Further, the implant includes an
 artificial spring (in Model/ContactForces.any) element to make the simulation
 more robust. For each simulation, the force produced by this artifical spring
 should be checked to be aware of the influence of this spring on the results.
+
+
+:::{admonition} In Model Repository:
+:class: seealso
+
+{anylink-file}` `
+:::
+
+
 
 ```{rubric} Footnotes
 ```

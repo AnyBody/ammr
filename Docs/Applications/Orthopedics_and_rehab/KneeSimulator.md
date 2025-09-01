@@ -1,6 +1,7 @@
 ---
 gallery_title: "Knee Simulator Model"
 gallery_image: "/Applications/images/KneeSimulator.webp"
+anylink: Application/Examples/KneeSimulator/Main.any
 ---
 
 (sphx_glr_auto_examples_Orthopedics_and_rehab_plot_KneeSimulator.py)=
@@ -8,25 +9,23 @@ gallery_image: "/Applications/images/KneeSimulator.webp"
 # Knee Simulator Model
 
 
-````{div} margin sd-text-center
-<img src="/Applications/images/KneeSimulator.webp" width="100%" align="center">
-
-{anylink-button}`Application/Examples/KneeSimulator/Main.any`
-````
+:::{anylink-gallery} 
+:::
 
 Model of a Knee Simulator using a knee implant model and force-dependent kinematics (FDK).
 For an indepth description of the mathematics and mechanics behind FDK please see [^cite_azdn17].
 
-:::{admonition} In Model Repository:
-:class: seealso
-
-{anylink-file}`Application/Examples/KneeSimulator/Main.any`
-
-:::
 
 This is stand alone demo model of a knee simulator device resembling the principles of the Kansas Knee simulator [^cite_hcmt10].
 The model is contructed as a stand-alone model and doesn't use any elements and body parts from the model repository (AMMR).
 Data for the total knee replacement (TKR) implant comes from the [6th Grand Challenge Competition to Predict In Vivo Knee Loads](https://simtk.org/projects/kneeloads).
+
+:::{admonition} In Model Repository:
+:class: seealso
+
+{anylink-file}` `
+
+:::
 
 ## Segments
 

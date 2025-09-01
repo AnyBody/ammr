@@ -1,32 +1,22 @@
 ---
 gallery_title: "Femoral Torsion tool"
 gallery_image: "/Applications/images/FemoralTorsion.webp"
+anylink: Application/Examples/FemoralTorsion/StandingModel.Main.any
 ---
 
 (sphx_glr_auto_examples_Orthopedics_and_rehab_plot_FemoralTorsionTool.py)=
 (example_femoral_torsion)=
 # Femoral Torsion tool
 
+:::{anylink-gallery} 
+:::
 
-````{div} margin sd-text-center
-<img src="/Applications/images/FemoralTorsion.webp" width="100%" align="center">
-
-{anylink-button}`Application/Examples/FemoralTorsion/StandingModel.Main.any`
-````
 
 This is an example of modifying the femoral torsion of the default leg
 ({ref}`TLEM 2.0 <tlem2>`) geometry by using a model utility tool included within
 the model repository. The  model is the simple standing model where the femoral
 torsion has been altered to 20 degrees. The model is also a good example on how
 a similar morphing approach can be used to personalize different body segments.
-
-
-:::{admonition} In Model Repository:
-:class: seealso
-
-{anylink-file}`Application/Examples/FemoralTorsion/StandingModel.Main.any`
-
-:::
 
 The tool was developed by Enrico De Pieri, from the University of Basel
 Children’s Hospital (UKBB), and Morten E. Lund, from AnyBody Technology A/S.
@@ -36,6 +26,16 @@ subject-specific values of femoral torsion, and investigate the effect of
 torsional alignment on hip loading. This work is published in 'Frontiers in
 Bioengineering and Biotechnology' [^cite_dflm21]. Please cite this article when using
 this tool.
+
+
+
+:::{admonition} In Model Repository:
+:class: seealso
+
+{anylink-file}` `
+
+:::
+
 
 :::{figure} /Applications/Orthopedics_and_rehab/femoral-torsion.png
 :align: center

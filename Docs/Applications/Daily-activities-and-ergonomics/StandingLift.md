@@ -13,13 +13,6 @@ anylink: Application/Examples/StandingLift/StandingLift.main.any
 
 Standing body model lifting a box.
 
-:::{admonition} In Model Repository:
-:class: seealso
-
-{anylink-button}`Application/Examples/StandingLift/StandingLift.main.any`
-{anylink-button}`Application/Examples/StandingLift/StandingLiftFEA.main.any`
-
-:::
 
 This application can be a good starting point for new applications involving
 the entire body, doing lifts from a standing posture. The model uses artificial
@@ -31,3 +24,11 @@ Please note that this model can also output computed forces to be used by FEA. I
 used by FEA tutorial.
 
 
+
+:::{admonition} In Model Repository:
+:class: seealso
+
+{anylink-button}`Application/Examples/StandingLift/StandingLift.main.any`
+{anylink-button}`Application/Examples/StandingLift/StandingLiftFEA.main.any`
+
+:::

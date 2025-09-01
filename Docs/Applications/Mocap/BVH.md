@@ -16,12 +16,6 @@ The model uses a BVH file with data from an Xsens suit. The ground reaction
 forces are predicted using the GRF prediction algorithm.
 
 
-:::{admonition} In Model Repository:
-:class: seealso
-
-{anylink-file}` `
-:::
-
 The model works using virtual markers placed on the BVH rig (i.e. the stick-figure
 model specified by the BVH file). The virtual markers are used to make the
 Musculoskeletal model moved similar to marker based MoCap models.
@@ -36,16 +30,10 @@ The remaining parts of the model are equivalent to other {ref}`MoCap model <anym
 :::
 
 
-::::{dropdown} Updating old (ammr \< 2.2.3) BVH based models
 
-The safest approach is to reimplement your model based on the newest BVH example and AMMR v.2.3.
 
-However, it is also possible to change a few files in existing models to utilize the
-new BVH improvements in AnyBody v.7.3.
+:::{admonition} In Model Repository:
+:class: seealso
 
-:::{Important}
-Make sure your use the new AMMR (>=2.3) and new AnyBody Modeling System (>=7.3).
-You can copy your existing model folder into the new AMMR, or edit the local `libdef.any` file to point to the new AMMR.
+{anylink-file}` `
 :::
-
-::::

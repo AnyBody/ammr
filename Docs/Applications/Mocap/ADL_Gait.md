@@ -17,16 +17,6 @@ anylink: Application/MocapExamples/ADL_Gait_[beta]/Subjects/2014001/2014001_C1_0
 Fullbody MoCap model with multiple subjects and trials based on the 
 "Rehazenter Adult Walking Dataset" by [Schreiber and Moissenet (2019)](https://doi.org/10.1038/s41597-019-0124-4).
 
-:::{admonition} In Model Repository:
-:class: seealso
-
-The model is located at: `Application/MocapExamples/ADL_Gait_[beta]`
-
-Dynamic trial: {anylink-file}`Subjects/2014001/2014001_C1_01/Main.any <Application/MocapExamples/ADL_Gait_[beta]/Subjects/2014001/2014001_C1_01/Main.any>`
-
-Standing reference: {anylink-file}`Subjects/2014001/2014001_ST/Main.any <Application/MocapExamples/ADL_Gait_[beta]/Subjects/2014001/2014001_ST/Main.any>`
-
-:::
 
 
 The model has 50 subjects and 1145 trials. Subjects walk at five different
@@ -55,6 +45,18 @@ with improvements to the model please share them back.
 The model was created by [Enrico De Pieri](https://www.linkedin.com/in/enrico-de-pieri-13096a7a), 
 [Anderson de Souza Castelo Oliveira](https://vbn.aau.dk/en/persons/oliveira), and [Morten Enemark Lund](https://www.linkedin.com/in/biomedical) but has not yet been used for publication.
 
+
+
+:::{admonition} In Model Repository:
+:class: seealso
+
+The model is located at: `Application/MocapExamples/ADL_Gait_[beta]`
+
+Dynamic trial: {anylink-file}`Subjects/2014001/2014001_C1_01/Main.any <Application/MocapExamples/ADL_Gait_[beta]/Subjects/2014001/2014001_C1_01/Main.any>`
+
+Standing reference: {anylink-file}`Subjects/2014001/2014001_ST/Main.any <Application/MocapExamples/ADL_Gait_[beta]/Subjects/2014001/2014001_ST/Main.any>`
+
+:::
 
 ## Dataset
 

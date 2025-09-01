@@ -15,11 +15,6 @@ A model of a seated human consisting of the full body model, a chair, and an
 interface between the two.
 
 
-:::{admonition} In Model Repository:
-:class: seealso
-
-{anylink-file}` `
-:::
 
 The Seated Human is a family of models resulting from a
 research project involving the furniture industry. This
@@ -42,3 +37,9 @@ to the normal force and the user can supply a friction
 coefficient for each surface such that the effect of different
 surface fabrics can be investigated.
 
+
+:::{admonition} In Model Repository:
+:class: seealso
+
+{anylink-file}` `
+:::

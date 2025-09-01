@@ -21,17 +21,7 @@ in the AAUHuman part of the Body directory. The model is grounded at the
 pelvis and the posture if the model is controlled through a `mannequin.any`
 file by means of joint angles.
 
-:::{admonition} In Model Repository:
-:class: seealso
 
-{anylink-file}`Application/Examples/FreePosture/FreePostureFullBodyMove.Main.any`
-
-{anylink-file}`Application/Examples/FreePosture/FreePostureFullBodyShoulderRhythmMove.Main.any`
-
-{anylink-file}`Application/Examples/FreePosture/FreePostureFullBodyShoulderRhythmStatic.Main.any`
-
-{anylink-file}`Application/Examples/FreePosture/FreePostureFullBodyShoulderRhythmStatic.Main.any`
-:::
 
 This application is a starting point for new applications involving the entire body.The model do not contain muscles and is only intended for running kinematic analysis
 
@@ -44,3 +34,13 @@ FullBodyModelSRHand is a fullbody model with a detailed hand and shoulder rhythm
 CONFIGURATION2 can be either "FreePostureStatic" or "FreePostureMove"
 FreePostureStatic is a static model which do not move its joint angles are controlled in the "mannequin.any" file
 FreePostureMove is a dynamic model controlled through angles which can be set in the "MannequinInterpolation.any" file
+
+:::{admonition} In Model Repository:
+:class: seealso
+Models are located in: `Application/Examples/FreePosture/`
+
+* {anylink-file}`FreePostureFullBodyMove.Main.any <Application/Examples/FreePosture/FreePostureFullBodyMove.Main.any>`
+* {anylink-file}`FreePostureFullBodyShoulderRhythmMove.Main.any <Application/Examples/FreePosture/FreePostureFullBodyShoulderRhythmMove.Main.any>`
+* {anylink-file}`FreePostureFullBodyShoulderRhythmStatic.Main.any <Application/Examples/FreePosture/FreePostureFullBodyShoulderRhythmStatic.Main.any>`
+* {anylink-file}`FreePostureFullBodyShoulderRhythmStatic.Main.any <Application/Examples/FreePosture/FreePostureFullBodyShoulderRhythmStatic.Main.any>`
+:::

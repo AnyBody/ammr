@@ -14,11 +14,6 @@ anylink: Application/Examples/Squat/Squat.main.any
 
 This model demonstrates parameterized squating motion.
 
-:::{admonition} In Model Repository:
-:class: seealso
-
-{anylink-file}` `
-:::
 
 Users can try to change different parameters of this model in the 'Input\Parameters.any' file including:
 
@@ -33,3 +28,9 @@ Ground reaction force(GRF) of the human model is predicted and you can check the
 
 The parametric motion elements are defined in 'Model\JointsAndDrivers.any'.
 
+
+:::{admonition} In Model Repository:
+:class: seealso
+
+{anylink-file}` `
+:::

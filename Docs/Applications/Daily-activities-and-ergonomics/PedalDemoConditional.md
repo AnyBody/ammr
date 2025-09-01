@@ -16,12 +16,6 @@ demonstrates conditional contact between the foot and the
 pedal.
 
 
-:::{admonition} In Model Repository:
-:class: seealso
-
-{anylink-file}` `
-:::
-
 This model is for design of a pedal that is comfortable to use
 for a seated operator depending on the stiffness of the embedded
 spring and the distance of the seat from the pedal. The model is
@@ -30,3 +24,9 @@ has conditional contact between the foot and the pedal, such that
 the contact becomes active when the two elements are in proximity
 with each other
 
+
+:::{admonition} In Model Repository:
+:class: seealso
+
+{anylink-file}` `
+:::

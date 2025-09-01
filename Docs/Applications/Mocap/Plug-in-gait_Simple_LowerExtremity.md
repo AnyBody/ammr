@@ -19,7 +19,6 @@ good starting point for new users. If you plan to have many trials/subjects,
 take a look at the example which better support multiple trails.
 
 
-
 :::{seealso}
 **Main file location in AMMR:**
 
