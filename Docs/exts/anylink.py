@@ -11,6 +11,9 @@ from sphinx.util.docutils import ReferenceRole, SphinxDirective, nodes
 BASE_BUTTON_CLASSES  = ["anylink-ref", "sd-btn", "sd-text-wrap", "sd-m-2","sd-shadow-sm", "sd-align-major-center", "sd-btn-outline-primary", "reference", "external"]
 
 
+def get_topmatter(obj): 
+    return read_topmatter(Path(obj.get_source_info()[0]).read_text(encoding="utf-8"))
+
 def create_trigger_node(obj, target):
     # Formatting of the anylink:// url is done in the javascript function when the pages loads
     # to ensure we can get the correct path to local repositories. See anylink.js 
@@ -41,7 +44,7 @@ class AnyLinkGallerySidebar(SphinxDirective):
 
     def run(self):
 
-        topmatter = read_topmatter(Path(self.get_source_info()[0]).read_text())
+        topmatter = get_topmatter(self)
         classes = ["anylink-ref", "sd-btn", "sd-text-wrap", "sd-m-2","sd-shadow-sm", "sd-align-major-center", "sd-btn-outline-primary", "reference", "external"]
         classes.extend(self.options.get("classes", "").split(" "))
 
@@ -80,7 +83,7 @@ class AnyLinkButton(ReferenceRole):
     def run(self):
 
         if self.target == " ":
-            topmatter = read_topmatter(Path(self.get_source_info()[0]).read_text())
+            topmatter = get_topmatter(self)
             self.target = topmatter.get("anylink", "")
             self.title = self.target
 
@@ -113,7 +116,7 @@ class AnyLinkFile(ReferenceRole):
         try:
 
             if self.target == " ":
-                topmatter = read_topmatter(Path(self.get_source_info()[0]).read_text())
+                topmatter = get_topmatter(self)
                 self.target = topmatter.get("anylink", "")
                 self.title = self.target
 
