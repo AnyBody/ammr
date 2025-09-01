@@ -1,28 +1,19 @@
 ---
 gallery_title: "Arm curl"
 gallery_image: "/Applications/images/ArmCurl.webp"
+anylink: Application/Examples/ArmCurl/ArmCurl.main.any
 ---
 
 (sphx_glr_auto_examples_Sports_plot_ArmCurl.py)=
 
 # Arm curl
 
-````{div} margin sd-text-center
-<img src="/Applications/images/ArmCurl.webp" width="100%" align="center">
+:::{anylink-gallery} 
+:::
 
-{anylink-button}`Application/Examples/ArmCurl/ArmCurl.main.any`
-
-````
 
 Example of an Arm Curl fitness machine.
 
-
-:::{admonition} In Model Repository:
-:class: seealso
-
-{anylink-file}`Application/Examples/ArmCurl/ArmCurl.main.any`
-
-:::
 The objective of this example is to adjust the eccentricity of the cable wheel
 such that the arm muscles experience a constant effort throughout the elbow
 flexion taking the change of moment arms of the muscles into account.
@@ -35,3 +26,10 @@ effort profile could be obtained.
 By chaning between the files "EnvironmentOptimized.any" and "Environment.any" it
 is possible to to see the machine with adjusted eccentricity and the one with
 zero eccentricity
+
+:::{admonition} In Model Repository:
+:class: seealso
+
+{anylink-file}` `
+
+:::

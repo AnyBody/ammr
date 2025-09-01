@@ -1,20 +1,30 @@
 ---
 gallery_title: "Wilke Spine Disc Pressure"
 gallery_image: "/Applications/images/SpinePressureStanding.webp"
+anylink: Application/Validation/WilkeSpinalDiscPressure/SpinePressureSeatingRelaxed/SpinePressureSeatingRelaxed.main.any
 ---
 
 (sphx_glr_auto_examples_Validation_plot_WilkeSpinePressure.py)=
 (example_wilkespinepressure)=
 # Wilke Spine Disc Pressure Model
 
-````{div} margin sd-text-center
-<img src="/Applications/images/SpinePressureStanding.webp" width="100%" align="center">
+:::{anylink-gallery} 
+:::
 
-{anylink-button}`Application/Validation/WilkeSpinalDiscPressure/SpinePressureSeatingRelaxed/SpinePressureSeatingRelaxed.main.any`
-
-````
 
 The Wilke Spine Pressure models are eight models that compare intradiscal pressure measured between L4 and L5 discs in different postures.
+
+
+
+For the comparison, all data is normalized (100 %) to the forces from *'SpinePressureStanding.Main.any'*  and *'Relaxed Standing'* to show trend validity between the various postures.
+
+<img src="/Applications/Validation/wilke.svg" align="center">
+
+
+Both papers refer to the same trial, but supplements each other with study information.
+
+- Wilke, H.J., Neef, P., Caimi, M., Hoogland, T., Claes, L.E., 1999. New in vivo measurements of pressures in the intervertebral disc in daily life. Spine 24, 755–762.
+- Wilke, H., Neef, P., Hinz, B., Seidel, H., Claes, L., 2001. Intradiscal pressure together with anthropometric data--a data set for the validation of models. Clin. Biomech. 16 Suppl 1, S111–26.
 
 
 :::{admonition} In Model Repository:
@@ -31,22 +41,6 @@ The Wilke Spine Pressure models are eight models that compare intradiscal pressu
 * {anylink-file}`SpinePressureStandingLiftStretchedArms.main.any <Application/Validation/SpinePressureStandingLiftStretchedArms/SpinePressureStandingLiftStretchedArms/SpinePressureSeatingRelaxed.main.any>`
 
 :::
-:::{seealso}
-**Main file location in AMMR:**
-
-{menuselection}`Application --> Validation --> WilkeSpinalDiscPressure -->`
-:::
-
-
-For the comparison, all data is normalized (100 %) to the forces from *'SpinePressureStanding.Main.any'*  and *'Relaxed Standing'* to show trend validity between the various postures.
-
-<img src="/Applications/Validation/wilke.svg" align="center">
-
-
-Both papers refer to the same trial, but supplements each other with study information.
-
-- Wilke, H.J., Neef, P., Caimi, M., Hoogland, T., Claes, L.E., 1999. New in vivo measurements of pressures in the intervertebral disc in daily life. Spine 24, 755–762.
-- Wilke, H., Neef, P., Hinz, B., Seidel, H., Claes, L., 2001. Intradiscal pressure together with anthropometric data--a data set for the validation of models. Clin. Biomech. 16 Suppl 1, S111–26.
 
 ::::{grid} 1 2 3 4
 :gutter: 3

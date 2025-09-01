@@ -1,31 +1,19 @@
 ---
 gallery_title: "Bike Model 2D"
 gallery_image: "/Applications/images/BikeModel2D.webp"
+anylink: Application/Examples/BikeModel2D/BikeModel2D.main.any
 ---
 
 (sphx_glr_auto_examples_Sports_plot_BikeModel2D.py)=
 
 # Bike Model 2D
 
-````{div} margin sd-text-center
-<img src="/Applications/images/BikeModel2D.webp" width="100%" align="center">
-
-{anylink-button}`Application/Examples/BikeModel2D/BikeModel2D.main.any`
-
-````
+:::{anylink-gallery} 
+:::
 
 
 A simple bicycle rider model using a planar
 leg model.
-
-
-
-:::{admonition} In Model Repository:
-:class: seealso
-
-{anylink-file}`Application/Examples/BikeModel2D/BikeModel2D.main.any`
-
-:::
 
 Although this model can be rotated in 3-D space it really is just a saggital
 plane pedaling model with only a few muscles in each leg. The beauty of
@@ -42,3 +30,12 @@ You can do lots of interesting stuff with this model:
 - Separate internal work for acceleraton of body segments
 
 from external work on the crank.
+
+
+
+:::{admonition} In Model Repository:
+:class: seealso
+
+{anylink-file}` `
+
+:::

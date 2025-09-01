@@ -1,18 +1,15 @@
 ---
 gallery_title: "Bergmann GH"
 gallery_image: "/Applications/images/BergmannGH.webp"
+anylink: Application/Validation/BergmannGH/BergmannGH.Main.any
 ---
 
 (sphx_glr_auto_examples_Validation_plot_BergmannGH.py)=
 
 # Bergmann GH
 
-````{div} margin sd-text-center
-<img src="/Applications/images/BergmannGH.webp" width="100%" align="center">
-
-{anylink-button}`Application/Validation/BergmannGH/BergmannGH.Main.any`
-````
-
+:::{anylink-gallery} 
+:::
 
 
 Model simulating arm-lift motion adapted from Bergmann et al., J. of

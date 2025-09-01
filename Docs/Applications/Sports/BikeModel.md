@@ -1,41 +1,19 @@
 ---
 gallery_title: "Bike Model"
 gallery_image: "/Applications/images/BikeModel-FullBody.webp"
+anylink: Application/Examples/BikeModel/BikeModel-FullBody.main.any
 ---
 
 (sphx_glr_auto_examples_Sports_plot_BikeModel.py)=
 (example_bikemodel)=
 # Bike Model
 
-````{div} margin sd-text-center
-<img src="/Applications/images/BikeModel-FullBody.webp" width="100%" align="center">
-
-{anylink-button}`Application/Examples/BikeModel/BikeModel-FullBody.main.any`
-````
-
+:::{anylink-gallery} 
+:::
 
 Bicycle rider model that runs either as
 FullBody or as LowerExtremity version.
 
-
-:::{admonition} In Model Repository:
-:class: seealso
-
-{menuselection}`Application --> Examples --> BikeModel -->`
-
-{anylink-file}`Application/Examples/ArmCurl/ArmCurl.main.any`
-
-:::
-
-:::{seealso}
-**Main file location in AMMR:**
-
-{menuselection}`Application --> Examples --> BikeModel -->`
-
-* {anylink-file}`BikeModel-FullBody.main.any <Application/Examples/BikeModel/BikeModel-FullBody.main.any>`
-* {anylink-file}`BikeModel-LowerBody.main.any <Application/Examples/BikeModel/BikeModel-LowerBody.main.any>`
-
-:::
 
 The model illustrates several important topics in model
 construction:
@@ -55,3 +33,15 @@ BikeLegConnection.any.
 
 The model can run in two configurations FullBodyModel and LowerExtremityModel this
 can be changed in the "Config.any" file
+
+
+
+:::{seealso}
+**Main file location in AMMR:**
+
+{menuselection}`Application --> Examples --> BikeModel -->`
+
+* {anylink-file}`BikeModel-FullBody.main.any <Application/Examples/BikeModel/BikeModel-FullBody.main.any>`
+* {anylink-file}`BikeModel-LowerBody.main.any <Application/Examples/BikeModel/BikeModel-LowerBody.main.any>`
+
+:::

@@ -1,19 +1,15 @@
 ---
 gallery_title: "The Aalborg Mandible model"
 gallery_image: "/Applications/images/AalborgMandibleValidation.webp"
+anylink: Application/Validation/AalborgMandibleValidation/Trials/ChewingClockwisePref0001/AnalysisFreeMovement.any
 ---
 
 (sphx_glr_auto_examples_Validation_plot_AalborgMandible.py)=
 (example_aalborgmandible)=
 # The Aalborg Mandible model
 
-````{div} margin sd-text-center
-<img src="/Applications/images/AalborgMandibleValidation.webp" width="100%" align="center">
-
-{anylink-button}`Application/Validation/AalborgMandibleValidation/Trials/ChewingClockwisePref0001/AnalysisFreeMovement.any`
-````
-
-
+:::{anylink-gallery} 
+:::
 
 This is a validation example of mandible model based on a CT scan of a 40 year old male.
 

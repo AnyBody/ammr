@@ -1,29 +1,18 @@
 ---
 gallery_title: "Exoskeleton concept model"
 gallery_image: "/Applications/images/ExoConcept_BoxLift.webp"
+anylink: Application/Examples/ExoskeletonConcept/ExoConcept_BoxLift.Main.any
 ---
 
 (sphx_glr_auto_examples_Other_plot_ExoConcept_BoxLift.py)=
 (example_exo_concept_boxlift)=
 # Exoskeleton concept model
 
-
-````{div} margin sd-text-center
-<img src="/Applications/images/ExoConcept_BoxLift.webp" width="100%" align="center">
-
-{anylink-button}`Application/Examples/ExoskeletonConcept/ExoConcept_BoxLift.Main.any`
-
-````
+:::{anylink-gallery} 
+:::
 
 
 Exoskeleton concept model.
-
-
-:::{admonition} In Model Repository:
-:class: seealso
-
-{anylink-file}`Application/Examples/ExoskeletonConcept/ExoConcept_BoxLift.Main.any`
-:::
 
 This example shows how to study different exoskeleton concepts on an activity. The model is
 based on the [webcast](https://www.anybodytech.com/webcasts/simulation-driven-conceptual-design-of-exoskeletons/)
@@ -46,3 +35,10 @@ Thus, there are four possibilities in this exoskeleton concept model:
   2. Spring force at knees.
   3. Idealized extensible rods crossing the knees, hips and lumbar spine.
   4. Spring force-based extensible rods crossing the knees, hips and lumbar spine.
+
+
+:::{admonition} In Model Repository:
+:class: seealso
+
+{anylink-file}` `
+:::

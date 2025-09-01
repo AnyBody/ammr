@@ -1,17 +1,17 @@
 ---
 gallery_title: "Evaluate moment arms"
 gallery_image: "/Applications/images/EvaluateMomentArms.webp"
+anylink: Application/Validation/EvaluateMomentArms/EvaluateMomentArms.main.any
 ---
 
 (sphx_glr_auto_examples_Validation_plot_EvaluateMomentArms.py)=
 (example_evaluate_momentarms)=
 # Evaluate moment arms
 
-````{div} margin sd-text-center
-<img src="/Applications/images/EvaluateMomentArms.webp" width="100%" align="center">
 
-{anylink-button}`Application/Validation/EvaluateMomentArms/EvaluateMomentArms.main.any`
-````
+:::{anylink-gallery} 
+:::
+
 
 This model shows how to enable the built-in moment arm evaluation studies.
 The studies can be enabled by setting the switch: `#define EVALUATE_MOMENT_ARMS 1`
@@ -34,6 +34,6 @@ affect performance when loading and switching between tabs/operations.
 :::{admonition} In Model Repository:
 :class: seealso
 
-{anylink-file}`Application/Validation/EvaluateMomentArms/EvaluateMomentArms.main.any`
+{anylink-file}` `
 
 :::

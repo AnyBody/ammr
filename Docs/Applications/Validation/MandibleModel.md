@@ -1,29 +1,18 @@
 ---
 gallery_title: "Symmetric Mandible example"
 gallery_image: "/Applications/images/MandibleChewingAndClenching.jpg"
+anylink: Application/Validation/MandibleChewingAndClenching/MandibleChewingAndClenching.main.any
 ---
 
 (sphx_glr_auto_examples_Validation_plot_MandibleModel.py)=
 (example_mandiblemodel)=
 # Symmetric Mandible example
 
-````{div} margin sd-text-center
-<img src="/Applications/images/MandibleChewingAndClenching.jpg" width="100%" align="center">
-
-{anylink-button}`Application/Validation/MandibleChewingAndClenching/MandibleChewingAndClenching.main.any`
-````
+:::{anylink-gallery} 
+:::
 
 
 Mandible model example.
-
-
-
-:::{admonition} In Model Repository:
-:class: seealso
-
-{anylink-file}`Application/Validation/MandibleChewingAndClenching/MandibleChewingAndClenching.main.any`
-
-:::
 
 Model simulating chewing and comparing values to measurements from de Zee et al., J. of Biomechanics 2007.
 
@@ -52,3 +41,10 @@ Do not hesitate to contact the author for questions and/or suggestions.
 > Aalborg University, Denmark
 > E-mail: <mailto:mdz@hst.aau.dk>
 
+
+:::{admonition} In Model Repository:
+:class: seealso
+
+{anylink-file}` `
+
+:::
