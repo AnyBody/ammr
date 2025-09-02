@@ -1,7 +1,7 @@
 ---
 gallery_title: "Exoskeleton concept model"
 gallery_image: "/Applications/images/ExoConcept_BoxLift.webp"
-anylink: Application/Examples/ExoskeletonConcept/ExoConcept_BoxLift.Main.any
+anylink: Application/Examples/ExoskeletonConcept/ExoConcept_BoxLift.main.any
 ---
 
 (sphx_glr_auto_examples_Other_plot_ExoConcept_BoxLift.py)=
