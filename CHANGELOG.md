@@ -16,8 +16,11 @@
 *  Updated the subscapularis insertion to the lesser tuberosity, improving its
    moment arms during humerus internal rotation. Special thanks to Researcher
    Margaux Peixoto (Laboratoire d'Innovation ETS, Montreal) for contributing this
-   enhancement to the shoulder model.
+   enhancement to the shoulder model.*  Fixed contact thresholds in {ref}`Leg Press Machine 
+   example<example_legpressmachinemodel>` to ensure contact with all the nodes.
 
+### ➕ Added:
+* The implemenation of the pelvis rotation vector measure in the interface folder has been refactored to allow overwritting the global reference frame.
 
 (ammr-3.1.3-changelog)=
 ## AMMR 3.1.3 (2025-06-16)
