@@ -9,7 +9,8 @@ anylink: Application/MocapExamples/Plug-in-gait_Simple/LowerExtremity.main.any
 # Simple Lower extremity model
 
 
-:::{anylink-gallery} 
+:::{anylink-gallery}
+:classes: margin
 :::
 
 

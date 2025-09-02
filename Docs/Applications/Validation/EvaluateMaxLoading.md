@@ -7,7 +7,8 @@ anylink: Application/Validation/EvaluateMaxExternalLoading/EvalMaxLoad.main.any
 (example_evaluate_max_load)=
 # Evaluate max external loading
 
-:::{anylink-gallery} 
+:::{anylink-gallery}
+:classes: margin
 :::
 
 

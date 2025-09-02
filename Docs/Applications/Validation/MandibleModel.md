@@ -8,7 +8,8 @@ anylink: Application/Validation/MandibleChewingAndClenching/MandibleChewingAndCl
 (example_mandiblemodel)=
 # Symmetric Mandible example
 
-:::{anylink-gallery} 
+:::{anylink-gallery}
+:classes: margin
 :::
 
 

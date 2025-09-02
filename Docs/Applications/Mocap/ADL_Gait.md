@@ -9,7 +9,8 @@ anylink: Application/MocapExamples/ADL_Gait_[beta]/Subjects/2014001/2014001_C1_0
 # ADL Gait (beta)
 
 
-:::{anylink-gallery} 
+:::{anylink-gallery}
+:classes: margin
 :::
 
 

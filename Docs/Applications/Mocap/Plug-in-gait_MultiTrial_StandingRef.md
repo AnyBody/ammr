@@ -9,7 +9,8 @@ anylink: Application/MocapExamples/Plug-in-gait_MultiTrial_StandingRef/Subjects/
 
 # Multi trial MoCap model
 
-:::{anylink-gallery} 
+:::{anylink-gallery}
+:classes: margin
 :::
 
 Example of a MoCap model structured for analyzing data from multiple subjects

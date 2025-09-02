@@ -8,7 +8,8 @@ anylink: Application/Examples/BenchPress/BenchPress.Main.any
 (example_benchpress)=
 # Bench Press
 
-:::{anylink-gallery} 
+:::{anylink-gallery}
+:classes: margin
 :::
 
 

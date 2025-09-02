@@ -9,7 +9,8 @@ anylink: Application/Examples/SpineFixationWithForceDepKinematics/SpineFixationW
 # Spine Fixation Model using Force Dependent Kinematics
 
 
-:::{anylink-gallery} 
+:::{anylink-gallery}
+:classes: margin
 :::
 
 This application is an example of how to use the new force-dependent

@@ -8,7 +8,8 @@ anylink: Application/Examples/WheelTurn/WheelTurn.main.any
 
 # Hand crank model
 
-:::{anylink-gallery} 
+:::{anylink-gallery}
+:classes: margin
 :::
 
 

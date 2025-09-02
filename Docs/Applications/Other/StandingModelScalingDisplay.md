@@ -9,7 +9,8 @@ anylink: Application/Examples/StandingModelScalingDisplay/StandingModelScalingDi
 # Standing Model Scaling Display
 
 
-:::{anylink-gallery} 
+:::{anylink-gallery}
+:classes: margin
 :::
 
 This application shows all the scaling laws available.

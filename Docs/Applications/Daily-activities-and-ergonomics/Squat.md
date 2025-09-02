@@ -8,7 +8,8 @@ anylink: Application/Examples/Squat/Squat.main.any
 (example_squat)=
 # Squat
 
-:::{anylink-gallery} 
+:::{anylink-gallery}
+:classes: margin
 :::
 
 

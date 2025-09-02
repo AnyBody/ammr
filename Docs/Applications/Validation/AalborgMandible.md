@@ -8,7 +8,8 @@ anylink: Application/Validation/AalborgMandibleValidation/Trials/ChewingClockwis
 (example_aalborgmandible)=
 # The Aalborg Mandible model
 
-:::{anylink-gallery} 
+:::{anylink-gallery}
+:classes: margin
 :::
 
 This is a validation example of mandible model based on a CT scan of a 40 year old male.

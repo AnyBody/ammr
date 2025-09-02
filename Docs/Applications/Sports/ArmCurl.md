@@ -8,7 +8,8 @@ anylink: Application/Examples/ArmCurl/ArmCurl.main.any
 
 # Arm curl
 
-:::{anylink-gallery} 
+:::{anylink-gallery}
+:classes: margin
 :::
 
 

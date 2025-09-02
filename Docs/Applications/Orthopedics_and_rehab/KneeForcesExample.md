@@ -8,7 +8,8 @@ anylink: Application/Examples/KneeForcesExample/Knee_force_example.main.any
 (example_knee_forces_estimate)=
 # Knee forces example
 
-:::{anylink-gallery} 
+:::{anylink-gallery}
+:classes: margin
 :::
 
 

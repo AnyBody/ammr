@@ -8,7 +8,8 @@ anylink: Application/Examples/StandingModel/StandingModel.main.any
 (example_standingmodel)=
 # Standing Model
 
-:::{anylink-gallery} 
+:::{anylink-gallery}
+:classes: margin
 :::
 
 A full-body model that which uses a center of mass drivers to keep balance and Ground Reaction Force prediction for contact with the ground.

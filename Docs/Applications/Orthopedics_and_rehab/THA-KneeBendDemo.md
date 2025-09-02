@@ -9,7 +9,8 @@ anylink: Application/Examples/THA-KneeBendDemo/THA-KneeBendDemo.main.any
 # Total Hip Arthroplasty (THA) Model
 
 
-:::{anylink-gallery} 
+:::{anylink-gallery}
+:classes: margin
 :::
 
 Model of a total hip replacement using a contact implant model and

@@ -9,7 +9,8 @@ anylink: Application/Validation/EvaluateMomentArms/EvaluateMomentArms.main.any
 # Evaluate moment arms
 
 
-:::{anylink-gallery} 
+:::{anylink-gallery}
+:classes: margin
 :::
 
 

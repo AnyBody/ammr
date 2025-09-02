@@ -8,7 +8,8 @@ anylink: Application/Examples/StatisticalScalingPlugin/Main.any
 
 # Statistical Scaling Plugin
 
-:::{anylink-gallery} 
+:::{anylink-gallery}
+:classes: margin
 :::
 
 Plugin for scaling subjects based on an anthropometric database.

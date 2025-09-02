@@ -9,7 +9,8 @@ anylink: Application/Examples/JumpingJack/JumpingJack.main.any
 # Jumping Jack
 
 
-:::{anylink-gallery} 
+:::{anylink-gallery}
+:classes: margin
 :::
 
 A simple jumping jack model, illustrating some kinematic modeling concepts for a very simple model.

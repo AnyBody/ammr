@@ -8,7 +8,8 @@ anylink: Application/MocapExamples/Plug-in-gait_Simple/FullBody.main.any
 
 # Simple Full body model
 
-:::{anylink-gallery} 
+:::{anylink-gallery}
+:classes: margin
 :::
 
 Example of full body MoCap model using the Plug-in-Gait marker protocol, and

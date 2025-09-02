@@ -8,7 +8,8 @@ anylink: Application/Examples/StandingLift/StandingLift.main.any
 (example_standinglift)=
 # Lifting Model
 
-:::{anylink-gallery} 
+:::{anylink-gallery}
+:classes: margin
 :::
 
 Standing body model lifting a box.

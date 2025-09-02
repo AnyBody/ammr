@@ -9,7 +9,8 @@ anylink: Application/Examples/FreePosture/FreePostureFullBodyMove.main.any
 # Free posture Models
 
 
-:::{anylink-gallery} 
+:::{anylink-gallery}
+:classes: margin
 :::
 
 

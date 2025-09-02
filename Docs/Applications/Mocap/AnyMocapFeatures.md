@@ -8,7 +8,8 @@ anylink: Application/MocapExamples/SpecialFeatures/ForcePlateSurfaceOffset.main.
 
 # AnyMoCap Features
 
-:::{anylink-gallery} 
+:::{anylink-gallery}
+:classes: margin
 :::
 
 A collection of small models that show-off special features of the

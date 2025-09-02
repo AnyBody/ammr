@@ -9,7 +9,8 @@ anylink: Application/MocapExamples/BVH_BoxLift/Subjects/S01/S01_T01/Main.any
 # BVH driven box lift example
 
 
-:::{anylink-gallery} 
+:::{anylink-gallery}
+:classes: margin
 :::
 
 

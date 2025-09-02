@@ -9,7 +9,8 @@ anylink: Application/Examples/ExoskeletonTrunk/ExoConceptTrunk_BoxLift.main.any
 # Trunk exoskeleton concept model
 
 
-:::{anylink-gallery} 
+:::{anylink-gallery}
+:classes: margin
 :::
 
 Trunk exoskeleton concept model.

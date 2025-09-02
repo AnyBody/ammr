@@ -8,7 +8,8 @@ anylink: Application/Validation/GaitVaughan/GaitVaughan.Main.any
 
 # Gait Vaughan
 
-:::{anylink-gallery} 
+:::{anylink-gallery}
+:classes: margin
 :::
 
 

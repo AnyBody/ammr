@@ -11,7 +11,8 @@ anylink: Application/MocapExamples/BVH_Xsens_OptimizeOrigin/Subjects/S1/S01_Tria
 # Optimize BVH Origin example
 
 
-:::{anylink-gallery} 
+:::{anylink-gallery}
+:classes: margin
 :::
 
 

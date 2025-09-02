@@ -8,7 +8,8 @@ anylink: Application/Validation/EvaluateJointStrength/EvaluateJointStrength.main
 (example_evaluate_joint_strength)=
 # Evaluate joint strength
 
-:::{anylink-gallery} 
+:::{anylink-gallery}
+:classes: margin
 :::
 
 

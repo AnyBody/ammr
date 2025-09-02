@@ -8,7 +8,8 @@ anylink: Application/Examples/LegPressMachine/LegPressMachine.main.any
 
 # Leg Press Machine
 
-:::{anylink-gallery} 
+:::{anylink-gallery}
+:classes: margin
 :::
 
 

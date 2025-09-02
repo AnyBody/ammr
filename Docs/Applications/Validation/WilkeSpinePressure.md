@@ -8,7 +8,8 @@ anylink: Application/Validation/WilkeSpinalDiscPressure/SpinePressureSeatingRela
 (example_wilkespinepressure)=
 # Wilke Spine Disc Pressure Model
 
-:::{anylink-gallery} 
+:::{anylink-gallery}
+:classes: margin
 :::
 
 

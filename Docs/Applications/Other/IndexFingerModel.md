@@ -8,7 +8,8 @@ anylink: Application/Beta/IndexFinger_JohnWu/IndexFinger_JohnWu.Main.any
 
 # Index finger model
 
-:::{anylink-gallery} 
+:::{anylink-gallery}
+:classes: margin
 :::
 
 The Index finger model is developed by John Z. Wu (NIOSH, Morgantwon, WV 26505, USA) in 2008.
