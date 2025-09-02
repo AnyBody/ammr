@@ -40,13 +40,6 @@ The AnyBody Managed Model Repository
 
 ::::::
 
-
-{anylink-button}`Application/Examples/Squat/Squat.main.any`
-
-
-
-
-
 Open body models
 : All models are open and editable with the AnyScript model language
 
