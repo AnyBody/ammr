@@ -365,7 +365,7 @@ for folder, section in gallery.items():
     content = gallery_template.render(examples=section)
     with open(gallery_txt, encoding="utf8") as fh:
         previous_content = fh.read()
-    if True: #content != previous_content:
+    if content != previous_content:
         with open(gallery_txt, "w", encoding="utf8") as fh:
             fh.write(content)
 
