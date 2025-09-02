@@ -36,7 +36,7 @@ Both papers refer to the same trial, but supplements each other with study infor
 * {anylink-file}`SpinePressureLyingOnBack.main.any <Application/Validation/WilkeSpinalDiscPressure/SpinePressureLyingOnBack/SpinePressureLyingOnBack.main.any>`
 * {anylink-file}`SpinePressureSeatingStraitNoSupport.main.any <Application/Validation/WilkeSpinalDiscPressure/SpinePressureSeatingStraitNoSupport/SpinePressureSeatingStraitNoSupport.main.any>`
 * {anylink-file}`SpinePressureStanding.main.any <Application/Validation/WilkeSpinalDiscPressure/SpinePressureStanding/SpinePressureStanding.main.any>`
-* {anylink-file}`SpinePressureStandingFlexed.main.any <Application/Validation/WilkeSpinalDiscPressure/SpinePressureStandingFlexed/SpinePressureStandingFlexed.main.any>`
+* {anylink-file}`SpinePressureStandingFlexed.main.any <Application/Validation/WilkeSpinalDiscPressure/SpinePressureStandingFlexed/SpinePressureStandingFlexed.Main.any>`
 * {anylink-file}`SpinePressureStandingLiftClose.main.any <Application/Validation/WilkeSpinalDiscPressure/SpinePressureStandingLiftClose/SpinePressureStandingLiftClose.main.any>`
 * {anylink-file}`SpinePressureStandingLiftFlexed.main.any <Application/Validation/WilkeSpinalDiscPressure/SpinePressureStandingLiftFlexed/SpinePressureStandingLiftFlexed.main.any>`
 * {anylink-file}`SpinePressureStandingLiftStretchedArms.main.any <Application/Validation/WilkeSpinalDiscPressure/SpinePressureStandingLiftStretchedArms/SpinePressureStandingLiftStretchedArms.main.any>`
