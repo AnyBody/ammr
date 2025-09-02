@@ -196,6 +196,8 @@ if tags.has("draft") and not release.endswith("beta"):
 anylink_ams_version = ams_version_short
 anylink_open_text = "Open in AnyBody"
 anylink_open_tooltip = f"Opens model in AnyBody {ams_version_short} (Must be installed) "
+anylink_repo_relative_paths = {'ammr': ("../", "../")} # indicate the relative path of the AMMR when installed and when build. 
+
 
 # This will cause the extensin to add an argument to anylink:// urls ("repo_path=") with the path
 # to the local repository when serving html locally. (defaults to True)

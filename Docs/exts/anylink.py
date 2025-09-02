@@ -30,8 +30,8 @@ def create_trigger_node(obj, target):
         if isinstance(repo_relative_path, tuple):
         # if it is a tuple use the second element for validating the target 
             repo_relative_path, repo_path = repo_relative_path
-            if not Path(repo_path).joinpath(obj.target).exists():
-                raise ValueError("Target file does not exists")
+            if not Path(repo_path).joinpath(target).exists():
+                raise ValueError(f"ERROR in {obj.get_source_info()}. Target file does not exists: {target}")
     else:
         repo_relative_path = ""
     javascript_fun = f"anylink_file(this, '{obj.config.anylink_ams_version}', 'ammr', '{target}', '{repo_relative_path}')"

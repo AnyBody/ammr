@@ -1,7 +1,7 @@
 ---
 gallery_title: "Optimize BVH Origin"
 gallery_image: "/Applications/images/BVH_OptimizeOrigin_Merged.jpg"
-anylink: Application/MocapExamples/BVH_Xsens_OptimizeOrigin/Subjects/S1/S01_Trial01/Main.any
+anylink: Application/MocapExamples/BVH_Xsens_OptimizeOrigin/Subjects/S01/S01_Trial01/Main.any
 ---
 
 (sphx_glr_auto_examples_Mocap_plot_BVH_OptimizeOrigin.py)=
@@ -42,5 +42,5 @@ to running the model.
 
 The model folder is at: `Application/MocapExamples/BVH_Xsens_OptimizeOrigin`
 
-Example: {anylink-file}`Subjects/S1/S01_Trial01/Main.any <Application/MocapExamples/BVH_Xsens_OptimizeOrigin/Subjects/S1/S01_Trial01/Main.any>`
+Example: {anylink-file}`Subjects/S1/S01_Trial01/Main.any <Application/MocapExamples/BVH_Xsens_OptimizeOrigin/Subjects/S01/S01_Trial01/Main.any>`
 :::
