@@ -105,7 +105,8 @@ class AnyLinkGallerySidebar(SphinxDirective):
         link_div = nodes.container("", link_p, classes=link_classes)
 
         #paragraph += open_ref #(nodes.container(classes=["sd-text-right"]) + open_ref)
-        elements += link_div
+        if self.env.app.tags.has("offline"):
+            elements += link_div
 
         return [elements]
 
@@ -135,6 +136,10 @@ class AnyLinkButton(ReferenceRole):
             )
             prb = self.inliner.problematic(self.rawtext, self.rawtext, msg)
             return [prb], [msg]
+        
+        if not self.env.app.tags.has("offline"):
+            button = nodes.inline("","")
+
 
         return [button], []
 
@@ -154,7 +159,10 @@ class AnyLink(ReferenceRole):
             refuri="",
             classes=["anylink-on-top"]
         )
-        reference += create_trigger_node(self, self.target) 
+        reference += create_trigger_node(self, self.target)
+
+        if not self.env.app.tags.has("offline"):
+            reference = nodes.inline("","")
 
         return [reference], []
 
@@ -213,6 +221,9 @@ class AnyLinkFile(ReferenceRole):
             )
             prb = self.inliner.problematic(self.rawtext, self.rawtext, msg)
             return [prb], [msg]
+        
+        if not self.env.app.tags.has("offline"):
+            ref_elem = nodes.inline("","")
 
         return [title_elem, ref_elem], []
 

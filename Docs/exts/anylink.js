@@ -1,5 +1,5 @@
 function anylink_file(dummy_element, version, repo, target, repo_relative_path) {
-    href =  "anylink2://AnyFile?"
+    href =  "anylink://AnyFile?"
     
     if (version != ""){
         href = href + "version=" + version + "&"
