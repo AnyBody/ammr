@@ -5,7 +5,7 @@ anylink: Application/Examples/LegPressMachine/LegPressMachine.main.any
 ---
 
 (sphx_glr_auto_examples_Sports_plot_LegPressMachine.py)=
-
+(example_legpressmachinemodel)=
 # Leg Press Machine
 
 :::{anylink-gallery}

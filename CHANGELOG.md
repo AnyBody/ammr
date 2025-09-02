@@ -13,6 +13,8 @@
    share the same marker protocol irrespectively of if the detailed or simple
    hand is enabled. 
 *  Fixed arm rest asymmetry in various sitting model application examples. 
+*  Fixed contact thresholds in {ref}`Leg Press Machine 
+   example<example_legpressmachinemodel>` to ensure contact with all the nodes.
 
 ### ➕ Added:
 * The implemenation of the pelvis rotation vector measure in the interface folder has been refactored to allow overwritting the global reference frame.
