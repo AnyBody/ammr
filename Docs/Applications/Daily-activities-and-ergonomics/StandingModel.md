@@ -1,7 +1,7 @@
 ---
 gallery_title: "Standing Model"
 gallery_image: "/Applications/images/StandingModel.webp"
-anylink: Application/Examples/StandingModel/StandingModel.main.any
+anylink: Application/Examples/StandingModel/StandingModel.Main.any
 ---
 
 (sphx_glr_auto_examples_ADLs_and_ergonomics_plot_StandingModel.py)=

@@ -1,7 +1,7 @@
 ---
 gallery_title: "Pedel demo"
 gallery_image: "/Applications/images/PedalDemoConditional.webp"
-anylink: Application/Examples/PedalDemoConditional/PedalDemoConditional.main.any
+anylink: Application/Examples/PedalDemoConditional/PedalDemoConditional.Main.any
 ---
 
 (sphx-glr-auto-examples-adls-and-ergonomics-plot-pedaldemoconditional-py)=

@@ -1,7 +1,7 @@
 ---
 gallery_title: "Wheel Chair model"
 gallery_image: "/Applications/images/WheelChairRancho.webp"
-anylink: Application/Examples/WheelChairRancho/WheelChairRancho.main.any
+anylink: Application/Examples/WheelChairRancho/WheelChairRancho.Main.any
 ---
 
 (sphx_glr_auto_examples_Orthopedics_and_rehab_plot_WheelChairRancho.py)=

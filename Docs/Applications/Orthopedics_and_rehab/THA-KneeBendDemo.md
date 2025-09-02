@@ -1,7 +1,7 @@
 ---
 gallery_title: "Total Hip Arthroplasty"
 gallery_image: "/Applications/images/THA-KneeBendDemo.webp"
-anylink: Application/Examples/THA-KneeBendDemo/THA-KneeBendDemo.main.any
+anylink: Application/Examples/THA-KneeBendDemo/THA-KneeBendDemo.Main.any
 ---
 
 (sphx_glr_auto_examples_Orthopedics_and_rehab_plot_THA-KneeBendDemo.py)=

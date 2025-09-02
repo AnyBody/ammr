@@ -1,7 +1,7 @@
 ---
 gallery_title: "Hand crank model"
 gallery_image: "/Applications/images/WheelTurn.webp"
-anylink: Application/Examples/WheelTurn/WheelTurn.main.any
+anylink: Application/Examples/WheelTurn/WheelTurn.Main.any
 ---
 
 (sphx_glr_auto_examples_ADLs_and_ergonomics_plot_WheelTurn.py)=
