@@ -1,7 +1,7 @@
 ---
 gallery_title: "Rat Hindlimb model"
 gallery_image: "/Applications/images/UlmRatHindLimbModel.jpg"
-anylink: Application/Beta/UlmRatHindLimbModel/UlmRatHindLimbModel.Main.any
+anylink: Application/Beta/UlmRatHindlimbModel/UlmRatHindLimbModel.Main.any
 ---
 
 (sphx_glr_auto_examples_Other_plot_UlmRatHindLimbModel.py)=
