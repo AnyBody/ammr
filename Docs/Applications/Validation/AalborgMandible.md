@@ -1,17 +1,16 @@
 ---
 gallery_title: "The Aalborg Mandible model"
 gallery_image: "/Applications/images/AalborgMandibleValidation.webp"
+anylink: Application/Validation/AalborgMandibleValidation/Trials/ChewingClockwisePref0001/AnalysisFreeMovement.any
 ---
 
 (sphx_glr_auto_examples_Validation_plot_AalborgMandible.py)=
 (example_aalborgmandible)=
 # The Aalborg Mandible model
 
-````{sidebar} **Example**
-<img src="/Applications/images/AalborgMandibleValidation.webp" width="70%" align="center">
-````
-
-
+:::{anylink-gallery}
+:margin:
+:::
 
 This is a validation example of mandible model based on a CT scan of a 40 year old male.
 
@@ -32,12 +31,15 @@ Independent Research under grant number: DFF-4184-00018.
 
 
 
-:::{seealso}
-**Model location in AMMR:**
+:::{admonition} In Model Repository:
+:class: seealso
+{file}`Application/Validation/AalborgMandibleValidation`
 
-{menuselection}`Application --> Validation --> AalborgMandibleValidation`
+* {anylink-file}`ChewingClockwisePref0001/AnalysisFDK.main.any <Application/Validation/AalborgMandibleValidation/Trials/ChewingClockwisePref0001/AnalysisFDK.main.any>`
+* {anylink-file}`ChewingClockwisePref0001/AnalysisFreeMovement.any <Application/Validation/AalborgMandibleValidation/Trials/ChewingClockwisePref0001/AnalysisFreeMovement.any>`
+* {anylink-file}`ChewingClockwisePref0001/AnalysisPlanar.main.any <Application/Validation/AalborgMandibleValidation/Trials/ChewingClockwisePref0001/AnalysisPlanar.main.any>`
+
 :::
-
 ## How to run the model
 
 Under the Trials folder, there are six folders with the recorded trials. One of

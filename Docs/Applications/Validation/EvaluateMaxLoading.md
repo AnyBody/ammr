@@ -1,14 +1,15 @@
 ---
 gallery_title: "Evaluate Max load"
 gallery_image: "/Applications/Validation/EvaluateMaxLoadPlot.png"
+anylink: Application/Validation/EvaluateMaxExternalLoading/EvalMaxLoad.main.any
 ---
 
 (example_evaluate_max_load)=
 # Evaluate max external loading
 
-````{sidebar} **Example**
-<img src="/Applications/images/WheelTurn.webp" width="70%" align="center">
-````
+:::{anylink-gallery}
+:margin:
+:::
 
 
 ```{include} ../../../Application/Validation/EvaluateMaxExternalLoading/EvalMaxLoad.main.any
@@ -17,8 +18,10 @@ gallery_image: "/Applications/Validation/EvaluateMaxLoadPlot.png"
 ```
 
 
-:::{seealso}
-**Main file location in AMMR:**
 
-{menuselection}`Application --> Validation --> EvaluateMaxExternalLoading --> EvalMaxLoad.main.any`
+:::{admonition} In Model Repository:
+:class: seealso
+
+{anylink-file}` `
+
 :::

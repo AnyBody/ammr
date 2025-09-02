@@ -1,25 +1,19 @@
 ---
 gallery_title: "Squat"
 gallery_image: "/Applications/images/Squat.webp"
+anylink: Application/Examples/Squat/Squat.main.any
 ---
 
 (sphx_glr_auto_examples_ADLs_and_ergonomics_plot_Squat.py)=
 (example_squat)=
 # Squat
 
-````{sidebar} **Example**
-<img src="/Applications/images/Squat.webp" width="70%" align="center">
-
-````
-
-This model demonstrates parameterized squating motion.
-
-:::{admonition} **Main file location in AMMR:**
-:class: see-also
-
-  {menuselection}`Application --> Examples --> Squat --> Squat.main.any`
+:::{anylink-gallery}
+:margin:
 :::
 
+
+This model demonstrates parameterized squating motion.
 
 
 Users can try to change different parameters of this model in the 'Input\Parameters.any' file including:
@@ -35,3 +29,9 @@ Ground reaction force(GRF) of the human model is predicted and you can check the
 
 The parametric motion elements are defined in 'Model\JointsAndDrivers.any'.
 
+
+:::{admonition} In Model Repository:
+:class: seealso
+
+{anylink-file}` `
+:::

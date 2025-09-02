@@ -1,16 +1,17 @@
 ---
 gallery_title: "Simple Knee force estimation"
 gallery_image: "/Applications/images/KneeForceExample.webp"
+anylink: Application/Examples/KneeForcesExample/Knee_force_example.main.any
 ---
 
 (sphx_glr_auto_examples_Orthopedics_and_rehab_plot_KneeForcesExample.py)=
 (example_knee_forces_estimate)=
 # Knee forces example
 
+:::{anylink-gallery}
+:margin:
+:::
 
-````{sidebar} **Example**
-<img src="/Applications/images/KneeForceExample.webp" width="70%" align="center">
-````
 
 Example of calculating the medial/lateral knee force from the total force and moment.
 
@@ -26,6 +27,14 @@ estimate for the actual knee condyle contact force.
 This example shows how to find the knee reaction forces and moments and decompose them into
 two equivalent forces which represent the medial and lateral knee force components acting from the
 femur to the tibial tray.
+
+:::{admonition} In Model Repository:
+:class: seealso
+
+{anylink-file}` `
+:::
+
+
 
 :::{figure} /Applications/Orthopedics_and_rehab/knee_forces.svg
 :align: center

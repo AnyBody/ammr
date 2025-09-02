@@ -1,27 +1,19 @@
 ---
 gallery_title: "Standing Model"
 gallery_image: "/Applications/images/StandingLift.webp"
+anylink: Application/Examples/StandingLift/StandingLift.main.any
 ---
 
 (sphx_glr_auto_examples_ADLs_and_ergonomics_plot_StandingLift.py)=
 (example_standinglift)=
 # Lifting Model
 
-````{sidebar} **Example**
-<img src="/Applications/images/StandingLift.webp" width="70%" align="center">
-
-````
+:::{anylink-gallery}
+:margin:
+:::
 
 Standing body model lifting a box.
 
-:::{seealso}
-**Main files location in AMMR:**
-
-{menuselection}`Application --> Examples --> StandingLift -->`
-
-{menuselection}`StandingLift.Main.any` /
-{menuselection}`StandingLiftFEA.Main.any`
-:::
 
 This application can be a good starting point for new applications involving
 the entire body, doing lifts from a standing posture. The model uses artificial
@@ -33,3 +25,11 @@ Please note that this model can also output computed forces to be used by FEA. I
 used by FEA tutorial.
 
 
+
+:::{admonition} In Model Repository:
+:class: seealso
+
+{anylink-button}`Application/Examples/StandingLift/StandingLift.main.any`
+{anylink-button}`Application/Examples/StandingLift/StandingLiftFEA.main.any`
+
+:::

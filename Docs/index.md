@@ -34,6 +34,7 @@ The AnyBody Managed Model Repository
 :class: sd-px-4 sd-fs-5
 
 {material-outlined}`timeline;1.5em` New in AMMR {{AMMR_VERSION}}
+```
 :::
 ::::
 

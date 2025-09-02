@@ -1,15 +1,16 @@
 ---
 gallery_title: "Standing Model"
 gallery_image: "/Applications/images/StandingModel.webp"
+anylink: Application/Examples/StandingModel/StandingModel.Main.any
 ---
 
 (sphx_glr_auto_examples_ADLs_and_ergonomics_plot_StandingModel.py)=
 (example_standingmodel)=
 # Standing Model
 
-````{sidebar} **Example**
-<img src="/Applications/images/StandingModel.webp" width="70%" align="center">
-````
+:::{anylink-gallery}
+:margin:
+:::
 
 A full-body model that which uses a center of mass drivers to keep balance and Ground Reaction Force prediction for contact with the ground.
 
@@ -26,9 +27,9 @@ The model has the following features which makes it a good starting point for cr
 The model is identical to the standing model created with the  template generator in the AnyBody Modeling System.
 
 
-:::{seealso}
-**Main file location in AMMR:**
+:::{admonition} In Model Repository:
+:class: seealso
 
-{menuselection}`Application --> Examples --> StandingModel --> StandingModel.Main.any`
+{anylink-file}` `
 :::
 
