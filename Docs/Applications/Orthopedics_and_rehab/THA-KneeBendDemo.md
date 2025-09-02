@@ -10,7 +10,7 @@ anylink: Application/Examples/THA-KneeBendDemo/THA-KneeBendDemo.main.any
 
 
 :::{anylink-gallery}
-:classes: margin
+:margin:
 :::
 
 Model of a total hip replacement using a contact implant model and

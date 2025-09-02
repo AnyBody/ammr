@@ -9,7 +9,7 @@ anylink: Application/Examples/FemoralTorsion/StandingModel.Main.any
 # Femoral Torsion tool
 
 :::{anylink-gallery}
-:classes: margin
+:margin:
 :::
 
 

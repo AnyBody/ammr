@@ -9,7 +9,7 @@ anylink: Application/Examples/SeatedHuman/SeatedHuman.main.any
 # Seated Human
 
 :::{anylink-gallery}
-:classes: margin
+:margin:
 :::
 
 A model of a seated human consisting of the full body model, a chair, and an

@@ -9,7 +9,7 @@ anylink: Application/Examples/Squat/Squat.main.any
 # Squat
 
 :::{anylink-gallery}
-:classes: margin
+:margin:
 :::
 
 

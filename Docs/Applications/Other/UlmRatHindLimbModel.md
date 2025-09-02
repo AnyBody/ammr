@@ -9,7 +9,7 @@ anylink: Application/Beta/UlmRatHindLimbModel/UlmRatHindLimbModel.Main.any
 # Rat Hindlimb model
 
 :::{anylink-gallery}
-:classes: margin
+:margin:
 :::
 
 The Ulm Rat hindlimb model is a simlation of the internal forces and moments in

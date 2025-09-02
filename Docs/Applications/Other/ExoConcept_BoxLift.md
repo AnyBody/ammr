@@ -9,7 +9,7 @@ anylink: Application/Examples/ExoskeletonConcept/ExoConcept_BoxLift.Main.any
 # Exoskeleton concept model
 
 :::{anylink-gallery}
-:classes: margin
+:margin:
 :::
 
 

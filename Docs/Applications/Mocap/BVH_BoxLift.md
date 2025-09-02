@@ -10,7 +10,7 @@ anylink: Application/MocapExamples/BVH_BoxLift/Subjects/S01/S01_T01/Main.any
 
 
 :::{anylink-gallery}
-:classes: margin
+:margin:
 :::
 
 

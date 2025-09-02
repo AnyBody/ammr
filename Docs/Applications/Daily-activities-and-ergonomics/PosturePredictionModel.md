@@ -10,7 +10,7 @@ anylink: Application/Examples/StandingPosturePredictionWithLoad/StandingPostureP
 # Posture Prediction Model
 
 :::{anylink-gallery}
-:classes: margin
+:margin:
 :::
 
 This is a model which can predict the posture as a consequence of applied loads in hands.

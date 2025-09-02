@@ -9,7 +9,7 @@ anylink: Application/Examples/KneeForcesExample/Knee_force_example.main.any
 # Knee forces example
 
 :::{anylink-gallery}
-:classes: margin
+:margin:
 :::
 
 

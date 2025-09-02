@@ -9,7 +9,7 @@ anylink: Application/Validation/WilkeSpinalDiscPressure/SpinePressureSeatingRela
 # Wilke Spine Disc Pressure Model
 
 :::{anylink-gallery}
-:classes: margin
+:margin:
 :::
 
 

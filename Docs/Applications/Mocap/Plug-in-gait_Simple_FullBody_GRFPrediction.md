@@ -10,7 +10,7 @@ anylink: Application/MocapExamples/Plug-in-gait_Simple/FullBody_GRFPrediction.ma
 # Simple GRF prediction model
 
 :::{anylink-gallery}
-:classes: margin
+:margin:
 :::
 
 

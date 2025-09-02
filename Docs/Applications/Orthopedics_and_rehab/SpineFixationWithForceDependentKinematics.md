@@ -10,7 +10,7 @@ anylink: Application/Examples/SpineFixationWithForceDepKinematics/SpineFixationW
 
 
 :::{anylink-gallery}
-:classes: margin
+:margin:
 :::
 
 This application is an example of how to use the new force-dependent

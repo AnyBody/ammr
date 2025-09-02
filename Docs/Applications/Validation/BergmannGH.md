@@ -9,7 +9,7 @@ anylink: Application/Validation/BergmannGH/BergmannGH.Main.any
 # Bergmann GH
 
 :::{anylink-gallery}
-:classes: margin
+:margin:
 :::
 
 

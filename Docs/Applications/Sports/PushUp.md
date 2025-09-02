@@ -9,7 +9,7 @@ anylink: Application/Examples/PushUp/PushUp.main.any
 # Push Up
 
 :::{anylink-gallery}
-:classes: margin
+:margin:
 :::
 
 A full-body model doing push-ups with assumed drivers.

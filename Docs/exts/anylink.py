@@ -1,15 +1,23 @@
 import os
 from collections import defaultdict
 from pathlib import Path
-from typing import Optional
+from typing import Optional, cast
 
 import docutils
 from myst_parser.config.main import read_topmatter
 from myst_parser.mdit_to_docutils.html_to_nodes import html_to_nodes
+from myst_parser.mocking import MockState
 from sphinx.util.docutils import ReferenceRole, SphinxDirective, nodes
 
-BASE_BUTTON_CLASSES  = ["anylink-ref", "sd-btn", "sd-text-wrap", "sd-m-2","sd-shadow-sm", "sd-align-major-center", "sd-btn-outline-primary", "reference", "external"]
+BASE_BUTTON_CLASSES  = ["anylink-on-top", "anylink-ref", "sd-btn", "sd-text-wrap", "sd-m-2","sd-shadow-sm", "sd-align-major-center", "sd-btn-outline-primary", "reference", "external"]
 
+
+import debugpy
+
+# 5678 is the default attach port in the VS Code debug configurations. Unless a host and port are specified, host defaults to 127.0.0.1
+# debugpy.listen(5678)
+# print('Waiting for debugger attach')
+# debugpy.wait_for_client()
 
 def get_topmatter(obj): 
     return read_topmatter(Path(obj.get_source_info()[0]).read_text(encoding="utf-8"))
@@ -35,52 +43,76 @@ def create_trigger_node(obj, target):
 class AnyLinkGallerySidebar(SphinxDirective): 
 
     required_arguments = 0
+    has_content = True
 
     option_spec = {
-        "classes": docutils.parsers.rst.directives.unchanged,
+        "link-classes": docutils.parsers.rst.directives.unchanged,
+        "margin": docutils.parsers.rst.directives.flag,
         "anylink": docutils.parsers.rst.directives.unchanged,
-        "gallery_image": docutils.parsers.rst.directives.unchanged,
+        "title": docutils.parsers.rst.directives.unchanged,
+        "image": docutils.parsers.rst.directives.unchanged,
+        "style": docutils.parsers.rst.directives.unchanged, # button or gallery
     }
 
     def run(self):
 
         topmatter = get_topmatter(self)
-        classes = ["anylink-ref", "sd-btn", "sd-text-wrap", "sd-m-2","sd-shadow-sm", "sd-align-major-center", "sd-btn-outline-primary", "reference", "external"]
-        classes.extend(self.options.get("classes", "").split(" "))
+        top_classes = ["sd-text-center"]
 
-        div = nodes.container(
-            classes=["margin", "sd-text-center"]
+        if "margin" in self.options:
+            top_classes.append("margin")
+
+        elements = nodes.container(
+            classes=top_classes
         )
 
-        gallery_image = self.options.get("gallery_image") or topmatter.get("gallery_image", "")
+        image = self.options.get("image") or topmatter.get("gallery_image", "")
 
-        img = html_to_nodes( f'<img src="{gallery_image}" align="center" width= "100%"/>', self.lineno, self.state._renderer)
-        div += img
+        img = html_to_nodes( f'<img src="{image}" align="center" width= "100%"/>', self.lineno, self.state._renderer)
+        elements += img
 
-        try:
-            button = nodes.reference(
-                "",
-                self.config.anylink_open_text,
-                internal=False,
-                refuri="",
-                classes=classes,
-            )
-            anylink = self.options.get("anylink") or topmatter.get("anylink", "")
-            button.children.append(create_trigger_node(self, anylink))
-            paragraph = nodes.paragraph()
-            paragraph += button
-            div += paragraph
 
-        except ValueError as e:
-            e.add_note(
-                "Invalid AMMR link %s" % anylink, line=self.lineno
-            )
-            raise e
-        return [div]
+        if self.content:
+            content_nodes = self.parse_inline(self.content[0], lineno=self.lineno+self.content_offset)[0]
+        else:
+            open_text = self.config.anylink_open_text
+            content_nodes = nodes.inline(open_text, open_text)
+            #content_nodes = nodes.paragraph(text= self.config.anylink_open_text).children
+
+
+        style_option = self.options.get("style", "button")
+        if style_option == "button": 
+            ref_classes = BASE_BUTTON_CLASSES
+        elif style_option == "gallery":
+            ref_classes = ["anylink-on-top", "anylink-ref", "reference", "external"]
+
+        open_ref = nodes.reference(
+            "",
+            "",
+            internal=False,
+            refuri="",
+            classes=ref_classes,
+        )
+        open_ref.children.extend(content_nodes)
+
+        anylink = self.options.get("anylink") or topmatter.get("anylink", "")
+        open_ref.children.append(create_trigger_node(self, anylink))
+
+        link_p = nodes.paragraph()
+        link_p.append(open_ref)
+
+        link_classes = self.options.get("link-classes", "").split(" ")
+        link_div = nodes.container("", link_p, classes=link_classes)
+
+        #paragraph += open_ref #(nodes.container(classes=["sd-text-right"]) + open_ref)
+        elements += link_div
+
+        return [elements]
 
 class AnyLinkButton(ReferenceRole):
 
     def run(self):
+
 
         if self.target == " ":
             topmatter = get_topmatter(self)
@@ -106,6 +138,25 @@ class AnyLinkButton(ReferenceRole):
 
         return [button], []
 
+
+
+
+
+class AnyLink(ReferenceRole):
+
+    def run(self):
+
+
+        reference = nodes.reference(
+            "",
+            self.title,
+            internal=False,
+            refuri="",
+            classes=["anylink-on-top"]
+        )
+        reference += create_trigger_node(self, self.target) 
+
+        return [reference], []
 
 
 class AnyLinkFile(ReferenceRole):
@@ -142,8 +193,6 @@ class AnyLinkFile(ReferenceRole):
                 internal=False,
                 refuri="",
                 classes=["anylink-ref"],
-                onerror="test"
-
             )
 
             reference += create_trigger_node(self, self.target)
@@ -193,6 +242,7 @@ def setup(app):
     
     app.add_role("anylink-button", AnyLinkButton())
     app.add_role("anylink-file", AnyLinkFile())
+    app.add_role("anylink", AnyLink())
     app.add_directive("anylink-gallery", AnyLinkGallerySidebar)
     app.add_config_value("anylink_ams_version", "", "env")
     app.add_config_value("anylink_open_text", "AnyBody", "env")

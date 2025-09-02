@@ -9,7 +9,7 @@ anylink: Application/Examples/PedalDemoConditional/PedalDemoConditional.main.any
 # Pedel demo
 
 :::{anylink-gallery}
-:classes: margin
+:margin:
 :::
 
 A leg pressing down a pedal. This

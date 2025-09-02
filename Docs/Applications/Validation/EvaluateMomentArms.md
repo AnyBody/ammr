@@ -10,7 +10,7 @@ anylink: Application/Validation/EvaluateMomentArms/EvaluateMomentArms.main.any
 
 
 :::{anylink-gallery}
-:classes: margin
+:margin:
 :::
 
 

@@ -9,7 +9,7 @@ anylink: Application/Examples/BikeModel/BikeModel-FullBody.main.any
 # Bike Model
 
 :::{anylink-gallery}
-:classes: margin
+:margin:
 :::
 
 Bicycle rider model that runs either as

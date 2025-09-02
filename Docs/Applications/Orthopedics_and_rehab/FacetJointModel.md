@@ -10,7 +10,7 @@ anylink: Application/Examples/FacetJointModel/FacetJointModel.main.any
 
 
 :::{anylink-gallery}
-:classes: margin
+:margin:
 :::
 
 A spine model with facet joints.

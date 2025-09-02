@@ -108,6 +108,7 @@ exclude_patterns = [
     "exts",
     "auto_examples",
     ".pixi",
+    "anybody-assistant"
 ]
 
 
@@ -349,8 +350,7 @@ for folder in galleryfolders:
             gallery[folder].append(
                 {
                     "doc": file.with_suffix("").as_posix(),
-                    "title": post["gallery_title"],
-                    "image": post["gallery_image"],
+                    **post
                 }
             )
 
@@ -363,7 +363,7 @@ for folder, section in gallery.items():
     content = gallery_template.render(examples=section)
     with open(gallery_txt, encoding="utf8") as fh:
         previous_content = fh.read()
-    if content != previous_content:
+    if True: #content != previous_content:
         with open(gallery_txt, "w", encoding="utf8") as fh:
             fh.write(content)
 

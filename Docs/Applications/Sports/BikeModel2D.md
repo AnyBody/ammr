@@ -9,7 +9,7 @@ anylink: Application/Examples/BikeModel2D/BikeModel2D.main.any
 # Bike Model 2D
 
 :::{anylink-gallery}
-:classes: margin
+:margin:
 :::
 
 

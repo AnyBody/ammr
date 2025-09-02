@@ -10,7 +10,7 @@ anylink: Application/MocapExamples/ADL_Gait_[beta]/Subjects/2014001/2014001_C1_0
 
 
 :::{anylink-gallery}
-:classes: margin
+:margin:
 :::
 
 

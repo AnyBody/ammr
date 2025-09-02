@@ -10,7 +10,7 @@ anylink: Application/Examples/FreePosture/FreePostureFullBodyMove.main.any
 
 
 :::{anylink-gallery}
-:classes: margin
+:margin:
 :::
 
 

@@ -8,7 +8,7 @@ anylink: Application/Validation/EvaluateMaxExternalLoading/EvalMaxLoad.main.any
 # Evaluate max external loading
 
 :::{anylink-gallery}
-:classes: margin
+:margin:
 :::
 
 

@@ -10,7 +10,7 @@ anylink: Application/Examples/WheelChairRancho/WheelChairRancho.main.any
 
 
 :::{anylink-gallery}
-:classes: margin
+:margin:
 :::
 
 A model of a person sitting in a wheelchair, the model is driven by motion

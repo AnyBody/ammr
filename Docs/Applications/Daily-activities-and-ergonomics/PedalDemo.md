@@ -9,7 +9,7 @@ anylink: Application/Examples/PedalDemo/PedalDemo.main.any
 # Pedel demo simple
 
 :::{anylink-gallery}
-:classes: margin
+:margin:
 :::
 
 This model demonstrates the construction

@@ -10,7 +10,7 @@ anylink: Application/MocapExamples/Plug-in-gait_Simple/LowerExtremity.main.any
 
 
 :::{anylink-gallery}
-:classes: margin
+:margin:
 :::
 
 

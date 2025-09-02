@@ -9,7 +9,7 @@ anylink: Application/Examples/BenchPress/BenchPress.Main.any
 # Bench Press
 
 :::{anylink-gallery}
-:classes: margin
+:margin:
 :::
 
 

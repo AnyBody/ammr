@@ -9,7 +9,7 @@ anylink: Application/Examples/WheelTurn/WheelTurn.main.any
 # Hand crank model
 
 :::{anylink-gallery}
-:classes: margin
+:margin:
 :::
 
 

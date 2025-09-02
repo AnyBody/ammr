@@ -12,7 +12,7 @@ anylink: Application/MocapExamples/BVH_Xsens_OptimizeOrigin/Subjects/S1/S01_Tria
 
 
 :::{anylink-gallery}
-:classes: margin
+:margin:
 :::
 
 

@@ -9,7 +9,7 @@ anylink: Application/MocapExamples/BVH_Xsens/Subjects/S1/S01_Trial01/Main.any
 # Inertial MoCap example
 
 :::{anylink-gallery}
-:classes: margin
+:margin:
 :::
 
 Example of a MoCap model using data from an inertial motion capture suit.

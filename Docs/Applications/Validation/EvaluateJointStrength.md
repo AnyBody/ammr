@@ -9,7 +9,7 @@ anylink: Application/Validation/EvaluateJointStrength/EvaluateJointStrength.main
 # Evaluate joint strength
 
 :::{anylink-gallery}
-:classes: margin
+:margin:
 :::
 
 

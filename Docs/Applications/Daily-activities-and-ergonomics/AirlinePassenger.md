@@ -9,7 +9,7 @@ anylink: "Application/Examples/AirlinePassenger/AirlinePassenger.main.any"
 # Airline passenger
 
 :::{anylink-gallery}
-:classes: margin
+:margin:
 :::
 
 

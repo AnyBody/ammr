@@ -9,7 +9,7 @@ anylink: Application/Examples/CrossTrainer/CrossTrainer.main.any
 # Cross Trainer
 
 :::{anylink-gallery}
-:classes: margin
+:margin:
 :::
 
 This model is based on a SolidWorks CAD model of a cross trainer fitness machine

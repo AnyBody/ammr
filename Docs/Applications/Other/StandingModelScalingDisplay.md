@@ -10,7 +10,7 @@ anylink: Application/Examples/StandingModelScalingDisplay/StandingModelScalingDi
 
 
 :::{anylink-gallery}
-:classes: margin
+:margin:
 :::
 
 This application shows all the scaling laws available.

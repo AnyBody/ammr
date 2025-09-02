@@ -10,7 +10,7 @@ anylink: Application/Examples/KneeSimulator/Main.any
 
 
 :::{anylink-gallery}
-:classes: margin
+:margin:
 :::
 
 Model of a Knee Simulator using a knee implant model and force-dependent kinematics (FDK).
