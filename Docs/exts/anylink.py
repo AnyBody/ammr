@@ -238,7 +238,7 @@ def copy_assets(asset_files):
     def copy_files(app, exc):
         for asset in asset_files:
             fn = Path(__file__).with_name(asset)
-            copy_asset(str(fn), os.path.join(app.outdir, "_static"))
+            copy_asset(str(fn), os.path.join(app.outdir, "_static"),force=True)
     
     return copy_files
 
