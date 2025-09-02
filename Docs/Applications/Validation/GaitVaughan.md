@@ -1,7 +1,7 @@
 ---
 gallery_title: "Gait Vaughan"
 gallery_image: "/Applications/images/GaitVaughan.webp"
-anylink: Application/Validation/GaitVaughan/GaitVaughan.Main.any
+anylink: Application/Validation/GaitVaughan/GaitVaughan.main.any
 ---
 
 (sphx_glr_auto_examples_Validation_plot_GaitVaughan.py)=
