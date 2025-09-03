@@ -5,27 +5,28 @@
 
 
 (ammr-3.1.4-changelog)=
-## AMMR 3.1.4 (2025-??-??)
+## AMMR 3.1.4 (2025-09-03)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.17043944.svg)](https://doi.org/10.5281/zenodo.17043944)
 [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.1.4-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
 
 
 ### 🩹 Fixed:
-*  Refactored the references in the hand model, so the BVH MoCap models can
-   share the same marker protocol irrespectively of if the detailed or simple
-   hand is enabled. 
-*  Updated the subscapularis insertion to the lesser tuberosity, improving its
-   moment arms during humerus internal rotation. Special thanks to Researcher
-   Margaux Peixoto (Laboratoire d'Innovation ETS, Montreal) for contributing this
-   enhancement to the shoulder model.*  Fixed contact thresholds in {ref}`Leg Press Machine 
-   example<example_legpressmachinemodel>` to ensure contact with all the nodes.
-*  The {ref}`joint strength evaluation
-  <sphx_glr_auto_examples_Validation_plot_EvaluateJointStrength.py>`. models
-  have been updated to use the "MinMaxAux" muscle recruitment solver. This
-  improves robustness, while giving the same results.
-
+* Refactored references in the hand model so BVH MoCap models can share the same
+  marker protocol regardless of whether the detailed or simple hand is enabled.
+* Updated the subscapularis insertion to the lesser tuberosity, improving its
+  moment arms during humerus internal rotation. Special thanks to researcher
+  Margaux Peixoto (Laboratoire d'Innovation ETS, Montreal) for contributing this
+  enhancement to the shoulder model.
+* Fixed contact thresholds in the {ref}`Leg Press Machine example
+  <example_legpressmachinemodel>` to ensure contact with all nodes.
+* The {ref}`joint strength evaluation
+  <sphx_glr_auto_examples_Validation_plot_EvaluateJointStrength.py>` models now
+  use the "MinMaxAux" muscle recruitment solver, improving robustness without
+  changing results.
 
 ### ➕ Added:
-* The implemenation of the pelvis rotation vector measure in the interface folder has been refactored to allow overwritting the global reference frame.
+* Refactored the implementation of the pelvis rotation vector measure in the
+  interface folder to allow overriding the global reference frame.
 
 (ammr-3.1.3-changelog)=
 ## AMMR 3.1.3 (2025-06-16)
