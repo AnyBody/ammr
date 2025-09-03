@@ -1,6 +1,7 @@
 ---
 gallery_title: "Posture Prediction Model"
 gallery_image: "/Applications/images/StandingPosturePredictionModel.webp"
+anylink: Application/Examples/StandingPosturePredictionWithLoad/StandingPosturePrediction.main.any
 ---
 
 
@@ -8,23 +9,13 @@ gallery_image: "/Applications/images/StandingPosturePredictionModel.webp"
 (example_posture_prediction)=
 # Posture Prediction Model
 
-
-````{sidebar} **Example**
-<img src="/Applications/images/StandingPosturePredictionModel.webp" width="70%" align="center">
-
-````
+:::{anylink-gallery}
+:margin:
+:::
 
 This is a model which can predict the posture as a consequence of applied loads in hands.
 It does this by minimizing joint torques and applying balance drivers which account for external
 applied loads.
-
-
-:::{seealso}
-**Main file location in AMMR:**
-
-{menuselection}`Application --> Examples --> StandingPosturePredictionWithLoad -->
-StandingPosturePrediction.main.any`
-:::
 
 
 The model is driven by a combination of the following drivers:
@@ -40,6 +31,13 @@ The model is driven by a combination of the following drivers:
 
 
 Two type of loads can be applied, either a fixed weight of the object and/or a force vector.
+
+:::{admonition} In Model Repository:
+:class: seealso
+
+{anylink-file}` `
+:::
+
 
 ## Usage
 
@@ -98,4 +96,5 @@ Your browser does not support the video tag.
 ```
 
 **Please note the speed of the video was increased for viewing purposes.**
+
 
