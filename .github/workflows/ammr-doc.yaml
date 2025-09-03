@@ -20,18 +20,24 @@ jobs:
     if: github.repository == 'anybody/ammr' || github.event_name != 'push'
   
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         
-      - uses: prefix-dev/setup-pixi@v0.8.8
+      - uses: prefix-dev/setup-pixi@v0.9.0
         with:
           environments: docs
           cache-write: ${{ github.event_name == 'push' && github.ref_name == 'master' }}
           activate-environment: docs
   
-      - name: Link check
-        run: |
-          cd Docs
-          sphinx-build -M linkcheck . _build -W --keep-going -a -q 
+      - uses: nick-fields/retry@v3
+        name: Link check
+        with:
+          timeout_minutes: 5
+          retry_wait_seconds: 30
+          max_attempts: 2
+          retry_on: error
+          command: |
+            cd Docs
+            sphinx-build -M linkcheck . _build -W --keep-going -a -q 
                             
       - name: Build Documentation
         run: |
@@ -50,7 +56,7 @@ jobs:
     if: (github.repository == 'anybody/ammr' || github.event_name != 'push') && github.ref == 'refs/heads/master'
   
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with: 
           fetch-depth: 0
           
@@ -59,7 +65,7 @@ jobs:
         run: |
           git checkout $(git describe --tags `git rev-list --tags=ammr* --max-count=1`);
       
-      - uses: prefix-dev/setup-pixi@v0.8.8
+      - uses: prefix-dev/setup-pixi@v0.9.0
         with:
             environments: docs
             cache-write: ${{ github.event_name == 'push' && github.ref_name == 'master' }}
@@ -80,15 +86,15 @@ jobs:
     needs: [build-latest, build-tagged]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: tagged-version
           path: public
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: beta-version
           path: public/beta
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v4
         with: 
           path: public
 

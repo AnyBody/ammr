@@ -1,6 +1,7 @@
 ---
 gallery_title: "Optimize BVH Origin"
 gallery_image: "/Applications/images/BVH_OptimizeOrigin_Merged.jpg"
+anylink: Application/MocapExamples/BVH_Xsens_OptimizeOrigin/Subjects/S01/S01_Trial01/Main.any
 ---
 
 (sphx_glr_auto_examples_Mocap_plot_BVH_OptimizeOrigin.py)=
@@ -10,19 +11,16 @@ gallery_image: "/Applications/images/BVH_OptimizeOrigin_Merged.jpg"
 # Optimize BVH Origin example
 
 
-````{sidebar} **Example**
-<img src="/Applications/images/BVH_OptimizeOrigin_Merged.jpg" width="70%" align="center">
-````
+:::{anylink-gallery}
+:margin:
+:::
+
 
 Example of a MoCap model using data from an inertial motion capture suit.
 The model uses a BVH file with data from an Xsens suit. The ground reaction
 forces are predicted using the GRF prediction algorithm.
 
 
-```{admonition} **Main file location in AMMR:**
-:class: seealso
-{menuselection}`Application --> MocapExamples --> BVH_Xsens_OptimizeOrigin --> Subjects --> S1 --> S01_Trial01 --> Main.any`
-```
 
 This particular example demonstrates a class template that can be used to optimize the origin of the
 BVH recording. The class template can be useful when BVH recordings consist of interaction of the subject
@@ -38,3 +36,11 @@ the size of the BVH stick figure. Hence the model contains no *Parameter identif
 In this model for optimizing the origin, the parameter identification step must be run manually prior
 to running the model.
 
+
+:::{admonition} In Model Repository:
+:class: seealso
+
+The model folder is at: `Application/MocapExamples/BVH_Xsens_OptimizeOrigin`
+
+Example: {anylink-file}`Subjects/S1/S01_Trial01/Main.any <Application/MocapExamples/BVH_Xsens_OptimizeOrigin/Subjects/S01/S01_Trial01/Main.any>`
+:::

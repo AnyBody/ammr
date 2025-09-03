@@ -1,24 +1,23 @@
 ---
 gallery_title: "ADL Gait (beta)"
 gallery_image: "/Applications/images/ADL_Gait.webp"
+anylink: Application/MocapExamples/ADL_Gait_[beta]/Subjects/2014001/2014001_C1_01/Main.any
 ---
 
 (sphx_glr_auto_examples_MoCap_plot_ADL_Gait.py)=
 (example_adlgait)=
 # ADL Gait (beta)
 
-````{sidebar} **Example**
-<img src="/Applications/images/ADL_Gait.webp" width="70%" align="center">
-````
+
+:::{anylink-gallery}
+:margin:
+:::
+
+
 
 Fullbody MoCap model with multiple subjects and trials based on the 
 "Rehazenter Adult Walking Dataset" by [Schreiber and Moissenet (2019)](https://doi.org/10.1038/s41597-019-0124-4).
 
-:::{admonition} **Main file location in AMMR:**
-:class: see-also
-
-  {menuselection}`Application --> MocapExamples --> ADL_Gait_[beta]`
-:::
 
 
 The model has 50 subjects and 1145 trials. Subjects walk at five different
@@ -47,6 +46,18 @@ with improvements to the model please share them back.
 The model was created by [Enrico De Pieri](https://www.linkedin.com/in/enrico-de-pieri-13096a7a), 
 [Anderson de Souza Castelo Oliveira](https://vbn.aau.dk/en/persons/oliveira), and [Morten Enemark Lund](https://www.linkedin.com/in/biomedical) but has not yet been used for publication.
 
+
+
+:::{admonition} In Model Repository:
+:class: seealso
+
+The model is located at: `Application/MocapExamples/ADL_Gait_[beta]`
+
+Dynamic trial: {anylink-file}`Subjects/2014001/2014001_C1_01/Main.any <Application/MocapExamples/ADL_Gait_[beta]/Subjects/2014001/2014001_C1_01/Main.any>`
+
+Standing reference: {anylink-file}`Subjects/2014001/2014001_ST/Main.any <Application/MocapExamples/ADL_Gait_[beta]/Subjects/2014001/2014001_ST/Main.any>`
+
+:::
 
 ## Dataset
 
@@ -123,11 +134,7 @@ The model also contains a batch processing Python script for running all models.
 To use the scirpt install the [Anaconda Python Distribution](https://www.anaconda.com/download). 
 
 The script uses the [AnyPyTools](https://github.com/AnyBody-Research-Group/AnyPyTools) library for working with the
-AnyBody Model System ( [Lund 2019](https://doi.org/10.21105/joss.01108) ). The library can be installed with:
-
-```bash
-conda install -c conda-forge anypytools
-```
+AnyBody Model System ( [Lund 2019](https://doi.org/10.21105/joss.01108) ). 
 
 Then run the following command in the model folder:
 

@@ -1,6 +1,7 @@
 ---
 gallery_title: "Trunk exoskeleton model"
 gallery_image: "/Applications/images/ExoConceptTrunk_BoxLift.webp"
+anylink: Application/Examples/ExoskeletonTrunk/ExoConceptTrunk_BoxLift.main.any
 ---
 
 (sphx_glr_auto_examples_Other_plot_ExoConceptTrunk_BoxLift.py)=
@@ -8,9 +9,9 @@ gallery_image: "/Applications/images/ExoConceptTrunk_BoxLift.webp"
 # Trunk exoskeleton concept model
 
 
-````{sidebar} **Example**
-<img src="/Applications/images/ExoConceptTrunk_BoxLift.webp" width="70%" align="center">
-````
+:::{anylink-gallery}
+:margin:
+:::
 
 Trunk exoskeleton concept model.
 
@@ -18,12 +19,13 @@ This simple example shows how the effects of an exoskeleton can be investigated 
 directly at the human joints.
 
 
-
-:::{seealso}
-**Main file location in AMMR:**
-
-{menuselection}`Application --> Examples --> ExoskeletonTrunk --> ExoConceptTrunk_BoxLift.main.any`
-:::
-
 The model points to the existing {ref}`BVH Box Lift model <example_bvh_boxlift>` in the AMMR and implements
 the trunk exoskeleton concept. In this example, a spring force is applied at the pelvis-thorax extension measure of the body model.
+
+
+:::{admonition} In Model Repository:
+:class: seealso
+
+{anylink-file}` `
+
+:::

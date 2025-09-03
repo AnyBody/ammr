@@ -79,8 +79,8 @@ segment foot models.
 
 More details on the TLEM2 model can be found online:
 
-- Webcast: [TLEMsafe: Personalization of musculoskeletal models and prediction of functional outcome](https://www.anybodytech.com/download/tlemsafe-personalization-of-musculoskeletal-models-and-prediction-of-functional-outcome/)
-- Webcast: [TLEMsafe: An integrated system to improve predictability of functional recovery of patients requiring musculoskeletal surgery](https://www.anybodytech.com/download/tlemsafe-an-integrated-system-to-improve-predictability-of-functional-recovery-of-patients-requiring-musculoskeletal-surgery/)
+- Webcast: [TLEMsafe: Personalization of musculoskeletal models and prediction of functional outcome](https://www.anybodytech.com/webcasts/tlemsafe-personalization-of-musculoskeletal-models-and-prediction-of-functional-outcome/)
+- Webcast: [TLEMsafe: An integrated system to improve predictability of functional recovery of patients requiring musculoskeletal surgery](https://www.anybodytech.com/webcasts/tlemsafe-an-integrated-system-to-improve-predictability-of-functional-recovery-of-patients-requiring-musculoskeletal-surgery/)
 
 
 

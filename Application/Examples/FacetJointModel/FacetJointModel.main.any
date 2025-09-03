@@ -1,17 +1,17 @@
 #include "../libdef.any"
 
 //This model presents a new methodology for implementation of facet joints in the lumbar spine model
-//developed by De Zee et al. (2007: J Biomech. 40, 1219-1227). It enables the facet joint forces 
+//developed by De Zee et al. (2007: J Biomech. 40, 1219-1227). It enables the facet joint forces
 //to become part of a redundant system of equilibrium equations for the entire system including
 //the muscles. This redundant system is subsequently solved uniquely thereby making it possible
-//to analyze the effect of whole body movements and loads on facet joint loading for the whole 
+//to analyze the effect of whole body movements and loads on facet joint loading for the whole
 //lumbar spine together with its muscles.
 
 //More details can also be found in the webcast
-//"Implementation of facet joints in a lumbar spine model (Mark de Zee, 25. September, 2008)" 
+//"Implementation of facet joints in a lumbar spine model (Mark de Zee, 25. September, 2008)"
 //it can be found at http://www.anybodytech.com
 
-//NOTE: for dynamic situation this model should be used with care since the facet 
+//NOTE: for dynamic situation this model should be used with care since the facet
 //joint forces in this situation may add energy to the mechanical system.
 
 
@@ -20,21 +20,21 @@ Main = {
   // Path to draw settings
   // ----------------------------------------------------------
   #include "Model/DrawSettings.any"
-  
+
 
   // ----------------------------------------------------------
   // Body Model Configuration
   // ----------------------------------------------------------
   #include "Model/BodyModelConfiguration.any"
-  
+
   // The Mannequin file specifies load-time positions for all the segments
   // in the HumanModel. This is important for the model's ablity to resolve
   // all the kinematic constraints when the model is analyzed.
-  // The mannequin file also drives those degrees of freedom of the human 
-  // model that are not governed by problem-specific drivers at run time.    
-  #include "Model/Mannequin.any" 
-  
-  // Model of the human body to be used for the analysis  
+  // The mannequin file also drives those degrees of freedom of the human
+  // model that are not governed by problem-specific drivers at run time.
+  #include "Model/Mannequin.any"
+
+  // Model of the human body to be used for the analysis
   #include "<ANYBODY_PATH_BODY>/HumanModel.any"
 
   /// The actual model where all components are assembled
@@ -43,24 +43,24 @@ Main = {
     AnyFolder &BodyModel=.HumanModel.BodyModel;
     /// Reference to the mannequin folder (used by drivers)
     AnyFolder &Mannequin =.HumanModel.Mannequin;
-  
+
     ///Create a link to trunk folder
     AnyFolder &TrunkFolder =   Main.HumanModel.BodyModel.Trunk;
     TrunkFolder = {
       //include the facet joints
       #include "Model/FacetJoints/FacetJointsLumbar.any"
     };
-     
+
     AnyFolder EnvironmentModel = {
-      #include "Model/Environment.any"     
+      #include "Model/Environment.any"
     };
-    
+
     AnyFolder ModelEnvironmentConnection = {
       #include "Model/JointsAndDriversSimple.any"
     }; // ModelEnvironmentConnection
-    
+
   }; // Model
-  
+
   // --------------------------------------------------------------
   // Studies
   // --------------------------------------------------------------
@@ -71,7 +71,7 @@ Main = {
     tStart=0;
     Gravity = {0.00, -9.81, 0.00};
     nStep = 1;
-    
+
     AnyOutputFile VertebraForcesL4L5 = {
       FileName = ANYBODY_PATH_OUTPUT+"/L4L5Forces.csv";
       AnyVar FacetForceL4L5R_A = Main.HumanModel.BodyModel.Trunk.JointsLumbar.FacetJointL4L5R.Push.NormalForceScalar;
@@ -82,22 +82,19 @@ Main = {
       + Main.HumanModel.BodyModel.Trunk.JointsLumbar.L4L5Jnt.Constraints.Reaction.Fout[2]^2)^0.5;
       AnyVar SpineAngle = Main.HumanModel.BodyModel.Trunk.JointsLumbar.PelvisThoraxRotMeasure.Pos[2]*180/pi*-1;
     };
-    
-    
+
+
     AnyOutputFun  FacetL4L5R = {
-      Val = .VertebraForcesL4L5.FacetForceL4L5R_B;      
+      Val = .VertebraForcesL4L5.FacetForceL4L5R_B;
     };
-    
+
     AnyOutputFun  ReactionForceL4L5= {
       Val = .VertebraForcesL4L5.ReactionForceL4L5;
     };
-    
+
   }; // Study
-  
+
   // Include an operation sequence to run all required steps of your application (see Operations tab)
-    #include "<ANYBODY_PATH_MODELUTILS>\Operations\RunAppSequence.any"    
-  
+    #include "<ANYBODY_PATH_MODELUTILS>\Operations\RunAppSequence.any"
+
 };// Main
-
-
-

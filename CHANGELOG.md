@@ -3,8 +3,73 @@
 % A rendered version of the CHANGELOG is avaible here:
 %    https://anyscript.org/ammr/beta/changelog.html
 
+
+(ammr-3.1.4-changelog)=
+## AMMR 3.1.4 (2025-09-03)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.17043944.svg)](https://doi.org/10.5281/zenodo.17043944)
+[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.1.4-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
+
+
+### 🩹 Fixed:
+* Refactored references in the hand model so BVH MoCap models can share the same
+  marker protocol regardless of whether the detailed or simple hand is enabled.
+* Updated the subscapularis insertion to the lesser tuberosity, improving its
+  moment arms during humerus internal rotation. Special thanks to researcher
+  Margaux Peixoto (Laboratoire d'Innovation ETS, Montreal) for contributing this
+  enhancement to the shoulder model.
+* Fixed contact thresholds in the {ref}`Leg Press Machine example
+  <example_legpressmachinemodel>` to ensure contact with all nodes.
+* The {ref}`joint strength evaluation
+  <sphx_glr_auto_examples_Validation_plot_EvaluateJointStrength.py>` models now
+  use the "MinMaxAux" muscle recruitment solver, improving robustness without
+  changing results.
+
+### ➕ Added:
+* Refactored the implementation of the pelvis rotation vector measure in the
+  interface folder to allow overriding the global reference frame.
+
+(ammr-3.1.3-changelog)=
+## AMMR 3.1.3 (2025-06-16)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.15672003.svg)](https://doi.org/10.5281/zenodo.15672003)
+[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.1.3-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
+
+### 🩹 Fixed:
+
+*   Fixed a regression in the `VideoLookAtCamera` VideoTool that prevented
+    animated GIFs from being created when the video source was not an `.mp4`
+    file. It now supports any video format compatible with the ffmpeg library.
+
+### 🔧 Changed:
+
+*   The intermediate joint angle files used in MoCap models now have headers
+    which reflect the original output measure instead of the variable name in
+    the output class. This is useful if the files are used for anything other
+    than transferring the joint angles from marker tracking to inverse dynamics.
+
+### ➕ Added:
+
+*   Two new outputs have been added to the `JointAngleOutputs` folder in the
+    MarkerTracking study in MoCap models:
+
+    *   `JointAngleOutputs.AllDoFs.Values`
+    *   `JointAngleOutputs.AllDoFs.Names`
+
+    These variables contain the values and names of all joint angle variables
+    saved during marker tracking. They provide an alternative way to access the
+    same intermediate joint angle values that AnyBody writes to files when
+    running marker tracking.
+
+
 (ammr-3.1.2-changelog)=
-## AMMR 3.1.2 (2025-??-??)
+## AMMR 3.1.2 (2025-06-02)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.15534589.svg)](https://doi.org/10.5281/zenodo.15534589)
+[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.1.2-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
+
+This release of AMMR contains an important fix to the robustness of the MoCap models. 
+If you experienced problems with kinematic errors when running inverse dynamics then
+please update to this version.
+
+### 🩹 Fixed:
 
 * Improved how kinematics calculated in marker tracking is applied 
   to inverse dynamics MoCap models. The previous
@@ -604,7 +669,7 @@ The `HumeroUlnarJoint` is the elbow flexion extension, and together
   <sphx_glr_auto_examples_Orthopedics_and_rehab_plot_KneeForcesExample.py>`>
 - A new box lifting motion capture model has been added. The model is based on
   data from an inertial measurement unit based suit
-  ([Xsens](https://www.movella.com/products/wearables/xsens-mtw-awinda)), and
+  ([Xsens](https://www.movella.com/wearables/xsens-mtw-awinda)), and
   illustrates how to connect MoCap models with objects in the environment.
   <{ref}`See more <sphx_glr_auto_examples_mocap_plot_bvh_boxlift.py>`>
 
@@ -2069,7 +2134,7 @@ the driver values are updated.
 - Fixed an issue preventing
   {ref}`sphx_glr_auto_examples_ADLs_and_ergonomics_plot_StandingModel.py` from
   working with one leg.
-- Fixed a problem with the drawings of the bones in the Arm model which were not
+- Fixed a problem with the visualization of the bones in the Arm model which were not
   always symmetrical.
 - Fixed symmetry issues in scaling laws for scapula and clavicula, and humerus.
 - Fixed a bug where a the Pectoralis wrapping cylinder was not a included in the

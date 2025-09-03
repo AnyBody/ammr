@@ -1,22 +1,22 @@
 AnyFolder GluteusMaximusCal ={
-  AnyComponentDefinition obj = {};  
-  
+  AnyComponentDefinition obj = {};
+
   AnyFolder &Pelvis = ...HumanFolderRef.Trunk.SegmentsLumbar.PelvisSeg;
   AnyFolder &Sacrum = ...HumanFolderRef.Trunk.SegmentsLumbar.SacrumSeg;
-  
+
   AnyFolder &LegSegSide = .SideHumanFolderRef.Leg.Seg;
-  
+
   AnyFolder &LegJointsSide = .SideHumanFolderRef.Leg.Jnt;
   AnyFolder &SacrumPelvisJnt = ...HumanFolderRef.Trunk.JointsLumbar.SacrumPelvisJnt;
-  
-  
+
+
   AnyFixedRefFrame ground = {
-    AnyRefNode node = { 
+    AnyRefNode node = {
       ARel=..Pelvis.Axes0;
       sRel=..Pelvis.r0;
     };
   };
-  
+
   AnyKinEq PelvisFix = {
     AnyKinLinear PelvisSacrumLinFix = {
       AnyRefFrame &ground = ..ground.node;
@@ -28,26 +28,26 @@ AnyFolder GluteusMaximusCal ={
       AnyRefFrame &Pelvis = .....HumanFolderRef.Trunk.SegmentsLumbar.PelvisSeg;
     };
   };
-  
+
   AnyKinEqSimpleDriver PelvisSacrumFix = {
     AnyKinMeasure& Jnt = .SacrumPelvisJnt;
     DriverPos = {0,0,0};
     DriverVel = {0,0,0};
-    Reaction.Type = {Off,Off,Off}; 
-  }; 
-  
+    Reaction.Type = {Off,Off,Off};
+  };
+
   AnyKinEqInterPolDriver Hip = {
-    AnyKinRotational &Spherical = ..SideInterfaceFolderRef.HipFlexion.HipMeasure; 
+    AnyKinRotational &Spherical = ..SideInterfaceFolderRef.HipFlexion.HipMeasure;
     Type = PiecewiseLinear;
     T =      {0.0, 1.0 };
     Data = { {-20,  130},
              {10,  -15},
              {45,  0}
-           }*pi/180; // Flexion - Abduction - external rotation  
-    
+           }*pi/180; // Flexion - Abduction - external rotation
+
     Reaction.Type = {Off, Off, Off};
   };
-  
+
   AnyKinEqInterPolDriver Knee = {
     AnyKinMeasure& Hinge = ..SideInterfaceFolderRef.KneeFlexion;
     Type = PiecewiseLinear;
@@ -55,7 +55,7 @@ AnyFolder GluteusMaximusCal ={
     Data = {{5,150}}*pi/180; // ? degrees knee flexion
     Reaction.Type = {Off};
   };
-  
+
   AnyKinEqInterPolDriver Ankle = {
     AnyKinMeasure& Hinge = ..SideInterfaceFolderRef.AnklePlantarFlexion;
     Type = PiecewiseLinear;
@@ -63,7 +63,7 @@ AnyFolder GluteusMaximusCal ={
     Data = {{0,40}}*pi/180; // 0 to 40 % plantar flexion
     Reaction.Type = {Off};
   };
-  
+
   AnyKinEqInterPolDriver SubTalar = {
     AnyKinMeasure& Hinge = ..SideInterfaceFolderRef.SubTalarEversion;
     Type = PiecewiseLinear;
@@ -71,9 +71,9 @@ AnyFolder GluteusMaximusCal ={
     Data = {{0,0}}*pi/180;
     Reaction.Type = {Off};
   };
-  
+
   AnyString MusPrefix = CompleteNameOf(&.SideHumanFolderRef.Leg.Mus);
-  
+
   AnyObjectPtrArray GluteusMaximusMuscles = ObjSearch(MusPrefix+".GluteusMaximus*", "AnyMuscle");
   AnyFloat  GluteusMaximusRmin = repmat(NumElemOf(GluteusMaximusMuscles), 0.5);
   AnyFloat  GluteusMaximusRmax = repmat(NumElemOf(GluteusMaximusMuscles), 1.2);
@@ -81,7 +81,7 @@ AnyFolder GluteusMaximusCal ={
 
 // The study: Operations to be performed on the model
 AnyBodyCalibrationStudy LegCalibrationStudyGluteusMaximus = {
-  AnyFolder &ref=.GluteusMaximusCal; 
+  AnyFolder &ref=.GluteusMaximusCal;
   nStep = 2;
   MuscleArr = arrcat(
                 ref.GluteusMaximusMuscles
@@ -94,4 +94,3 @@ AnyBodyCalibrationStudy LegCalibrationStudyGluteusMaximus = {
                    );
   InitialConditions.SolverType = KinSolOverDeterminate;
 };
-

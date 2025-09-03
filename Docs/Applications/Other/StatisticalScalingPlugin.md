@@ -1,15 +1,16 @@
 ---
 gallery_title: "Statistical Scaling Plugin"
 gallery_image: "/Applications/images/StatisticalScalingPlugin.jpg"
+anylink: Application/Examples/StatisticalScalingPlugin/Main.any
 ---
 
 (sphx_glr_auto_examples_Other_plot_StatisticalScalingPlugin.py)=
 
 # Statistical Scaling Plugin
 
-````{sidebar} **Example**
-<img src="/Applications/images/StatisticalScalingPlugin.jpg" width="70%" align="center">
-````
+:::{anylink-gallery}
+:margin:
+:::
 
 Plugin for scaling subjects based on an anthropometric database.
 
@@ -18,13 +19,6 @@ small app which allows you to simply specify a few anatomical or functional
 parameters when scaling the model. The plugin calculates the remaining (free)
 anthropometric variables based on the ANSUR [^f1] anthropometrical database.
 
-
-
-:::{seealso}
-**Main file location in AMMR:**
-
-{menuselection}`Application --> Examples --> StatisticalScalingPlugin --> Main.any`
-:::
 
 The big advantage is that the correlation between variables are maintained, so
 the model will have realistic anthropometrical dimension as long as the
@@ -46,6 +40,12 @@ the anthropometricall constraintsngiven by the user. Please see:
 :::{warning}
 The plugin can not be used to generate subjects which are very
 different from the population of the ANSUR database. For example children.
+:::
+
+:::{admonition} In Model Repository:
+:class: seealso
+
+{anylink-file}` `
 :::
 
 ## Use the plugin in other models

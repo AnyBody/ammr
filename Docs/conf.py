@@ -65,6 +65,7 @@ extensions = [
     "sphinx_design",
     "sphinx_togglebutton",
     "sphinx_copybutton",
+    "anylink",
 
     # "sphinxcontrib.youtube",
     # "sphinx_copybutton",
@@ -107,7 +108,11 @@ exclude_patterns = [
     "exts",
     "auto_examples",
     ".pixi",
+    "anybody-assistant"
 ]
+
+
+
 
 # The name of the Pygments (syntax highlighting) style to use.
 highlight_language = "AnyScriptDoc"
@@ -186,6 +191,18 @@ if tags.has("draft") and not release.endswith("beta"):
     release = release + "-beta"
 
 
+# -- Options for AnyLink extensions -----------------------------------
+
+anylink_ams_version = ams_version_short
+anylink_open_text = "Open in AnyBody"
+anylink_open_tooltip = f"Opens model in AnyBody {ams_version_short} (Must be installed) "
+anylink_repo_relative_paths = {'ammr': ("../", "../")} # indicate the relative path of the AMMR when installed and when build. 
+
+
+# This will cause the extensin to add an argument to anylink:// urls ("repo_path=") with the path
+# to the local repository when serving html locally. (defaults to True)
+anylink_link_local_repo = True
+
 
 
 
@@ -223,7 +240,7 @@ html_last_updated_fmt = ""
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static", "body/_static"]
-html_css_files = ["_static/custom.css"]
+html_css_files = ["custom.css"]
 
 
 html_logo = "_static/AMMR.svg"
@@ -243,8 +260,8 @@ html_theme_options = {
     "home_page_in_toc": False,
     "show_toc_level": 1,
 
-    "pygment_light_style": "AnyScript",
-    "pygment_dark_style": "stata-dark",
+    "pygments_light_style": "AnyScript",
+    "pygments_dark_style": "stata-dark",
 
 
     # "use_sidenotes": True,
@@ -335,8 +352,7 @@ for folder in galleryfolders:
             gallery[folder].append(
                 {
                     "doc": file.with_suffix("").as_posix(),
-                    "title": post["gallery_title"],
-                    "image": post["gallery_image"],
+                    **post
                 }
             )
 
@@ -374,7 +390,7 @@ linkcheck_ignore = [
     "https://doi.org/10.1016/j.clinbiomech.2006.10.003",  # clinbiomech.com prevents the linkcheck
     "https://doi.org/10.1002/jor.25267",  # wiley.com prevents the linkcheck
     "https://web.archive.org*",  # web.archive.org is currently down due to hacking atacks
-    "https://doi.org/10.5281/zenodo.15094590", # version not released yet
+    "https://doi.org/10.5281/zenodo.17043944", # version not released yet
 ]
 
 linkcheck_allowed_redirects = {

@@ -1,15 +1,16 @@
 ---
 gallery_title: "Evaluate joint strength"
 gallery_image: "/Applications/images/EvaluateJointStrength.webp"
+anylink: Application/Validation/EvaluateJointStrength/EvaluateJointStrength.main.any
 ---
 
 (sphx_glr_auto_examples_Validation_plot_EvaluateJointStrength.py)=
 (example_evaluate_joint_strength)=
 # Evaluate joint strength
 
-````{sidebar} **Example**
-<img src="/Applications/images/EvaluateJointStrength.webp" width="70%" align="center">
-````
+:::{anylink-gallery}
+:margin:
+:::
 
 
 This model shows how to enable the built-in studies to evaluate joint strength.
@@ -30,9 +31,10 @@ affect perfomance when loading and switching between tabs/operations.
 :::
 
 
+:::{admonition} In Model Repository:
+:class: seealso
 
-:::{seealso}
-**Main file location in AMMR:**
+{anylink-file}` `
 
-{menuselection}`Application --> Validation --> EvaluateJointStrength --> EvaluateJointStrength.main.any`
 :::
+

@@ -1,15 +1,15 @@
 /// Support conditions between the footrest and the feet
-AnyFolder FootSupport = 
+AnyFolder FootSupport =
 {
   AnyVar   Strength=....Parameters.SupportSettings.FootrestSupportStrength;
   AnyVar   StaticFrictionCoefficient=....Parameters.SupportSettings.StaticFrictionFootrest;
-  
+
   AnyVar CC_Radius = 2.0*max({Main.Parameters.DesignParameters.Foot_Rest_Width/2,
-                          Main.Parameters.DesignParameters.Foot_Rest_Height/2}) ; 
+                          Main.Parameters.DesignParameters.Foot_Rest_Height/2}) ;
   AnyVar CC_LimitLow = -Main.Parameters.DesignParameters.Foot_Rest_Thick;
-  AnyVar CC_LimitHigh = Main.Parameters.DesignParameters.Foot_Rest_Thick/2 * 0.001; 
-  
-  AnySeg VFPlate_Left= 
+  AnyVar CC_LimitHigh = Main.Parameters.DesignParameters.Foot_Rest_Thick/2;
+
+  AnySeg VFPlate_Left=
   {
       Mass = 0 ;
       Jii = {0,0,0};
@@ -17,15 +17,15 @@ AnyFolder FootSupport =
       Axes0 = Main.Model.EnvironmentModel.Segs.Foot_Rest.Axes0;
 
   };
-  AnyKinEqSimpleDriver VFPlate_Left_Fix = 
+  AnyKinEqSimpleDriver VFPlate_Left_Fix =
   {
-      AnyKinLinear lin = 
+      AnyKinLinear lin =
       {
         Ref = 0;
         AnyRefNode& base = Main.Model.EnvironmentModel.Segs.Foot_Rest.cc_base_node;
-        AnySeg& target = ..VFPlate_Left;        
+        AnySeg& target = ..VFPlate_Left;
       };
-      AnyKinRotational rot = 
+      AnyKinRotational rot =
       {
         AnyRefNode& base = Main.Model.EnvironmentModel.Segs.Foot_Rest.cc_base_node;
         AnySeg& target = ..VFPlate_Left;
@@ -38,28 +38,28 @@ AnyFolder FootSupport =
       DriverVel = {0,0,0,0,0,0};
       Reaction.Type = {Off, Off, Off, Off, Off, Off};
   };
-  AnyReacForce VFPlate_Left_Force = 
+  AnyReacForce VFPlate_Left_Force =
   {
       AnyKinLinear& lin = .VFPlate_Left_Fix.lin;
       AnyKinRotational& rot = .VFPlate_Left_Fix.rot;
   };
-  
-  AnySeg VFPlate_Right= 
+
+  AnySeg VFPlate_Right=
   {
       Mass = 0 ;
       Jii = {0,0,0};
       r0 = Main.Model.EnvironmentModel.Segs.Foot_Rest.r0;
-      Axes0 = Main.Model.EnvironmentModel.Segs.Foot_Rest.Axes0;      
+      Axes0 = Main.Model.EnvironmentModel.Segs.Foot_Rest.Axes0;
   };
-  AnyKinEqSimpleDriver VFPlate_Right_Fix = 
+  AnyKinEqSimpleDriver VFPlate_Right_Fix =
   {
-      AnyKinLinear lin = 
+      AnyKinLinear lin =
       {
         Ref = 0;
         AnyRefNode& base = Main.Model.EnvironmentModel.Segs.Foot_Rest.cc_base_node;
-        AnySeg& target = ..VFPlate_Right;        
+        AnySeg& target = ..VFPlate_Right;
       };
-      AnyKinRotational rot = 
+      AnyKinRotational rot =
       {
         AnyRefNode& base = Main.Model.EnvironmentModel.Segs.Foot_Rest.cc_base_node;
         AnySeg& target = ..VFPlate_Right;
@@ -72,13 +72,13 @@ AnyFolder FootSupport =
       DriverVel = {0,0,0,0,0,0};
       Reaction.Type = {Off, Off, Off, Off, Off, Off};
   };
-  AnyReacForce VFPlate_Right_Force = 
+  AnyReacForce VFPlate_Right_Force =
   {
       AnyKinLinear& lin = .VFPlate_Right_Fix.lin;
       AnyKinRotational& rot = .VFPlate_Right_Fix.rot;
   };
-  
-  AnyFolder Draw_COP_Left = 
+
+  AnyFolder Draw_COP_Left =
   {
     AnyVar fx = .VFPlate_Left_Force.Fout[0];
     AnyVar fy = .VFPlate_Left_Force.Fout[1];
@@ -87,59 +87,15 @@ AnyFolder FootSupport =
     AnyVar my = .VFPlate_Left_Force.Fout[4];
     AnyVar mz = .VFPlate_Left_Force.Fout[5];
 
-    // Y is normal direction 
+    // Y is normal direction
     AnyVar fyy = iffun(gtfun( (fy^2)^0.5,0),fy,fy+1000000);
     AnyVar Vx = mz/fyy;
     AnyVar Vy = 0;
-    AnyVar Vz = -mx/fyy;    
-    
+    AnyVar Vz = -mx/fyy;
+
     AnyRefFrame& ref_VFPlate = .VFPlate_Left;
-    
-    AnyDrawLine Line = 
-    {
-        p0 = {.Vx, .Vy, .Vz};
-        p1 = p0 + Main.DrawSettings.DrawSettingsSupport.Lin.ScaleFactor* {.fx, .fy, .fz};
-        AnyRefFrame& ref = .ref_VFPlate;
-        Line.RGB ={1,0,0};
-        Line.Thickness = 0.01;
-        Line.End.Thickness = 2*0.01;
-        Line.End.Length = 4*0.01;
-        Line.End.Style = Line3DCapStyleArrow;        
-        GlobalCoord=Off;    
-    };
-    
-    ref_VFPlate = 
-    {
-        AnyDrawSphere COP_ball = 
-        {
-            RGB = {0,1,0};
-            ScaleXYZ = 0.015 *{1,1,1};
-            AnyFloatVar f_size = sqrt(pow(..fx,2)+pow(..fy,2)+pow(..fz,2));
-            Opacity = iffun(gtfun( f_size, 1e-6), 1.0, 0.0);
-            Position = {..Vx, ..Vy, ..Vz};
-        };
-    };
-       
-  };
 
-  AnyFolder Draw_COP_Right = 
-  {
-    AnyVar fx = .VFPlate_Right_Force.Fout[0];
-    AnyVar fy = .VFPlate_Right_Force.Fout[1];
-    AnyVar fz = .VFPlate_Right_Force.Fout[2];
-    AnyVar mx = .VFPlate_Right_Force.Fout[3];
-    AnyVar my = .VFPlate_Right_Force.Fout[4];
-    AnyVar mz = .VFPlate_Right_Force.Fout[5];
-
-    // Y is normal direction 
-    AnyVar fyy = iffun(gtfun( (fy^2)^0.5,0),fy,fy+1000000);
-    AnyVar Vx = mz/fyy;
-    AnyVar Vy = 0;
-    AnyVar Vz = -mx/fyy;    
-    
-    AnyRefFrame& ref_VFPlate = .VFPlate_Right;
-    
-    AnyDrawLine Line = 
+    AnyDrawLine Line =
     {
         p0 = {.Vx, .Vy, .Vz};
         p1 = p0 + Main.DrawSettings.DrawSettingsSupport.Lin.ScaleFactor* {.fx, .fy, .fz};
@@ -149,12 +105,12 @@ AnyFolder FootSupport =
         Line.End.Thickness = 2*0.01;
         Line.End.Length = 4*0.01;
         Line.End.Style = Line3DCapStyleArrow;
-        GlobalCoord=Off;    
+        GlobalCoord=Off;
     };
-    
-    ref_VFPlate = 
+
+    ref_VFPlate =
     {
-        AnyDrawSphere COP_ball = 
+        AnyDrawSphere COP_ball =
         {
             RGB = {0,1,0};
             ScaleXYZ = 0.015 *{1,1,1};
@@ -162,501 +118,554 @@ AnyFolder FootSupport =
             Opacity = iffun(gtfun( f_size, 1e-6), 1.0, 0.0);
             Position = {..Vx, ..Vy, ..Vz};
         };
-    };   
-  };
-   
+    };
 
-  
-  AnyFolder FootSupportBackRight = 
+  };
+
+  AnyFolder Draw_COP_Right =
+  {
+    AnyVar fx = .VFPlate_Right_Force.Fout[0];
+    AnyVar fy = .VFPlate_Right_Force.Fout[1];
+    AnyVar fz = .VFPlate_Right_Force.Fout[2];
+    AnyVar mx = .VFPlate_Right_Force.Fout[3];
+    AnyVar my = .VFPlate_Right_Force.Fout[4];
+    AnyVar mz = .VFPlate_Right_Force.Fout[5];
+
+    // Y is normal direction
+    AnyVar fyy = iffun(gtfun( (fy^2)^0.5,0),fy,fy+1000000);
+    AnyVar Vx = mz/fyy;
+    AnyVar Vy = 0;
+    AnyVar Vz = -mx/fyy;
+
+    AnyRefFrame& ref_VFPlate = .VFPlate_Right;
+
+    AnyDrawLine Line =
+    {
+        p0 = {.Vx, .Vy, .Vz};
+        p1 = p0 + Main.DrawSettings.DrawSettingsSupport.Lin.ScaleFactor* {.fx, .fy, .fz};
+        AnyRefFrame& ref = .ref_VFPlate;
+        Line.RGB ={1,0,0};
+        Line.Thickness = 0.01;
+        Line.End.Thickness = 2*0.01;
+        Line.End.Length = 4*0.01;
+        Line.End.Style = Line3DCapStyleArrow;
+        GlobalCoord=Off;
+    };
+
+    ref_VFPlate =
+    {
+        AnyDrawSphere COP_ball =
+        {
+            RGB = {0,1,0};
+            ScaleXYZ = 0.015 *{1,1,1};
+            AnyFloatVar f_size = sqrt(pow(..fx,2)+pow(..fy,2)+pow(..fz,2));
+            Opacity = iffun(gtfun( f_size, 1e-6), 1.0, 0.0);
+            Position = {..Vx, ..Vy, ..Vz};
+        };
+    };
+  };
+
+
+
+  AnyFolder FootSupportBackRight =
   {
     AnyRefFrame &BaseObject = .VFPlate_Right;
     AnyRefFrame &TargetObject =....BodyModel.Right.Leg.Seg.Foot.HeelJoint;
-    
-    TargetObject = 
+
+    TargetObject =
     {
       AnyDrawNode  drw=
       {
         ScaleXYZ={0.005,.005,.005};
         RGB={0,0,1};
-      };      
+      };
     };
-    
+
     AnyRefFrame &StrengthObject=TargetObject; //Node used for strength measurement, occasionally this is different from the target object
     AnyFolder &DrawRef=Main.DrawSettings; //reference to the folder which contains drawsettings
-    AnyVar UserDefinedLimitLow=.CC_LimitLow ; 
-    AnyVar UserDefinedLimitHigh=.CC_LimitHigh ; 
-    AnyVar UserDefinedRadiusLimit=.CC_Radius ; 
+    AnyVar UserDefinedLimitLow=.CC_LimitLow ;
+    AnyVar UserDefinedLimitHigh=.CC_LimitHigh ;
+    AnyVar UserDefinedRadiusLimit=.CC_Radius ;
     AnyVar Strength =.Strength;  //strength of muscles
     AnyVar StaticFrictionCoefficient=.StaticFrictionCoefficient; //Friction coefficient
     AnyVar ScaleFactor =1; //scale factor for draw vectors it can be set differently than by the drawsettings
     AnyIntArray Direction={1,2,0}; //first element gives normal direction
     #include  "<ANYBODY_PATH_MODELUTILS>\FrictionContactMuscles\ContactSurfaceLinPush.any"
   };
-  
-  AnyFolder FootSupportBackLeft = 
+
+  AnyFolder FootSupportBackLeft =
   {
     AnyRefFrame &BaseObject = .VFPlate_Left;
     AnyRefFrame &TargetObject =....BodyModel.Left.Leg.Seg.Foot.HeelJoint;
-    
-    TargetObject = 
+
+    TargetObject =
     {
       AnyDrawNode  drw=
       {
         ScaleXYZ={0.005,.005,.005};
         RGB={0,0,1};
-      };      
+      };
     };
-    
-    AnyRefFrame &StrengthObject=TargetObject; //Node used for strength measurement, occasionally this is different from the target object    
+
+    AnyRefFrame &StrengthObject=TargetObject; //Node used for strength measurement, occasionally this is different from the target object
     AnyFolder &DrawRef=Main.DrawSettings; //reference to the folder which contains drawsettings
-    AnyVar UserDefinedLimitLow=.CC_LimitLow ; 
-    AnyVar UserDefinedLimitHigh=.CC_LimitHigh ; 
-    AnyVar UserDefinedRadiusLimit=.CC_Radius ; 
+    AnyVar UserDefinedLimitLow=.CC_LimitLow ;
+    AnyVar UserDefinedLimitHigh=.CC_LimitHigh ;
+    AnyVar UserDefinedRadiusLimit=.CC_Radius ;
     AnyVar Strength =.Strength;  //strength of muscles
     AnyVar StaticFrictionCoefficient=.StaticFrictionCoefficient; //Friction coefficient
     AnyVar ScaleFactor =1; //scale factor for draw vectors it can be set differently than by the drawsettings
     AnyIntArray Direction={1,2,0}; //first element gives normal direction
     #include  "<ANYBODY_PATH_MODELUTILS>\FrictionContactMuscles\ContactSurfaceLinPush.any"
   };
-  
-  AnyFolder FootSupportFrontRight1 = 
+
+  AnyFolder FootSupportFrontRight1 =
   {
     //AnyRefFrame &BaseObject = Main.Model.EnvironmentModel.SAHC_Segs.Bed_Wall_Down.cc_base_node;
     AnyRefFrame &BaseObject = .VFPlate_Right;
     AnyRefFrame &TargetObject =....BodyModel.Right.Leg.Seg.Foot.ToeLateralContactNode;
-    
-    TargetObject = 
+
+    TargetObject =
     {
       AnyDrawNode  drw=
       {
         ScaleXYZ={0.005,.005,.005};
         RGB={0,0,1};
-      };      
+      };
     };
-    
+
     AnyRefFrame &StrengthObject=TargetObject; //Node used for strength measurement, occasionally this is different from the target object
-    
+
     AnyFolder &DrawRef=Main.DrawSettings; //reference to the folder which contains drawsettings
-    AnyVar UserDefinedLimitLow=.CC_LimitLow ; 
-    AnyVar UserDefinedLimitHigh=.CC_LimitHigh ; 
-    AnyVar UserDefinedRadiusLimit=.CC_Radius ; 
-    
+    AnyVar UserDefinedLimitLow=.CC_LimitLow ;
+    AnyVar UserDefinedLimitHigh=.CC_LimitHigh ;
+    AnyVar UserDefinedRadiusLimit=.CC_Radius ;
+
     AnyVar Strength =.Strength;  //strength of muscles
     AnyVar StaticFrictionCoefficient=.StaticFrictionCoefficient; //Friction coefficient
     AnyVar ScaleFactor =1; //scale factor for draw vectors it can be set differently than by the drawsettings
-    
+
     AnyIntArray Direction={1,2,0}; //first element gives normal direction
     #include  "<ANYBODY_PATH_MODELUTILS>\FrictionContactMuscles\ContactSurfaceLinPush.any"
   };
 
-  AnyFolder FootSupportFrontRight2 = 
+  AnyFolder FootSupportFrontRight2 =
   {
     //AnyRefFrame &BaseObject = Main.Model.EnvironmentModel.SAHC_Segs.Bed_Wall_Down.cc_base_node;
     AnyRefFrame &BaseObject = .VFPlate_Right;
     AnyRefFrame &TargetObject =....BodyModel.Right.Leg.Seg.Foot.ToeMedialContactNode;
-    
-    TargetObject = 
+
+    TargetObject =
     {
       AnyDrawNode  drw=
       {
         ScaleXYZ={0.005,.005,.005};
         RGB={0,0,1};
-      };      
+      };
     };
-    
+
     AnyRefFrame &StrengthObject=TargetObject; //Node used for strength measurement, occasionally this is different from the target object
-    
+
     AnyFolder &DrawRef=Main.DrawSettings; //reference to the folder which contains drawsettings
-    AnyVar UserDefinedLimitLow=.CC_LimitLow ; 
-    AnyVar UserDefinedLimitHigh=.CC_LimitHigh ; 
-    AnyVar UserDefinedRadiusLimit=.CC_Radius ; 
-    
+    AnyVar UserDefinedLimitLow=.CC_LimitLow ;
+    AnyVar UserDefinedLimitHigh=.CC_LimitHigh ;
+    AnyVar UserDefinedRadiusLimit=.CC_Radius ;
+
     AnyVar Strength =.Strength;  //strength of muscles
     AnyVar StaticFrictionCoefficient=.StaticFrictionCoefficient; //Friction coefficient
     AnyVar ScaleFactor =1; //scale factor for draw vectors it can be set differently than by the drawsettings
-    
+
     AnyIntArray Direction={1,2,0}; //first element gives normal direction
     #include  "<ANYBODY_PATH_MODELUTILS>\FrictionContactMuscles\ContactSurfaceLinPush.any"
   };
-  AnyFolder FootSupportFrontRight3 = 
+  AnyFolder FootSupportFrontRight3 =
   {
     AnyRefFrame &BaseObject = .VFPlate_Right;
     AnyRefFrame &TargetObject =....BodyModel.Right.Leg.Seg.Foot.ToeLateralContactNode;
-    
+
     AnyRefFrame &StrengthObject=TargetObject; //Node used for strength measurement, occasionally this is different from the target object
-    
+
     AnyFolder &DrawRef=Main.DrawSettings; //reference to the folder which contains drawsettings
-    AnyVar UserDefinedLimitLow=.CC_LimitLow ; 
-    AnyVar UserDefinedLimitHigh=.CC_LimitHigh ; 
-    AnyVar UserDefinedRadiusLimit=.CC_Radius ; 
-    
+    AnyVar UserDefinedLimitLow=.CC_LimitLow ;
+    AnyVar UserDefinedLimitHigh=.CC_LimitHigh ;
+    AnyVar UserDefinedRadiusLimit=.CC_Radius ;
+
     AnyVar Strength =.Strength;  //strength of muscles
     AnyVar StaticFrictionCoefficient=.StaticFrictionCoefficient; //Friction coefficient
     AnyVar ScaleFactor =1; //scale factor for draw vectors it can be set differently than by the drawsettings
-    
+
     AnyIntArray Direction={1,2,0}; //first element gives normal direction
     #include  "<ANYBODY_PATH_MODELUTILS>\FrictionContactMuscles\ContactSurfaceLinPush.any"
   };
-  AnyFolder FootSupportFrontRight4 = 
+  AnyFolder FootSupportFrontRight4 =
   {
     //AnyRefFrame &BaseObject = Main.Model.EnvironmentModel.SAHC_Segs.Bed_Wall_Down.cc_base_node;
     AnyRefFrame &BaseObject = .VFPlate_Right;
     AnyRefFrame &TargetObject =....BodyModel.Right.Leg.Seg.Foot.MetatarsalJoint1Node;
-    
-    TargetObject = 
+
+    TargetObject =
     {
       AnyDrawNode  drw=
       {
         ScaleXYZ={0.005,.005,.005};
         RGB={0,0,1};
-      };      
+      };
     };
-    
+
     AnyRefFrame &StrengthObject=TargetObject; //Node used for strength measurement, occasionally this is different from the target object
-    
+
     AnyFolder &DrawRef=Main.DrawSettings; //reference to the folder which contains drawsettings
-    AnyVar UserDefinedLimitLow=.CC_LimitLow ; 
-    AnyVar UserDefinedLimitHigh=.CC_LimitHigh ; 
-    AnyVar UserDefinedRadiusLimit=.CC_Radius ; 
-    
+    AnyVar UserDefinedLimitLow=.CC_LimitLow ;
+    AnyVar UserDefinedLimitHigh=.CC_LimitHigh ;
+    AnyVar UserDefinedRadiusLimit=.CC_Radius ;
+
     AnyVar Strength =.Strength;  //strength of muscles
     AnyVar StaticFrictionCoefficient=.StaticFrictionCoefficient; //Friction coefficient
     AnyVar ScaleFactor =1; //scale factor for draw vectors it can be set differently than by the drawsettings
-    
+
     AnyIntArray Direction={1,2,0}; //first element gives normal direction
     #include  "<ANYBODY_PATH_MODELUTILS>\FrictionContactMuscles\ContactSurfaceLinPush.any"
   };
-  AnyFolder FootSupportFrontRight5 = 
+  AnyFolder FootSupportFrontRight5 =
   {
     //AnyRefFrame &BaseObject = Main.Model.EnvironmentModel.SAHC_Segs.Bed_Wall_Down.cc_base_node;
     AnyRefFrame &BaseObject = .VFPlate_Right;
     AnyRefFrame &TargetObject =....BodyModel.Right.Leg.Seg.Foot.MetatarsalJoint2Node;
-    
-    TargetObject = 
+
+    TargetObject =
     {
       AnyDrawNode  drw=
       {
         ScaleXYZ={0.005,.005,.005};
         RGB={0,0,1};
-      };      
+      };
     };
-    
+
     AnyRefFrame &StrengthObject=TargetObject; //Node used for strength measurement, occasionally this is different from the target object
-    
+
     AnyFolder &DrawRef=Main.DrawSettings; //reference to the folder which contains drawsettings
-    AnyVar UserDefinedLimitLow=.CC_LimitLow ; 
-    AnyVar UserDefinedLimitHigh=.CC_LimitHigh ; 
-    AnyVar UserDefinedRadiusLimit=.CC_Radius ; 
-    
+    AnyVar UserDefinedLimitLow=.CC_LimitLow ;
+    AnyVar UserDefinedLimitHigh=.CC_LimitHigh ;
+    AnyVar UserDefinedRadiusLimit=.CC_Radius ;
+
     AnyVar Strength =.Strength;  //strength of muscles
     AnyVar StaticFrictionCoefficient=.StaticFrictionCoefficient; //Friction coefficient
     AnyVar ScaleFactor =1; //scale factor for draw vectors it can be set differently than by the drawsettings
-    
+
     AnyIntArray Direction={1,2,0}; //first element gives normal direction
     #include  "<ANYBODY_PATH_MODELUTILS>\FrictionContactMuscles\ContactSurfaceLinPush.any"
   };
-  AnyFolder FootSupportFrontRight6 = 
+  AnyFolder FootSupportFrontRight6 =
   {
     //AnyRefFrame &BaseObject = Main.Model.EnvironmentModel.SAHC_Segs.Bed_Wall_Down.cc_base_node;
     AnyRefFrame &BaseObject = .VFPlate_Right;
     AnyRefFrame &TargetObject =....BodyModel.Right.Leg.Seg.Foot.MetatarsalJoint3Node;
-    
-    TargetObject = 
+
+    TargetObject =
     {
       AnyDrawNode  drw=
       {
         ScaleXYZ={0.005,.005,.005};
         RGB={0,0,1};
-      };      
+      };
     };
-    
+
     AnyRefFrame &StrengthObject=TargetObject; //Node used for strength measurement, occasionally this is different from the target object
-    
+
     AnyFolder &DrawRef=Main.DrawSettings; //reference to the folder which contains drawsettings
-    AnyVar UserDefinedLimitLow=.CC_LimitLow ; 
-    AnyVar UserDefinedLimitHigh=.CC_LimitHigh ; 
-    AnyVar UserDefinedRadiusLimit=.CC_Radius ; 
-    
+    AnyVar UserDefinedLimitLow=.CC_LimitLow ;
+    AnyVar UserDefinedLimitHigh=.CC_LimitHigh ;
+    AnyVar UserDefinedRadiusLimit=.CC_Radius ;
+
     AnyVar Strength =.Strength;  //strength of muscles
     AnyVar StaticFrictionCoefficient=.StaticFrictionCoefficient; //Friction coefficient
     AnyVar ScaleFactor =1; //scale factor for draw vectors it can be set differently than by the drawsettings
-    
+
     AnyIntArray Direction={1,2,0}; //first element gives normal direction
     #include  "<ANYBODY_PATH_MODELUTILS>\FrictionContactMuscles\ContactSurfaceLinPush.any"
   };
-  AnyFolder FootSupportFrontRight7 = 
+  AnyFolder FootSupportFrontRight7 =
   {
     //AnyRefFrame &BaseObject = Main.Model.EnvironmentModel.SAHC_Segs.Bed_Wall_Down.cc_base_node;
     AnyRefFrame &BaseObject = .VFPlate_Right;
     AnyRefFrame &TargetObject =....BodyModel.Right.Leg.Seg.Foot.MetatarsalJoint4Node;
-    
-    TargetObject = 
+
+    TargetObject =
     {
       AnyDrawNode  drw=
       {
         ScaleXYZ={0.005,.005,.005};
         RGB={0,0,1};
-      };      
+      };
     };
-    
+
     AnyRefFrame &StrengthObject=TargetObject; //Node used for strength measurement, occasionally this is different from the target object
-    
+
     AnyFolder &DrawRef=Main.DrawSettings; //reference to the folder which contains drawsettings
-    AnyVar UserDefinedLimitLow=.CC_LimitLow ; 
-    AnyVar UserDefinedLimitHigh=.CC_LimitHigh ; 
-    AnyVar UserDefinedRadiusLimit=.CC_Radius ; 
-    
+    AnyVar UserDefinedLimitLow=.CC_LimitLow ;
+    AnyVar UserDefinedLimitHigh=.CC_LimitHigh ;
+    AnyVar UserDefinedRadiusLimit=.CC_Radius ;
+
     AnyVar Strength =.Strength;  //strength of muscles
     AnyVar StaticFrictionCoefficient=.StaticFrictionCoefficient; //Friction coefficient
     AnyVar ScaleFactor =1; //scale factor for draw vectors it can be set differently than by the drawsettings
-    
+
     AnyIntArray Direction={1,2,0}; //first element gives normal direction
     #include  "<ANYBODY_PATH_MODELUTILS>\FrictionContactMuscles\ContactSurfaceLinPush.any"
   };
-  AnyFolder FootSupportFrontRight8 = 
+  AnyFolder FootSupportFrontRight8 =
   {
     //AnyRefFrame &BaseObject = Main.Model.EnvironmentModel.SAHC_Segs.Bed_Wall_Down.cc_base_node;
     AnyRefFrame &BaseObject = .VFPlate_Right;
     AnyRefFrame &TargetObject =....BodyModel.Right.Leg.Seg.Foot.MetatarsalJoint5Node;
-    
-    TargetObject = 
+
+    TargetObject =
     {
       AnyDrawNode  drw=
       {
         ScaleXYZ={0.005,.005,.005};
         RGB={0,0,1};
-      };      
+      };
     };
-    
+
     AnyRefFrame &StrengthObject=TargetObject; //Node used for strength measurement, occasionally this is different from the target object
-    
+
     AnyFolder &DrawRef=Main.DrawSettings; //reference to the folder which contains drawsettings
-    AnyVar UserDefinedLimitLow=.CC_LimitLow ; 
-    AnyVar UserDefinedLimitHigh=.CC_LimitHigh ; 
-    AnyVar UserDefinedRadiusLimit=.CC_Radius ; 
-    
+    AnyVar UserDefinedLimitLow=.CC_LimitLow ;
+    AnyVar UserDefinedLimitHigh=.CC_LimitHigh ;
+    AnyVar UserDefinedRadiusLimit=.CC_Radius ;
+
     AnyVar Strength =.Strength;  //strength of muscles
     AnyVar StaticFrictionCoefficient=.StaticFrictionCoefficient; //Friction coefficient
     AnyVar ScaleFactor =1; //scale factor for draw vectors it can be set differently than by the drawsettings
-    
+
     AnyIntArray Direction={1,2,0}; //first element gives normal direction
     #include  "<ANYBODY_PATH_MODELUTILS>\FrictionContactMuscles\ContactSurfaceLinPush.any"
-  };  
-  
-  AnyFolder FootSupportFrontLeft1 = 
+  };
+
+  AnyFolder FootSupportFrontLeft1 =
   {
     //AnyRefFrame &BaseObject = Main.Model.EnvironmentModel.SAHC_Segs.Bed_Wall_Down.cc_base_node;
     AnyRefFrame &BaseObject = .VFPlate_Left;
     AnyRefFrame &TargetObject =....BodyModel.Left.Leg.Seg.Foot.ToeLateralContactNode;
-    
-    TargetObject = 
+
+    TargetObject =
     {
       AnyDrawNode  drw=
       {
         ScaleXYZ={0.005,.005,.005};
         RGB={0,0,1};
-      };      
+      };
     };
-    
+
     AnyRefFrame &StrengthObject=TargetObject; //Node used for strength measurement, occasionally this is different from the target object
-    
+
     AnyFolder &DrawRef=Main.DrawSettings; //reference to the folder which contains drawsettings
-    AnyVar UserDefinedLimitLow=.CC_LimitLow ; 
-    AnyVar UserDefinedLimitHigh=.CC_LimitHigh ; 
-    AnyVar UserDefinedRadiusLimit=.CC_Radius ; 
-    
+    AnyVar UserDefinedLimitLow=.CC_LimitLow ;
+    AnyVar UserDefinedLimitHigh=.CC_LimitHigh ;
+    AnyVar UserDefinedRadiusLimit=.CC_Radius ;
+
     AnyVar Strength =.Strength;  //strength of muscles
     AnyVar StaticFrictionCoefficient=.StaticFrictionCoefficient; //Friction coefficient
     AnyVar ScaleFactor =1; //scale factor for draw vectors it can be set differently than by the drawsettings
-    
+
     AnyIntArray Direction={1,2,0}; //first element gives normal direction
     #include  "<ANYBODY_PATH_MODELUTILS>\FrictionContactMuscles\ContactSurfaceLinPush.any"
   };
-  
-  AnyFolder FootSupportFrontLeft2 = 
+
+  AnyFolder FootSupportFrontLeft2 =
   {
     AnyRefFrame &BaseObject = .VFPlate_Left;
     AnyRefFrame &TargetObject =....BodyModel.Left.Leg.Seg.Foot.ToeMedialContactNode;
-    
+
+    TargetObject =
+    {
+      AnyDrawNode  drw=
+      {
+        ScaleXYZ={0.005,.005,.005};
+        RGB={0,0,1};
+      };
+    };
+
     AnyRefFrame &StrengthObject=TargetObject; //Node used for strength measurement, occasionally this is different from the target object
-    
+
     AnyFolder &DrawRef=Main.DrawSettings; //reference to the folder which contains drawsettings
-    AnyVar UserDefinedLimitLow=.CC_LimitLow ; 
-    AnyVar UserDefinedLimitHigh=.CC_LimitHigh ; 
-    AnyVar UserDefinedRadiusLimit=.CC_Radius ; 
-    
+    AnyVar UserDefinedLimitLow=.CC_LimitLow ;
+    AnyVar UserDefinedLimitHigh=.CC_LimitHigh ;
+    AnyVar UserDefinedRadiusLimit=.CC_Radius ;
+
     AnyVar Strength =.Strength;  //strength of muscles
     AnyVar StaticFrictionCoefficient=.StaticFrictionCoefficient; //Friction coefficient
     AnyVar ScaleFactor =1; //scale factor for draw vectors it can be set differently than by the drawsettings
-    
+
     AnyIntArray Direction={1,2,0}; //first element gives normal direction
     #include  "<ANYBODY_PATH_MODELUTILS>\FrictionContactMuscles\ContactSurfaceLinPush.any"
   };
-  
-  AnyFolder FootSupportFrontLeft3 = 
+
+  AnyFolder FootSupportFrontLeft3 =
   {
     AnyRefFrame &BaseObject = .VFPlate_Left;
     AnyRefFrame &TargetObject =....BodyModel.Left.Leg.Seg.Foot.ToeLateralContactNode;
 
     AnyRefFrame &StrengthObject=TargetObject; //Node used for strength measurement, occasionally this is different from the target object
-    
+
     AnyFolder &DrawRef=Main.DrawSettings; //reference to the folder which contains drawsettings
-    AnyVar UserDefinedLimitLow=.CC_LimitLow ; 
-    AnyVar UserDefinedLimitHigh=.CC_LimitHigh ; 
-    AnyVar UserDefinedRadiusLimit=.CC_Radius ; 
-    
+    AnyVar UserDefinedLimitLow=.CC_LimitLow ;
+    AnyVar UserDefinedLimitHigh=.CC_LimitHigh ;
+    AnyVar UserDefinedRadiusLimit=.CC_Radius ;
+
     AnyVar Strength =.Strength;  //strength of muscles
     AnyVar StaticFrictionCoefficient=.StaticFrictionCoefficient; //Friction coefficient
     AnyVar ScaleFactor =1; //scale factor for draw vectors it can be set differently than by the drawsettings
-    
+
     AnyIntArray Direction={1,2,0}; //first element gives normal direction
     #include  "<ANYBODY_PATH_MODELUTILS>\FrictionContactMuscles\ContactSurfaceLinPush.any"
-  };  
+  };
 
-  AnyFolder FootSupportFrontLeft4 = 
+  AnyFolder FootSupportFrontLeft4 =
   {
     //AnyRefFrame &BaseObject = Main.Model.EnvironmentModel.SAHC_Segs.Bed_Wall_Down.cc_base_node;
     AnyRefFrame &BaseObject = .VFPlate_Left;
     AnyRefFrame &TargetObject =....BodyModel.Left.Leg.Seg.Foot.MetatarsalJoint1Node;
-    
-    TargetObject = 
+
+    TargetObject =
     {
       AnyDrawNode  drw=
       {
         ScaleXYZ={0.005,.005,.005};
         RGB={0,0,1};
-      };      
+      };
     };
-    
+
     AnyRefFrame &StrengthObject=TargetObject; //Node used for strength measurement, occasionally this is different from the target object
-    
+
     AnyFolder &DrawRef=Main.DrawSettings; //reference to the folder which contains drawsettings
-    AnyVar UserDefinedLimitLow=.CC_LimitLow ; 
-    AnyVar UserDefinedLimitHigh=.CC_LimitHigh ; 
-    AnyVar UserDefinedRadiusLimit=.CC_Radius ; 
-    
+    AnyVar UserDefinedLimitLow=.CC_LimitLow ;
+    AnyVar UserDefinedLimitHigh=.CC_LimitHigh ;
+    AnyVar UserDefinedRadiusLimit=.CC_Radius ;
+
     AnyVar Strength =.Strength;  //strength of muscles
     AnyVar StaticFrictionCoefficient=.StaticFrictionCoefficient; //Friction coefficient
     AnyVar ScaleFactor =1; //scale factor for draw vectors it can be set differently than by the drawsettings
-    
+
     AnyIntArray Direction={1,2,0}; //first element gives normal direction
     #include  "<ANYBODY_PATH_MODELUTILS>\FrictionContactMuscles\ContactSurfaceLinPush.any"
   };
-  AnyFolder FootSupportFrontLeft5 = 
+  AnyFolder FootSupportFrontLeft5 =
   {
     //AnyRefFrame &BaseObject = Main.Model.EnvironmentModel.SAHC_Segs.Bed_Wall_Down.cc_base_node;
     AnyRefFrame &BaseObject = .VFPlate_Left;
     AnyRefFrame &TargetObject =....BodyModel.Left.Leg.Seg.Foot.MetatarsalJoint2Node;
-    
-    TargetObject = 
+
+    TargetObject =
     {
       AnyDrawNode  drw=
       {
         ScaleXYZ={0.005,.005,.005};
         RGB={0,0,1};
-      };      
+      };
     };
-    
+
     AnyRefFrame &StrengthObject=TargetObject; //Node used for strength measurement, occasionally this is different from the target object
-    
+
     AnyFolder &DrawRef=Main.DrawSettings; //reference to the folder which contains drawsettings
-    AnyVar UserDefinedLimitLow=.CC_LimitLow ; 
-    AnyVar UserDefinedLimitHigh=.CC_LimitHigh ; 
-    AnyVar UserDefinedRadiusLimit=.CC_Radius ; 
-    
+    AnyVar UserDefinedLimitLow=.CC_LimitLow ;
+    AnyVar UserDefinedLimitHigh=.CC_LimitHigh ;
+    AnyVar UserDefinedRadiusLimit=.CC_Radius ;
+
     AnyVar Strength =.Strength;  //strength of muscles
     AnyVar StaticFrictionCoefficient=.StaticFrictionCoefficient; //Friction coefficient
     AnyVar ScaleFactor =1; //scale factor for draw vectors it can be set differently than by the drawsettings
-    
+
     AnyIntArray Direction={1,2,0}; //first element gives normal direction
     #include  "<ANYBODY_PATH_MODELUTILS>\FrictionContactMuscles\ContactSurfaceLinPush.any"
   };
-  AnyFolder FootSupportFrontLeft6 = 
+  AnyFolder FootSupportFrontLeft6 =
   {
     //AnyRefFrame &BaseObject = Main.Model.EnvironmentModel.SAHC_Segs.Bed_Wall_Down.cc_base_node;
     AnyRefFrame &BaseObject = .VFPlate_Left;
     AnyRefFrame &TargetObject =....BodyModel.Left.Leg.Seg.Foot.MetatarsalJoint3Node;
-    
-    TargetObject = 
+
+    TargetObject =
     {
       AnyDrawNode  drw=
       {
         ScaleXYZ={0.005,.005,.005};
         RGB={0,0,1};
-      };      
+      };
     };
-    
+
     AnyRefFrame &StrengthObject=TargetObject; //Node used for strength measurement, occasionally this is different from the target object
-    
+
     AnyFolder &DrawRef=Main.DrawSettings; //reference to the folder which contains drawsettings
-    AnyVar UserDefinedLimitLow=.CC_LimitLow ; 
-    AnyVar UserDefinedLimitHigh=.CC_LimitHigh ; 
-    AnyVar UserDefinedRadiusLimit=.CC_Radius ; 
-    
+    AnyVar UserDefinedLimitLow=.CC_LimitLow ;
+    AnyVar UserDefinedLimitHigh=.CC_LimitHigh ;
+    AnyVar UserDefinedRadiusLimit=.CC_Radius ;
+
     AnyVar Strength =.Strength;  //strength of muscles
     AnyVar StaticFrictionCoefficient=.StaticFrictionCoefficient; //Friction coefficient
     AnyVar ScaleFactor =1; //scale factor for draw vectors it can be set differently than by the drawsettings
-    
+
     AnyIntArray Direction={1,2,0}; //first element gives normal direction
     #include  "<ANYBODY_PATH_MODELUTILS>\FrictionContactMuscles\ContactSurfaceLinPush.any"
   };
-  AnyFolder FootSupportFrontLeft7 = 
+  AnyFolder FootSupportFrontLeft7 =
   {
     //AnyRefFrame &BaseObject = Main.Model.EnvironmentModel.SAHC_Segs.Bed_Wall_Down.cc_base_node;
     AnyRefFrame &BaseObject = .VFPlate_Left;
     AnyRefFrame &TargetObject =....BodyModel.Left.Leg.Seg.Foot.MetatarsalJoint4Node;
-    
-    TargetObject = 
+
+    TargetObject =
     {
       AnyDrawNode  drw=
       {
         ScaleXYZ={0.005,.005,.005};
         RGB={0,0,1};
-      };      
+      };
     };
-    
+
     AnyRefFrame &StrengthObject=TargetObject; //Node used for strength measurement, occasionally this is different from the target object
-    
+
     AnyFolder &DrawRef=Main.DrawSettings; //reference to the folder which contains drawsettings
-    AnyVar UserDefinedLimitLow=.CC_LimitLow ; 
-    AnyVar UserDefinedLimitHigh=.CC_LimitHigh ; 
-    AnyVar UserDefinedRadiusLimit=.CC_Radius ; 
-    
+    AnyVar UserDefinedLimitLow=.CC_LimitLow ;
+    AnyVar UserDefinedLimitHigh=.CC_LimitHigh ;
+    AnyVar UserDefinedRadiusLimit=.CC_Radius ;
+
     AnyVar Strength =.Strength;  //strength of muscles
     AnyVar StaticFrictionCoefficient=.StaticFrictionCoefficient; //Friction coefficient
     AnyVar ScaleFactor =1; //scale factor for draw vectors it can be set differently than by the drawsettings
-    
+
     AnyIntArray Direction={1,2,0}; //first element gives normal direction
     #include  "<ANYBODY_PATH_MODELUTILS>\FrictionContactMuscles\ContactSurfaceLinPush.any"
   };
-  AnyFolder FootSupportFrontLeft8 = 
+  AnyFolder FootSupportFrontLeft8 =
   {
     //AnyRefFrame &BaseObject = Main.Model.EnvironmentModel.SAHC_Segs.Bed_Wall_Down.cc_base_node;
     AnyRefFrame &BaseObject = .VFPlate_Left;
     AnyRefFrame &TargetObject =....BodyModel.Left.Leg.Seg.Foot.MetatarsalJoint5Node;
-    
-    TargetObject = 
+
+    TargetObject =
     {
       AnyDrawNode  drw=
       {
         ScaleXYZ={0.005,.005,.005};
         RGB={0,0,1};
-      };      
+      };
     };
-    
+
     AnyRefFrame &StrengthObject=TargetObject; //Node used for strength measurement, occasionally this is different from the target object
-    
+
     AnyFolder &DrawRef=Main.DrawSettings; //reference to the folder which contains drawsettings
-    AnyVar UserDefinedLimitLow=.CC_LimitLow ; 
-    AnyVar UserDefinedLimitHigh=.CC_LimitHigh ; 
-    AnyVar UserDefinedRadiusLimit=.CC_Radius ; 
-    
+    AnyVar UserDefinedLimitLow=.CC_LimitLow ;
+    AnyVar UserDefinedLimitHigh=.CC_LimitHigh ;
+    AnyVar UserDefinedRadiusLimit=.CC_Radius ;
+
     AnyVar Strength =.Strength;  //strength of muscles
     AnyVar StaticFrictionCoefficient=.StaticFrictionCoefficient; //Friction coefficient
     AnyVar ScaleFactor =1; //scale factor for draw vectors it can be set differently than by the drawsettings
-    
+
     AnyIntArray Direction={1,2,0}; //first element gives normal direction
     #include  "<ANYBODY_PATH_MODELUTILS>\FrictionContactMuscles\ContactSurfaceLinPush.any"
-  };  
-  
+  };
+
 };

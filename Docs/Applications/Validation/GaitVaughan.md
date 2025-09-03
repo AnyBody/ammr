@@ -1,23 +1,26 @@
 ---
 gallery_title: "Gait Vaughan"
 gallery_image: "/Applications/images/GaitVaughan.webp"
+anylink: Application/Validation/GaitVaughan/GaitVaughan.main.any
 ---
 
 (sphx_glr_auto_examples_Validation_plot_GaitVaughan.py)=
 
 # Gait Vaughan
 
-````{sidebar} **Example**
-<img src="/Applications/images/GaitVaughan.webp" width="70%" align="center">
-````
+:::{anylink-gallery}
+:margin:
+:::
+
 
 Gait model based on data from the book by Vaughan et al. comparing AnyBody predicted muscle activations with
 EMG measurements.
 
 
 
-:::{seealso}
-**Main file location in AMMR:**
+:::{admonition} In Model Repository:
+:class: seealso
 
-{menuselection}`Application --> Validation --> GaitVaughan --> GaitVaughan.Main.any`
+{anylink-file}` `
+
 :::

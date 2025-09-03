@@ -1,6 +1,7 @@
 ---
 gallery_title: "Multi trial MoCap model"
 gallery_image: "/Applications/images/Plug-in-gait_Squat_Flywheel.webp"
+anylink: Application/MocapExamples/Plug-in-gait_MultiTrial_StandingRef/Subjects/S1/S1_FlywheelSquat/Main.any
 ---
 
 (sphx_glr_auto_examples_Mocap_plot_Plug-in-gait_MultiTrial_StandingRef.py)=
@@ -8,10 +9,9 @@ gallery_image: "/Applications/images/Plug-in-gait_Squat_Flywheel.webp"
 
 # Multi trial MoCap model
 
-
-````{sidebar} **Example**
-<img src="/Applications/images/Plug-in-gait_Squat_Flywheel.webp" width="70%" align="center">
-````
+:::{anylink-gallery}
+:margin:
+:::
 
 Example of a MoCap model structured for analyzing data from multiple subjects
 and trials. This special structure makes it much easier to work with large
@@ -29,6 +29,18 @@ School of Technology and Health) in Sweden.
 The files are structured so each trial has its own folder with a main file
 (`Main.any`) and a file with trial specific data (`TrialSpecificData.any`).
 The C3D files are placed together in a separate folder.
+
+:::{admonition} In Model Repository:
+:class: seealso
+{file}`Application/MocapExamples/Plug-in-gait_MultiTrial_StandingRef`
+
+**Dynamic trial:** {anylink-file}`Subjects/S1/S1_FlywheelSquat/Main.any <Application/MocapExamples/Plug-in-gait_MultiTrial_StandingRef/Subjects/S1/S1_FlywheelSquat/Main.any>`
+
+**Standing reference:** {anylink-file}`Subjects/S1/S1_FlywheelSquat/Main.any <Application/MocapExamples/Plug-in-gait_MultiTrial_StandingRef/Subjects/S1/S1_StandingRef/Main.any>`
+
+:::
+
+## Model structure
 
 The model is structured as outlined below:
 

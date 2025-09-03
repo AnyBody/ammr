@@ -1,23 +1,20 @@
 ---
 gallery_title: "Wilke Spine Disc Pressure"
 gallery_image: "/Applications/images/SpinePressureStanding.webp"
+anylink: Application/Validation/WilkeSpinalDiscPressure/SpinePressureSeatingRelaxed/SpinePressureSeatingRelaxed.main.any
 ---
 
 (sphx_glr_auto_examples_Validation_plot_WilkeSpinePressure.py)=
 (example_wilkespinepressure)=
 # Wilke Spine Disc Pressure Model
 
-````{sidebar} **Example**
-<img src="/Applications/images/SpinePressureStanding.webp" width="70%" align="center">
-````
+:::{anylink-gallery}
+:margin:
+:::
+
 
 The Wilke Spine Pressure models are eight models that compare intradiscal pressure measured between L4 and L5 discs in different postures.
 
-:::{seealso}
-**Main file location in AMMR:**
-
-{menuselection}`Application --> Validation --> WilkeSpinalDiscPressure -->`
-:::
 
 
 For the comparison, all data is normalized (100 %) to the forces from *'SpinePressureStanding.Main.any'*  and *'Relaxed Standing'* to show trend validity between the various postures.
@@ -29,6 +26,29 @@ Both papers refer to the same trial, but supplements each other with study infor
 
 - Wilke, H.J., Neef, P., Caimi, M., Hoogland, T., Claes, L.E., 1999. New in vivo measurements of pressures in the intervertebral disc in daily life. Spine 24, 755–762.
 - Wilke, H., Neef, P., Hinz, B., Seidel, H., Claes, L., 2001. Intradiscal pressure together with anthropometric data--a data set for the validation of models. Clin. Biomech. 16 Suppl 1, S111–26.
+
+
+:::{admonition} In Model Repository:
+:class: seealso
+{menuselection}`Application --> Validation --> WilkeSpinalDiscPressure`
+
+* {anylink-file}`SpinePressureSeatingRelaxed.main.any <Application/Validation/WilkeSpinalDiscPressure/SpinePressureSeatingRelaxed/SpinePressureSeatingRelaxed.main.any>`
+
+* {anylink-file}`SpinePressureLyingOnBack.main.any <Application/Validation/WilkeSpinalDiscPressure/SpinePressureLyingOnBack/SpinePressureLyingOnBack.main.any>`
+
+* {anylink-file}`SpinePressureSeatingStraitNoSupport.main.any <Application/Validation/WilkeSpinalDiscPressure/SpinePressureSeatingStraitNoSupport/SpinePressureSeatingStraitNoSupport.main.any>`
+
+* {anylink-file}`SpinePressureStanding.main.any <Application/Validation/WilkeSpinalDiscPressure/SpinePressureStanding/SpinePressureStanding.Main.any>`
+
+* {anylink-file}`SpinePressureStandingFlexed.main.any <Application/Validation/WilkeSpinalDiscPressure/SpinePressureStandingFlexed/SpinePressureStandingFlexed.Main.any>`
+
+* {anylink-file}`SpinePressureStandingLiftClose.main.any <Application/Validation/WilkeSpinalDiscPressure/SpinePressureStandingLiftClose/SpinePressureStandingLiftClose.main.any>`
+
+* {anylink-file}`SpinePressureStandingLiftFlexed.main.any <Application/Validation/WilkeSpinalDiscPressure/SpinePressureStandingLiftFlexed/SpinePressureStandingLiftFlexed.main.any>`
+
+* {anylink-file}`SpinePressureStandingLiftStretchedArms.main.any <Application/Validation/WilkeSpinalDiscPressure/SpinePressureStandingLiftStretchedArms/SpinePressureStandingLiftStretchedArms.main.any>`
+
+:::
 
 ::::{grid} 1 2 3 4
 :gutter: 3

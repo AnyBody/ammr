@@ -1,26 +1,19 @@
 ---
 gallery_title: "Push Up"
 gallery_image: "/Applications/images/PushUp.webp"
+anylink: Application/Examples/PushUp/PushUp.main.any
 ---
 
 (sphx_glr_auto_examples_Sports_plot_PushUp.py)=
 
 # Push Up
 
-````{sidebar} **Example**
-<img src="/Applications/images/PushUp.webp" width="70%" align="center">
-````
-
+:::{anylink-gallery}
+:margin:
+:::
 
 A full-body model doing push-ups with assumed drivers.
 
-
-
-:::{seealso}
-**Main file location in AMMR:**
-
-{menuselection}`Application --> Examples --> PushUp --> PushUp.main.any`
-:::
 
 The model displays several topics
 
@@ -34,4 +27,12 @@ Environment.any
 :::{caution}
 The model seems to be too weak for the load applied when doing pushups, this
 is a sign that the shoulder needs more adjustments before it becomes reliable
+:::
+
+
+:::{admonition} In Model Repository:
+:class: seealso
+
+{anylink-file}` `
+
 :::

@@ -1,28 +1,21 @@
 ---
 gallery_title: "Seated Human"
 gallery_image: "/Applications/images/SeatedHuman.webp"
+anylink: Application/Examples/SeatedHuman/SeatedHuman.main.any
 ---
 
 (sphx-glr-auto-examples-adls-and-ergonomics-plot-seatedhuman-py)=
 (example_seatedhuman)=
 # Seated Human
 
-
-````{sidebar} **Example**
-<img src="/Applications/images/SeatedHuman.webp" width="70%" align="center">
-
-````
+:::{anylink-gallery}
+:margin:
+:::
 
 A model of a seated human consisting of the full body model, a chair, and an
 interface between the two.
 
 
-:::{seealso}
-**Main file location in AMMR:**
-
-{menuselection}`Application --> Examples --> SeatedHuman -->
-SeatedHuman.Main.any`
-:::
 
 The Seated Human is a family of models resulting from a
 research project involving the furniture industry. This
@@ -45,3 +38,9 @@ to the normal force and the user can supply a friction
 coefficient for each surface such that the effect of different
 surface fabrics can be investigated.
 
+
+:::{admonition} In Model Repository:
+:class: seealso
+
+{anylink-file}` `
+:::

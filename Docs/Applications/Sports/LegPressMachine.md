@@ -1,15 +1,16 @@
 ---
 gallery_title: "Leg Press Machine"
 gallery_image: "/Applications/images/LegPressMachine.webp"
+anylink: Application/Examples/LegPressMachine/LegPressMachine.main.any
 ---
 
 (sphx_glr_auto_examples_Sports_plot_LegPressMachine.py)=
-
+(example_legpressmachinemodel)=
 # Leg Press Machine
 
-````{sidebar} **Example**
-<img src="/Applications/images/LegPressMachine.webp" width="70%" align="center">
-````
+:::{anylink-gallery}
+:margin:
+:::
 
 
 A model illustrating a leg press exercise and it demonstrates the use of the
@@ -17,8 +18,9 @@ SolidModeling Class Template in the ToolBox of AMMR.
 
 
 
-:::{seealso}
-**Main file location in AMMR:**
+:::{admonition} In Model Repository:
+:class: seealso
 
-{menuselection}`Application --> Examples --> LegPressMachine --> LegPressMachine.main.any`
+{anylink-file}` `
+
 :::

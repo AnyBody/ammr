@@ -1,16 +1,16 @@
 ---
 gallery_title: "Bergmann GH"
 gallery_image: "/Applications/images/BergmannGH.webp"
+anylink: Application/Validation/BergmannGH/BergmannGH.Main.any
 ---
 
 (sphx_glr_auto_examples_Validation_plot_BergmannGH.py)=
 
 # Bergmann GH
 
-````{sidebar} **Example**
-<img src="/Applications/images/BergmannGH.webp" width="70%" align="center">
-````
-
+:::{anylink-gallery}
+:margin:
+:::
 
 
 Model simulating arm-lift motion adapted from Bergmann et al., J. of
@@ -19,8 +19,9 @@ study.
 
 
 
-:::{seealso}
-**Main file location in AMMR:**
+:::{admonition} In Model Repository:
+:class: seealso
 
-{menuselection}`Application --> Validation --> BergmannGH --> BergmannGH.Main.any`
+{anylink-file}`Application/Validation/BergmannGH/BergmannGH.Main.any`
+
 :::
