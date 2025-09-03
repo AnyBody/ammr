@@ -8,12 +8,15 @@
 ## AMMR 3.1.4 (2025-??-??)
 [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.1.4-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
 
+
 ### 🩹 Fixed:
 *  Refactored the references in the hand model, so the BVH MoCap models can
    share the same marker protocol irrespectively of if the detailed or simple
    hand is enabled. 
-*  Fixed arm rest asymmetry in various sitting model application examples. 
-*  Fixed contact thresholds in {ref}`Leg Press Machine 
+*  Updated the subscapularis insertion to the lesser tuberosity, improving its
+   moment arms during humerus internal rotation. Special thanks to Researcher
+   Margaux Peixoto (Laboratoire d'Innovation ETS, Montreal) for contributing this
+   enhancement to the shoulder model.*  Fixed contact thresholds in {ref}`Leg Press Machine 
    example<example_legpressmachinemodel>` to ensure contact with all the nodes.
 *  The {ref}`joint strength evaluation
   <sphx_glr_auto_examples_Validation_plot_EvaluateJointStrength.py>`. models
