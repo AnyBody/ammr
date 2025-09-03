@@ -5,11 +5,13 @@
 
 
 (ammr-3.1.4-changelog)=
-## AMMR 3.1.4 (2025-??-??)
+## AMMR 3.1.4 (2025-09-03)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.17043944.svg)](https://doi.org/10.5281/zenodo.17043944)
 [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.1.4-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
 
+
 ### 🩹 Fixed:
-*  Refactored the references in the hand model, so the BVH MoCap models can
+*  Refactored references in the hand model, so the BVH MoCap models can
    share the same marker protocol irrespectively of if the detailed or simple
    hand is enabled. 
 *  Fixed arm rest asymmetry in various sitting model application examples. 
