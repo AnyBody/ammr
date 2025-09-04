@@ -69,6 +69,11 @@ to use the new structure.
 
 ### MoCap models
 
+The metatarsal joint nodes in the TLEM foot model have been updated to be at the joint centers
+instead of the contact between the metatarsals and proximal phalanges. This will affect MoCap models 
+where foot markers, for example RTOE or RMT5, are located relative to the metatarsal joint nodes 
+using the option `PlaceMarkerAt`. The `sRelOpt` parameter for such markers must be updated in
+the marker protocol.
 
 ## Load time errors
 
