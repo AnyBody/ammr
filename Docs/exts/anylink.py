@@ -68,7 +68,7 @@ class AnyLinkGallerySidebar(SphinxDirective):
 
         image = self.options.get("image") or topmatter.get("gallery_image", "")
 
-        img = html_to_nodes( f'<img src="{image}" class="dark-light" align="center" width= "100%"/>', self.lineno, self.state._renderer)
+        img = html_to_nodes( f'<img src="{image}" align="center" width= "100%"/>', self.lineno, self.state._renderer)
         
         elements += img
 

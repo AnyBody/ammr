@@ -29,7 +29,7 @@ used by FEA tutorial.
 :::{admonition} In Model Repository:
 :class: seealso
 
-{anylink-button}`Application/Examples/StandingLift/StandingLift.main.any`
-{anylink-button}`Application/Examples/StandingLift/StandingLiftFEA.main.any`
+{anylink-file}`Application/Examples/StandingLift/StandingLift.main.any`
+{anylink-file}`Application/Examples/StandingLift/StandingLiftFEA.main.any`
 
 :::
