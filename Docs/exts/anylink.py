@@ -69,6 +69,7 @@ class AnyLinkGallerySidebar(SphinxDirective):
         image = self.options.get("image") or topmatter.get("gallery_image", "")
 
         img = html_to_nodes( f'<img src="{image}" align="center" width= "100%"/>', self.lineno, self.state._renderer)
+        
         elements += img
 
 
@@ -105,7 +106,7 @@ class AnyLinkGallerySidebar(SphinxDirective):
         link_div = nodes.container("", link_p, classes=link_classes)
 
         #paragraph += open_ref #(nodes.container(classes=["sd-text-right"]) + open_ref)
-        if self.env.app.tags.has("offline"):
+        if self.env.app.tags.has("anylink"):
             elements += link_div
 
         return [elements]
@@ -137,7 +138,7 @@ class AnyLinkButton(ReferenceRole):
             prb = self.inliner.problematic(self.rawtext, self.rawtext, msg)
             return [prb], [msg]
         
-        if not self.env.app.tags.has("offline"):
+        if not self.env.app.tags.has("anylink"):
             button = nodes.inline("","")
 
 
@@ -161,7 +162,7 @@ class AnyLink(ReferenceRole):
         )
         reference += create_trigger_node(self, self.target)
 
-        if not self.env.app.tags.has("offline"):
+        if not self.env.app.tags.has("anylink"):
             reference = nodes.inline("","")
 
         return [reference], []
@@ -222,7 +223,7 @@ class AnyLinkFile(ReferenceRole):
             prb = self.inliner.problematic(self.rawtext, self.rawtext, msg)
             return [prb], [msg]
         
-        if not self.env.app.tags.has("offline"):
+        if not self.env.app.tags.has("anylink"):
             ref_elem = nodes.inline("","")
 
         return [title_elem, ref_elem], []
