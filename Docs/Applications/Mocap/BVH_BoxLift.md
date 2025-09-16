@@ -1,6 +1,7 @@
 ---
 gallery_title: "BVH driven box lift"
 gallery_image: "/Applications/images/BVH_BoxLift.webp"
+anylink: Application/MocapExamples/BVH_BoxLift/Subjects/S01/S01_T01/Main.any
 ---
 
 (sphx_glr_auto_examples_Mocap_plot_BVH_BoxLift.py)=
@@ -8,21 +9,15 @@ gallery_image: "/Applications/images/BVH_BoxLift.webp"
 # BVH driven box lift example
 
 
-````{sidebar} **Example**
-<img src="/Applications/images/BVH_BoxLift.webp" width="70%" align="center">
-````
+:::{anylink-gallery}
+:margin:
+:::
 
 
 Example of a MoCap model using data from an inertial measurement unit (IMU) based suit.
 The model uses a BVH file with data from an Xsens suit. The ground reaction forces are
 predicted using the GRF prediction algorithm.
 
-
-```{admonition} **Main file Example:**
-:class: seealso
-{menuselection}`Application --> MocapExamples --> BVH_BoxLift --> Subjects --> S01 -->
-S01_T01 --> Main.any`
-```
 
 The model works using virtual markers placed on the BVH rig (i.e. the stick-figure model
 specified by the BVH file). The virtual markers are used to make the Musculoskeletal model
@@ -36,3 +31,10 @@ identification* step to find the parameters. The remaining parts of the model ar
 This particular example shows how to model a box which connects to the hand segments.
 This is useful when investigation the effects of interaction with environment objects
 even when there is no kinematic data for that object.
+
+
+:::{admonition} In Model Repository:
+:class: seealso
+
+{anylink-file}` `
+:::
