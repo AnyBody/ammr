@@ -6,6 +6,23 @@ In the repository, you can find musculoskeletal applications from a wide area of
 interests. These models are from various AnyBody users, and all demonstrate
 features from the AnyBody Modeling System.
 
+:::::{only} anylink
+
+::::{dropdown}  Click ![anylink button](../_static/AnyLinkLoad.svg){w="1.5em" pointer-events="none"  cursor=default } to open models in AnyBody
+:color: danger
+:icon: download
+
+**Note:** The first time click the you will be prompted to extract/install a local copy of the model repository (AMMR).
+
+![anylink button](../_static/anylink-unpack-dialog.png)
+
+Next, select the parent folder where AMMR should be extracted. For example your documents folder.
+
+:::
+::::
+
+:::::
+
 
 (adl_examples)=
 ## Daily activities and ergonomics
