@@ -1,7 +1,6 @@
 
 import os
 import re
-
 from pathlib import Path
 
 from jinja2 import Template
@@ -73,7 +72,13 @@ for target,template, data in targets:
     template = tmplpath / template
     with open(template) as fh:
         tmpl = Template(fh.read())
-    with open(target, "w") as fh:
+
+    if Path(target).suffix == ".any":
+        newline = "\r\n"
+    else:
+        newline = "\n"
+        
+    with open(target, "w", newline=newline) as fh:
         fh.write(tmpl.render(data=data))
 
 

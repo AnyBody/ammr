@@ -10,10 +10,10 @@ parameters = list(data["parameters"])
 constants = list(data["constants"])
 
 
-with open("bm-parameters.txt", "w") as fp:
+with open("bm-parameters.txt", "w", newline="\n") as fp:
     fp.write(" ".join(parameters))
 
-with open("bm-constants.txt", "w") as fp:
+with open("bm-constants.txt", "w", newline="\n") as fp:
     fp.write(" ".join(constants))
 
 
@@ -31,5 +31,5 @@ anyscript_highlighters = f"""
 
 """
 
-with open("anyscript_highlighters.txt", "w") as fp:
+with open("anyscript_highlighters.txt", "w", newline="\n") as fp:
     fp.write(anyscript_highlighters)
