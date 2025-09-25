@@ -85,7 +85,7 @@ The Femoral torsion tool uses a functionality override scaling for thigh segment
 the include file sets `#define CUSTOM_SCALING_Right_Thigh` and `#define CUSTOM_SCALING_Left_Thigh` to override the default scaling for the right/left
 thigh.
 
-:::{seealso} See the {doc}`scaling tutorial <tutorials:Scaling/lesson4>` for
+:::{seealso} See the {doc}`scaling tutorial <tutorials:Scaling/lesson2>` for
 more information on how to use the custom scaling functionality in the
 general case.
 :::
