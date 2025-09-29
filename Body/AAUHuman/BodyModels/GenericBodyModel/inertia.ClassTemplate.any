@@ -5,39 +5,56 @@ This allows the density to be variable to make the overall Mass of the body corr
 #class_template BodyMassCorrection(){
   /// Litterature based density
   AnyFloatVar DensityTheoretical ??= Main.HumanModel.BodyModel.Trunk.Data.unscaled.ModelParameters.AdiposeTissueDensity;
-  
+
   /// Setting to determine if this inertia is part of the mass correction
   AnySwitchVar enableMassCorrection ??= On;
-  
+
   // Calculated Density accounting for correct mass distribution throughout whole body region
   AnyFolder &inertiaObject = #parent;
   inertiaObject.Density = iffun(enableMassCorrection, Main.HumanModel.BodyModel.Trunk.Data.MassDistribution.mass_scale, 1.0) * DensityTheoretical;
 };
 
-/* 
+#class_template BodyMassCorrectionGeneric(
+
+){
+  #var AnyVar Mass_Scale =1;
+  /// Litterature based density
+  AnyFloatVar DensityTheoretical ??= Main.HumanModel.BodyModel.Trunk.Data.unscaled.ModelParameters.AdiposeTissueDensity;
+
+  /// Setting to determine if this inertia is part of the mass correction
+  AnySwitchVar enableMassCorrection ??= On;
+
+  // Calculated Density accounting for correct mass distribution throughout whole body region
+  AnyFolder &inertiaObject = #parent;
+  inertiaObject.Density = iffun(enableMassCorrection, Mass_Scale, 1.0) * DensityTheoretical;
+};
+
+
+
+/*
   Template to make inertia objects that are not based on geometry compatible with the mass correction calculation
   This is used for the inertia objects of type AnyInertiaMatrix that do no have Density and Volume properties
-*/ 
+*/
 #class_template BodyMassCorrectionCompatibility(){
   /// For this compatibility template we need to set the DensityTheoretical to the mass of the object given from the StandardParameters
   #var AnyFloatVar DensityTheoretical;
-  
+
   /// Setting to determine if this inertia is part of the mass correction
   AnySwitchVar enableMassCorrection ??= On;
-  
+
   // Calculated Mass accounting for correct mass distribution throughout whole body region
   AnyFolder &inertiaObject = #parent;
 
   inertiaObject = {
-    /// Volume is set to one since we specify the DensityTheoretical to be the standardParamter mass 
-    AnyFloatVar Volume = 1.0; 
+    /// Volume is set to one since we specify the DensityTheoretical to be the standardParamter mass
+    AnyFloatVar Volume = 1.0;
     Mass = iffun(.enableMassCorrection, Main.HumanModel.BodyModel.Trunk.Data.MassDistribution.mass_scale, 1.0) * .DensityTheoretical;
   };
 };
 
 #class_template rib_outer_inertia(
     __CLASS__ = AnyInertiaSolid,
-){ 
+){
 
   // Select which rib to generate inertia for
   #var AnyInt rib_index;
@@ -47,24 +64,24 @@ This allows the density to be variable to make the overall Mass of the body corr
   AnyInt _rib_index = rib_index - round(.Data.AllRibs.OuterInertiaPoints.calculations.InnerPointFun.first_rib);
 
   BodyMassCorrection massCorrection() = {};
-  
+
   AnySurfTriCylMesh inertia_cyl = {
     /// ensure that left side ribs are not getting a negative volume
     TriangleDirection = iffun(gtfun(...Sign, 0), RotCounterclockwise, RotClockwise);
-    
+
     viewSurface = {
       Visible ??= Main.DrawSettings.InertiaSolids.Visible;
       PickableZOrdering ??= Main.DrawSettings.InertiaSolids.PickableZOrdering;
       RGB ??= {0.8, 0, 0};
       Opacity ??= Main.DrawSettings.InertiaSolids.Opacity;
-    };  
-    
+    };
+
     // Handle left-right mirroring
     AnyFloat mirror_transform = reshape(
-      repmat(..Data.AllRibs.OuterInertiaPoints.calculations.InnerPointFun.n_points, {1, 1, ...Sign}), 
+      repmat(..Data.AllRibs.OuterInertiaPoints.calculations.InnerPointFun.n_points, {1, 1, ...Sign}),
       {..Data.AllRibs.OuterInertiaPoints.calculations.InnerPointFun.n_points, 3}
     );
-    
+
     Points = arrcat(
       {..CT.sRel}, // Pole1
       ..Scale(mult(..Data.AllRibs.OuterInertiaPoints.inner_points_below[._rib_index], mirror_transform)),
@@ -75,10 +92,10 @@ This allows the density to be variable to make the overall Mass of the body corr
     );
 
     /// number of points per line along rib
-    AnyInt step ??= ..Data.AllRibs.OuterInertiaPoints.calculations.InnerPointFun.n_points; 
+    AnyInt step ??= ..Data.AllRibs.OuterInertiaPoints.calculations.InnerPointFun.n_points;
     AnyInt n_lines ??= 4; ///< number of lines along rib to draw cyl from
     AnyInt end ??= n_lines * step; ///< index of the last point before pole2
-    
+
     // we create the maximum number of rings to get the smoothest surface
     // each column has the pole indexes inserted at the start and end
     CylMesh = {

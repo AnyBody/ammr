@@ -8,37 +8,65 @@ AnySeg Hand ={
 
   AnyMat33 Mirror={{1,0,0},{0,1,0},{0,0,..Sign}};
 
-  AnyFunTransform3D &Scale=..Scaling.Hand.ScaleFunction;
-  Scale = { AnyFunTransform3D& GeomScale = .Scale; };
+  //AnyFunTransform3D &Scale=..Scaling.Hand.ScaleFunction;
+  // Scale = { AnyFunTransform3D& GeomScale = .Scale; };
 
-  r0=.WristJointSeg.RadialUlnarDeviation.sRel*.WristJointSeg.Axes0'+.WristJointSeg.r0 - Ref.wj.sRel * Axes0';//.Radius.wj.sRel*.Radius.Axes0'+.Radius.r0+;
+#ifndef  WRIST_EXPERIMENTAL
+r0=.WristJointSeg.RadioCarpalDeviation.sRel*.WristJointSeg.Axes0'+.WristJointSeg.r0 - Ref.wj.sRel * Axes0';//.Radius.wj.sRel*.Radius.Axes0'+.Radius.r0+;
+#endif
+#ifdef  WRIST_EXPERIMENTAL
+ r0=.Radius.RadioCarpal.sRel*.Radius.Axes0'+.Radius.r0-Ref.RadioCarpalFlexion.sRel*Axes0';
+#endif
+
+
+  UseInertiaObjects = On;
 
   #include "../DrawSettings/Nodes.any"
 
   AnyFolder &Data = ..Data.unscaled.ModelParameters.HandSeg.SimpleHandSeg;
 
-  AnyVar MassS = ..MassScaling.Hand.MassScale;
 
-  AnyVar MassStandard = ..StandardParameters.Hand.Mass; // Veeger1997 subject no.4.
 
-  Mass = MassS*MassStandard;
+AnyInertiaSolid BoneInertiaObject = {
+    BodyMassCorrectionGeneric massCorrection() = {
+      Mass_Scale=....Data.MassDistribution.mass_scale;
+      DensityTheoretical = ....Data.unscaled.ModelParameters.BoneDensity;
+      enableMassCorrection = Off;
+    };
+    AnySurfSTL surface = {
+      FileName = ....Data.unscaled.STL.FileNameHand;
+      AnyFunTransform3D &scale = ..Scale;
+      ScaleXYZ={1,1,1}*..Mirror;
+    };
+  };
 
-  AnyVar LengthStandard = 0.1;// Guesstimate..
 
-  AnyVar Length = 0.1; // Guesstimate..
-  AnyVar Radius = (Mass/(pi*Length*..StandardParameters.Hand.Density))^0.5;
 
-  AnyVar Ixx = 0.25*Mass*Radius*Radius + 1/12*Mass*Length*Length;
-  AnyVar Iyy = 0.5*Mass*Radius*Radius;
-  AnyVar Izz = Ixx;
-  Jii = {Ixx,Iyy,Izz};
-
-  sCoM=Scale(Data.sCoM_pos);
-  JaboutCoMOnOff = On;
-
-  AnyRefNode AnatomicalFrame = {};
   AnyRefNode& MoCapMarkerFrameAMMR24 = AnatomicalFrame; ///< For backwards Compatibility with AMMR 2.4 MoCap Marker protocols
+
+  AnyFloat pUnscaled = { Data.wj_pos,Data.MCP2_Distal_pos, Data.MCP5_Distal_pos }*Mirror;
+
+  Scale = {AnyFunTransform3D& GeomScale = ...Scaling.Hand.ScaleFunction;};
+
+  AnyVar Sign = ..Sign;
+
+  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(p, SIGN)  p[0]
+  #define MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(p, SIGN) RotMat(p[0],0.5*(p[1]+p[2]),p[1])*RotMat(0.5*pi,z)*RotMat(0.5*pi,y)*RotMat(0.5*(1-SIGN)*pi,y)
+
+  #include "..\Scaling\SegScaleFunWrtAnatomicalFrame.any"
+
+  AnyRefNode AnatomicalFrame =  {
+    AnyFloat pScaled = .Scale(.pUnscaled);
+    sRel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(pScaled, .Sign);
+    ARel = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(pScaled, .Sign);
+    AnyVec3 sRelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_s(.pUnscaled, .Sign); ///< Generic unscaled position of thigh ScalingNode
+    AnyMat33 ARelUnscaled = MACRO_CONSTRUCT_ANATOMICAL_FRAME_A(.pUnscaled, .Sign);///< Generic unscaled rotation of thigh ScalingNode
+  };
+  #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_s
+  #undef MACRO_CONSTRUCT_ANATOMICAL_FRAME_A
+
   AnyRefNode& ScalingNode = AnatomicalFrame;
+   AnyFunTransform3D& GeomScale = Scale;
 
   // Not used or duplicated in the Ref folder (kept for now)
   //AnyRefNode Hand     ={ sRel=.Scale({-0.1,0,.0})*.Mirror;};
@@ -47,16 +75,48 @@ AnySeg Hand ={
 
   AnyRefNode Ref={
 
-   AnyRefNode wj={ sRel=..Scale(..Data.wj_pos*..Mirror);
-     //Note:STC Issue for scaling
-     ARel = {{1,0,0},
+  AnyFunTransform3D& Scale = .Scale;
+  AnyFolder& ScalingNode = .ScalingNode;
+
+
+  //Note depending on the joint configuration this node may not be used directly
+  //Wrist joint seg and hand share scaling function
+  //We construct the RadiocarpalFlexion axis here and the wrist joint seg utilize directly the scaled sRel and ARels
+  //The distance between flexion and deviation axis is 5 mm for an unscaled model. Sources for the 5 mm "A kinematic model of the upper limb based on the visible human project (VHP) image dataset, Pandy et.al. 1999"
+  AnyRefNode RadioCarpalFlexion = {
+    //Wrist joint location
+    sRel =..Scale(..Data.RadioCarpalFlexion_pos*..Mirror );
+    /// wrist joint flexion axis is defined from joint center pointing to radialStylo and using the MCP2 and MCP5 midpoint
+    ARel = RotMat(sRel,..Scale(..Data.RadiolStyloInNeutralConf_pos*..Mirror),  0.5*(..Scale(..Data.MCP2_Distal_pos*..Mirror)+ ..Scale(..Data.MCP5_Distal_pos*..Mirror)));
+  };
+
+  AnyRefNode RadioCarpalDeviation = {
+    // wrist joint is defined from the two epicondyle bony landmarks
+    sRel =..Scale(..Data.RadioCarpalDeviation_pos*..Mirror );
+    ARel =.RadioCarpalFlexion.ARel*RotMat(0.5*pi,z)*RotMat(pi,x);  //note here we re-use the axis from RadioCarpalFlexion but flip it around this ensures the flexion and deviation axes are orthogonal
+  };
+
+
+  //Deprecated use RadioCarpalDeviation instead
+  AnyRefNode wj={ sRel=..Scale(..Data.wj_pos*..Mirror);
+     ARel = {
+       {1,0,0},
        {0,....Sign*1,0},
        {0,0,....Sign*1}
      };
    };
 
+   AnyRefNode MCP1                                      = { sRel = ..Scale(..Data.MCP1_Distal_pos                                *..Mirror); };
+   AnyRefNode MCP2                                      = { sRel = ..Scale(..Data.MCP2_Distal_pos                                *..Mirror); };
+   AnyRefNode MCP3                                      = { sRel = ..Scale(..Data.MCP3_Distal_pos                                *..Mirror); };
+   AnyRefNode MCP4                                      = { sRel = ..Scale(..Data.MCP4_Distal_pos                                *..Mirror); };
+   AnyRefNode MCP5                                      = { sRel = ..Scale(..Data.MCP5_Distal_pos                                *..Mirror); };
+
+
+
    AnyRefNode PalmJoint                                 = { sRel = ..Scale(..Data.PalmJoint_pos                                *..Mirror); };
    AnyRefNode Hand                                      = { sRel = ..Scale(..Data.Hand_pos                                     *..Mirror); };
+   AnyRefNode HandMid                                  = { sRel = ..Scale(..Data.Hand_mid_pos                                 *..Mirror); };
    AnyRefNode Via1_ExtensorIndicis                     = { sRel = ..Scale(..Data.Via1_ExtensorIndicis_pos                    *..Mirror); };
    AnyRefNode I_ExtensorIndicis                        = { sRel = ..Scale(..Data.I_ExtensorIndicis_pos                       *..Mirror); };
    AnyRefNode I_ExtensorPollicisLongus                = { sRel = ..Scale(..Data.I_ExtensorPollicisLongus_pos               *..Mirror); };

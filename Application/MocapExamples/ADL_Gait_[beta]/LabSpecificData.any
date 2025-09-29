@@ -19,6 +19,21 @@ Main.ModelSetup.LabSpecificData = {
  // to the models. Choises are "Trunk" or "Pelvis".
  #define MOCAP_HUMAN_GROUND_RESIDUALS "Pelvis"
 
+ #ifndef REFERENCE_TRIAL
+ // Overwrite the global reference frame in which the pelvis is measured. Ensure it always
+ // point in the direction model walks in the lab. This ensures that the output values
+ // are independent of the walking direction.
+ Main.HumanModel.BodyModel.Interface.Trunk.PelvisPosX.lin = {
+    AnyFixedRefFrame GlobalCorrected = {
+        AnyVar direction = Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.Axes0[0][0];
+        Axes = RotMat(iffun(gtfun(direction,0), 0.0, pi), z)*RotMat(pi/2,x);
+    };
+ };
+ Main.HumanModel.BodyModel.Interface.Trunk.PelvisRotVec = {
+    AnyFixedRefFrame& GlobalCorrected = .PelvisPosX.lin.GlobalCorrected;
+ };
+ #endif
+
 
  #include "Outputs.any"
 
@@ -35,9 +50,9 @@ Main.ModelSetup.LabSpecificData = {
   };
 
   Main.Studies.ParameterIdentification.KinematicStudyForParameterIdentification= {
-    Kinematics.KinematicTol = 1e-6;
+    Kinematics.KinematicTol = 1e-5;
   };
-  Main.ModelSetup.TrialSpecificData.ParameterOptimizationConvergenceTol = 1e-2;
+  Main.ModelSetup.TrialSpecificData.ParameterOptimizationConvergenceTol = 1e-3;
 
 
 

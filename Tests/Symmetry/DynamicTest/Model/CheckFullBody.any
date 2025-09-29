@@ -1,0 +1,155 @@
+#include "../../../tools.any"
+
+#define TEST_SEVERITY assert
+
+  
+#include "MuscleSymmetryCheck.any"
+
+      
+  
+
+AnyFolder CheckModel ={
+
+ AnyFloat kin_tol ??= 1e-5;
+   AnyFloat force_tol ??= 1e-3;
+ 
+
+
+    AnyInt TrunkPositions = TEST_SEVERITY( 
+      orfun( 
+        not(Main.TestTrigger),  
+        ltfun(Main.StudyRef.SymmetryCheck.Trunk.Kinematics.pos.NormalizedDifference, kin_tol)
+      ),
+      "Trunk model positions asymmetric"
+    );
+    
+    
+ #if BM_ARM_RIGHT == ON & BM_ARM_LEFT == ON
+
+    
+    AnyInt ArmPositions = TEST_SEVERITY( 
+      orfun( 
+        not(Main.TestTrigger),  
+        ltfun(Main.StudyRef.SymmetryCheck.Arm.Kinematics.pos.NormalizedDifference, kin_tol)
+      ),
+      "Arm model positions asymmetric"
+    );
+    AnyInt HandPositions = TEST_SEVERITY( 
+      orfun( 
+        not(Main.TestTrigger),  
+        ltfun(Main.StudyRef.SymmetryCheck.Arm.Kinematics.hand_pos.NormalizedDifference, kin_tol)
+      ),
+      "Hand model positions asymmetric"
+    );
+    
+    #if BM_ARM_MUSCLES_RIGHT == OFF & BM_ARM_MUSCLES_LEFT == OFF
+      AnyInt ArmJntForces = TEST_SEVERITY(
+        ltfun(Main.StudyRef.SymmetryCheck.Arm.JntMuscle.ft.NormalizedDifference, force_tol),
+        "Arm model joint forces asymmetric"
+      );
+    #else
+      AnyInt ArmMuscleLengths = TEST_SEVERITY(
+        orfun(
+          not(Main.TestTrigger),
+          ltfun(Main.StudyRef.SymmetryCheck.Arm.Muscle.lmt.NormalizedDifference, kin_tol)
+        ),
+        "Arm muscle lengths asymmetric"
+      );
+
+// NaN compare issue was solved in AnyBody 8.0.2 
+#if (ANYBODY_V1 > 8) | (ANYBODY_V1 == 8 & ANYBODY_V2 > 0) | (ANYBODY_V1 == 8 & ANYBODY_V2 == 0 & ANYBODY_V3 > 1 )
+      AnyInt ArmMuscleLengthVelocities = TEST_SEVERITY(
+        ltfun(Main.StudyRef.SymmetryCheck.Arm.Muscle.lmtDot.NormalizedDifference, kin_tol),
+        "Arm muscle length velocities asymmetric: " + strval(max(Main.StudyRef.SymmetryCheck.Arm.Muscle.lmtDot.NormalizedDifference))
+      );
+#endif
+  
+      AnyInt ArmMuscleStrengths = TEST_SEVERITY(
+        ltfun(Main.StudyRef.SymmetryCheck.Arm.Muscle.strength.NormalizedDifference, kin_tol),
+        "Arm muscle strength asymmetric"
+      );
+      AnyInt ArmMusForces = TEST_SEVERITY(
+        ltfun(Main.StudyRef.SymmetryCheck.Arm.Muscle.ft.NormalizedDifference, force_tol),
+        "Arm model muscle forces asymmetric"
+      );
+    #endif
+  #endif
+
+
+    #if BM_TRUNK_MUSCLES == ON
+      AnyInt TrunkMuscleLengths = TEST_SEVERITY(
+        orfun(
+          not(Main.TestTrigger),
+          ltfun(Main.StudyRef.SymmetryCheck.Trunk.Muscle.lmt.NormalizedDifference, kin_tol)
+        ),
+        "Trunk muscle lengths asymmetric"
+      );
+      
+// NaN compare issue was solved in AnyBody 8.0.2 
+#if (ANYBODY_V1 > 8) | (ANYBODY_V1 == 8 & ANYBODY_V2 > 0) | (ANYBODY_V1 == 8 & ANYBODY_V2 == 0 & ANYBODY_V3 > 1 )
+      AnyInt TrunkMuscleLengthVelocities = TEST_SEVERITY(
+        ltfun(Main.StudyRef.SymmetryCheck.Trunk.Muscle.lmtDot.NormalizedDifference, kin_tol),
+        "Trunk muscle length velocities asymmetric"
+      );
+#endif
+  
+      AnyInt TrunkMuscleStrengths = TEST_SEVERITY(
+        ltfun(Main.StudyRef.SymmetryCheck.Trunk.Muscle.strength.NormalizedDifference, kin_tol),
+        "Trunk muscle strength asymmetric"
+      );
+      AnyInt TrunkMusForces = TEST_SEVERITY(
+        ltfun(Main.StudyRef.SymmetryCheck.Trunk.Muscle.ft.NormalizedDifference, force_tol),
+        "Trunk model muscle forces asymmetric"
+      );
+    #endif
+
+
+  AnyInt LegPositions = TEST_SEVERITY( 
+      orfun( 
+        not(Main.TestTrigger),  
+        ltfun(Main.StudyRef.SymmetryCheck.Leg.Kinematics.pos.NormalizedDifference, kin_tol)
+      ),
+      "Leg model positions asymmetric"
+    );
+
+      #if  ((BM_LEG_MUSCLES_RIGHT != OFF) & (BM_LEG_MUSCLES_LEFT != OFF))
+
+    AnyInt LegMuscleLengths = TEST_SEVERITY(
+      orfun(
+        not(Main.TestTrigger),
+        ltfun(Main.StudyRef.SymmetryCheck.Leg.Muscle.lmt.NormalizedDifference, kin_tol)
+      ),
+      "Leg muscle lengths asymmetric"
+    );
+  
+// NaN compare issue was solved in AnyBody 8.0.2 
+#if (ANYBODY_V1 > 8) | (ANYBODY_V1 == 8 & ANYBODY_V2 > 0) | (ANYBODY_V1 == 8 & ANYBODY_V2 == 0 & ANYBODY_V3 > 1 )
+    AnyInt LegMuscleLengthVelocities = TEST_SEVERITY(
+      ltfun(Main.StudyRef.SymmetryCheck.Leg.Muscle.lmtDot.NormalizedDifference, kin_tol),
+      "Leg muscle length velocities asymmetric"
+    );
+#endif
+
+    AnyInt LegMuscleStrengths = TEST_SEVERITY(
+      ltfun(Main.StudyRef.SymmetryCheck.Leg.Muscle.strength.NormalizedDifference, kin_tol),
+      "Leg muscle strength asymmetric"
+    );
+
+    AnyInt LegMusForces = TEST_SEVERITY(
+      ltfun(Main.StudyRef.SymmetryCheck.Leg.Muscle.ft.NormalizedDifference, force_tol),
+      "Leg model muscle forces asymmetric"
+    );
+
+    AnyInt LegPolylinePoints = TEST_SEVERITY(
+      orfun(
+        not(Main.TestTrigger),
+        ltfun(Main.StudyRef.SymmetryCheck.Leg.Wrapping.AbsDifference, kin_tol),
+      ),
+      "Leg wrapping polyline points asymmetric"
+    );
+    
+      #endif
+    
+
+  };
+

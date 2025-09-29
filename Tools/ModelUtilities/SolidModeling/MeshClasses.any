@@ -1,0 +1,497 @@
+#ifndef TOOLS_MODELUTILITIES_SOLIDMODELING_MESHCLASSES
+#define TOOLS_MODELUTILITIES_SOLIDMODELING_MESHCLASSES
+
+//This mesh can create a mesh spanned by two spheres and a cone
+
+#class_template TwoSphereConeMesh (
+__CLASS__ = AnySurfTriCylMesh ,
+ADD_NODEGROUP = "Off" 
+)
+{
+  #var AnyFloat Radius1; // in m
+  #var AnyFloat Radius2; // in m
+  
+  #var AnyFloat Pos1 ={0,0,0}; //sphere1 position
+  #var AnyFloat Pos2 ={0,0,0}; //sphere2 position
+  #var AnyFloat Pos3 ={0,0,0}; //points used to define reference node created by mesh 
+  
+  
+  
+  
+    
+   #var AnyInt Sphere1PointsNo; 
+   #var AnyInt Sphere2PointsNo;
+   #var AnyInt LinePointsNo;
+
+  
+  #var AnyInt RotationNo=20;  //number of angle discretizations
+  #var AnyFloat RGB={0,0,1};
+  #var AnyFloat Opacity=1;
+  
+  #var AnyFloat Start_Surf_Par =0;  //should be a number btw 0 and 1 can be used to "crop" the generated surf
+  #var AnyFloat End_Surf_Par =1;  //should be a number btw 0 and 1
+  
+  #var AnyFloat Start_Surf_Angle=0;  //Allows cropping on angles... 0 to 2*pi gives full sweep 
+  #var AnyFloat End_Surf_Angle=2*pi;
+  
+  #var AnySwitchVar Visible = On;
+  
+  #var AnyFloat Direction = 1;
+
+  AnyInt PointsNo=  Sphere1PointsNo +Sphere2PointsNo+LinePointsNo; //total number of points along length of mesh
+
+  
+  AnyFolder Calculations ={
+    //frm https://www.quora.com/How-do-I-find-the-plane-equation-which-is-tangent-to-two-spheres
+    //(x+h1)^2+(y+k1)^2=R1^2  
+    //(x+h2)^2+(y+k2)^2=R2^2
+    
+    AnyVar k1=0;  AnyVar h1=0;    AnyVar R1=.Radius1;
+    AnyVar k2=0;  AnyVar h2=vnorm(.Pos2-.Pos1);  AnyVar R2= .Radius2;
+    
+    AnyFloat m_p = -(k2-k1)*(h2-h1)+(R2-R1)*sqrt((k2-k2)^2+(h2-h1)^2-(R2-R1)^2)/((R2-R2)^2-(h2-h1)^2);
+    AnyFloat b_p = k1-h1*m_p+R1*sqrt(m_p^2+1);
+    
+    AnyFloat TangentPoint1 = {h1+R1*m_p/sqrt(m_p^2+1),k1-R1/sqrt(m_p^2+1),0};
+    AnyFloat TangentPoint2 = {h2+R2*m_p/sqrt(m_p^2+1),k2-R2/sqrt(m_p^2+1),0};
+    
+    //Calculate angle span for sphere using law of cosine
+    AnyFloat a1= R1;         AnyFloat b1= R1;  AnyFloat c1= vnorm({-R1,0,0}-TangentPoint1);
+    AnyFloat C1= acos((c1^2-a1^2-b1^2)/(-2*a1*b1));      
+    AnyFloat a2= R2;         AnyFloat b2= R2;  AnyFloat c2= vnorm({R2+h2,0,0}-TangentPoint2);
+    AnyFloat C2= acos((c2^2-a2^2-b2^2)/(-2*a2*b2));      
+    
+    AnyFloat d1=(C1/(2*pi))*(2*pi*R1);  //arc length
+    AnyFloat d2=(C2/(2*pi))*(2*pi*R2);  //arc length
+    AnyFloat d3= vnorm(TangentPoint2-TangentPoint1);
+    
+    AnyFloat TotalLength= d1+d2+d3;
+    
+    
+    //here we construct points along sphere1 in 2D from tip to tangent point
+    AnyFloat ang1 = pi-farr(0.0,C1/.Sphere1PointsNo,.Sphere1PointsNo);
+    
+    AnyFloat x1=R1*cos(ang1);
+    AnyFloat y1=R1*sin(ang1);
+    AnyFloat z1=zeros(.Sphere1PointsNo);
+    AnyFloat Sphere1Points= {x1,y1,z1};
+    
+    //here we construct points along sphere2 in 2D from tangent point to tip
+    AnyFloat ang2 = flip(farr(0.0,C2/.Sphere2PointsNo,.Sphere2PointsNo));
+    AnyFloat Translation = reshape(repmat(.Sphere2PointsNo,{h2,0,0}),{.Sphere2PointsNo,3})';
+    AnyFloat x2=Translation[0]+R2*cos(ang2);
+    AnyFloat y2=Translation[1]+R2*sin(ang2);
+    AnyFloat z2=Translation[2]+zeros(.Sphere2PointsNo);
+    AnyFloat Sphere2Points= {x2,y2,z2};
+    
+    //here we construct points on the straight line between tangent points
+    AnyFloat Steps = farr(0.0,1/(.LinePointsNo-1),.LinePointsNo);
+    AnyFloat LinePointsx = TangentPoint1[0]+Steps*(TangentPoint2[0]-TangentPoint1[0]);
+    AnyFloat LinePointsy = TangentPoint1[1]+Steps*(TangentPoint2[1]-TangentPoint1[1]);
+    AnyFloat LinePointsz = zeros(.LinePointsNo);
+    
+    AnyFloat PointsCombined_ = {arrcat(x1,LinePointsx,x2),arrcat(y1,-LinePointsy,y2),arrcat(z1,LinePointsz,z2)}';
+    
+    AnyFolder SplineCal ={
+      AnyFloat Data=.PointsCombined_';
+      AnyInt   Data_Size = SizesOf(Data')[0];
+      AnyFloat Data_Accum_L = arrcat(0.0,vnorm((DIFFMAT(Data_Size))*Data')*(TRI(Data_Size-1)'));
+      AnyFloat Data_L = TOTAL_POLYLINE_LENGTH(Data');
+      AnyFloat Data_REL_L =  Data_Accum_L/Data_L;
+      
+      //T as length
+      AnyFunInterpol Fun = { 
+        T= .Data_Accum_L/.Data_L;
+        AnyInt Size =.Data_Size; 
+        Type=Bspline; 
+        Data = .Data;
+      }; 
+      
+      AnyFunInterpol Fun_Resample = { 
+        AnyFloat Temp = linspace(0,1-0,floor((1-0-0)*100));
+        Type=PiecewiseLinear; 
+        //Type=Bspline;  
+        AnyFloat L=.Data_L ; 
+        T= linspace(0,1,floor((1)*100));
+        Data = .Fun(Temp)';
+      }; 
+    };
+    
+    AnyFloat PointsCombined = SplineCal.Fun_Resample(linspace(.Start_Surf_Par,.End_Surf_Par,.PointsNo));
+    
+    //here we setup angle vector for rotatings PointsCombined around x axsis
+    AnyInt Size = .PointsNo; 
+    
+    AnyInt   number_of_points =.RotationNo;
+    AnyFloat angles_temp = farr(.Start_Surf_Angle,(.End_Surf_Angle-.Start_Surf_Angle)/(number_of_points-iffun(eqfun(.End_Surf_Angle-.Start_Surf_Angle,2*pi),0,1)),number_of_points);
+    AnyFloat angles_reverse = arrcat(angles_temp[0],take(flip(angles_temp),iarr(0,1,.RotationNo-2)));  //we flip angles depending on direction ... and "bump" vector one to ensure same start.. this is because start and end is not identical we skip one.. to avoid triangles of zero size
+
+    
+    AnyFloat angles= iffun(eqfun(.Direction,1),angles_temp,angles_reverse);
+
+    //now we start setting up points for each ring in cyl mesh 
+    //for each x val we do a full rotation
+    //here we create x values matrix
+    AnyFloat Px1 = PointsCombined'[0];
+    AnyFloat Px1_1= repmat(number_of_points,1,Px1) ;
+    AnyFloat PointsRingsx = flatten(reshape(Px1_1,{number_of_points,SizesOf(Px1)[0]})');
+    
+    //here we create y values matrix
+    AnyFloat Py1   = PointsCombined'[1];
+    AnyFloat Py1_1 = repmat(number_of_points,1,Py1) ;
+    AnyFloat Py1_2 = reshape(Py1_1,{number_of_points,SizesOf(Py1)[0]})';
+    AnyFloat temp   = reshape(repmat(SizesOf(Py1)[0],cos(angles)),{SizesOf(Py1)[0],number_of_points});
+    AnyFloat PointsRingsy = flatten( mult(temp,Py1_2));
+   
+    //here we create z values matrix
+    AnyFloat Pz1   = Py1;
+    AnyFloat Pz1_1 = repmat(number_of_points,1,Pz1) ;
+    AnyFloat Pz1_2 = reshape(Pz1_1,{number_of_points,SizesOf(Pz1)[0]})';
+    AnyFloat temp2   = reshape(repmat(SizesOf(Pz1)[0],sin(angles)),{SizesOf(Py1)[0],number_of_points});
+    AnyFloat PointsRingsz = flatten(mult(temp2,Pz1_2));
+    
+    //here we have all points {{ring1x, ring2x..},{ring1y, ring2y..},{ring1z, ring2z..}}
+    AnyFloat all = {PointsRingsx,PointsRingsy,PointsRingsz}';
+  };
+  
+  sRel = Pos1;
+  ARel = RotMat(sRel,Pos2,sRel+Pos3);
+ 
+//       Enable for visual debug
+//        AnyDrawPointCloud Line2D ={
+//          Points=.Calculations.PointsCombined;
+//          Points3D=On;    
+//          PointStyle.Size=0.011;
+//          RGB={0,0,1};
+//        };
+//        
+//        AnyDrawPointCloud Line3DRotated ={
+//          Points=.Calculations.all;
+//          Points3D=On;    
+//          PointStyle.Size=0.010;
+//          RGB={1,0,0};
+//        };
+  //      
+  //      AnyRefNode TangentPoint1={sRel=...Calculations.TangentPoint1;AnyDrawRefFrame drw ={};};
+  //      AnyRefNode TangentPoint2={sRel=...Calculations.TangentPoint2;AnyDrawRefFrame drw ={};};
+  
+  viewSurface.Face  =1;     
+  viewSurface.Visible=Visible;
+  viewSurface.RGB=RGB;
+  viewSurface.Opacity=Opacity;
+  
+  TriangleDirection = iffun(eqfun(Direction,1),RotCounterclockwise,RotClockwise);
+
+  
+  Points=Calculations.all;
+  AnyIntArray indicies_ = iarr(0,Calculations.number_of_points*Calculations.Size-1);
+  CylMesh = reshape(indicies_,{Calculations.Size,Calculations.number_of_points});
+  
+  #if ADD_NODEGROUP =="On"
+  AnyRefNodeGroup Nodes= {
+    CreateMotionOutput.r=On;
+    NodeDefaults.CreateMotionOutput.r=On;
+    NodeAmount = .PointsNo*.RotationNo; 
+    NodeName = "C"; // base name for
+    Node_sRels =  .Calculations.all;  
+  };
+  #endif
+  
+};
+
+
+
+#class_template AxisSymmetricMesh (
+__CLASS__ = AnySurfTriCylMesh ,
+ADD_NODEGROUP = "Off" 
+)
+{
+  #var AnyFloat Pos1 ={0,0,0};  //start of axis line
+  #var AnyFloat Pos2 ={1,0,0}; //end of axis line
+  #var AnyFloat Pos3 ={0,0,1.0};   //points used to control refnode orientation
+
+  #var AnyInt PointsNo=100;   //total number of points along length of mesh
+  #var AnyFloat RadiusVec ={0.1,0.1,0.1,0.1,0.1,0.1};  //Radius vector
+  
+  #var AnyFloat RadiusScaleVec={1,1,1,1,1};   //Scaling of radius vector depending on angle can be used to create spiral like shapes
+  
+  #var AnyInt RotationNo=30;  //number of angle discretizations
+  #var AnyFloat RGB={0,0,1};
+  #var AnyFloat Opacity=1;
+  
+  #var AnyFloat Start_Surf_Par =0;  //should be a number btw 0 and 1 can be used to "crop" the generated surf
+  #var AnyFloat End_Surf_Par =1;  //should be a number btw 0 and 1
+  
+  #var AnyFloat Start_Surf_Angle=0;  //Allows cropping on angles... 0 to 2*pi gives full sweep 
+  #var AnyFloat End_Surf_Angle=2*pi;
+
+
+  
+  #var AnySwitchVar Visible = On;
+  
+  AnyFolder Calculations ={
+    
+    AnyInt size = SizesOf(.RadiusVec)[0];
+    AnyFloat xVals =farr(0.0,vnorm(.Pos2-.Pos1)/(.PointsNo-1),.PointsNo);
+    
+    AnyFunInterpol LineFun= {
+      T= farr(0.0,vnorm(..Pos2-..Pos1)/(.size-1),.size);
+      Data={..RadiusVec};
+      Type=Bspline;
+      BsplineOrder=4;
+    };
+    
+    AnyFunInterpol RadiusScaleFun= {
+      T= farr(0.0,1/(SizesOf(..RadiusScaleVec)[0]-1),SizesOf(..RadiusScaleVec)[0]);
+      Data={..RadiusScaleVec};
+      Type=Bspline;
+      BsplineOrder=4;
+    };
+    
+    AnyFloat TotalLength= 1;
+    AnyFloat x1=xVals;
+    AnyFloat y1=LineFun(xVals)';
+    AnyFloat z1=zeros(SizesOf(x1)[0]);
+    AnyFloat Points= {x1,y1,z1};
+     
+    AnyFloat PointsCombined_ = Points';
+    
+    AnyFolder SplineCal ={
+      AnyFloat Data=.PointsCombined_';
+      AnyInt   Data_Size = SizesOf(Data')[0];
+      AnyFloat Data_Accum_L = arrcat(0.0,vnorm((DIFFMAT(Data_Size))*Data')*(TRI(Data_Size-1)'));
+      AnyFloat Data_L = TOTAL_POLYLINE_LENGTH(Data');
+      AnyFloat Data_REL_L =  Data_Accum_L/Data_L;
+      
+      //T as length
+      AnyFunInterpol Fun = { 
+        T= .Data_Accum_L/.Data_L;
+        AnyInt Size =.Data_Size; 
+        Type=Bspline; 
+        Data = .Data;
+      }; 
+      
+      AnyFunInterpol Fun_Resample = { 
+        AnyFloat Temp = linspace(0,1-0,floor((1-0-0)*100));
+        Type=PiecewiseLinear; 
+        AnyFloat L=.Data_L ; 
+        T= linspace(0,1,floor((1)*100));
+        Data = .Fun(Temp)';
+      }; 
+    };
+    
+    AnyFloat PointsCombined = SplineCal.Fun_Resample(linspace(.Start_Surf_Par,.End_Surf_Par,.PointsNo));
+    
+    //here we setup angle vector for rotatings PointsCombined around x axsis
+    AnyInt Size = SizesOf(PointsCombined)[0];
+    AnyFloat angles = farr(.Start_Surf_Angle,(.End_Surf_Angle-.Start_Surf_Angle)/(.RotationNo-iffun(eqfun(.End_Surf_Angle-.Start_Surf_Angle,2*pi),0,1)),.RotationNo);
+    
+    
+    //now we start setting up points for each ring in cyl mesh 
+    //for each x val we do a full rotation
+    //here we create x values matrix
+    AnyFloat Px1 = PointsCombined'[0];
+    AnyFloat Px1_1= repmat(.RotationNo,1,Px1) ;
+    AnyFloat PointsRingsx = flatten(reshape(Px1_1,{.RotationNo,SizesOf(Px1)[0]})');
+    
+    //here we create matrix used for scaling radius for each angle
+    AnyFloat a0  = RadiusScaleFun(farr(0.0,1.0/(.RotationNo-1),.RotationNo));
+    AnyFloat a1_1  = repmat(.PointsNo,1,a0) ;
+    AnyFloat a1_2   = reshape(a1_1,{.PointsNo,SizesOf(a0)[0]});
+    
+    //here we create y values matrix
+    AnyFloat Py1   = PointsCombined'[1];
+    AnyFloat Py1_1 = repmat(.RotationNo,1,Py1) ;
+    AnyFloat Py1_2 = reshape(Py1_1,{.RotationNo,SizesOf(Py1)[0]})';
+    AnyFloat temp   = reshape(repmat(SizesOf(Py1)[0],cos(angles)),{SizesOf(Py1)[0],.RotationNo});
+    AnyFloat PointsRingsy = flatten( mult(mult(temp,Py1_2),a1_2));
+    
+    //here we create z values matrix
+    AnyFloat Pz1   = Py1;
+    AnyFloat Pz1_1 = repmat(.RotationNo,1,Pz1) ;
+    AnyFloat Pz1_2 = reshape(Pz1_1,{.RotationNo,SizesOf(Pz1)[0]})';
+    AnyFloat temp2   = reshape(repmat(SizesOf(Pz1)[0],sin(angles)),{SizesOf(Py1)[0],.RotationNo});
+    AnyFloat PointsRingsz = flatten(mult(mult(temp2,Pz1_2),a1_2));
+    
+    //here we have all points {{ring1x, ring2x..},{ring1y, ring2y..},{ring1z, ring2z..}}
+    AnyFloat all = {PointsRingsx,PointsRingsy,PointsRingsz}';
+    
+  };
+  
+  sRel =Pos1;
+  ARel = RotMat(sRel,Pos2,sRel+Pos3);
+  
+  //For visual debug
+  //            AnyDrawPointCloud Line2D ={
+  //              Points=.Calculations.PointsCombined;
+  //              Points3D=On;    
+  //              PointStyle.Size=0.011;
+  //              RGB={0,0,1};
+  //            };
+  //            
+  //            AnyDrawPointCloud Line3DRotated ={
+  //              Points=.Calculations.all;
+  //              Points3D=On;    
+  //              PointStyle.Size=0.010;
+  //              RGB={1,0,0};
+  //            };
+   
+  viewSurface.Face  =1;     
+  viewSurface.Visible=Visible;
+  viewSurface.RGB=RGB;
+  viewSurface.Opacity=Opacity;
+  Points=Calculations.all;
+ 
+  AnyIntArray indicies_ = iarr(0,RotationNo*PointsNo-1);
+  CylMesh = reshape(indicies_,{PointsNo,RotationNo});
+  
+  
+  #if ADD_NODEGROUP =="On"
+  AnyRefNodeGroup Nodes= {
+    CreateMotionOutput.r=On;
+    NodeDefaults.CreateMotionOutput.r=On;
+    NodeAmount = .PointsNo*.RotationNo; 
+    NodeName = "C"; // base name for
+    Node_sRels =  .Calculations.all;  
+  };
+  #endif
+};
+
+
+
+#class_template SphereMesh (
+__CLASS__ = AnySurfTriCylMesh ,
+ADD_NODEGROUP = "Off" 
+
+)
+{
+  #var AnyFloat Radius; // in m
+  
+  #var AnyFloat Pos ={0,0,0}; //center of sphere
+  
+  #var AnyInt PointsNo=40;
+  #var AnyInt Sphere1PointsNo=100;
+  
+  #var AnyInt RotationNo=20;
+  #var AnyFloat RGB={0,0,1};
+  #var AnyFloat Opacity=1;
+  
+  #var AnyFloat Start_Surf_Par =0;  //should be a number btw 0 and 1 can be used to "crop" the generated surf
+  #var AnyFloat End_Surf_Par =1;  //should be a number btw 0 and 1
+  
+  #var AnyFloat Start_Surf_Angle=0;
+  #var AnyFloat End_Surf_Angle=2*pi;
+  
+  
+  #var AnySwitchVar Visible = On;
+  
+  AnyFolder Calculations ={
+    AnyFloat R1=.Radius;
+    AnyFloat TotalLength= pi*R1;
+    
+    //here we construct points along sphere in 2D 
+    AnyFloat ang1 = pi-farr(0.0,pi/.Sphere1PointsNo,.Sphere1PointsNo);
+    
+    AnyFloat x1=R1*cos(ang1);
+    AnyFloat y1=R1*sin(ang1);
+    AnyFloat z1=zeros(.Sphere1PointsNo);
+    AnyFloat Sphere1Points= {x1,y1,z1};
+    
+    AnyFloat PointsCombined_ = {x1,y1,z1}';
+    
+    AnyFolder SplineCal ={
+      AnyFloat Data=.PointsCombined_';
+      
+      AnyInt   Data_Size = SizesOf(Data')[0];
+      AnyFloat Data_Accum_L = arrcat(0.0,vnorm((DIFFMAT(Data_Size))*Data')*(TRI(Data_Size-1)'));
+      AnyFloat Data_L = TOTAL_POLYLINE_LENGTH(Data');
+      AnyFloat Data_REL_L =  Data_Accum_L/Data_L;
+      
+      //T as length
+      AnyFunInterpol Fun = { 
+        T= .Data_Accum_L/.Data_L;
+        AnyInt Size =.Data_Size; 
+        Type=Bspline; 
+        Data = .Data;
+      }; 
+      
+      AnyFunInterpol Fun_Resample = { 
+        AnyFloat Temp = linspace(0,1-0,floor((1-0-0)*100));
+        Type=PiecewiseLinear; //Bspline;  
+        //Type=Bspline;  
+        AnyFloat L=.Data_L ; //max(.S);
+        T= linspace(0,1,floor((1)*100));
+        Data = .Fun(Temp)';
+      }; 
+    };
+    
+    AnyFloat PointsCombined = SplineCal.Fun_Resample(linspace(.Start_Surf_Par,.End_Surf_Par,.PointsNo));
+    
+    //here we setup angle vector for rotatings PointsCombined around x axsis
+    AnyInt Size = .PointsNo; 
+    
+    AnyInt   number_of_points =.RotationNo;
+    AnyFloat angles = farr(.Start_Surf_Angle,(.End_Surf_Angle-.Start_Surf_Angle)/(number_of_points-iffun(eqfun(.End_Surf_Angle-.Start_Surf_Angle,2*pi),0,1)),number_of_points);
+    
+    //now we start setting up points for each ring in cyl mesh 
+    //for each x val we do a full rotation
+    //here we create x values matrix
+    AnyFloat Px1 = PointsCombined'[0];
+    AnyFloat Px1_1= repmat(number_of_points,1,Px1) ;
+    AnyFloat PointsRingsx = flatten(reshape(Px1_1,{number_of_points,SizesOf(Px1)[0]})');
+    
+    //here we create y values matrix
+    AnyFloat Py1   = PointsCombined'[1];
+    AnyFloat Py1_1 = repmat(number_of_points,1,Py1) ;
+    AnyFloat Py1_2 = reshape(Py1_1,{number_of_points,SizesOf(Py1)[0]})';
+    AnyFloat temp   = reshape(repmat(SizesOf(Py1)[0],cos(angles)),{SizesOf(Py1)[0],number_of_points});
+    AnyFloat PointsRingsy = flatten( mult(temp,Py1_2));
+    
+    //here we create z values matrix
+    AnyFloat Pz1   = Py1;
+    AnyFloat Pz1_1 = repmat(number_of_points,1,Pz1) ;
+    AnyFloat Pz1_2 = reshape(Pz1_1,{number_of_points,SizesOf(Pz1)[0]})';
+    AnyFloat temp2   = reshape(repmat(SizesOf(Pz1)[0],sin(angles)),{SizesOf(Py1)[0],number_of_points});
+    AnyFloat PointsRingsz = flatten(mult(temp2,Pz1_2));
+    
+    //here we have all points {{ring1x, ring2x..},{ring1y, ring2y..},{ring1z, ring2z..}}
+    AnyFloat all = {PointsRingsx,PointsRingsy,PointsRingsz}';
+  };
+  
+  sRel =Pos;
+  
+  AnyDrawPointCloud Line2D ={
+    Points=.Calculations.PointsCombined;
+    Points3D=On;    
+    PointStyle.Size=0.011;
+    RGB={0,0,1};
+  };
+  
+  AnyDrawPointCloud Line3DRotated ={
+    Points=.Calculations.all;
+    Points3D=On;    
+    PointStyle.Size=0.010;
+    RGB={0,1,0};
+  };
+  
+  viewSurface.Face  =1;     
+  viewSurface.Visible=Visible;
+  viewSurface.RGB=RGB;
+  viewSurface.Opacity=Opacity;
+  
+  Points=Calculations.all;
+  AnyIntArray indicies_ = iarr(0,Calculations.number_of_points*Calculations.Size-1);
+  CylMesh = reshape(indicies_,{Calculations.Size,Calculations.number_of_points});
+  
+  #if ADD_NODEGROUP =="On"
+  AnyRefNodeGroup Nodes= {
+    CreateMotionOutput.r=On;
+    NodeDefaults.CreateMotionOutput.r=On;
+    NodeAmount = .PointsNo*.RotationNo; 
+    NodeName = "C"; // base name for
+    Node_sRels =  .Calculations.all;  
+  };
+  #endif
+  
+};
+#endif

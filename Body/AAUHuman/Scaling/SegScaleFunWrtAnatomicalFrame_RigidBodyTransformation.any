@@ -1,0 +1,81 @@
+
+
+///The scale function which will be used for all AnyRefNode objects 
+///in the corresponding AnySeg object.
+AnyFunTransform3D Scale = 
+{
+  /// T0: A transform to the unscaled scaling frame frame from the segmental ref. frame
+  /// Transformation is made using VTK_LANDMARK_RIGIDBODY 
+  AnyFunTransform3DLin T0 =   {
+    AnyFunTransform3DLin2   RigidBodyTransform = {
+      Points0 = ...Points0;
+      Points1 = ...Points1;
+      AnyFloat lin= take(TransformationMatrix, {3,7,11});
+      AnyFloat rot= take(TransformationMatrix, {{0,1,2},{4,5,6},{8,9,10}});
+      Mode = VTK_LANDMARK_RIGIDBODY;
+    };
+    
+    ScaleMat = RigidBodyTransform.rot' ;
+    Offset = -RigidBodyTransform.lin ;
+  };
+  
+  /// T0_Inv:  A transform to the segmental ref. frame from the unscaled scaling frame 
+  AnyFunTransform3DLin T0_Inv = 
+  {
+    ScaleMat = .T0.ScaleMat';
+    Offset = -( .T0.ScaleMat * .T0.Offset')' ;
+  };          
+  
+  /// Combination of three transformations: T0'(G(T0(X)))
+  /// This applies GeomScale in unscaled anatomical
+  AnyFunTransform3D T0GT0Inv =
+  {
+    PreTransforms = 
+    {
+      &.T0,
+      &.GeomScale, 
+      &.T0_Inv
+    };
+  };
+  
+  
+  // T1: A transform to the scaled scaling frame from the segmental ref. frame  
+  AnyFunTransform3DLin T1 =  {
+    
+    AnyFunTransform3DLin2   RigidBodyTransform = {
+      ///^ Points0: set of scaled feature points in scaling frame
+      Points0 = ..GeomScale(...Points0);
+      ///^ Points1: set of scaled feature points(by T0GT0Inv) given in segmental frame
+      Points1 = ..T0GT0Inv(...Points1);
+      
+      AnyFloat lin= take(TransformationMatrix, {3,7,11});
+      AnyFloat rot= take(TransformationMatrix, {{0,1,2},{4,5,6},{8,9,10}});
+      Mode = VTK_LANDMARK_RIGIDBODY;
+    };
+    
+    ScaleMat = RigidBodyTransform.rot' ;
+    Offset =- RigidBodyTransform.lin  ;
+  };
+  
+  /// T1_Inv:  A transform to the segmental ref. frame from the scaled anatomical frame
+  AnyFunTransform3DLin T1_Inv = 
+  {
+    ScaleMat = .T1.ScaleMat' ;
+    Offset = -( .T1.ScaleMat * .T1.Offset')';
+  };
+  
+  
+  
+  
+  PreTransforms =   {
+    &T0,
+    &GeomScale, 
+    &T1_Inv
+  };  
+};
+
+
+
+
+
+

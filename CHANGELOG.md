@@ -100,6 +100,15 @@ You can [enable backwards compatibility](changes-to-bodymodel-folders) by settin
 
 **Changed:**
 
+(changes-to-shoulder-arm model)=
+* {doc}`/body/shoulder_arm_model` has been updated in terms of anatomical frames, scaling, and mass properties:
+   * Anatomical frames are now explicitly defined using bony landmarks, replacing previous implicit definitions. The new definitions ensure consistency throughout the body: in a standing posture, the Y-axis points upward, the X-axis points forward, and the Z-axis points laterally (to the right). This update affects models with nodes referenced to the anatomical frame, such as MoCap models, which may require updated marker protocols. A migration guide is available.
+   * Scaling of the scapula and clavicle now uses the thorax trunk `ScalingNode`. While this was previously the case, the new implementation is more precise. The conoid ligament length is also scaled more accurately, resulting in improved initial positioning of the clavicle and scapula across all scaling scenarios.
+   * Inertia calculations are now based on approximate skin surfaces and bone geometries, providing greater accuracy.
+   * Postural frames have been introduced in the shoulder girdle to enhance anatomical representation.
+
+
+
 (changes-to-default-pelvis-morphology)=
 
 * The default pelvis morphology is now the one from the trunk model, as opposed to the pelvis belonging

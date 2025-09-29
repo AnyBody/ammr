@@ -1,0 +1,493 @@
+//fatal_warnings = ["WARNING"]
+//ignore_errors = ["AbductionInitialPosturePertubation", "'GHRot'  :  Close to"]
+//define = (
+//[
+//    {'SCALING_TYPE': '"NONE"'},
+//    {'SCALING_TYPE': '"LINEAR"'},
+//    {'SCALING_TYPE': '"RBF_SCALING"'}
+//],
+//[
+//    {'RIGHT_LEFT_SCALE_SYM': '"On"'},
+//    {'RIGHT_LEFT_SCALE_SYM': '"Off"'}
+//]
+//)
+
+#include "../libdef.any"
+//#define WRIST_EXPERIMENTAL
+#include "Class_MorphingPipeline.any"
+#include "<AMMR_TOOLS>/ModelUtilities\SolidModeling/MeshClasses.any"
+
+
+
+//Test model
+
+//The model can test in six different configs...
+//three scaling type settings and if the model is right/left symmetrically scaled or not
+
+//Load positions in folder "LoadInitpos_test" are checked for all configs... here we check that the scaling frames are identical
+//Scapula and clavicula should be identical to thorax
+//Radius and Ulna scaling nodes should also be identical
+
+
+//Compare scaling nodes positions while running in folder "Compare_Scaling_Nodes_Running" we check that the scaling frames are identical
+//Scapula and clavicula should be identical to thorax (Done only for SCALINGTYPE_NONE) due to scapula contact it will not match 100% when scaled...
+//Radius and Ulna scaling nodes should also be identical (These are always checked.)
+
+
+
+//Select between three different scaling options
+#ifndef TEST_NAME
+  #define SCALING_TYPE "NONE"
+  #define RIGHT_LEFT_SCALE_SYM "Off"
+#endif
+
+#if  SCALING_TYPE  =="RBF_SCALING"
+   #define BM_SCALING _SCALING_STANDARD_
+#endif
+
+#if SCALING_TYPE =="NONE"
+  #define BM_SCALING _SCALING_NONE_
+#endif
+
+#if  SCALING_TYPE =="LINEAR"
+ #define BM_SCALING _SCALING_XYZ_
+#endif
+
+
+//RunTest.....
+
+// ----------------------------------------------------------
+// Model configuration:
+// For more info on body model configuration options please load the model and double click on:
+// #path HTML_DOC "<AMMR_PATH_DOC>/bm_config/index.html"
+// ----------------------------------------------------------
+
+// Use interpolation drivers to define motion
+#define DriverSelection "FreePostureCustom"
+
+//Actual model
+  #include "../../../../Application/Examples/FreePosture/FreePostureFullBodyStatic.Main.any"
+
+Main ={
+
+
+  #include "Mannequin.any"
+
+  Model={
+    ModelEnvironmentConnection = {
+         #include "../../../../Application/Examples/FreePosture/Model/JointsAndDriversConstant.any"
+       };
+     };
+  Study.Kinematics.KinematicTol =1e-8;
+  Study.InitialConditions.KinematicTol=1e-8;
+
+  Study.InitialConditions ={
+
+    #if SCALING_TYPE =="RBF_SCALING"
+    MORPHING_FUNC Thorax(
+    REF_BODY_PART=Main.HumanModel.BodyModel.Trunk.Segments.ThoraxSeg,
+    REF_BODY_PART_SCALING =Main.HumanModel.Scaling.GeometricalScaling.Thorax
+    ) = {
+      SourceLandmarks =0.3* {{-1,-1,-1},{1,-1,-1},{1,1,-1},{-1,1,-1},{-1,-1,1},{1,-1,1},{1,1,1},{-1,1,1}};
+
+      #if    RIGHT_LEFT_SCALE_SYM=="Off"
+      TargetLandmarks =0.3* {{-1,-1,-1},{1,-1,-1},{1,1,-1},{-1,1,-1},{-1,-1,1},{1,-1,1},{1,1,1},2*{-1,1,1}};
+      #else
+      TargetLandmarks =0.2* {{-1,-1,-1},{1,-1,-1},2*{1,1,-1},2*{-1,1,-1},{-1,-1,1},{1,-1,1},2*{1,1,1},2*{-1,1,1}};
+      #endif
+
+    };
+    #endif
+
+
+
+
+    //Define some scaling in the model that allows some testing...  either symmetric or not...
+    #if SCALING_TYPE =="LINEAR"
+    Main.HumanModel.Anthropometrics.SegmentScaleFactors.Thorax.DepthScale=1.2;
+    Main.HumanModel.Anthropometrics.SegmentScaleFactors.Thorax.WidthScale=1;
+    Main.HumanModel.Anthropometrics.SegmentScaleFactors.Thorax.LengthScale=1.3;
+
+    Main.HumanModel.Anthropometrics.SegmentScaleFactors.Right.Ulna.LengthScale=2;
+    Main.HumanModel.Anthropometrics.SegmentScaleFactors.Right.Ulna.WidthScale=2;
+    Main.HumanModel.Anthropometrics.SegmentScaleFactors.Right.Ulna.DepthScale=2;
+
+    Main.HumanModel.Anthropometrics.SegmentScaleFactors.Right.Radius.LengthScale=Main.HumanModel.Anthropometrics.SegmentScaleFactors.Right.Ulna.LengthScale;
+    Main.HumanModel.Anthropometrics.SegmentScaleFactors.Right.Radius.WidthScale=Main.HumanModel.Anthropometrics.SegmentScaleFactors.Right.Ulna.WidthScale;
+    Main.HumanModel.Anthropometrics.SegmentScaleFactors.Right.Radius.DepthScale=Main.HumanModel.Anthropometrics.SegmentScaleFactors.Right.Ulna.DepthScale;
+
+
+    #if RIGHT_LEFT_SCALE_SYM =="Off"
+    Main.HumanModel.Anthropometrics.SegmentScaleFactors.Left.Ulna.LengthScale=1;
+    Main.HumanModel.Anthropometrics.SegmentScaleFactors.Left.Ulna.WidthScale=1;
+    Main.HumanModel.Anthropometrics.SegmentScaleFactors.Left.Ulna.DepthScale=1;
+    Main.HumanModel.Anthropometrics.SegmentScaleFactors.Left.Radius.LengthScale=Main.HumanModel.Anthropometrics.SegmentScaleFactors.Left.Ulna.LengthScale;
+    Main.HumanModel.Anthropometrics.SegmentScaleFactors.Left.Radius.WidthScale=Main.HumanModel.Anthropometrics.SegmentScaleFactors.Left.Ulna.WidthScale;
+    Main.HumanModel.Anthropometrics.SegmentScaleFactors.Left.Radius.DepthScale=Main.HumanModel.Anthropometrics.SegmentScaleFactors.Left.Ulna.DepthScale;
+    #else
+    Main.HumanModel.Anthropometrics.SegmentScaleFactors.Left.Ulna.LengthScale=Main.HumanModel.Anthropometrics.SegmentScaleFactors.Right.Ulna.LengthScale;
+    Main.HumanModel.Anthropometrics.SegmentScaleFactors.Left.Ulna.WidthScale=Main.HumanModel.Anthropometrics.SegmentScaleFactors.Right.Ulna.WidthScale;
+    Main.HumanModel.Anthropometrics.SegmentScaleFactors.Left.Ulna.DepthScale=    Main.HumanModel.Anthropometrics.SegmentScaleFactors.Right.Ulna.DepthScale;
+    Main.HumanModel.Anthropometrics.SegmentScaleFactors.Left.Radius.LengthScale=Main.HumanModel.Anthropometrics.SegmentScaleFactors.Left.Ulna.LengthScale;
+    Main.HumanModel.Anthropometrics.SegmentScaleFactors.Left.Radius.WidthScale=Main.HumanModel.Anthropometrics.SegmentScaleFactors.Left.Ulna.WidthScale;
+    Main.HumanModel.Anthropometrics.SegmentScaleFactors.Left.Radius.DepthScale=Main.HumanModel.Anthropometrics.SegmentScaleFactors.Left.Ulna.DepthScale;
+    #endif
+
+
+    #endif
+
+
+
+    //These measures are used to create data points ... this is used when creating data files for the model.
+    //The file has measures from one bone to the next... e.g. ulna and radius measure condyles on humerus.. these points are used
+    //to construct coordinate systems..
+    #include "MeasureInNeutralPos.any"
+
+    AnyFolder Load_Initpos_test ={
+
+      AnyMessage InitposDiff_Clavicula_Right_Warning = {
+        AnyFloat pos1 = Main.HumanModel.BodyModel.Right.ShoulderArm.Segments.Clavicula.Axes0*Main.HumanModel.BodyModel.Right.ShoulderArm.Segments.Clavicula.ScalingNode.ARel;
+        AnyFloat pos2 = Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.Axes0*Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.ScalingNode.ARel;
+        AnyFloat max_diff =max(max(pos1-pos2));
+        TriggerRuntime  = iffun(ltfun(max_diff,0.000001),Off,On);
+        Type = MSG_Error;
+        Message = "There is a difference bewteen initial rotations of scalingnode on thorax and clavicula at load time, they are supposed to be identical";
+      };
+
+      AnyMessage InitposDiff_Scapula_Right_Warning = {
+        AnyFloat pos1 = Main.HumanModel.BodyModel.Right.ShoulderArm.Segments.Scapula.Axes0*Main.HumanModel.BodyModel.Right.ShoulderArm.Segments.Scapula.ScalingNode.ARel;
+        AnyFloat pos2 = Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.Axes0*Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.ScalingNode.ARel;
+        AnyFloat max_diff =max(max(pos1-pos2));
+        TriggerRuntime  = iffun(ltfun(max_diff,0.000001),Off,On);
+        Type = MSG_Error;
+        Message = "There is a difference bewteen initial rotations of scalingnode on thorax and scapula at load time, they are supposed to be identical";
+      };
+
+      AnyMessage InitposDiff_Ulna_Right_Warning = {
+        AnyFloat pos1 = Main.HumanModel.BodyModel.Right.ShoulderArm.Segments.Ulna.Axes0*Main.HumanModel.BodyModel.Right.ShoulderArm.Segments.Ulna.HumeroUlnar.ARel;
+        AnyFloat pos2 = Main.HumanModel.BodyModel.Right.ShoulderArm.Segments.Humerus.Axes0*Main.HumanModel.BodyModel.Right.ShoulderArm.Segments.Humerus.HumeroUlnar.ARel;
+
+        AnyFloat max_diff =max(max(pos1-pos2));
+        TriggerRuntime  = iffun(ltfun(max_diff,0.000001),Off,On);
+        Type = MSG_Error;
+        Message = "There is a difference bewteen initial rotations of nodes used for humeroulna joint they are supposed to be identical";
+      };
+
+      AnyMessage InitposDiff_Radius_Right_Warning = {
+        AnyFloat pos1 = Main.HumanModel.BodyModel.Right.ShoulderArm.Segments.Radius.Axes0*Main.HumanModel.BodyModel.Right.ShoulderArm.Segments.Radius.ScalingNode.ARel;
+        AnyFloat pos2 = Main.HumanModel.BodyModel.Right.ShoulderArm.Segments.Ulna.Axes0*Main.HumanModel.BodyModel.Right.ShoulderArm.Segments.Ulna.ScalingNode.ARel;
+
+        AnyFloat max_diff =max(max(pos1-pos2));
+        TriggerRuntime  = iffun(ltfun(max_diff,0.000001),Off,On);
+        Type = MSG_Error;
+        Message = "There is a difference bewteen initial rotations of nodes used for radius ulna scaling they are supposed to be identical at load time";
+      };
+
+      AnyMessage InitposDiff_Clavicula_Left_Warning = {
+        AnyFloat pos1 = Main.HumanModel.BodyModel.Left.ShoulderArm.Segments.Clavicula.Axes0*Main.HumanModel.BodyModel.Left.ShoulderArm.Segments.Clavicula.ScalingNode.ARel;
+        AnyFloat pos2 = Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.Axes0*Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.ScalingNode.ARel;
+        AnyFloat max_diff =max(max(pos1-pos2));
+        TriggerRuntime  = iffun(ltfun(max_diff,0.000001),Off,On);
+        Type = MSG_Error;
+        Message = "There is a difference bewteen initial rotations of scalingnode on thorax and clavicula at load time, they are supposed to be identical";
+      };
+
+      AnyMessage InitposDiff_Scapula_Left_Warning = {
+        AnyFloat pos1 = Main.HumanModel.BodyModel.Left.ShoulderArm.Segments.Scapula.Axes0*Main.HumanModel.BodyModel.Left.ShoulderArm.Segments.Scapula.ScalingNode.ARel;
+        AnyFloat pos2 = Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.Axes0*Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.ScalingNode.ARel;
+        AnyFloat max_diff =max(max(pos1-pos2));
+        TriggerRuntime  = iffun(ltfun(max_diff,0.000001),Off,On);
+        Type = MSG_Error;
+        Message = "There is a difference bewteen initial rotations of scalingnode on thorax and scapula at load time, they are supposed to be identical";
+      };
+
+      AnyMessage InitposDiff_Ulna_Left_Warning = {
+        AnyFloat pos1 = Main.HumanModel.BodyModel.Left.ShoulderArm.Segments.Ulna.Axes0*Main.HumanModel.BodyModel.Left.ShoulderArm.Segments.Ulna.HumeroUlnar.ARel;
+        AnyFloat pos2 = Main.HumanModel.BodyModel.Left.ShoulderArm.Segments.Humerus.Axes0*Main.HumanModel.BodyModel.Left.ShoulderArm.Segments.Humerus.HumeroUlnar.ARel;
+        AnyFloat max_diff =max(max(pos1-pos2));
+        TriggerRuntime  = iffun(ltfun(max_diff,0.000001),Off,On);
+        Type = MSG_Error;
+        Message = "There is a difference bewteen initial rotations of nodes used for humeroulna joint they are supposed to be identical";
+      };
+
+      AnyMessage InitposDiff_Radius_Left_Warning = {
+        AnyFloat pos1 = Main.HumanModel.BodyModel.Left.ShoulderArm.Segments.Radius.Axes0*Main.HumanModel.BodyModel.Left.ShoulderArm.Segments.Radius.ScalingNode.ARel;
+        AnyFloat pos2 = Main.HumanModel.BodyModel.Left.ShoulderArm.Segments.Ulna.Axes0*Main.HumanModel.BodyModel.Left.ShoulderArm.Segments.Ulna.ScalingNode.ARel;
+        AnyFloat max_diff =max(max(pos1-pos2));
+        TriggerRuntime  = iffun(ltfun(max_diff,0.000001),Off,On);
+        Type = MSG_Error;
+        Message = "There is a difference bewteen initial rotations of nodes used for radius ulna scaling they are supposed to be identical at load time";
+      };
+
+    };
+
+    //only for scaling NONE there will be a perfect match... otherwise the ellipsoid contact will change locations slightly and exact match will not be obtained
+    AnyFolder Compare_Scaling_Nodes_Running ={
+
+      #if SCALING_TYPE == "NONE"
+
+
+      AnyMessage ScalingNode_Lin_Thorax_Clavicula_Right_Warning = {
+        AnyKinLinear lin ={
+          AnyRefFrame  &ref1 = Main.HumanModel.BodyModel.Right.ShoulderArm.Segments.Clavicula.ScalingNode;
+          AnyRefFrame  &ref2 = Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.ScalingNode;
+        };
+        AnyFloat max_diff = max(lin.Pos);
+        TriggerRuntime  = andfun(System.LoadedModel.LoadComplete,iffun(ltfun(max_diff,0.000001),Off,On));  //note tol needs to be higher than kin tol... error accumulates in joints.. this is like measuing on an open "closed" chain
+        Type = MSG_Error;
+        Message = "After running initial pos there is a difference bewteen position of scalingnode thorax and equivalent node on clavicula ";
+      };
+
+
+      AnyMessage ScalingNode_Rot_Thorax_Clavicula_Right_Warning = {
+        AnyKinRotational rot ={
+          AnyRefFrame  &ref1 = Main.HumanModel.BodyModel.Right.ShoulderArm.Segments.Clavicula.ScalingNode;
+          AnyRefFrame  &ref2 = Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.ScalingNode;
+          Type=RotAxesAngles;
+        };
+        AnyFloat max_diff = max(rot.Pos);
+        TriggerRuntime  = andfun(System.LoadedModel.LoadComplete,iffun(ltfun(max_diff,0.000001),Off,On));  //note tol needs to be higher than kin tol... error accumulates in joints.. this is like measuing on an open "closed" chain
+        Type = MSG_Error;
+        Message = "After running initial pos there is a difference bewteen position of scalingnode thorax and equivalent node on clavicula ";
+      };
+
+
+      AnyMessage ScalingNode_Lin_Thorax_Scapula_Right_Warning = {
+        AnyKinLinear lin ={
+          AnyRefFrame  &ref1 = Main.HumanModel.BodyModel.Right.ShoulderArm.Segments.Scapula.ScalingNode;
+          AnyRefFrame  &ref2 = Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.ScalingNode;
+        };
+        AnyFloat max_diff = max(lin.Pos);
+        TriggerRuntime  = andfun(System.LoadedModel.LoadComplete,iffun(ltfun(max_diff,0.000001),Off,On));
+        Type = MSG_Error;
+        Message = "After running initial pos there is a difference bewteen position of scalingnode thorax and equivalent node on scapula ";
+      };
+
+      AnyMessage ScalingNode_Rot_Thorax_Scapula_Right_Warning = {
+        AnyKinRotational rot ={
+          AnyRefFrame  &ref1 = Main.HumanModel.BodyModel.Right.ShoulderArm.Segments.Scapula.ScalingNode;
+          AnyRefFrame  &ref2 = Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.ScalingNode;
+          Type=RotAxesAngles;
+        };
+        AnyFloat max_diff = max(rot.Pos);
+        TriggerRuntime  = andfun(System.LoadedModel.LoadComplete,iffun(ltfun(max_diff,0.000001),Off,On));
+        Type = MSG_Error;
+        Message = "After running initial pos there is a difference bewteen position of scalingnode thorax and equivalent node on scapula ";
+      };
+
+
+      AnyMessage ScalingNode_Lin_Thorax_Clavicula_Left_Warning = {
+        AnyKinLinear lin ={
+          AnyRefFrame  &ref1 = Main.HumanModel.BodyModel.Left.ShoulderArm.Segments.Clavicula.ScalingNode;
+          AnyRefFrame  &ref2 = Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.ScalingNode;
+        };
+        AnyFloat max_diff = max(lin.Pos);
+        TriggerRuntime  = andfun(System.LoadedModel.LoadComplete,iffun(ltfun(max_diff,0.000001),Off,On));
+        Type = MSG_Error;
+        Message = "After running initial pos there is a difference bewteen position of scalingnode thorax and equivalent node on scapula ";
+      };
+
+
+
+
+      AnyMessage ScalingNode_Rot_Thorax_Clavicula_Left_Warning = {
+        AnyKinRotational rot ={
+          AnyRefFrame  &ref1 = Main.HumanModel.BodyModel.Left.ShoulderArm.Segments.Clavicula.ScalingNode;
+          AnyRefFrame  &ref2 = Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.ScalingNode;
+          Type=RotAxesAngles;
+        };
+        AnyFloat max_diff = max(rot.Pos);
+        TriggerRuntime  = andfun(System.LoadedModel.LoadComplete,iffun(ltfun(max_diff,0.000001),Off,On));
+        Type = MSG_Error;
+        Message = "After running initial pos there is a difference bewteen position of scalingnode thorax and equivalent node on Clavicula ";
+      };
+
+
+      AnyMessage ScalingNode_Lin_Thorax_Scapula_Left_Warning = {
+        AnyKinLinear lin ={
+          AnyRefFrame  &ref1 = Main.HumanModel.BodyModel.Left.ShoulderArm.Segments.Scapula.ScalingNode;
+          AnyRefFrame  &ref2 = Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.ScalingNode;
+        };
+        AnyFloat max_diff = max(lin.Pos);
+        TriggerRuntime  = andfun(System.LoadedModel.LoadComplete,iffun(ltfun(max_diff,0.000001),Off,On));
+        Type = MSG_Error;
+        Message = "After running initial pos there is a difference bewteen position of scalingnode thorax and equivalent node on scapula ";
+      };
+
+      AnyMessage ScalingNode_Rot_Thorax_Scapula_Left_Warning = {
+        AnyKinRotational rot ={
+          AnyRefFrame  &ref1 = Main.HumanModel.BodyModel.Left.ShoulderArm.Segments.Scapula.ScalingNode;
+          AnyRefFrame  &ref2 = Main.HumanModel.BodyModel.Trunk.Segments.PelvisSeg.ScalingNode;
+          Type=RotAxesAngles;
+        };
+        AnyFloat max_diff = max(rot.Pos);
+        TriggerRuntime  = andfun(System.LoadedModel.LoadComplete,iffun(ltfun(max_diff,0.000001),Off,On));
+        Type = MSG_Error;
+        Message = "After running initial pos there is a difference bewteen position of scalingnode thorax and equivalent node on scapula ";
+      };
+
+
+      #endif
+
+      AnyMessage ScalingNode_Lin_Radius_Ulna_Right_Warning = {
+        AnyKinLinear lin ={
+          AnyRefFrame  &ref1 = Main.HumanModel.BodyModel.Right.ShoulderArm.Segments.Radius.ScalingNode;
+          AnyRefFrame  &ref2 = Main.HumanModel.BodyModel.Right.ShoulderArm.Segments.Ulna.ScalingNode;
+        };
+
+        AnyFloat max_diff = max(lin.Pos);
+        TriggerRuntime  = andfun(System.LoadedModel.LoadComplete,iffun(ltfun(max_diff,0.000001),Off,On));
+        Type = MSG_Error;
+        Message = "After running initial pos there is a difference bewteen position of scaling nodes of ulna and radius ";
+      };
+
+      AnyMessage ScalingNode_Rot_Radius_Ulna_Right_Warning = {
+        AnyKinRotational rot ={
+          AnyRefFrame  &ref1 = Main.HumanModel.BodyModel.Right.ShoulderArm.Segments.Radius.ScalingNode;
+          AnyRefFrame  &ref2 = Main.HumanModel.BodyModel.Right.ShoulderArm.Segments.Ulna.ScalingNode;
+          Type =RotAxesAngles;
+        };
+
+        AnyFloat max_diff = max(rot.Pos);
+        TriggerRuntime  = andfun(System.LoadedModel.LoadComplete,iffun(ltfun(max_diff,0.000001),Off,On));
+        Type = MSG_Error;
+        Message = "After running initial pos there is a difference bewteen position of scaling nodes of ulna and radius ";
+      };
+
+
+
+
+
+      AnyMessage ScalingNode_Lin_Radius_Ulna_Left_Warning = {
+        AnyKinLinear lin ={
+          AnyRefFrame  &ref1 = Main.HumanModel.BodyModel.Left.ShoulderArm.Segments.Radius.ScalingNode;
+          AnyRefFrame  &ref2 = Main.HumanModel.BodyModel.Left.ShoulderArm.Segments.Ulna.ScalingNode;
+        };
+
+        AnyFloat max_diff = max(lin.Pos);
+        TriggerRuntime  = andfun(System.LoadedModel.LoadComplete,iffun(ltfun(max_diff,0.000001),Off,On));
+        Type = MSG_Error;
+        Message = "After running initial pos there is a difference bewteen position of scaling nodes of ulna and radius ";
+      };
+
+      AnyMessage ScalingNode_Rot_Radius_Ulna_Left_Warning = {
+        AnyKinRotational rot ={
+          AnyRefFrame  &ref1 = Main.HumanModel.BodyModel.Left.ShoulderArm.Segments.Radius.ScalingNode;
+          AnyRefFrame  &ref2 = Main.HumanModel.BodyModel.Left.ShoulderArm.Segments.Ulna.ScalingNode;
+          Type =RotAxesAngles;
+        };
+
+        AnyFloat max_diff = max(rot.Pos);
+        TriggerRuntime  = andfun(System.LoadedModel.LoadComplete,iffun(ltfun(max_diff,0.000001),Off,On));
+        Type = MSG_Error;
+        Message = "After running initial pos there is a difference bewteen position of scaling nodes of ulna and radius ";
+      };
+
+
+
+    };
+
+
+
+    AnyFolder Compare_Joint_Nodes ={
+
+      //this joint is made using two pairs of nodes.. the proximalRadioUlnar coordinate system is supposed to be identical for these two bones when unscaled and driven to zero
+      AnyMessage ProximalRadioUlnar_Right_Warning = {
+        AnyKinRotational rot ={
+          AnyRefFrame  &ref1 = Main.HumanModel.BodyModel.Right.ShoulderArm.Segments.Ulna.ProximalRadioUlnar;
+          AnyRefFrame  &ref2 = Main.HumanModel.BodyModel.Right.ShoulderArm.Segments.Radius.ProximalRadioUlnar;
+          Type=RotAxesAngles;
+        };
+        AnyFloat max_diff = max(rot.Pos);
+        TriggerRuntime  = andfun(System.LoadedModel.LoadComplete,iffun(ltfun(max_diff,0.00001),Off,On));
+        Type = MSG_Error;
+        Message = "After running initial pos there is a difference between nodes use to measure ProximalRadioUlnar rotaion when model is unscaled and driven to zero they should be identical ";
+      };
+
+
+      AnyMessage ProximalRadioUlnar_Left_Warning = {
+        AnyKinRotational rot ={
+          AnyRefFrame  &ref1 = Main.HumanModel.BodyModel.Left.ShoulderArm.Segments.Ulna.ProximalRadioUlnar;
+          AnyRefFrame  &ref2 = Main.HumanModel.BodyModel.Left.ShoulderArm.Segments.Radius.ProximalRadioUlnar;
+          Type=RotAxesAngles;
+        };
+        AnyFloat max_diff = max(rot.Pos);
+        TriggerRuntime  = andfun(System.LoadedModel.LoadComplete,iffun(ltfun(max_diff,0.00001),Off,On));
+        Type = MSG_Error;
+        Message = "After running initial pos there is a difference between nodes use to measure ProximalRadioUlnar rotaion when model is unscaled and driven to zero they should be identical ";
+      };
+    };
+
+
+    //check symmetry on some specific nodes... if the model is scaled symmetric otherwise do not preform this check
+    #if  RIGHT_LEFT_SCALE_SYM == "On"
+    AnyFolder Symmetry_In_Kinematics ={
+      AnyMessage Scapula_gh = {
+        AnyFloat  r= Main.HumanModel.BodyModel.Right.ShoulderArm.Segments.Scapula.gh.r;
+        AnyFloat  l = Main.HumanModel.BodyModel.Left.ShoulderArm.Segments.Scapula.gh.r;
+        AnyVar diff= max({r[0]-l[0],r[1]-l[1],r[2]+l[2]}); //sym on Z
+        TriggerRuntime  = andfun(System.LoadedModel.LoadComplete,iffun(ltfun(diff,0.00001),Off,On));
+        Type = MSG_Error;
+        Message = "Non symmetry detected in model";
+      };
+      AnyMessage Clavicula_ac = {
+        AnyFloat  r= Main.HumanModel.BodyModel.Right.ShoulderArm.Segments.Clavicula.ac.r;
+        AnyFloat  l = Main.HumanModel.BodyModel.Left.ShoulderArm.Segments.Clavicula.ac.r;
+        AnyVar diff= max({r[0]-l[0],r[1]-l[1],r[2]+l[2]}); //sym on Z
+        TriggerRuntime  = andfun(System.LoadedModel.LoadComplete,iffun(ltfun(diff,0.00001),Off,On));
+        Type = MSG_Error;
+        Message = "Non symmetry detected in model";
+      };
+      AnyMessage Humerus_HumeroUlnar = {
+        AnyFloat  r= Main.HumanModel.BodyModel.Right.ShoulderArm.Segments.Humerus.HumeroUlnar.r;
+        AnyFloat  l = Main.HumanModel.BodyModel.Left.ShoulderArm.Segments.Humerus.HumeroUlnar.r;
+        AnyVar diff= max({r[0]-l[0],r[1]-l[1],r[2]+l[2]}); //sym on Z
+        TriggerRuntime  = andfun(System.LoadedModel.LoadComplete,iffun(ltfun(diff,0.00001),Off,On));
+        Type = MSG_Error;
+        Message = "Non symmetry detected in model";
+      };
+      AnyMessage Ulna_DistalRadioUlnar = {
+        AnyFloat  r= Main.HumanModel.BodyModel.Right.ShoulderArm.Segments.Ulna.DistalRadioUlnar.r;
+        AnyFloat  l = Main.HumanModel.BodyModel.Left.ShoulderArm.Segments.Ulna.DistalRadioUlnar.r;
+        AnyVar diff= max({r[0]-l[0],r[1]-l[1],r[2]+l[2]}); //sym on Z
+        TriggerRuntime  = andfun(System.LoadedModel.LoadComplete,iffun(ltfun(diff,0.00001),Off,On));
+        Type = MSG_Error;
+        Message = "Non symmetry detected in model";
+      };
+
+      AnyMessage Radius_ProximalRadioUlnar = {
+        AnyFloat  r= Main.HumanModel.BodyModel.Right.ShoulderArm.Segments.Radius.ProximalRadioUlnar.r;
+        AnyFloat  l = Main.HumanModel.BodyModel.Left.ShoulderArm.Segments.Radius.ProximalRadioUlnar.r;
+        AnyVar diff= max({r[0]-l[0],r[1]-l[1],r[2]+l[2]}); //sym on Z
+        TriggerRuntime  = andfun(System.LoadedModel.LoadComplete,iffun(ltfun(diff,0.00001),Off,On));
+        Type = MSG_Error;
+        Message = "Non symmetry detected in model";
+
+      };
+
+      AnyMessage WristJointSeg_ProximalRadioUlnar = {
+        AnyFloat  r= Main.HumanModel.BodyModel.Right.ShoulderArm.Segments.WristJointSeg.RadioCarpalDeviation.r;
+        AnyFloat  l= Main.HumanModel.BodyModel.Left.ShoulderArm.Segments.WristJointSeg.RadioCarpalDeviation.r;
+        AnyVar diff= max({r[0]-l[0],r[1]-l[1],r[2]+l[2]}); //sym on Z
+        TriggerRuntime  = andfun(System.LoadedModel.LoadComplete,iffun(ltfun(diff,0.00001),Off,On));
+        Type = MSG_Error;
+        Message = "Non symmetry detected in model";
+      };
+
+      AnyMessage Hand_MCP5 = {
+        AnyFloat  r= Main.HumanModel.BodyModel.Right.ShoulderArm.Segments.Hand.Ref.MCP5.r;
+        AnyFloat  l= Main.HumanModel.BodyModel.Left.ShoulderArm.Segments.Hand.Ref.MCP5.r;
+        AnyVar diff= max({r[0]-l[0],r[1]-l[1],r[2]+l[2]}); //sym on Z
+        TriggerRuntime  = andfun(System.LoadedModel.LoadComplete,iffun(ltfun(diff,0.00001),Off,On));
+        Type = MSG_Error;
+        Message = "Non symmetry detected in model";
+      };
+
+    };
+    #endif
+
+  }; //initial conditions
+
+};
+
+

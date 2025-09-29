@@ -49,6 +49,7 @@
 
 //Include nodes for muscles
 
+AnyFolder &Ref= Carpals;
 
 CarpalsRef = {
   //It is used for wrapping of the flexor muscles.
@@ -57,7 +58,7 @@ CarpalsRef = {
 
   AnyRefNode FlexorMuscleCyl = {
 
-    sRel = ..Carpals.wj.sRel-.Scale({0,0.07,....Sign*0})-...WristJointSeg.RadialUlnarDeviation.sRel*{{1,0,0},{0,1,0},{0,0,....Sign*1}};
+    sRel = ..Carpals.wj.sRel-.Scale({0,0.07,....Sign*0})-...WristJointSeg.RadioCarpalDeviation.sRel*{{1,0,0},{0,1,0},{0,0,....Sign*1}};
 
     AnyVec3 P1= sRel;
     AnyVec3 P3 =P1+ .Scale({0.0,0.0,....Sign*0.0115});//*...Sign;
@@ -340,13 +341,23 @@ Finger5MetaRef = {
     AnySeg Carpals={
       Mass= .HandMass/6;
       Jii={0,0,0};
-      r0 = ..WristJointSeg.RadialUlnarDeviation.sRel*..WristJointSeg.Axes0'+..WristJointSeg.r0;
+      r0 = ..WristJointSeg.RadioCarpalDeviation.sRel*..WristJointSeg.Axes0'+..WristJointSeg.r0;
+     AnyFolder &Data = ...Data.unscaled.ModelParameters.HandSeg.SimpleHandSeg;
+ AnyMat33 Mirror={{1,0,0},{0,1,0},{0,0,...Sign}};
 
 //      Axes0 = .WristJointSeg.Axes0*RotMat(90/180*pi,x)*RotMat(..Sign*15/180*pi,y)*RotMat(-90/180*pi,z);
       //AnyDrawRefFrame drw1={RGB={0,0,1}; ScaleXYZ={0.15,0.15,0.15};};
 
 //       AnyVar Scale=..Scaling.GeometricalScaling.Hand.LengthScale;
-       AnyFunTransform3D &Scale=.GScaling.Hand.ScaleFunction;
+       AnyFunTransform3D Scale= {
+         AnyFunTransform3D& GeomScale = ..GScaling.Hand.ScaleFunction;
+         PreTransforms ={&GeomScale};
+       };
+       AnyRefNode ScalingNode = {};
+
+       AnyRefNode HandMid = {
+         sRel = .Scale({-0.015,-0.075,0.0});
+       };
 
 
 //      AnyDrawRefFrame drw2={RGB={1,0,0};};
@@ -362,7 +373,15 @@ Finger5MetaRef = {
 
 
 
-      AnyRefNode wj={
+  AnyRefNode RadioCarpalDeviation = {
+    // wrist joint is defined from the two epicondyle bony landmarks
+    sRel =.Scale(.Data.RadioCarpalDeviation_pos*.Mirror +{0.015,0.0,0}*.Mirror);
+    //Note first rotations is because of difference in simple and detailed hans seg coordinate systems
+    ARel =RotMat(pi*0.5,z)* RotMat(-pi*0.5,x)* ...WristJointSeg.RadioCarpalFlexion.ARel*RotMat(0.5*pi,z)*RotMat(pi,x)*RotMat((1-....Sign)*pi*0.5,x);  //note here we re-use the axis from RadioCarpalFlexion but flip it around this ensures the flexion and deviation axes are orthogonal
+  };
+
+
+     AnyRefNode wj={
         sRel=.Scale({-0.005,0.005,....Sign*-0.005} + {0.005, -0.001433, ....Sign*0.001099}); //corrected
 
 

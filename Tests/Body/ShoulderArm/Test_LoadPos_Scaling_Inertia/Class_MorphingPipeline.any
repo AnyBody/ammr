@@ -1,0 +1,135 @@
+
+#class_template MORPHING_FUNC(REF_BODY_PART, REF_BODY_PART_SCALING, MORPHING_TYPE="RBF", MIRROR=1)
+{
+  AnyFloat LandmarkPlaceHolder = {{1.0, 0.0, 0.0},{0.0, 1.0, 0.0},{0.0, 0.0, 1.0},{0.0, 0.0, 0.0}};//REF_BODY_PART.MorphingLandmarks;  
+  #var AnyFloat SourceLandmarks = LandmarkPlaceHolder;                          // the intention here is to allow a different set of unscaled landmarks if default do not suffice
+  #var AnyFloat TargetLandmarks = LandmarkPlaceHolder;                          // placeholder
+  
+  AnyFolder &refScaling = REF_BODY_PART_SCALING;
+  AnyFolder &refBodyPart = REF_BODY_PART;
+  
+  
+  refScaling = {
+    
+    ScaleFunction.Custom = &Transform;
+    
+    AnyFunTransform3DLin Transform = 
+    {
+      ScaleMat = {{1,0,0},{0,1,0},{0,0,1}};
+      Offset = {0,0,0};
+      #if MORPHING_TYPE == "AFFINE"
+      PreTransforms = {&.AffineTransform, &.ReverseTransform};
+      #endif     
+      #if MORPHING_TYPE == "RBF"
+      PreTransforms = {&.RBFTransform, &.ReverseTransform};
+      #endif
+      #if MORPHING_TYPE == "STL"
+      PreTransforms = {&.STLTransform, &.ReverseTransform};
+      #endif
+    };
+    
+    #var AnyFloat SourceLandmarks = .SourceLandmarks;                          // the intention here is to allow a different set of unscaled landmarks if default do not suffice
+    #var AnyFloat TargetLandmarks = .TargetLandmarks;                          // placeholder
+    
+    AnyFunTransform3D &RefTSeg2ScaleFrame = TSeg2ScaleFrame;
+    AnyFunTransform3DLin2 AffineTransform = 
+    {
+      //PreTransforms = {};
+      Points0 = .RefTSeg2ScaleFrame(.SourceLandmarks);
+      Points1 = .TargetLandmarks;
+      
+      Mode = VTK_LANDMARK_AFFINE;
+    };
+    
+    AnyFunTransform3DLin2 ReverseTransform = {
+      Points0 = .AffineTransform.Points1;
+      Points1 = .AffineTransform.Points0;
+      Mode = VTK_LANDMARK_RIGIDBODY;
+    };
+    
+    #if MORPHING_TYPE == "RBF" | MORPHING_TYPE == "STL"
+    AnyFunTransform3DRBF RBFTransform = 
+    {
+      PreTransforms = {&.AffineTransform};
+      RBFDef = 
+      {
+        //Type = RBF_ThinPlate;
+        Type = RBF_Triharmonic;
+        Param = 1;
+      };
+      Points0 = .AffineTransform.Points0;
+      Points1 = .AffineTransform.Points1;
+      
+      BoundingBox = 
+      {
+        Type = BB_Cartesian;
+        ScaleXYZ = 2*{1, 1, 1};
+        DivisionFactorXYZ = 5*{1, 1, 1};
+      };
+      BoundingBoxOnOff = On;
+    };  
+    #endif
+    
+    #if MORPHING_TYPE == "STL"
+    AnyFunTransform3DSTL STLTransform = 
+    {
+      PreTransforms = {&.RBFTransform};
+      //RBFDef.Type = RBF_ThinPlate;
+      RBFDef.Type = RBF_Triharmonic;
+      AnyFixedRefFrame Input = 
+      {
+        AnySurfSTL SourceSurf = 
+        {
+          FileName = ...Surfaces.Source;
+          ScaleXYZ = {1, 1, 1};
+          AnyFunTransform3D& Transform = ...RefTSeg2ScaleFrame;
+        };
+        AnySurfSTL TargetSurf = 
+        {
+          FileName = ...Surfaces.Target;
+          ScaleXYZ = {1, 1, 1};
+        };
+      };
+      
+      SurfaceObjects0 = {&Input.SourceSurf};
+      SurfaceObjects1 = {&Input.TargetSurf};
+      
+      NumPoints = 100;
+      BoundingBox.ScaleXYZ = 2.0*{1, 1, 1};
+      BoundingBox.DivisionFactorXYZ = {1, 1, 1};
+      BoundingBoxOnOff = On;
+    };
+    #endif
+  }; 
+  
+  
+  
+  refBodyPart =   { 
+    
+    AnyFunTransform3DLin2 Align_Transform2 = 
+    {
+      Points0 = ..refScaling.TargetLandmarks;
+      Points1 = .Scale(..refScaling.SourceLandmarks);
+      Mode = VTK_LANDMARK_RIGIDBODY ;
+    };
+   
+    AnyFunTransform3DLin Mirror_Transform = 
+    {
+      ScaleMat = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
+      Offset = {0, 0, 0};
+    };
+    
+    AnyFunTransform3D Mapping_Transform = 
+    {
+      PreTransforms = 
+      {
+        &.Mirror_Transform,
+      //  &.Align_Transform
+      };
+    }; 
+  };
+  
+  
+}; // MORPHING_FUNC
+
+
