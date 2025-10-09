@@ -78,4 +78,16 @@ the marker protocol.
 ## Load time errors
 
 
+
+:::{dropdown}  `'MoCapMarkerFrameAMMR24'  :  Unresolved object`
+
+
+```
+ERROR(SCR.PRS9) :   "MarkerProtocol.any(###)"  :     Defined at :   "MarkerProtocol.any(###)"  :   'MoCapMarkerFrameAMMR24'  :  Unresolved object
+```
+
+The `MoCapMarkerFrameAMMR24` have been removed in AMMR4. Remove the argument completely or change it to `ScalingNode`(default). Please see the {anylink-file}`marker protocol <Application/MocapExamples/Plug-in-gait_Simple/Setup/MarkerProtocol.any>` in the gallery models for examples on how to define markers at different bony landmarks.  
+
+:::
+
 ## Deprecation warnings

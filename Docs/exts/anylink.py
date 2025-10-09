@@ -131,9 +131,9 @@ class AnyLinkButton(ReferenceRole):
             )
             button += create_trigger_node(self, self.target)
 
-        except ValueError:
+        except ValueError as e:
             msg = self.inliner.reporter.error(
-                "Invalid AMMR link %s" % self.target, line=self.lineno
+                "Invalid AMMR link %s: %s" % (self.target, str(e)), line=self.lineno
             )
             prb = self.inliner.problematic(self.rawtext, self.rawtext, msg)
             return [prb], [msg]
@@ -216,9 +216,9 @@ class AnyLinkFile(ReferenceRole):
             ref_elem = nodes.inline(classes=["anylink-tooltip"])
             ref_elem += superscript
 
-        except ValueError:
+        except ValueError as e:
             msg = self.inliner.reporter.error(
-                "Invalid AMMR link %s" % self.target, line=self.lineno
+                "Invalid AMMR link %s: %s" % (self.target, str(e)), line=self.lineno
             )
             prb = self.inliner.problematic(self.rawtext, self.rawtext, msg)
             return [prb], [msg]

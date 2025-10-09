@@ -35,6 +35,8 @@ See below for more details
 #class_template CreateMarkerDriver (
   MarkerName=_NOT_DEFINED_,
   MarkerPlacement,
+  PlaceMarkerAt = ScalingNode,
+  AlignMarkerWith=ScalingNode,
   WeightX=1, WeightY=1, WeightZ=1,
   OptX=0, OptY=0, OptZ=0,
   ScaleMarkerPosOnOff = 1,
@@ -44,7 +46,6 @@ See below for more details
   PARAMETER_OPT_STUDY = Main.Studies.ParameterIdentification,
   C3D_OBJECT = Main.ModelSetup.C3DFileData,
   BODY_MODEL_FOLDER = Main.HumanModel.BodyModel,
-  PlaceMarkerAt = MoCapMarkerFrameAMMR24,
   USE_BVH_INPUT = 0,
   BVH_OBJECT = Main.ModelSetup.BVHFileData,
   MarkerPlacementBVH = REQUIRED_FOR_BVH_INPUT,
@@ -61,6 +62,9 @@ See below for more details
 // CreateMarkerDriver#PlaceMarkerAt
 //    Specifies which coordinate system on the segment the marker is place.
 //    This is used when placing markers relative to bony landmarks. (Defaults to `AnatomicalFrame`)
+// CreateMarkerDriver#AlignMarkerWith
+//    Specifies which coordinate system for the marker. This influences what how the inputs
+//    in sRelOpt are interpreted. Defaults is to align with the Scaling Frame.
 // CreateMarkerDriver#WeightX
 //     The weight of soft driver for the marker in X direction
 // CreateMarkerDriver#WeightY
@@ -249,14 +253,38 @@ AnyMessage TestMarkerExist ={
   AnyFolder &MarkerPlacementSegment = BODY_MODEL_FOLDER.MarkerPlacement;
   MarkerPlacementSegment = {
     AnyRefNode __NAME__##_MARKER_NODE_POSTFIX  ={
-      #if ScaleMarkerPosOnOff == 1
-        AnyVec3 MarkerOffset = (.Scale.GeomScale(..sRelOpt) + ..sRelOptEdit )*.ScalingNode.ARel' ;
+       #if ScaleMarkerPosOnOff == 1
+        AnySwitchVar scale_offset_allowed = bool(prod(eqfun(.Scale.GeomScale({0,0,0.0}), {0,0,0.0})));
+        AnyVec3 MarkerOffset = iffun(scale_offset_allowed,
+            (.Scale.GeomScale(..sRelOpt) + ..sRelOptEdit )*ARel',
+            (..sRelOpt + ..sRelOptEdit )*ARel',
+        );
+       #else
+        AnyVec3 MarkerOffset = (..sRelOpt + ..sRelOptEdit )*ARel';
+       #endif
+
         sRel = .PlaceMarkerAt.sRel + MarkerOffset;
-        ARel= .ScalingNode.ARel;
-      #else
-        sRel = .PlaceMarkerAt.sRel + (..sRelOpt + ..sRelOptEdit )*.PlaceMarkerAt.ARel';
-        ARel= .PlaceMarkerAt.ARel;
-      #endif
+        ARel= .AlignMarkerWith.ARel;
+
+
+        #if (ScaleMarkerPosOnOff == 1) & (PlaceMarkerAt != ScalingNode & PlaceMarkerAt != AnatomicalFrameTrunk)
+        AnyMessage WarnIfScalingDisabled_##__NAME__##_marker = {
+          Type = MSG_Warning;
+          TriggerRuntime = andfun(not(.scale_offset_allowed), not(System.LoadedModel.LoadComplete));
+          AnyStringVar SegmentName = NameOf(ObjGetParent(2));
+          AnyStringVar RefName = NameOf(&..PlaceMarkerAt);
+          Message =strformat("\n"+
+          "-------------------------------------------------------------------------------------------------------------------\n"+
+          "    The scale function for the '" + SegmentName + "' segment does not support scaling the marker offset (sRelOpt)   \n"+
+          "    when the marker is placed relative to a reframe, i.e. when using 'PlaceMarkerAt=" + RefName +"'  \n" +
+          " \n" +
+          "    Note: \n"+
+          "    This only affects the offset. The position (" + SegmentName + "." + RefName +") where the marker is located, is still scaled.\n"+
+          "    Set `ScaleMarkerPosOnOff = OFF` to suppress this warning.  \n" +
+          "-------------------------------------------------------------------------------------------------------------------\n"
+          );
+        };
+        #endif
 
 //      This was an attempt to allow PlaceMarkerAt to be anywhere and not only
 //      a RefNode on the segments.

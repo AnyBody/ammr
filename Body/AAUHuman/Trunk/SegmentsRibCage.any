@@ -6,14 +6,14 @@ AnyFolder Right = {
 
     //These nodes are used for Scapula_Ribcage_Contact_Model
     #include "ThoraxScapulaContactRibPoints.any"
-  
+
     #if BM_TRUNK_THORACIC_STERNUM_TOPOLOGY == 4
       #include "CostalCartilageSegments.any"
     #endif
   #undef _SIDE_
 }; //End of Right folder
 
-AnyFolder Left = {    
+AnyFolder Left = {
   AnyFolder &TrunkFrame = .PelvisSeg.AnatomicalFrameTrunk;
   AnyVar Sign = -1;
   #define _SIDE_ Left
@@ -21,7 +21,7 @@ AnyFolder Left = {
 
     //These nodes are used for Scapula_Ribcage_Contact_Model
     #include "ThoraxScapulaContactRibPoints.any"
-  
+
      #if BM_TRUNK_THORACIC_STERNUM_TOPOLOGY == 4
       #include "CostalCartilageSegments.any"
     #endif
@@ -30,13 +30,13 @@ AnyFolder Left = {
 }; // End of Left folder
 
 AnySeg SternumSeg = {
-  
+
   AnyFolder &Data = ..Data.unscaled.ModelParameters;
 
   /// Sternum is difficult to estimate init pos for, due to the over-determinate problem
   /// To resolve this issue we use the transformation function VTK_LANDMARK_RIGIDBODY
   /// This functions takes two sets of landmarks.
-  /// Target points P1: Here we assume ribs to move with respective vertebra, 
+  /// Target points P1: Here we assume ribs to move with respective vertebra,
   /// we then calculate CC joint position in global space for each rib
   /// Source points P0: Here we take the sRel values of the CC joints
   /// The transformation function is then used to find r0 and Axes0
@@ -46,7 +46,7 @@ AnySeg SternumSeg = {
     InitialPositionTransform({1.0,0,0}),
     InitialPositionTransform({0.0,1,0})
   );
-  
+
   AnyFunTransform3DLin2 InitialPositionTransform = {
     Points0 = {
       CC1_R,CC2_R,CC3_R,CC4_R,CC5_R,CC6_R,CC7_R,CC8_R,CC9_R,CC10_R,
@@ -79,7 +79,7 @@ AnySeg SternumSeg = {
     AnyFloat R8_CC8_L = ..Left.R8Seg.r0 + ..Left.R8Seg.CC.sRel * ..Left.R8Seg.Axes0';
     AnyFloat R9_CC9_L = ..Left.R9Seg.r0 + ..Left.R9Seg.CC.sRel * ..Left.R9Seg.Axes0';
     AnyFloat R10_CC10_L = ..Left.R10Seg.r0 + ..Left.R10Seg.CC.sRel * ..Left.R10Seg.Axes0';
-  
+
     AnyFloat CC1_R = ..SternumSeg.Right.CCNodeR1.sRel;
     AnyFloat CC2_R = ..SternalBodySeg.Right.CCNodeR2.sRel;
     AnyFloat CC3_R = ..SternalBodySeg.Right.CCNodeR3.sRel;
@@ -109,13 +109,13 @@ AnySeg SternumSeg = {
   // This file includes the trunk specifc scaling function
   // and anatomical reference system
   #include "TrunkAnatomicalFrame.any"
-  
+
   TrunkScaleWithInterfaceMorphing Scale(
     GeomScale = ...Scaling.GeometricalScaling.Thorax.ScaleFunction,
     PelvisSeg = ..PelvisSeg,
   ) = {};
-  
-  AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards compatability with AMMR 2.4 MoCap Marker protocols
+
+
 
     AnyInertiaSolid BoneInertiaObject = {
       BodyMassCorrection massCorrection() = {
@@ -134,58 +134,58 @@ AnySeg SternumSeg = {
     FileName = ...Data.unscaled.STL.FilenameSternalManubriumSeg;
     RGB = Main.DrawSettings.Colors.Segments;
     AnyFunTransform3D &Scale = .Scale;
-  }; 
-  
+  };
+
   AnyRefNode ManubriosternalJointNode = {
     sRel = .Scale(.Data.Sternum.ManubriosternalJointNode_Pos);
     AnyFloatVar Width = .Data.Sternum.ManubriosternalJointWidth;
     AnyRefNode LateralNode = {sRel = {0, 0, .Width / 2}; };
     AnyRefNode MedialNode = {sRel = {0, 0, -.Width / 2}; };
   };
-  
+
   //Incisura jungularis right and left
   //the nodes are used for attachment of ShoulderArm block
   AnyRefNode ij = {
     AnyFloat Mirror = eye(3);
     //This is the standard value for the ij it must be used in order to scale the model
     //since nodes are inserted into this node.
-    //If the position of ij are to be adjusted it should be done by changing sRelStd 
-    AnyVec3 sRelStd = .Data.Sternum.ij_pos;  
+    //If the position of ij are to be adjusted it should be done by changing sRelStd
+    AnyVec3 sRelStd = .Data.Sternum.ij_pos;
     sRel = .Scale(sRelStd);
     ARel = .AnatomicalFrameTrunk.ARel * {{0, 0, -1}, {0, 1, 0}, {1, 0, 0}};
   };
-  
+
   AnyRefNode iji = {
     AnyFloat Mirror = {{-1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
-    
+
     //This is the standard value for the ij it must be used in order to scale the model
     //since nodes are inserted into this node.
-    //If the position of ij are to be adjusted it should be done by changing sRelS 
-    AnyVec3 sRelStd = .Data.Sternum.ij_pos;    
-    sRel = .Scale(sRelStd);      
+    //If the position of ij are to be adjusted it should be done by changing sRelS
+    AnyVec3 sRelStd = .Data.Sternum.ij_pos;
+    sRel = .Scale(sRelStd);
     ARel = .AnatomicalFrameTrunk.ARel* {{0, 0, -1}, {0, 1, 0}, {1, 0, 0}};
   };
-                    
+
   AnyRefNode Right ={
     AnyInt Sign = 1;
     AnyFunTransform3D &Scale = .Scale;
-  };         
+  };
   AnyRefNode Left ={
     AnyInt Sign = -1;
     AnyFunTransform3D &Scale = .Scale;
-  };              
+  };
 };
 
 AnySeg SternalBodySeg = {
-  
+
   AnyFolder &Data = ..Data.unscaled.ModelParameters;
 
-  r0= .SternumSeg.r0; 
+  r0= .SternumSeg.r0;
   Axes0= .SternumSeg.Axes0;
-  
+
   // Inertia properties for the segment
   UseInertiaObjects = On;
-  
+
   AnyInertiaSolid BoneInertiaObject = {
       BodyMassCorrection massCorrection() = {
         DensityTheoretical = ....Data.unscaled.ModelParameters.BoneDensity;
@@ -203,7 +203,7 @@ AnySeg SternalBodySeg = {
   // for now this covers the inertia of both sternum and sternal body segments
   AnyInertiaSolid OuterInertiaObject = {
     BodyMassCorrection massCorrection() = {};
-    
+
     AnySurfSTL surface = {
       FileName = ....Data.unscaled.STL.FilenameSternumInertia;
       AnyFunTransform3D &scale = ..Scale;
@@ -227,41 +227,41 @@ AnySeg SternalBodySeg = {
   // This file includes the trunk specifc scaling function
   // and anatomical reference system
   #include "TrunkAnatomicalFrame.any"
-  
+
   TrunkScaleWithInterfaceMorphing Scale(
     GeomScale = ...Scaling.GeometricalScaling.Thorax.ScaleFunction,
     PelvisSeg = ..PelvisSeg,
   ) = {};
-  
-  AnyRefNode MoCapMarkerFrameAMMR24 = {}; ///< For backwards compatability with AMMR 2.4 MoCap Marker protocols
-  
+
+
+
   AnyDrawSurf SternalBody = {
     FileName = ...Data.unscaled.STL.FilenameSternalBodySeg;
     RGB =Main.DrawSettings.Colors.Segments;
     AnyFunTransform3D &Scale = .Scale;
-  }; 
-  
+  };
+
   AnyRefNode ManubriosternalJointNode = {
     sRel = .Scale(.Data.Sternum.ManubriosternalJointNode_Pos);
     AnyFloatVar Width = .Data.Sternum.ManubriosternalJointWidth;
     AnyRefNode LateralNode = {sRel = {0, 0, .Width / 2}; };
     AnyRefNode MedialNode = {sRel = {0, 0, -.Width / 2}; };
   };
-                    
+
   AnyRefNode Right ={
     AnyFunTransform3D &Scale = .Scale;
     #if BM_TRUNK_THORACIC_STERNUM_TOPOLOGY == 4
       AnyRefNode CostalCartilageJointNode ={
         sRel = ..Scale(..Data.Sternum.Right.CostalCartilageJointNode_Pos);
-      }; 
+      };
     #endif
-  };         
+  };
   AnyRefNode Left ={
     AnyFunTransform3D &Scale = .Scale;
     #if BM_TRUNK_THORACIC_STERNUM_TOPOLOGY == 4
       AnyRefNode CostalCartilageJointNode ={
         sRel = ..Scale(..Data.Sternum.Left.CostalCartilageJointNode_Pos);
-      };    
+      };
     #endif
   };
 };
