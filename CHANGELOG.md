@@ -146,6 +146,12 @@ You can [enable backwards compatibility](changes-to-bodymodel-folders) by settin
 * The color of force plates in C3D-based MoCap models has been adjusted to better distinguish between 
   when the foot is in contact with the force plate and when it is not.
 
+* The SubTalar joint axis definition has been refactored. It is now defined vertically below the midpoint 
+  of the tendon calcaneus nodes, replacing the previous fixed value. This update makes the joint axis 
+  more reliable in scaled models and ensures accurate alignment between the medial and lateral fibres 
+  of gastrocnemius and soleus muscles. The change causes a minor shift in the joint axis, but it should 
+  not significantly impact results.
+
 ### Removed:
 
 * The deprecated TLEM 1 model has been removed from the AMMR. The TLEM 2.2 model is now the only TLEM based model 
