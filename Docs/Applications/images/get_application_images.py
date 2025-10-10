@@ -33,7 +33,7 @@ macros = []
 for file in test_files:
     if "CREATE_IMAGE" not in file.read_text():
         continue
-    defines["TEST_NAME"] = f'"{file.name + "_0"}"'
+    defines["TEST_NAME"] = f'"{file.stem}"'
     macros.append(
         [
             mc.Load(str(file), defs=defines),
@@ -46,9 +46,9 @@ if RUN_ANYBODY_MODELS:
     results = app.start_macro(macros)
     
 
-for elem in results:
-    if "ERROR" in elem:
-        print(elem["ERROR"])
+    for elem in results:
+        if "ERROR" in elem:
+            print(elem["ERROR"])
 
 
 image_files = [
@@ -57,7 +57,7 @@ image_files = [
 ]
 
 
-RE_IMAGE = re.compile(r'.*[tT]est_(.+?)\.any_0_InitPos.png')
+RE_IMAGE = re.compile(r'.*[tT]est_(.+?)_InitPos.png')
 
 for fimg in image_files:
     m = RE_IMAGE.match(fimg.name)
