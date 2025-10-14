@@ -222,7 +222,7 @@ While the previous step included the human body model in `Model`, a key piece of
 machinery was still missing - Motion constraints. Here the default mannequin
 drivers are inserted (`AnyFolder &MotionDrivers`). While motion prescription is
 elaborated on in 
-{doc}`the making things move tutorial <tutorials:Making_things_move/index>`, 
+{doc}`the making things move tutorial <tutorials:Motion_Capture_Movement/index>`, 
 a basic AnyBody requirement is that the number of motion constraints (called
 motion drivers in AnyBody) must at least equal the number of DOFs of the model.
 
