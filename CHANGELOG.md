@@ -30,6 +30,16 @@ You can [enable backwards compatibility](changes-to-bodymodel-folders) by settin
 ```
 :::
 
+:::{admonition} Default foot model changed. 
+:class: warning
+The default foot model for the TLEM leg has been switched to the rigid configuration of the
+{ref}`Glasgow-Maastricht (GM) foot model<GM Foot Model>`. See below [implications of this change](changes-to-default-foot-model). 
+You can revert to the TLEM foot model by setting:
+```AnyScriptDoc
+#define BM_FOOT_MODEL _FOOT_MODEL_DEFAULT_
+```
+:::
+
 **Fixed:**
 
 * Fixed the inclusion of the buckle segmental masses in the calculation of the TotalBodyMass variable.
@@ -61,13 +71,14 @@ You can [enable backwards compatibility](changes-to-bodymodel-folders) by settin
 
   It is possible to revert to the old buckle implementation with switch {bm_statement}`_CAVITY_MODEL_BUCKLE_`. 
 
-* The Glasgow-Maastricht (GM) foot model is now integrated into the AMMR in a beta state currently. 
+* The Glasgow-Maastricht (GM) foot model is now integrated into the AMMR. 
   The GM foot has been morphed to the TLEM foot and uses the same reference system and ankle and subtalar joint 
-  parameters as the TLEM foot. The muscle parameters of the foot instead come from the GM foot. The GM foot models are available 
-  in multiple configurations: rigid foot (which will eventually become the default foot), toe flexion configuration 
-  (which has linked flexion extension degree of freedom for all toes), and the full-blown detailed foot model with 
-  26 segments. The GM foot model is also accompanied by new switches, for example, {bm_statement}`BM_FOOT_MUSCLES_BOTH` to 
-  control the muscle behavior in GM foot model. See the {ref}`documentation page <GM Foot Model>` for more info.
+  parameters as the TLEM foot. The muscle parameters of the foot instead come from the GM foot. The GM foot models 
+  are available in multiple configurations: rigid foot (which is now the default foot model for the TLEM leg
+  in AMMR), toe flexion configuration (which has linked flexion extension degree of freedom for all toes), and the 
+  full-blown detailed foot model with 26 segments. The GM foot model is also accompanied by new switches, for 
+  example, {bm_statement}`BM_FOOT_MUSCLES_LEFT` to control the muscle behavior in GM foot model. 
+  See the {ref}`documentation page <GM Foot Model>` for more info.
 
 * A new system for handling mass and inertia calculation for segments in the
   Trunk. Now we utilize the new inertia classes derived from `AnyInertia`. The
@@ -137,6 +148,19 @@ You can [enable backwards compatibility](changes-to-bodymodel-folders) by settin
 (changes-to-bodymodel-folders)=
 
 * Many of the key folders inside the Leg and Arm models have been renamed to create a unified structure across the full BodyModel. To bring back the old structure we have temporarily included a backward compatibility switch `BM_COMPATIBILITY_BODYMODEL_STRUCTURE` To ensure a smooth transition.
+
+(changes-to-default-foot-model)=
+
+* The default foot model for the TLEM leg is now changed to the rigid variant of the 
+  {ref}`GM foot model <GM Foot Model>` instead of the default TLEM foot. This is done to 
+  use the detailed dataset available in the GM foot model. This change might
+  lead to `Unresolved object` errors in objects referring to the foot model. See this 
+  {ref}`guide<Foot Unresolved Objects>` on how to resolve these errors. The TLEM foot model
+  can be selected with: 
+
+  ```AnyScriptDoc
+  #define BM_FOOT_MODEL _FOOT_MODEL_DEFAULT_
+  ```  
 
 * The metatarsal joint nodes in the TLEM foot model have been updated to be consistent with the GM foot model.
   The joint nodes are now located at joint centers instead of the contact between the bone surfaces. 

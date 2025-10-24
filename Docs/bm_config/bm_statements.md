@@ -128,8 +128,8 @@ A flag to switch on/off inclusion of the draw settings (may be needed in case of
 
 Parameter defining the foot model used.
 
-:Default: {any}`_FOOT_MODEL_DEFAULT_`
-:Example: `#define BM_FOOT_MODEL _FOOT_MODEL_DEFAULT_`
+:Default: {any}`_FOOT_MODEL_RIGID_GM_`
+:Example: `#define BM_FOOT_MODEL _FOOT_MODEL_RIGID_GM_`
 :Options:
   - {any}`_FOOT_MODEL_NONE_` -> Switch off foot model"
   - {any}`_FOOT_MODEL_DEFAULT_` -> Switch for using the default foot model
@@ -322,25 +322,6 @@ Parameter to define muscle behavior of the right leg
 ::::
 
 
-::::{dropdown} `BM_FOOT_MUSCLES_BOTH`
-:animate: fade-in-slide-down
-:margin: 0 0 3 3
-
-```{ammr:bm_statement} BM_FOOT_MUSCLES_BOTH
-
-Parameter to define muscle behavior of both right and left foot
-
-:Default: {any}`BM_LEG_MUSCLES_BOTH`
-:Example: `#define BM_FOOT_MUSCLES_BOTH BM_LEG_MUSCLES_BOTH`
-:Options:
-  - {any}`OFF` -> Switch OFF
-  - {any}`_MUSCLES_SIMPLE_` -> Constant to use simple muscles
-  - {any}`_MUSCLES_3E_HILL_` -> Constant to use 3 element Hill-type muscle
-
-```
-::::
-
-
 ::::{dropdown} `BM_FOOT_MUSCLES_LEFT`
 :animate: fade-in-slide-down
 :margin: 0 0 3 3
@@ -349,13 +330,12 @@ Parameter to define muscle behavior of both right and left foot
 
 Parameter to define muscle behavior of the left foot
 
-:Default: {any}`BM_FOOT_MUSCLES_BOTH`
-:Example: `#define BM_FOOT_MUSCLES_LEFT BM_FOOT_MUSCLES_BOTH`
+:Default: {any}`BM_LEG_MUSCLES_LEFT`
+:Example: `#define BM_FOOT_MUSCLES_LEFT BM_LEG_MUSCLES_LEFT`
 :Options:
   - {any}`OFF` -> Switch OFF
   - {any}`_MUSCLES_SIMPLE_` -> Constant to use simple muscles
   - {any}`_MUSCLES_3E_HILL_` -> Constant to use 3 element Hill-type muscle
-  - {any}`BM_FOOT_MUSCLES_BOTH` -> 
 
 ```
 ::::
@@ -369,13 +349,12 @@ Parameter to define muscle behavior of the left foot
 
 Parameter to define muscle behavior of the right foot
 
-:Default: {any}`BM_FOOT_MUSCLES_BOTH`
-:Example: `#define BM_FOOT_MUSCLES_RIGHT BM_FOOT_MUSCLES_BOTH`
+:Default: {any}`BM_LEG_MUSCLES_RIGHT`
+:Example: `#define BM_FOOT_MUSCLES_RIGHT BM_LEG_MUSCLES_RIGHT`
 :Options:
   - {any}`OFF` -> Switch OFF
   - {any}`_MUSCLES_SIMPLE_` -> Constant to use simple muscles
   - {any}`_MUSCLES_3E_HILL_` -> Constant to use 3 element Hill-type muscle
-  - {any}`BM_FOOT_MUSCLES_BOTH` -> 
 
 ```
 ::::

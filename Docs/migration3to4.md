@@ -89,5 +89,31 @@ ERROR(SCR.PRS9) :   "MarkerProtocol.any(###)"  :     Defined at :   "MarkerProto
 The `MoCapMarkerFrameAMMR24` have been removed in AMMR4. Remove the argument completely or change it to `ScalingNode`(default). Please see the {anylink-file}`marker protocol <Application/MocapExamples/Plug-in-gait_Simple/Setup/MarkerProtocol.any>` in the gallery models for examples on how to define markers at different bony landmarks.  
 
 :::
+(Foot Unresolved Objects)=
+### Foot model errors
+
+The default foot model for the TLEM leg is now changed to the rigid variant of the 
+{ref}`GM foot model <GM Foot Model>` instead of the default TLEM foot. This is done to 
+make use of the more detailed dataset available in the GM foot model. This change might
+lead to `Unresolved object` errors for objects referring to objects within the foot model.
+These can be resolved by including the name of the intrinsic foot segment in the path. For
+example, the unresolved MetatarsalJoint1Node node on the foot:
+
+```AnyScriptDoc
+AnyRefNode &MyNode = .Foot.MetatarsalJoint1Node;
+```
+can be resolved by inserting the intrinsic Metatarsal1 foot segment in the path:
+
+```AnyScriptDoc
+AnyRefNode &MyNode = .Foot.Metatarsal1.MetatarsalJoint1Node;
+```
+It is advised to always construct pointers to foot segment objects using the intrinsic foot segment.
+See {ref}`usage of GM foot model <GM foot model usage>` for more info.
+
+If you would like to work with the TLEM foot model, it can be selected by the following
+BM Statement:
+```AnyScriptDoc
+#define BM_FOOT_MODEL _FOOT_MODEL_DEFAULT_
+```  
 
 ## Deprecation warnings

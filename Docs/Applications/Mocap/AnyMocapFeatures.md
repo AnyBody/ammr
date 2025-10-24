@@ -17,16 +17,18 @@ A collection of small models that show-off special features of the
 
 This includes:
 
+* {ref}`Different ways to drive toe flexion. <example_mocap_bvh_toe_flexion>`
 * Offset to forceplates.
 * Individual cutoff frequencies for markers.
-* Normalization with respect to gait cycle events
-* Using time-varying weight for markers
+* Normalization with respect to gait cycle events.
+* Using time-varying weight for markers.
 * Much more.
 
 :::{admonition} In Model Repository:
 :class: seealso
 The files are all located in `Application/MocapExamples/SpecialFeatures`: 
 
+* {anylink-file}`BVH_Xsens_ToeFlexion.main.any <Application/MocapExamples/SpecialFeatures/BVH_Xsens_ToeFlexion.main.any>` 
 * {anylink-file}`ExternalDesVars.main.any <Application/MocapExamples/SpecialFeatures/ExternalDesVars.main.any>` 
 * {anylink-file}`ForcePlateSurfaceOffset.main.any <Application/MocapExamples/SpecialFeatures/ForcePlateSurfaceOffset.main.any>`
 * {anylink-file}`GaitCycleNormalization.main.any <Application/MocapExamples/SpecialFeatures/GaitCycleNormalization.main.any>`

@@ -1,0 +1,64 @@
+// Example of toe flexion in BVH model. This example shows how to drive 
+// toe flexion in different ways. Toe flexion in the left foot is driven
+// through BVH data by adding a marker on the toe tip. Toe flexion in
+// the right foot is driven using RotationPenetrationCombiDriver class 
+// template.
+
+#include "../libdef.any"
+
+#define MOCAP_NAME_MAINFILEDIR "S01_Trial01"
+
+#define BM_FOOT_MODEL _FOOT_MODEL_TOE_FLEX_GM_
+
+// Include BVH_Xsens example
+#include "../BVH_Xsens/Subjects/S1/S01_Trial01/Main.any"
+
+
+Main = {
+
+  ModelSetup.MocapDrivers = {
+
+    // Add marker on left toe tip to drive toe flexion.
+    CreateMarkerDriver LTTIP(
+    MarkerPlacement= Left.Leg.Seg.Foot.DistalPhalange1,
+    PlaceMarkerAt=AnatomicalFrame,
+    MarkerPlacementBVH= Main.ModelSetup.BVHFileData.Model.Hips.LeftHip.LeftKnee.LeftAnkle.LeftToe.Seg.End_Site,
+    OptX=OFF,OptY=OFF,OptZ=OFF,  
+    WeightX=1,WeightY=1,WeightZ=1,
+    ScaleMarkerPosOnOff =ON,
+    USE_BVH_INPUT = ON
+    ) = 
+    {
+      sRelOpt =  {0.14, -0.08, -0.0} + {0.065,-0.01,0};
+      sRelOnBVH = {0.0, 0, 0 };
+    };
+
+
+  };
+
+  ModelSetup.MocapExtraDrivers.ExtraDrivers ={
+    // RotationPenetrationCombiDriver class template creates soft drivers that drive rotational 
+    // and linear measures to ensure that the rotational measure (toe flexion) is normally at zero  
+    // unless it deviates to prevent penetration of a target frame (toe tip) in a box shaped space. 
+    // The flexion extension of the toes is linked in the toe flex GM foot model.
+    // This class template is used to drive the flexion extension of right toes. They normally 
+    // stay at the neutral angle, but bend to prevent penetration with the ground during toe-off.
+  
+    // You can make multiple of these to simulate variation in the floor by adjusting the corners.
+    // You can simulate, for example, stairs or inclined floor.
+    RotationPenetrationCombiDriver ToeDriverRight (
+      TARGET_FRAME = Main.HumanModel.BodyModel.Right.Leg.Seg.Foot.DistalPhalange1.ToeTip,
+      NEUTRAL_ANGLE_MEASURE = Main.HumanModel.BodyModel.Interface.Right.MetatarsoPhalangeal1DorsiFlexion
+      ) = {
+            Corners = {
+                        {2.8,0.0,-2.5},
+                        {2.8,0.0,-5.5},
+                        {2.0,0.0,-5.5},
+                        {2.0,0.0,-2.5},
+                      };
+            Settings.DepthLowerLimit = 0.018; // to account for shoe thickness
+            Settings.UsePlaneBordersForBoundsCheck = 0; // to check for penetration on an infinite plane defined by the corners
+          };
+    
+  };
+}; //Main
