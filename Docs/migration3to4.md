@@ -89,6 +89,23 @@ ERROR(SCR.PRS9) :   "MarkerProtocol.any(###)"  :     Defined at :   "MarkerProto
 The `MoCapMarkerFrameAMMR24` have been removed in AMMR4. Remove the argument completely or change it to `ScalingNode`(default). Please see the {anylink-file}`marker protocol <Application/MocapExamples/Plug-in-gait_Simple/Setup/MarkerProtocol.any>` in the gallery models for examples on how to define markers at different bony landmarks.  
 
 :::
+
+
+:::{dropdown}  `'HeelContactNode'  :  Unresolved object`
+
+```
+ERROR(SCR.PRS9) :   "C:\####\GroundDrivers.any(7)"  :   'HeelContactNode'  :  Unresolved object
+```
+
+This node has been renamed to `HeelContactNodeLow` in the new GM foot model, and is
+now located under different sub-frame, to ensure the model has the same
+structure regardless of how detailed the foot model is. This particular error
+can be fixed by changing `HeelContactNode` -> `Calcaneus.HeelContactNodeLow`.
+See the {ref}`section on foot model errors <Foot Unresolved Objects>`
+
+:::
+
+
 (Foot Unresolved Objects)=
 ### Foot model errors
 
@@ -107,6 +124,15 @@ can be resolved by inserting the intrinsic Metatarsal1 foot segment in the path:
 ```AnyScriptDoc
 AnyRefNode &MyNode = .Foot.Metatarsal1.MetatarsalJoint1Node;
 ```
+
+Similar errors can be expected for the following: 
+
+* `HeelContactNode` -> `Calcaneus.HeelContactNodeLow`
+* `ToeLateralContactNode` -> `ProximalPhalange5.ToeLateralContactNode`
+* `ToeMedialContactNode` -> `ProximalPhalange1.ToeMedialContactNode`
+* `ToeJoint` -> `Metatarsal1.ToeJoint`
+
+
 It is advised to always construct pointers to foot segment objects using the intrinsic foot segment.
 See {ref}`usage of GM foot model <GM foot model usage>` for more info.
 
