@@ -29,7 +29,7 @@ Making MoCap models the easier
 :::{seealso}
 :class: margin
 The AnyBody tutorials, and the lesson on using the
-{doc}`AnyMoCap model <tutorials:Making_things_move/lesson5>`
+{doc}`AnyMoCap model <tutorials:Motion_Capture_Movement/lesson1>`
 :::
 
 
