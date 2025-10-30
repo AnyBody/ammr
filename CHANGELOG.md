@@ -185,6 +185,16 @@ You can revert to the TLEM foot model by setting:
   ```
 * Remove a number of previously deprecated `BM_XXX` switches and constants. 
 
+(ammr-3.1.5-changelog)=
+## AMMR 3.1.5 (2025-??-??)
+
+### 🔧 Changed:**
+* The implementation of the wrapping muscles which also have via points have
+  been optimized. This speeds up most models with many wrapping muscles 10-20%
+  since the alogithm only doesn't have to consider all muscle segments when
+  solving the wrapping problems.
+
+
 (ammr-3.1.4-changelog)=
 ## AMMR 3.1.4 (2025-09-03)
 [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.17043944.svg)](https://doi.org/10.5281/zenodo.17043944)
