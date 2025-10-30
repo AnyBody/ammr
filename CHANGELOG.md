@@ -3,6 +3,12 @@
 % A rendered version of the CHANGELOG is avaible here:
 %    https://anyscript.org/ammr/beta/changelog.html
 
+**🔧 Changed:**
+* The implementation of the wrapping muscles which also have via points have
+  been optimized. This speeds up most models with many wrapping muscles 10-20%
+  since the alogithm only doesn't have to consider all muscle segments when
+  solving the wrapping problems.
+
 
 (ammr-3.1.4-changelog)=
 ## AMMR 3.1.4 (2025-09-03)
