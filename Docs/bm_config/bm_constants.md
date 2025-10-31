@@ -132,7 +132,19 @@ Switch to use leg model: "Leg"
 
 :::{ammr:bm_constant} _FOOT_MODEL_NONE_
 :value: 0
-Switch off foot model"
+Switch off foot model
+:::
+::::
+
+
+
+::::{dropdown} `_FOOT_MODEL_LEG_FOOT_`
+:animate: fade-in-slide-down
+:margin: 0 0 2 2
+
+:::{ammr:bm_constant} _FOOT_MODEL_LEG_FOOT_
+:value: 1
+Switch for using the foot model from the selected leg model
 :::
 ::::
 
@@ -143,8 +155,9 @@ Switch off foot model"
 :margin: 0 0 2 2
 
 :::{ammr:bm_constant} _FOOT_MODEL_DEFAULT_
-:value: 1
-Switch for using the default foot model
+:value: 9
+:deprecated:
+`_FOOT_MODEL_DEFAULT_` is deprecated. Please use `_FOOT_MODEL_RIGID_GM_` instead.
 :::
 ::::
 

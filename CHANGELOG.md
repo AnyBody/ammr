@@ -36,7 +36,7 @@ The default foot model for the TLEM leg has been switched to the rigid configura
 {ref}`Glasgow-Maastricht (GM) foot model<GM Foot Model>`. See below [implications of this change](changes-to-default-foot-model). 
 You can revert to the TLEM foot model by setting:
 ```AnyScriptDoc
-#define BM_FOOT_MODEL _FOOT_MODEL_DEFAULT_
+#define BM_FOOT_MODEL _FOOT_MODEL_LEG_FOOT_
 ```
 :::
 
@@ -155,11 +155,12 @@ You can revert to the TLEM foot model by setting:
   {ref}`GM foot model <GM Foot Model>` instead of the default TLEM foot. This is done to 
   use the detailed dataset available in the GM foot model. This change might
   lead to `Unresolved object` errors in objects referring to the foot model. See this 
-  {ref}`guide<Foot Unresolved Objects>` on how to resolve these errors. The TLEM foot model
+  {ref}`guide<Foot Unresolved Objects>` on how to resolve these errors. Corresponding to 
+  this change, the switch `_FOOT_MODEL_DEFAULT_` is now deprecated. The TLEM foot model
   can be selected with: 
 
   ```AnyScriptDoc
-  #define BM_FOOT_MODEL _FOOT_MODEL_DEFAULT_
+  #define BM_FOOT_MODEL _FOOT_MODEL_LEG_FOOT_
   ```  
 
 * The metatarsal joint nodes in the TLEM foot model have been updated to be consistent with the GM foot model.

@@ -139,7 +139,7 @@ See {ref}`usage of GM foot model <GM foot model usage>` for more info.
 If you would like to work with the TLEM foot model, it can be selected by the following
 BM Statement:
 ```AnyScriptDoc
-#define BM_FOOT_MODEL _FOOT_MODEL_DEFAULT_
+#define BM_FOOT_MODEL _FOOT_MODEL_LEG_FOOT_
 ```  
 
 ## Deprecation warnings
