@@ -8,7 +8,7 @@ Some of the models are donated by AnyBody users and now maintained as part of AM
 
 :::::{only} anylink
 
-::::{dropdown}  Click ![anylink button](../_static/AnyLinkLoad.svg){w="1.5em" pointer-events="none"  cursor=default } to open models in AnyBody
+::::{dropdown}  Click ![anylink button](../_static/AnyLinkLoad.svg){.no-image-click w="1.5em" } to open models in AnyBody
 :color: danger
 :icon: download
 
