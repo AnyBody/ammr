@@ -3,7 +3,19 @@
 % A rendered version of the CHANGELOG is avaible here:
 %    https://anyscript.org/ammr/beta/changelog.html
 
-**🔧 Changed:**
+
+(ammr-3.1.5-changelog)=
+## AMMR 3.1.5 (2025-??-??)
+
+### 🩹 Fixed:
+* The BVH marker protocol have been improved to better handling scaling of
+  people which are very different from a standard size. Now the pelvis height
+  follows the scaling of the rest of the trunk, and neck-length head-height are
+  linked. 
+
+
+
+### 🔧 Changed:
 * The implementation of the wrapping muscles which also have via points have
   been optimized. This speeds up most models with many wrapping muscles 10-20%
   since the alogithm only doesn't have to consider all muscle segments when
