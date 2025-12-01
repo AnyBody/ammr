@@ -2,8 +2,8 @@
 AnyFolder JointsAndDrivers={
 
   AnyFolder &RefHM = Main.Model.BodyModel;
-  AnyFolder &JntPos=.Mannequin.Posture;
-  AnyFolder &JntVel=.Mannequin.PostureVel;
+  AnyFolder &JntPos = .Mannequin.Posture;
+  AnyFolder &JntVel = .Mannequin.PostureVel;
 
 
 
@@ -25,13 +25,13 @@ AnyFolder JointsAndDrivers={
     AnyKinMeasure& lb = ..BodyModel.Interface.Trunk.SkullThoraxLateralBending;
     AnyKinMeasure& ar = ..BodyModel.Interface.Trunk.SkullThoraxRotation;
     AnyKinMeasure& fe = ..BodyModel.Interface.Trunk.SkullThoraxFlexion;
-    DriverPos=pi/180*{.JntPos.NeckLateralBending,.JntPos.NeckRotation,-1*.JntPos.NeckExtension};
-    DriverVel=pi/180*{.JntVel.NeckLateralBending,.JntVel.NeckRotation,-1*.JntVel.NeckExtension};
-    Reaction.Type={Off,Off,Off};
+    DriverPos = pi/180*{.JntPos.NeckLateralBending,.JntPos.NeckRotation,-1*.JntPos.NeckExtension};
+    DriverVel = pi/180*{.JntVel.NeckLateralBending,.JntVel.NeckRotation,-1*.JntVel.NeckExtension};
+    Reaction.Type = {Off,Off,Off};
   };
 
   //Thorax pelvis rotation driver
-  AnyKinEqSimpleDriver PostureDriver ={
+  AnyKinEqSimpleDriver PostureDriver = {
     AnyKinMeasure& Ref2 = ..BodyModel.Interface.Trunk.PelvisThoraxLateralBending;
     AnyKinMeasure& Ref3 = ..BodyModel.Interface.Trunk.PelvisThoraxRotation;
     AnyKinMeasure& Ref1 = ..BodyModel.Interface.Trunk.PelvisThoraxExtension;
@@ -50,22 +50,16 @@ AnyFolder JointsAndDrivers={
   };
 
 
-
-
-
-  AnyKinLinear SideWayLin = {
-    AnySeg &ThoraxSegRef =.RefHM.Trunk.Segments.ThoraxSeg;
-    AnyFixedRefFrame &groundfootr= Main.Model.Environment.GlobalRef;
-  }; //Foot to ground
-
-
-  AnyKinMeasureOrg SideWayLinOrg={
-    AnyKinLinear &ref=.SideWayLin;
-    MeasureOrganizer ={2};
+  AnyKinMeasureOrg SideWayLin = {
+    AnyKinLinear SideWayLin3D = {
+      AnySeg &ThoraxSegRef =.RefHM.Trunk.Segments.ThoraxSeg;
+      AnyFixedRefFrame &groundfootr= Main.Model.Environment.GlobalRef;
+    }; //Foot to ground
+    MeasureOrganizer = {2};
   };
 
   AnyKinEqSimpleDriver SideWayLinDrv = {
-    AnyKinMeasure& Jnt = .SideWayLinOrg;
+    AnyKinMeasure& Jnt = .SideWayLin;
     MeasureOrganizer = {0};
     DriverPos = {0};
     DriverVel = {0};
@@ -73,32 +67,28 @@ AnyFolder JointsAndDrivers={
   };
 
 
-  AnyKinLinear ChestHeight = {
-    AnyFixedRefFrame &handground= Main.Model.Environment.GlobalRef;
-    AnyRefNode &thorax = .RefHM.Trunk.Segments.SternumSeg.ij;
-    //AnyDrawPLine test={Thickness=0.005;RGB={0,0,1};};
-
-  };
-
-  AnyKinMeasureOrg ChestHeightOrg = {
-    AnyKinLinear &chestheight =.ChestHeight;
+  AnyKinMeasureOrg ChestHeight = {
+    AnyKinLinear ChestFloorTranslation = {
+      AnyFixedRefFrame &ground= Main.Model.Environment.GlobalRef;
+      AnyRefNode &thorax = .RefHM.Trunk.Segments.SternumSeg.ij;
+      //AnyDrawPLine test={Thickness=0.005;RGB={0,0,1};};
+    };
     MeasureOrganizer={1};
   };
 
   AnyKinEqFourierDriver ChestHeightDrv = {
-
-   AnyKinMeasure& Jnt = .ChestHeightOrg;
-
-   AnyFloat RangeOfMotion = DesignVar({0.07,0.48});
-   AnyVar Phase = 180;
-   Freq = 0.5;
-   Type = Cos;
-   A = 0.5*{{RangeOfMotion[1]+RangeOfMotion[0], abs(RangeOfMotion[1]- RangeOfMotion[0])}};
-   B = {{0, Phase}};
-   Reaction.Type = {Off};
-};
-
-
+    AnyKinMeasure& Jnt = .ChestHeight;
+    Type = Cos;
+    AnyVar a0 = (..ChestHeightTop + ..ChestHeightBottom) / 2;
+    AnyVar a1 = -(..ChestHeightTop - ..ChestHeightBottom) / 2;
+    AnyVar b0 = 0;
+    AnyVar b1 = 0;
+    AnyVar w = 2;
+    Freq = 1 / ..Time;
+    A = {{a0,a1}};
+    B = {{b0,b1}};
+    Reaction.Type = {Off};
+  };
 
 
 
@@ -134,7 +124,7 @@ AnyFolder JointsAndDrivers={
     };
 
 
-    AnyKinEqSimpleDriver HandToGroundRotMoverZYX={
+    AnyKinEqSimpleDriver HandToGroundRotMoverZYX = {
       AnyKinRotational &ref=.HandToGroundRotMover;
       MeasureOrganizer={0,1,2};
       DriverPos={0,pi,0};
@@ -160,7 +150,7 @@ AnyFolder JointsAndDrivers={
 
 
     //Sterno clavicular joint driver
-    AnyKinEqSimpleDriver SCDriverRight ={
+    AnyKinEqSimpleDriver SCDriverRight = {
       AnyKinMeasure& ref1 =...BodyModel.Interface.Right.SternoClavicularProtraction;
       AnyKinMeasure& ref2 =...BodyModel.Interface.Right.SternoClavicularElevation;
       DriverPos = pi/180*{
@@ -175,7 +165,7 @@ AnyFolder JointsAndDrivers={
     };
 
     //Arm position driver
-    AnyKinEqSimpleDriver ArmPosture ={
+    AnyKinEqSimpleDriver ArmPosture = {
        AnyKinLinear ShoulderElbowDist = {
          Ref = 0;
          AnyRefFrame& Thorax =  ....BodyModel.Trunk.Segments.SternumSeg.ij;
@@ -199,7 +189,7 @@ AnyFolder JointsAndDrivers={
     // ************************************
 
     //Hip driver
-    AnyKinEqSimpleDriver HipDriverRight={
+    AnyKinEqSimpleDriver HipDriverRight = {
       AnyKinMeasure& ref1 =...BodyModel.Interface.Right.HipFlexion;
       AnyKinMeasure& ref2 =...BodyModel.Interface.Right.HipExternalRotation;
       AnyKinMeasure& ref3 =...BodyModel.Interface.Right.HipAbduction;
@@ -218,7 +208,7 @@ AnyFolder JointsAndDrivers={
     };
 
     //Knee driver
-    AnyKinEqSimpleDriver KneeDriverRight={
+    AnyKinEqSimpleDriver KneeDriverRight = {
       AnyKinMeasureOrg  &Knee = ...BodyModel.Interface.Right.KneeFlexion;
       DriverPos=pi/180*{..JntPos.Right.KneeFlexion};
       DriverVel = pi/180*{..JntVel.Right.KneeFlexion};
@@ -226,7 +216,7 @@ AnyFolder JointsAndDrivers={
     };
 
     //Ankle driver
-    AnyKinEqSimpleDriver AnkleDriverRight={
+    AnyKinEqSimpleDriver AnkleDriverRight = {
       AnyKinMeasure& ref1=...BodyModel.Interface.Right.AnklePlantarFlexion;
       #if BM_LEG_MODEL == _LEG_MODEL_LEG_
         AnyKinMeasure& ref2=...BodyModel.Interface.Right.AnkleEversion;
