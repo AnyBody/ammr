@@ -66,6 +66,8 @@ extensions = [
     "sphinx_togglebutton",
     "sphinx_copybutton",
     "anylink",
+    "sphinx_reredirects"
+
 
     # "sphinxcontrib.youtube",
     # "sphinx_copybutton",
@@ -375,6 +377,11 @@ for folder, section in gallery.items():
 import generate_class_template_docs
 
 generate_class_template_docs.run_all()
+
+
+redirects = {
+    # "body/leg_tlem2_model" : "body/leg_tlem2_model.html",  This page must redirect if it is ever removed, used in different publications
+}
 
 
 user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
