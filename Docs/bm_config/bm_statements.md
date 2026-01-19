@@ -2378,6 +2378,23 @@ An object path leading to the selected global reference frame
 ::::
 
 
+::::{dropdown} `BM_INCLUDE_GIT_INFO`
+:animate: fade-in-slide-down
+:margin: 0 0 3 3
+
+```{ammr:bm_statement} BM_INCLUDE_GIT_INFO
+
+Switch to include git version information in the model metadata if available.
+
+:Default: ON
+:Example: `#define BM_INCLUDE_GIT_INFO ON`
+:Options: {ammr:bm_constant}`ON`/{ammr:bm_constant}`OFF`
+
+
+```
+::::
+
+
 ::::{dropdown} `BM_COMPATIBILITY_24_TRUNK_SELECTED_OUTPUTS_JRF`
 :animate: fade-in-slide-down
 :margin: 0 0 3 3
