@@ -12,7 +12,8 @@
   people which are very different from a standard size. Now the pelvis height
   follows the scaling of the rest of the trunk, and neck-length head-height are
   linked. 
-
+* Asymmetric ground reaction force in the {ref}`Squat model <example_squat>` have 
+  been fixed.
 
 
 ### 🔧 Changed:
