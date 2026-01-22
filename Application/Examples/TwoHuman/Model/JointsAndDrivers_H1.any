@@ -1,0 +1,82 @@
+//#define EXCLUDE_COM_BALANCE_DRIVERS
+// Center of Mass drivers can be excluded
+// by setting #define EXCLUDE_COM_BALANCE_DRIVERS
+#ifndef EXCLUDE_COM_BALANCE_DRIVERS
+
+   //Constraint the collective CoM to be right above the GlobalRef
+   AnyKinDriver CenterOfMassDriver = {
+     AnyKinMeasure& CoM = ...BodyModel1.Interface.CenterOfMass;
+     AnyFunConst Position = {
+       Value = Main.Model.CenterOfMassXZ_H1;
+     };
+     MeasureOrganizer = {0,2};  // Only the x and z directions
+     Reaction.Type = {Off,Off};
+
+   };
+   // Ankles are assigned a lower weight so most of the
+   // center of mass balancing will happen at the ankle joint.
+   Main.Model.DefaultMannequinDrivers_H1.DefaultWeakDriverWeight = 0.01;
+   Main.Model.DefaultMannequinDrivers_H1.AnkleDriverLeftFlexion.WeakDriverWeight = 0.001;
+   Main.Model.DefaultMannequinDrivers_H1.AnkleDriverRightFlexion.WeakDriverWeight = 0.001;
+
+#endif
+
+//#undef EXCLUDE_COM_BALANCE_DRIVERS
+
+// Foot driver constraints can be excluded
+// by setting #define EXCLUDE_FOOT_CONSTRAINTS
+#ifndef EXCLUDE_FOOT_CONSTRAINTS
+
+  // Default drivers for the pelvis position is set to zero
+  // since foot drivers determine the position of the model
+  Main.Model.DefaultMannequinDrivers_H1.PelvisGroundDriverPosX.WeakDriverWeight = 0;
+  Main.Model.DefaultMannequinDrivers_H1.PelvisGroundDriverPosY.WeakDriverWeight = 0;
+  Main.Model.DefaultMannequinDrivers_H1.PelvisGroundDriverPosZ.WeakDriverWeight = 0;
+  Main.Model.DefaultMannequinDrivers_H1.PelvisGroundDriverRotX.WeakDriverWeight = 0;
+  Main.Model.DefaultMannequinDrivers_H1.PelvisGroundDriverRotY.WeakDriverWeight = 0;
+  Main.Model.DefaultMannequinDrivers_H1.PelvisGroundDriverRotZ.WeakDriverWeight = 0;
+
+
+  AnyFolder Right =
+  {
+    AnyKinEq HeelFloorContraint = {
+      AnyKinLinear HeelMeasure = {
+        AnyRefFrame &FootPrint = Main.Model.Environment.GlobalRef.RightFootPrint_H1;
+        AnyRefFrame &Heel = Main.Human1.HumanModel.BodyModel.Right.Leg.Seg.Foot.HeelContactNodeLow;
+      };
+      Reaction.Type = {Off,Off,Off};
+    };
+
+    AnyKinEq ToeDirectionContraint =
+    {
+      AnyKinLinear ToeDirection = {
+        AnyRefFrame &FootPrint = Main.Model.Environment.GlobalRef.RightFootPrint_H1;
+        AnyRefFrame &Heel = Main.Human1.HumanModel.BodyModel.Right.Leg.Seg.Foot.BigToeNode;
+      };
+      MeasureOrganizer = {1,2}; // Only y,z direction
+      Reaction.Type = {Off,Off};
+    };
+  };
+
+  AnyFolder Left =
+  {
+    AnyKinEq HeelFloorContraint = {
+      AnyKinLinear HeelMeasure = {
+        AnyRefFrame &FootPrint = Main.Model.Environment.GlobalRef.LeftFootPrint_H1;
+        AnyRefFrame &Heel = Main.Human1.HumanModel.BodyModel.Left.Leg.Seg.Foot.HeelContactNodeLow;
+      };
+      Reaction.Type = {Off,Off,Off};
+    };
+
+    AnyKinEq ToeDirectionContraint =
+    {
+      AnyKinLinear ToeDirection = {
+        AnyRefFrame &FootPrint = Main.Model.Environment.GlobalRef.LeftFootPrint_H1;
+        AnyRefFrame &Heel = Main.Human1.HumanModel.BodyModel.Left.Leg.Seg.Foot.BigToeNode;
+      };
+      MeasureOrganizer = {1,2}; // Only y,z direction
+      Reaction.Type = {Off,Off};
+    };
+  };
+
+#endif

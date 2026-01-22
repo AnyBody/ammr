@@ -1,0 +1,130 @@
+#include "libdef.any"
+
+Main =
+{
+  // BodyModel configuration:
+  // Specify which limb segments to include, the type of muscles, joints, scaling etc
+  #include "Model/BodyModelConfiguration.any"
+
+  #define BM_CONFIG_VALUES ON
+//  #define BM_CONFIG_MESSAGES ON
+  
+  // Include the Human model from AMMR
+  AnyFolder Human1 = {
+    #include "<ANYBODY_PATH_BODY>\HumanModel.any"
+  };
+  AnyFolder Human2 = {
+    #ifdef BM_DRAWSETTINGS_SKIP
+    #undef BM_DRAWSETTINGS_SKIP
+    #define BM_DRAWSETTINGS_SKIP ON
+    #endif
+//    #ifdef BM_SCALING
+//    #undef BM_SCALING
+//    #endif
+//    #ifdef BM_SCALING_FILE
+////    #undef BM_SCALING_FILE
+//    AnyVar Test = 1;
+//    #endif
+    #undef BM_SCALING
+    #undef _BM_PELVIS_DISPLAY_
+    #define BM_SCALING _SCALING_STANDARD_
+
+    #ifdef DEF_BM_SCALING_FILE
+    #undef DEF_BM_SCALING_FILE
+    #endif
+    
+    #undef BM_MANNEQUIN_DRIVER_ANKLE_EVERSION_RIGHT
+    #undef BM_MANNEQUIN_DRIVER_ANKLE_EVERSION_LEFT
+    #undef BM_TRUNK_DISC_STIFNESS
+    #undef BM_TRUNK_LUMBAR_DISC_STIFNESS
+    #undef BM_TRUNK_CERVICAL_DISC_STIFNESS
+    
+    
+    
+    Main.Human2.HumanModel.Anthropometrics.BodyHeight = 1.9;
+//    Main.Human2.HumanModel.ScalingLaw.GeometricalScaling.Thorax.OriginUnscaled = HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.AnatomicalFrame.ScalingOrigins.Lumbar;
+    #include "<ANYBODY_PATH_BODY>\HumanModel.any"
+  };
+
+  // Define desired posture or movement of the model
+  #include "Model\Mannequin_H1.any"
+  // Define desired posture or movement of the model
+  #include "Model\Mannequin_H2.any"
+
+  // Compose the model used by the study
+  AnyFolder Model =
+  {
+     // Center of Mass (COM) position in the ground XZ plane
+     // COM balance driver can be excluded with:
+//      #define EXCLUDE_COM_BALANCE_DRIVERS
+     AnyVector CenterOfMassXZ_H1 = {-0.02,0};
+     AnyVector CenterOfMassXZ_H2 = {0.70,0.0};
+
+     // Positioning of the right and left feet.
+     // Ground-foot constraints can be excluded with:
+     // #define EXCLUDE_FOOT_CONSTRAINTS
+     Environment.GlobalRef.RightFootPrint_H1 = {
+        AnyVec3 HeelPosition = {-0.12, 0, 0.14};
+        AnyVec3 ToeDirection = {1, 0, 0.1};
+     };
+     Environment.GlobalRef.LeftFootPrint_H1 = {
+        AnyVec3 HeelPosition = {-0.12, 0, -0.14};
+        AnyVec3 ToeDirection = {1, 0, -0.1};
+     };
+     Environment.GlobalRef2.RightFootPrint_H2 = {
+        AnyVec3 HeelPosition = {-0.08+1.05, 0, -0.14};
+        AnyVec3 ToeDirection = {-1, 0, 0.1};
+     };
+     Environment.GlobalRef2.LeftFootPrint_H2 = {
+        AnyVec3 HeelPosition = {-0.08+1.05, 0, 0.14};
+        AnyVec3 ToeDirection = {-1, 0, -0.1};
+     };
+
+    // Include the body part of the Human model
+    AnyFolder &BodyModel1 = .Human1.HumanModel.BodyModel;
+    AnyFolder &BodyModel2 = .Human2.HumanModel.BodyModel;
+
+    // Include the default mannequin drivers
+    AnyFolder &DefaultMannequinDrivers_H1 = .Human1.HumanModel.DefaultMannequinDrivers;
+    AnyFolder &DefaultMannequinDrivers_H2 = .Human2.HumanModel.DefaultMannequinDrivers;
+
+    // Environment files are used to include objects surrounding human,
+    // e.g. global reference frame
+    #include "Model\Environment.any"
+
+    AnyFolder ModelEnvironmentConnection =
+    {
+      AnyFolder Human1 = {
+        // This file contains all contraints to simulate the standing human
+        #include "Model/JointsAndDrivers_H1.any"
+        
+        // Ground reaction force prediction
+        #include "Model/GRFPrediction_H1.any"
+      };
+      AnyFolder Human2 = {
+        // This file contains all contraints to simulate the standing human
+        #include "Model/JointsAndDrivers_H2.any"
+        
+        // Ground reaction force prediction
+        #include "Model/GRFPrediction_H2.any"
+      };
+    };
+  };
+  // Define Study for running kinematics and inverse dynamics simulation analyses
+  AnyBodyStudy Study =
+  {
+    // Include the Model within the Study
+    AnyFolder &Model = .Model;
+
+    Gravity={0.0, -9.81, 0.0};
+    nStep = 11;
+
+    // Overdeterminate solver is needed while using the
+    // soft default mannequin drivers.
+    Kinematics.SolverType = KinSolOverDeterminate;
+    InitialConditions.SolverType = Kinematics.SolverType ;
+  };
+  // This is readymade simulation package including some pre-processing steps and the InverseDynamics analysis
+  #include "Model\RunAppSequence.any"
+
+}; //Main
