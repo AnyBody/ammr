@@ -378,7 +378,7 @@ import generate_class_template_docs
 generate_class_template_docs.run_all()
 
 
-user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0"
 
 linkcheck_ignore = [
     r".*linkcheck_ignore",
