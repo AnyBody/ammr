@@ -65,9 +65,8 @@ Model Repository consists of three parts:
 If you are a new user check the [AnyBody Tutorials](https://anyscript.org/tutorials/) and 
 the getting started video on AnyBody.
 
-The following {doc}`Getting Started section </getting_started>` on the 
-AMMR provides insight into how AMMR is structured, how to
-install it and how to use it.
+The [Getting Started tutorial](https://anyscript.org/tutorials/A_Getting_started/index.html) 
+guides you through setting up the AMMR, understanding its structure, and learning how to use it.
 ```
 
 <span class="material-symbols-outlined">
@@ -120,13 +119,10 @@ used together as a full body, scalable musculoskeletal model.
 
 
 ```{toctree}
-:caption: Examples and applications
 :includehidden: true
 :hidden:
 
-getting_started
 Gallery of examples <Applications/index>
-migration
 ```
 
 
@@ -137,32 +133,21 @@ migration
 
 Overview <body/models>
 bm_config/index
+migration
 ```
 
 
 ```{toctree}
-:caption: Tools
+:caption: Applications and Tools
 :includehidden: true
 :maxdepth: 0
 :hidden:
 :glob:
 
-tools/class-templates
-```
-
-
-
-```{toctree}
-:caption: Guides
-:includehidden: true
-:hidden:
-:maxdepth: 2
-:titlesonly:
-
-creating_model_from_scratch
-Scaling/intro
 anymocap/index
-
+grf_prediction/grf-prediction
+Scaling/intro
+tools/class-templates
 ```
 
 

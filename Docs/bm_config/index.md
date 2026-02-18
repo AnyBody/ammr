@@ -44,7 +44,7 @@ Most models can also be configured using the
 :::
 
 There are body model parameters for configuring each body part, controlling scaling, controlling the default
-mannequin drivers (click to see tutorial on {ref}`modelling from scratch <MannequinDriver>`), as well as other global options for the model.
+mannequin drivers, as well as other global options for the model.
 
 See the following links for details on BM parameters related to different body parts and modelling options:
 
