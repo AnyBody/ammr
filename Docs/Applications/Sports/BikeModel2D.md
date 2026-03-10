@@ -1,6 +1,6 @@
 ---
 gallery_title: "Bike Model 2D"
-gallery_image: "/Applications/images/BikeModel2D.webp"
+gallery_image: "/Applications/images/BikeModel2D.png"
 anylink: Application/Examples/BikeModel2D/BikeModel2D.main.any
 ---
 
