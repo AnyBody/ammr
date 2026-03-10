@@ -113,7 +113,7 @@ based models.
 The model is run in the same way as other models. The only difference is that it
 now uses GRF prediction instead of force plates data.
 
-:::{figure} /anymocap/grf_output.png
+:::{figure} grf_output.png
 :align: center
 :::
 

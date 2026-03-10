@@ -1,6 +1,6 @@
 ---
 gallery_title: "Bike Model"
-gallery_image: "/Applications/images/BikeModel-FullBody.webp"
+gallery_image: "/Applications/images/BikeModel-FullBody.png"
 anylink: Application/Examples/BikeModel/BikeModel-FullBody.main.any
 ---
 
