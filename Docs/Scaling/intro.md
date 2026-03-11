@@ -2,31 +2,18 @@
 
 # Introduction to Scaling
 
-:::{sidebar} Scaling Tutorials
+Musculoskeletal models must be scalable to sizes of different individuals to be
+useful for product design. Scaling pertains not only to the overall geometry,
+but also muscle insertion points, muscle parameters, wrapping surfaces etc.
+AnyBody has a both generic and user-define scaling laws for models in the
+repository.
 
-The three tutorials covers the different scaling 
-methods shown in the table below:
-
-```{toctree}
-:maxdepth: 1
-
-lesson1
-lesson2
-lesson3
-
-```
-:::
-
-Musculoskeletal models must be scalable to sizes of different
-individuals to be useful for product design. Scaling pertains not only to the overall geometry,
-but also muscle insertion points, muscle parameters, wrapping
-surfaces etc. AnyBody has a both generic and user-define scaling laws for models in the repository.
-
-For details on scaling theory behind please take a look at [Rasmussen 2005](https://paperpile.com/shared/sqkoXwnHARTiI82J2Sarhcg).
+For details on scaling theory behind please take a look at 
+[Rasmussen 2005](https://paperpile.com/shared/sqkoXwnHARTiI82J2Sarhcg).
 
 Size related parameters of models in the {doc}`AMMR </index>`
 are seldom defined as constant numbers, but instead computed from global measurements
-(e.g., total height, weight of human) based on a scaling law. Thus all body models
+(e.g., total height, weight of human) based on a scaling law. Thus, all body models
 expect the definition of a scaling law, although user can
 choose the actual law.
 
@@ -62,22 +49,29 @@ Currently there are six pre-defined scaling laws available in AnyBody:
 muscles, in addition to the size and mass of the bone.** This strength
 scaling is done automatically in most cases. We will come back to it
 when needed. Users who need a more comprehensive introduction can view
-this recorded previous webcast titled [“Anthropometrical Scaling of
-Musculoskeletal
-Models”](https://www.anybodytech.com/webcasts/anthropometrical-scaling-of-musculoskeletal-models).
+this recorded previous webcast titled 
+[“Anthropometrical Scaling of Musculoskeletal Models”](https://www.anybodytech.com/webcasts/anthropometrical-scaling-of-musculoskeletal-models).
+
+To get a thorough understanding of how to configure your AnyBody models to use these build-in scaling laws,
+please see the tutorial [“Scaling and Personalizing your Model”](https://anyscript.org/tutorials/Scaling/index.html).
+This tutorial also includes more advanced personalization methods for accurate 
+subject-specific scaling based on medical imaging data.
 
 ## Overwriting default input parameters
 
-After selecting a scaling law, the user can override the default input
-parameters. All input parameters can be accesed in the
+After selecting a scaling law to implement, the user can override the default input
+parameters. All input parameters can be accessed in the
 `Main.HumanModel.Anthropometrics` folder.
 
-For example, to adjust the height of
-the model, the user can add the following code to the `Main` file:
+For example, to adjust the height of the model, the user can add the following
+code to the `Main` file:
 
 ```AnyScriptDoc
 Main.HumanModel.Anthropometrics.BodyHeight = 1.8; // overwrites the default value
 ```
+
+Based on the used scaling law, this would scale the height of the model and all
+parameters that are related to the height.
 
 ### Using legacy `AnyMan.any` files
 
@@ -90,10 +84,3 @@ You can specify your own file with by setting the `BM_SCALING_ANTHRO_FILE` BM st
 
 This method is not recommended for new models, but it is still supported for older models.
 
-:::{admonition} **Next lesson:**
-:class: seealso
-Now head for {doc}`lesson1`.
-:::
-
-% ..  image:: _static/intro/image1.jpeg
-%     :width: 80%
