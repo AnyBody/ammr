@@ -35,7 +35,7 @@ finished by the AnyBody Technology.
 The current version has been updated several times and is still being
 maintained in collaboration with The AnyBody Research Group at Aalborg
 University (DK) (www.anybody.aau.dk) and University of Twente (NL) under
-the TLEMsafe project ([www.tlemsafe.eu](https://tlemsafe.eu/)).
+the [TLEMsafe project](https://web.archive.org/web/20200326110052/https://tlemsafe.eu/).
 
 ## Example Configuration
 
