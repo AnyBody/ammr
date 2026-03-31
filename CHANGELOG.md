@@ -5,7 +5,7 @@
 
 
 (ammr-3.1.5-changelog)=
-## AMMR 3.1.5 (2025-??-??)
+## AMMR 3.1.5 (2026-03-31)
 
 ### 🩹 Fixed:
 * The BVH marker protocol have been improved to better handling scaling of

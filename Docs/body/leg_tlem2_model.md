@@ -36,7 +36,7 @@ full list of configuration parameters.
 ## Background
 
 The model is based on published anatomical data produced from a cadaver study in
-the [TLEMsafe EU project](https://tlemsafe.eu/). The first implementation of
+the [TLEMsafe EU project](https://web.archive.org/web/20200326110052/https://tlemsafe.eu/). The first implementation of
 the musculoskeletal model was created by Vincenzo Carbone and René Fluit from
 the University of Twente [^cite_cfpk15].
 
