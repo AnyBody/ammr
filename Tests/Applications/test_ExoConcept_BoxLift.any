@@ -1,0 +1,73 @@
+//define = [
+//    {'EXO_CONCEPT':'1'}, 
+//    {'EXO_CONCEPT':'2'}, 
+//    {'EXO_CONCEPT':'3'}, 
+//    {'EXO_CONCEPT':'4'}, 
+//]
+//ignore_errors = ["Orientation close to Gimbal Lock"]
+
+
+#include "../libdef.any"
+
+#ifdef TEST_NAME
+#define  MOCAP_TEST_FILENAME_PREFIX  TEST_NAME + "_"
+#else
+#define  MOCAP_TEST_FILENAME_PREFIX  "GUI1_"
+//#define CREATE_IMAGE
+#endif
+
+
+#path MOCAP_PATH_MAINFILEDIR "../../Application/Examples/ExoskeletonConcept/"
+#path MOCAP_PATH_MAINFILE "<MOCAP_PATH_MAINFILEDIR>/ExoConcept_BoxLift.Main.any"
+
+
+
+
+#ifdef CREATE_IMAGE
+#undef MOCAP_TEST_FILENAME_PREFIX
+#path TEMP_PATH "<MOCAP_PATH_MAINFILEDIR>/Output"
+#endif
+
+
+
+//// Run Analysis with a reduced number of time steps
+//// to make test go faster. 
+//#define N_STEP_PARAM_OPT 10
+#define N_STEP_KINEMATICS 100
+#define N_STEP 20
+
+
+
+#include "<MOCAP_PATH_MAINFILE>"
+
+Main = 
+{
+  AnyOperationSequence  TestRunApplication = 
+  {
+   // AnyOperation& BVH_StickFigure = Main.Studies.BVH_StickFigure.Kinematics;
+    AnyOperation& RunAnalysis = Main.RunAnalysis; 
+  };
+
+  
+  #ifndef CREATE_IMAGE
+    AnyOperation& RunTest = Main.TestRunApplication;
+  #else
+  #include "../Cameras.any"
+  // Use a a special time for the initial position picture.   
+  AnyOperationSequence CameraInitPos = 
+  {
+     AnyOperationSetValue setTime = 
+     {
+       AnyFloat t_custom  = 1.7;
+       Source = {&t_custom};
+       Target = {&Main.Studies.InverseDynamicStudy.tStart};
+     };
+     AnyOperation& CameraInitPos = Main.Studies.InverseDynamicStudy.InitialConditions;
+  };
+  LoadTimeCam.CameraLookAtPoint = Main.HumanModel.BodyModel.Trunk.SegmentsLumbar.PelvisSeg.r +{0.2,-0.25,0};
+  LoadTimeCam.CameraFieldOfView = DesignVar(1.75);
+  LoadTimeCam.CameraDirection  = {0.5,0.2,0.5};
+
+  #endif  
+  
+};

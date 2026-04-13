@@ -114,9 +114,8 @@ More information can be found online:
   20\. September, 2012)
 
   [Presentation
-  (2Mb)](http://www.anybodytech.com/download.html?did=webcasts.files&fname=AnyBodyWebcast-2012-09-20-FootModel.pdf&t=1&tt=wc),
-  [Playback
-  (36Mb)](http://www.anybodytech.com/download.html?did=webcasts.files&fname=AnyBodyWebcast-2012-09-20-FootModel.wmv&t=1&tt=wc)
+  (2Mb)](https://www.anybodytech.com/the-new-glasgow-maastricht-anybody-foot-model/?wpdmdl=3101&ind=0),
+  [YouTube](https://www.anybodytech.com/the-new-glasgow-maastricht-anybody-foot-model/)
 
   This webcast presents a detailed AnyBody musculoskeletal foot model
   which includes all bones and joints of a real foot. Developed in

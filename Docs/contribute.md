@@ -46,7 +46,7 @@ You can also view other freely available models and resources hosted on [GitHub]
 
 \# Upload ammr zip file to Zenodo
 
-> # Either use the AMMR zip file created by the AMS build. This  (it con or create a
+> \# Either use the AMMR zip file created by the AMS build. This  (it con or create a
 >
 > : released zip file by running:
 >
@@ -60,10 +60,6 @@ You can also view other freely available models and resources hosted on [GitHub]
 >
 > \# Edit the draft Zenodo release to upload a zip file with AMMR.
 
-```{rubric} To do list
-```
 
-```{eval-rst}
-.. todolist::
-```
+
 :::

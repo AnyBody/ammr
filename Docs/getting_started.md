@@ -145,6 +145,6 @@ the simulation. In this case everything in `Main.Model` folder is part of the si
 {doc}`The full tutorial on how to create a HumanModel from scratch </creating_model_from_scratch>`
 :::
 
-[anybody modelling system]: https://www.anybodytech.com/software/ams/
+[anybody modelling system]: https://www.anybodytech.com/software/anybodymodelingsystem/ 
 [anyscript]: https://anyscript.org/tutorials/A_Getting_started_anyscript/index.html
 [human model]: https://anyscript.org/tutorials/A_Getting_started/lesson1.html

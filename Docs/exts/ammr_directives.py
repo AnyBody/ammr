@@ -96,7 +96,7 @@ class AMMR_BMStatement(std.Target):
         node["domain"] = "ammr"
         node.document = self.state.document
         node["objtype"] = "bm_statement"
-        node.set_class("section")
+        node['classes'].append("section")
 
         # Add the signature child node for permalinks.
         title = sphinx.addnodes.desc_signature(var_name, "")
@@ -106,7 +106,8 @@ class AMMR_BMStatement(std.Target):
         title["first"] = False
         title["objtype"] = node["objtype"]
         self.add_name(title)
-        title.set_class("ammr-bm_statement-title")
+        title['classes'].append("ammr-bm_statement-title")
+        # title['classes'].append("sd-d-none")
 
         title += sphinx.addnodes.desc_name(var_name, var_name)
         node.append(title)
@@ -196,7 +197,7 @@ class AMMR_BMConstant(std.Target):
         node = sphinx.addnodes.desc()
         node.document = self.state.document
         node["objtype"] = "bm_constant"
-        node.set_class("section")
+        node['classes'].append("section")
 
         # Add the signature child node for permalinks.
         title = sphinx.addnodes.desc_signature(var_name, "")
@@ -206,7 +207,9 @@ class AMMR_BMConstant(std.Target):
         title["first"] = False
         title["objtype"] = node["objtype"]
         self.add_name(title)
-        title.set_class("ammr-bm_constant-title")
+        title['classes'].append("ammr-bm_constant-title")
+        # title['classes'].append("sd-d-none")
+
 
         title += sphinx.addnodes.desc_name(var_name, var_name)
         node.append(title)
@@ -288,6 +291,32 @@ class AMMRDomain(Domain):
             if doc == docname:
                 del bm_constant_list[var]
 
+    def search_doc(self, key):
+        zret = []
+        roles_to_search =  ["bm_statement", "bm_constant"]
+        for role in roles_to_search:
+            if key in self.data[role]:
+                zret.append( (self.data[role][key], role) )
+        return zret
+
+    def resolve_any_xref(self, env, src_doc, builder, target, node, cont_node):
+        role_matches = self.search_doc(target)
+        condidate_node =  []
+        for (dst_doc, role) in role_matches:
+            newnode = sphinx.util.nodes.make_refnode(
+                builder,
+                src_doc,
+                dst_doc,
+                nodes.make_id(target),
+                cont_node,
+                target,
+            )
+            condidate_node.append((f"ammr:{role}", newnode))
+
+        return condidate_node
+
+
+
     def find_doc(self, key, obj_type):
         zret = None
 
@@ -312,7 +341,7 @@ class AMMRDomain(Domain):
                 dst_doc,
                 nodes.make_id(target),
                 cont_node,
-                "records.config",
+                target,
             )
 
     def get_objects(self):

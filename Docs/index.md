@@ -49,4 +49,4 @@ install it and how to use it.
 **Continue:** {doc}`Get Started using the AMMR </getting_started>`
 :::
 
-[anybody modeling system]: https://www.anybodytech.com/software/ams/
+[anybody modeling system]: https://www.anybodytech.com/software/anybodymodelingsystem/

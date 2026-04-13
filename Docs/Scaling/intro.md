@@ -62,7 +62,7 @@ scaling is done automatically in most cases. We will come back to it
 when needed. Users who need a more comprehensive introduction can view
 this recorded previous webcast titled [“Anthropometrical Scaling of
 Musculoskeletal
-Models”](http://www.anybodytech.com/downloads/documentation/#20090319).
+Models”](https://www.anybodytech.com/anthropometrical-scaling-of-musculoskeletal-models/).
 
 ```{rubric} Tutorial
 ```

@@ -1448,6 +1448,7 @@ Switch for the mannequin driver being active or not
 
 
 ```{ammr:bm_statement} BM_MANNEQUIN_DRIVER_ANKLE_EVERSION_RIGHT
+:deprecated:
 
 Switch for the mannequin driver being active or not
 
@@ -1553,6 +1554,7 @@ Switch for the mannequin driver being active or not
 
 
 ```{ammr:bm_statement} BM_MANNEQUIN_DRIVER_ANKLE_EVERSION_LEFT
+:deprecated:
 
 Switch for the mannequin driver being active or not
 

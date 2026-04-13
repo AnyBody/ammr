@@ -19,7 +19,7 @@
 
 
 
-#class_template CreateMarkerDriver (MarkerName,
+#class_template CreateMarkerDriver (MarkerName = _NOT_DEFINED_,
                                     MarkerPlacement,
                                     WeightX=1, WeightY=1, WeightZ=1,
                                     OptX=0, OptY=0, OptZ=0,
@@ -37,6 +37,36 @@
                                     DRAW_SCALE = 1
                                     ){
                                       
+                                     
+//  #if  MarkerName != _NOT_DEFINED_
+//  AnyInt Deprecated_MarkerName_argument = warn(0, strformat("\n"+
+//       "------------------------------------------------------------------------------------------------------\n"+
+//       "    The "MarkerName" argument to CreateDriver is deprecated. Just give the class template the same   \n"+
+//       "    name as the marker. \n"+
+//       "-------------------------------------------------------------------------------------------------------\n")
+//    );
+//  
+//  #endif
+
+#if  USE_BVH_INPUT
+#if MarkerName != _NOT_DEFINED_
+#if MarkerName != __NAME__
+  AnyMessage NotSupported_MarkerName_argument = {
+    TriggerPreProcess = On;
+    Type = MSG_ErrorFatal;
+    Message = strformat("\n"+
+         "------------------------------------------------------------------------------------------------------\n"+
+         "    The "MarkerName" can't be specified for the BVH based models. \n"+
+         "    Just remove the MarkerName argument to the class template. \n"+
+         "-------------------------------------------------------------------------------------------------------\n");
+  };
+#endif
+#endif
+#endif
+
+
+                                      
+                                      
   #var AnyVar ConstMarkerWeightX = WeightX;  
   #var AnyVar ConstMarkerWeightY = WeightY;
   #var AnyVar ConstMarkerWeightZ = WeightZ;
@@ -45,8 +75,13 @@
     AnyFunSquareWaveThreshold MarkerWeightsFun = 
     {
       #var dT = {C3D_OBJECT.WeightTransitionTime};
+      #if MarkerName == _NOT_DEFINED_
+      T = C3D_OBJECT.Points.Markers.__NAME__.PosInterpol.T;
+      Data = C3D_OBJECT.Points.Markers.__NAME__.Residual;
+      #else
       T = C3D_OBJECT.Points.Markers.MarkerName.PosInterpol.T;
       Data = C3D_OBJECT.Points.Markers.MarkerName.Residual;
+      #endif
       OutputValues = 
             {{0, .ConstMarkerWeightX },
              {0, .ConstMarkerWeightY },
@@ -81,25 +116,24 @@
 
   
   
-  Main.ModelSetup.Macros={
-    AnyStringVar Set##MarkerName = ("classoperation "+  CompleteNameOf(...sRelOptEdit) + " " + strquote("Set Value") +  strformat ("\n")+ "classoperation Main " + strquote("Update Values") + strformat ("\n"));
+  Main.ModelSetup.Macros={ 
+     AnyStringVar Set##__NAME__ = ("classoperation "+  CompleteNameOf(...sRelOptEdit) + " " + strquote("Set Value") +  strformat ("\n")+ "classoperation Main " + strquote("Update Values") + strformat ("\n"));
   };
 
   
   Main.ModelSetup.ParameterIdentification = {
-      AnyDesVar MarkerName##_X = {
-        Val = ....sRelOptEdit[0];    
+      AnyDesVar __NAME__##_X = {   Val = ....sRelOptEdit[0];    
         #var Min=-100;
         #var Max=100;      
       };
       
-      AnyDesVar MarkerName##_Y = {
+      AnyDesVar __NAME__##_Y = {
         Val = ....sRelOptEdit[1];   
         #var Min=-100;
         #var Max=100;      
       };
       
-      AnyDesVar MarkerName##_Z = {
+      AnyDesVar __NAME__##_Z = {
         Val = ....sRelOptEdit[2];   
         #var Min=-100;
         #var Max=100;      
@@ -111,7 +145,7 @@
   AnyFolder &MarkerPlacementSegment = BODY_MODEL_FOLDER.MarkerPlacement;
   MarkerPlacementSegment = {
     
-    AnyRefNode MarkerName={
+    AnyRefNode __NAME__  ={
       #if ScaleMarkerPosOnOff == 1
         AnyVec3 MarkerOffset = (.GeomScale(..sRelOpt) + ..sRelOptEdit )*.AnatomicalFrame.ARel' ;
         sRel = .PlaceMarkerAt.sRel + MarkerOffset;
@@ -183,8 +217,19 @@
         };
         #endif
         Linear.Ref=0;
-        AnyRefFrame &MarkerRef = BODY_MODEL_FOLDER.MarkerPlacement.MarkerName;
-        //AnyFolder &MarkerName = C3D_OBJECT.Points.Markers.MarkerName;
+        
+        
+        AnyRefFrame &MarkerRef = BODY_MODEL_FOLDER.MarkerPlacement.__NAME__;
+        
+        #if USE_BVH_INPUT
+          AnyFolder &MarkerDataRef = BVH_OBJECT.Markers.__NAME__;
+        #else
+          #if MarkerName == _NOT_DEFINED_
+          AnyFolder &MarkerDataRef = C3D_OBJECT.Points.Markers.__NAME__;
+          #else
+          AnyFolder &MarkerDataRef = C3D_OBJECT.Points.Markers.MarkerName;
+          #endif
+        #endif
         
         #if FilterCutOffFrequency > 0
    	  /// A lowpass butterworth filter
@@ -203,23 +248,14 @@
             #var Type = Bspline;
             BsplineOrder =4;
 
-            #if USE_BVH_INPUT
-            T = BVH_OBJECT.Markers.MarkerName.PosInterpol.T;
-            Data = .LowPassFilter(BVH_OBJECT.Markers.MarkerName.Pos');
-            #else
-            T = C3D_OBJECT.Points.Markers.MarkerName.PosInterpol.T;
-            Data = .LowPassFilter(C3D_OBJECT.Points.Markers.MarkerName.Pos');
-            #endif
+            T = .MarkerDataRef.PosInterpol.T;
+            Data = .LowPassFilter(.MarkerDataRef.Pos');
           };
           
-        #else
-        #if USE_BVH_INPUT
+        #else        
         
-        
-        AnyParamFun &InterpolRef = BVH_OBJECT.Markers.MarkerName.PosInterpol;
-        #else
-        AnyParamFun &InterpolRef = C3D_OBJECT.Points.Markers.MarkerName.PosInterpol;
-        #endif
+        AnyParamFun &InterpolRef = MarkerDataRef.PosInterpol;
+
         #endif
         
         WeightFun={.MarkerWeightsPtr};
@@ -227,16 +263,16 @@
 
   PARAMETER_OPT_STUDY ={
 
-    #if OptX ==1 
-    AnyDesVar &MarkerName##_X =  Main.ModelSetup.ParameterIdentification.MarkerName##_X;
+    #if OptX ==1
+      AnyDesVar &__NAME__##_X =  Main.ModelSetup.ParameterIdentification.__NAME__##_X;
     #endif
     
     #if OptY ==1
-    AnyDesVar &MarkerName##_Y =  Main.ModelSetup.ParameterIdentification.MarkerName##_Y;
+      AnyDesVar &__NAME__##_Y =  Main.ModelSetup.ParameterIdentification.__NAME__##_Y;
     #endif
     
     #if OptZ ==1
-    AnyDesVar &MarkerName##_Z =  Main.ModelSetup.ParameterIdentification.MarkerName##_Z;
+      AnyDesVar &__NAME__##_Z =  Main.ModelSetup.ParameterIdentification.__NAME__##_Z;
     #endif        
     
   };
@@ -244,19 +280,22 @@
 #if USE_BVH_INPUT
 
    BVH_OBJECT.Markers = {
-      AnyVirtualMarkerBVH MarkerName = {
-        RefFramePtr = &MarkerPlacementBVH.MarkerName;
-      };        
+      AnyVirtualMarkerBVH __NAME__ = {
+        RefFramePtr = &MarkerPlacementBVH.__NAME__;
+      };
    };
 
   
   //AnyFolder &MarkerInsertionNodeBVH = MarkerPlacementBVH;  
   MarkerPlacementBVH = 
   {
-    AnyRefNode MarkerName = 
-    {
+    AnyRefNode __NAME__ = {
       //sRel = ..sRelOnBVH;
+      #if MarkerName == _NOT_DEFINED_
+      sRel = Main.ModelSetup.MocapDrivers.__NAME__.sRelOnBVH ;
+      #else
       sRel = Main.ModelSetup.MocapDrivers.MarkerName.sRelOnBVH ;
+      #endif
       AnyDrawNode drw_node = 
       {
         #var RGB = {0, 1, 0};

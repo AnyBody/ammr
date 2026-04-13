@@ -17,7 +17,7 @@ the whole lumbar spine together with its muscles.
  
 More details can also be found in the webcast
 "Implementation of facet joints in a lumbar spine model (Mark de Zee, 25. September, 2008)" 
-it can be found at http://www.anybodytech.com
+it can be found at https://www.anybodytech.com
  
 .. note:: For dynamic situation this model should be used with care since the facet 
     joint forces in this situation may add energy to the mechanical system.
