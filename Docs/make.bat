@@ -44,7 +44,7 @@ git checkout -b archive
 git checkout archive
 git add -f Documentation\*
 git commit -m "doc archive"
-git archive archive -o release.zip
+git archive archive -o ammr-release.zip
 git reset --soft HEAD~
 git reset
 git checkout master
