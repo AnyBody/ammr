@@ -3,6 +3,12 @@
 % A rendered version of the CHANGELOG is avaible here:
 %    https://anyscript.org/ammr/beta/changelog.html
 
+(ammr-3.2.0-changelog)=
+## AMMR 3.2.0 (2026-05-??)
+
+PREPARATION FOR NEXT VERSION TO BE SHIPPED WITH AnyBody 8.2.0
+and to be able to test AnyBody compatibility mode for AMMR 3.1.x versus 3.2.x
+
 
 (ammr-3.1.5-changelog)=
 ## AMMR 3.1.5 (2026-03-31)
