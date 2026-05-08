@@ -3,9 +3,25 @@
 % A rendered version of the CHANGELOG is avaible here:
 %    https://anyscript.org/ammr/beta/changelog.html
 
+(ammr-3-2-0-changelog)=
+## AMMR 3.2.0 (2026-05-08)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.20082156.svg)](https://doi.org/10.5281/zenodo.20082156)
+[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.2.0-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
+
+### 🩹 Fixed
+
+### 🔧 Changed
+
+### ➕ Added
+
+### Removed
+
 
 (ammr-3.1.5-changelog)=
 ## AMMR 3.1.5 (2026-03-31)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.18388854.svg)](https://doi.org/10.5281/zenodo.18388854)
+[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.1.5-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
+
 
 ### 🩹 Fixed:
 * The BVH marker protocol have been improved to better handling scaling of
