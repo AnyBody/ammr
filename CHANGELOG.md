@@ -14,17 +14,18 @@
 
 ### 🔧 Changed
 
-* Updated the AnyMoCap marker driver implementation to use the new time-array access available in AnyBody 8.2.
+* This AMMR provides necessary updates to optimally use AnyBody 8.2.
+  These updates target the AnyMoCap models and tools. 
+  Updates are related to improvements of the 'AnyInputC3D' class used for MoCap data import.
+  AnyBody 8.2 cause several deprecation warnings with AMMR 3.1.x MoCap models,
+  and it will run in a special compatibility mode. 
+  AMMR 3.2 eliminates these warnings and the less efficient compatibility mode.  
 * Updated documentation link checking to use a dedicated user agent and longer timeout for slow pages.
 * Updated CI workflow action dependencies across the test and documentation pipelines.
 
 ### ➕ Added
 
 * Added a pixi command and workflow step for generating an AMMR zip package.
-
-### Removed
-
-* Removed unnecessary and deprecated members from AnyMoCap C3D settings in the Plug-in-gait simple setup.
 
 
 (ammr-3.1.5-changelog)=
