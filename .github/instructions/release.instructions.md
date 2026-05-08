@@ -28,12 +28,15 @@ Each section should also include a link to the AnyBody download page for the AMS
 ```
 Where `<ANYBODY_VERSION>` is the version of AnyBody that includes the AMMR release.
 
+## Step 3: Update the AnyBody used in CI Pipelines
+If the new release of the AMMR requires a new version of AnyBody, the AnyBody version used in the CI pipelines should also be updated. This can be done by updating the anybodycon dependency in the feature.anybodycon.target.win-64.dependencies entry in the `pixi.toml` file. The version number should be updated to the version of AnyBody that includes the AMMR release.
+
 ## Step 3: Create a Release Tag
 After updating the version number and the changelog, the next step is to create a release tag in the Git repository. This can be done using the following command:
-```git tag -a ammr-<VERSION_NUMBER> -m "Release version <VERSION_NUMBER>"
+```git tag -a ams.<VERSION_NUMBER> -m "Release version <VERSION_NUMBER>"
 ```
-Where `<VERSION_NUMBER>` is the version number of the release. After creating the tag, it should be pushed to the remote repository using the following command:
-```git push origin ammr-<VERSION_NUMBER>
+Where `<VERSION_NUMBER>` is the version number of the AMS release associated with the AMMR release. After creating the tag, it should be pushed to the remote repository using the following command:
+```git push origin ams.<VERSION_NUMBER>
 ```
 
 ## Step 4: Create a Release on GitHub
