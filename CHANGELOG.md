@@ -3,15 +3,36 @@
 % A rendered version of the CHANGELOG is avaible here:
 %    https://anyscript.org/ammr/beta/changelog.html
 
-(ammr-3.2.0-changelog)=
-## AMMR 3.2.0 (2026-05-??)
+(ammr-3-2-0-changelog)=
+## AMMR 3.2.0 (2026-05-08)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.20082156.svg)](https://doi.org/10.5281/zenodo.20082156)
+[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.2.0-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
 
-PREPARATION FOR NEXT VERSION TO BE SHIPPED WITH AnyBody 8.2.0
-and to be able to test AnyBody compatibility mode for AMMR 3.1.x versus 3.2.x
+### 🩹 Fixed
+
+* Fixed the SLA link and updated the copyright year in the repository license text.
+
+### 🔧 Changed
+
+* This AMMR provides necessary updates to optimally use AnyBody 8.2.
+  These updates target the AnyMoCap models and tools. 
+  Updates are related to improvements of the 'AnyInputC3D' class used for MoCap data import.
+  AnyBody 8.2 cause several deprecation warnings with AMMR 3.1.x MoCap models,
+  and it will run in a special compatibility mode. 
+  AMMR 3.2 eliminates these warnings and the less efficient compatibility mode.  
+* Updated documentation link checking to use a dedicated user agent and longer timeout for slow pages.
+* Updated CI workflow action dependencies across the test and documentation pipelines.
+
+### ➕ Added
+
+* Added a pixi command and workflow step for generating an AMMR zip package.
 
 
 (ammr-3.1.5-changelog)=
 ## AMMR 3.1.5 (2026-03-31)
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.18388854.svg)](https://doi.org/10.5281/zenodo.18388854)
+[![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.1.5-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
+
 
 ### 🩹 Fixed:
 * The BVH marker protocol have been improved to better handling scaling of

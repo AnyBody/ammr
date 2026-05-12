@@ -377,7 +377,12 @@ import generate_class_template_docs
 generate_class_template_docs.run_all()
 
 
-user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0"
+# Keep a simple bot-identifying user agent for linkcheck.
+# Browser-like strings are currently challenged by host anti-bot rules.
+user_agent = "Sphinx/9.1.0"
+# Zenodo and some other sites can be slow to respond, so increase the timeout for linkcheck.
+linkcheck_timeout = 45
+
 
 linkcheck_ignore = [
     r".*linkcheck_ignore",
