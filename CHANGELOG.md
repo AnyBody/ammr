@@ -5,7 +5,7 @@
 
 (ammr-3-2-1-changelog)=
 ## AMMR 3.2.1 (2026-??-?? - TO BE UPDATED)
-<!-- [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.20082156.svg)](https://doi.org/10.5281/zenodo.20082156) -->
+[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.20082156.svg)](https://doi.org/10.5281/zenodo.20082156)
 [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.2.1-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
 
 ### 🩹 Fixed
@@ -19,10 +19,15 @@
   by ROTATION data in C3D files.
 
 
+
 (ammr-3-2-0-changelog)=
 ## AMMR 3.2.0 (2026-05-08)
-[![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.20082156.svg)](https://doi.org/10.5281/zenodo.20082156)
 [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.2.0-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
+
+:::{note} This version was not properly released on Zenodo due to issues in the release process. 
+Version 3.2.1 was released as replacement shortly after, containing fixes and improvements these and other issues (see above).
+:::
+
 
 ### 🩹 Fixed
 
