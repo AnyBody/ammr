@@ -21,6 +21,7 @@
 
 
 (ammr-3-2-0-changelog)=
+
 ## AMMR 3.2.0 (2026-05-08)
 <!-- [![Zenodo link](https://zenodo.org/badge/DOI/10.5281/zenodo.20082156.svg)](https://doi.org/10.5281/zenodo.20082156) -->
 [![AnyBody link](https://img.shields.io/badge/Included_with_AnyBody-8.2.0-yellowgreen)](https://www.anybodytech.com/resources/customer-downloads/)
