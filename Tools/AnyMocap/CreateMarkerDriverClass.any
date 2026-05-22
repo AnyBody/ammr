@@ -50,6 +50,8 @@ See below for more details
   MarkerPlacementBVH = REQUIRED_FOR_BVH_INPUT,
   DRAW_SCALE = 1,
   SKIP_MARKER_EXIST_CHECK = 0,
+  USE_C3D_ROTATION_INPUT = 0,
+  MarkerPlacementC3DRotation = REQUIRED_FOR_C3D_ROTATION_INPUT
 )
 {
 
@@ -114,6 +116,12 @@ See below for more details
 //     Disable the check if the marker exists in the C3D file. This switch must be
 //     enabled if you model is structured so markers are created
 //     before the AnyInputC3D file have been defined. (Defaults to 0)
+// CreateMarkerDriver#USE_C3D_ROTATION_INPUT
+//     Switch to specify if Rotations input from C3D file should be used. This may be
+//     required for newer marker-less optical systems.
+// CreateMarkerDriver#MarkerPlacementC3DRotation
+//     Specifies the C3D model segment on which the virtual marker is placed when 
+//     using C3D file with Rotations input.
 
 
 //  #if  MarkerName != _NOT_DEFINED_
@@ -142,8 +150,23 @@ See below for more details
 #endif
 #endif
 
+#if  USE_C3D_ROTATION_INPUT
+#if MarkerName != _NOT_DEFINED_
+#if MarkerName != __NAME__
+  AnyMessage NotSupported_MarkerName_argument = {
+    TriggerPreProcess = On;
+    Type = MSG_ErrorFatal;
+    Message = strformat("\n"+
+         "------------------------------------------------------------------------------------------------------\n"+
+         "    The "MarkerName" can't be specified for the C3D Rotations based models. \n"+
+         "    Just remove the MarkerName argument to the class template. \n"+
+         "-------------------------------------------------------------------------------------------------------\n");
+  };
+#endif
+#endif
+#endif
 
-#if  USE_BVH_INPUT == 0
+#if  (USE_BVH_INPUT == 0) & (USE_C3D_ROTATION_INPUT == 0)
 #if SKIP_MARKER_EXIST_CHECK == 0
 AnyMessage TestMarkerExist ={
 #if MarkerName == _NOT_DEFINED_
@@ -167,15 +190,14 @@ AnyMessage TestMarkerExist ={
   #var AnyVar ConstMarkerWeightY = WeightY;
   #var AnyVar ConstMarkerWeightZ = WeightZ;
 
-  #if (UseC3DWeightResiduals == 1) & (USE_BVH_INPUT == 0)
+  #if (UseC3DWeightResiduals == 1) & (USE_BVH_INPUT == 0) & (USE_C3D_ROTATION_INPUT == 0)
     AnyFunSquareWaveThreshold MarkerWeightsFun =
     {
       #var dT = {C3D_OBJECT.WeightTransitionTime};
+      T = C3D_OBJECT.Points.Abscissa.t;
       #if MarkerName == _NOT_DEFINED_
-      T = C3D_OBJECT.Points.Markers.__NAME__.PosInterpol.T;
       #var Data = C3D_OBJECT.Points.Markers.__NAME__.Residual;
       #else
-      T = C3D_OBJECT.Points.Markers.MarkerName.PosInterpol.T;
       #var Data = C3D_OBJECT.Points.Markers.MarkerName.Residual;
       #endif
       OutputValues =
@@ -207,6 +229,13 @@ AnyMessage TestMarkerExist ={
   #var AnyVec3 sRelOnBVH = {0,0,0};
   #endif
 
+  #if USE_C3D_ROTATION_INPUT
+  // CreateMarkerDriver
+  /// Position of the marker on the C3D Rotation stick figure model. This is only
+  /// used when using C3D Rotation input.
+  #var AnyVec3 sRelOnC3DRotation = {0,0,0};
+  #endif
+  
   #var AnyVec3 sRelOptDelta = {0, 0, 0};
 
   #if OptX ==0 & OptY == 0 & OptZ == 0
@@ -324,8 +353,12 @@ AnyMessage TestMarkerExist ={
 
         AnyRefFrame &MarkerRef = BODY_MODEL_FOLDER.MarkerPlacement.__NAME__##_Marker;
 
-        #if USE_BVH_INPUT
+        #if (USE_BVH_INPUT == 1) | (USE_C3D_ROTATION_INPUT == 1) 
+          #if USE_BVH_INPUT
           AnyFolder &MarkerDataRef = BVH_OBJECT.Markers.__NAME__;
+          #else
+          AnyFolder &MarkerDataRef = C3D_OBJECT.Rotations.Markers.__NAME__;
+          #endif
         #else
           #if MarkerName == _NOT_DEFINED_
           AnyFolder &MarkerDataRef = C3D_OBJECT.Points.Markers.__NAME__;
@@ -351,7 +384,7 @@ AnyMessage TestMarkerExist ={
             #var Type = Bspline;
             BsplineOrder =4;
 
-            T = .MarkerDataRef.PosInterpol.T;
+            TPtr = .MarkerDataRef.PosInterpol.TPtr;
             Data = .LowPassFilter(.MarkerDataRef.Pos');
           };
 
@@ -383,7 +416,7 @@ AnyMessage TestMarkerExist ={
 #if USE_BVH_INPUT
 
    BVH_OBJECT.Markers = {
-      AnyVirtualMarkerBVH __NAME__ = {
+      AnyDataMarkerVirtual __NAME__ = {
         RefFramePtr = &MarkerPlacementBVH.__NAME__;
       };
    };
@@ -414,6 +447,36 @@ AnyMessage TestMarkerExist ={
 
 #endif
 
+#if USE_C3D_ROTATION_INPUT
+
+   C3D_OBJECT.Rotations.Markers = {
+      AnyDataMarkerVirtual __NAME__ = {
+        RefFramePtr = &MarkerPlacementC3DRotation.__NAME__;
+      };
+   };
+
+
+  MarkerPlacementC3DRotation =
+  {
+    AnyRefNode __NAME__ = {
+      //sRel = ..sRelOnBVH;
+      #if MarkerName == _NOT_DEFINED_
+      sRel = Main.ModelSetup.MocapDrivers.__NAME__.sRelOnC3DRotation ;
+      #else
+      sRel = Main.ModelSetup.MocapDrivers.MarkerName.sRelOnRotation ;
+      #endif
+      AnyDrawNode drw_node =
+      {
+        #var RGB = {0, 1, 0};
+        #var ScaleXYZ = 0.015*{1, 1, 1};
+        Visible = C3D_OBJECT.Model.MarkerVisible;
+      };
+    };
+  };//
+
+
+
+#endif
 
 
 
