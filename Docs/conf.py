@@ -1,4 +1,6 @@
 # -- Project information -----------------------------------------------------
+import multiprocessing
+multiprocessing.set_start_method("fork", force=True)
 import os
 import re
 import subprocess

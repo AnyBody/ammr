@@ -36,7 +36,7 @@ If you have a fix or an improvement to the models we are happy to accept it. Cod
 fixes are submitted on GitHub. 
 
 Simply fork this repository, editor your fork and [start a pull
-request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request) 
+request](https://docs.github.com/en/pull-requests/how-tos/create-pull-requests/creating-a-pull-request) 
 
 
 
