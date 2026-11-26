@@ -1,4 +1,6 @@
 # -- Project information -----------------------------------------------------
+import multiprocessing
+multiprocessing.set_start_method("fork", force=True)
 import os
 import re
 import subprocess
@@ -381,7 +383,8 @@ generate_class_template_docs.run_all()
 # Browser-like strings are currently challenged by host anti-bot rules.
 user_agent = "Sphinx/9.1.0"
 # Zenodo and some other sites can be slow to respond, so increase the timeout for linkcheck.
-linkcheck_timeout = 45
+linkcheck_timeout = 30
+linkcheck_retries = 2
 
 
 linkcheck_ignore = [
